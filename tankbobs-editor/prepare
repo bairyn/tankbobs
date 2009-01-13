@@ -1,0 +1,2 @@
+#!/bin/sh
+qmake-qt4 -Wall -norecursive

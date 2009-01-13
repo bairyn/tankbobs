@@ -1,0 +1,1245 @@
+<ui version="4.0" >
+ <class>PropertiesDialog</class>
+ <widget class="QDialog" name="PropertiesDialog" >
+  <property name="windowModality" >
+   <enum>Qt::NonModal</enum>
+  </property>
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>500</width>
+    <height>400</height>
+   </rect>
+  </property>
+  <property name="cursor" >
+   <cursorShape>SizeAllCursor</cursorShape>
+  </property>
+  <property name="windowTitle" >
+   <string>Properties</string>
+  </property>
+  <property name="modal" >
+   <bool>true</bool>
+  </property>
+  <widget class="QCheckBox" name="fourVertices" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>10</x>
+     <y>20</y>
+     <width>81</width>
+     <height>19</height>
+    </rect>
+   </property>
+   <property name="cursor" >
+    <cursorShape>UpArrowCursor</cursorShape>
+   </property>
+   <property name="text" >
+    <string>Four Vertices</string>
+   </property>
+   <property name="checked" >
+    <bool>true</bool>
+   </property>
+   <property name="tristate" >
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="script1" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>120</x>
+     <y>50</y>
+     <width>113</width>
+     <height>20</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLabel" name="script1Label" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>10</x>
+     <y>50</y>
+     <width>101</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="cursor" >
+    <cursorShape>SizeAllCursor</cursorShape>
+   </property>
+   <property name="text" >
+    <string>script1 (on touch)</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="script2Label" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>10</x>
+     <y>70</y>
+     <width>101</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="cursor" >
+    <cursorShape>SizeAllCursor</cursorShape>
+   </property>
+   <property name="text" >
+    <string>script2 (on damage)</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="script2" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>120</x>
+     <y>70</y>
+     <width>113</width>
+     <height>20</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="script3" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>120</x>
+     <y>90</y>
+     <width>113</width>
+     <height>20</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLabel" name="script3Label" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>10</x>
+     <y>90</y>
+     <width>101</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="cursor" >
+    <cursorShape>SizeAllCursor</cursorShape>
+   </property>
+   <property name="text" >
+    <string>script3 (scripts walls)</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="groupLabel" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>10</x>
+     <y>110</y>
+     <width>101</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="cursor" >
+    <cursorShape>SizeAllCursor</cursorShape>
+   </property>
+   <property name="text" >
+    <string>teleporter group</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="group" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>120</x>
+     <y>110</y>
+     <width>113</width>
+     <height>20</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="active" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>120</x>
+     <y>130</y>
+     <width>113</width>
+     <height>20</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="powerups" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>120</x>
+     <y>150</y>
+     <width>113</width>
+     <height>20</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLabel" name="powerupsLabel" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>10</x>
+     <y>150</y>
+     <width>101</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="cursor" >
+    <cursorShape>SizeAllCursor</cursorShape>
+   </property>
+   <property name="text" >
+    <string>PowerupSP powerups</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="enableLabel" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>10</x>
+     <y>170</y>
+     <width>101</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="cursor" >
+    <cursorShape>SizeAllCursor</cursorShape>
+   </property>
+   <property name="text" >
+    <string>PowerupSP enable</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="activeLabel" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>10</x>
+     <y>130</y>
+     <width>101</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="cursor" >
+    <cursorShape>SizeAllCursor</cursorShape>
+   </property>
+   <property name="text" >
+    <string>teleporter active</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="enable" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>120</x>
+     <y>170</y>
+     <width>113</width>
+     <height>20</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="detail" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>10</x>
+     <y>190</y>
+     <width>81</width>
+     <height>19</height>
+    </rect>
+   </property>
+   <property name="cursor" >
+    <cursorShape>UpArrowCursor</cursorShape>
+   </property>
+   <property name="text" >
+    <string>detail</string>
+   </property>
+   <property name="checked" >
+    <bool>false</bool>
+   </property>
+   <property name="tristate" >
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="structural" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>120</x>
+     <y>20</y>
+     <width>81</width>
+     <height>19</height>
+    </rect>
+   </property>
+   <property name="cursor" >
+    <cursorShape>UpArrowCursor</cursorShape>
+   </property>
+   <property name="text" >
+    <string>structural</string>
+   </property>
+   <property name="checked" >
+    <bool>false</bool>
+   </property>
+   <property name="tristate" >
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="backmost" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>240</x>
+     <y>20</y>
+     <width>81</width>
+     <height>19</height>
+    </rect>
+   </property>
+   <property name="cursor" >
+    <cursorShape>UpArrowCursor</cursorShape>
+   </property>
+   <property name="text" >
+    <string>back-most</string>
+   </property>
+   <property name="checked" >
+    <bool>false</bool>
+   </property>
+   <property name="tristate" >
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="back" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>240</x>
+     <y>70</y>
+     <width>81</width>
+     <height>19</height>
+    </rect>
+   </property>
+   <property name="cursor" >
+    <cursorShape>UpArrowCursor</cursorShape>
+   </property>
+   <property name="text" >
+    <string>back</string>
+   </property>
+   <property name="checked" >
+    <bool>false</bool>
+   </property>
+   <property name="tristate" >
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="backleast" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>240</x>
+     <y>120</y>
+     <width>81</width>
+     <height>19</height>
+    </rect>
+   </property>
+   <property name="cursor" >
+    <cursorShape>UpArrowCursor</cursorShape>
+   </property>
+   <property name="text" >
+    <string>back-least</string>
+   </property>
+   <property name="checked" >
+    <bool>false</bool>
+   </property>
+   <property name="tristate" >
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="topleast" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>240</x>
+     <y>170</y>
+     <width>81</width>
+     <height>19</height>
+    </rect>
+   </property>
+   <property name="cursor" >
+    <cursorShape>UpArrowCursor</cursorShape>
+   </property>
+   <property name="text" >
+    <string>top-least</string>
+   </property>
+   <property name="checked" >
+    <bool>false</bool>
+   </property>
+   <property name="tristate" >
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="top" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>240</x>
+     <y>220</y>
+     <width>81</width>
+     <height>19</height>
+    </rect>
+   </property>
+   <property name="cursor" >
+    <cursorShape>UpArrowCursor</cursorShape>
+   </property>
+   <property name="text" >
+    <string>top</string>
+   </property>
+   <property name="checked" >
+    <bool>false</bool>
+   </property>
+   <property name="tristate" >
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="topmost" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>240</x>
+     <y>260</y>
+     <width>81</width>
+     <height>19</height>
+    </rect>
+   </property>
+   <property name="cursor" >
+    <cursorShape>UpArrowCursor</cursorShape>
+   </property>
+   <property name="text" >
+    <string>top-most</string>
+   </property>
+   <property name="checked" >
+    <bool>false</bool>
+   </property>
+   <property name="tristate" >
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="nopass" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>120</x>
+     <y>190</y>
+     <width>81</width>
+     <height>19</height>
+    </rect>
+   </property>
+   <property name="cursor" >
+    <cursorShape>UpArrowCursor</cursorShape>
+   </property>
+   <property name="text" >
+    <string>nopass</string>
+   </property>
+   <property name="checked" >
+    <bool>false</bool>
+   </property>
+   <property name="tristate" >
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="damage" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>120</x>
+     <y>220</y>
+     <width>81</width>
+     <height>19</height>
+    </rect>
+   </property>
+   <property name="cursor" >
+    <cursorShape>UpArrowCursor</cursorShape>
+   </property>
+   <property name="text" >
+    <string>damage</string>
+   </property>
+   <property name="checked" >
+    <bool>false</bool>
+   </property>
+   <property name="tristate" >
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="touch" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>120</x>
+     <y>260</y>
+     <width>81</width>
+     <height>19</height>
+    </rect>
+   </property>
+   <property name="cursor" >
+    <cursorShape>UpArrowCursor</cursorShape>
+   </property>
+   <property name="text" >
+    <string>touch</string>
+   </property>
+   <property name="checked" >
+    <bool>false</bool>
+   </property>
+   <property name="tristate" >
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="missiles" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>10</x>
+     <y>220</y>
+     <width>81</width>
+     <height>19</height>
+    </rect>
+   </property>
+   <property name="cursor" >
+    <cursorShape>UpArrowCursor</cursorShape>
+   </property>
+   <property name="text" >
+    <string>missiles</string>
+   </property>
+   <property name="checked" >
+    <bool>false</bool>
+   </property>
+   <property name="tristate" >
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="backmostmore" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>10</x>
+     <y>260</y>
+     <width>91</width>
+     <height>19</height>
+    </rect>
+   </property>
+   <property name="cursor" >
+    <cursorShape>UpArrowCursor</cursorShape>
+   </property>
+   <property name="text" >
+    <string>back-mostmore</string>
+   </property>
+   <property name="checked" >
+    <bool>false</bool>
+   </property>
+   <property name="tristate" >
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="backmostmost" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>10</x>
+     <y>280</y>
+     <width>91</width>
+     <height>19</height>
+    </rect>
+   </property>
+   <property name="cursor" >
+    <cursorShape>UpArrowCursor</cursorShape>
+   </property>
+   <property name="text" >
+    <string>back-mostmost</string>
+   </property>
+   <property name="checked" >
+    <bool>false</bool>
+   </property>
+   <property name="tristate" >
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QLabel" name="setidLabel" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>240</x>
+     <y>140</y>
+     <width>41</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="cursor" >
+    <cursorShape>SizeAllCursor</cursorShape>
+   </property>
+   <property name="text" >
+    <string>set id</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="texture" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>312</x>
+     <y>90</y>
+     <width>81</width>
+     <height>20</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLabel" name="mapidLabel" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>10</x>
+     <y>300</y>
+     <width>81</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="cursor" >
+    <cursorShape>SizeAllCursor</cursorShape>
+   </property>
+   <property name="text" >
+    <string>map id</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="maptitleLabel" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>10</x>
+     <y>320</y>
+     <width>81</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="cursor" >
+    <cursorShape>SizeAllCursor</cursorShape>
+   </property>
+   <property name="text" >
+    <string>map title</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="mapdescriptionLabel" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>10</x>
+     <y>340</y>
+     <width>81</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="cursor" >
+    <cursorShape>SizeAllCursor</cursorShape>
+   </property>
+   <property name="text" >
+    <string>map description</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="mapauthorsLabel" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>10</x>
+     <y>360</y>
+     <width>81</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="cursor" >
+    <cursorShape>SizeAllCursor</cursorShape>
+   </property>
+   <property name="text" >
+    <string>map authors</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="mapversionLabel" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>10</x>
+     <y>380</y>
+     <width>81</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="cursor" >
+    <cursorShape>SizeAllCursor</cursorShape>
+   </property>
+   <property name="text" >
+    <string>map version</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="mapid" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>120</x>
+     <y>300</y>
+     <width>113</width>
+     <height>20</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="maptitle" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>120</x>
+     <y>320</y>
+     <width>113</width>
+     <height>20</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="mapdescription" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>120</x>
+     <y>340</y>
+     <width>113</width>
+     <height>20</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="mapauthors" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>120</x>
+     <y>360</y>
+     <width>113</width>
+     <height>20</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="mapversion" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>120</x>
+     <y>380</y>
+     <width>113</width>
+     <height>20</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="Line" name="configLine" >
+   <property name="geometry" >
+    <rect>
+     <x>247</x>
+     <y>310</y>
+     <width>131</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="orientation" >
+    <enum>Qt::Horizontal</enum>
+   </property>
+  </widget>
+  <widget class="QProgressBar" name="configBar" >
+   <property name="enabled" >
+    <bool>true</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>250</x>
+     <y>280</y>
+     <width>118</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="minimum" >
+    <number>0</number>
+   </property>
+   <property name="value" >
+    <number>24</number>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="autoselect" >
+   <property name="enabled" >
+    <bool>true</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>250</x>
+     <y>330</y>
+     <width>131</width>
+     <height>19</height>
+    </rect>
+   </property>
+   <property name="cursor" >
+    <cursorShape>UpArrowCursor</cursorShape>
+   </property>
+   <property name="text" >
+    <string>Auto Select</string>
+   </property>
+   <property name="checked" >
+    <bool>false</bool>
+   </property>
+   <property name="tristate" >
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="nomodify" >
+   <property name="enabled" >
+    <bool>true</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>250</x>
+     <y>350</y>
+     <width>131</width>
+     <height>19</height>
+    </rect>
+   </property>
+   <property name="cursor" >
+    <cursorShape>UpArrowCursor</cursorShape>
+   </property>
+   <property name="text" >
+    <string>Read Only</string>
+   </property>
+   <property name="checked" >
+    <bool>false</bool>
+   </property>
+   <property name="tristate" >
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="autonotexture" >
+   <property name="enabled" >
+    <bool>true</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>250</x>
+     <y>370</y>
+     <width>131</width>
+     <height>19</height>
+    </rect>
+   </property>
+   <property name="cursor" >
+    <cursorShape>UpArrowCursor</cursorShape>
+   </property>
+   <property name="text" >
+    <string>Auto No Texture</string>
+   </property>
+   <property name="checked" >
+    <bool>false</bool>
+   </property>
+   <property name="tristate" >
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QLabel" name="setorderLabel" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>240</x>
+     <y>150</y>
+     <width>41</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="cursor" >
+    <cursorShape>SizeAllCursor</cursorShape>
+   </property>
+   <property name="text" >
+    <string>set order</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="setnameLabel" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>240</x>
+     <y>160</y>
+     <width>41</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="cursor" >
+    <cursorShape>SizeAllCursor</cursorShape>
+   </property>
+   <property name="text" >
+    <string>set name</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="mapnameLabel" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>240</x>
+     <y>200</y>
+     <width>41</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="cursor" >
+    <cursorShape>SizeAllCursor</cursorShape>
+   </property>
+   <property name="text" >
+    <string>map name</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="setdescriptionLabel" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>240</x>
+     <y>210</y>
+     <width>41</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="cursor" >
+    <cursorShape>SizeAllCursor</cursorShape>
+   </property>
+   <property name="text" >
+    <string>set description</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="setauthorsLabel" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>240</x>
+     <y>240</y>
+     <width>41</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="cursor" >
+    <cursorShape>SizeAllCursor</cursorShape>
+   </property>
+   <property name="text" >
+    <string>set authors</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="setversionLabel" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>240</x>
+     <y>250</y>
+     <width>41</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="cursor" >
+    <cursorShape>SizeAllCursor</cursorShape>
+   </property>
+   <property name="text" >
+    <string>set version</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="textureLabel" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>240</x>
+     <y>90</y>
+     <width>41</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="cursor" >
+    <cursorShape>SizeAllCursor</cursorShape>
+   </property>
+   <property name="text" >
+    <string>texture</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="setid" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>310</x>
+     <y>130</y>
+     <width>81</width>
+     <height>20</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="setorder" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>310</x>
+     <y>150</y>
+     <width>81</width>
+     <height>20</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="setname" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>310</x>
+     <y>170</y>
+     <width>81</width>
+     <height>20</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="mapname" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>310</x>
+     <y>200</y>
+     <width>81</width>
+     <height>20</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="setdescription" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>310</x>
+     <y>220</y>
+     <width>81</width>
+     <height>16</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="setauthors" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>310</x>
+     <y>240</y>
+     <width>81</width>
+     <height>16</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="setversion" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>310</x>
+     <y>260</y>
+     <width>81</width>
+     <height>16</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="settitle" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>310</x>
+     <y>40</y>
+     <width>81</width>
+     <height>20</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLabel" name="settitleLabel" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>240</x>
+     <y>40</y>
+     <width>41</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="cursor" >
+    <cursorShape>SizeAllCursor</cursorShape>
+   </property>
+   <property name="text" >
+    <string>set title</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="mapinitscript" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>410</x>
+     <y>10</y>
+     <width>81</width>
+     <height>16</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="mapexitscript" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>410</x>
+     <y>70</y>
+     <width>81</width>
+     <height>16</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLabel" name="mapinitscriptLabel" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>350</x>
+     <y>10</y>
+     <width>41</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="cursor" >
+    <cursorShape>SizeAllCursor</cursorShape>
+   </property>
+   <property name="text" >
+    <string>initscript</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="mapexitscriptLabel" >
+   <property name="enabled" >
+    <bool>false</bool>
+   </property>
+   <property name="geometry" >
+    <rect>
+     <x>350</x>
+     <y>70</y>
+     <width>41</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="cursor" >
+    <cursorShape>SizeAllCursor</cursorShape>
+   </property>
+   <property name="text" >
+    <string>exitscript</string>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

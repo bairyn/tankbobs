@@ -1,0 +1,71 @@
+<config>
+	<info>
+		The following keys are reserved:
+		0x08: BACKSPACE
+		0x0D: ENTER
+		0x1B: ESCAPE
+		273: UP (tank controls are allowed)
+		274: DOWN (tank controls are allowed)
+		276: LEFT (tank controls are allowed)
+		275: RIGHT (tank controls are allowed)
+	</info>
+
+	<font>
+		<sans>
+			<size>2</size>
+			<ttf>DejaVuSans-Bold.ttf</ttf>
+		</sans>
+	</font>
+
+	<game>
+		<player1>
+			<name>Player1</name>
+		</player1>
+		<player2>
+			<name>Player2</name>
+		</player2>
+		<computers>0</computers>
+		<overview>1</overview>
+	</game>
+
+	<key>
+		<select></select>
+		<up>280</up> 'PGUP'
+		<down>281</down> 'PGDOWN'
+		<left></left>
+		<right></right>
+		<exit></exit>
+		<quit>0x71</quit> 'q'
+		<pause>0x70</pause> 'p'
+		<player1>
+			<forward></forward> 'w'
+			<back></back> 's'
+			<left></left> 'a'
+			<right></right> 'd'
+		</player1>
+		<player2>
+			<forward>273</forward> 'UP'
+			<back>274</back> 'DOWN'
+			<left>276</left> 'LEFT'
+			<right>275</right> 'RIGHT'
+		</player2>
+		<player3>
+			<forward></forward>
+			<back></back>
+			<left></left>
+			<right></right>
+		</player3>
+		<player4>
+			<forward></forward>
+			<back></back>
+			<left></left>
+			<right></right>
+		</player4>
+	</key>
+
+	<renderer>
+		<fullscreen>0</fullscreen>
+		<width>800</width>
+		<height>600</height>
+	</renderer>
+</config>

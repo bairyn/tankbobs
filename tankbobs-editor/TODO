@@ -1,0 +1,16 @@
+Critical - must implement by next release
+ 1. Texture browser
+ 2. On key 'n' property browser
+
+Very high priority - should be implemented by next release
+ 1. Undo/Redo system
+ 2. More scale flexibility than limited 100x100 grid
+
+High priority - must be implemented as soon as possible
+ 1. Configuration GUI
+
+Medium priority - should be implemented as soon as possible
+
+Low priority - implementation can wait
+
+Very low priority - mere possibility
