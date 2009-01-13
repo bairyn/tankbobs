@@ -1,7 +1,4 @@
---this file needs to be completely rewritten!!  The format should also
---be rewritten
---
---it is crap I made as a beginner programmer
+--this needs to be completely rewritten
 
 --[[
 Copyright (C) 2008 Byron James Johnson
@@ -184,7 +181,7 @@ end
 local function c_tcm_private_base_base(t, i)
 	while true do
 		local c = tankbobs.io_getChar(t[1])
-		if c == c_const_get("c_tcm_eof") then
+		if c == c_const_get("tcm_eof") then
 			return nil
 		elseif c == t[2] then
 			return i
@@ -199,7 +196,7 @@ local function c_tcm_private_base_base(t, i)
 						if c == 0 then
 							break
 						end
-						if c == c_const_get("c_tcm_eof") then
+						if c == c_const_get("tcm_eof") then
 							error("parsing map ended early")
 						end
 					end
@@ -219,7 +216,7 @@ local function c_tcm_private_base_base(t, i)
 						if c == 0 then
 							break
 						end
-						if c == c_const_get("c_tcm_eof") then
+						if c == c_const_get("tcm_eof") then
 							error("parsing map ended early")
 						end
 					end
@@ -238,7 +235,7 @@ local function c_tcm_private_base_base(t, i)
 						if c == 0 then
 							break
 						end
-						if c == c_const_get("c_tcm_eof") then
+						if c == c_const_get("tcm_eof") then
 							error("parsing map ended early")
 						end
 					end
@@ -258,7 +255,7 @@ local function c_tcm_private_base_base(t, i)
 					if c == 0 then
 						break
 					end
-					if c == c_const_get("c_tcm_eof") then
+					if c == c_const_get("tcm_eof") then
 						error("parsing map ended early")
 					end
 				end
@@ -281,7 +278,7 @@ end
 local function c_tcm_private_skipbase(f, s)
 	f:seek("cur", -s)
 	local c = tankbobs.io_getChar(t[1])
-	if c == c_const_get("c_tcm_eof") then
+	if c == c_const_get("tcm_eof") then
 		return nil
 	elseif c == t[2] then
 		return i
@@ -296,7 +293,7 @@ local function c_tcm_private_skipbase(f, s)
 					if c == 0 then
 						break
 					end
-					if c == c_const_get("c_tcm_eof") then
+					if c == c_const_get("tcm_eof") then
 						error("parsing map ended early")
 					end
 				end
@@ -316,7 +313,7 @@ local function c_tcm_private_skipbase(f, s)
 					if c == 0 then
 						break
 					end
-					if c == c_const_get("c_tcm_eof") then
+					if c == c_const_get("tcm_eof") then
 						error("parsing map ended early")
 					end
 				end
@@ -335,7 +332,7 @@ local function c_tcm_private_skipbase(f, s)
 					if c == 0 then
 						break
 					end
-					if c == c_const_get("c_tcm_eof") then
+					if c == c_const_get("tcm_eof") then
 						error("parsing map ended early")
 					end
 				end
@@ -355,7 +352,7 @@ local function c_tcm_private_skipbase(f, s)
 				if c == 0 then
 					break
 				end
-				if c == c_const_get("c_tcm_eof") then
+				if c == c_const_get("tcm_eof") then
 					error("parsing map ended early")
 				end
 			end
@@ -395,9 +392,9 @@ local function c_tcm_private_header(f, filename)
 		error("map " .. filename .. " is not a valid c_tcm file")
 	elseif tankbobs.io_getChar(f) ~= 0x01 then
 		error("map " .. filename .. " is not a valid c_tcm file")
-	elseif string.format("%X", tankbobs.io_getInt(f))  ~= string.format("%X", c_const_get("c_tcm_magic")) then
+	elseif string.format("%X", tankbobs.io_getInt(f))  ~= string.format("%X", c_const_get("tcm_magic")) then
 		error("map " .. filename .. " is not a valid c_tcm file")
-	elseif tankbobs.io_getChar(f) ~= c_const_get("c_tcm_version") then
+	elseif tankbobs.io_getChar(f) ~= c_const_get("tcm_version") then
 		f:seek("cur", -4)
 		print("map " .. filename .. " is compatible with tankbobs version " .. tostring(tankbobs.io_getChar(f)) .. ", you are using version " .. tostring(c_const_get("version")) .. "; you probably won't get what you were expecting!  Expect a crash.  Continuing anyway...")
 	end
@@ -416,8 +413,8 @@ local function c_tcm_private_psets(filename)
 		description = c_tcm_private_getstr(f)
 		authors = c_tcm_private_getstr(f)
 		version = c_tcm_private_getstr(f)
-		if id == c_const_get("c_tcm_eof") or title == c_const_get("c_tcm_eof") or name == c_const_get("c_tcm_eof") or description == c_const_get("c_tcm_eof") or authors == c_const_get("c_tcm_eof") or version == c_const_get("c_tcm_eof") or id == nil or title == nil or name == nil or description == nil or authors == nil or version == nil then
-			error("c_tcm " .. filename .. " has an incomplete set description")
+		if id == c_const_get("tcm_eof") or title == c_const_get("tcm_eof") or name == c_const_get("tcm_eof") or description == c_const_get("tcm_eof") or authors == c_const_get("tcm_eof") or version == c_const_get("tcm_eof") or id == nil or title == nil or name == nil or description == nil or authors == nil or version == nil then
+			error("tcm " .. filename .. " has an incomplete set description")
 		elseif order == 1 then
 			local set = {id, order, name, title, description, authors, version}
 			table.insert(c_tcm_sets, set)
@@ -435,11 +432,11 @@ local function c_tcm_private_plevels(filename, id)
 		sid = tankbobs.io_getInt(f)
 		order = tankbobs.io_getInt(f)
 		local c = c_tcm_private_getstr(f)
-		if c == nil or c == c_const_get("c_tcm_eof")== c_const_get("c_tcm_eof") or sid == nil or sid == c_const_get("c_tcm_eof") or order == nil or order == c_const_get("c_tcm_eof") then
+		if c == nil or c == c_const_get("tcm_eof")== c_const_get("tcm_eof") or sid == nil or sid == c_const_get("tcm_eof") or order == nil or order == c_const_get("tcm_eof") then
 			error("tcm " .. filename .. " has an incomplete set description")
 		end
 		c = c_tcm_private_getstr(f)
-		if c == nil or c == c_const_get("c_tcm_eof") then
+		if c == nil or c == c_const_get("tcm_eof") then
 			error("tcm " .. filename .. " has an incomplete set description")
 		end
 		c = c_tcm_private_getstr(f)
@@ -447,15 +444,15 @@ local function c_tcm_private_plevels(filename, id)
 			error("tcm " .. filename .. " has an incomplete set description")
 		end
 		c = c_tcm_private_getstr(f)
-		if c == nil or c == c_const_get("c_tcm_eof") then
+		if c == nil or c == c_const_get("tcm_eof") then
 			error("tcm " .. filename .. " has an incomplete set description")
 		end
 		c = c_tcm_private_getstr(f)
-		if c == nil or c == c_const_get("c_tcm_eof") then
+		if c == nil or c == c_const_get("tcm_eof") then
 			error("tcm " .. filename .. " has an incomplete set description")
 		end
 		if sid == id then
-			f:seek("set", c_const_get("c_tcm_headerLength") - 1)
+			f:seek("set", c_const_get("tcm_headerLength") - 1)
 			local id, name, title, description, authors, version, initscript, exitscript
 			for _ in c_tcm_private_base(f, 0x01) do
 				id = tankbobs.io_getInt(f)
@@ -468,7 +465,7 @@ local function c_tcm_private_plevels(filename, id)
 				exitscript = c_tcm_private_getstr(f)
 				break
 			end
-			if id == nil or name == nil or title == nil or description == nil or authors == nil or version == nil or initscript == nil or exitscript == nil or id == c_const_get("c_tcm_eof") or name == c_const_get("c_tcm_eof") or title == c_const_get("c_tcm_eof") or description == c_const_get("c_tcm_eof") or authors == c_const_get("c_tcm_eof") or version == c_const_get("c_tcm_eof") or initscript == c_const_get("c_tcm_eof") or exitscript == c_const_get("c_tcm_eof") then
+			if id == nil or name == nil or title == nil or description == nil or authors == nil or version == nil or initscript == nil or exitscript == nil or id == c_const_get("tcm_eof") or name == c_const_get("tcm_eof") or title == c_const_get("tcm_eof") or description == c_const_get("tcm_eof") or authors == c_const_get("tcm_eof") or version == c_const_get("tcm_eof") or initscript == c_const_get("tcm_eof") or exitscript == c_const_get("tcm_eof") then
 				error("c_tcm " .. filename .. " has an incomplete map description")
 			end
 			local level = {sid, id, name, title, descripition, authors, version, initscript, exitscript, filename, order}
@@ -539,37 +536,37 @@ local function c_tcm_private_plevel(order)
 		y3 = tankbobs.io_getDouble(f)
 		x4 = tankbobs.io_getDouble(f)
 		y4 = tankbobs.io_getDouble(f)
-		if x4 == c_const_get("c_tcm_eof") and y4 == c_const_get("c_tcm_eof") then
+		if x4 == c_const_get("tcm_eof") and y4 == c_const_get("tcm_eof") then
 			x4, y4 = nil, nil
 		end
-		if texture == nil or traits == nil or script1 == nil or script2 == nil or script3 == nil or x1 == nil or y1 == nil or x2 == nil or y2 == nil or x3 == nil or y3 == nil or texture == c_const_get("c_tcm_eof") or traits == c_const_get("c_tcm_eof") or script1 == c_const_get("c_tcm_eof") or script2 == c_const_get("c_tcm_eof") or script3 == c_const_get("c_tcm_eof") or x1 == c_const_get("c_tcm_eof") or y1 == c_const_get("c_tcm_eof") or x2 == -2 or y2 == c_const_get("c_tcm_eof") or x3 == c_const_get("c_tcm_eof") or y3 == c_const_get("c_tcm_eof") or x4 == c_const_get("c_tcm_eof") or y4 == c_const_get("c_tcm_eof") then
-			error("c_tcm " .. filename .. " has an incomplete map description")
+		if texture == nil or traits == nil or script1 == nil or script2 == nil or script3 == nil or x1 == nil or y1 == nil or x2 == nil or y2 == nil or x3 == nil or y3 == nil or texture == c_const_get("tcm_eof") or traits == c_const_get("tcm_eof") or script1 == c_const_get("tcm_eof") or script2 == c_const_get("tcm_eof") or script3 == c_const_get("tcm_eof") or x1 == c_const_get("tcm_eof") or y1 == c_const_get("tcm_eof") or x2 == -2 or y2 == c_const_get("tcm_eof") or x3 == c_const_get("tcm_eof") or y3 == c_const_get("tcm_eof") or x4 == c_const_get("tcm_eof") or y4 == c_const_get("tcm_eof") then
+			error("tcm " .. filename .. " has an incomplete map description")
 		end
 		local wall = {texture, traits, script1, script2, script3, x1, y1, x2, y2, x3, y3, x4, y4}
 		table.insert(c_tcm_map.walls, wall)
 	end
 
-	f:seek("set", c_const_get("c_tcm_headerLength") - 1)
+	f:seek("set", c_const_get("tcm_headerLength") - 1)
 	local x, y
 	for _ in c_tcm_private_base(f, 0x06) do
 		x = tankbobs.io_getDouble(f)
 		y = tankbobs.io_getDouble(f)
-		if x == nil or y == nil or x == c_const_get("c_tcm_eof") or y == c_const_get("c_tcm_eof") then
-			error("c_tcm " .. filename .. " has an incomplete map description")
+		if x == nil or y == nil or x == c_const_get("tcm_eof") or y == c_const_get("tcm_eof") then
+			error("tcm " .. filename .. " has an incomplete map description")
 		end
 		local spawn = {x, y}
 		table.insert(c_tcm_map.spawns, spawn)
 	end
 
-	f:seek("set", c_const_get("c_tcm_headerLength") - 1)
+	f:seek("set", c_const_get("tcm_headerLength") - 1)
 	local powerups, enable
 	for _ in c_tcm_private_base(f, 0x05) do
 		powerups = c_tcm_private_getstr(f)
 		enable = tankbobs.io_getInt(f)
 		x = tankbobs.io_getDouble(f)
 		y = tankbobs.io_getDouble(f)
-		if powerups == nil or enable == nil or x == nil or y == nil or powerups == c_const_get("c_tcm_eof") or enable == c_const_get("c_tcm_eof") or x == c_const_get("c_tcm_eof") or y == c_const_get("c_tcm_eof") then
-			error("c_tcm " .. filename .. " has an incomplete map description")
+		if powerups == nil or enable == nil or x == nil or y == nil or powerups == c_const_get("tcm_eof") or enable == c_const_get("tcm_eof") or x == c_const_get("tcm_eof") or y == c_const_get("tcm_eof") then
+			error("tcm " .. filename .. " has an incomplete map description")
 		end
 		local powerspawn = {powerups, enable, x, y}
 		table.insert(c_tcm_map.powerspawns, powerspawn)
@@ -580,9 +577,9 @@ function c_tcm_headers()  -- c_tcm_sets
 	if c_tcm_sets[1] ~= nil then
 		return
 	end
-	for filename in lfs.dir(c_const_get("c_tcm_dir")) do
+	for filename in lfs.dir(c_const_get("tcm_dir")) do
 		if not filename:find("^%.") and filename:find("%.c_tcm$") then
-			c_tcm_private_psets(c_const_get("c_tcm_dir") .. filename)
+			c_tcm_private_psets(c_const_get("tcm_dir") .. filename)
 		end
 	end
 end
@@ -592,9 +589,9 @@ function c_tcm_levels(id)  -- c_tcm_set
 		c_tcm_set = nil
 		c_tcm_set = {nil}
 	end
-	for filename in lfs.dir(c_const_get("c_tcm_dir")) do
+	for filename in lfs.dir(c_const_get("tcm_dir")) do
 		if not filename:find("^%.") and filename:find("%.c_tcm$") then
-			c_tcm_private_plevels(c_const_get("c_tcm_dir") .. filename, id)
+			c_tcm_private_plevels(c_const_get("tcm_dir") .. filename, id)
 		end
 	end
 end

@@ -23,6 +23,10 @@ common.lua
 common lua functions
 --]]
 
+function common_nil(...)
+	return ...
+end
+
 function common_init()
 	require "tankbobs"
 	tankbobs.t_initialize(client and not server);

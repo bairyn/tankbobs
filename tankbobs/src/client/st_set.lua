@@ -26,9 +26,9 @@ set selection
 function st_set_init()
 	gui_widget("label", renderer_font.sans, 50, 92.5, renderer_size.sans, "Select Level Set")
 	gui_widget("active", c_state_advance, renderer_font.sans, 25, 87.5, renderer_size.sans, "Back")
-	tcm_headers()
+	c_tcm_headers()
 	local x, y = 50, 85
-	for id, _, _, title in tcm_setsi() do
+	for id, _, _, title in c_tcm_setsi() do
 		gui_widget("active", st_set_select, renderer_font.sans, x, y, renderer_size.sans, title, id)
 		y = y - 2.5
 	end
@@ -44,9 +44,9 @@ end
 
 function st_set_button(button, pressed)
 	if pressed == 1 then
-		if button == 0x1B or button == config_get("config.key.quit") then
+		if button == 0x1B or button == c_config_get("config.key.quit") then
 			c_state_advance()
-		elseif button == config_get("config.key.exit") then
+		elseif button == c_config_get("config.key.exit") then
 			c_state_new(exit_state)
 		end
 		gui_button(button)
@@ -63,7 +63,7 @@ end
 
 function st_set_select(title, id)
 	main_data.set_title = title
-	tcm_levels(id)
+	c_tcm_levels(id)
 	c_state_new(level_state)
 end
 

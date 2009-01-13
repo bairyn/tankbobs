@@ -23,10 +23,6 @@ main.lua
 startup and the like
 --]]
 
-function main(...)
-	return ...
-end
-
 function main_init()
 	--execution begins here; args are stored in table 'args', ./tankbobs will result in {"./tankbobs"}
 	main_data = {}
@@ -44,8 +40,8 @@ function main_init()
 
 	c_state_new(title_state)
 
-	while not main_done do
-		local results, eventqueue = tankbobs.sdlevents()
+	while not done do
+		local results, eventqueue = tankbobs.in_getEvents()
 		if results ~= nil then
 			local lastevent = eventqueue
 			repeat

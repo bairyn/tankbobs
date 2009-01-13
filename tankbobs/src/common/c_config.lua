@@ -320,7 +320,7 @@ function c_config_init()
 				end
 			end
 			clone(v, k)
-		elseif type(k) == "string" and type(config_get(k)) == "table" then
+		elseif type(k) == "string" and type(c_config_get(k)) == "table" then
 			local function clone(i, o)
 				for k, v in pairs(i) do
 					if type(v) == "table" then

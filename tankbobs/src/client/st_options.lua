@@ -24,7 +24,7 @@ configuration screen
 --]]
 
 function st_options_init()
-	options_video = config_backup("config.video")
+	options_video = c_config_backup("config.video")
 	local fullscreen =
 	{
 		{"No",  st_options_fullscreen},
@@ -40,30 +40,30 @@ function st_options_init()
 		{"1024x1024", st_options_resolution}
 	}
 	local function fullscreend()
-		return config_get("config.video.fullscreen") == 0 and "No" or "Yes"
+		return c_config_get("config.video.fullscreen") == 0 and "No" or "Yes"
 	end
 	local function resolutiond()
-		if config_get("config.video.width") == 320 and config_get("config.video.height") == 200 then
+		if c_config_get("config.video.width") == 320 and c_config_get("config.video.height") == 200 then
 			return "320x200"
-		elseif config_get("config.video.width") == 640 and config_get("config.video.height") == 480 then
+		elseif c_config_get("config.video.width") == 640 and c_config_get("config.video.height") == 480 then
 			return "640x480"
-		elseif config_get("config.video.width") == 800 and config_get("config.video.height") == 600 then
+		elseif c_config_get("config.video.width") == 800 and c_config_get("config.video.height") == 600 then
 			return "800x600"
-		elseif config_get("config.video.width") == 1024 and config_get("config.video.height") == 768 then
+		elseif c_config_get("config.video.width") == 1024 and c_config_get("config.video.height") == 768 then
 			return "1024x768"
-		elseif config_get("config.video.width") == 1024 and config_get("config.video.height") == 1024 then
+		elseif c_config_get("config.video.width") == 1024 and c_config_get("config.video.height") == 1024 then
 			return "1024x1024"
 		else
 			return "Custom"
 		end
 	end
 	gui_widget("active", st_options_back, renderer_font.sans, 25, 75, renderer_size.sans, "Back")
-	gui_widget("option", main_nil, renderer_font.sans, 50, 67.5, renderer_size.sans, "Fullscreen", fullscreen, fullscreend())
-	gui_widget("option", main_nil, renderer_font.sans, 50, 65, renderer_size.sans, "Resolution", resolution, resolutiond())
+	gui_widget("option", common_nil, renderer_font.sans, 50, 67.5, renderer_size.sans, "Fullscreen", fullscreen, fullscreend())
+	gui_widget("option", common_nil, renderer_font.sans, 50, 65, renderer_size.sans, "Resolution", resolution, resolutiond())
 	gui_widget("active", st_options_apply, renderer_font.sans, 50, 62.5, renderer_size.sans, "Apply")
 
-	gui_widget("active", function () options_key = "config.key.quit" end, renderer_font.sans, 50, 57.5, renderer_size.sans, function () return "Quit   " .. gui_char(config_get("config.key.quit")) .. ((options_key == "config.key.quit") and ("-") or ("")) end)
-	gui_widget("active", function () options_key = "config.key.exit" end, renderer_font.sans, 50, 55, renderer_size.sans, function () return "Exit   " .. gui_char(config_get("config.key.exit")) .. ((options_key == "config.key.exit") and ("-") or ("")) end)
+	gui_widget("active", function () options_key = "config.key.quit" end, renderer_font.sans, 50, 57.5, renderer_size.sans, function () return "Quit   " .. gui_char(c_config_get("config.key.quit")) .. ((options_key == "config.key.quit") and ("-") or ("")) end)
+	gui_widget("active", function () options_key = "config.key.exit" end, renderer_font.sans, 50, 55, renderer_size.sans, function () return "Exit   " .. gui_char(c_config_get("config.key.exit")) .. ((options_key == "config.key.exit") and ("-") or ("")) end)
 end
 
 function st_options_done()
@@ -80,16 +80,16 @@ function st_options_button(button, pressed)
 		elseif button == 0x1B then
 			options_key = nil
 		elseif button == 0x08 then
-			config_set(options_key, "")
+			c_config_set(options_key, "")
 			options_key = nil
 		else
-			config_set(options_key, button)
+			c_config_set(options_key, button)
 			options_key = nil
 		end
 	elseif pressed == 1 and not options_key then
-		if button == config_get("config.key.exit") then
+		if button == c_config_get("config.key.exit") then
 			c_state_new(exit_state)
-		elseif button == 0x1B or button == config_get("config.key.quit") then
+		elseif button == 0x1B or button == c_config_get("config.key.quit") then
 			st_options_back()
 		end
 		gui_button(button)
@@ -105,42 +105,42 @@ function st_options_step()
 end
 
 function st_options_back()
-	config_restore("config.video", options_video)
+	c_config_restore("config.video", options_video)
 	options_video = nil
 	c_state_advance()
 end
 
 function st_options_fullscreen(v)
 	if v == "Yes" then
-		config_set("config.video.fullscreen", 1)
+		c_config_set("config.video.fullscreen", 1)
 	elseif v == "No" then
-		config_set("config.video.fullscreen", 0)
+		c_config_set("config.video.fullscreen", 0)
 	end
 end
 
 function st_options_resolution(v)
 	if v == "320x200" then
-		config_set("config.video.width", 320)
-		config_set("config.video.height", 200)
+		c_config_set("config.video.width", 320)
+		c_config_set("config.video.height", 200)
 	elseif v == "640x480" then
-		config_set("config.video.width", 640)
-		config_set("config.video.height", 480)
+		c_config_set("config.video.width", 640)
+		c_config_set("config.video.height", 480)
 	elseif v == "800x600" then
-		config_set("config.video.width", 800)
-		config_set("config.video.height", 600)
+		c_config_set("config.video.width", 800)
+		c_config_set("config.video.height", 600)
 	elseif v == "1024x768" then
-		config_set("config.video.width", 1024)
-		config_set("config.video.height", 768)
+		c_config_set("config.video.width", 1024)
+		c_config_set("config.video.height", 768)
 	elseif v == "1024x1024" then
-		config_set("config.video.width", 1024)
-		config_set("config.video.height", 1024)
+		c_config_set("config.video.width", 1024)
+		c_config_set("config.video.height", 1024)
 	end
 end
 
 function st_options_apply()
-	options_video = config_backup("config.video")
+	options_video = c_config_backup("config.video")
 	renderer_updateWindow()  -- in case SDL forgets to send a resize signal
-	tankbobs.newvideo(config_get("config.video.width"), config_get("config.video.height"), not not (config_get("config.video.fullscreen") and config_get("config.video.fullscreen") > 0), const_get("title"), const_get("icon"))
+	tankbobs.r_newWindow(c_config_get("config.video.width"), c_config_get("config.video.height"), not not (c_config_get("config.video.fullscreen") and c_config_get("config.video.fullscreen") > 0), c_const_get("title"), c_const_get("icon"))
 end
 
 options_state =

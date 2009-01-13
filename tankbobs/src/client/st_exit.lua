@@ -24,19 +24,19 @@ title screen
 --]]
 
 function st_exit_init()
-	main_done = true
+	done = true
 end
 
 exit_state =
 {
 	name   = "exit_state",
 	init   = st_exit_init,
-	done   = main_nil,
+	done   = common_nil,
 	next   = nil,
 
-	click  = main_nil,
-	button = main_nil,
-	mouse  = main_nil,
+	click  = common_nil,
+	button = common_nil,
+	mouse  = common_nil,
 
-	main   = main_nil
+	main   = common_nil
 }

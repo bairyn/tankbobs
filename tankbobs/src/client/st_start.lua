@@ -44,11 +44,11 @@ end
 
 function st_start_button(button, pressed)
 	if pressed == 1 then
-		if button == 0x1B or button == config_get("config.key.quit") then
+		if button == 0x1B or button == c_config_get("config.key.quit") then
 			c_state_advance()
-		elseif button == 0x0D or button == config_get("config.key.select") then
+		elseif button == 0x0D or button == c_config_get("config.key.select") then
 			c_state_advance()
-		elseif button == config_get("config.key.exit") then
+		elseif button == c_config_get("config.key.exit") then
 			c_state_new(exit_state)
 		end
 	end
