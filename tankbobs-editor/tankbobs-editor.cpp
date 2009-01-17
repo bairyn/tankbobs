@@ -19,11 +19,15 @@ extern vector<entities::Wall *>              wall;
 
 char order = 0;
 
-static int entBase = 0;
+// TODO: implement queue for keyXLast, or handle it better
+static int keyPressLast = 0, keyReleaseLast = 0;
+static int entBase = 0, gridBase = 0;
 QString file = "";
 extern void *selection;
 extern int selectionType;
-static int x_begin = -1, y_begin = -1, x_end, y_end;
+static int x_begin = -1, y_begin = -1, x_end = -1, y_end = -1;
+double zoom = 1.0;
+int x_scroll = 0, y_scroll = 0;
 
 Tankbobs_editor::Tankbobs_editor(QWidget *parent)
 {
@@ -224,25 +228,25 @@ void Editor::resizeGL(int w, int h)
 	glViewport(0.0, 0.0, w, h);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glOrtho(0.0, 100.0, 0.0, 100.0, -1.0, 1.0);
+	glOrtho(0.0, GRIDSIZE, 0.0, GRIDSIZE, -1.0, 1.0);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 }
 
 int Editor::mx(int x)
 {
-	return static_cast<int>(100.0 * static_cast<double>(x) / static_cast<double>(width()));
+	return static_cast<int>(GRIDSIZE / zoom * static_cast<double>(x) / static_cast<double>(width()));
 }
 
 int Editor::my(int y)
 {
-	return 100 - static_cast<int>(100.0 * static_cast<double>(y) / static_cast<double>(height()));
+	return GRIDSIZE / zoom - static_cast<int>(GRIDSIZE / zoom * static_cast<double>(y) / static_cast<double>(height()));
 }
 
 void Editor::mousePressEvent(QMouseEvent *e)
 {
-	x_begin = mx(e->x());
-	y_begin = my(e->y());
+	x_begin = x_end = mx(e->x());
+	y_begin = y_end = my(e->y());
 }
 
 void Editor::mouseReleaseEvent(QMouseEvent *e)
@@ -250,56 +254,73 @@ void Editor::mouseReleaseEvent(QMouseEvent *e)
 	x_end = mx(e->x());
 	y_end = my(e->y());
 
-	switch(selectionType)
+	if(!(e->buttons() & Qt::RightButton))
 	{
-		case e_selectionNone:
-			trm_select(x_end, y_end);
-			break;
+		switch(selectionType)
+		{
+			case e_selectionNone:
+				trm_select(x_end + x_scroll, y_end + y_scroll);
+				break;
 
-		case e_selectionWall:
-			trm_newWall(x_begin, y_begin, x_end, y_end);
-			break;
+			case e_selectionWall:
+				trm_newWall(x_end + x_scroll, y_begin, x_end + x_scroll, y_end);
+				break;
 
-		case e_selectionPlayerSpawnPoint:
-			trm_newPlayerSpawnPoint(x_end, y_end);
-			break;
+			case e_selectionPlayerSpawnPoint:
+				trm_newPlayerSpawnPoint(x_end + x_scroll, y_end + y_scroll);
+				break;
 
-		case e_selectionPowerupSpawnPoint:
-			trm_newPowerupSpawnPoint(x_end, y_end);
-			break;
+			case e_selectionPowerupSpawnPoint:
+				trm_newPowerupSpawnPoint(x_end + x_scroll, y_end + y_scroll);
+				break;
 
-		case e_selectionTeleporter:
-			trm_newTeleporter(x_end, y_end);
-			break;
+			case e_selectionTeleporter:
+				trm_newTeleporter(x_end + x_scroll, y_end + y_scroll);
+				break;
 
-		default:
-			QMessageBox::critical(this, "Entity type selection error", "The selected entity type was not recognized.");
-			fprintf(stderr, "The selected entity type was not recognized.\n");
-			this->exit();
-			break;
+			default:
+				QMessageBox::critical(this, "Entity type selection error", "The selected entity type was not recognized.");
+				fprintf(stderr, "The selected entity type was not recognized.\n");
+				this->exit();
+				break;
+		}
+
+		if(config_get_int(c_autoSelect))
+			selectionType = e_selectionNone;
 	}
 
 	x_begin = -1;
 	y_begin = -1;
-
-	if(config_get_int(c_autoSelect))
-		selectionType = e_selectionNone;
 }
 
 void Tankbobs_editor::keyPressEvent(QKeyEvent *e)
 {
-	trm_keypress(e->key(), !e->isAutoRepeat());
+	keyPressLast = trm_keypress(e->key(), !e->isAutoRepeat());
 }
 
 void Tankbobs_editor::keyReleaseEvent(QKeyEvent *e)
 {
-	trm_keyrelease(e->key());
+	keyReleaseLast = trm_keyrelease(e->key());
 }
 
-void Editor::mouseMoveEvent(QMoveEvent *e)
+void Editor::mouseMoveEvent(QMouseEvent *e)
 {
-	x_end = mx(e->pos().x());
-	y_end = my(e->pos().y());
+	int x_last_scroll = x_end;
+	int y_last_scroll = y_end;
+
+	x_end = mx(e->x());
+	y_end = my(e->y());
+
+	if((e->buttons() & Qt::RightButton) && x_begin >= 0 && y_begin >= 0)
+	{
+		x_scroll += x_end - x_last_scroll;
+		y_scroll += y_end - y_last_scroll;
+	}
+
+	if((e->buttons() & Qt::MidButton) && x_begin >= 0 && y_begin >= 0)
+	{
+		zoom += ZOOMFACTOR * (y_end - y_last_scroll);
+	}
 }
 
 static void drawPlayerSpawnPoints(void)
@@ -471,6 +492,45 @@ void Editor::initializeGL()
 	resizeGL(width(), height());
 	glColor4d(1.0, 1.0, 1.0, 1.0);
 
+	// initialize grid
+	#define GRIDLINES 1024  // approximate number of grid lines drawn on each side
+	if(!(gridBase = glGenLists(1)))
+	{
+		QMessageBox::critical(this, "OpenGL error", "No room for display lists.");
+		fprintf(stderr, "No room for display lists.\n");
+		this->exit();
+	}
+
+	glNewList(gridBase, GL_COMPILE);
+		glPushAttrib(GL_CURRENT_BIT);
+			for(float v = -GRIDSIZE * GRIDLINES; v < GRIDSIZE * GRIDLINES + GRIDSIZE * SMALL; v += GRIDSIZE)
+			{
+				glColor4d(0.05, 0.5, 0.1, 1.0);
+				glBegin(GL_LINES);
+					glVertex2d(v, -GRIDSIZE * GRIDLINES);
+					glVertex2d(v, +GRIDSIZE * GRIDLINES);
+				glEnd();
+			}
+			for(float h = -GRIDSIZE * GRIDLINES; h < GRIDSIZE * GRIDLINES + GRIDSIZE * SMALL; h += GRIDSIZE)
+			{
+				glColor4d(0.05, 0.5, 0.1, 1.0);
+				glBegin(GL_LINES);
+					glVertex2d(-GRIDSIZE * GRIDLINES, h);
+					glVertex2d(+GRIDSIZE * GRIDLINES, h);
+				glEnd();
+			}
+			glColor4d(0.1, 1.0, 0.2, 1.0);
+			glBegin(GL_LINE_STRIP);
+				glVertex2d(0.0, 0.0);
+				glVertex2d(GRIDSIZE, 0.0);
+				glVertex2d(GRIDSIZE, GRIDSIZE);
+				glVertex2d(0.0, GRIDSIZE);
+				glVertex2d(0.0, 0.0);
+			glEnd();
+		glPopAttrib();
+	glEndList();
+
+	// intialize entities
 	if(!(entBase = glGenLists(e_numSelection)))
 	{
 		QMessageBox::critical(this, "OpenGL error", "No room for display lists.");
@@ -518,7 +578,52 @@ void Editor::initializeGL()
 void Editor::paintGL()
 {
 	TE_GLB;
+	glScaled(zoom, zoom, 1.0);
+	glTranslated(x_scroll, y_scroll, 0.0);
+
+	// handle key press events
+	if(keyPressLast)
+	{
+		switch(keyPressLast)
+		{
+			default:
+				break;
+		}
+		keyPressLast = 0;
+	}
+
+	if(keyReleaseLast)
+	{
+		switch(keyReleaseLast)
+		{
+			default:
+				break;
+		}
+		keyReleaseLast = 0;
+	}
+
+	// draw all entities
 	util_fpermutation(editorPaintGLCache.l0, editorPaintGLCache.l1, editorPaintGLCache.l2, order++);
+
+	// draw grid to aid scrolling
+	glCallList(gridBase);
+
+	// draw a wall ghost
+	if(x_begin >= 0 && y_begin >= 0 && selectionType == e_selectionWall)
+	{
+		glPushAttrib(GL_POLYGON_BIT | GL_CURRENT_BIT);
+			glColor4d(0.425, 0.4, 0.45, 1.0);
+			glCullFace(GL_FRONT_AND_BACK);
+			glPushMatrix();
+				glBegin(GL_QUADS);
+					glVertex2d(x_begin, y_begin);
+					glVertex2d(x_begin, y_end);
+					glVertex2d(x_end,   y_end);
+					glVertex2d(x_end,   y_begin);
+				glEnd();
+			glPopMatrix();
+		glPopAttrib();
+	}
 	TE_GLE;
 }
 
@@ -549,50 +654,3 @@ void Texture::paintGL()
 	glEnd();
 	TE_GLE;
 }
-
-
-
-
-
-/*
-
-
-void Tankbobs_editor::doSomething()
-{
-    int value1, value2;
-    Qt::CheckState state;
-    QString str;
-
-    textEdit->append( "Path to file: " + lineEdit->text() );
-
-    value1 = spinBox1->value();
-    value2 = spinBox2->value();
-
-    textEdit->append( "Number 1 value: " + QString::number(value1) );
-    textEdit->append( "Number 2 value: " + QString::number(value2) );
-
-    state = checkBox->checkState();
-
-    str = "Checkbox says: ";
-    if ( state == Qt::Checked ) str += "yes";
-    else str += "no";
-    textEdit->append( str );
-
-    textEdit->append( "ComboBox current text: " + comboBox->currentText() );
-    textEdit->append( "ComboBox current item: " + QString::number(comboBox->currentIndex()) );
-}
-
-
-
-
-
-void Tankbobs_editor::about()
-{
-    QMessageBox::about(this,"About myQtApp",
-                "This app was coded for educational purposes.\n"
-                "Number 1 is: " + QString::number(spinBox1->value()) + "\n\n"
-                "Bye.\n");
-}
-
-
-*/

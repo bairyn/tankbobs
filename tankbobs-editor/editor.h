@@ -22,7 +22,7 @@ class Editor : public QGLWidget
 	protected:
 		void mousePressEvent(QMouseEvent *e);
 		void mouseReleaseEvent(QMouseEvent *e);
-		void mouseMoveEvent(QMoveEvent *e);
+		void mouseMoveEvent(QMouseEvent *e);
 		void initializeGL(void);
 		void resizeGL(int w, int h);
 		void paintGL(void);

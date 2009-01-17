@@ -8,9 +8,11 @@ void trm_newPlayerSpawnPoint(int x, int y);
 void trm_newPowerupSpawnPoint(int x, int y);
 void trm_newTeleporter(int x, int y);
 void trm_newWall(int xs, int ys, int xe, int ye);
-void trm_keypress(int key, bool initial);
-void trm_keyrelease(int key);
+int  trm_keypress(int key, bool initial);
+int  trm_keyrelease(int key);
 
 #define NOVALUEDOUBLE  1.5e307
+#define GRIDSIZE 100.0
+#define ZOOMFACTOR 0.01  // 1 percent per pixel
 
 #endif

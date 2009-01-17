@@ -21,6 +21,9 @@ vector<entities::Teleporter *>        teleporter;
 vector<entities::Wall *>              wall;
 vector<void *>                        selections;
 
+extern double zoom;
+extern int x_scroll, y_scroll;
+
 static void trm_private_modifyAttempted()
 {
 	window->statusAppend("Modify attempted in read-only mode");
@@ -330,7 +333,7 @@ void trm_newWall(int xs, int ys, int xe, int ye)
 	selection = reinterpret_cast<void *>(wall[wall.size() - 1]);
 }
 
-void trm_keypress(int key, bool initial)
+int trm_keypress(int key, bool initial)
 {
 	if(key == Qt::Key_Backspace)
 	{
@@ -343,13 +346,13 @@ void trm_keypress(int key, bool initial)
 					if(config_get_int(c_noModify))
 					{
 						trm_private_modifyAttempted();
-						return;
+						return 0;
 					}
 
 					modified = true;
 					selection = NULL;
 					playerSpawnPoint.erase(i);
-					return;
+					return 0;
 				}
 			}
 			for(vector<entities::PowerupSpawnPoint *>::iterator i = powerupSpawnPoint.begin(); i != powerupSpawnPoint.end(); ++i)
@@ -359,13 +362,13 @@ void trm_keypress(int key, bool initial)
 					if(config_get_int(c_noModify))
 					{
 						trm_private_modifyAttempted();
-						return;
+						return 0;
 					}
 
 					modified = true;
 					selection = NULL;
 					powerupSpawnPoint.erase(i);
-					return;
+					return 0;
 				}
 			}
 			for(vector<entities::Teleporter *>::iterator i = teleporter.begin(); i != teleporter.end(); ++i)
@@ -375,13 +378,13 @@ void trm_keypress(int key, bool initial)
 					if(config_get_int(c_noModify))
 					{
 						trm_private_modifyAttempted();
-						return;
+						return 0;
 					}
 
 					modified = true;
 					selection = NULL;
 					teleporter.erase(i);
-					return;
+					return 0;
 				}
 			}
 			for(vector<entities::Wall *>::iterator i = wall.begin(); i != wall.end(); ++i)
@@ -391,13 +394,13 @@ void trm_keypress(int key, bool initial)
 					if(config_get_int(c_noModify))
 					{
 						trm_private_modifyAttempted();
-						return;
+						return 0;
 					}
 
 					modified = true;
 					selection = NULL;
 					wall.erase(i);
-					return;
+					return 0;
 				}
 			}
 		}
@@ -445,8 +448,20 @@ void trm_keypress(int key, bool initial)
 		selectionType = e_selectionNone;
 		Tankbobs_editor::topen();
 	}
+	else if(key == Qt::Key_R && initial)
+	{
+		x_scroll = y_scroll = 0;
+		return 1;
+	}
+	else if(key == Qt::Key_Z && initial)
+	{
+		zoom = 1.0;
+	}
+
+	return 0;
 }
 
-void trm_keyrelease(int key)
+int trm_keyrelease(int key)
 {
+	return 0;
 }

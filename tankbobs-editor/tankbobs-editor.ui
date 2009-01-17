@@ -177,7 +177,7 @@
      <bool>true</bool>
     </property>
     <property name="text" >
-     <string>Copyright © 2008 Byron James Johnson</string>
+     <string>Copyright © 2008 Byron Johnson</string>
     </property>
    </widget>
    <widget class="QComboBox" name="texture" >

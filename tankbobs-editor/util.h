@@ -4,6 +4,9 @@
 #include <QApplication>
 #include <string>
 
+#define LARGE 1.0e+5f
+#define SMALL 1.0e-3f
+
 std::string util_qtcp(const QString &s);
 int         util_strncmp(const char *s1, const char *s2, int len);
 int         util_atoi(const char *s);
