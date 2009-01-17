@@ -60,9 +60,12 @@ sizeof(a) / sizeof(a[0])
  */
 #define UTIL_SWAPINTEGERS(a, b)                                                \
 {                                                                              \
-	a ^= b;                                                                    \
-	b ^= a;                                                                    \
-	a ^= b;                                                                    \
+	if(a != b)                                                                 \
+	{                                                                          \
+		a ^= b;                                                                \
+		b ^= a;                                                                \
+		a ^= b;                                                                \
+	}                                                                          \
 }                                                                              \
 
 /*
