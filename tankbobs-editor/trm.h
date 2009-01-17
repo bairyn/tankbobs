@@ -13,6 +13,7 @@ int  trm_keyrelease(int key);
 
 #define NOVALUEDOUBLE  1.5e307
 #define GRIDSIZE 100.0
-#define ZOOMFACTOR 0.01  // 1 percent per pixel
+#define ZOOMFACTOR 0.02  // 2% per pixel
+#define ZOOMQUADFACTOR 0.5
 
 #endif

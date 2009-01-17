@@ -27,6 +27,7 @@ extern void *selection;
 extern int selectionType;
 static int x_begin = -1, y_begin = -1, x_end = -1, y_end = -1;
 double zoom = 1.0;
+static int y_last_zoom = 0;
 int x_scroll = 0, y_scroll = 0;
 
 Tankbobs_editor::Tankbobs_editor(QWidget *parent)
@@ -245,6 +246,9 @@ int Editor::my(int y)
 
 void Editor::mousePressEvent(QMouseEvent *e)
 {
+	if(e->buttons() & Qt::MidButton)
+		y_last_zoom = e->y();
+
 	x_begin = x_end = mx(e->x());
 	y_begin = y_end = my(e->y());
 }
@@ -259,23 +263,23 @@ void Editor::mouseReleaseEvent(QMouseEvent *e)
 		switch(selectionType)
 		{
 			case e_selectionNone:
-				trm_select(x_end + x_scroll, y_end + y_scroll);
+				trm_select(x_end - x_scroll, y_end - y_scroll);
 				break;
 
 			case e_selectionWall:
-				trm_newWall(x_end + x_scroll, y_begin, x_end + x_scroll, y_end);
+				trm_newWall(x_end - x_scroll, y_begin - y_scroll, x_end - x_scroll, y_end - y_scroll);
 				break;
 
 			case e_selectionPlayerSpawnPoint:
-				trm_newPlayerSpawnPoint(x_end + x_scroll, y_end + y_scroll);
+				trm_newPlayerSpawnPoint(x_end - x_scroll, y_end - y_scroll);
 				break;
 
 			case e_selectionPowerupSpawnPoint:
-				trm_newPowerupSpawnPoint(x_end + x_scroll, y_end + y_scroll);
+				trm_newPowerupSpawnPoint(x_end - x_scroll, y_end - y_scroll);
 				break;
 
 			case e_selectionTeleporter:
-				trm_newTeleporter(x_end + x_scroll, y_end + y_scroll);
+				trm_newTeleporter(x_end - x_scroll, y_end - y_scroll);
 				break;
 
 			default:
@@ -305,21 +309,26 @@ void Tankbobs_editor::keyReleaseEvent(QKeyEvent *e)
 
 void Editor::mouseMoveEvent(QMouseEvent *e)
 {
-	int x_last_scroll = x_end;
-	int y_last_scroll = y_end;
-
-	x_end = mx(e->x());
-	y_end = my(e->y());
-
-	if((e->buttons() & Qt::RightButton) && x_begin >= 0 && y_begin >= 0)
+	if(x_begin >= 0 && y_begin >= 0)
 	{
-		x_scroll += x_end - x_last_scroll;
-		y_scroll += y_end - y_last_scroll;
-	}
+		int x_last_scroll = x_end;
+		int y_last_scroll = y_end;
 
-	if((e->buttons() & Qt::MidButton) && x_begin >= 0 && y_begin >= 0)
-	{
-		zoom += ZOOMFACTOR * (y_end - y_last_scroll);
+		x_end = mx(e->x());
+		y_end = my(e->y());
+
+		if(e->buttons() & Qt::RightButton)
+		{
+			x_scroll += x_end - x_last_scroll;
+			y_scroll += y_end - y_last_scroll;
+		}
+
+		if(e->buttons() & Qt::MidButton)
+		{
+			double z = zoom + ZOOMFACTOR * (y_last_zoom - e->y());
+			y_last_zoom = e->y();
+			zoom += zoom * zoom * (z - zoom) * ZOOMQUADFACTOR;
+		}
 	}
 }
 
@@ -616,10 +625,10 @@ void Editor::paintGL()
 			glCullFace(GL_FRONT_AND_BACK);
 			glPushMatrix();
 				glBegin(GL_QUADS);
-					glVertex2d(x_begin, y_begin);
-					glVertex2d(x_begin, y_end);
-					glVertex2d(x_end,   y_end);
-					glVertex2d(x_end,   y_begin);
+					glVertex2d(x_begin - x_scroll, y_begin - y_scroll);
+					glVertex2d(x_begin - x_scroll, y_end   - y_scroll);
+					glVertex2d(x_end   - x_scroll, y_end   - y_scroll);
+					glVertex2d(x_end   - x_scroll, y_begin - y_scroll);
 				glEnd();
 			glPopMatrix();
 		glPopAttrib();
