@@ -31,6 +31,7 @@ class Tankbobs_editor : public QMainWindow, private Ui::MainWindow
 		void save();
 		void saveAs();
 		void exit();
+		void import();
 		void openTextureDirectory();
 		void statusClear();
 

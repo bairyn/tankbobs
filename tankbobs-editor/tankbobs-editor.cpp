@@ -53,6 +53,7 @@ Tankbobs_editor::Tankbobs_editor(QWidget *parent)
 	connect(playerSpawnPoint, SIGNAL(clicked()), this, SLOT(selectionPlayerSpawnPoint()));
 	connect(powerupSpawnPoint, SIGNAL(clicked()), this, SLOT(selectionPowerupSpawnPoint()));
 	connect(teleporter, SIGNAL(clicked()), this, SLOT(selectionTeleporter()));
+	connect(actionImport, SIGNAL(triggered()), this, SLOT(import()));
 	connect(actionOpen, SIGNAL(triggered()), this, SLOT(open()));
 	connect(actionSave, SIGNAL(triggered()), this, SLOT(save()));
 	connect(actionSave_As, SIGNAL(triggered()), this, SLOT(saveAs()));
@@ -86,11 +87,6 @@ void Tankbobs_editor::selectionPowerupSpawnPoint()
 void Tankbobs_editor::selectionTeleporter()
 {
 	selectionType = e_selectionTeleporter;
-}
-
-void Tankbobs_editor::open()
-{
-	topen();
 }
 
 void Tankbobs_editor::tsaveAs(void)
@@ -217,6 +213,16 @@ void Tankbobs_editor::save()
 void Tankbobs_editor::saveAs()
 {
 	tsaveAs();
+}
+
+void Tankbobs_editor::import()
+{
+	timport();
+}
+
+void Tankbobs_editor::open()
+{
+	topen();
 }
 
 void Tankbobs_editor::exit()

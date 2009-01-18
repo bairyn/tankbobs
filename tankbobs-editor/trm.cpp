@@ -1091,6 +1091,10 @@ int trm_keypress(int key, bool initial, QKeyEvent *e)
 	{
 		Tankbobs_editor::topen();
 	}
+	else if(key == Qt::Key_I && initial)
+	{
+		Tankbobs_editor::timport();
+	}
 	else if(key == Qt::Key_R && initial)
 	{
 		x_scroll = y_scroll = 0;

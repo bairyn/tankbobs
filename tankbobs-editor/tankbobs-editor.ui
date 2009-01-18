@@ -25,7 +25,7 @@
       <x>10</x>
       <y>10</y>
       <width>181</width>
-      <height>191</height>
+      <height>209</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout" >
@@ -169,7 +169,7 @@
      <rect>
       <x>10</x>
       <y>250</y>
-      <width>191</width>
+      <width>211</width>
       <height>16</height>
      </rect>
     </property>
@@ -177,7 +177,7 @@
      <bool>true</bool>
     </property>
     <property name="text" >
-     <string>Copyright © 2008 Byron Johnson</string>
+     <string>Copyright © 2008 Byron James Johnson</string>
     </property>
    </widget>
    <widget class="QComboBox" name="texture" >
@@ -245,7 +245,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>26</height>
+     <height>29</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile" >
@@ -274,6 +274,7 @@
      <bool>false</bool>
     </property>
     <addaction name="actionOpen" />
+    <addaction name="actionImport" />
     <addaction name="separator" />
     <addaction name="actionSave" />
     <addaction name="actionSave_As" />
@@ -331,6 +332,11 @@
   <action name="actionClear" >
    <property name="text" >
     <string>&amp;C&amp;lear</string>
+   </property>
+  </action>
+  <action name="actionImport" >
+   <property name="text" >
+    <string>&amp;Import</string>
    </property>
   </action>
  </widget>
