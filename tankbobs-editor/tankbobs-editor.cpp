@@ -20,6 +20,8 @@ extern vector<entities::Wall *>              wall;
 char order = 0;
 
 // TODO: implement queue for keyXLast, or handle it better
+static bool ctrl = false;
+static bool shift = false;
 static int keyPressLast = 0, keyReleaseLast = 0;
 static int entBase = 0, gridBase = 0;
 QString file = "";
@@ -116,6 +118,7 @@ void Tankbobs_editor::tsaveAs(void)
 			fprintf(stderr, "Could not save file.\n");
 		}
 		free(f);
+		modified = false;
 	}
 }
 
@@ -140,11 +143,15 @@ void Tankbobs_editor::tsave(void)
 		fprintf(stderr, "Could not save file.\n");
 	}
 	free(f);
+	modified = false;
 }
 
 void Tankbobs_editor::topen(void)
 {
 	extern Tankbobs_editor *window;
+	if(modified)
+		if(QMessageBox::question(window, "Confirm", "Are you sure you want to continue?\nUnsaved progress might be lost", QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes)
+			return;
 	QString tmp, def = "Tankbobs Raw Map (*.trm)";
 	tmp = QFileDialog::getOpenFileName(window, tr("Open File"), tr(""), tr("All Files (*);;Tankbobs Raw Map (*.trm)"), &def);
 	if(tmp.length())
@@ -160,12 +167,44 @@ void Tankbobs_editor::topen(void)
 			fprintf(stderr, "The file name is too large for tankbobs-editor.  Please report this problem.\n");
 		}
 		strncpy(f, util_qtcp(file).c_str(), 2000);
-		if(!trm_open(f))
+		if(!trm_open(f, false))
 		{
 			free(f);
 			QMessageBox::critical(window, "FS error", "Could not open file.");
 			fprintf(stderr, "Could not open file.\n");
 		}
+		free(f);
+	}
+}
+
+void Tankbobs_editor::timport(void)
+{
+	extern Tankbobs_editor *window;
+	if(modified)
+		if(QMessageBox::question(window, "Confirm", "Are you sure you want to continue?\nUnsaved progress might be lost", QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes)
+			return;
+	QString tmp, def = "Tankbobs Raw Map (*.trm)";
+	tmp = QFileDialog::getOpenFileName(window, tr("Open File"), tr(""), tr("All Files (*);;Tankbobs Raw Map (*.trm)"), &def);
+	if(tmp.length())
+	{
+		file = tmp;
+		window->setWindowTitle(QString(file.right(file.lastIndexOf('/'))) + QString(" - ") + QString(file) + QString(" - tankbobs-editor"));
+		char *f = reinterpret_cast<char *>(malloc(2000 + 1));
+		if(!f || file.length() > 2000)
+		{
+			if(f)
+				free(f);
+			QMessageBox::critical(window, "FS error", "The file name is too large for tankbobs-editor.  Please report this problem.");
+			fprintf(stderr, "The file name is too large for tankbobs-editor.  Please report this problem.\n");
+		}
+		strncpy(f, util_qtcp(file).c_str(), 2000);
+		if(!trm_open(f, true))
+		{
+			free(f);
+			QMessageBox::critical(window, "FS error", "Could not open file.");
+			fprintf(stderr, "Could not open file.\n");
+		}
+		window->setWindowTitle(QString(file.right(file.lastIndexOf('/'))) + QString(" - ") + QString(file) + QString(" - tankbobs-editor"));
 		free(f);
 	}
 }
@@ -251,6 +290,15 @@ void Editor::mousePressEvent(QMouseEvent *e)
 
 	x_begin = x_end = mx(e->x());
 	y_begin = y_end = my(e->y());
+
+	if(e->modifiers() & Qt::ControlModifier)
+		ctrl = true;
+	else
+		ctrl = false;
+	if(e->modifiers() & Qt::ShiftModifier)
+		shift = true;
+	else
+		shift = false;
 }
 
 void Editor::mouseReleaseEvent(QMouseEvent *e)
@@ -258,7 +306,7 @@ void Editor::mouseReleaseEvent(QMouseEvent *e)
 	x_end = mx(e->x());
 	y_end = my(e->y());
 
-	if(!(e->buttons() & Qt::RightButton))
+	if(!ctrl && !shift && !(e->buttons() & Qt::RightButton))
 	{
 		switch(selectionType)
 		{
@@ -293,18 +341,27 @@ void Editor::mouseReleaseEvent(QMouseEvent *e)
 			selectionType = e_selectionNone;
 	}
 
+	if(e->modifiers() & Qt::ControlModifier)
+		ctrl = true;
+	else
+		ctrl = false;
+	if(e->modifiers() & Qt::ShiftModifier)
+		shift = true;
+	else
+		shift = false;
+
 	x_begin = -1;
 	y_begin = -1;
 }
 
 void Tankbobs_editor::keyPressEvent(QKeyEvent *e)
 {
-	keyPressLast = trm_keypress(e->key(), !e->isAutoRepeat());
+	keyPressLast = trm_keypress(e->key(), !e->isAutoRepeat(), e);
 }
 
 void Tankbobs_editor::keyReleaseEvent(QKeyEvent *e)
 {
-	keyReleaseLast = trm_keyrelease(e->key());
+	keyReleaseLast = trm_keyrelease(e->key(), e);
 }
 
 void Editor::mouseMoveEvent(QMouseEvent *e)
@@ -321,13 +378,30 @@ void Editor::mouseMoveEvent(QMouseEvent *e)
 		{
 			x_scroll += x_end - x_last_scroll;
 			y_scroll += y_end - y_last_scroll;
+			if(x_scroll > MAXSCROLL)
+				x_scroll = MAXSCROLL;
+			if(x_scroll < MINSCROLL)
+				x_scroll = MINSCROLL;
+			if(y_scroll > MAXSCROLL)
+				y_scroll = MAXSCROLL;
+			if(y_scroll < MINSCROLL)
+				y_scroll = MINSCROLL;
 		}
 
 		if(e->buttons() & Qt::MidButton)
 		{
+			double tmp = zoom;
 			double z = zoom + ZOOMFACTOR * (y_last_zoom - e->y());
 			y_last_zoom = e->y();
 			zoom += zoom * zoom * (z - zoom) * ZOOMQUADFACTOR;
+			if(zoom < MINZOOM)
+				zoom = MINZOOM;
+			if(zoom > MAXZOOM)
+				zoom = MAXZOOM;
+			if(x_scroll < SMALL && x_scroll > -SMALL) x_scroll = SMALL;
+			if(y_scroll < SMALL && y_scroll > -SMALL) y_scroll = SMALL;
+			//x_scroll += (tmp - zoom) / x_scroll;  // I have no idea how to implement this.  TODO
+			//y_scroll += (tmp - zoom) / y_scroll;
 		}
 	}
 }
@@ -502,7 +576,6 @@ void Editor::initializeGL()
 	glColor4d(1.0, 1.0, 1.0, 1.0);
 
 	// initialize grid
-	#define GRIDLINES 1024  // approximate number of grid lines drawn on each side
 	if(!(gridBase = glGenLists(1)))
 	{
 		QMessageBox::critical(this, "OpenGL error", "No room for display lists.");

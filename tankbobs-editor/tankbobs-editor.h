@@ -19,6 +19,7 @@ class Tankbobs_editor : public QMainWindow, private Ui::MainWindow
 		static void tsaveAs(void);
 		static void tsave(void);
 		static void topen(void);
+		static void timport(void);
 
 	public slots:
 		void selectionCancel();

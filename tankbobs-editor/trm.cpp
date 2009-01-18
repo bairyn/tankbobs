@@ -1,3 +1,4 @@
+#include <cstdlib>
 #include <QApplication>
 #include <vector>
 #include <fstream>
@@ -7,6 +8,8 @@
 #include "entities.h"
 #include "config.h"
 #include "properties.h"
+
+extern QString file;
 
 bool modified = false;
 
@@ -29,9 +32,648 @@ static void trm_private_modifyAttempted()
 	window->statusAppend("Modify attempted in read-only mode");
 }
 
-bool trm_open(const char *filename)
+
+
+
+
+/*
+
+The following few lines were stolen from trmc.c and slightly modified
+
+*/
+
+char *stringvalue(char *, char *, int, int);  /* these 3 functions will insert a NULL byte before each , */
+int integervalue(char *, char *, int, int);
+double doublevalue(char *, char *, int, int);
+
+int restore(char *start, char *end)
 {
-	return false;
+	int dq = 0;
+
+	if(start >= end)
+	{
+		fprintf(stdout, "Warning: could not restore field - overlapping bounds\n");
+		return 1;
+	}
+
+	for(; start < end; start++)
+	{
+		if(*start == '"')
+			dq = !dq;
+		if(!*start)
+			*start = ((dq) ? '"' : ' ');
+	}
+
+	return 0;
+}
+
+char *stringvalue(char *start, char *end, int field, int nofieldNoWarning)  // alias nofieldnowarning=optional
+{
+	int i, dq = 0;
+	char *pos = start, *pos2;
+
+	if(start >= end)
+	{
+		fprintf(stdout, "Warning: empty or small field\n");
+		return (char *)NOVALUE;
+	}
+
+	/* first set pos to starting position of field (non-whitespace character after ,) */
+	for(i = 0; i < field; i++)
+	{
+		while(pos < end && (dq || *pos != ','))
+		{
+			if(*pos == '"' && *(pos - 1) != '\\')
+				dq = !dq;
+			if(dq && !*pos)
+				dq = !dq;
+			pos++;
+		}
+
+		if(pos++ >= end)
+		{
+			if(!nofieldNoWarning)
+			{
+				if(!dq)
+					fprintf(stdout, "Warning: too few fields for value requested\n");
+				else
+					fprintf(stdout, "Warning: unterminated string\n");
+				return (char *)NOVALUE;
+			}
+			return (char *)NOVALUE;
+		}
+	}
+	while(pos < end && *pos != ',' && (*pos == '\n' || *pos == ' ' || *pos == '\t' || *pos == '\r')) pos++;
+	if(*pos == ',' || pos >= end)
+	{
+		if(!nofieldNoWarning)
+		{
+			fprintf(stdout, "Warning: cannot parse value requested\n");
+			return (char *)NOVALUE;
+		}
+		return (char *)NOVALUE;
+	}
+
+	/* (after checking for "'s to reset pos, ) set pos2 to end of string */
+	pos2 = pos;
+	if(*pos == '"')
+	{
+		pos++;
+		pos2++;
+		while(pos2 < end && *pos2 && (*pos2 != '"' || *(pos2 - 1) == '\\')) pos2++;
+		if(pos2 >= end)
+		{
+			fprintf(stdout, "Warning: unterminated string\n");
+			return (char *)NOVALUE;
+		}
+		pos2--;
+	}
+	else
+	{
+		while(pos2 < end && *pos2 != ',') pos2++;
+		do pos2--; while(pos2 > start && (*pos2 == '\n' || *pos2 == ' ' || *pos2 == '\t' || *pos2 == '\r'));
+	}
+
+	/* leave escapes to be dealt with in the function */
+	/* insert NULL byte (replaces either " before the space before the comma, or the space before the comma) */
+	*((*pos2 == '"' && pos2 != (pos - 1)) ? (pos2++) : (++pos2)) = 0;
+	return pos;
+}
+
+int integervalue(char *start, char *end, int field, int nofieldNoWarning)
+{
+	int i, dq = 0, sign = 1, result = 0;
+	char *pos = start;
+
+	if(start >= end)
+	{
+		fprintf(stdout, "Warning: empty or small field\n");
+		return NOVALUE;
+	}
+
+	/* first set pos to starting position of field (first digit) */
+	for(i = 0; i < field; i++)
+	{
+		while(pos < end && (dq || *pos != ','))
+		{
+			if(*pos == '"' && *(pos - 1) != '\\')
+				dq = !dq;
+			if(dq && !*pos)
+				dq = !dq;
+			pos++;
+		}
+
+		if(pos++ >= end)
+		{
+			if(!nofieldNoWarning)
+			{
+				if(!dq)
+					fprintf(stdout, "Warning: too few fields for value requested\n");
+				else
+					fprintf(stdout, "Warning: unterminated string\n");
+				return NOVALUE;
+			}
+			return NOVALUE;
+		}
+	}
+	while(pos < end && *pos != ',' && (*pos < '0' || *pos > '9') && *pos != '+' && *pos != '-') pos++;
+	if(*pos == ',' || pos >= end)
+	{
+		if(!nofieldNoWarning)
+		{
+			fprintf(stdout, "Warning: cannot parse value requested\n");
+			return NOVALUE;
+		}
+		return NOVALUE;
+	}
+
+	/* now parse the integer */
+	if(*pos == '+' || *pos == '-')
+	{
+		if(*pos++ == '-')
+			sign = -1;
+	}
+	if(*pos < '0' || *pos > '9')
+	{
+		if(!nofieldNoWarning)
+		{
+			fprintf(stdout, "Warning: integer value cannot be parsed - (sign?) missing integer\n");
+			return NOVALUE;
+		}
+		return NOVALUE;
+	}
+	while(*pos >= '0' && *pos <= '9')
+	{
+		result = result * 10 + (*pos - '0');
+
+		pos++;
+	}
+
+	/* we good! */
+	return result * sign;
+}
+
+double doublevalue(char *start, char *end, int field, int nofieldNoWarning)
+{
+	int i, dq = 0;
+	double sign = 1, result = 0.0;
+	char *pos = start;
+
+	if(start >= end)
+	{
+		fprintf(stdout, "Warning: empty or small field\n");
+		return NOVALUEDOUBLE;
+	}
+
+	/* first set pos to starting position of field (first digit) */
+	for(i = 0; i < field; i++)
+	{
+		while(pos < end && (dq || *pos != ','))
+		{
+			if(*pos == '"' && *(pos - 1) != '\\')
+				dq = !dq;
+			if(dq && !*pos)
+				dq = !dq;
+			pos++;
+		}
+
+		if(pos++ >= end)
+		{
+			if(!nofieldNoWarning)
+			{
+				if(!dq)
+					fprintf(stdout, "Warning: too few fields for value requested\n");
+				else
+					fprintf(stdout, "Warning: unterminated string\n");
+				return NOVALUEDOUBLE;
+			}
+			return NOVALUEDOUBLE;
+		}
+	}
+	while(pos < end && *pos != ',' && (*pos < '0' || *pos > '9') && *pos != '+' && *pos != '-' && *pos != '.') pos++;
+	if(*pos == ',' || pos >= end)
+	{
+		if(!nofieldNoWarning)
+		{
+			fprintf(stdout, "Warning: cannot parse value requested\n");
+			return NOVALUEDOUBLE;
+		}
+		return NOVALUEDOUBLE;
+	}
+
+	/* now parse the double */
+	if(*pos == '+' || *pos == '-')
+	{
+		if(*pos++ == '-')
+			sign = -1;
+	}
+	if(*pos != '.' && (*pos < '0' || *pos > '9'))
+	{
+		if(!nofieldNoWarning)
+		{
+			fprintf(stdout, "Warning: double value cannot be parsed - (sign?) missing double\n");
+			return NOVALUEDOUBLE;
+		}
+		return NOVALUEDOUBLE;
+	}
+	if(*pos == '.')
+	{
+		double depth = 0.1;
+
+		pos++;
+
+		if(*pos < '0' || *pos > '9')
+		{
+			if(!nofieldNoWarning)
+			{
+				fprintf(stdout, "Warning: double value cannot be parsed - (sign?) missing double\n");
+				return NOVALUEDOUBLE;
+			}
+			return NOVALUEDOUBLE;
+		}
+
+		while(*pos >= '0' && *pos <= '9')
+		{
+			result += (*pos - '0') * depth;
+			depth *= 0.1;
+
+			pos++;
+		}
+	}
+	else
+	{
+		while(*pos >= '0' && *pos <= '9')
+		{
+			result = result * 10 + (*pos - '0');
+
+			pos++;
+		}
+		if(*pos++ != '.')
+		{
+		}
+		else if(*pos < '0' || *pos > '9')
+		{
+		}
+		else
+		{
+			double depth = 0.1;
+
+			while(*pos >= '0' && *pos <= '9')
+			{
+				result += (*pos - '0') * depth;
+				depth *= 0.1;
+
+				pos++;
+			}
+		}
+	}
+
+	/* we good! */
+	return result * sign;
+}
+
+char *next_field_offset(char *in)
+{
+	while(*in)
+	{
+		if(*in++ == '{')
+			return in;
+	}
+
+	return 0;
+}
+
+char *next_field_close(char *in)
+{
+	while(*in)
+	{
+		if(*in++ == '}')
+			return (--in - 1); /* yuck */
+	}
+
+	return 0;
+}
+
+int validate(char *in)
+{
+	int count = 1;
+	char field = '{';
+	char *t = in, *pos = in;
+
+	/* make sure there is something to parse */
+	while(*pos != '{')
+	{
+		if(!*pos++)
+		{
+			fprintf(stdout, "Warning: nothing to validate\n");
+			return 1;
+		}
+	} pos = t;
+
+	/* validate an even number of {}'s */
+	while(*pos)
+	{
+		if(*pos == '{' || *pos == '}')
+			count++;
+
+		if(!count)
+		{
+			fprintf(stdout, "Warning: too many fields");
+			return 1;
+		}
+
+		pos++;
+	} pos = t;
+	count++;
+	if(count % 2)
+	{
+		fprintf(stdout, "Warning: uneven number of {}'s");
+		return 1;
+	}
+
+	/* validate the order of {}'s */
+	while(*pos)
+	{
+		if(*pos == '{' || *pos == '}')
+		{
+			if(*pos != field)
+			{
+				fprintf(stdout, "Warning: invalid order of {}'s");
+				return 1;
+			}
+			if(*pos == '{')
+				field = '}';
+			else
+				field = '{';
+		}
+
+		pos++;
+	} pos = t;
+
+	/* we're good */
+	return 0;
+}
+
+static void addSpacesBeforeCommasAndEnd(char *te)
+{
+	char *p = te;
+	char ** const Po = &p, *pE = p;
+	char *pB = *Po;
+	while(*p++);
+	pE = --p;
+	p = pB;
+	/* so now we have pB set to start, pE set to end(p->null turm) and variable p set to start */
+	while(p < pE)
+	{
+		if(*p == ',' || *p == '}')
+		{
+			memmove(p + 1, p, pE++ - p);
+			*p++ = ' ';
+		}
+		p++;
+	} p = pB;
+}
+
+
+
+
+bool trm_open(const char *filename, bool import)  // Will not confirm lost progress!
+{
+	char *buf;
+	buf = reinterpret_cast<char *>(malloc(TEMAXBUF + 60));
+
+	ifstream fin(filename, ios::in);
+	if(fin.fail())
+		return false;
+
+	if(!buf)
+	{
+		fprintf(stderr, "could not allocate enough memory.  Try compiling with a smaller buffer size\n");
+		return false;
+	}
+
+	if(!import)
+	{
+		modified = false;
+		tmap = entities::Map();
+		playerSpawnPoint.clear();
+		powerupSpawnPoint.clear();
+		teleporter.clear();
+		wall.clear();
+	}
+	else
+	{
+		modified = true;
+		file = "";
+	}
+
+	fin.read(buf, TEMAXBUF - 1);
+	char *pos = buf, *pos2 = buf;
+	if(!fin.eof())
+	{
+		free(buf);
+		fprintf(stderr, "file too big for buffer.  Try compiling with a bigger buffer size\n");
+		return false;
+	}
+
+	if(validate(pos))
+	{
+		free(buf);
+		fprintf(stderr, "invalid file\n");
+		return false;
+	}
+
+	addSpacesBeforeCommasAndEnd(pos);
+
+	if(!next_field_offset(pos))
+	{
+		fprintf(stdout, "empty file\n");
+		return false;
+	}
+
+	while((pos = next_field_offset(pos)))
+	{
+		if(!(pos2 = next_field_close(pos)))
+		{
+			fprintf(stderr, "corrupt file to parse\n");
+			return false;
+		}
+
+		if(!stringvalue(pos, pos2, 0, 0))
+		{
+			return false;
+		}
+
+		else if(!strcmp(stringvalue(pos, pos2, 0, 0), "map"))
+		{
+			if(!import)
+			{
+				tmap.id = integervalue(pos, pos2, 1, 0);
+				tmap.name = stringvalue(pos, pos2, 2, 0);
+				tmap.title = stringvalue(pos, pos2, 3, 0);
+				if(!stringvalue(pos, pos2, 4, 1) || stringvalue(pos, pos2, 4, 1) == (char *)NOVALUE)
+					tmap.description = "";
+				else
+					tmap.description = stringvalue(pos, pos2, 4, 1);
+				if(!stringvalue(pos, pos2, 5, 1) || stringvalue(pos, pos2, 5, 1) == (char *)NOVALUE)
+					tmap.authors = "";
+				else
+					tmap.authors = stringvalue(pos, pos2, 5, 1);
+				if(!stringvalue(pos, pos2, 6, 1) || stringvalue(pos, pos2, 6, 1) == (char *)NOVALUE)
+					tmap.version = "";
+				else
+					tmap.version = stringvalue(pos, pos2, 6, 1);
+				if(!stringvalue(pos, pos2, 7, 1) || stringvalue(pos, pos2, 7, 1) == (char *)NOVALUE)
+					tmap.initscript = "";
+				else
+					tmap.initscript = stringvalue(pos, pos2, 7, 1);
+				if(!stringvalue(pos, pos2, 8, 1) || stringvalue(pos, pos2, 8, 1) == (char *)NOVALUE)
+					tmap.exitscript = "";
+				else
+					tmap.exitscript = stringvalue(pos, pos2, 8, 1);
+			}
+		}
+		else if(!strcmp(stringvalue(pos, pos2, 0, 0), "set"))
+		{
+			if(!import)
+			{
+				tmap.setid = integervalue(pos, pos2, 1, 0);
+				tmap.setorder = integervalue(pos, pos2, 2, 0);
+				tmap.setname = stringvalue(pos, pos2, 3, 0);
+				tmap.settitle = stringvalue(pos, pos2, 4, 0);
+				if(!stringvalue(pos, pos2, 5, 1) || stringvalue(pos, pos2, 5, 1) == (char *)NOVALUE)
+					tmap.setdescription = "";
+				else
+					tmap.setdescription = stringvalue(pos, pos2, 5, 1);
+				if(!stringvalue(pos, pos2, 6, 1) || stringvalue(pos, pos2, 6, 1) == (char *)NOVALUE)
+					tmap.setauthors = "";
+				else
+					tmap.setauthors = stringvalue(pos, pos2, 6, 1);
+				if(!stringvalue(pos, pos2, 7, 1) || stringvalue(pos, pos2, 7, 1) == (char *)NOVALUE)
+					tmap.setversion = "";
+				else
+					tmap.setversion = stringvalue(pos, pos2, 7, 1);
+			}
+		}
+		else if(!strcmp(stringvalue(pos, pos2, 0, 0), "wall"))
+		{
+			wall.push_back(new entities::Wall(stringvalue(pos, pos2, 1, 0), stringvalue(pos, pos2, 2, 0), stringvalue(pos, pos2, 3, 0), stringvalue(pos, pos2, 4, 0), stringvalue(pos, pos2, 5, 0), doublevalue(pos, pos2, 6, 0), doublevalue(pos, pos2, 7, 0), doublevalue(pos, pos2, 8, 0), doublevalue(pos, pos2, 9, 0), doublevalue(pos, pos2, 10, 0), doublevalue(pos, pos2, 11, 0), doublevalue(pos, pos2, 12, 1), doublevalue(pos, pos2, 13, 1)));
+		}
+		else if(!strcmp(stringvalue(pos, pos2, 0, 0), "teleporter"))
+		{
+			teleporter.push_back(new entities::Teleporter(doublevalue(pos, pos2, 3, 0), doublevalue(pos, pos2, 4, 0), integervalue(pos, pos2, 1, 0), integervalue(pos, pos2, 2, 0)));
+		}
+		else if(!strcmp(stringvalue(pos, pos2, 0, 0), "powerspawn"))
+		{
+			powerupSpawnPoint.push_back(new entities::PowerupSpawnPoint(doublevalue(pos, pos2, 3, 0), doublevalue(pos, pos2, 4, 0), integervalue(pos, pos2, 2, 0), stringvalue(pos, pos2, 1, 0)));
+		}
+		else if(!strcmp(stringvalue(pos, pos2, 0, 0), "spawnpoint"))
+		{
+			playerSpawnPoint.push_back(new entities::PlayerSpawnPoint(doublevalue(pos, pos2, 1, 0), doublevalue(pos, pos2, 2, 0)));
+		}
+		else
+		{
+			fprintf(stdout, "Warning: field %s not known\n", stringvalue(pos, pos2, 0, 0));
+		}
+
+		if(restore(pos, pos2))
+		{
+			fprintf(stderr, "error restoring memory from %p to %p\n", pos, pos2);
+			free(buf);
+			return false;
+		}
+	}
+
+	free(buf);
+	return true;
+
+/*
+	char buf[TEMAXBUF];  // TEMAXBUF is 1024
+	int line = 0;
+
+	ifstream fin(filename, ios::in);
+	if(fin.fail())
+		return false;
+
+	if(!import)
+	{
+		modified = false;
+		tmap = entities::Map();
+		playerSpawnPoint.clear();
+		powerupSpawnPoint.clear();
+		teleporter.clear();
+		wall.clear();
+	}
+	else
+	{
+		file = "";
+	}
+
+	while(fin.getline(buf, TEMAXBUF), line++, !fin.eof())
+	{
+		if(fin.fail())
+		{
+			fprintf(stderr, "line %d too big to store into a %d byte buffer\n", line, TEMAXBUF);
+			return false;
+		}
+
+		char *p = buf;
+		while(*p != '{')
+		{
+			if(!*p++)
+			{
+				fprintf(stderr, "line %d is missing a '{'\n", line);
+				return false;
+			}
+		}
+		char *p2 = p + 1;
+		while(*p2 != '}')
+		{
+			if(!*p2++)
+			{
+				fprintf(stderr, "line %d is missing a '{'\n", line);
+				return false;
+			}
+		}
+		p++;
+		p2--;
+		// p is now set to the character after '{' and p2 to the character
+		// before '}'
+		while(*p && p <= p2 && *p != ' ' && *p != '\t' && *p != '\n') p++;
+		while(*p2 && p2 >= p && *p2 != ' '&& *p2 != '\t' && *p2 != '\n') p2++;
+		if(p2 <= p || p > p2)
+		{
+			fprintf(sterr, "erroneous line %d: no body detected\n", line);
+		}
+		// p is now the first non-whitespace character
+		// p2 is the last non-whitespace character
+		char buf2[TEMAXBUF];
+		int i = 1;
+		while((int)(i++) <= (int)(TEMAXBUF))
+		{
+			if(i <= 0)
+			{
+				fprintf(stderr, "on parsing line %d: the iterator can't hold enough memory to point to buffer\n", line);
+				return false;
+			}
+		}
+		i = 0;
+		char *etype = buf2;
+		if(*etype == '"')
+			etype++;
+		char *p3 = p;
+		while(*p3 && p3 <= p2 && *p != ' ' && *p3 != '\t' && *p3 != '\n') p3++;
+		if(p2 <= p3 || p3 > p2)
+		{
+			fprintf(sterr, "erroneous line %d: no body detected\n", line);
+		}
+		while(p <= p2 && *p != '"' && *p != ',' && *p != '')
+		{
+			
+		}
+	}
+
+	return true;*/
 }
 
 bool trm_save(const char *filename)
@@ -333,7 +975,7 @@ void trm_newWall(int xs, int ys, int xe, int ye)
 	selection = reinterpret_cast<void *>(wall[wall.size() - 1]);
 }
 
-int trm_keypress(int key, bool initial)
+int trm_keypress(int key, bool initial, QKeyEvent *e)
 {
 	if(key == Qt::Key_Backspace)
 	{
@@ -426,6 +1068,7 @@ int trm_keypress(int key, bool initial)
 	{
 		selectionType = e_selectionPlayerSpawnPoint;
 	}
+//	else if(key == Qt::Key_O && initial && !(e->modifiers() & Qt::ControlModifier))
 	else if(key == Qt::Key_O && initial)
 	{
 		selectionType = e_selectionPowerupSpawnPoint;
@@ -438,6 +1081,7 @@ int trm_keypress(int key, bool initial)
 	{
 		Tankbobs_editor::tsave();
 	}
+//	else if(key == Qt::Key_O && !initial && !(e->modifiers() & Qt::ControlModifier))
 	else if(key == Qt::Key_O && !initial)
 	{
 		selectionType = e_selectionNone;
@@ -445,7 +1089,6 @@ int trm_keypress(int key, bool initial)
 	}
 	else if(key == Qt::Key_T && initial)
 	{
-		selectionType = e_selectionNone;
 		Tankbobs_editor::topen();
 	}
 	else if(key == Qt::Key_R && initial)
@@ -461,7 +1104,7 @@ int trm_keypress(int key, bool initial)
 	return 0;
 }
 
-int trm_keyrelease(int key)
+int trm_keyrelease(int key, QKeyEvent *e)
 {
 	return 0;
 }
