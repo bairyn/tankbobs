@@ -321,7 +321,7 @@ void Editor::mouseReleaseEvent(QMouseEvent *e)
 				break;
 
 			case e_selectionWall:
-				trm_newWall(x_end - x_scroll, y_begin - y_scroll, x_end - x_scroll, y_end - y_scroll);
+				trm_newWall(x_begin - x_scroll, y_begin - y_scroll, x_end - x_scroll, y_end - y_scroll);
 				break;
 
 			case e_selectionPlayerSpawnPoint:
