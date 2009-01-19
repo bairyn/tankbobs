@@ -412,6 +412,16 @@ void Editor::mouseMoveEvent(QMouseEvent *e)
 	}
 }
 
+static void drawCircle(double radius, double c = 0.25, double e = 360.0, double s = 0.0)
+{
+	glBegin(GL_LINE_LOOP);
+		for(double i = s; i < e; i += c)
+		{
+			glVertex2d(cos(UTIL_RAD(i) * radius), sin(sin(UTIL_RAD(i)) * radius));
+		}
+	glEnd();
+}
+
 static void drawPlayerSpawnPoints(void)
 {
 	for(vector<entities::PlayerSpawnPoint *>::iterator i = playerSpawnPoint.begin(); i != playerSpawnPoint.end(); ++i)
@@ -424,7 +434,7 @@ static void drawPlayerSpawnPoints(void)
 					glCallList(entBase + e_selectionPlayerSpawnPoint);
 				if(e == reinterpret_cast<void *>(selection))
 				{
-					glScaled(1.1, 1.1, 1.0);
+					glScaled(1.1 / zoom, 1.1 / zoom, 1.0);
 					glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 					glColor4d(1.0, 0.0, 0.0, 1.0);
 					if(glIsList(entBase + e_selectionPlayerSpawnPoint))
@@ -447,7 +457,7 @@ static void drawPowerupSpawnPoints(void)
 					glCallList(entBase + e_selectionPowerupSpawnPoint);
 				if(e == reinterpret_cast<void *>(selection))
 				{
-					glScaled(1.1, 1.1, 1.0);
+					glScaled(1.1 / zoom, 1.1 / zoom, 1.0);
 					glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 					glColor4d(1.0, 0.0, 0.0, 1.0);
 					if(glIsList(entBase + e_selectionPowerupSpawnPoint))
@@ -470,7 +480,7 @@ static void drawTeleporters(void)
 					glCallList(entBase + e_selectionTeleporter);
 				if(e == reinterpret_cast<void *>(selection))
 				{
-					glScaled(1.1, 1.1, 1.0);
+					glScaled(1.1 / zoom, 1.1 / zoom, 1.0);
 					glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 					glColor4d(1.0, 0.0, 0.0, 1.0);
 					if(glIsList(entBase + e_selectionTeleporter))
@@ -492,27 +502,76 @@ static void drawWalls(void)
 				ax = ((e->x4 == NOVALUEDOUBLE || e->y4 == NOVALUEDOUBLE) ? ((e->x1 + e->x2 + e->x3) / 3) : ((e->x1 + e->x2 + e->x3 + e->x4) / 4));
 				ay = ((e->x4 == NOVALUEDOUBLE || e->y4 == NOVALUEDOUBLE) ? ((e->y1 + e->y2 + e->y3) / 3) : ((e->y1 + e->y2 + e->y3 + e->y4) / 4));
 				glTranslated(ax, ay, 0.0);
-				if(e->x4 == NOVALUEDOUBLE || e->y4 == NOVALUEDOUBLE)
+				if(e == reinterpret_cast<void *>(selection))
 				{
-					glBegin(GL_TRIANGLES);
-						glVertex2d(ax - e->x1, ay - e->y1);
-						glVertex2d(ax - e->x2, ay - e->y2);
-						glVertex2d(ax - e->x3, ay - e->y3);
-					glEnd();
+					glScaled(1.1 / zoom, 1.1 / zoom, 1.0);
+					glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+					glColor4d(1.0, 0.0, 0.0, 1.0);
+					if(e->x4 == NOVALUEDOUBLE || e->y4 == NOVALUEDOUBLE)
+					{
+						glBegin(GL_TRIANGLES);
+							glVertex2d(ax - e->x1, e->y1);
+							glVertex2d(ax - e->x2, e->y2);
+							glVertex2d(ax - e->x3, e->y3);
+						glEnd();
+					}
+					else
+					{
+						glBegin(GL_QUADS);
+							glVertex2d(ax - e->x1, e->y1);
+							glVertex2d(ax - e->x2, e->y2);
+							glVertex2d(ax - e->x3, e->y3);
+							glVertex2d(ax - e->x4, e->y4);
+						glEnd();
+					}
+					// - draw in red
+					glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+					glColor4d(1.0, 0.0, 0.0, 1.0);
+					if(e->x4 == NOVALUEDOUBLE || e->y4 == NOVALUEDOUBLE)
+					{
+						glBegin(GL_TRIANGLES);
+							glVertex2d(ax - e->x1, ay - e->y1);
+							glVertex2d(ax - e->x2, ay - e->y2);
+							glVertex2d(ax - e->x3, ay - e->y3);
+						glEnd();
+					}
+					else
+					{
+						glBegin(GL_QUADS);
+							glVertex2d(ax - e->x1, ay - e->y1);
+							glVertex2d(ax - e->x2, ay - e->y2);
+							glVertex2d(ax - e->x3, ay - e->y3);
+							glVertex2d(ax - e->x4, ay - e->y4);
+						glEnd();
+					}
+					// -
+					if(ctrl && shift)
+					{
+						glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+						glColor4d(1.0, 0.5, 0.0, 1.0);
+						glPushMatrix();
+							glTranslated(ax - e->x1, ay - e->y1, 0.0);
+							drawCircle(3.0 / zoom);
+						glPopMatrix();
+						glPushMatrix();
+							glTranslated(ax - e->x2, ay - e->y2, 0.0);
+							drawCircle(3.0 / zoom);
+						glPopMatrix();
+						glPushMatrix();
+							glTranslated(ax - e->x1, ay - e->y3, 0.0);
+							drawCircle(3.0 / zoom);
+						glPopMatrix();
+						if(e->x4 == NOVALUEDOUBLE || e->y4 == NOVALUEDOUBLE)
+						{
+							glPushMatrix();
+								glTranslated(ax - e->x4, ay - e->y4, 0.0);
+								drawCircle(3.0 / zoom);
+							glPopMatrix();
+						}
+					}
 				}
 				else
 				{
-					glBegin(GL_QUADS);
-						glVertex2d(ax - e->x1, ay - e->y1);
-						glVertex2d(ax - e->x2, ay - e->y2);
-						glVertex2d(ax - e->x3, ay - e->y3);
-						glVertex2d(ax - e->x4, ay - e->y4);
-					glEnd();
-				}
-				if(e == reinterpret_cast<void *>(selection))
-				{
-					glScaled(1.1, 1.1, 1.0);
-					glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 					glColor4d(1.0, 0.0, 0.0, 1.0);
 					if(e->x4 == NOVALUEDOUBLE || e->y4 == NOVALUEDOUBLE)
 					{
@@ -608,12 +667,11 @@ void Editor::initializeGL()
 				glEnd();
 			}
 			glColor4d(0.1, 1.0, 0.2, 1.0);
-			glBegin(GL_LINE_STRIP);
+			glBegin(GL_LINE_LOOP);
 				glVertex2d(0.0, 0.0);
 				glVertex2d(GRIDSIZE, 0.0);
 				glVertex2d(GRIDSIZE, GRIDSIZE);
 				glVertex2d(0.0, GRIDSIZE);
-				glVertex2d(0.0, 0.0);
 			glEnd();
 		glPopAttrib();
 	glEndList();
@@ -708,6 +766,55 @@ void Editor::paintGL()
 					glVertex2d(x_begin - x_scroll, y_end   - y_scroll);
 					glVertex2d(x_end   - x_scroll, y_end   - y_scroll);
 					glVertex2d(x_end   - x_scroll, y_begin - y_scroll);
+				glEnd();
+			glPopMatrix();
+		glPopAttrib();
+	}
+	// or another type of ghost
+	if(x_begin >= 0 && y_begin >= 0 && selectionType == e_selectionPlayerSpawnPoint)
+	{
+		glPushAttrib(GL_POLYGON_BIT | GL_CURRENT_BIT);
+			glColor4d(1.0 * 0.225, 1.0 * 0.2, 0.0 * 0.25, 1.0);
+			glCullFace(GL_FRONT_AND_BACK);
+			glPushMatrix();
+				glTranslated(x_end, y_end, 0.0);
+				glBegin(GL_QUADS);
+					glVertex2d(-PLAYERSPAWNPOINT_WIDTH * 0.5, +PLAYERSPAWNPOINT_HEIGHT * 0.5);
+					glVertex2d(-PLAYERSPAWNPOINT_WIDTH * 0.5, -PLAYERSPAWNPOINT_HEIGHT * 0.5);
+					glVertex2d(+PLAYERSPAWNPOINT_WIDTH * 0.5, -PLAYERSPAWNPOINT_HEIGHT * 0.5);
+					glVertex2d(+PLAYERSPAWNPOINT_WIDTH * 0.5, +PLAYERSPAWNPOINT_HEIGHT * 0.5);
+				glEnd();
+			glPopMatrix();
+		glPopAttrib();
+	}
+	if(x_begin >= 0 && y_begin >= 0 && selectionType == e_selectionPowerupSpawnPoint)
+	{
+		glPushAttrib(GL_POLYGON_BIT | GL_CURRENT_BIT);
+			glColor4d(0.0 * 0.225, 0.0 * 0.2, 1.0 * 0.25, 1.0);
+			glCullFace(GL_FRONT_AND_BACK);
+			glPushMatrix();
+				glTranslated(x_end, y_end, 0.0);
+				glBegin(GL_QUADS);
+					glVertex2d(-POWERUPSPAWNPOINT_WIDTH * 0.5, +POWERUPSPAWNPOINT_HEIGHT * 0.5);
+					glVertex2d(-POWERUPSPAWNPOINT_WIDTH * 0.5, -POWERUPSPAWNPOINT_HEIGHT * 0.5);
+					glVertex2d(+POWERUPSPAWNPOINT_WIDTH * 0.5, -POWERUPSPAWNPOINT_HEIGHT * 0.5);
+					glVertex2d(+POWERUPSPAWNPOINT_WIDTH * 0.5, +POWERUPSPAWNPOINT_HEIGHT * 0.5);
+				glEnd();
+			glPopMatrix();
+		glPopAttrib();
+	}
+	if(x_begin >= 0 && y_begin >= 0 && selectionType == e_selectionTeleporter)
+	{
+		glPushAttrib(GL_POLYGON_BIT | GL_CURRENT_BIT);
+			glColor4d(0.0 * 0.225, 1.0 * 0.2, 0.0 * 0.25, 1.0);
+			glCullFace(GL_FRONT_AND_BACK);
+			glPushMatrix();
+				glTranslated(x_end, y_end, 0.0);
+				glBegin(GL_QUADS);
+					glVertex2d(-TELEPORTER_WIDTH * 0.5, +TELEPORTER_HEIGHT * 0.5);
+					glVertex2d(-TELEPORTER_WIDTH * 0.5, -TELEPORTER_HEIGHT * 0.5);
+					glVertex2d(+TELEPORTER_WIDTH * 0.5, -TELEPORTER_HEIGHT * 0.5);
+					glVertex2d(+TELEPORTER_WIDTH * 0.5, +TELEPORTER_HEIGHT * 0.5);
 				glEnd();
 			glPopMatrix();
 		glPopAttrib();

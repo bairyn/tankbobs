@@ -83,6 +83,7 @@ Properties::Properties(QWidget *parent)
 			script3->setText(QString(reinterpret_cast<entities::Wall *>(selection)->script3.c_str()));
 
 			selected = true;
+			fourVertices->setEnabled(true);
 			texture->setEnabled(true);
 			textureLabel->setEnabled(true);
 			script1->setEnabled(true);

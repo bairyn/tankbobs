@@ -7,6 +7,11 @@
 #define LARGE 1.0e+5f
 #define SMALL 1.0e-3f
 
+#include "pi.h"
+
+#define UTIL_RAD(d) (d * M_PI / 180.0)
+#define UTIL_DEG(r) (r * 180.0 / M_PI)
+
 std::string util_qtcp(const QString &s);
 int         util_strncmp(const char *s1, const char *s2, int len);
 int         util_atoi(const char *s);
