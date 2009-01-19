@@ -25,7 +25,7 @@ static bool shift = false;
 static int keyPressLast = 0, keyReleaseLast = 0;
 static int entBase = 0, gridBase = 0;
 QString file = "";
-extern void *selection;
+extern void *selection;  // TODO: use a vector instead of a single pointer
 extern int selectionType;
 static int x_begin = -1, y_begin = -1, x_end = -1, y_end = -1;
 double zoom = 1.0;
