@@ -21,7 +21,7 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 gui.lua
 
 Graphical User Interface
-I'm not a good GUI guy, so I had implement gui_conserve() which stops gui input to keep it from being very slow (see the license, there's at leasy a 5 or so second delay)
+TODO: better ui?
 --]]
 
 function gui_init()
