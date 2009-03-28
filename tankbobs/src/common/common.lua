@@ -76,7 +76,7 @@ end
 
 function common_endsIn(str, match)
 	if not (type(str) == "string" and type(match) == "string") then
-		common_error("Invalid arguments passed: ", str, match)
+		common_error("common_endsIn: invalid arguments passed: ", str, match)
 	end
 
 	return match == "" or str:sub(-match:len()) == match
