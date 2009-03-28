@@ -42,6 +42,7 @@ function c_mods_load(dir)
 
 	for filename in lfs.dir(dir) do
 		if not filename:find("^%.") and common_endsIn(filename, ".lua") then
+			common_print("Running mod: " .. filename)
 			dofile(dir .. filename)
 		end
 	end
