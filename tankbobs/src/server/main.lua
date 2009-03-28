@@ -18,54 +18,11 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 --]]
 
 --[[
-common.lua
+main.lua
 
-common lua functions
+startup and the like
 --]]
 
-function common_nil(...)
-	return ...
-end
-
-function common_init()
-	require "tankbobs"
-	tankbobs.t_initialize(client and not server);
-
-	c_const_init()
-
-	c_data_init()
-
-	c_module_init()
-
-	c_config_init()
-
-	c_mods_init()
-	b_mods()  -- anything below this is moddable
-
-	c_state_init()
-
-	c_tcm_init()
-end
-
-function common_done()
-	c_tcm_done()
-
-	c_state_done()
-
-	c_mods_done()
-
-	c_config_done()
-
-	c_module_done()
-
-	c_data_done()
-
-	c_const_done()
-
-	tankbobs.t_quit()
-end
-
-function common_error(...)
-	print("Error exiting: " .. ...)
-	c_state_goto(exit_state)  -- TODO: is there a better way to do this?
+function b_mods()
+	c_mods_load(c_const_get("server-mods_dir"))
 end

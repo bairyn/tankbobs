@@ -26,21 +26,28 @@ It is up to the server and client to call
 --]]
 
 function c_mods_init()
+end
+
+function c_mods_done()
+end
+
+function c_mods_load(dir)
 	require "lfs"
+
+	if not dir or dir == "" then
+		c_error "Invalid mod directory."
+	end
 
 	mods_data = {}  -- defines, values, other uses, etc; for mods
 
-	for filename in lfs.dir(c_const_get("mods_dir")) do
-		if not filename:find("^%.") then
-			dofile(c_const_get("mods_dir") .. filename)
+	for filename in lfs.dir(dir) do
+		if not filename:find("^%.") and filename:endsin(".lua") then
+			dofile(dir .. filename)
 		end
 	end
 
 	c_mods_data_load()
 	c_mods_body()
-end
-
-function c_mods_done()
 end
 
 function c_mods_data_load()  -- redefine some constants

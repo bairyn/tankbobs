@@ -168,3 +168,7 @@ function main_parseArgs(args)
 
 	return parse(1)
 end
+
+function b_mods()
+	c_mods_load(c_const_get("client-mods_dir"))
+end

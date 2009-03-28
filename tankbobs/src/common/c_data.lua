@@ -26,10 +26,11 @@ constants
 function c_data_init()
 	c_data_init = nil
 
-	c_const_set("version", "0.9.0")
+	c_const_set("version", "0.1.0-dev")
 	c_const_set("debug", select(1, tankbobs.t_isDebug()))
 	c_const_set("data_dir", "./data/")
-	c_const_set("mods_dir", "./mod/")
+	c_const_set("client-mods_dir", "./mod-client/")
+	c_const_set("server-mods_dir", "./mod-server/")
 
 	c_const_set("module_dir", c_const_get("data_dir") .. "modules/", 1)
 	c_const_set("textures_dir",  c_const_get("data_dir") .. "textures/", 1)
