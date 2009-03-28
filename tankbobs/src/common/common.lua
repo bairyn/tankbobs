@@ -69,3 +69,15 @@ function common_error(...)
 	print("Error exiting: " .. ...)
 	c_state_goto(exit_state)  -- TODO: is there a better way to do this?
 end
+
+function common_print(...)
+	print(...)
+end
+
+function common_endsIn(str, match)
+	if not (type(str) == "string" and type(match) == "string") then
+		common_error("Invalid arguments passed: ", str, match)
+	end
+
+	return match == "" or str:sub(-match:len()) == match
+end

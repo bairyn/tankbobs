@@ -22,10 +22,43 @@ vector<entities::PlayerSpawnPoint *>  playerSpawnPoint;
 vector<entities::PowerupSpawnPoint *> powerupSpawnPoint;
 vector<entities::Teleporter *>        teleporter;
 vector<entities::Wall *>              wall;
-vector<void *>                        selections;
+vector<void *>                        selections;  // list of _previously_ selected
+vector<void *>                        selection;  // actual selection
 
 extern double zoom;
 extern int x_scroll, y_scroll;
+
+// isSelected returns 0 if not selected, else returns value in relation
+// to last selected.  for example, if entity e was last selected, 1 in returned.
+// if e was second to be selected 2 is returned.
+int trm_isSelected(void *e)
+{
+	int c = 0;
+	void *t;
+
+	for(vector<entities::void *>::reverse_iterator i = selection.rbegin; i != selection.rend; ++i)
+	{
+		c++;
+		t = reinterpret_cast<void *>(*i);
+		if(t == e)
+		{
+			return c;
+		}
+	}
+
+	return false;
+}
+
+void trm_setSelected(void *e)
+{
+	selection.push_back(e);
+}
+
+void trm_clearAndSetSelected(void *e)
+{
+	selection.clear();
+	selection.push_back(e);
+}
 
 static void trm_private_modifyAttempted()
 {
@@ -797,7 +830,7 @@ bool trm_save(const char *filename)
 	return true;
 }
 
-void trm_select(int x, int y)
+void trm_select(int x, int y, int multiple)
 {
 	// TODO: implement polymorphism to eliminate redundant use of iterating through
 	// each type of entity; other functions (eg newPlayerSpawnPoint) also need

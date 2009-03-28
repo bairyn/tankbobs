@@ -41,7 +41,7 @@ function c_mods_load(dir)
 	mods_data = {}  -- defines, values, other uses, etc; for mods
 
 	for filename in lfs.dir(dir) do
-		if not filename:find("^%.") and filename:endsin(".lua") then
+		if not filename:find("^%.") and common_endsIn(filename, ".lua") then
 			dofile(dir .. filename)
 		end
 	end

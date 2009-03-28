@@ -16,6 +16,7 @@ extern vector<entities::PlayerSpawnPoint *>  playerSpawnPoint;
 extern vector<entities::PowerupSpawnPoint *> powerupSpawnPoint;
 extern vector<entities::Teleporter *>        teleporter;
 extern vector<entities::Wall *>              wall;
+extern vector<void *> selection;
 
 char order = 0;
 

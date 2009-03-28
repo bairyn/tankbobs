@@ -1,6 +1,9 @@
 #ifndef TRM_H
 #define TRM_H
 
+int  trm_isSelected(void *e);
+void trm_setSelected(void *e);
+void trm_clearAndSetSelected(void *e);
 bool trm_open(const char *filename, bool import);
 bool trm_save(const char *filename);
 void trm_select(int x, int y);
