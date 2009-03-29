@@ -23,14 +23,20 @@ math.lua
 math
 --]]
 
+function c_math_init()
+end
+
+function c_math_done()
+end
+
 -- 2d math
 
 function c_radians(degrees)
-	return degrees * 180 / math.pi
+	return degrees * math.pi / 180
 end
 
 function c_degrees(radians)
-	return radians * math.pi / 180
+	return radians * 180 / math.pi
 end
 
 c_vec2 =
@@ -46,10 +52,12 @@ c_vec2 =
 	new = function (self, o)
 		o = o or {}  --  create table if user does not provide one
 		setmetatable(o, self)
-		self.__index = self
+		o.i = self
+		o.self = {}  -- initialize the values
+		o.self.x, o.self.y, o.self.R, o.self.t = 0, 0, 0, 0  -- initialize the values
 		return o
 	end,
-	x = function (self, v)
+	vx = function (self, v)
 		if v then
 			self.self.x = v
 			-- calculate polar coordinates and return
@@ -60,7 +68,7 @@ c_vec2 =
 			return self.self.x
 		end
 	end,
-	y = function (self, v)
+	vy = function (self, v)
 		if v then
 			self.self.y = v
 			-- calculate polar coordinates and return
@@ -71,7 +79,7 @@ c_vec2 =
 			return self.self.y
 		end
 	end,
-	R = function (self, v)
+	vR = function (self, v)
 		if v then
 			self.self.R = v
 			-- calculate rectangular coordinates and return
@@ -82,10 +90,12 @@ c_vec2 =
 			return self.self.R
 		end
 	end,
-	t = function (self, v)
+	vt = function (self, v)
 		if v then
 			self.self.t = v
 			-- calculate rectangular coordinates and return
+			self.self.x = self.self.R * math.cos(self.self.t)
+			self.self.y = self.self.R * math.sin(self.self.t)
 			return self.self.t
 		else
 			return self.self.t
@@ -95,70 +105,86 @@ c_vec2 =
 		self:R(1)
 	end,
 	add = function (a, b)
-		a:x(a:x() + b:x())
-		a:y(a:y() + b:y())
+		a:vx(a:vx() + b:vx())
+		a:vy(a:vy() + b:vy())
 	end,
 	sub = function (a, b)
-		a:x(a:x() - b:x())
-		a:y(a:y() - b:y())
+		a:x(va:x() - b:vx())
+		a:y(va:y() - b:vy())
 	end,
 	inv = function (self)
-		self:x(-self:x())
-		self:y(-self:y())
+		self:vx(-self:vx())
+		self:vy(-self:vy())
 	end,
 	unit = function (self)
 		r = c_vec2:new()
-		r:x(self:x())
-		r:y(self:y())
+		r:vx(self:vx())
+		r:vy(self:vy())
 		r:R(1)
 		return r
 	end,
 	__add = function (a, b)
 		r = c_vec2:new()
-		r:x(a:x() + b:x())
-		r:y(a:y() + b:y())
+		r:vx(a:vx() + b:vx())
+		r:vy(a:vy() + b:vy())
 		return r
 	end,
 	__sub = function (a, b)
 		r = c_vec2:new()
-		r:x(a:x() - b:x())
-		r:y(a:y() - b:y())
+		r:vx(a:vx() - b:vx())
+		r:vy(a:vy() - b:vy())
 		return r
 	end,
 	__unm = function (a)
 		r = c_vec2:new()
-		r:x(-a:x())
-		r:y(-a:y())
+		r:vx(-a:vx())
+		r:vy(-a:vy())
 		return r
 	end,
 	__len = function (self)
 		-- returns a number, not a vector
-		return self:R()
+		return self:vR()
 	end,
 	__eq = function (a, b)
-		return a:x() == b:x() and a:y() == b:y()
+		return a:vx() == b:vx() and a:vy() == b:vy()
+	end,
+	__index = function (self, key)
+		-- allow syntax for vector.x = 0, etc
+		if key == "x" then
+			return self:vx(value)
+		elseif key == "y" then
+			return self:vy(value)
+		elseif key == "R" then
+			return self:vR(value)
+		elseif key == "t" then
+			return self:vt(value)
+		elseif type(rawget(self, "i")) == "table" then
+			return rawget(rawget(self, "i"), key)
+		end
 	end,
 	__newindex = function (self, key, value)
 		-- allow syntax for vector.x = 0, etc
 		if key == "x" then
-			self:x(value)
+			return self:vx(value)
 		elseif key == "y" then
-			self:y(value)
+			return self:vy(value)
 		elseif key == "R" then
-			self:R(value)
+			return self:vR(value)
 		elseif key == "t" then
-			self:t(value)
+			return self:vt(value)
+		else
+			rawset(self, key, value)
 		end
 	end,
 	__call = function (self, x, y)
 		-- rectangular coordinates
 		-- an argument check might be good here if it does't impede performance
-		self:x(x)
-		self:y(y)
+		self:vx(x)
+		self:vy(y)
 	end
 }
 
 -- example_vector = c_vec2:new()
--- example_vector.x(2.5)
+-- example_vector.vx(2.5)
 -- example_vector(3, 4)
--- example_vector.x = 3
+-- example_vector.x = 5

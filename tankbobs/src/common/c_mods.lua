@@ -35,7 +35,7 @@ function c_mods_load(dir)
 	require "lfs"
 
 	if not dir or dir == "" then
-		c_error "Invalid mod directory."
+		error "Invalid mod directory."
 	end
 
 	mods_data = {}  -- defines, values, other uses, etc; for mods

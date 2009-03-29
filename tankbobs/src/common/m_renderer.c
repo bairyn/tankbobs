@@ -172,7 +172,9 @@ int r_newWindow(lua_State *L)
 
 	if(!SDL_SetVideoMode(w, h, 0, SDL_OPENGL | ((f) ? (SDL_FULLSCREEN) : (0))))
 	{
+#ifdef TDEBUG
 		fprintf(stdout, "Warning: could not init video mode.  Trying again with lower antialias multisampling\n");
+#endif
 		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 8);
 		if(!SDL_SetVideoMode(w, h, 0, SDL_OPENGL | ((f) ? (SDL_FULLSCREEN) : (0))))
 		{

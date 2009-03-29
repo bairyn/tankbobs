@@ -69,11 +69,6 @@ function common_done()
 	tankbobs.t_quit()
 end
 
-function common_error(...)
-	print("Error: " .. ...)
-	error "Aborting."
-end
-
 function common_print(...)
 	print(...)
 end
