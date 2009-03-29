@@ -32,116 +32,37 @@ format is simple:
 5th byte is 0x01
 6th-10th is Sint32 magic number
 11th byte is Uint8 (char) version
-12th+ is data
-
-bytes for data is simple:
-LENGTH: four bytes for int of length of upcoming string, or 0 to autodetermine
-			 - length of NULL-terminated
-this is optional: means the byte sequence is still required, but it doesn't need
-					 - to be descriptive
-0x00: no operation
-0x01: the following bytes describe the map itself
-	id
-		(next four bytes of integer)
-	THEN(IN order)name
-		LENGTH
-		name string
-	THEN:
-		LENGTH
-		title string
-	THEN: this is optional
-		LENGTH
-		description string
-	THEN: this is optional
-		LENGTH
-		authors string
-	THEN: this is optional
-		LENGTH
-		version string
-	THEN: this is optional
-		LENGTH
-		initscript string
-	THEN: this is optional
-		LENGTH
-		exitscript string
-0x02: the following bytes describe the set
-	id
-		(next four bytes of integer)
-	THEN: order
-		4byteinteger
-	THEN:
-		LENGTH
-		name string
-	THEN:
-		LENGTH
-		title string
-	THEN: this is optional
-		LENGTH
-		description string
-	THEN: this is optional
-		LENGTH
-		authors string
-	THEN: this is optional
-		LENGTH
-		version string
-0x03: a wall
-	texture
-		LENGTH
-		texture string
-	traits of any order bytes
-		4int: 0 for null-terminated byte sequence, or number of bytes
-		{
-			0x01: detail
-			OR 0x02: back-most
-			OR 0x03: back
-			OR 0x04: back-least
-			OR 0x05: top-least
-			OR 0x06: top
-			OR 0x07: top-most
-			OR 0x08: touch(script1)
-			OR 0x09: damage(script2)
-			OR 0x0A: missiles
-			OR 0x0B: nopass
-			OR 0x0C: back-mostmore
-			OR 0x0D: back-mostmost
-		}
-	script1
-		LENGTH
-		script1 string
-	script2
-		LENGTH
-		script2 string
-	script3
-		LENGTH
-		script3 string
-	.
-		8bytedouble: x1
-		THEN 8bytedouble: y1
-	.
-		8bytedouble: x2
-		THEN 8bytedouble: y2
-	.
-		8bytedouble: x3
-		THEN 8bytedouble: y3
-	this is optional (set both to -1 if triangular)
-		8bytedouble: x4
-		THEN 8bytedouble: y4
-0x04: unused
-0x05: a powerspawn
-	powerups
-		LENGTH
-		powerup string
-	enable
-		4int
-	x
-		8double: x
-	y
-		8double: y
-0x06: a spawnpoint
-	x
-		8double: x
-	y
-		8double: y
+--
+4 bytes map version sint
+512 bytes authors
+256 bytes map version
+4 bytes map version (for compatibility issues in the future)
+4 bytes number of walls
+4 bytes number of teleporters
+4 bytes number of playerSpawnPoints
+4 bytes number of powerupSpawnPoints
+walls, ...
+ -8 bytes x1 double float
+ -8 bytes y1 double float
+ -8 bytes x2 double float
+ -8 bytes y2 double float
+ -8 bytes x3 double float
+ -8 bytes y3 double float
+ -8 bytes x4 double float
+ -8 bytes y4 double float
+ -1 byte: if non-zero, the 4th coordinates are used
+ -256 bytes texture
+ -4 bytes level of wall (tanks are level 9)
+ - 325 total bytes, this amount for each wall
+teleporters, ...
+ -8 bytes x1 double float
+ -8 bytes y1 double float
+playerSpawnPoints
+ -8 bytes x1 double float
+ -8 bytes y1 double float
+powerupSpawnPoints
+ -8 bytes x1 double float
+ -8 bytes y1 double float
 --]]
 
 function c_tcm_init()

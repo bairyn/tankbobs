@@ -42,6 +42,8 @@ function common_init()
 	c_mods_init()
 	b_mods()  -- anything below this is moddable
 
+	c_math_init()
+
 	c_state_init()
 
 	c_tcm_init()
@@ -51,6 +53,8 @@ function common_done()
 	c_tcm_done()
 
 	c_state_done()
+
+	c_math_init()
 
 	c_mods_done()
 
@@ -66,8 +70,8 @@ function common_done()
 end
 
 function common_error(...)
-	print("Error exiting: " .. ...)
-	c_state_goto(exit_state)  -- TODO: is there a better way to do this?
+	print("Error: " .. ...)
+	error "Aborting."
 end
 
 function common_print(...)
