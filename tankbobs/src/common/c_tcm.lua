@@ -1,5 +1,3 @@
---this needs to be completely rewritten
-
 --[[
 Copyright (C) 2008 Byron James Johnson
 
@@ -22,8 +20,8 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 --[[
 c_tcm.lua
 
-map loading and reading.  The TankCompiledMap (compiled from trm(TankRawMap))
-format is simple:
+TankCompiledMap (compiled TankRawMap)
+format:
 
 1st byte is 0x00
 2nd byte is 0x54 -]
@@ -34,14 +32,18 @@ format is simple:
 11th byte is Uint8 (char) version
 --
 4 bytes map version sint
+64 bytes unique name
+64 bytes title
+64 bytes description
 512 bytes authors
-256 bytes map version
+64 bytes map version
 4 bytes map version (for compatibility issues in the future)
 4 bytes number of walls
 4 bytes number of teleporters
 4 bytes number of playerSpawnPoints
 4 bytes number of powerupSpawnPoints
 walls, ...
+ -4 bytes id
  -8 bytes x1 double float
  -8 bytes y1 double float
  -8 bytes x2 double float
@@ -53,20 +55,33 @@ walls, ...
  -1 byte: if non-zero, the 4th coordinates are used
  -256 bytes texture
  -4 bytes level of wall (tanks are level 9)
- - 325 total bytes, this amount for each wall
+ - 329 total bytes, this amount for each wall
 teleporters, ...
+ -4 bytes id
+ -4 bytes target id
  -8 bytes x1 double float
  -8 bytes y1 double float
+ - 24 total bytes
 playerSpawnPoints
+ -4 bytes id
  -8 bytes x1 double float
  -8 bytes y1 double float
+ - 20 total bytes
 powerupSpawnPoints
+ -4 bytes id
  -8 bytes x1 double float
  -8 bytes y1 double float
+ -4 bytes powerups to enable
+ -4 bytes more powerups to enable
+ -4 bytes more powerups to enable
+ -4 bytes more powerups to enable
+ -another 4 groups of powerups - altogether 16 bytes
+ - 52 total bytes
 --]]
 
 function c_tcm_init()
 	c_const_set("tcm_dir", c_const_get("data_dir") .. "tcm/")
+	c_const_set("tcm_sets_dir", c_const_get("data_dir") .. "sets/")
 	local magic = 0xDEADBEEF
 	c_const_set("tcm_magic", magic)
 	c_const_set("tcm_version", 1)
@@ -80,24 +95,242 @@ function c_tcm_init()
 	c_const_set("tcm_spawnpointWidth",  5, 1)
 	c_const_set("tcm_spawnpointHeight", 5, 1)
 
-	c_tcm_map =
-	{
-		nil
-	}
+	-- parse every set into memory
+	c_tcm_current_sets = {}
 
-	c_tcm_set =
-	{
-		nil
-	}
-
-	c_tcm_sets =
-	{
-		nil
-	}
+	c_tcm_read_sets(c_const_get("tcm_sets_dir"), c_tcm_current_sets)
 end
 
 function c_tcm_done()
 end
+
+c_tcm_sets =
+{
+	new = function (self, o)
+		o = o or {}
+		common_clone(self, o)
+		setmetatable(o, {__index = self})
+		self.__index = self
+		return o
+	end,
+
+	name = "",  -- internal name.
+	title = "",  -- the name the player will see.
+	description = "",  -- the description
+	mapnames = {}  -- the filename of all of the maps (relative to tcm directory)
+}
+
+-- class for names of the *maps*
+c_tcm_set =
+{
+	new = function (self, o)
+		o = o or {}
+		common_clone(self, o)
+		setmetatable(o, {__index = self})
+		self.__index = self
+		return o
+	end,
+
+	version = 0
+	name = "",  -- unique name.
+	title = "",  -- the name the player will see.
+	description = "",  -- the description
+	authors = "",
+	version_string = ""
+}
+
+c_tcm_map =
+{
+	new = function (self, o)
+		o = o or {}
+		common_clone(self, o)
+		setmetatable(o, {__index = self})
+		self.__index = self
+		return o
+	end,
+
+	walls = {},  -- table of walls
+	teleporters = {},  -- table of walls
+	playerSpawnPoints = {},  -- table of walls
+	powerupSpawnPoints = {},  -- table of walls
+	title = "",  -- the name the player will see.
+	description = ""  -- the description
+}
+
+function c_tcm_read_sets(dir, t)
+	require "lfs"
+
+	if not dir or dir == "" then
+		error "Invalid set directory."
+	end
+
+	mods_data = {}  -- defines, values, other uses, etc; for mods
+
+	for filename in lfs.dir(dir) do
+		if not filename:find("^%.") and filename:find("^set-") and common_endsIn(filename, ".txt") then
+			c_tcm_read_set(dir .. filename, t)
+		end
+	end
+
+	c_mods_data_load()
+	c_mods_body()
+end
+
+function c_tcm_read_set(filename, t)
+	local s = c_tcm_set:new()
+	local set_f, err = io.open(filename, "r")
+	local line
+
+	if not set_f then
+		error "Error opening '" .. filename .. "': " .. err
+	end
+
+	-- read the set file line by line:
+	-- The 1st line is the set's name
+	line, err = set_f:read()
+	if not line then
+		error "Unexepected EOF when reading '" .. filename .. "': " .. err
+	end
+	s.name = line
+
+	-- The 2nd line is the set's title
+	line, err = set_f:read()
+	if not line then
+		error "Unexepected EOF when reading '" .. filename .. "': " .. err
+	end
+	s.title = line
+
+	-- The 3rd line is the set's description
+	line, err = set_f:read()
+	if not line then
+		error "Unexepected EOF when reading '" .. filename .. "': " .. err
+	end
+	s.description = line
+
+	-- read the set's filenames
+	line = set_f:read()
+	while line and type(line) == "string" and line ~= "" do
+		table.insert(s.maps, c_const_get("tcm_dir") .. line)
+
+		line = set_f:read()
+	end
+
+	set_f:close()
+
+	table.insert(t, s)
+end
+
+local function c_tcm_private_setsi_iter(_, i)
+	local set = next(c_tcm_current_sets, i)
+
+	i = i + 1
+
+	if set then
+		return set.name, set.title, set.description
+	else
+		return nil
+	end
+end
+
+-- name, title, description
+function c_tcm_setsi()
+	return c_tcm_private_setsi_iter, nil, 0
+end
+
+function c_tcm_populate(name)
+	c_tcm_current_set = {}
+
+	for k, v in pairs(c_tcm_current_sets) do
+		if v.name == name then
+			found = true
+
+			-- populate c_tcm_current_set with data from each map of the set
+			for k, v in pairs(v.maps) do
+				set = c_tcm_map_header(v)
+				table.insert(c_tcm_current_set, set)
+			end
+
+			return
+		end
+	end
+
+	error "Set '" .. name .. "' not found"
+end
+
+-- f: io function (e.g. tankbobs.io_getChar)
+-- i: input file
+-- t: if this argument is specified, instead of giving an error, nil is returned
+-- ...: extra arguments to pass (t can be false)
+local function c_tcm_private_get(f, i, t, ...)
+	local d = f(i, ...)
+
+	if d == c_const_get("tcm_eof") then
+		if t then
+			return nil
+		else
+			error "EOF unexpected"
+		end
+	end
+end
+
+local function c_tcm_check_true_header(i)
+	if c_tcm_private_get(tankbobs.io_getChar, i) ~= 0x00 then
+		error "Invalid map header"
+	elseif c_tcm_private_get(tankbobs.io_getChar, i) ~= 0x54 then
+		error "Invalid map header"
+	elseif c_tcm_private_get(tankbobs.io_getChar, i) ~= 0x43 then
+		error "Invalid map header"
+	elseif c_tcm_private_get(tankbobs.io_getChar, i) ~= 0x4D then
+		error "Invalid map header"
+	elseif c_tcm_private_get(tankbobs.io_getChar, i) ~= 0x01 then
+		error "Invalid map header"
+	elseif c_tcm_private_get(tankbobs.io_getInt, i) ~= string.format("%X", c_const_get("tcm_magic")) then
+		error "Invalid map header"
+	elseif c_tcm_private_get(tankbobs.io_getChar, i) ~= c_const_get("tcm_version") then
+		i:seek("cur", -1)
+		io.write("Warning: map was built for tcm version '", tostring(c_tcm_private_get(tankbobs.io_getChar, i)), "'; you are using version '", tostring(c_const_get("tcm_version")), "'")
+	end
+end
+
+function c_tcm_map_header(map)
+	local r = c_tcm_set:new()
+
+	if c_const_get("debug") then
+		io.write("Parsing header of file: ", map)
+	end
+
+	local i, err, errnum = io.open(map, "r")
+
+	if not i then
+		error "Could not open '" .. map .. "': " .. err .. " - error number: " .. errnum .. "."
+	end
+	
+	c_tcm_check_true_header(i)
+
+	r.version = c_tcm_private_get(tankbobs.io_getChar, i)
+	r.name = c_tcm_private_get(tankbobs.io_getStr, i, false, 64)
+	r.title = c_tcm_private_get(tankbobs.io_getStr, i, false, 64)
+	r.description = c_tcm_private_get(tankbobs.io_getStr, i, false, 64)
+	r.authors = c_tcm_private_get(tankbobs.io_getStr, i, false, 512)
+	r.version_string = c_tcm_private_get(tankbobs.io_getStr, i, false, 64)
+	-- strip trailing 0's from NULL-terminated strings passed by C
+	r.name = r.name:gsub("%z*$", "")
+	r.title = r.title:gsub("%z*$", "")
+	r.description = r.description:gsub("%z*$", "")
+	r.authors = r.authors:gsub("%z*$", "")
+	r.version_string = r.version_string:gsub("%z*$", "")
+
+	i:close()
+end
+
+
+
+
+
+
+
+
+
 
 local function c_tcm_private_base_base(t, i)
 	while true do

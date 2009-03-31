@@ -30,7 +30,18 @@ function c_const_init()
 	local const = {}
 
 	function c_const_get(k)
-		return const[k] and const[k]["v"]
+		if not cont[k] then
+			return nil
+		end
+
+		-- return a proxy table so that the real table doesn't change (the clone also handles sub-tables)
+		if type(const[k]["v"]) == "table" then
+			local t = {}
+			common_clone(const[k]["v"], t)
+			return t
+		else
+			return const[k] and const[k]["v"]
+		end
 	end
 
 	function c_const_set(k, v, c)

@@ -35,6 +35,11 @@ function common_init()
 
 	c_data_init()
 
+	-- remove debug if debugging isn't enabled for security reasons
+	if not c_const_get("debug") then
+		debug = nil
+	end
+
 	c_module_init()
 
 	c_config_init()
@@ -79,4 +84,83 @@ function common_endsIn(str, match)
 	end
 
 	return match == "" or str:sub(-match:len()) == match
+end
+
+function common_clone(i, o)
+	o = o or {}
+
+	for k, v in pairs(i) do
+		if type(v) == "table" then
+			if type(o[k]) ~= "table" then
+				o[k] = {}
+			end
+			common_clone(v, o[k])
+		else
+			o[k] = v
+		end
+	end
+
+	return o
+end
+
+function common_clone_except(i, o, h, s)
+	local continue = false
+
+	o = o or {}
+
+	for k, v in pairs(i) do
+		for _, v2 in pairs(h) do
+			if string.match(tostring(k), v2) then
+				continue = true
+				break
+			end
+		end
+
+		if not continue then
+			if type(v) == "table" then
+				if type(o[k]) ~= "table" then
+					o[k] = {}
+				end
+				if s:len() > 0 then
+					s = s + "."
+				end
+				common_clone(v, o[k], h, s .. k)
+			else
+				o[k] = v
+			end
+		end
+
+		continue = false
+	end
+
+	return o
+end
+
+function common_empty(t)
+	return next(t) == nil
+end
+
+function common_getField(f, e)
+	local v = e or _G
+
+	for k in string.gmatch(f, "[%w_]+") do
+		v = v[w]
+	end
+
+	return v
+end
+
+function common_setField(f, v, e)
+	local t = e or _G
+
+	for w, d in sting.gmatch(f, "([%w_]+)(.?)") do
+	if d == "." then
+		if type(t[w]) ~= "table" then
+			t[w] = {}
+		end
+		t = t[w]
+	else
+		t[w] = v
+		return t[w]
+	end
 end

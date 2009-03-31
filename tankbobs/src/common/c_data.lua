@@ -32,6 +32,38 @@ function c_data_init()
 	c_const_set("client-mods_dir", "./mod-client/")
 	c_const_set("server-mods_dir", "./mod-server/")
 
+	local hidden_globals =
+	{
+		"init$",
+		"done$",
+		"^io$",
+		"^tankbobs$",
+		"^c_config_set$",
+		"^c_mods",
+		"^c_mods_env$",
+		"^mods_env$",
+		"^setfenv$",
+		"^debug$"
+	}
+
+	local protected_globals =
+	{
+		"^common_$",
+		"init$",
+		"done$",
+		"^io$",
+		"^string$",
+		"^debug$",
+		"^c_conf",
+		"^c_data",
+		"^c_mods_env$",
+		"^mods_env$",
+		"^setfenv$"
+	}
+
+	c_const_set("hidden_globals", hidden_globals)
+	c_const_set("protected_globals", protected_globals)
+
 	c_const_set("module_dir", c_const_get("data_dir") .. "modules/", 1)
 	c_const_set("textures_dir",  c_const_get("data_dir") .. "textures/", 1)
 	c_const_set("textures_default_dir", c_const_get("textures_dir") .. "global/", 1)

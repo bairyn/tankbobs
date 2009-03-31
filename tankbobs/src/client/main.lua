@@ -24,14 +24,14 @@ startup and the like
 --]]
 
 function main_init()
-	--execution begins here; args are stored in table 'args', ./tankbobs will result in {"./tankbobs"}
+	--execution begins here; args are stored in table 'args'; ./tankbobs will generate {"./tankbobs"}
 	main_data = {}
 
 	if main_parseArgs(args) then
 		return
 	end
 
-	args = nil  --security measures
+	args = nil  -- protect against bad code
 
 	renderer_init()
 
@@ -46,7 +46,7 @@ function main_init()
 			local lastevent = eventqueue
 			repeat
 				if tankbobs.in_getEventData(lastevent, "type") == "quit" then
-					main_done = true
+					done = true
 				elseif tankbobs.in_getEventData(lastevent, "type") == "video" then
 					config_set("config.video.width", tankbobs.in_getEventData(lastevent, "intData0"))
 					config_set("config.video.height", tankbobs.in_getEventData(lastevent, "intData1"))
@@ -95,9 +95,6 @@ function main_init()
 	end
 
 	renderer_done()
-end
-
-function main_done()
 end
 
 function main_parseArgs(args)

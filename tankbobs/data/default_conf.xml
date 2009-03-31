@@ -1,13 +1,13 @@
 <config>
 	<info>
-		The following keys are reserved:
+		The following keys should not be used:
 		0x08: BACKSPACE
 		0x0D: ENTER
 		0x1B: ESCAPE
-		273: UP (tank controls are allowed)
-		274: DOWN (tank controls are allowed)
-		276: LEFT (tank controls are allowed)
-		275: RIGHT (tank controls are allowed)
+		273: UP (exception: tank movement)
+		274: DOWN (exception: tank movement)
+		276: LEFT (exception: tank movement)
+		275: RIGHT (exception: tank movement)
 	</info>
 
 	<font>
@@ -68,4 +68,6 @@
 		<width>800</width>
 		<height>600</height>
 	</renderer>
+
+	<unsafe>false</unsafe>
 </config>

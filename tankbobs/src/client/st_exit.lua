@@ -18,9 +18,9 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 --]]
 
 --[[
-st_title.lua
+st_exit.lua
 
-title screen
+for exiting
 --]]
 
 function st_exit_init()

@@ -121,6 +121,18 @@ function c_config_init()
 					v = v:match("^[\n\t ]*([%d%.]+)[\n\t ]*$")
 					if v == nil then
 						v = oldV
+						v = string.match(v:lower(), "^[\n\t ]*(false)[\n\t ]*$") == "false" then
+						if == nil then
+							v = oldV
+							v = string.match(v:lower(), "^[\n\t ]*(true)[\n\t ]*$") == "false" then
+							if == nil then
+								v = oldV
+							else
+								v = true
+							end
+						else
+							v = false
+						end
 					else
 						if(tonumber(v)) then
 							v = tonumber(v)
@@ -274,29 +286,9 @@ function c_config_init()
 		local res = {}
 		k = k or config
 		if type(k) == "table" then
-			local function clone(i, o)
-				for k, v in pairs(i) do
-					if type(v) == "table" then
-						o[k] = {}
-						clone(v, o[k])
-					else
-						o[k] = v
-					end
-				end
-			end
-			clone(k, res)
+			common_clone(k, res)
 		elseif type(k) == "string" and type(c_config_get(k)) == "table" then
-			local function clone(i, o)
-				for k, v in pairs(i) do
-					if type(v) == "table" then
-						o[k] = {}
-						clone(v, o[k])
-					else
-						o[k] = v
-					end
-				end
-			end
-			clone(c_config_get(k), res)
+			common_clone(c_config_get(k), res)
 		else
 			error("config_backup invalid backup key")
 		end
@@ -309,29 +301,9 @@ function c_config_init()
 			error("config_restore invalid value")
 		end
 		if type(k) == "table" then
-			local function clone(i, o)
-				for k, v in pairs(i) do
-					if type(v) == "table" then
-						o[k] = {}
-						clone(v, o[k])
-					else
-						o[k] = v
-					end
-				end
-			end
-			clone(v, k)
+			common_clone(v, k)
 		elseif type(k) == "string" and type(c_config_get(k)) == "table" then
-			local function clone(i, o)
-				for k, v in pairs(i) do
-					if type(v) == "table" then
-						c_config_force_set(k, {}, o)
-						clone(v, o[k])
-					else
-						c_config_force_set(k, v, o)
-					end
-				end
-			end
-			clone(v, c_config_get(k))
+			common_clone(v, c_config_get(k))
 		else
 			error("config_restore invalid backup key")
 		end
