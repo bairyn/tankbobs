@@ -157,13 +157,13 @@ function c_mods_load(dir)
 		common_clone_except(_G, c_mods_env, c_const_get("hidden_globals"))
 		c_mods_env._G = false
 	end
-	setfenv_f(1, c_mods_env)  -- in Lua 5.1, loadfile and even dofile ignore calls to setfenv so mods are broken until this bug is fixed
 
 	for _, v in pairs(mods) do
 		if c_const_get("debug") then
 			common_print("Running mod: " .. v[1])
 		end
 
+		setfenv_f(v[2], c_mods_env)
 		local status, err = pcall(v[2])
 
 		if not status then
