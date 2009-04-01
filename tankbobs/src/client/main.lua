@@ -97,6 +97,9 @@ function main_init()
 	renderer_done()
 end
 
+function main_done()
+end
+
 function main_parseArgs(args)
 	local function main_usage()
 		io.stdout:write("Usage\n\n-h: print this help message\n-d: use default configuration (old configuration may be lost)/rc.xml\n-c x y: set config x to y\n")
