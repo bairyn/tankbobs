@@ -33,6 +33,35 @@ function c_config_init()
 	local config = {}
 	local id
 
+	local function trim(v)
+		local oldV = v
+		if type(v) == "string" then
+			v = v:match("^[\n\t ]*([%d%.]+)[\n\t ]*$")
+			if v == nil then
+				v = oldV
+				v = string.match(v:lower(), "^[\n\t ]*false[\n\t ]*$")
+				if v == nil then
+					v = oldV
+					v = string.match(v:lower(), "^[\n\t ]*true[\n\t ]*$")
+					if v == nil then
+						v = oldV
+					else
+						v = true
+					end
+				else
+					v = false
+				end
+			else
+				if(tonumber(v)) then
+					v = tonumber(v)
+				else
+					v = oldV
+				end
+			end
+		end
+		return v
+	end
+
 	local function c_config_init(config, defaults)
 		local function parse(data, config)
 			config["r_init"] = true
@@ -114,38 +143,7 @@ function c_config_init()
 	local function c_config_force_set(k, v, conf)
 		conf = conf or config
 
-		local function trim()
-			return function (v)
-				local oldV = v
-				if type(v) == "string" then
-					v = v:match("^[\n\t ]*([%d%.]+)[\n\t ]*$")
-					if v == nil then
-						v = oldV
-						v = string.match(v:lower(), "^[\n\t ]*(false)[\n\t ]*$") == "false"
-						if v == nil then
-							v = oldV
-							v = string.match(v:lower(), "^[\n\t ]*(true)[\n\t ]*$") == "false"
-							if v == nil then
-								v = oldV
-							else
-								v = true
-							end
-						else
-							v = false
-						end
-					else
-						if(tonumber(v)) then
-							v = tonumber(v)
-						else
-							v = oldV
-						end
-					end
-				end
-				return v
-			end
-		end
-
-		v = trim()(v)
+		v = trim(v)
 
 		if k == nil then
 			error("no key for config set")
@@ -172,26 +170,7 @@ function c_config_init()
 	function c_config_set(k, v, conf)
 		conf = conf or config
 
-		local function trim()
-			return function (v)
-				local oldV = v
-				if type(v) == "string" then
-					v = v:match("^[\n\t ]*([%d%.]+)[\n\t ]*$")
-					if v == nil then
-						v = oldV
-					else
-						if(tonumber(v)) then
-							v = tonumber(v)
-						else
-							v = oldV
-						end
-					end
-				end
-				return v
-			end
-		end
-
-		v = trim()(v)
+		v = trim(v)
 
 		if k == nil then
 			error("no key for config set")
@@ -221,28 +200,6 @@ function c_config_init()
 
 	function c_config_get(k, conf, nilOnError)
 		conf = conf or config
-
-		local function trim()
-			return function (v)
-				local oldV = v
-				if type(v) == "string" then
-					v = v:match("^[\n\t ]*([%d%.]+)[\n\t ]*$")
-					if v == nil then
-						v = oldV
-						if tonumber(v) then
-							v = tonumber(v)
-						end
-					else
-						if(tonumber(v)) then
-							v = tonumber(v)
-						else
-							v = oldV
-						end
-					end
-				end
-				return v
-			end
-		end
 
 		if k == nil then
 			error("no key for config retrieval")
@@ -275,7 +232,7 @@ function c_config_init()
 			end
 			local pos = k:find('%.')
 			if pos == nil then
-				return trim()(conf[k])
+				return trim(conf[k])
 			else
 				return c_config_get(k:sub(pos + 1, -1), conf[k:sub(1, pos - 1)])
 			end

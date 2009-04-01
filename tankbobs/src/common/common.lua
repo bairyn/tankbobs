@@ -141,7 +141,7 @@ function common_clone_except(i, o, e)
 			local continue = false
 
 			if s:len() > 0 then
-				s = s + "."
+				s = s .. "."
 			end
 
 			for _, v2 in pairs(e) do

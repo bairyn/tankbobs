@@ -140,7 +140,7 @@ function main_parseArgs(args)
 					config_set(string.sub(args[i + 1], 1, (string.find(args[i + 1], "[\n\t ]+")) - 1), string.sub(args[i + 1], select(2, string.find(args[i + 1], "[\n\t ]+") + 1, -1)))
 					return parse(i + 2)
 				elseif args[i + 2] then
-					config_set(args[i + 1], args[i + 2])
+					c_config_set(args[i + 1], args[i + 2])
 					return parse(i + 3)
 				end
 			else
@@ -148,7 +148,7 @@ function main_parseArgs(args)
 					config_set(string.sub(args[i], select(2, string.find(args[i], "^[\n\t ]*-c[\n\t ]*")) + 1, string.find(args[i], "[\n\t ]+", select(2, string.find(args[i], "^[\n\t ]*-c[\n\t ]*")) + 1) - 1), string.sub(args[i], select(2, string.find(args[i], "[\n\t ]+", select(2, string.find(args[i], "^[\n\t ]*-c[\n\t ]*")) + 1)) + 1, -1))
 					return parse(i + 1)
 				elseif args[i + 1] then
-					config_set(string.sub(args[i], select(2, string.find(args[i], "^[\n\t ]*-c[\n\t ]*")) + 1, -1), args[i + 1])
+					c_config_set(string.sub(args[i], select(2, string.find(args[i], "^[\n\t ]*-c[\n\t ]*")) + 1, -1), args[i + 1])
 					return parse(i + 2)
 				end
 			end

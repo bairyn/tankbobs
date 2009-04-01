@@ -143,7 +143,7 @@ function c_mods_load(dir)
 
 	for filename in lfs.dir(dir) do
 		if not filename:find("^%.") and common_endsIn(filename, ".lua") then
-			table.insert(mods, dir .. filename)
+			table.insert(mods, {dir .. filename, loadfile(dir .. filename)})
 		end
 	end
 
@@ -157,14 +157,14 @@ function c_mods_load(dir)
 		common_clone_except(_G, c_mods_env, c_const_get("hidden_globals"))
 		c_mods_env._G = false
 	end
-	setfenv_f(1, c_mods_env)
+	setfenv_f(1, c_mods_env)  -- in Lua 5.1, loadfile and even dofile ignore calls to setfenv so mods are broken until this bug is fixed
 
 	for _, v in pairs(mods) do
 		if c_const_get("debug") then
-			common_print("Running mod: " .. v)
+			common_print("Running mod: " .. v[1])
 		end
 
-		local status, err = pcall(dofile, v)
+		local status, err = pcall(v[2])
 
 		if not status then
 			print("Error running mod '" .. v .. "': " .. err)
