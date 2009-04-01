@@ -121,11 +121,11 @@ function c_config_init()
 					v = v:match("^[\n\t ]*([%d%.]+)[\n\t ]*$")
 					if v == nil then
 						v = oldV
-						v = string.match(v:lower(), "^[\n\t ]*(false)[\n\t ]*$") == "false" then
-						if == nil then
+						v = string.match(v:lower(), "^[\n\t ]*(false)[\n\t ]*$") == "false"
+						if v == nil then
 							v = oldV
-							v = string.match(v:lower(), "^[\n\t ]*(true)[\n\t ]*$") == "false" then
-							if == nil then
+							v = string.match(v:lower(), "^[\n\t ]*(true)[\n\t ]*$") == "false"
+							if v == nil then
 								v = oldV
 							else
 								v = true

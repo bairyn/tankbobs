@@ -18,7 +18,7 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 --]]
 
 --[[
-mods.lua
+c_mods.lua
 
 includes common functions for mod use or that would otherwise not be available to mods.
 traverses mod directory for function redefinitions.
@@ -33,75 +33,98 @@ end
 function c_mods_done()
 end
 
--- treat functions specially
-function common_clone_except_special(i, o, h, s)
-	local continue = false
+function common_clone_except_special(i, o, e)
+	local cloned_tables = {}
 
 	o = o or {}
 
-	for k, v in pairs(i) do
-		for _, v2 in pairs(h) do
-			if string.match(tostring(k), v2) then
-				continue = true
-				break
+	local function clone_level(i, o, e, s)
+		table.insert(cloned_tables, o)
+		table.insert(cloned_tables, i)
+
+		for k, v in pairs(i) do
+			local recursed = false
+			local continue = false
+
+			if s:len() > 0 then
+				s = s + "."
+			end
+
+			for _, v2 in pairs(e) do
+				if string.match(s .. k, v2) then
+					continue = true
+					break
+				end
+			end
+
+			if not continue then
+				if type(v) == "table" then
+					for _, v2 in pairs(cloned_tables) do
+						if v == v2 or o[k] == v2 then
+							recursed = true
+							break
+						end
+					end
+
+					if not recursed then
+						if type(o[k]) ~= "table" then
+							o[k] = {}
+						end
+						clone_level(v, o[k], e, s .. k)
+					end
+				--+++++++++++++++++++++++++++++++++++++++++++++++--
+				elseif type(v) == "function" then  -- handle functions specially
+					local do_f = v
+
+					o[k] = function (...)
+						local unsafe = c_config_get("config.mods.unsafe")
+						local G_t = _G
+						local setfenv_f = setfenv
+
+						setfenv = nil
+
+						if unsafe and not c_const_get("debug") then
+							error "Debugging is disabled.  Not running in unsafe mode."
+						end
+
+						if unsafe then
+							common_clone(_G, c_mods_env)
+						else
+							common_clone_except(_G, c_mods_env, c_const_get("hidden_globals"))
+							c_mods_env._G = false
+						end
+						setfenv_f(1, c_mods_env)
+
+						local result = {do_f(...)}
+
+						if unsafe then
+							common_clone(c_mods_env, G_t)
+						else
+							--common_clone_except(c_mods_env, G_t, c_const_get("protected_globals"))
+							-- use a special version of clone so that redefined functions (protected globals can be accessed but not redefined) don't have access to hidden globals
+
+							common_clone_except_special(c_mods_env, G_t, c_const_get("protected_globals"))
+						end
+
+						setfenv = setfenv_f
+
+						return unpack(result)
+					end
+				--+++++++++++++++++++++++++++++++++++++++++++++++--
+				else
+					if c_const_get("debug") and type(v) == "userdata" then
+						common_print("Warning: cloning table containing a member of the userdata type")
+					end
+
+					o[k] = v
+				end
 			end
 		end
 
-		if not continue then
-			if type(v) == "table" then
-				if type(o[k]) ~= "table" then
-					o[k] = {}
-				end
-				if s:len() > 0 then
-					s = s + "."
-				end
-				common_clone(v, o[k], h, s .. k)
-			elseif type(v) == "function" then  -- handle functions specially
-				local do_f = v
-
-				o[k] = function (...)
-					local unsafe = c_config_get("config.mods.unsafe")
-					local G_t = _G
-					local setfenv_f = setfenv
-
-					setfenv = nil
-
-					if unsafe and not c_const_get("debug") then
-						error "Debugging is disabled.  Not running in unsafe mode."
-					end
-
-					if unsafe then
-						common_clone(_G, c_mods_env)
-					else
-						common_clone_except(_G, c_mods_env, c_const_get("hidden_globals"))
-						c_mods_env._G = false
-					end
-					setfenv_f(1, c_mods_env)
-
-					local result = {do_f(...)}
-
-					if unsafe then
-						common_clone(c_mods_env, G_t)
-					else
-						--common_clone_except(c_mods_env, G_t, c_const_get("protected_globals"))
-						-- use a special version of clone so that redefined functions (protected globals can be accessed but not redefined) don't have access to hidden globals
-
-						common_clone_except_special(c_mods_env, G_t, c_const_get("protected_globals"))
-					end
-
-					setfenv = setfenv_f
-
-					return unpack(result)
-				end
-			else
-				o[k] = v
-			end
-		end
-
-		continue = false
+		return o
 	end
 
-	return o
+	clone_level(i, o, e, "")
 end
 
 function c_mods_load(dir)
@@ -110,11 +133,18 @@ function c_mods_load(dir)
 	local G_t = _G
 	local unsafe = c_config_get("config.mods.unsafe")
 	local setfenv_f = setfenv
+	local mods = {}
 
 	setfenv = nil
 
 	if not dir or dir == "" then
 		error "Invalid mod directory."
+	end
+
+	for filename in lfs.dir(dir) do
+		if not filename:find("^%.") and common_endsIn(filename, ".lua") then
+			table.insert(mods, dir .. filename)
+		end
 	end
 
 	if unsafe and not c_const_get("debug") then
@@ -129,20 +159,20 @@ function c_mods_load(dir)
 	end
 	setfenv_f(1, c_mods_env)
 
-	for filename in lfs.dir(dir) do
-		if not filename:find("^%.") and common_endsIn(filename, ".lua") then
-			if c_const_get("debug") then
-				common_print("Running mod: " .. filename)
-			end
-			local status, err = pcall(dofile, dir .. filename)
-			if not status then
-				print("Error running mod '" .. filename .. "': " .. err)
-			end
+	for _, v in pairs(mods) do
+		if c_const_get("debug") then
+			common_print("Running mod: " .. v)
+		end
+
+		local status, err = pcall(dofile, v)
+
+		if not status then
+			print("Error running mod '" .. v .. "': " .. err)
 		end
 	end
 
 	if unsafe then
-		common_clone(c_mods_env, G_t)
+		common_clone(G_t.c_mods_env, G_t)
 	else
 		--common_clone_except(c_mods_env, G_t, c_const_get("protected_globals"))
 		-- use a special version of clone so that redefined functions (protected globals can be accessed but not redefined) don't have access to hidden globals

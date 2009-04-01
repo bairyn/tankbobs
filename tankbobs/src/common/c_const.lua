@@ -30,7 +30,7 @@ function c_const_init()
 	local const = {}
 
 	function c_const_get(k)
-		if not cont[k] then
+		if not const[k] then
 			return nil
 		end
 
@@ -40,13 +40,13 @@ function c_const_init()
 			common_clone(const[k]["v"], t)
 			return t
 		else
-			return const[k] and const[k]["v"]
+			return const[k]["v"]
 		end
 	end
 
 	function c_const_set(k, v, c)
 		if type(k) ~= "string" then
-			error("attempt to set constant using key of non-string type " .. type(k))
+			error("attempt to set constant with non-string key" .. type(k))
 		end
 
 		if c_const_get(k) == nil then

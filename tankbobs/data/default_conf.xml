@@ -69,5 +69,7 @@
 		<height>600</height>
 	</renderer>
 
-	<unsafe>false</unsafe>
+	<mods>
+		<unsafe>false</unsafe>
+	</mods>
 </config>

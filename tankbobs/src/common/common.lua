@@ -87,53 +87,99 @@ function common_endsIn(str, match)
 end
 
 function common_clone(i, o)
-	o = o or {}
-
-	for k, v in pairs(i) do
-		if type(v) == "table" then
-			if type(o[k]) ~= "table" then
-				o[k] = {}
-			end
-			common_clone(v, o[k])
-		else
-			o[k] = v
-		end
-	end
-
-	return o
-end
-
-function common_clone_except(i, o, h, s)
-	local continue = false
+	local cloned_tables = {}
 
 	o = o or {}
 
-	for k, v in pairs(i) do
-		for _, v2 in pairs(h) do
-			if string.match(tostring(k), v2) then
-				continue = true
-				break
-			end
-		end
+	local function clone_level(i, o)
+		table.insert(cloned_tables, o)
+		table.insert(cloned_tables, i)
 
-		if not continue then
+		for k, v in pairs(i) do
+			local recursed = false
+
 			if type(v) == "table" then
-				if type(o[k]) ~= "table" then
-					o[k] = {}
+				for _, v2 in pairs(cloned_tables) do
+					if v == v2 or o[k] == v2 then
+						recursed = true
+						break
+					end
 				end
-				if s:len() > 0 then
-					s = s + "."
+
+				if not recursed then
+					if type(o[k]) ~= "table" then
+						o[k] = {}
+					end
+					clone_level(v, o[k])
 				end
-				common_clone(v, o[k], h, s .. k)
 			else
+				if c_const_get("debug") and type(v) == "userdata" then
+					common_print("Warning: cloning table containing a member of the userdata type")
+				end
+
 				o[k] = v
 			end
 		end
 
-		continue = false
+		return o
 	end
 
-	return o
+	clone_level(i, o)
+end
+
+function common_clone_except(i, o, e)
+	local cloned_tables = {}
+
+	o = o or {}
+
+	local function clone_level(i, o, e, s)
+		table.insert(cloned_tables, o)
+		table.insert(cloned_tables, i)
+
+		for k, v in pairs(i) do
+			local recursed = false
+			local continue = false
+
+			if s:len() > 0 then
+				s = s + "."
+			end
+
+			for _, v2 in pairs(e) do
+				if string.match(s .. k, v2) then
+					continue = true
+					break
+				end
+			end
+
+			if not continue then
+				if type(v) == "table" then
+					for _, v2 in pairs(cloned_tables) do
+						if v == v2 or o[k] == v2 then
+							recursed = true
+							break
+						end
+					end
+
+					if not recursed then
+						if type(o[k]) ~= "table" then
+							o[k] = {}
+						end
+						clone_level(v, o[k], e, s .. k)
+					end
+				else
+					if c_const_get("debug") and type(v) == "userdata" then
+						common_print("Warning: cloning table containing a member of the userdata type")
+					end
+
+					o[k] = v
+				end
+			end
+		end
+
+		return o
+	end
+
+	clone_level(i, o, e, "")
 end
 
 function common_empty(t)
@@ -154,13 +200,14 @@ function common_setField(f, v, e)
 	local t = e or _G
 
 	for w, d in sting.gmatch(f, "([%w_]+)(.?)") do
-	if d == "." then
-		if type(t[w]) ~= "table" then
-			t[w] = {}
+		if d == "." then
+			if type(t[w]) ~= "table" then
+				t[w] = {}
+			end
+			t = t[w]
+		else
+			t[w] = v
+			return t[w]
 		end
-		t = t[w]
-	else
-		t[w] = v
-		return t[w]
 	end
 end

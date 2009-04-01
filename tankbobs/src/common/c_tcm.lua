@@ -131,7 +131,7 @@ c_tcm_set =
 		return o
 	end,
 
-	version = 0
+	version = 0,
 	name = "",  -- unique name.
 	title = "",  -- the name the player will see.
 	description = "",  -- the description
@@ -182,28 +182,28 @@ function c_tcm_read_set(filename, t)
 	local line
 
 	if not set_f then
-		error "Error opening '" .. filename .. "': " .. err
+		error("Error opening '" .. filename .. "': " .. err)
 	end
 
 	-- read the set file line by line:
 	-- The 1st line is the set's name
 	line, err = set_f:read()
 	if not line then
-		error "Unexepected EOF when reading '" .. filename .. "': " .. err
+		error("Unexepected EOF when reading '" .. filename .. "': " .. err)
 	end
 	s.name = line
 
 	-- The 2nd line is the set's title
 	line, err = set_f:read()
 	if not line then
-		error "Unexepected EOF when reading '" .. filename .. "': " .. err
+		error("Unexepected EOF when reading '" .. filename .. "': " .. err)
 	end
 	s.title = line
 
 	-- The 3rd line is the set's description
 	line, err = set_f:read()
 	if not line then
-		error "Unexepected EOF when reading '" .. filename .. "': " .. err
+		error("Unexepected EOF when reading '" .. filename .. "': " .. err)
 	end
 	s.description = line
 
@@ -254,7 +254,7 @@ function c_tcm_populate(name)
 		end
 	end
 
-	error "Set '" .. name .. "' not found"
+	error("Set '" .. name .. "' not found")
 end
 
 -- f: io function (e.g. tankbobs.io_getChar)
@@ -302,7 +302,7 @@ function c_tcm_map_header(map)
 	local i, err, errnum = io.open(map, "r")
 
 	if not i then
-		error "Could not open '" .. map .. "': " .. err .. " - error number: " .. errnum .. "."
+		error("Could not open '" .. map .. "': " .. err .. " - error number: " .. errnum .. ".")
 	end
 	
 	c_tcm_check_true_header(i)
