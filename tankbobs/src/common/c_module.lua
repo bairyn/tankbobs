@@ -20,7 +20,7 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 --[[
 c_module.lua
 
-basic interface to including _Lua_ modules
+interface to modules
 --]]
 
 function c_module_init()

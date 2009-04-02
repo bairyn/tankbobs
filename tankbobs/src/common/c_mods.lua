@@ -78,10 +78,6 @@ function common_clone_except_special(i, o, e)
 
 					o[k] = function (...)
 						local unsafe = c_config_get("config.mods.unsafe")
-						local G_t = _G
-						local setfenv_f = setfenv
-
-						setfenv = nil
 
 						if unsafe and not c_const_get("debug") then
 							error "Debugging is disabled.  Not running in unsafe mode."
@@ -93,17 +89,17 @@ function common_clone_except_special(i, o, e)
 							common_clone_except(_G, c_mods_env, c_const_get("hidden_globals"))
 							c_mods_env._G = false
 						end
-						setfenv_f(1, c_mods_env)
+						setfenv_f(do_f, c_mods_env)
 
 						local result = {do_f(...)}
 
 						if unsafe then
-							common_clone(c_mods_env, G_t)
+							common_clone(c_mods_env, _G)
 						else
 							--common_clone_except(c_mods_env, G_t, c_const_get("protected_globals"))
 							-- use a special version of clone so that redefined functions (protected globals can be accessed but not redefined) don't have access to hidden globals
 
-							common_clone_except_special(c_mods_env, G_t, c_const_get("protected_globals"))
+							common_clone_except_special(c_mods_env, _G, c_const_get("protected_globals"))
 						end
 
 						setfenv = setfenv_f
@@ -130,12 +126,8 @@ end
 function c_mods_load(dir)
 	require "lfs"
 
-	local G_t = _G
 	local unsafe = c_config_get("config.mods.unsafe")
-	local setfenv_f = setfenv
 	local mods = {}
-
-	setfenv = nil
 
 	if not dir or dir == "" then
 		error "Invalid mod directory."
@@ -172,11 +164,11 @@ function c_mods_load(dir)
 	end
 
 	if unsafe then
-		common_clone(G_t.c_mods_env, G_t)
+		common_clone(c_mods_env, _G)
 	else
 		--common_clone_except(c_mods_env, G_t, c_const_get("protected_globals"))
 		-- use a special version of clone so that redefined functions (protected globals can be accessed but not redefined) don't have access to hidden globals
-		common_clone_except_special(c_mods_env, G_t, c_const_get("protected_globals"))
+		common_clone_except_special(c_mods_env, _G, c_const_get("protected_globals"))
 	end
 
 	c_mods_data_load()

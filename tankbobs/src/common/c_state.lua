@@ -211,6 +211,7 @@ function c_state_advance()
 	end
 
 	if not c_state_validate(state) then
+debug.debug()
 		error("c_state_advance: state " .. c_state_state.cur.name .. " advance called with no valid next")
 	end
 
