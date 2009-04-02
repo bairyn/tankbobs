@@ -20,8 +20,7 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 --[[
 c_const.lua
 
-const vars - most mods should not need to redefine anything here
-if the changes is set to -1 it is always allowed to changed
+(semi-)constant data
 --]]
 
 function c_const_init()

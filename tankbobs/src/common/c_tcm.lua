@@ -43,7 +43,8 @@ format:
 4 bytes number of playerSpawnPoints
 4 bytes number of powerupSpawnPoints
 walls, ...
- -4 bytes id
+ -4 bytes id (unique to every other entity's id too)
+ -1 byte: if non-zero, the 4th coordinates are used
  -8 bytes x1 double float
  -8 bytes y1 double float
  -8 bytes x2 double float
@@ -52,7 +53,6 @@ walls, ...
  -8 bytes y3 double float
  -8 bytes x4 double float
  -8 bytes y4 double float
- -1 byte: if non-zero, the 4th coordinates are used
  -256 bytes texture
  -4 bytes level of wall (tanks are level 9)
  - 329 total bytes, this amount for each wall
@@ -75,7 +75,7 @@ powerupSpawnPoints
  -4 bytes more powerups to enable
  -4 bytes more powerups to enable
  -4 bytes more powerups to enable
- -another 4 groups of powerups - altogether 16 bytes
+ -another 4 groups of powerups - altogether 64 bytes
  - 52 total bytes
 --]]
 
@@ -94,6 +94,7 @@ function c_tcm_init()
 	c_const_set("tcm_powerspawnHeight", 5, 1)
 	c_const_set("tcm_spawnpointWidth",  5, 1)
 	c_const_set("tcm_spawnpointHeight", 5, 1)
+	c_const_set("tcm_tankLevel", 9, 1)
 
 	-- parse every set into memory
 	c_tcm_current_sets = {}
@@ -109,6 +110,9 @@ c_tcm_sets =
 	new = function (self, o)
 		o = o or {}
 		common_clone(self, o)
+		if self.init then
+			self.init(o)
+		end
 		setmetatable(o, {__index = self})
 		self.__index = self
 		return o
@@ -126,6 +130,9 @@ c_tcm_set =
 	new = function (self, o)
 		o = o or {}
 		common_clone(self, o)
+		if self.init then
+			self.init(o)
+		end
 		setmetatable(o, {__index = self})
 		self.__index = self
 		return o
@@ -144,17 +151,125 @@ c_tcm_map =
 	new = function (self, o)
 		o = o or {}
 		common_clone(self, o)
+		if self.init then
+			self.init(o)
+		end
 		setmetatable(o, {__index = self})
 		self.__index = self
 		return o
 	end,
 
+	version = 0,
+	name = "",  -- unique name.
+	title = "",  -- the name the player will see.
+	description = "",  -- the description
+	authors = "",
+	version_string = "",
+
+	walls_n = 0,
+	teleporters_n = 0,
+	playerSpawnPoints_n = 0,
+	powerupSpawnPoints_n = 0,
+
 	walls = {},  -- table of walls
 	teleporters = {},  -- table of walls
 	playerSpawnPoints = {},  -- table of walls
 	powerupSpawnPoints = {},  -- table of walls
-	title = "",  -- the name the player will see.
-	description = ""  -- the description
+	message = ""  -- the level message
+}
+
+c_tcm_wall =
+{
+	new = function (self, o)
+		o = o or {}
+		common_clone(self, o)
+		if self.init then
+			self.init(o)
+		end
+		setmetatable(o, {__index = self})
+		self.__index = self
+		return o
+	end,
+
+	init = function (o)
+		o.p[1] = c_vec2:new()
+		o.p[2] = c_vec2:new()
+		o.p[3] = c_vec2:new()
+		--o.p[4] = c_vec2:new()
+		o.l = c_const_get("tcm_tankLevel")
+	end,
+
+	id = 0,
+	p = {},
+	texture = "",
+	l = 0,
+	q = false  -- only for a quick way to see if the 4th point exists
+}
+
+c_tcm_teleporter =
+{
+	new = function (self, o)
+		o = o or {}
+		common_clone(self, o)
+		if self.init then
+			self.init(o)
+		end
+		setmetatable(o, {__index = self})
+		self.__index = self
+		return o
+	end,
+
+	init = function (o)
+		o.p[1] = c_vec2:new()
+	end,
+
+	id = 0,
+	t = 0
+	p = {}
+}
+
+c_tcm_playerSpawnPoint =
+{
+	new = function (self, o)
+		o = o or {}
+		common_clone(self, o)
+		if self.init then
+			self.init(o)
+		end
+		setmetatable(o, {__index = self})
+		self.__index = self
+		return o
+	end,
+
+	init = function (o)
+		o.p[1] = c_vec2:new()
+	end,
+
+	id = 0,
+	p = {}
+}
+
+c_tcm_powerupSpawnPoint =
+{
+	new = function (self, o)
+		o = o or {}
+		common_clone(self, o)
+		if self.init then
+			self.init(o)
+		end
+		setmetatable(o, {__index = self})
+		self.__index = self
+		return o
+	end,
+
+	init = function (o)
+		o.p[1] = c_vec2:new()
+		o.enabledPowerups.foo = false
+	end,
+
+	id = 0,
+	p = {},
+	enabledPowerups = {}
 }
 
 function c_tcm_read_sets(dir, t)
@@ -288,7 +403,7 @@ local function c_tcm_check_true_header(i)
 		error "Invalid map header"
 	elseif c_tcm_private_get(tankbobs.io_getChar, i) ~= c_const_get("tcm_version") then
 		i:seek("cur", -1)
-		io.write("Warning: map was built for tcm version '", tostring(c_tcm_private_get(tankbobs.io_getChar, i)), "'; you are using version '", tostring(c_const_get("tcm_version")), "'")
+		io.stdout:write("Warning: map was built for tcm version '", tostring(c_tcm_private_get(tankbobs.io_getChar, i)), "'; you are using version '", tostring(c_const_get("tcm_version")), "'")
 	end
 end
 
@@ -296,7 +411,7 @@ function c_tcm_map_header(map)
 	local r = c_tcm_set:new()
 
 	if c_const_get("debug") then
-		io.write("Parsing header of file: ", map)
+		io.stdout:write("Parsing header of file: ", map)
 	end
 
 	local i, err, errnum = io.open(map, "r")
@@ -323,472 +438,102 @@ function c_tcm_map_header(map)
 	i:close()
 end
 
+-- load map whose filename is specified by `map` into c_tcm_current_map
+function c_tcm_map_load(map)
+	c_tcm_current_map = c_tcm_map:new()
 
-
-
-
-
-
-
-
-
-local function c_tcm_private_base_base(t, i)
-	while true do
-		local c = tankbobs.io_getChar(t[1])
-		if c == c_const_get("tcm_eof") then
-			return nil
-		elseif c == t[2] then
-			return i
-		elseif c == 0x00 then
-		elseif c == 0x01 then
-			t[1]:seek("cur", 4)
-			for _ = 1, 7 do
-				c = tankbobs.io_getInt(t[1])
-				if c == 0 then
-					while true do
-						c = tankbobs.io_getChar(t[1])
-						if c == 0 then
-							break
-						end
-						if c == c_const_get("tcm_eof") then
-							error("parsing map ended early")
-						end
-					end
-				elseif type(c) == "number" and c > 0 then
-					t[1]:seek("cur", c)
-				else
-					error("parsing map ended early")
-				end
-			end
-		elseif c == 0x02 then
-			t[1]:seek("cur", 8)
-			for _ = 1, 5 do
-				c = tankbobs.io_getInt(t[1])
-				if c == 0 then
-					while true do
-						c = tankbobs.io_getChar(t[1])
-						if c == 0 then
-							break
-						end
-						if c == c_const_get("tcm_eof") then
-							error("parsing map ended early")
-						end
-					end
-				elseif type(c) == "number" and c > 0 then
-					t[1]:seek("cur", c)
-				else
-					error("parsing map ended early")
-				end
-			end
-		elseif c == 0x03 then
-			for _ = 1, 5 do
-				c = tankbobs.io_getInt(t[1])
-				if c == 0 then
-					while true do
-						c = tankbobs.io_getChar(t[1])
-						if c == 0 then
-							break
-						end
-						if c == c_const_get("tcm_eof") then
-							error("parsing map ended early")
-						end
-					end
-				elseif type(c) == "number" and c > 0 then
-					t[1]:seek("cur", c)
-				else
-					error("parsing map ended early")
-				end
-			end
-			t[1]:seek("cur", 58)
-		elseif c == 0x04 then
-		elseif c == 0x05 then
-			c = tankbobs.io_getInt(t[1])
-			if c == 0 then
-				while true do
-					c = tankbobs.io_getChar(t[1])
-					if c == 0 then
-						break
-					end
-					if c == c_const_get("tcm_eof") then
-						error("parsing map ended early")
-					end
-				end
-			elseif type(c) == "number" and c > 0 then
-				t[1]:seek("cur", c)
-			else
-				error("parsing map ended early")
-			end
-			t[1]:seek("cur", 20)
-		elseif c == 0x06 then
-			t[1]:seek("cur", 16)
-		end
+	if c_const_get("debug") then
+		io.stdout:write("Reading map: ", map)
 	end
-end
 
-local function c_tcm_private_base(f, b)
-	return c_tcm_private_base_base, {f, b}, 0
-end
+	local i, err, errnum = io.open(map, "r")
 
-local function c_tcm_private_skipbase(f, s)
-	f:seek("cur", -s)
-	local c = tankbobs.io_getChar(t[1])
-	if c == c_const_get("tcm_eof") then
-		return nil
-	elseif c == t[2] then
-		return i
-	elseif c == 0x00 then
-	elseif c == 0x01 then
-		t[1]:seek("cur", 4)
-		for _ = 1, 7 do
-			c = tankbobs.io_getInt(t[1])
-			if c == 0 then
-				while true do
-					c = tankbobs.io_getChar(t[1])
-					if c == 0 then
-						break
-					end
-					if c == c_const_get("tcm_eof") then
-						error("parsing map ended early")
-					end
-				end
-			elseif type(c) == "number" and c > 0 then
-				t[1]:seek("cur", c)
-			else
-				error("parsing map ended early")
-			end
-		end
-	elseif c == 0x02 then
-		t[1]:seek("cur", 8)
-		for _ = 1, 5 do
-			c = tankbobs.io_getInt(t[1])
-			if c == 0 then
-				while true do
-					c = tankbobs.io_getChar(t[1])
-					if c == 0 then
-						break
-					end
-					if c == c_const_get("tcm_eof") then
-						error("parsing map ended early")
-					end
-				end
-			elseif type(c) == "number" and c > 0 then
-				t[1]:seek("cur", c)
-			else
-				error("parsing map ended early")
-			end
-		end
-	elseif c == 0x03 then
-		for _ = 1, 5 do
-			c = tankbobs.io_getInt(t[1])
-			if c == 0 then
-				while true do
-					c = tankbobs.io_getChar(t[1])
-					if c == 0 then
-						break
-					end
-					if c == c_const_get("tcm_eof") then
-						error("parsing map ended early")
-					end
-				end
-			elseif type(c) == "number" and c > 0 then
-				t[1]:seek("cur", c)
-			else
-				error("parsing map ended early")
-			end
-		end
-		t[1]:seek("cur", 58)
-	elseif c == 0x04 then
-	elseif c == 0x05 then
-		c = tankbobs.io_getInt(t[1])
-		if c == 0 then
-			while true do
-				c = tankbobs.io_getChar(t[1])
-				if c == 0 then
-					break
-				end
-				if c == c_const_get("tcm_eof") then
-					error("parsing map ended early")
-				end
-			end
-		elseif type(c) == "number" and c > 0 then
-			t[1]:seek("cur", c)
+	if not i then
+		error("Could not open '" .. map .. "': " .. err .. " - error number: " .. errnum .. ".")
+	end
+
+	c_tcm_check_true_header(i)
+
+	c_tcm_current_map.version = c_tcm_private_get(tankbobs.io_getChar, i)
+	c_tcm_current_map.name = c_tcm_private_get(tankbobs.io_getStr, i, false, 64)
+	c_tcm_current_map.title = c_tcm_private_get(tankbobs.io_getStr, i, false, 64)
+	c_tcm_current_map.description = c_tcm_private_get(tankbobs.io_getStr, i, false, 64)
+	c_tcm_current_map.authors = c_tcm_private_get(tankbobs.io_getStr, i, false, 512)
+	c_tcm_current_map.version_string = c_tcm_private_get(tankbobs.io_getStr, i, false, 64)
+	-- strip trailing 0's from NULL-terminated strings passed by C
+	c_tcm_current_map.name = c_tcm_current_map.name:gsub("%z*$", "")
+	c_tcm_current_map.title = c_tcm_current_map.title:gsub("%z*$", "")
+	c_tcm_current_map.description = c_tcm_current_map.description:gsub("%z*$", "")
+	c_tcm_current_map.authors = c_tcm_current_map.authors:gsub("%z*$", "")
+	c_tcm_current_map.version_string = c_tcm_current_map.version_string:gsub("%z*$", "")
+
+	c_tcm_current_map.walls_n = c_tcm_private_get(tankbobs.io_getInt, i)
+	c_tcm_current_map.teleporters_n = c_tcm_private_get(tankbobs.io_getInt, i)
+	c_tcm_current_map.playerSpawnPoints_n = c_tcm_private_get(tankbobs.io_getInt, i)
+	c_tcm_current_map.powerupSpawnPoints_n = c_tcm_private_get(tankbobs.io_getInt, i)
+
+	for i = 1, c_tcm_current_map.walls_n do
+		local wall = c_tcm_wall:new()
+
+		wall.id = c_tcm_private_get(tankbobs.io_getInt, i)
+		if c_tcm_private_get(tankbobs.io_getChar, i) ~= 0 then
+			wall.q = true
 		else
-			error("parsing map ended early")
+			wall.q = false
 		end
-		t[1]:seek("cur", 20)
-	elseif c == 0x06 then
-		t[1]:seek("cur", 16)
-	end
-end
-
-local function c_tcm_private_getstr(f)
-	local c = tankbobs.io_getInt(f)
-	if c == 0 then
-		return tankbobs.io_getStr(f)
-	elseif c > 0 then
-		return tankbobs.io_getStrL(f, c)
-	else
-		error("error parsing map: preterminated byte sequence")
-	end
-end
-
-local function c_tcm_private_header(f, filename)
-	if not f then
-		error("cannot read " .. filename)
-	end
-	if tankbobs.io_getChar(f) ~= 0x00 then
-		error("map " .. filename .. " is not a valid c_tcm file")
-	elseif tankbobs.io_getChar(f) ~= 0x54 then
-		error("map " .. filename .. " is not a valid c_tcm file")
-	elseif tankbobs.io_getChar(f) ~= 0x43 then
-		error("map " .. filename .. " is not a valid c_tcm file")
-	elseif tankbobs.io_getChar(f) ~= 0x4D then
-		error("map " .. filename .. " is not a valid c_tcm file")
-	elseif tankbobs.io_getChar(f) ~= 0x01 then
-		error("map " .. filename .. " is not a valid c_tcm file")
-	elseif string.format("%X", tankbobs.io_getInt(f))  ~= string.format("%X", c_const_get("tcm_magic")) then
-		error("map " .. filename .. " is not a valid c_tcm file")
-	elseif tankbobs.io_getChar(f) ~= c_const_get("tcm_version") then
-		f:seek("cur", -4)
-		print("map " .. filename .. " is compatible with tankbobs version " .. tostring(tankbobs.io_getChar(f)) .. ", you are using version " .. tostring(c_const_get("version")) .. "; you probably won't get what you were expecting!  Expect a crash.  Continuing anyway...")
-	end
-end
-
-local function c_tcm_private_psets(filename)
-	local id, order, name, title, description, authors, version
-	local f = io.open(filename, "r")
-	c_tcm_private_header(f, filename)
-	local first, c = false
-	for _ in c_tcm_private_base(f, 0x02) do
-		id = tankbobs.io_getInt(f)
-		order = tankbobs.io_getInt(f)
-		name = c_tcm_private_getstr(f)
-		title = c_tcm_private_getstr(f)
-		description = c_tcm_private_getstr(f)
-		authors = c_tcm_private_getstr(f)
-		version = c_tcm_private_getstr(f)
-		if id == c_const_get("tcm_eof") or title == c_const_get("tcm_eof") or name == c_const_get("tcm_eof") or description == c_const_get("tcm_eof") or authors == c_const_get("tcm_eof") or version == c_const_get("tcm_eof") or id == nil or title == nil or name == nil or description == nil or authors == nil or version == nil then
-			error("tcm " .. filename .. " has an incomplete set description")
-		elseif order == 1 then
-			local set = {id, order, name, title, description, authors, version}
-			table.insert(c_tcm_sets, set)
-		end
-		return
-	end
-end
-
-local function c_tcm_private_plevels(filename, id)
-	local sid, lid, order
-	local f = io.open(filename, "r")
-	c_tcm_private_header(f, filename)
-	local first, c = false
-	for _ in c_tcm_private_base(f, 0x02) do
-		sid = tankbobs.io_getInt(f)
-		order = tankbobs.io_getInt(f)
-		local c = c_tcm_private_getstr(f)
-		if c == nil or c == c_const_get("tcm_eof")== c_const_get("tcm_eof") or sid == nil or sid == c_const_get("tcm_eof") or order == nil or order == c_const_get("tcm_eof") then
-			error("tcm " .. filename .. " has an incomplete set description")
-		end
-		c = c_tcm_private_getstr(f)
-		if c == nil or c == c_const_get("tcm_eof") then
-			error("tcm " .. filename .. " has an incomplete set description")
-		end
-		c = c_tcm_private_getstr(f)
-		if c == nil or c == -1 then
-			error("tcm " .. filename .. " has an incomplete set description")
-		end
-		c = c_tcm_private_getstr(f)
-		if c == nil or c == c_const_get("tcm_eof") then
-			error("tcm " .. filename .. " has an incomplete set description")
-		end
-		c = c_tcm_private_getstr(f)
-		if c == nil or c == c_const_get("tcm_eof") then
-			error("tcm " .. filename .. " has an incomplete set description")
-		end
-		if sid == id then
-			f:seek("set", c_const_get("tcm_headerLength") - 1)
-			local id, name, title, description, authors, version, initscript, exitscript
-			for _ in c_tcm_private_base(f, 0x01) do
-				id = tankbobs.io_getInt(f)
-				name = c_tcm_private_getstr(f)
-				title = c_tcm_private_getstr(f)
-				description = c_tcm_private_getstr(f)
-				authors = c_tcm_private_getstr(f)
-				version = c_tcm_private_getstr(f)
-				initscript = c_tcm_private_getstr(f)
-				exitscript = c_tcm_private_getstr(f)
-				break
-			end
-			if id == nil or name == nil or title == nil or description == nil or authors == nil or version == nil or initscript == nil or exitscript == nil or id == c_const_get("tcm_eof") or name == c_const_get("tcm_eof") or title == c_const_get("tcm_eof") or description == c_const_get("tcm_eof") or authors == c_const_get("tcm_eof") or version == c_const_get("tcm_eof") or initscript == c_const_get("tcm_eof") or exitscript == c_const_get("tcm_eof") then
-				error("c_tcm " .. filename .. " has an incomplete map description")
-			end
-			local level = {sid, id, name, title, descripition, authors, version, initscript, exitscript, filename, order}
-			c_tcm_set[order] = level
-			return
+		wall.p[1].x = c_tcm_private_get(tankbobs.io_getDouble, i)
+		wall.p[1].y = c_tcm_private_get(tankbobs.io_getDouble, i)
+		wall.p[2].x = c_tcm_private_get(tankbobs.io_getDouble, i)
+		wall.p[2].y = c_tcm_private_get(tankbobs.io_getDouble, i)
+		wall.p[3].x = c_tcm_private_get(tankbobs.io_getDouble, i)
+		wall.p[3].y = c_tcm_private_get(tankbobs.io_getDouble, i)
+		if wall.q then
+			wall.p[4].x = c_tcm_private_get(tankbobs.io_getDouble, i)
+			wall.p[4].y = c_tcm_private_get(tankbobs.io_getDouble, i)
 		else
-			return
+			i:seek("cur", 16)
 		end
-	end
-end
+		wall.texture = c_tcm_private_get(tankbobs.io_getStr, i, false, 256)
+		wall.texture = wall.texture:gsub("%z*$", "")
+		wall.l = c_tcm_private_get(tankbobs.io_getInt, i)
 
-local function c_tcm_private_plevel(order)
-	local filename = c_tcm_set[order][10]
-	local f = io.open(filename, "r")
-	c_tcm_private_header(f, filename)
-	c_tcm_map.walls       = {}
-	c_tcm_map.spawns      = {}
-	c_tcm_map.powerspawns = {}
-	c_tcm_map.initscript  = ((c_tcm_set[order][8] == "") and (nil) or (c_tcm_set[order][8]))
-	c_tcm_map.exitscript  = ((c_tcm_set[order][9] == "") and (nil) or (c_tcm_set[order][9]))
-
-	local texture
-	local traits = {}
-	local script1, script2, script3, x1, y1, x2, y2, x3, y3, x4, y4
-	for _ in c_tcm_private_base(f, 0x03) do
-		texture = c_tcm_private_getstr(f)
-		local traitstr = c_tcm_private_getstr(f)
-		if traitstr:find(string.format("%c", 0x01)) then
-			traits.detail = true
-		end
-		if traitstr:find(string.format("%c", 0x02)) then
-			traits.back_most = true
-		elseif traitstr:find(string.format("%c", 0x03)) then
-			traits.back = true
-		elseif traitstr:find(string.format("%c", 0x04)) then
-			traits.back_least = true
-		elseif traitstr:find(string.format("%c", 0x05)) then
-			traits.top_least = true
-		elseif traitstr:find(string.format("%c", 0x06)) then
-			traits.top = true
-		elseif traitstr:find(string.format("%c", 0x07)) then
-			traits.top_most = true
-		elseif traitstr:find(string.format("%c", 0x0C)) then
-			traits.back_mostmore = true
-		elseif traitstr:find(string.format("%c", 0x0D)) then
-			traits.back_mostmost = true
-		end
-		if traitstr:find(string.format("%c", 0x08)) then
-			traits.touch = true
-		end
-		if traitstr:find(string.format("%c", 0x09)) then
-			traits.damage = true
-		end
-		if traitstr:find(string.format("%c", 0x0A)) then
-			traits.missiles = true
-		end
-		if traitstr:find(string.format("%c", 0x0B)) then
-			traits.nopass = true
-		end
-		script1 = c_tcm_private_getstr(f)
-		script2 = c_tcm_private_getstr(f)
-		script3 = c_tcm_private_getstr(f)
-		x1 = tankbobs.io_getDouble(f)
-		y1 = tankbobs.io_getDouble(f)
-		x2 = tankbobs.io_getDouble(f)
-		y2 = tankbobs.io_getDouble(f)
-		x3 = tankbobs.io_getDouble(f)
-		y3 = tankbobs.io_getDouble(f)
-		x4 = tankbobs.io_getDouble(f)
-		y4 = tankbobs.io_getDouble(f)
-		if x4 == c_const_get("tcm_eof") and y4 == c_const_get("tcm_eof") then
-			x4, y4 = nil, nil
-		end
-		if texture == nil or traits == nil or script1 == nil or script2 == nil or script3 == nil or x1 == nil or y1 == nil or x2 == nil or y2 == nil or x3 == nil or y3 == nil or texture == c_const_get("tcm_eof") or traits == c_const_get("tcm_eof") or script1 == c_const_get("tcm_eof") or script2 == c_const_get("tcm_eof") or script3 == c_const_get("tcm_eof") or x1 == c_const_get("tcm_eof") or y1 == c_const_get("tcm_eof") or x2 == -2 or y2 == c_const_get("tcm_eof") or x3 == c_const_get("tcm_eof") or y3 == c_const_get("tcm_eof") or x4 == c_const_get("tcm_eof") or y4 == c_const_get("tcm_eof") then
-			error("tcm " .. filename .. " has an incomplete map description")
-		end
-		local wall = {texture, traits, script1, script2, script3, x1, y1, x2, y2, x3, y3, x4, y4}
-		table.insert(c_tcm_map.walls, wall)
+		table.insert(c_tcm_current_map.walls, wall)
 	end
 
-	f:seek("set", c_const_get("tcm_headerLength") - 1)
-	local x, y
-	for _ in c_tcm_private_base(f, 0x06) do
-		x = tankbobs.io_getDouble(f)
-		y = tankbobs.io_getDouble(f)
-		if x == nil or y == nil or x == c_const_get("tcm_eof") or y == c_const_get("tcm_eof") then
-			error("tcm " .. filename .. " has an incomplete map description")
-		end
-		local spawn = {x, y}
-		table.insert(c_tcm_map.spawns, spawn)
+	for it = 1, c_tcm_current_map.teleporters_n do
+		local teleporter = c_tcm_teleporter:new()
+
+		teleporter.id = c_tcm_private_get(tankbobs.io_getInt, i)
+		teleporter.t = c_tcm_private_get(tankbobs.io_getInt, i)
+		teleporter.p[1].x = c_tcm_private_get(tankbobs.io_getDouble, i)
+		teleporter.p[1].y = c_tcm_private_get(tankbobs.io_getDouble, i)
+
+		table.insert(c_tcm_current_map.teleporters, teleporter)
 	end
 
-	f:seek("set", c_const_get("tcm_headerLength") - 1)
-	local powerups, enable
-	for _ in c_tcm_private_base(f, 0x05) do
-		powerups = c_tcm_private_getstr(f)
-		enable = tankbobs.io_getInt(f)
-		x = tankbobs.io_getDouble(f)
-		y = tankbobs.io_getDouble(f)
-		if powerups == nil or enable == nil or x == nil or y == nil or powerups == c_const_get("tcm_eof") or enable == c_const_get("tcm_eof") or x == c_const_get("tcm_eof") or y == c_const_get("tcm_eof") then
-			error("tcm " .. filename .. " has an incomplete map description")
-		end
-		local powerspawn = {powerups, enable, x, y}
-		table.insert(c_tcm_map.powerspawns, powerspawn)
-	end
-end
+	for it = 1, c_tcm_current_map.playerSpawnPoints_n do
+		local playerSpawnPoint = c_tcm_playerSpawnPoint:new()
 
-function c_tcm_headers()  -- c_tcm_sets
-	if c_tcm_sets[1] ~= nil then
-		return
-	end
-	for filename in lfs.dir(c_const_get("tcm_dir")) do
-		if not filename:find("^%.") and filename:find("%.c_tcm$") then
-			c_tcm_private_psets(c_const_get("tcm_dir") .. filename)
-		end
-	end
-end
+		playerSpawnPoint.id = c_tcm_private_get(tankbobs.io_getInt, i)
+		playerSpawnPoint.p[1].x = c_tcm_private_get(tankbobs.io_getDouble, i)
+		playerSpawnPoint.p[1].y = c_tcm_private_get(tankbobs.io_getDouble, i)
 
-function c_tcm_levels(id)  -- c_tcm_set
-	if c_tcm_set[1] ~= nil then
-		c_tcm_set = nil
-		c_tcm_set = {nil}
+		table.insert(c_tcm_current_map.playerSpawnPoints, playerSpawnPoint)
 	end
-	for filename in lfs.dir(c_const_get("tcm_dir")) do
-		if not filename:find("^%.") and filename:find("%.c_tcm$") then
-			c_tcm_private_plevels(c_const_get("tcm_dir") .. filename, id)
-		end
-	end
-end
 
-function c_tcm_level(order)  -- c_tcm_map
---	if c_tcm_map[1] ~= nil then
---		-- any freeing goes here
---	end
-	c_tcm_map = nil
-	c_tcm_map = {}
-	c_tcm_private_plevel(order)
-end
+	for it = 1, c_tcm_current_map.powerupSpawnPoints_n do
+		local powerupSpawnPoint = c_tcm_powerupSpawnPoint:new()
 
-function c_tcm_setsi()
-	local i = 0
-	return function ()
-		i = i + 1
-		local j = 0
-		for k, v in ipairs(c_tcm_sets) do
-			if v ~= nil then
-				j = j + 1
-				if j == i then
-					return v[1], v[2], v[3], v[4], v[5], v[6]
-				end
-			end
-		end
-		return nil
-	end
-end
+		powerupSpawnPoint.id = c_tcm_private_get(tankbobs.io_getInt, i)
+		powerupSpawnPoint.p[1].x = c_tcm_private_get(tankbobs.io_getDouble, i)
+		powerupSpawnPoint.p[1].y = c_tcm_private_get(tankbobs.io_getDouble, i)
 
-function c_tcm_levelsi()
-	local i = 0
-	return function ()
-		i = i + 1
-		local j= 0
-		for k, v in ipairs(c_tcm_set) do
-			if v ~= nil then
-				j = j + 1
-				if j == i then
-					return v[1], v[2], v[3], v[4], v[5], v[6], v[7], v[8], v[9], v[10], v[11]
-				end
-			end
+		local powerups = {}
+		for it = 1, 16 do  -- the format includes 16 ints for different powerup possibilities
+			table.insert(powerups, c_tcm_private_get(tankbobs.io_getInt, i))
 		end
-		return nil
+		-- powerupSpawnPoint.enabledPowerups.x = true | false will be set when more powerups exist
+
+		table.insert(c_tcm_current_map.powerupSpawnPoints, powerupSpawnPoint)
 	end
 end
