@@ -120,8 +120,7 @@ c_tcm_sets =
 
 	name = "",  -- internal name.
 	title = "",  -- the name the player will see.
-	description = "",  -- the description
-	mapnames = {}  -- the filename of all of the maps (relative to tcm directory)
+	description = ""  -- the description
 }
 
 -- class for names of the *maps*
@@ -138,6 +137,7 @@ c_tcm_set =
 		return o
 	end,
 
+	maps = {},  -- the filename of all of the maps (relative to tcm directory)
 	version = 0,
 	name = "",  -- unique name.
 	title = "",  -- the name the player will see.
@@ -224,7 +224,7 @@ c_tcm_teleporter =
 	end,
 
 	id = 0,
-	t = 0
+	t = 0,
 	p = {}
 }
 
@@ -333,23 +333,6 @@ function c_tcm_read_set(filename, t)
 	set_f:close()
 
 	table.insert(t, s)
-end
-
-local function c_tcm_private_setsi_iter(_, i)
-	local set = next(c_tcm_current_sets, i)
-
-	i = i + 1
-
-	if set then
-		return set.name, set.title, set.description
-	else
-		return nil
-	end
-end
-
--- name, title, description
-function c_tcm_setsi()
-	return c_tcm_private_setsi_iter, nil, 0
 end
 
 function c_tcm_populate(name)

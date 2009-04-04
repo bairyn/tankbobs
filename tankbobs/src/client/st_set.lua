@@ -27,8 +27,8 @@ function st_set_init()
 	gui_widget("label", renderer_font.sans, 50, 92.5, renderer_size.sans, "Select Level Set")
 	gui_widget("active", c_state_advance, renderer_font.sans, 25, 87.5, renderer_size.sans, "Back")
 	local x, y = 50, 85
-	for name, title, description in c_tcm_setsi() do
-		gui_widget("active", st_set_select, renderer_font.sans, x, y, renderer_size.sans, title, name)
+	for _, v in pairs(c_tcm_current_sets) do
+		gui_widget("active", st_set_select, renderer_font.sans, x, y, renderer_size.sans, v.title, v.name)
 		y = y - 2.5
 	end
 end
@@ -61,8 +61,8 @@ function st_set_step()
 end
 
 function st_set_select(title, name)
-	main_data.set_title = title
 	c_tcm_populate(name)
+	c_state_new(level_state)
 end
 
 set_state =

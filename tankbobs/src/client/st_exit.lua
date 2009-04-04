@@ -31,12 +31,12 @@ exit_state =
 {
 	name   = "exit_state",
 	init   = st_exit_init,
-	done   = common_nil,
-	next   = nil,
+	done   = st_exit_init,
+	next   = st_exit_init,
 
-	click  = common_nil,
-	button = common_nil,
-	mouse  = common_nil,
+	click  = st_exit_init,
+	button = st_exit_init,
+	mouse  = st_exit_init,
 
-	main   = common_nil
+	main   = st_exit_init
 }

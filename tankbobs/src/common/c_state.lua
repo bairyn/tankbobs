@@ -91,7 +91,6 @@ function c_state_done()
 	end
 end
 
-
 function c_state_validate(state)  -- "private" function - do not call this outside this file
 	if not state then
 		return false
@@ -211,7 +210,6 @@ function c_state_advance()
 	end
 
 	if not c_state_validate(state) then
-debug.debug()
 		error("c_state_advance: state " .. c_state_state.cur.name .. " advance called with no valid next")
 	end
 
@@ -276,7 +274,7 @@ function c_state_step()
 		if type(res) == "number" or type(res) == "boolean" or type(res) == "string" then
 			error("c_state_step: state " .. c_state_state.cur.name .. " returned an error value: " .. tostring(res))
 		elseif tostring(res) then
-			error("c_state_step: state " .. c_state_state.cur.name .. " returned an error value (info loss): " .. tostring(res))
+			error("c_state_step: state " .. c_state_state.cur.name .. " returned an error value: " .. tostring(res))
 		else
 			error("c_state_step: state " .. c_state_state.cur.name .. " returned an error value of type: " .. type(res))
 		end
