@@ -33,7 +33,7 @@ function c_const_init()
 			return nil
 		end
 
-		-- return a proxy table so that the real table doesn't change (the clone also handles sub-tables)
+		-- return a proxy table so the real table doesn't change (the clone also handles sub-tables)
 		if type(const[k]["v"]) == "table" then
 			local t = {}
 			common_clone(const[k]["v"], t)

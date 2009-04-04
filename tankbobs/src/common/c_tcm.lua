@@ -105,25 +105,6 @@ end
 function c_tcm_done()
 end
 
-c_tcm_sets =
-{
-	new = function (self, o)
-		o = o or {}
-		common_clone(self, o)
-		if self.init then
-			self.init(o)
-		end
-		setmetatable(o, {__index = self})
-		self.__index = self
-		return o
-	end,
-
-	name = "",  -- internal name.
-	title = "",  -- the name the player will see.
-	description = ""  -- the description
-}
-
--- class for names of the *maps*
 c_tcm_set =
 {
 	new = function (self, o)
@@ -137,13 +118,10 @@ c_tcm_set =
 		return o
 	end,
 
-	maps = {},  -- the filename of all of the maps (relative to tcm directory)
-	version = 0,
-	name = "",  -- unique name.
+	maps = {},  -- table of maps.  All maps are loaded once
+	name = "",  -- internal name.
 	title = "",  -- the name the player will see.
-	description = "",  -- the description
-	authors = "",
-	version_string = ""
+	description = ""  -- the description
 }
 
 c_tcm_map =
@@ -159,9 +137,11 @@ c_tcm_map =
 		return o
 	end,
 
+	map = "",  -- the filename
+
 	version = 0,
-	name = "",  -- unique name.
-	title = "",  -- the name the player will see.
+	name = "",  -- unique name
+	title = "",  -- the name the player will see
 	description = "",  -- the description
 	authors = "",
 	version_string = "",
@@ -322,10 +302,10 @@ function c_tcm_read_set(filename, t)
 	end
 	s.description = line
 
-	-- read the set's filenames
+	-- read the set's filenames and read their headers
 	line = set_f:read()
 	while line and type(line) == "string" and line ~= "" do
-		table.insert(s.maps, c_const_get("tcm_dir") .. line)
+		table.insert(s.maps, c_tcm_read_map(c_const_get("tcm_dir") .. line))
 
 		line = set_f:read()
 	end
@@ -335,29 +315,9 @@ function c_tcm_read_set(filename, t)
 	table.insert(t, s)
 end
 
-function c_tcm_populate(name)
-	c_tcm_current_set = {}
-
-	for k, v in pairs(c_tcm_current_sets) do
-		if v.name == name then
-			found = true
-
-			-- populate c_tcm_current_set with data from each map of the set
-			for k, v in pairs(v.maps) do
-				set = c_tcm_map_header(v)
-				table.insert(c_tcm_current_set, set)
-			end
-
-			return
-		end
-	end
-
-	error("Set '" .. name .. "' not found")
-end
-
 -- f: io function (e.g. tankbobs.io_getChar)
 -- i: input file
--- t: if this argument is specified, instead of giving an error, nil is returned
+-- t: if this argument is true, instead of giving an error, nil is returned
 -- ...: extra arguments to pass (t can be false)
 local function c_tcm_private_get(f, i, t, ...)
 	local d = f(i, ...)
@@ -390,12 +350,14 @@ local function c_tcm_check_true_header(i)
 	end
 end
 
-function c_tcm_map_header(map)
-	local r = c_tcm_set:new()
+function c_tcm_read_map(map)
+	local r = c_tcm_map:new()
 
 	if c_const_get("debug") then
 		io.stdout:write("Parsing header of file: ", map)
 	end
+
+	r.map = map
 
 	local i, err, errnum = io.open(map, "r")
 
@@ -418,44 +380,12 @@ function c_tcm_map_header(map)
 	r.authors = r.authors:gsub("%z*$", "")
 	r.version_string = r.version_string:gsub("%z*$", "")
 
-	i:close()
-end
+	r.walls_n = c_tcm_private_get(tankbobs.io_getInt, i)
+	r.teleporters_n = c_tcm_private_get(tankbobs.io_getInt, i)
+	r.playerSpawnPoints_n = c_tcm_private_get(tankbobs.io_getInt, i)
+	r.powerupSpawnPoints_n = c_tcm_private_get(tankbobs.io_getInt, i)
 
--- load map whose filename is specified by `map` into c_tcm_current_map
-function c_tcm_map_load(map)
-	c_tcm_current_map = c_tcm_map:new()
-
-	if c_const_get("debug") then
-		io.stdout:write("Reading map: ", map)
-	end
-
-	local i, err, errnum = io.open(map, "r")
-
-	if not i then
-		error("Could not open '" .. map .. "': " .. err .. " - error number: " .. errnum .. ".")
-	end
-
-	c_tcm_check_true_header(i)
-
-	c_tcm_current_map.version = c_tcm_private_get(tankbobs.io_getChar, i)
-	c_tcm_current_map.name = c_tcm_private_get(tankbobs.io_getStr, i, false, 64)
-	c_tcm_current_map.title = c_tcm_private_get(tankbobs.io_getStr, i, false, 64)
-	c_tcm_current_map.description = c_tcm_private_get(tankbobs.io_getStr, i, false, 64)
-	c_tcm_current_map.authors = c_tcm_private_get(tankbobs.io_getStr, i, false, 512)
-	c_tcm_current_map.version_string = c_tcm_private_get(tankbobs.io_getStr, i, false, 64)
-	-- strip trailing 0's from NULL-terminated strings passed by C
-	c_tcm_current_map.name = c_tcm_current_map.name:gsub("%z*$", "")
-	c_tcm_current_map.title = c_tcm_current_map.title:gsub("%z*$", "")
-	c_tcm_current_map.description = c_tcm_current_map.description:gsub("%z*$", "")
-	c_tcm_current_map.authors = c_tcm_current_map.authors:gsub("%z*$", "")
-	c_tcm_current_map.version_string = c_tcm_current_map.version_string:gsub("%z*$", "")
-
-	c_tcm_current_map.walls_n = c_tcm_private_get(tankbobs.io_getInt, i)
-	c_tcm_current_map.teleporters_n = c_tcm_private_get(tankbobs.io_getInt, i)
-	c_tcm_current_map.playerSpawnPoints_n = c_tcm_private_get(tankbobs.io_getInt, i)
-	c_tcm_current_map.powerupSpawnPoints_n = c_tcm_private_get(tankbobs.io_getInt, i)
-
-	for i = 1, c_tcm_current_map.walls_n do
+	for i = 1, r.walls_n do
 		local wall = c_tcm_wall:new()
 
 		wall.id = c_tcm_private_get(tankbobs.io_getInt, i)
@@ -480,10 +410,10 @@ function c_tcm_map_load(map)
 		wall.texture = wall.texture:gsub("%z*$", "")
 		wall.l = c_tcm_private_get(tankbobs.io_getInt, i)
 
-		table.insert(c_tcm_current_map.walls, wall)
+		table.insert(r.walls, wall)
 	end
 
-	for it = 1, c_tcm_current_map.teleporters_n do
+	for it = 1, r.teleporters_n do
 		local teleporter = c_tcm_teleporter:new()
 
 		teleporter.id = c_tcm_private_get(tankbobs.io_getInt, i)
@@ -491,20 +421,20 @@ function c_tcm_map_load(map)
 		teleporter.p[1].x = c_tcm_private_get(tankbobs.io_getDouble, i)
 		teleporter.p[1].y = c_tcm_private_get(tankbobs.io_getDouble, i)
 
-		table.insert(c_tcm_current_map.teleporters, teleporter)
+		table.insert(r.teleporters, teleporter)
 	end
 
-	for it = 1, c_tcm_current_map.playerSpawnPoints_n do
+	for it = 1, r.playerSpawnPoints_n do
 		local playerSpawnPoint = c_tcm_playerSpawnPoint:new()
 
 		playerSpawnPoint.id = c_tcm_private_get(tankbobs.io_getInt, i)
 		playerSpawnPoint.p[1].x = c_tcm_private_get(tankbobs.io_getDouble, i)
 		playerSpawnPoint.p[1].y = c_tcm_private_get(tankbobs.io_getDouble, i)
 
-		table.insert(c_tcm_current_map.playerSpawnPoints, playerSpawnPoint)
+		table.insert(r.playerSpawnPoints, playerSpawnPoint)
 	end
 
-	for it = 1, c_tcm_current_map.powerupSpawnPoints_n do
+	for it = 1, r.powerupSpawnPoints_n do
 		local powerupSpawnPoint = c_tcm_powerupSpawnPoint:new()
 
 		powerupSpawnPoint.id = c_tcm_private_get(tankbobs.io_getInt, i)
@@ -517,6 +447,30 @@ function c_tcm_map_load(map)
 		end
 		-- powerupSpawnPoint.enabledPowerups.x = true | false will be set when more powerups exist
 
-		table.insert(c_tcm_current_map.powerupSpawnPoints, powerupSpawnPoint)
+		table.insert(r.powerupSpawnPoints, powerupSpawnPoint)
 	end
+
+	i:close()
+end
+
+function c_tcm_select_set(name)
+	for k, v in pairs(c_tcm_current_sets) do
+		if v.name == name then
+			c_tcm_current_set = v
+			return
+		end
+	end
+
+	error("c_tcm_select_set: set '" .. name .. "' not found")
+end
+
+function c_tcm_select_map(name)
+	for k, v in pairs(c_tcm_current_set.maps) do
+		if v.name == name then
+			c_tcm_current_map = v
+			return
+		end
+	end
+
+	error("c_tcm_select_map: map '" .. name .. "' not found")
 end

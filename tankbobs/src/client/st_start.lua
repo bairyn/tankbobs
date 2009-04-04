@@ -20,7 +20,7 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 --[[
 st_start.lua
 
-level start screen
+temporary state (until a better gui) before play state.
 --]]
 
 function st_start_init()

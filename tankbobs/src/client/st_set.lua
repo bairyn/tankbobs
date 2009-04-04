@@ -61,7 +61,7 @@ function st_set_step()
 end
 
 function st_set_select(title, name)
-	c_tcm_populate(name)
+	c_tcm_select_set(name)
 	c_state_new(level_state)
 end
 
