@@ -29,8 +29,8 @@ LIBSRCS    := `$(shell) $(FIND) ./src/lib    -name \*\.c`
 LIBOBJS    := `$(shell) $(FIND) ./src/lib    -name \*\.o`
 SERVER     := `$(shell) $(FIND) ./src/server -name \*\.c`
 CLIENT     := `$(shell) $(FIND) ./src/client -name \*\.c`
-TSTRSRCS   := `$(shell) $(FIND) ./src/tstr   -name \*\.c`
-TSTROBJS   := `$(shell) $(FIND) ./src/tstr   -name \*\.o`
+TSTRSRCS   := `$(shell) $(FIND) ./src/lib/tstr   -name \*\.c`
+TSTROBJS   := `$(shell) $(FIND) ./src/lib/tstr   -name \*\.o`
 TRMC       := `$(shell) $(FIND) ./src/trmc   -name \*\.c`
 SRCS       := `$(shell) $(FIND) ./src        -name \*\.c` `$(shell) $(FIND) ./src -name \*\.h` `$(shell) $(FIND) ./src -name \*\.lua` [Mm]akefile
 
@@ -63,7 +63,7 @@ else
     RMDATASRC := -r data-src
     RMSRC := -r src
 endif
-INCLUDES := -I./src/lib -I./src/tstr -I./src/common -I/usr/include/lua5.1
+INCLUDES := -I./src/lib -I./src/lib/tstr -I./src/common -I/usr/include/lua5.1
 SERVERINCLUDES := -I./src/server
 CLIENTINCLUDES := -I./src/client
 LIBS := -L. -llua5.1 -lSDL -lSDL_mixer -lSDL_image -lfreetype -lGL -lGLU  -lz
