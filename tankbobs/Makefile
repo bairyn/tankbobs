@@ -1,7 +1,4 @@
-# Tankbobs
-# 
-# This makefile is not a "real" makefile, but it makes and it works
-# TODO: make the makefile a real makefile
+# Simple makefile for Tankbobs
 
 CC = gcc
 LD = ld
@@ -29,7 +26,6 @@ LIBSRCS    := `$(shell) $(FIND) ./src/lib    -name \*\.c`
 LIBOBJS    := `$(shell) $(FIND) ./src/lib    -name \*\.o`
 SERVER     := `$(shell) $(FIND) ./src/server -name \*\.c`
 CLIENT     := `$(shell) $(FIND) ./src/client -name \*\.c`
-TSTRSRCS   := `$(shell) $(FIND) ./src/lib/tstr   -name \*\.c`
 TSTROBJS   := `$(shell) $(FIND) ./src/lib/tstr   -name \*\.o`
 TRMC       := `$(shell) $(FIND) ./src/trmc   -name \*\.c`
 SRCS       := `$(shell) $(FIND) ./src        -name \*\.c` `$(shell) $(FIND) ./src -name \*\.h` `$(shell) $(FIND) ./src -name \*\.lua` [Mm]akefile
@@ -89,7 +85,7 @@ trmc : tstr
 	$(CC) $(CFLAGS) $(INCLUDES) -o trmc $(TRMC)
 
 tstr :
-	$(CC) -o tstr.so $(DLLFLAGS) $(CFLAGS) $(INCLUDES) $(TSTRSRCS) $(SHAREDSRCS) $(LIBSRCS)
+	$(CC) -o tstr.so $(DLLFLAGS) $(CFLAGS) $(INCLUDES) $(SHAREDSRCS) $(LIBSRCS)
 
 tankbobslib : tstr
 	$(CC) -o tankbobs.so $(CCMODULEFLAGS) $(CFLAGS) $(INCLUDES) $(COMMONSRCS) $(SHAREDSRCS) $(LIBSRCS) $(LIBS)
