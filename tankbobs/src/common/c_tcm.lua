@@ -20,6 +20,19 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 --[[
 c_tcm.lua
 
+TankRawMap text format
+everything is read line by line
+Backslashes can be used for special character if it is followed by two hex chars.  (e.g. "\31" will be translated as "1", and "\ZYX" will be unchanged: "\ZYX")
+The first element identifies the entity type.
+Any whitespace before or after any commas is ignored.  Trailing whitespace at the end of a line is also ignored.  Escapes can be used to include whitespace (e.g. "  \31foo" for " foo").
+
+Entities
+map, string name, string title, string description, string authors, string version, integer version - the result is undefined if multiple map entities exist.  The concept of the "map" entity is similar to Quake's "worldspawn" entity.
+wall, integer quad, double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, string texture, integer level / layer of wall
+teleporter, string name, string targetName, double x1, double y1
+playerSpawnPoint, double x1, double y1
+powerupSpawnPoint, double x1, double y1, string stringPowerupsToEnable - stringPowerupsToEnable will be searched for and will be tested if it has the name of any powerups
+
 TankCompiledMap (compiled TankRawMap)
 format:
 
@@ -31,7 +44,6 @@ format:
 6th-10th is Sint32 magic number
 11th byte is Uint8 (char) version
 --
-4 bytes map version sint
 64 bytes unique name
 64 bytes title
 64 bytes description
@@ -43,7 +55,7 @@ format:
 4 bytes number of playerSpawnPoints
 4 bytes number of powerupSpawnPoints
 walls, ...
- -4 bytes id (unique to every other entity's id too)
+ -4 bytes id (unique only to other walls)
  -1 byte: if non-zero, the 4th coordinates are used
  -8 bytes x1 double float
  -8 bytes y1 double float
