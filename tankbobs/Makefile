@@ -91,7 +91,7 @@ tankbobslib : tstr
 	$(CC) -o tankbobs.so $(CCMODULEFLAGS) $(CFLAGS) $(INCLUDES) $(COMMONSRCS) $(SHAREDSRCS) $(LIBSRCS) $(LIBS)
 
 tcm : trmc
-	./trmc -noprompt $(TRMS)
+	./trmc $(TRMS)
 
 server : tstr
 	$(LC) $(LFLAGS) -o ./server $(SERVEROBJS) $(COMMONOBJS)

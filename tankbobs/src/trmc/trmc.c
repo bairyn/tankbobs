@@ -24,9 +24,6 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <stdio.h>
-#include <iostream.h>
-#include <fstream.h>
-#include <string.h>
 
 #include <SDL/SDL_endian.h>
 
@@ -38,7 +35,7 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 #define MAX_STRING_STRUCT_CHARS 256
 #define MAX_LINE_SIZE 1024
 
-static int m_force = 0;  // force overwriting compiled maps
+static int m_force = 0;  /* force overwriting compiled maps */
 
 static char *read_line = NULL;
 static int read_pos = 0;
@@ -212,7 +209,7 @@ static void put_cchar(FILE *fout, const char c)
 static void put_str(FILE *fout, const char *s, int l)
 {
 	while(l--)
-		put_char(s++);
+		put_char(fout, s++);
 }
 
 static char read_getChar(char **p)
@@ -256,7 +253,7 @@ static char read_getChar(char **p)
 			return 0x10 * (c - 'a' + 0x0A) + hex;
 		}
 	}
-	//else
+	/* else */
 	return *((*p)++);
 }
 
@@ -274,7 +271,7 @@ static int read_int(void)
 		exit(1);
 	}
 
-	// set position to the first character after the comma
+	/* set position to the first character after the comma */
 	for(i = 0; i < read_pos; i++)
 	{
 		while(*p && p - read_line < MAX_LINE_SIZE)
@@ -296,7 +293,7 @@ static int read_int(void)
 		}
 	}
 
-	// check for overflows
+	/* check for overflows */
 	p2 = p;
 
 	while(*p2++)
@@ -308,12 +305,12 @@ static int read_int(void)
 		}
 	}
 
-	// skip whitespace
+	/* skip whitespace */
 	while(*p == ' ' || *p == '\t') p++;
 
-	// read the integer
+	/* read the integer */
 
-	// read the signs
+	/* read the signs */
 	while(*p == '+' || *p == '-')
 		if(*p++ == '-')
 			sign = -sign;
@@ -339,15 +336,15 @@ static double read_double(void)
 	double sign = 1;
 	double value = 0;
 	double fraction = 0;
-	bool decimal = 0;
+	char decimal = 0;
 
 	if(!read_line)
 	{
-		fprintf(stderr, "Error: read_int() called before read_reset()\n");
+		fprintf(stderr, "Error: read_double() called before read_reset()\n");
 		exit(1);
 	}
 
-	// set position to the first character after the comma
+	/* set position to the first character after the comma */
 	for(i = 0; i < read_pos; i++)
 	{
 		while(*p && p - read_line < MAX_LINE_SIZE)
@@ -369,7 +366,7 @@ static double read_double(void)
 		}
 	}
 
-	// check for overflows
+	/* check for overflows */
 	p2 = p;
 
 	while(*p2++)
@@ -381,12 +378,12 @@ static double read_double(void)
 		}
 	}
 
-	// skip whitespace
+	/* skip whitespace */
 	while(*p == ' ' || *p == '\t') p++;
 
-	// read the double
+	/* read the double */
 
-	// read the signs
+	/* read the signs */
 	while(*p == '+' || *p == '-')
 		if(*p++ == '-')
 			sign = -sign;
@@ -433,11 +430,11 @@ static void read_string(char *s)
 
 	if(!read_line)
 	{
-		fprintf(stderr, "Error: read_int() called before read_reset()\n");
+		fprintf(stderr, "Error: read_string() called before read_reset()\n");
 		exit(1);
 	}
 
-	// set position to the first character after the comma
+	/* set position to the first character after the comma */
 	for(i = 0; i < read_pos; i++)
 	{
 		while(*p && p - read_line < MAX_LINE_SIZE)
@@ -459,7 +456,7 @@ static void read_string(char *s)
 		}
 	}
 
-	// check for overflows
+	/* check for overflows */
 	p2 = p;
 
 	while(*p2++)
@@ -471,15 +468,10 @@ static void read_string(char *s)
 		}
 	}
 
-	// skip whitespace
+	/* skip whitespace */
 	while(*p == ' ' || *p == '\t') p++;
 
-	// read the integer
-
-	// read the signs
-	while(*p == '+' || *p == '-')
-		if(*p++ == '-')
-			sign = -sign;
+	/* read the string */
 
 	i = s[0] = 0;
 
@@ -492,7 +484,7 @@ static void read_string(char *s)
 		c = read_getChar(&p);
 	}
 
-	// strip trailing whitespace
+	/* strip trailing whitespace */
 	while(i > 0 && (s[i] == ' ' || s[i] == '\t'))
 	{
 		s[i--] - 0;
@@ -509,8 +501,10 @@ static int read_reset(char *line)
 	if(!line)
 	{
 		fprintf(stderr, "Error: invalid line passed to read_reset\n");
-		exit(1);
+		return 0;
 	}
+
+	return 1;
 }
 
 #define MAX_MAPS 1
@@ -542,7 +536,7 @@ static struct wall_s
 	double y3;
 	double x4;
 	double y4;
-	char texture[256];  // hardcoded for format
+	char texture[256];  /* hardcoded for format */
 	int level;
 } walls[MAX_WALLS];
 
@@ -578,7 +572,7 @@ static int oc = 0;
 
 static void add_map(char *name, char *title, char *description, char *version_s, int version)
 {
-	map_t *map = maps[mc++];
+	map_t *map = &maps[mc++];
 
 	if(mc >= MAX_MAPS)
 	{
@@ -588,14 +582,14 @@ static void add_map(char *name, char *title, char *description, char *version_s,
 
 	strncpy(map->name, name, sizeof(map->name));
 	strncpy(map->title, title, sizeof(map->title));
-	strncpy(map->description_s, description_s, sizeof(map->description_s));
-	strncpy(map->version, version, sizeof(map->version));
+	strncpy(map->description, description, sizeof(map->description));
+	strncpy(map->version_s, version_s, sizeof(map->version_s));
 	map->version = version;
 }
 
 static void add_wall(int quad, double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, char *texture, int level)
 {
-	wall_t *wall = walls[wc++];
+	wall_t *wall = &walls[wc++];
 
 	if(wc >= MAX_WALLS)
 	{
@@ -618,7 +612,7 @@ static void add_wall(int quad, double x1, double y1, double x2, double y2, doubl
 
 static void add_teleporter(char *name, char *targetName, double x1, double y1)
 {
-	teleporter_t *teleporter = teleporters[tc++];
+	teleporter_t *teleporter = &teleporters[tc++];
 
 	if(tc >= MAX_TELEPORTERS)
 	{
@@ -634,7 +628,7 @@ static void add_teleporter(char *name, char *targetName, double x1, double y1)
 
 static void add_playerSpawnPoint(double x1, double y1)
 {
-	playerSpawnPoint_t *playerSpawnPoint = playerSpawnPoints[lc++];
+	playerSpawnPoint_t *playerSpawnPoint = &playerSpawnPoints[lc++];
 
 	if(lc >= MAX_PLAYERSPAWNPOINTS)
 	{
@@ -648,7 +642,7 @@ static void add_playerSpawnPoint(double x1, double y1)
 
 static void add_powerupSpawnPoint(double x1, double y1, char *powerupsToEnable)
 {
-	powerupSpawnPoint_t *powerupSpawnPoint = powerupSpawnPoints[oc++];
+	powerupSpawnPoint_t *powerupSpawnPoint = &powerupSpawnPoints[oc++];
 
 	if(oc >= MAX_POWERUPSPAWNPOINTS)
 	{
@@ -658,17 +652,15 @@ static void add_powerupSpawnPoint(double x1, double y1, char *powerupsToEnable)
 
 	powerupSpawnPoint->x1 = x1;
 	powerupSpawnPoint->y1 = y1;
-	strncpy(teleporter->name, name, sizeof(teleporter->name));
 	strncpy(powerupSpawnPoint->powerupsToEnable, powerupsToEnable, sizeof(powerupSpawnPoint->powerupsToEnable));
 }
 
 static int compile(const char *filename)
 {
-	int tmp;
 	char c;
 	char tcmFilenameBuf[TCM_FILENAME_BUF_SIZE];
 	char *tcmFilename = tcmFilenameBuf;
-	int tcmAllocated = 0;  // see if we need to free the memory
+	int tcmAllocated = 0;  /* see if we need to free the memory */
 	char *p;
 	FILE *fin;
 	FILE *fout;
@@ -685,22 +677,22 @@ static int compile(const char *filename)
 	if(strlen(filename) + strlen(".tcm") + 1 > sizeof(tcmFilenameBuf))
 	{
 		tcmAllocated = 1;
-		tcmFilename = calloc(sizeof(char), strlen(filename) + strlen(".tcm") + 1);  // not enough room for tcm filename, so allocate more memory for it
+		tcmFilename = calloc(sizeof(char), strlen(filename) + strlen(".tcm") + 1);  /* not enough room for tcm filename, so allocate more memory for it */
 	}
 
 	strcpy(tcmFilename, filename);
 
-	// change .trm to .tcm or else append .tcm
+	/* change .trm to .tcm or else append .tcm */
 	p = tcmFilename;
 	while(*p) p++;
-	if(((int) p - tcmFilename) > strlen(".tcm") + 1 && *(p - 4) == '.' && *(p - 3) == 't' && *(p - 2) == 'r' && *(p - 1) == 'm')  // NOTE: strlen(...) _+ 1_ doesn't match ".tcm" exactly (we don't want to match hidden files)
+	if((p - tcmFilename) > strlen(".tcm") + 1 && *(p - 4) == '.' && *(p - 3) == 't' && *(p - 2) == 'r' && *(p - 1) == 'm')  /* NOTE: strlen(...) _+ 1_ doesn't match ".tcm" exactly (we don't want to match hidden files) */
 	{
-		// filename ends in .trm; change tcmFilename to .tcm
+		/* filename ends in .trm; change tcmFilename to .tcm */
 		*(p - 2) = 'c';
 	}
 	else
 	{
-		// append .tcm
+		/* append .tcm */
 		*p++ = '.';
 		*p++ = 't';
 		*p++ = 'c';
@@ -708,9 +700,9 @@ static int compile(const char *filename)
 		*p++ = 0;
 	}
 
-	// we have the filename for the input and ouput files, so open the streams
+	/* we have the filename for the input and ouput files, so open the streams */
 
-	// first check we aren't overwriting anything undesirablely
+	/* first check we aren't overwriting anything undesirablely */
 	fout = fopen(tcmFilename, "rb");
 	if(fout)
 	{
@@ -734,7 +726,7 @@ static int compile(const char *filename)
 		return 0;
 	}
 
-	// read map and store all of map into memory
+	/* read map and store all of map into memory */
 	while((c = fgetc(fin)) != EOF)
 	{
 		if(c == '\n')
@@ -745,13 +737,13 @@ static int compile(const char *filename)
 
 				if(!read_reset(line))
 				{
-					fprintf(stderr);
-					fclosef(fin);
+					fprintf(stderr, "Error reading file: '%s'\n", filename);
+					fclose(fin);
 					return 0;
 				}
 
-				read_string(line, entity);
-				if(strncmp(entity, "map") == 0)
+				read_string(entity);
+				if(strncmp(entity, "map", sizeof(entity)) == 0)
 				{
 					char name[MAX_STRING_SIZE];
 					char title[MAX_STRING_SIZE];
@@ -759,15 +751,15 @@ static int compile(const char *filename)
 					char version_s[MAX_STRING_SIZE];
 					int version;
 
-					 read_string(name);
-					 read_string(title);
-					 read_string(description);
-					 read_string(version_s);
-					 version = read_int();
+					read_string(name);
+					read_string(title);
+					read_string(description);
+					read_string(version_s);
+					version = read_int();
 
 					add_map(name, title, description, version_s, version);
 				}
-				else if(strncmp(entity, "wall") == 0)
+				else if(strncmp(entity, "wall", sizeof(entity)) == 0)
 				{
 					int quad;
 					double x1, y1;
@@ -787,11 +779,11 @@ static int compile(const char *filename)
 					x4 = read_double();
 					y4 = read_double();
 					read_string(texture);
-					level = read_string(line);
+					level = read_int();
 
 					add_wall(quad, x1, y1, x2, y2, x3, y3, x4, y4, texture, level);
 				}
-				else if(strncmp(entity, "teleporter") == 0)
+				else if(strncmp(entity, "teleporter", sizeof(entity)) == 0)
 				{
 					char name[MAX_STRING_SIZE];
 					char targetName[MAX_STRING_SIZE];
@@ -804,7 +796,7 @@ static int compile(const char *filename)
 
 					add_teleporter(name, targetName, x1, y1);
 				}
-				else if(strncmp(entity, "playerSpawnPoint") == 0)
+				else if(strncmp(entity, "playerSpawnPoint", sizeof(entity)) == 0)
 				{
 					double x1, y1;
 
@@ -813,7 +805,7 @@ static int compile(const char *filename)
 
 					add_playerSpawnPoint(x1, y1);
 				}
-				else if(strncmp(entity, "powerupSpawnPoint") == 0)
+				else if(strncmp(entity, "powerupSpawnPoint", sizeof(entity)) == 0)
 				{
 					double x1, y1;
 					char powerupsToEnable[MAX_STRING_SIZE];
@@ -826,7 +818,7 @@ static int compile(const char *filename)
 				}
 				else
 				{
-					fclosef(fin);
+					fclose(fin);
 					if(tcmAllocated)
 						free(tcmFilename);
 					fprintf(stderr, "Unknown entity when reading '%s': '%s'\n", filename, entity);
@@ -859,14 +851,14 @@ static int compile(const char *filename)
 		return 0;
 	}
 
-	// header
-	put_char(fout, 0x00);
-	put_char(fout, 0x54);
-	put_char(fout, 0x43);
-	put_char(fout, 0x4D);
-	put_char(fout, 0x01);
+	/* header */
+	put_cchar(fout, 0x00);
+	put_cchar(fout, 0x54);
+	put_cchar(fout, 0x43);
+	put_cchar(fout, 0x4D);
+	put_cchar(fout, 0x01);
 	put_cint(fout, MAGIC);
-	put_char(fout, VERSION);
+	put_cchar(fout, VERSION);
 
 	put_str(fout, maps[0].name, 64);
 	put_str(fout, maps[0].title, 64);
@@ -895,7 +887,7 @@ static int compile(const char *filename)
 		put_cdouble(fout, wall->x4);
 		put_cdouble(fout, wall->y4);
 		put_str(fout, wall->texture, 256);
-		put_int(fout, wall->level);
+		put_cint(fout, wall->level);
 	}
 
 	for(i = 0; i < tc; i++)
@@ -903,7 +895,7 @@ static int compile(const char *filename)
 		int id = 0;
 		teleporter_t *teleporter = &teleporters[i];
 
-		// find the target
+		/* find the target */
 		for(j = 0; j < tc; j++)
 		{
 			teleporter_t *teleporter2 = &teleporters[j];
@@ -917,8 +909,8 @@ static int compile(const char *filename)
 
 		put_cint(fout, i);
 		put_cint(fout, id);
-		put_cdouble(fout, wall->x1);
-		put_cdouble(fout, wall->y1);
+		put_cdouble(fout, teleporter->x1);
+		put_cdouble(fout, teleporter->y1);
 	}
 
 	for(i = 0; i < lc; i++)
@@ -935,11 +927,11 @@ static int compile(const char *filename)
 		int powerups[16] = {0};
 		powerupSpawnPoint_t *powerupSpawnPoint = &powerupSpawnPoints[i];
 
-		if(strstr(powerupSpawnPoint, "foo"))
+		if(strstr(powerupSpawnPoint->powerupsToEnable, "foo"))
 		{
 			powerups[0] |= 0x00000001;
 		}
-		if(strstr(powerupSpawnPoint, "bar"))
+		if(strstr(powerupSpawnPoint->powerupsToEnable, "bar"))
 		{
 			powerups[0] |= 0x00000002;
 		}
@@ -963,16 +955,17 @@ static int compile(const char *filename)
 
 int main(int argc, char **argv)
 {
+	int i;
 	int force = 0;
 
-	// parse the options first
+	/* parse the options first */
 	for(i = 0; i < argc; i++)
 	{
 		if(argv[i][0] == '-')
 		{
 			if(argv[i][1] == '-')
 			{
-				// continue parsing filenames
+				/* continue parsing filenames */
 				force = i + 1;
 				break;
 			}
@@ -994,7 +987,7 @@ int main(int argc, char **argv)
 		}
 	}
 
-	// parse the filenames
+	/* parse the filenames */
 	for(i = force; i < argc; i++)
 	{
 		if(force || argv[i][0] != '-')
@@ -1005,6 +998,22 @@ int main(int argc, char **argv)
 				return 1;
 			}
 		}
+	}
+
+	if(0)
+	{
+		/* unused function warning */
+		put_double(NULL, NULL);
+		put_float(NULL, NULL);
+		put_int(NULL, NULL);
+		put_short(NULL, NULL);
+		put_char(NULL, NULL);
+		put_cdouble(NULL, 0);
+		put_cfloat(NULL, 0);
+		put_cint(NULL, 0);
+		put_cshort(NULL, 0);
+		put_cchar(NULL, 0);
+		put_str(NULL, NULL, 0);
 	}
 
 	return 0;
