@@ -15,9 +15,7 @@ int  trm_keypress(int key, bool initial, QKeyEvent *e);
 int  trm_keyrelease(int key, QKeyEvent *e);
 
 //#define TEMAXBUF 1024
-#define TEMAXBUF 100000  // big ugly buffer for storing an entire file
-#define NOVALUEDOUBLE  1.5e307
-#define NOVALUE -214783646 /* must be non-zero */
+#define TEMAXBUF 100000
 #define GRIDSIZE 100.0
 #define GRIDLINES 4  // approximate number of grid lines drawn on each side
 #define ZOOMFACTOR 0.02  // 2% per pixel

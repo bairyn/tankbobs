@@ -37,7 +37,7 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 
 static int m_force = 0;  /* force overwriting compiled maps */
 
-static char *read_line = NULL;
+static const char *read_line = NULL;
 static int read_pos = 0;
 
 static void put_double(FILE *fout, const double *d)
@@ -212,7 +212,7 @@ static void put_str(FILE *fout, const char *s, int l)
 		put_char(fout, s++);
 }
 
-static char read_getChar(char **p)
+static char read_getChar(const char **p)
 {
 	char c;
 	char hex;
@@ -493,7 +493,7 @@ static void read_string(char *s)
 	read_pos++;
 }
 
-static int read_reset(char *line)
+static int read_reset(const char *line)
 {
 	read_line = line;
 	read_pos = 0;

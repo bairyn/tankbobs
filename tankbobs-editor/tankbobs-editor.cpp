@@ -16,7 +16,7 @@ extern vector<entities::PlayerSpawnPoint *>  playerSpawnPoint;
 extern vector<entities::PowerupSpawnPoint *> powerupSpawnPoint;
 extern vector<entities::Teleporter *>        teleporter;
 extern vector<entities::Wall *>              wall;
-extern vector<void *> selection;
+//extern vector<void *> selection;
 
 char order = 0;
 
@@ -397,7 +397,7 @@ void Editor::mouseMoveEvent(QMouseEvent *e)
 
 		if(e->buttons() & Qt::MidButton)
 		{
-			double tmp = zoom;
+			//double tmp = zoom;
 			double z = zoom + ZOOMFACTOR * (y_last_zoom - e->y());
 			y_last_zoom = e->y();
 			zoom += zoom * zoom * (z - zoom) * ZOOMQUADFACTOR;
@@ -407,7 +407,7 @@ void Editor::mouseMoveEvent(QMouseEvent *e)
 				zoom = MAXZOOM;
 			if(x_scroll < SMALL && x_scroll > -SMALL) x_scroll = SMALL;
 			if(y_scroll < SMALL && y_scroll > -SMALL) y_scroll = SMALL;
-			//x_scroll += (tmp - zoom) / x_scroll;  // I have no idea how to implement this.  TODO
+			//x_scroll += (tmp - zoom) / x_scroll;
 			//y_scroll += (tmp - zoom) / y_scroll;
 		}
 	}
@@ -500,15 +500,15 @@ static void drawWalls(void)
 		glPushAttrib(GL_POLYGON_BIT | GL_CURRENT_BIT);
 			glPushMatrix();
 				double ax, ay;
-				ax = ((e->x4 == NOVALUEDOUBLE || e->y4 == NOVALUEDOUBLE) ? ((e->x1 + e->x2 + e->x3) / 3) : ((e->x1 + e->x2 + e->x3 + e->x4) / 4));
-				ay = ((e->x4 == NOVALUEDOUBLE || e->y4 == NOVALUEDOUBLE) ? ((e->y1 + e->y2 + e->y3) / 3) : ((e->y1 + e->y2 + e->y3 + e->y4) / 4));
+				ax = ((!e->quad) ? ((e->x1 + e->x2 + e->x3) / 3) : ((e->x1 + e->x2 + e->x3 + e->x4) / 4));
+				ay = ((!e->quad) ? ((e->y1 + e->y2 + e->y3) / 3) : ((e->y1 + e->y2 + e->y3 + e->y4) / 4));
 				glTranslated(ax, ay, 0.0);
 				if(e == reinterpret_cast<void *>(selection))
 				{
 					glScaled(1.1 / zoom, 1.1 / zoom, 1.0);
 					glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 					glColor4d(1.0, 0.0, 0.0, 1.0);
-					if(e->x4 == NOVALUEDOUBLE || e->y4 == NOVALUEDOUBLE)
+					if(!e->quad)
 					{
 						glBegin(GL_TRIANGLES);
 							glVertex2d(ax - e->x1, e->y1);
@@ -528,7 +528,7 @@ static void drawWalls(void)
 					// - draw in red
 					glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 					glColor4d(1.0, 0.0, 0.0, 1.0);
-					if(e->x4 == NOVALUEDOUBLE || e->y4 == NOVALUEDOUBLE)
+					if(!e->quad)
 					{
 						glBegin(GL_TRIANGLES);
 							glVertex2d(ax - e->x1, ay - e->y1);
@@ -562,7 +562,7 @@ static void drawWalls(void)
 							glTranslated(ax - e->x1, ay - e->y3, 0.0);
 							drawCircle(3.0 / zoom);
 						glPopMatrix();
-						if(e->x4 == NOVALUEDOUBLE || e->y4 == NOVALUEDOUBLE)
+						if(e->quad)
 						{
 							glPushMatrix();
 								glTranslated(ax - e->x4, ay - e->y4, 0.0);
@@ -574,7 +574,7 @@ static void drawWalls(void)
 				else
 				{
 					glColor4d(1.0, 0.0, 0.0, 1.0);
-					if(e->x4 == NOVALUEDOUBLE || e->y4 == NOVALUEDOUBLE)
+					if(e->quad)
 					{
 						glBegin(GL_TRIANGLES);
 							glVertex2d(ax - e->x1, ay - e->y1);
