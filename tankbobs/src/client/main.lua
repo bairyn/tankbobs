@@ -48,16 +48,16 @@ function main_init()
 				if tankbobs.in_getEventData(lastevent, "type") == "quit" then
 					done = true
 				elseif tankbobs.in_getEventData(lastevent, "type") == "video" then
-					config_set("config.video.width", tankbobs.in_getEventData(lastevent, "intData0"))
-					config_set("config.video.height", tankbobs.in_getEventData(lastevent, "intData1"))
+					config_set("config.renderer.width", tankbobs.in_getEventData(lastevent, "intData0"))
+					config_set("config.renderer.height", tankbobs.in_getEventData(lastevent, "intData1"))
 					renderer_updateWindow()
 				elseif tankbobs.in_getEventData(lastevent, "type") == "video_focus" then
 					video_updateWindow()
 				elseif tankbobs.in_getEventData(lastevent, "type") == "mousedown" then
 					local x, y = tankbobs.in_getEventData(lastevent, "intData1"), tankbobs.in_getEventData(lastevent, "intData2")
-					y = c_config_get("config.video.height") - y
-					x = 100 * x / c_config_get("config.video.width")
-					y = 100 * y / c_config_get("config.video.height")
+					y = c_config_get("config.renderer.height") - y
+					x = 100 * x / c_config_get("config.renderer.width")
+					y = 100 * y / c_config_get("config.renderer.height")
 					if tankbobs.in_getEventData(lastevent, "intData0") >= 1 and tankbobs.in_getEventData(lastevent, "intData0") <= 5 then
 						c_state_click(tankbobs.in_getEventData(lastevent, "intData0"), 1, x, y)
 					else
@@ -65,9 +65,9 @@ function main_init()
 					end
 				elseif tankbobs.in_getEventData(lastevent, "type") == "mouseup" then
 					local x, y = tankbobs.in_getEventData(lastevent, "intData1"), tankbobs.in_getEventData(lastevent, "intData2")
-					y = c_config_get("config.video.height") - y
-					x = 100 * x / c_config_get("config.video.width")
-					y = 100 * y / c_config_get("config.video.height")
+					y = c_config_get("config.renderer.height") - y
+					x = 100 * x / c_config_get("config.renderer.width")
+					y = 100 * y / c_config_get("config.renderer.height")
 					if tankbobs.in_getEventData(lastevent, "intData0") >= 1 and tankbobs.in_getEventData(lastevent, "intData0") <= 5 then
 						c_state_click(tankbobs.in_getEventData(lastevent, "intData0"), 0, x, y)
 					else
@@ -80,9 +80,9 @@ function main_init()
 				elseif tankbobs.in_getEventData(lastevent, "type") == "mousemove" then
 					local x, y, xrel, yrel = tankbobs.in_getEventData(lastevent, "intData0"), tankbobs.in_getEventData(lastevent, "intData1"), tankbobs.in_getEventData(lastevent, "intData2"), tankbobs.in_getEventData(lastevent, "intData3")
 					yrel = -yrel
-					y = c_config_get("config.video.height") - y
-					x = 100 * x / c_config_get("config.video.width")
-					y = 100 * y / c_config_get("config.video.height")
+					y = c_config_get("config.renderer.height") - y
+					x = 100 * x / c_config_get("config.renderer.width")
+					y = 100 * y / c_config_get("config.renderer.height")
 					c_state_mouse(x, y, xrel, yrel)
 				end
 				lastevent = tankbobs.in_nextEvent(lastevent)

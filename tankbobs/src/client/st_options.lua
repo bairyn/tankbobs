@@ -24,7 +24,7 @@ configuration screen
 --]]
 
 function st_options_init()
-	options_video = c_config_backup("config.video")
+	options_video = c_config_backup("config.renderer")
 	local fullscreen =
 	{
 		{"No",  st_options_fullscreen},
@@ -40,18 +40,18 @@ function st_options_init()
 		{"1024x1024", st_options_resolution}
 	}
 	local function fullscreend()
-		return c_config_get("config.video.fullscreen") == 0 and "No" or "Yes"
+		return c_config_get("config.renderer.fullscreen") == 0 and "No" or "Yes"
 	end
 	local function resolutiond()
-		if c_config_get("config.video.width") == 320 and c_config_get("config.video.height") == 200 then
+		if c_config_get("config.renderer.width") == 320 and c_config_get("config.renderer.height") == 200 then
 			return "320x200"
-		elseif c_config_get("config.video.width") == 640 and c_config_get("config.video.height") == 480 then
+		elseif c_config_get("config.renderer.width") == 640 and c_config_get("config.renderer.height") == 480 then
 			return "640x480"
-		elseif c_config_get("config.video.width") == 800 and c_config_get("config.video.height") == 600 then
+		elseif c_config_get("config.renderer.width") == 800 and c_config_get("config.renderer.height") == 600 then
 			return "800x600"
-		elseif c_config_get("config.video.width") == 1024 and c_config_get("config.video.height") == 768 then
+		elseif c_config_get("config.renderer.width") == 1024 and c_config_get("config.renderer.height") == 768 then
 			return "1024x768"
-		elseif c_config_get("config.video.width") == 1024 and c_config_get("config.video.height") == 1024 then
+		elseif c_config_get("config.renderer.width") == 1024 and c_config_get("config.renderer.height") == 1024 then
 			return "1024x1024"
 		else
 			return "Custom"
@@ -105,42 +105,42 @@ function st_options_step()
 end
 
 function st_options_back()
-	c_config_restore("config.video", options_video)
+	c_config_restore("config.renderer", options_video)
 	options_video = nil
 	c_state_advance()
 end
 
 function st_options_fullscreen(v)
 	if v == "Yes" then
-		c_config_set("config.video.fullscreen", 1)
+		c_config_set("config.renderer.fullscreen", 1)
 	elseif v == "No" then
-		c_config_set("config.video.fullscreen", 0)
+		c_config_set("config.renderer.fullscreen", 0)
 	end
 end
 
 function st_options_resolution(v)
 	if v == "320x200" then
-		c_config_set("config.video.width", 320)
-		c_config_set("config.video.height", 200)
+		c_config_set("config.renderer.width", 320)
+		c_config_set("config.renderer.height", 200)
 	elseif v == "640x480" then
-		c_config_set("config.video.width", 640)
-		c_config_set("config.video.height", 480)
+		c_config_set("config.renderer.width", 640)
+		c_config_set("config.renderer.height", 480)
 	elseif v == "800x600" then
-		c_config_set("config.video.width", 800)
-		c_config_set("config.video.height", 600)
+		c_config_set("config.renderer.width", 800)
+		c_config_set("config.renderer.height", 600)
 	elseif v == "1024x768" then
-		c_config_set("config.video.width", 1024)
-		c_config_set("config.video.height", 768)
+		c_config_set("config.renderer.width", 1024)
+		c_config_set("config.renderer.height", 768)
 	elseif v == "1024x1024" then
-		c_config_set("config.video.width", 1024)
-		c_config_set("config.video.height", 1024)
+		c_config_set("config.renderer.width", 1024)
+		c_config_set("config.renderer.height", 1024)
 	end
 end
 
 function st_options_apply()
-	options_video = c_config_backup("config.video")
+	options_video = c_config_backup("config.renderer")
 	renderer_updateWindow()  -- in case SDL forgets to send a resize signal
-	tankbobs.r_newWindow(c_config_get("config.video.width"), c_config_get("config.video.height"), not not (c_config_get("config.video.fullscreen") and c_config_get("config.video.fullscreen") > 0), c_const_get("title"), c_const_get("icon"))
+	tankbobs.r_newWindow(c_config_get("config.renderer.width"), c_config_get("config.renderer.height"), not not (c_config_get("config.renderer.fullscreen") and c_config_get("config.renderer.fullscreen") > 0), c_const_get("title"), c_const_get("icon"))
 end
 
 options_state =
