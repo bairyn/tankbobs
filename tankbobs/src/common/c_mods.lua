@@ -89,7 +89,7 @@ function common_clone_except_special(i, o, e)
 							common_clone_except(_G, c_mods_env, c_const_get("hidden_globals"))
 							c_mods_env._G = false
 						end
-						setfenv_f(do_f, c_mods_env)
+						setfenv(do_f, c_mods_env)
 
 						local result = {do_f(...)}
 
@@ -101,8 +101,6 @@ function common_clone_except_special(i, o, e)
 
 							common_clone_except_special(c_mods_env, _G, c_const_get("protected_globals"))
 						end
-
-						setfenv = setfenv_f
 
 						return unpack(result)
 					end
@@ -155,7 +153,7 @@ function c_mods_load(dir)
 			common_print("Running mod: " .. v[1])
 		end
 
-		setfenv_f(v[2], c_mods_env)
+		setfenv(v[2], c_mods_env)
 		local status, err = pcall(v[2])
 
 		if not status then
@@ -173,8 +171,6 @@ function c_mods_load(dir)
 
 	c_mods_data_load()
 	c_mods_body()
-
-	setfenv = setfenv_f
 end
 
 function c_mods_data_load()  -- redefine some constants
