@@ -259,7 +259,7 @@ static char read_getChar(const char **p)
 
 static int read_int(void)
 {
-	char *p = read_line, *p2;
+	const char *p = read_line, *p2;
 	int i;
 	char c;
 	int sign = 1;
@@ -332,7 +332,7 @@ static int read_int(void)
 
 static double read_double(void)
 {
-	char *p = read_line, *p2;
+	const char *p = read_line, *p2;
 	int i;
 	char c;
 	double sign = 1;
@@ -428,7 +428,7 @@ static double read_double(void)
 
 static void read_string(char *s)
 {
-	char *p = read_line, *p2;
+	const char *p = read_line, *p2;
 	int i;
 	char c;
 
@@ -613,7 +613,7 @@ static void add_wall(int quad, double x1, double y1, double x2, double y2, doubl
 	wall->level = level;
 }
 
-static void add_teleporter(char *name, char *targetName, double x1, double y1)
+static void add_teleporter(const char *name, const char *targetName, double x1, double y1)
 {
 	teleporter_t *teleporter = &teleporters[tc++];
 
@@ -643,7 +643,7 @@ static void add_playerSpawnPoint(double x1, double y1)
 	playerSpawnPoint->y1 = y1;
 }
 
-static void add_powerupSpawnPoint(double x1, double y1, char *powerupsToEnable)
+static void add_powerupSpawnPoint(double x1, double y1, const char *powerupsToEnable)
 {
 	powerupSpawnPoint_t *powerupSpawnPoint = &powerupSpawnPoints[oc++];
 
