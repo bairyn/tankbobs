@@ -72,7 +72,7 @@ void trm_clearAndSetSelected(void *e)
 #endif
 }
 
-static void trm_private_modifyAttempted()
+void trm_modifyAttempted()
 {
 	window->statusAppend("Modify attempted in read-only mode");
 }
@@ -534,7 +534,7 @@ bool trm_save(const char *filename)
 {
 	if(config_get_int(c_noModify))
 	{
-		trm_private_modifyAttempted();
+		trm_modifyAttempted();
 		return false;
 	}
 
@@ -756,7 +756,7 @@ void trm_newPlayerSpawnPoint(int x, int y)
 {
 	if(config_get_int(c_noModify))
 	{
-		trm_private_modifyAttempted();
+		trm_modifyAttempted();
 		return;
 	}
 
@@ -770,7 +770,7 @@ void trm_newPowerupSpawnPoint(int x, int y)
 {
 	if(config_get_int(c_noModify))
 	{
-		trm_private_modifyAttempted();
+		trm_modifyAttempted();
 		return;
 	}
 
@@ -784,7 +784,7 @@ void trm_newTeleporter(int x, int y)
 {
 	if(config_get_int(c_noModify))
 	{
-		trm_private_modifyAttempted();
+		trm_modifyAttempted();
 		return;
 	}
 
@@ -798,7 +798,7 @@ void trm_newWall(int xs, int ys, int xe, int ye)
 {
 	if(config_get_int(c_noModify))
 	{
-		trm_private_modifyAttempted();
+		trm_modifyAttempted();
 		return;
 	}
 
@@ -822,7 +822,7 @@ int trm_keypress(int key, bool initial, QKeyEvent *e)
 				{
 					if(config_get_int(c_noModify))
 					{
-						trm_private_modifyAttempted();
+						trm_modifyAttempted();
 						return 0;
 					}
 
@@ -838,7 +838,7 @@ int trm_keypress(int key, bool initial, QKeyEvent *e)
 				{
 					if(config_get_int(c_noModify))
 					{
-						trm_private_modifyAttempted();
+						trm_modifyAttempted();
 						return 0;
 					}
 
@@ -854,7 +854,7 @@ int trm_keypress(int key, bool initial, QKeyEvent *e)
 				{
 					if(config_get_int(c_noModify))
 					{
-						trm_private_modifyAttempted();
+						trm_modifyAttempted();
 						return 0;
 					}
 
@@ -870,7 +870,7 @@ int trm_keypress(int key, bool initial, QKeyEvent *e)
 				{
 					if(config_get_int(c_noModify))
 					{
-						trm_private_modifyAttempted();
+						trm_modifyAttempted();
 						return 0;
 					}
 

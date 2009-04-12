@@ -105,7 +105,7 @@ Properties::Properties(QWidget *parent)
 	connect(targetName, SIGNAL(textChanged(const QString &)), this, SLOT(targetNameChanged(const QString &)));
 	connect(powerups, SIGNAL(textChanged(const QString &)), this, SLOT(powerupsChanged(const QString &)));
 	connect(fourVertices, SIGNAL(stateChanged(int)), this, SLOT(fourVerticesChanged(int)));
-	connect(level, SIGNAL(textChanged(int)), this, SLOT(levelChanged(int)));
+	connect(level, SIGNAL(textChanged(const QString &)), this, SLOT(levelChanged(const QString &)));
 	connect(autoselect, SIGNAL(stateChanged(int)), this, SLOT(autoselectChanged(int)));
 	connect(nomodify, SIGNAL(stateChanged(int)), this, SLOT(nomodifyChanged(int)));
 	connect(autonotexture, SIGNAL(stateChanged(int)), this, SLOT(autonotextureChanged(int)));

@@ -13,6 +13,7 @@ void trm_newTeleporter(int x, int y);
 void trm_newWall(int xs, int ys, int xe, int ye);
 int  trm_keypress(int key, bool initial, QKeyEvent *e);
 int  trm_keyrelease(int key, QKeyEvent *e);
+void trm_modifyAttempted();
 
 //#define TEMAXBUF 1024
 #define TEMAXBUF 100000

@@ -18,11 +18,15 @@ extern vector<entities::Teleporter *>        teleporter;
 extern vector<entities::Wall *>              wall;
 //extern vector<void *> selection;
 
+double *x_selected = NULL, *y_selected = NULL;
+
 char order = 0;
 
 // TODO: implement queue for keyXLast, or handle it better
 static bool ctrl = false;
 static bool shift = false;
+// shift translates; control translates vertices.
+// with both selected, group select.
 static int keyPressLast = 0, keyReleaseLast = 0;
 static int entBase = 0, gridBase = 0;
 QString file = "";
@@ -292,20 +296,127 @@ int Editor::my(int y)
 
 void Editor::mousePressEvent(QMouseEvent *e)
 {
-	if(e->buttons() & Qt::MidButton)
-		y_last_zoom = e->y();
-
 	x_begin = x_end = mx(e->x());
 	y_begin = y_end = my(e->y());
 
-	if(e->modifiers() & Qt::ControlModifier)
-		ctrl = true;
-	else
-		ctrl = false;
-	if(e->modifiers() & Qt::ShiftModifier)
-		shift = true;
-	else
-		shift = false;
+	if(e->buttons() & Qt::MidButton)
+		y_last_zoom = e->y();
+
+	if(!((e->buttons() & Qt::RightButton) || (e->buttons() & Qt::MidButton) || (e->button() == Qt::RightButton) || (e->button() == Qt::MidButton)))
+	{
+		if(ctrl && shift)
+		{
+			// group select
+		}
+		else if(ctrl)
+		{
+			// translate vertices
+
+			// select nearest vertex
+			bool selected = x_selected || y_selected;
+			if(!selected)
+			for(vector<entities::PlayerSpawnPoint *>::iterator i = playerSpawnPoint.begin(); i != playerSpawnPoint.end(); ++i)
+			{
+				entities::PlayerSpawnPoint *e = *i;
+
+				if(trm_isSelected(e))
+				{
+					if(config_get_int(c_noModify))
+					{
+						trm_modifyAttempted();
+						return;
+					}
+
+					modified = true;
+
+					selected = true;
+				}
+			}
+			if(!selected)
+			for(vector<entities::PowerupSpawnPoint *>::iterator i = powerupSpawnPoint.begin(); i != powerupSpawnPoint.end(); ++i)
+			{
+				entities::PowerupSpawnPoint *e = *i;
+
+				if(trm_isSelected(e))
+				{
+					if(config_get_int(c_noModify))
+					{
+						trm_modifyAttempted();
+						return;
+					}
+
+					modified = true;
+
+					selected = true;
+				}
+			}
+			if(!selected)
+			for(vector<entities::Teleporter *>::iterator i = teleporter.begin(); i != teleporter.end(); ++i)
+			{
+				entities::Teleporter *e = *i;
+
+				if(trm_isSelected(e))
+				{
+					if(config_get_int(c_noModify))
+					{
+						trm_modifyAttempted();
+						return;
+					}
+
+					modified = true;
+
+					selected = true;
+				}
+			}
+			if(!selected)
+			for(vector<entities::Wall *>::iterator i = wall.begin(); i != wall.end(); ++i)
+			{
+				entities::Wall *e = *i;
+
+				if(trm_isSelected(e))
+				{
+					if(config_get_int(c_noModify))
+					{
+						trm_modifyAttempted();
+						return;
+					}
+
+					modified = true;
+
+					selected = true;
+
+					// find the nearest vertex
+					x_selected = &e->x1;
+					y_selected = &e->y1;
+					if(sqrt(pow(*x_selected - x_end, 2) + pow(*y_selected - y_end, 2)) < sqrt(pow(e->x2 - x_end, 2) + pow(e->y2 - y_end, 2)))
+					{
+						x_selected = &e->x2;
+						x_selected = &e->y2;
+					}
+					if(sqrt(pow(*x_selected - x_end, 2) + pow(*y_selected - y_end, 2)) < sqrt(pow(e->x3 - x_end, 2) + pow(e->y3 - y_end, 2)))
+					{
+						x_selected = &e->x3;
+						x_selected = &e->y3;
+					}
+					if(e->quad)
+					if(sqrt(pow(*x_selected - x_end, 2) + pow(*y_selected - y_end, 2)) < sqrt(pow(e->x4 - x_end, 2) + pow(e->y4 - y_end, 2)))
+					{
+						x_selected = &e->x4;
+						x_selected = &e->y4;
+					}
+				}
+			}
+
+		}
+		else if(shift)
+		{
+			// translate
+		}
+		else
+		{
+			// individual select or build
+		}
+	}
 }
 
 void Editor::mouseReleaseEvent(QMouseEvent *e)
@@ -313,41 +424,6 @@ void Editor::mouseReleaseEvent(QMouseEvent *e)
 	x_end = mx(e->x());
 	y_end = my(e->y());
 
-	if(!ctrl && !shift && !(e->buttons() & Qt::RightButton))
-	{
-		switch(selectionType)
-		{
-			case e_selectionNone:
-				trm_select(x_end - x_scroll, y_end - y_scroll);
-				break;
-
-			case e_selectionWall:
-				trm_newWall(x_begin - x_scroll, y_begin - y_scroll, x_end - x_scroll, y_end - y_scroll);
-				break;
-
-			case e_selectionPlayerSpawnPoint:
-				trm_newPlayerSpawnPoint(x_end - x_scroll, y_end - y_scroll);
-				break;
-
-			case e_selectionPowerupSpawnPoint:
-				trm_newPowerupSpawnPoint(x_end - x_scroll, y_end - y_scroll);
-				break;
-
-			case e_selectionTeleporter:
-				trm_newTeleporter(x_end - x_scroll, y_end - y_scroll);
-				break;
-
-			default:
-				QMessageBox::critical(this, "Entity type selection error", "The selected entity type was not recognized.");
-				fprintf(stderr, "The selected entity type was not recognized.\n");
-				this->exit();
-				break;
-		}
-
-		if(config_get_int(c_autoSelect))
-			selectionType = e_selectionNone;
-	}
-
 	if(e->modifiers() & Qt::ControlModifier)
 		ctrl = true;
 	else
@@ -357,17 +433,68 @@ void Editor::mouseReleaseEvent(QMouseEvent *e)
 	else
 		shift = false;
 
+	if(!((e->buttons() & Qt::RightButton) || (e->buttons() & Qt::MidButton) || (e->button() == Qt::RightButton) || (e->button() == Qt::MidButton)))
+	{
+		x_selected = NULL;
+		y_selected = NULL;
+
+		if(!ctrl && !shift)
+		{
+			switch(selectionType)
+			{
+				case e_selectionNone:
+					trm_select(x_end - x_scroll, y_end - y_scroll);
+					break;
+
+				case e_selectionWall:
+					trm_newWall(x_begin - x_scroll, y_begin - y_scroll, x_end - x_scroll, y_end - y_scroll);
+					break;
+
+				case e_selectionPlayerSpawnPoint:
+					trm_newPlayerSpawnPoint(x_end - x_scroll, y_end - y_scroll);
+					break;
+
+				case e_selectionPowerupSpawnPoint:
+					trm_newPowerupSpawnPoint(x_end - x_scroll, y_end - y_scroll);
+					break;
+
+				case e_selectionTeleporter:
+					trm_newTeleporter(x_end - x_scroll, y_end - y_scroll);
+					break;
+
+				default:
+					QMessageBox::critical(this, "Entity type selection error", "The selected entity type was not recognized.");
+					fprintf(stderr, "The selected entity type was not recognized.\n");
+					this->exit();
+					break;
+			}
+
+			if(config_get_int(c_autoSelect))
+				selectionType = e_selectionNone;
+		}
+	}
+
 	x_begin = -1;
 	y_begin = -1;
 }
 
 void Tankbobs_editor::keyPressEvent(QKeyEvent *e)
 {
+	if(e->key() == Qt::Key_Control)
+		ctrl = true;
+	if(e->key() == Qt::Key_Shift)
+		shift = true;
+
 	keyPressLast = trm_keypress(e->key(), !e->isAutoRepeat(), e);
 }
 
 void Tankbobs_editor::keyReleaseEvent(QKeyEvent *e)
 {
+	if(e->key() == Qt::Key_Control)
+		ctrl = false;
+	if(e->key() == Qt::Key_Shift)
+		shift = false;
+
 	keyReleaseLast = trm_keyrelease(e->key(), e);
 }
 
@@ -409,6 +536,94 @@ void Editor::mouseMoveEvent(QMouseEvent *e)
 			if(y_scroll < SMALL && y_scroll > -SMALL) y_scroll = SMALL;
 			//x_scroll += (tmp - zoom) / x_scroll;
 			//y_scroll += (tmp - zoom) / y_scroll;
+		}
+
+		if(!shift && ctrl)
+		{
+			*x_selected += x_end - x_last_scroll;
+			*y_selected += y_end - y_last_scroll;
+		}
+		else if(shift && !ctrl)
+		{
+			// translate all selected
+			for(vector<entities::PlayerSpawnPoint *>::iterator i = playerSpawnPoint.begin(); i != playerSpawnPoint.end(); ++i)
+			{
+				entities::PlayerSpawnPoint *e = *i;
+
+				if(trm_isSelected(e))
+				{
+					if(config_get_int(c_noModify))
+					{
+						trm_modifyAttempted();
+						return;
+					}
+
+					modified = true;
+
+					e->x += x_end - x_last_scroll;
+					e->y += y_end - y_last_scroll;
+				}
+			}
+			for(vector<entities::PowerupSpawnPoint *>::iterator i = powerupSpawnPoint.begin(); i != powerupSpawnPoint.end(); ++i)
+			{
+				entities::PowerupSpawnPoint *e = *i;
+
+				if(trm_isSelected(e))
+				{
+					if(config_get_int(c_noModify))
+					{
+						trm_modifyAttempted();
+						return;
+					}
+
+					modified = true;
+
+					e->x += x_end - x_last_scroll;
+					e->y += y_end - y_last_scroll;
+				}
+			}
+			for(vector<entities::Teleporter *>::iterator i = teleporter.begin(); i != teleporter.end(); ++i)
+			{
+				entities::Teleporter *e = *i;
+
+				if(trm_isSelected(e))
+				{
+					if(config_get_int(c_noModify))
+					{
+						trm_modifyAttempted();
+						return;
+					}
+
+					modified = true;
+
+					e->x += x_end - x_last_scroll;
+					e->y += y_end - y_last_scroll;
+				}
+			}
+			for(vector<entities::Wall *>::iterator i = wall.begin(); i != wall.end(); ++i)
+			{
+				entities::Wall *e = *i;
+
+				if(trm_isSelected(e))
+				{
+					if(config_get_int(c_noModify))
+					{
+						trm_modifyAttempted();
+						return;
+					}
+
+					modified = true;
+
+					e->x1 += x_end - x_last_scroll;
+					e->y1 += y_end - y_last_scroll;
+					e->x2 += x_end - x_last_scroll;
+					e->y2 += y_end - y_last_scroll;
+					e->x3 += x_end - x_last_scroll;
+					e->y3 += y_end - y_last_scroll;
+					e->x4 += x_end - x_last_scroll;
+					e->y4 += y_end - y_last_scroll;
+				}
+			}
 		}
 	}
 }
@@ -778,7 +993,7 @@ void Editor::paintGL()
 			glColor4d(1.0 * 0.225, 1.0 * 0.2, 0.0 * 0.25, 1.0);
 			glCullFace(GL_FRONT_AND_BACK);
 			glPushMatrix();
-				glTranslated(x_end, y_end, 0.0);
+				glTranslated(x_end - x_scroll, y_end - y_scroll, 0.0);
 				glBegin(GL_QUADS);
 					glVertex2d(-PLAYERSPAWNPOINT_WIDTH * 0.5, +PLAYERSPAWNPOINT_HEIGHT * 0.5);
 					glVertex2d(-PLAYERSPAWNPOINT_WIDTH * 0.5, -PLAYERSPAWNPOINT_HEIGHT * 0.5);
@@ -794,7 +1009,7 @@ void Editor::paintGL()
 			glColor4d(0.0 * 0.225, 0.0 * 0.2, 1.0 * 0.25, 1.0);
 			glCullFace(GL_FRONT_AND_BACK);
 			glPushMatrix();
-				glTranslated(x_end, y_end, 0.0);
+				glTranslated(x_end - x_scroll, y_end - y_scroll, 0.0);
 				glBegin(GL_QUADS);
 					glVertex2d(-POWERUPSPAWNPOINT_WIDTH * 0.5, +POWERUPSPAWNPOINT_HEIGHT * 0.5);
 					glVertex2d(-POWERUPSPAWNPOINT_WIDTH * 0.5, -POWERUPSPAWNPOINT_HEIGHT * 0.5);
@@ -810,7 +1025,7 @@ void Editor::paintGL()
 			glColor4d(0.0 * 0.225, 1.0 * 0.2, 0.0 * 0.25, 1.0);
 			glCullFace(GL_FRONT_AND_BACK);
 			glPushMatrix();
-				glTranslated(x_end, y_end, 0.0);
+				glTranslated(x_end - x_scroll, y_end - y_scroll, 0.0);
 				glBegin(GL_QUADS);
 					glVertex2d(-TELEPORTER_WIDTH * 0.5, +TELEPORTER_HEIGHT * 0.5);
 					glVertex2d(-TELEPORTER_WIDTH * 0.5, -TELEPORTER_HEIGHT * 0.5);
