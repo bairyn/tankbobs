@@ -959,7 +959,7 @@ static int compile(const char *filename)
 int main(int argc, char **argv)
 {
 	int i;
-	int force = 0;
+	int force = 1;
 
 	/* parse the options first */
 	for(i = 1; i < argc; i++)
@@ -993,7 +993,7 @@ int main(int argc, char **argv)
 	/* parse the filenames */
 	for(i = force; i < argc; i++)
 	{
-		if(force || argv[i][0] != '-')
+		if(force > 1 || argv[i][0] != '-')
 		{
 			if(!compile(argv[i]))
 			{
