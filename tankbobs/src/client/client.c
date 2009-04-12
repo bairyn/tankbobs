@@ -23,10 +23,10 @@ SDL_mixer, GL, and GLU
 */
 
 #include <stdlib.h>
-#include <lua5.1/lua.h>
-#include <lua5.1/lauxlib.h>
-#include <lua5.1/lualib.h>
-#include <lua5.1/luaconf.h>
+#include <lua.h>
+#include <lauxlib.h>
+#include <lualib.h>
+#include <luaconf.h>
 #include <stdio.h>
 #include "common.h"
 
