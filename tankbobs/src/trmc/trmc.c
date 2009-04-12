@@ -962,7 +962,7 @@ int main(int argc, char **argv)
 	int force = 0;
 
 	/* parse the options first */
-	for(i = 0; i < argc; i++)
+	for(i = 1; i < argc; i++)
 	{
 		if(argv[i][0] == '-')
 		{
