@@ -577,7 +577,7 @@ static void add_map(char *name, char *title, char *description, char *version_s,
 {
 	map_t *map = &maps[mc++];
 
-	if(mc >= MAX_MAPS)
+	if(mc > MAX_MAPS)
 	{
 		fprintf(stderr, "Error: map overflow (%d)\n", MAX_MAPS);
 		exit(1);
@@ -594,7 +594,7 @@ static void add_wall(int quad, double x1, double y1, double x2, double y2, doubl
 {
 	wall_t *wall = &walls[wc++];
 
-	if(wc >= MAX_WALLS)
+	if(wc > MAX_WALLS)
 	{
 		fprintf(stderr, "Error: wall overflow (%d)\n", MAX_WALLS);
 		exit(1);
@@ -617,7 +617,7 @@ static void add_teleporter(const char *name, const char *targetName, double x1, 
 {
 	teleporter_t *teleporter = &teleporters[tc++];
 
-	if(tc >= MAX_TELEPORTERS)
+	if(tc > MAX_TELEPORTERS)
 	{
 		fprintf(stderr, "Error: teleporter overflow (%d)\n", MAX_TELEPORTERS);
 		exit(1);
@@ -633,7 +633,7 @@ static void add_playerSpawnPoint(double x1, double y1)
 {
 	playerSpawnPoint_t *playerSpawnPoint = &playerSpawnPoints[lc++];
 
-	if(lc >= MAX_PLAYERSPAWNPOINTS)
+	if(lc > MAX_PLAYERSPAWNPOINTS)
 	{
 		fprintf(stderr, "Error: playerSpawnPoint overflow (%d)\n", MAX_PLAYERSPAWNPOINTS);
 		exit(1);
@@ -647,7 +647,7 @@ static void add_powerupSpawnPoint(double x1, double y1, const char *powerupsToEn
 {
 	powerupSpawnPoint_t *powerupSpawnPoint = &powerupSpawnPoints[oc++];
 
-	if(oc >= MAX_POWERUPSPAWNPOINTS)
+	if(oc > MAX_POWERUPSPAWNPOINTS)
 	{
 		fprintf(stderr, "Error: powerupSpawnPoint overflow (%d)\n", MAX_POWERUPSPAWNPOINTS);
 		exit(1);
