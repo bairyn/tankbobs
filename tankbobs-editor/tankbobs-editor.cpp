@@ -562,7 +562,7 @@ static void drawWalls(void)
 							glTranslated(ax - e->x1, ay - e->y3, 0.0);
 							drawCircle(3.0 / zoom);
 						glPopMatrix();
-						if(e->quad)
+						if(!e->quad)
 						{
 							glPushMatrix();
 								glTranslated(ax - e->x4, ay - e->y4, 0.0);
@@ -574,7 +574,7 @@ static void drawWalls(void)
 				else
 				{
 					glColor4d(1.0, 0.0, 0.0, 1.0);
-					if(e->quad)
+					if(!e->quad)
 					{
 						glBegin(GL_TRIANGLES);
 							glVertex2d(ax - e->x1, ay - e->y1);

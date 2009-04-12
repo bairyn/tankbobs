@@ -315,12 +315,14 @@ static int read_int(void)
 		if(*p++ == '-')
 			sign = -sign;
 
-	c = read_getChar(&p);
-	while(*p != ',' && c >= '0' && c <= '9')
+	while(*p != ',')
 	{
-		value = value * 10 + c - '0';
-
 		c = read_getChar(&p);
+
+		if(!(c >= '0' && c <= '9'))
+			break;
+
+		value = value * 10 + c - '0';
 	}
 
 	read_pos++;
@@ -388,9 +390,13 @@ static double read_double(void)
 		if(*p++ == '-')
 			sign = -sign;
 
-	c = read_getChar(&p);
-	while(*p != ',' && ((c == '.') || (c >= '0' && c <= '9')))
+	while(*p != ',')
 	{
+		c = read_getChar(&p);
+
+		if(!((c == '.') || (c >= '0' && c <= '9')))
+			break;
+
 		if(decimal)
 		{
 			if(c == '.')
@@ -413,8 +419,6 @@ static double read_double(void)
 				value = value * 10 + c - '0';
 			}
 		}
-
-		c = read_getChar(&p);
 	}
 
 	read_pos++;
@@ -475,13 +479,12 @@ static void read_string(char *s)
 
 	i = s[0] = 0;
 
-	c = read_getChar(&p);
 	while(*p != ',' && i < MAX_STRING_SIZE - 1)
 	{
+		c = read_getChar(&p);
+
 		s[i++] = c;
 		s[i] = 0;
-
-		c = read_getChar(&p);
 	}
 
 	/* strip trailing whitespace */
