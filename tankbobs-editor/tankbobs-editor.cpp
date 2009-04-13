@@ -538,7 +538,7 @@ void Editor::mouseMoveEvent(QMouseEvent *e)
 			//y_scroll += (tmp - zoom) / y_scroll;
 		}
 
-		if(!shift && ctrl)
+		if(!shift && ctrl && x_selected && y_selected)
 		{
 			*x_selected += x_end - x_last_scroll;
 			*y_selected += y_end - y_last_scroll;
