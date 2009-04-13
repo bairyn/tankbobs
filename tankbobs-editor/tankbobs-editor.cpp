@@ -720,7 +720,7 @@ static void drawWalls(void)
 				glTranslated(ax, ay, 0.0);
 				if(e == reinterpret_cast<void *>(selection))
 				{
-					glScaled(1.1 / ZOOM, 1.1 / ZOOM, 1.0);
+					//glScaled(1.1 / ZOOM, 1.1 / ZOOM, 1.0);  // vertices of walls need to be more accurate; selected walls are already known by their outline
 					glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 					glColor4d(1.0, 0.0, 0.0, 1.0);  // red
 					if(!e->quad)
@@ -764,6 +764,7 @@ static void drawWalls(void)
 								}
 								glTranslated(ax - e->x2, ay - e->y2, 0.0);
 								drawCircle(3.0 / ZOOM);
+							glPopAttrib();
 						glPopMatrix();
 						glPushMatrix();
 							glPushAttrib(GL_CURRENT_BIT);
