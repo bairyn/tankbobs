@@ -358,7 +358,7 @@ local function c_tcm_check_true_header(i)
 		error "Invalid map header"
 	elseif c_tcm_private_get(tankbobs.io_getChar, i) ~= c_const_get("tcm_version") then
 		i:seek("cur", -1)
-		io.stdout:write("Warning: map was built for tcm version '", tostring(c_tcm_private_get(tankbobs.io_getChar, i)), "'; you are using version '", tostring(c_const_get("tcm_version")), "'")
+		io.stdout:write("Warning: map was built for tcm version '", tostring(c_tcm_private_get(tankbobs.io_getChar, i)), "'; you are using version '", tostring(c_const_get("tcm_version")), "'\n")
 	end
 end
 
@@ -366,7 +366,7 @@ function c_tcm_read_map(map)
 	local r = c_tcm_map:new()
 
 	if c_const_get("debug") then
-		io.stdout:write("Parsing header of file: ", map)
+		io.stdout:write("Parsing header of file: ", map, "\n")
 	end
 
 	r.map = map

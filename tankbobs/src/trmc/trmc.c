@@ -658,6 +658,15 @@ static void add_powerupSpawnPoint(double x1, double y1, const char *powerupsToEn
 	strncpy(powerupSpawnPoint->powerupsToEnable, powerupsToEnable, sizeof(powerupSpawnPoint->powerupsToEnable));
 }
 
+static char hidden(const char *filename)
+{
+	const char *p = filename;
+
+	while(*p) p++;
+	while(p >= filename && *p != '/') p--;
+	return *++p == '.';
+}
+
 static int compile(const char *filename)
 {
 	char c;
@@ -671,7 +680,7 @@ static int compile(const char *filename)
 	int j;
 	char line[MAX_LINE_SIZE] = {""};
 
-	if(*filename == '.')
+	if(hidden(filename))
 	{
 		fprintf(stderr, "Warning: ignoring hidden file: '%s'\n", filename);
 		return 1;
