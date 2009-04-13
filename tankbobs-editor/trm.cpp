@@ -608,7 +608,6 @@ bool trm_save(const char *filename)
 		<< e->x
 		<< ", "
 		<< e->y
-		<< ", "
 		<< endl;
 	}
 
