@@ -26,4 +26,6 @@ void trm_modifyAttempted();
 #define MINSCROLL -GRIDSIZE * GRIDLINES
 #define MAXSCROLL  GRIDSIZE * GRIDLINES
 
+#define ZOOM ((zoom) > (1.0) ? (zoom) : (zoom))
+
 #endif

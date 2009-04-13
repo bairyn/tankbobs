@@ -650,7 +650,7 @@ static void drawPlayerSpawnPoints(void)
 					glCallList(entBase + e_selectionPlayerSpawnPoint);
 				if(e == reinterpret_cast<void *>(selection))
 				{
-					glScaled(1.1 / zoom, 1.1 / zoom, 1.0);
+					glScaled(1.1 / ZOOM, 1.1 / ZOOM, 1.0);
 					glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 					glColor4d(1.0, 0.0, 0.0, 1.0);
 					if(glIsList(entBase + e_selectionPlayerSpawnPoint))
@@ -673,7 +673,7 @@ static void drawPowerupSpawnPoints(void)
 					glCallList(entBase + e_selectionPowerupSpawnPoint);
 				if(e == reinterpret_cast<void *>(selection))
 				{
-					glScaled(1.1 / zoom, 1.1 / zoom, 1.0);
+					glScaled(1.1 / ZOOM, 1.1 / ZOOM, 1.0);
 					glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 					glColor4d(1.0, 0.0, 0.0, 1.0);
 					if(glIsList(entBase + e_selectionPowerupSpawnPoint))
@@ -696,7 +696,7 @@ static void drawTeleporters(void)
 					glCallList(entBase + e_selectionTeleporter);
 				if(e == reinterpret_cast<void *>(selection))
 				{
-					glScaled(1.1 / zoom, 1.1 / zoom, 1.0);
+					glScaled(1.1 / ZOOM, 1.1 / ZOOM, 1.0);
 					glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 					glColor4d(1.0, 0.0, 0.0, 1.0);
 					if(glIsList(entBase + e_selectionTeleporter))
@@ -720,29 +720,9 @@ static void drawWalls(void)
 				glTranslated(ax, ay, 0.0);
 				if(e == reinterpret_cast<void *>(selection))
 				{
-					glScaled(1.1 / zoom, 1.1 / zoom, 1.0);
+					glScaled(1.1 / ZOOM, 1.1 / ZOOM, 1.0);
 					glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-					glColor4d(1.0, 0.0, 0.0, 1.0);
-					if(!e->quad)
-					{
-						glBegin(GL_TRIANGLES);
-							glVertex2d(ax - e->x1, e->y1);
-							glVertex2d(ax - e->x2, e->y2);
-							glVertex2d(ax - e->x3, e->y3);
-						glEnd();
-					}
-					else
-					{
-						glBegin(GL_QUADS);
-							glVertex2d(ax - e->x1, e->y1);
-							glVertex2d(ax - e->x2, e->y2);
-							glVertex2d(ax - e->x3, e->y3);
-							glVertex2d(ax - e->x4, e->y4);
-						glEnd();
-					}
-					// - draw in red
-					glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-					glColor4d(1.0, 0.0, 0.0, 1.0);
+					glColor4d(1.0, 0.0, 0.0, 1.0);  // red
 					if(!e->quad)
 					{
 						glBegin(GL_TRIANGLES);
