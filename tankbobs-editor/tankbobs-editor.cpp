@@ -388,18 +388,18 @@ void Editor::mousePressEvent(QMouseEvent *e)
 					// find the nearest vertex
 					x_selected = &e->x1;
 					y_selected = &e->y1;
-					if(sqrt(pow(*x_selected - x_end, 2) + pow(*y_selected - y_end, 2)) < sqrt(pow(e->x2 - x_end, 2) + pow(e->y2 - y_end, 2)))
+					if(sqrt(pow(*x_selected - x_end, 2) + pow(*y_selected - y_end, 2)) > sqrt(pow(e->x2 - x_end, 2) + pow(e->y2 - y_end, 2)))
 					{
 						x_selected = &e->x2;
 						y_selected = &e->y2;
 					}
-					if(sqrt(pow(*x_selected - x_end, 2) + pow(*y_selected - y_end, 2)) < sqrt(pow(e->x3 - x_end, 2) + pow(e->y3 - y_end, 2)))
+					if(sqrt(pow(*x_selected - x_end, 2) + pow(*y_selected - y_end, 2)) > sqrt(pow(e->x3 - x_end, 2) + pow(e->y3 - y_end, 2)))
 					{
 						x_selected = &e->x3;
 						y_selected = &e->y3;
 					}
 					if(e->quad)
-					if(sqrt(pow(*x_selected - x_end, 2) + pow(*y_selected - y_end, 2)) < sqrt(pow(e->x4 - x_end, 2) + pow(e->y4 - y_end, 2)))
+					if(sqrt(pow(*x_selected - x_end, 2) + pow(*y_selected - y_end, 2)) > sqrt(pow(e->x4 - x_end, 2) + pow(e->y4 - y_end, 2)))
 					{
 						x_selected = &e->x4;
 						y_selected = &e->y4;
@@ -714,30 +714,25 @@ static void drawWalls(void)
 		entities::Wall *e = *i;
 		glPushAttrib(GL_POLYGON_BIT | GL_CURRENT_BIT);
 			glPushMatrix();
-				double ax, ay;
-				ax = ((!e->quad) ? ((e->x1 + e->x2 + e->x3) / 3) : ((e->x1 + e->x2 + e->x3 + e->x4) / 4));
-				ay = ((!e->quad) ? ((e->y1 + e->y2 + e->y3) / 3) : ((e->y1 + e->y2 + e->y3 + e->y4) / 4));
-				glTranslated(ax, ay, 0.0);
 				if(e == reinterpret_cast<void *>(selection))
 				{
-					//glScaled(1.1 / ZOOM, 1.1 / ZOOM, 1.0);  // vertices of walls need to be more accurate; selected walls are already known by their outline
 					glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 					glColor4d(1.0, 0.0, 0.0, 1.0);  // red
 					if(!e->quad)
 					{
 						glBegin(GL_TRIANGLES);
-							glVertex2d(ax - e->x1, ay - e->y1);
-							glVertex2d(ax - e->x2, ay - e->y2);
-							glVertex2d(ax - e->x3, ay - e->y3);
+							glVertex2d(e->x1, e->y1);
+							glVertex2d(e->x2, e->y2);
+							glVertex2d(e->x3, e->y3);
 						glEnd();
 					}
 					else
 					{
 						glBegin(GL_QUADS);
-							glVertex2d(ax - e->x1, ay - e->y1);
-							glVertex2d(ax - e->x2, ay - e->y2);
-							glVertex2d(ax - e->x3, ay - e->y3);
-							glVertex2d(ax - e->x4, ay - e->y4);
+							glVertex2d(e->x1, e->y1);
+							glVertex2d(e->x2, e->y2);
+							glVertex2d(e->x3, e->y3);
+							glVertex2d(e->x4, e->y4);
 						glEnd();
 					}
 					// -
@@ -752,7 +747,7 @@ static void drawWalls(void)
 								{
 									glColor4d(0.2, 0.1, 0.6, 1.0);
 								}
-								glTranslated(ax - e->x1, ay - e->y1, 0.0);
+								glTranslated(e->x1, e->y1, 0.0);
 								drawCircle(3.0 / ZOOM);
 							glPopAttrib();
 						glPopMatrix();
@@ -762,7 +757,7 @@ static void drawWalls(void)
 								{
 									glColor4d(0.2, 0.1, 0.6, 1.0);
 								}
-								glTranslated(ax - e->x2, ay - e->y2, 0.0);
+								glTranslated(e->x2, e->y2, 0.0);
 								drawCircle(3.0 / ZOOM);
 							glPopAttrib();
 						glPopMatrix();
@@ -772,7 +767,7 @@ static void drawWalls(void)
 								{
 									glColor4d(0.2, 0.1, 0.6, 1.0);
 								}
-								glTranslated(ax - e->x3, ay - e->y3, 0.0);
+								glTranslated(e->x3, e->y3, 0.0);
 								drawCircle(3.0 / ZOOM);
 							glPopAttrib();
 						glPopMatrix();
@@ -784,7 +779,7 @@ static void drawWalls(void)
 									{
 										glColor4d(0.2, 0.1, 0.6, 1.0);
 									}
-									glTranslated(ax - e->x4, ay - e->y4, 0.0);
+									glTranslated(e->x4, e->y4, 0.0);
 									drawCircle(3.0 / zoom);
 								glPopAttrib();
 							glPopMatrix();
@@ -797,18 +792,18 @@ static void drawWalls(void)
 					if(!e->quad)
 					{
 						glBegin(GL_TRIANGLES);
-							glVertex2d(ax - e->x1, ay - e->y1);
-							glVertex2d(ax - e->x2, ay - e->y2);
-							glVertex2d(ax - e->x3, ay - e->y3);
+							glVertex2d(e->x1, e->y1);
+							glVertex2d(e->x2, e->y2);
+							glVertex2d(e->x3, e->y3);
 						glEnd();
 					}
 					else
 					{
 						glBegin(GL_QUADS);
-							glVertex2d(ax - e->x1, ay - e->y1);
-							glVertex2d(ax - e->x2, ay - e->y2);
-							glVertex2d(ax - e->x3, ay - e->y3);
-							glVertex2d(ax - e->x4, ay - e->y4);
+							glVertex2d(e->x1, e->y1);
+							glVertex2d(e->x2, e->y2);
+							glVertex2d(e->x3, e->y3);
+							glVertex2d(e->x4, e->y4);
 						glEnd();
 					}
 				}
@@ -972,7 +967,7 @@ void Editor::paintGL()
 	// draw all entities
 	util_fpermutation(editorPaintGLCache.l0, editorPaintGLCache.l1, editorPaintGLCache.l2, order++);
 
-	// draw grid to aid scrolling
+	// draw grid
 	glCallList(gridBase);
 
 	// draw a wall ghost
