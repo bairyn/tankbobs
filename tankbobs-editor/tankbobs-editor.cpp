@@ -745,23 +745,47 @@ static void drawWalls(void)
 					{
 						glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 						glColor4d(1.0, 0.5, 0.0, 1.0);
+						// selected vertex is bluish
 						glPushMatrix();
-							glTranslated(ax - e->x1, ay - e->y1, 0.0);
-							drawCircle(3.0 / zoom);
+							glPushAttrib(GL_CURRENT_BIT);
+								if(x_selected == &e->x1 && y_selected == &e->y1)
+								{
+									glColor4d(0.2, 0.1, 0.6, 1.0);
+								}
+								glTranslated(ax - e->x1, ay - e->y1, 0.0);
+								drawCircle(3.0 / ZOOM);
+							glPopAttrib();
 						glPopMatrix();
 						glPushMatrix();
-							glTranslated(ax - e->x2, ay - e->y2, 0.0);
-							drawCircle(3.0 / zoom);
+							glPushAttrib(GL_CURRENT_BIT);
+								if(x_selected == &e->x2 && y_selected == &e->y2)
+								{
+									glColor4d(0.2, 0.1, 0.6, 1.0);
+								}
+								glTranslated(ax - e->x2, ay - e->y2, 0.0);
+								drawCircle(3.0 / ZOOM);
 						glPopMatrix();
 						glPushMatrix();
-							glTranslated(ax - e->x3, ay - e->y3, 0.0);
-							drawCircle(3.0 / zoom);
+							glPushAttrib(GL_CURRENT_BIT);
+								if(x_selected == &e->x3 && y_selected == &e->y3)
+								{
+									glColor4d(0.2, 0.1, 0.6, 1.0);
+								}
+								glTranslated(ax - e->x3, ay - e->y3, 0.0);
+								drawCircle(3.0 / ZOOM);
+							glPopAttrib();
 						glPopMatrix();
 						if(e->quad)
 						{
 							glPushMatrix();
-								glTranslated(ax - e->x4, ay - e->y4, 0.0);
-								drawCircle(3.0 / zoom);
+								glPushAttrib(GL_CURRENT_BIT);
+									if(x_selected == &e->x4 && y_selected == &e->y4)
+									{
+										glColor4d(0.2, 0.1, 0.6, 1.0);
+									}
+									glTranslated(ax - e->x4, ay - e->y4, 0.0);
+									drawCircle(3.0 / zoom);
+								glPopAttrib();
 							glPopMatrix();
 						}
 					}
