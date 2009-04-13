@@ -741,7 +741,7 @@ static void drawWalls(void)
 						glEnd();
 					}
 					// -
-					if(ctrl && shift)
+					if(ctrl && !shift)
 					{
 						glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 						glColor4d(1.0, 0.5, 0.0, 1.0);
@@ -754,10 +754,10 @@ static void drawWalls(void)
 							drawCircle(3.0 / zoom);
 						glPopMatrix();
 						glPushMatrix();
-							glTranslated(ax - e->x1, ay - e->y3, 0.0);
+							glTranslated(ax - e->x3, ay - e->y3, 0.0);
 							drawCircle(3.0 / zoom);
 						glPopMatrix();
-						if(!e->quad)
+						if(e->quad)
 						{
 							glPushMatrix();
 								glTranslated(ax - e->x4, ay - e->y4, 0.0);
