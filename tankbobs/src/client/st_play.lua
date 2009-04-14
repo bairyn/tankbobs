@@ -51,6 +51,32 @@ function st_play_mouse(x, y, xrel, yrel)
 end
 
 function st_play_step()
+	-- TODO: use display lists and find a better algorithm for "depth"
+
+	-- iterate each time from 1 to hard-coded 20 but render tanks before level 9
+	for i = 1, 20 do
+		for k, v in pairs(c_tcm_current_map.walls) do
+			if i == c_const_get("tcm_tankLevel") then
+				-- render tanks
+			end
+
+			if v.l == i then
+				if v.q then
+					gl.Begin("QUADS")
+				else
+					gl.Begin("TRIANGLES")
+				end
+					gl.Vertex(v.p[1].x, v.p[1].y)
+					gl.Vertex(v.p[2].x, v.p[2].y)
+					gl.Vertex(v.p[3].x, v.p[3].y)
+					if v.q then
+						gl.Vertex(v.p[4].x, v.p[4].y)
+					end
+				gl.End()
+			end
+		end
+	end
+	
 	gui_paint()
 end
 
