@@ -25,7 +25,7 @@ temporary state (until a better gui) before play state.
 
 function st_start_init()
 	gui_conserve()
-	start_countdowntime = tankbobs.sdlgetticks()
+	start_countdowntime = tankbobs.t_getTicks()
 	gui_labelColor(1.0, 0.0, 0.0, 1.0)
 	gui_widget("label", renderer_font.sans, 50, 50, renderer_size.sans, start_count)
 end
@@ -58,8 +58,8 @@ function st_start_mouse(x, y, xrel, yrel)
 end
 
 function st_start_step()
-	if tankbobs.sdlgetticks() >= start_countdowntime + 1000 then
-		start_countdowntime = tankbobs.sdlgetticks()
+	if tankbobs.t_getTicks() >= start_countdowntime + 1000 then
+		start_countdowntime = tankbobs.t_getTicks()
 		if start_countdown == nil then
 			start_countdown = 1
 			gui_labelColor(1.0, 1.0, 0.0, 1.0)

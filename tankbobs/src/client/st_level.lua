@@ -62,7 +62,7 @@ end
 
 function st_level_select(title, name)
 	c_tcm_select_map(name)
-	c_state_goto(start_state)
+	c_state_new(start_state)
 end
 
 level_state =
