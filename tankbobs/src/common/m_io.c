@@ -470,7 +470,7 @@ int io_getStrL(lua_State *L)
 	int eof;
 	unsigned char *result;
 	int i, len = luaL_checkinteger(L, -1);
-	FILE *fin = *((FILE **)lua_touserdata(L, -1));
+	FILE *fin = *((FILE **)lua_touserdata(L, -2));
 
 	CHECKINIT(init, L);
 

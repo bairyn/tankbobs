@@ -382,12 +382,13 @@ function c_tcm_read_map(map)
 	c_tcm_check_true_header(i)
 
 	r.version = c_tcm_private_get(tankbobs.io_getChar, i)
-	r.name = c_tcm_private_get(tankbobs.io_getStr, i, false, 64)
-	r.title = c_tcm_private_get(tankbobs.io_getStr, i, false, 64)
-	r.description = c_tcm_private_get(tankbobs.io_getStr, i, false, 64)
-	r.authors = c_tcm_private_get(tankbobs.io_getStr, i, false, 512)
-	r.version_string = c_tcm_private_get(tankbobs.io_getStr, i, false, 64)
+	r.name = c_tcm_private_get(tankbobs.io_getStrL, i, false, 64)
+	r.title = c_tcm_private_get(tankbobs.io_getStrL, i, false, 64)
+	r.description = c_tcm_private_get(tankbobs.io_getStrL, i, false, 64)
+	r.authors = c_tcm_private_get(tankbobs.io_getStrL, i, false, 512)
+	r.version_string = c_tcm_private_get(tankbobs.io_getStrL, i, false, 64)
 	-- strip trailing 0's from NULL-terminated strings passed by C
+	-- we might use getStr and avoid this but if the string uses all of the bytes getStr won't work
 	r.name = r.name:gsub("%z*$", "")
 	r.title = r.title:gsub("%z*$", "")
 	r.description = r.description:gsub("%z*$", "")
@@ -399,7 +400,7 @@ function c_tcm_read_map(map)
 	r.playerSpawnPoints_n = c_tcm_private_get(tankbobs.io_getInt, i)
 	r.powerupSpawnPoints_n = c_tcm_private_get(tankbobs.io_getInt, i)
 
-	for i = 1, r.walls_n do
+	for it = 1, r.walls_n do
 		local wall = c_tcm_wall:new()
 
 		wall.id = c_tcm_private_get(tankbobs.io_getInt, i)
@@ -420,7 +421,7 @@ function c_tcm_read_map(map)
 		else
 			i:seek("cur", 16)
 		end
-		wall.texture = c_tcm_private_get(tankbobs.io_getStr, i, false, 256)
+		wall.texture = c_tcm_private_get(tankbobs.io_getStrL, i, false, 256)
 		wall.texture = wall.texture:gsub("%z*$", "")
 		wall.l = c_tcm_private_get(tankbobs.io_getInt, i)
 

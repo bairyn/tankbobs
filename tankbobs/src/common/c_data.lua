@@ -52,6 +52,7 @@ function c_data_init()
 		"init$",
 		"done$",
 		"^io$",
+		"^tankbobs$",
 		"^string$",
 		"^debug$",
 		"^c_conf",
