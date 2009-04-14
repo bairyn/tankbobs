@@ -187,7 +187,7 @@ c_tcm_wall =
 		o.p[1] = c_vec2:new()
 		o.p[2] = c_vec2:new()
 		o.p[3] = c_vec2:new()
-		--o.p[4] = c_vec2:new()
+		o.p[4] = c_vec2:new()
 		o.l = c_const_get("tcm_tankLevel")
 	end,
 
@@ -381,12 +381,12 @@ function c_tcm_read_map(map)
 	
 	c_tcm_check_true_header(i)
 
-	r.version = c_tcm_private_get(tankbobs.io_getChar, i)
 	r.name = c_tcm_private_get(tankbobs.io_getStrL, i, false, 64)
 	r.title = c_tcm_private_get(tankbobs.io_getStrL, i, false, 64)
 	r.description = c_tcm_private_get(tankbobs.io_getStrL, i, false, 64)
 	r.authors = c_tcm_private_get(tankbobs.io_getStrL, i, false, 512)
 	r.version_string = c_tcm_private_get(tankbobs.io_getStrL, i, false, 64)
+	r.version = c_tcm_private_get(tankbobs.io_getInt, i)
 	-- strip trailing 0's from NULL-terminated strings passed by C
 	-- we might use getStr and avoid this but if the string uses all of the bytes getStr won't work
 	r.name = r.name:gsub("%z*$", "")
@@ -413,13 +413,16 @@ function c_tcm_read_map(map)
 		wall.p[1].y = c_tcm_private_get(tankbobs.io_getDouble, i)
 		wall.p[2].x = c_tcm_private_get(tankbobs.io_getDouble, i)
 		wall.p[2].y = c_tcm_private_get(tankbobs.io_getDouble, i)
-		wall.p[3].x = c_tcm_private_get(tankbobs.io_getDouble, i)
+		wall.p[3].x = c_tcm_private_get(tankbobs.io_getDouble, i)  -- unexpected EOF
 		wall.p[3].y = c_tcm_private_get(tankbobs.io_getDouble, i)
 		if wall.q then
 			wall.p[4].x = c_tcm_private_get(tankbobs.io_getDouble, i)
 			wall.p[4].y = c_tcm_private_get(tankbobs.io_getDouble, i)
 		else
 			i:seek("cur", 16)
+			--for its = 1, 2 do
+				--c_tcm_private_get(tankbobs.io_getDouble, i)
+			--end
 		end
 		wall.texture = c_tcm_private_get(tankbobs.io_getStrL, i, false, 256)
 		wall.texture = wall.texture:gsub("%z*$", "")
@@ -466,6 +469,8 @@ function c_tcm_read_map(map)
 	end
 
 	i:close()
+
+	return r;
 end
 
 function c_tcm_select_set(name)

@@ -299,6 +299,15 @@ void Editor::mousePressEvent(QMouseEvent *e)
 	x_begin = x_end = mx(e->x());
 	y_begin = y_end = my(e->y());
 
+	if(e->modifiers() & Qt::ControlModifier)
+		ctrl = true;
+	else
+		ctrl = false;
+	if(e->modifiers() & Qt::ShiftModifier)
+		shift = true;
+	else
+		shift = false;
+
 	if(e->buttons() & Qt::MidButton)
 		y_last_zoom = e->y();
 
@@ -500,6 +509,15 @@ void Tankbobs_editor::keyReleaseEvent(QKeyEvent *e)
 
 void Editor::mouseMoveEvent(QMouseEvent *e)
 {
+	if(e->modifiers() & Qt::ControlModifier)
+		ctrl = true;
+	else
+		ctrl = false;
+	if(e->modifiers() & Qt::ShiftModifier)
+		shift = true;
+	else
+		shift = false;
+
 	if(x_begin >= 0 && y_begin >= 0)
 	{
 		int x_last_scroll = x_end;
