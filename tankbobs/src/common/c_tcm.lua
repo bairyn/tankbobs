@@ -341,6 +341,8 @@ local function c_tcm_private_get(f, i, t, ...)
 			error "EOF unexpected"
 		end
 	end
+
+	return d
 end
 
 local function c_tcm_check_true_header(i)
