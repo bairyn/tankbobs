@@ -35,7 +35,7 @@ function st_play_init()
 		table.insert(c_world_tanks, tank)
 
 		if not (c_config_get("config.game.player" .. tostring(i) .. ".name", nil, true)) then
-			c_config_set("config.game.player" .. tostring(i) .. ".name", "Player" .. trstring(i))
+			c_config_set("config.game.player" .. tostring(i) .. ".name", "Player" .. tostring(i))
 		end
 
 		tank.name = c_config_get("config.game.player" .. tostring(i) .. ".name")
@@ -61,6 +61,34 @@ function st_play_button(button, pressed)
 			c_state_advance()
 		elseif button == c_config_get("config.key.exit") then
 			c_state_new(exit_state)
+		else
+			for i = 1, c_config_get("config.game.players") + c_config_get("config.game.computers") do
+				if not (c_config_get("config.key.player" .. tostring(i) .. ".forward", nil, true)) then
+					c_config_set("config.key.player" .. tostring(i) .. ".forward", false)
+				end
+				if not (c_config_get("config.key.player" .. tostring(i) .. ".back", nil, true)) then
+					c_config_set("config.key.player" .. tostring(i) .. ".back", false)
+				end
+				if not (c_config_get("config.key.player" .. tostring(i) .. ".right", nil, true)) then
+					c_config_set("config.key.player" .. tostring(i) .. ".right", false)
+				end
+				if not (c_config_get("config.key.player" .. tostring(i) .. ".left", nil, true)) then
+					c_config_set("config.key.player" .. tostring(i) .. ".left", false)
+				end
+
+				if button == c_config_get("config.key.player" .. tostring(i) .. ".forward") then
+					c_world_tanks[i].state.forward = pressed
+				end
+				if button == c_config_get("config.key.player" .. tostring(i) .. ".back") then
+					c_world_tanks[i].state.back = pressed
+				end
+				if button == c_config_get("config.key.player" .. tostring(i) .. ".left") then
+					c_world_tanks[i].state.left = pressed
+				end
+				if button == c_config_get("config.key.player" .. tostring(i) .. ".right") then
+					c_world_tanks[i].state.right = pressed
+				end
+			end
 		end
 		gui_button(button)
 	end

@@ -85,7 +85,7 @@ c_world_tank_state =
 	new = common_new,
 
 	forward = false,
-	forward = false,
+	back = false,
 	right = false,
 	left = false
 }
