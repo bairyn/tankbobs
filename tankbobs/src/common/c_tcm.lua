@@ -419,8 +419,8 @@ function c_tcm_read_map(map)
 	-- sort entities based on their id's, so that wall[i] has an id of i - 1
 	table.sort(r.walls, function (e1, e2) return e1.id < e2.id end)
 	table.sort(r.teleporters, function (e1, e2) return e1.id < e2.id end)
-	table.sort(r.playerSpawnPoint, function (e1, e2) return e1.id < e2.id end)
-	table.sort(r.powerupSpawnPoint, function (e1, e2) return e1.id < e2.id end)
+	table.sort(r.playerSpawnPoints, function (e1, e2) return e1.id < e2.id end)
+	table.sort(r.powerupSpawnPoints, function (e1, e2) return e1.id < e2.id end)
 
 	return r;
 end

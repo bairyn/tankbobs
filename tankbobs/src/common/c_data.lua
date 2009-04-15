@@ -83,9 +83,7 @@ function c_data_init()
 	c_const_set("icon", c_const_get("data_dir") .. "icon.png", 1)
 	c_const_set("title", "tankbobs", 1)
 
-	c_const_set("max_tanks", "64", 1)
-
-	c_config_cheat_protect("config.game.timescale")
+	c_const_set("max_tanks", 64, 1)
 end
 
 function c_data_done()

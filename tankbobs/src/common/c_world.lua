@@ -26,17 +26,19 @@ world and physics
 local lastTime = 0
 
 function c_world_init()
+	c_config_cheat_protect("config.game.timescale")
+
 	c_const_set("world_time", 1000)  -- everything is relative to change and seconds.  A speed of 5 means 5 units per second
 
 	c_const_set("tank_health", 100, 1)
-	c_const_set("tank_hullx1", -7.5, 1)
-	c_const_set("tank_hully1", +7.5, 1)
-	c_const_set("tank_hullx2", -7.5, 1)
-	c_const_set("tank_hully2", -7.5, 1)
-	c_const_set("tank_hullx3", +7.5, 1)
-	c_const_set("tank_hully3", -7.5, 1)
-	c_const_set("tank_hullx4", +7.5, 1)
-	c_const_set("tank_hully4", +7.5, 1)
+	c_const_set("tank_hullx1", -2.0, 1)
+	c_const_set("tank_hully1",  2.0, 1)
+	c_const_set("tank_hullx2", -2.0, 1)
+	c_const_set("tank_hully2", -2.0, 1)
+	c_const_set("tank_hullx3",  2.0, 1)
+	c_const_set("tank_hully3", -2.0, 1)
+	c_const_set("tank_hullx4",  2.0, 1)
+	c_const_set("tank_hully4",  2.0, 1)
 
 	c_world_tanks = {}
 end
@@ -97,6 +99,10 @@ function c_world_tank_checkSpawn(tank)
 		return
 	end
 
+	if tank.lastSpawnPoint == 0 then
+		tank.lastSpawnPoint = 1
+	end
+
 	local sp = tank.lastSpawnPoint
 	local playerSpawnPoint = c_tcm_current_map.playerSpawnPoints[tank.lastSpawnPoint]
 
@@ -117,20 +123,21 @@ function c_world_tank_checkSpawn(tank)
 
 		if tank.lastSpawnPoint == sp then
 			-- no spawn points can be used
-			return
+			return false
 		end
 	end
 
 	-- spawn
 	tank.v[1].R = 0  -- no velocity
-	tank.p[1](playerSpawsPoint.p[1])
+	tank.p[1](playerSpawnPoint.p[1])
 	tank.health = c_const_get("tank_health")
 	tank.exists = true
+	return true
 end
 
 function c_world_tank_canSpawn(tank)
 	-- test if spawning interfere with another tank
-	return true
+	return c_tcm_current_map.playerSpawnPoints[tank.lastSpawnPoint]  -- for now, TMP, only test if the spawn point exists
 end
 
 function c_world_step()
@@ -139,6 +146,11 @@ function c_world_step()
 		return
 	end
 
-	local d = (tankbobs.t_getTicks() - lastTime) / (c_const_get("world_time") * c_config_get("config.game.timescale))
+	local d = (tankbobs.t_getTicks() - lastTime) / (c_const_get("world_time") * c_config_get("config.game.timescale"))
 	lastTime = tankbobs.t_getTicks()
+
+	-- check for tanks needing spawn
+	for k, v in pairs(c_world_tanks) do
+		c_world_tank_checkSpawn(v)
+	end
 end

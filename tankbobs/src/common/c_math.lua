@@ -197,10 +197,10 @@ c_vec2 =
 			-- set rectangular coordinates
 			self:vx(x)
 			self:vy(y)
-		else
+		elseif x then
 			-- assignment
-			self:vx(x:x())
-			self:vy(x:y())
+			self:vx(x:vx())
+			self:vy(x:vy())
 		end
 	end
 }

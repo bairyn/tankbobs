@@ -197,7 +197,7 @@ function c_config_init()
 		end
 
 		if cheats_table[kt] or (type(kt) == "string" and kt:find('%.') and cheats_table[kt:substr(kt:find('%.'))]) then
-			io:stdout.write(kt, " is cheat protected")
+			io.stdout:write(kt, " is cheat protected")
 			return
 		end
 
@@ -349,8 +349,6 @@ function c_config_init()
 		f:flush()
 		f:close()
 	end
-
-	function c_config_cheats_set(v)
 end
 
 function c_config_done()
