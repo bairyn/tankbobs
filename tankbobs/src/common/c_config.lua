@@ -196,7 +196,7 @@ function c_config_init()
 			error("cannot set reserved key " .. k)
 		end
 
-		if cheats_table[kt] or (type(kt == "string" and kt:find('%.') and cheats_table[kt:substr(kt:find('%.'))]) then
+		if cheats_table[kt] or (type(kt) == "string" and kt:find('%.') and cheats_table[kt:substr(kt:find('%.'))]) then
 			io:stdout.write(kt, " is cheat protected")
 			return
 		end
