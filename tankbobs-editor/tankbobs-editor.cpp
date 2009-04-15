@@ -397,18 +397,18 @@ void Editor::mousePressEvent(QMouseEvent *e)
 					// find the nearest vertex
 					x_selected = &e->x1;
 					y_selected = &e->y1;
-					if(sqrt(pow(*x_selected - x_end, 2) + pow(*y_selected - y_end, 2)) > sqrt(pow(e->x2 - x_end, 2) + pow(e->y2 - y_end, 2)))
+					if(sqrt(pow(*x_selected - x_end + x_scroll, 2) + pow(*y_selected - y_end + y_scroll, 2)) > sqrt(pow(e->x2 - x_end + x_scroll, 2) + pow(e->y2 - y_end + y_scroll, 2)))
 					{
 						x_selected = &e->x2;
 						y_selected = &e->y2;
 					}
-					if(sqrt(pow(*x_selected - x_end, 2) + pow(*y_selected - y_end, 2)) > sqrt(pow(e->x3 - x_end, 2) + pow(e->y3 - y_end, 2)))
+					if(sqrt(pow(*x_selected - x_end + x_scroll, 2) + pow(*y_selected - y_end + y_scroll, 2)) > sqrt(pow(e->x3 - x_end + x_scroll, 2) + pow(e->y3 - y_end + y_scroll, 2)))
 					{
 						x_selected = &e->x3;
 						y_selected = &e->y3;
 					}
 					if(e->quad)
-					if(sqrt(pow(*x_selected - x_end, 2) + pow(*y_selected - y_end, 2)) > sqrt(pow(e->x4 - x_end, 2) + pow(e->y4 - y_end, 2)))
+					if(sqrt(pow(*x_selected - x_end + x_scroll, 2) + pow(*y_selected - y_end + y_scroll, 2)) > sqrt(pow(e->x4 - x_end + x_scroll, 2) + pow(e->y4 - y_end + y_scroll, 2)))
 					{
 						x_selected = &e->x4;
 						y_selected = &e->y4;

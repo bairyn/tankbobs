@@ -31,11 +31,11 @@ end
 
 -- 2d math
 
-function c_radians(degrees)
+function c_math_radians(degrees)
 	return degrees * math.pi / 180
 end
 
-function c_degrees(radians)
+function c_math_degrees(radians)
 	return radians * 180 / math.pi
 end
 

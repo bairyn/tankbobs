@@ -31,14 +31,14 @@ function c_world_init()
 	c_const_set("world_time", 1000)  -- everything is relative to change and seconds.  A speed of 5 means 5 units per second
 
 	c_const_set("tank_health", 100, 1)
-	c_const_set("tank_hullx1", -2.0, 1)
+	c_const_set("tank_hullx1", -1.75, 1)
 	c_const_set("tank_hully1",  2.0, 1)
 	c_const_set("tank_hullx2", -2.0, 1)
 	c_const_set("tank_hully2", -2.0, 1)
 	c_const_set("tank_hullx3",  2.0, 1)
 	c_const_set("tank_hully3", -2.0, 1)
 	c_const_set("tank_hullx4",  2.0, 1)
-	c_const_set("tank_hully4",  2.0, 1)
+	c_const_set("tank_hully4",  1.75, 1)
 
 	c_world_tanks = {}
 end
