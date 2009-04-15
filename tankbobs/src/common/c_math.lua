@@ -193,8 +193,15 @@ c_vec2 =
 	__call = function (self, x, y)
 		-- rectangular coordinates
 		-- an argument check might be good here if it does't impede performance
-		self:vx(x)
-		self:vy(y)
+		if y then
+			-- set rectangular coordinates
+			self:vx(x)
+			self:vy(y)
+		else
+			-- assignment
+			self:vx(x:x())
+			self:vy(x:y())
+		end
 	end
 }
 
@@ -202,3 +209,5 @@ c_vec2 =
 -- example_vector.vx(2.5)
 -- example_vector(3, 4)
 -- example_vector.x = 5
+-- other_vector = c_vec2:new()
+-- other_vector(example_vector)

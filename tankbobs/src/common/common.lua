@@ -52,9 +52,13 @@ function common_init()
 	c_state_init()
 
 	c_tcm_init()
+
+	c_world_init()
 end
 
 function common_done()
+	c_world_done()
+
 	c_tcm_done()
 
 	c_state_done()
@@ -210,4 +214,16 @@ function common_setField(f, v, e)
 			return t[w]
 		end
 	end
+end
+
+-- for classes and inheritance
+function common_new(self, o)
+	o = o or {}
+	common_clone(self, o)
+	if self.init then
+		self.init(o)
+	end
+	setmetatable(o, {__index = self})
+	self.__index = self
+	return o
 end

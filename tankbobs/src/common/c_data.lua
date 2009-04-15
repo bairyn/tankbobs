@@ -43,6 +43,7 @@ function c_data_init()
 		"^c_mods_env$",
 		"^mods_env$",
 		"^setfenv$",
+		"^c_config_cheat",
 		"^debug$"
 	}
 
@@ -59,6 +60,7 @@ function c_data_init()
 		"^c_data",
 		"^c_mods_env$",
 		"^mods_env$",
+		"^c_config_cheat",
 		"^setfenv$"
 	}
 
@@ -80,6 +82,10 @@ function c_data_init()
 	c_const_set("scripts_dir", c_const_get("data_dir") .. "scripts/", 1)
 	c_const_set("icon", c_const_get("data_dir") .. "icon.png", 1)
 	c_const_set("title", "tankbobs", 1)
+
+	c_const_set("max_tanks", "64", 1)
+
+	c_config_cheat_protect("config.game.timescale")
 end
 
 function c_data_done()

@@ -25,10 +25,30 @@ main play state
 
 function st_play_init()
 	gui_conserve()
+
+	for i = 1, c_config_get("config.game.players") + c_config_get("config.game.computers") do
+		if i > c_const_get("max_tanks") then
+			break
+		end
+
+		local tank = c_world_tank:new()
+		table.insert(c_world_tanks, tank)
+
+		if not (c_config_get("config.game.player" .. tostring(i) .. ".name", nil, true)) then
+			c_config_set("config.game.player" .. tostring(i) .. ".name", "Player" .. trstring(i))
+		end
+
+		tank.name = c_config_get("config.game.player" .. tostring(i) .. ".name")
+
+		-- spawn
+		c_world_tank_spawn(tank)
+	end
 end
 
 function st_play_done()
 	gui_finish()
+
+	c_world_tanks = {}
 end
 
 function st_play_click(button, pressed, x, y)
@@ -53,11 +73,24 @@ end
 function st_play_step()
 	-- TODO: use display lists and find a better algorithm for "depth"
 
+	c_world_step()
+
 	-- iterate each time from 1 to hard-coded 20 but render tanks before level 9
 	for i = 1, 20 do
 		for k, v in pairs(c_tcm_current_map.walls) do
 			if i == c_const_get("tcm_tankLevel") then
 				-- render tanks
+				-- TMP: aoeu
+				for k, v in pairs(c_world_tanks) do
+					if(v.exists) then
+						gl.Begin("QUADS")
+							gl.Vertex(v.p[1].x + v.h[1].x, v.p[1].y + v.h[1].y)
+							gl.Vertex(v.p[1].x + v.h[2].x, v.p[1].y + v.h[2].y)
+							gl.Vertex(v.p[1].x + v.h[3].x, v.p[1].y + v.h[3].y)
+							gl.Vertex(v.p[1].x + v.h[4].x, v.p[1].y + v.h[4].y)
+						gl.End()
+					end
+				end
 			end
 
 			if v.l == i then

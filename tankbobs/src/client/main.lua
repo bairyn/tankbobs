@@ -152,6 +152,10 @@ function main_parseArgs(args)
 					return parse(i + 2)
 				end
 			end
+		elseif string.find(args[i], "^-C") then
+			c_config_cheats_set(true)
+		elseif string.find(args[i], "^-n") then
+			c_config_cheats_set(false)
 		else
 			local res = c_mods_argParse(args[i], args, i)
 			if res then

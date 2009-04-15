@@ -18,13 +18,9 @@
 	</font>
 
 	<game>
-		<player1>
-			<name>Player1</name>
-		</player1>
-		<player2>
-			<name>Player2</name>
-		</player2>
+		<timescale>1<timescale>
 		<computers>0</computers>
+		<players>2</computers>
 		<overview>1</overview>
 	</game>
 
@@ -49,18 +45,6 @@
 			<left>276</left> 'LEFT'
 			<right>275</right> 'RIGHT'
 		</player2>
-		<player3>
-			<forward></forward>
-			<back></back>
-			<left></left>
-			<right></right>
-		</player3>
-		<player4>
-			<forward></forward>
-			<back></back>
-			<left></left>
-			<right></right>
-		</player4>
 	</key>
 
 	<renderer>

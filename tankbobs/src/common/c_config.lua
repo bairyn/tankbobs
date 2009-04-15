@@ -33,6 +33,9 @@ function c_config_init()
 	local config = {}
 	local id
 
+	local cheats_enabled = false
+	local cheats_table = {}  -- keys of cheat-protected keys
+
 	local function trim(v)
 		local oldV = v
 		if type(v) == "string" then
@@ -167,8 +170,21 @@ function c_config_init()
 		end
 	end
 
-	function c_config_set(k, v, conf)
+	function c_config_cheats_set(e)
+		cheats_enabled = not not e 
+	end
+
+	function c_config_cheats_get()
+		return cheats_enabled
+	end
+
+	function c_config_cheat_protect(k)
+		table.insert(cheats_table, k)
+	end
+
+	function c_config_set(k, v, conf, kt)
 		conf = conf or config
+		kt = kt or k
 
 		v = trim(v)
 
@@ -180,8 +196,9 @@ function c_config_init()
 			error("cannot set reserved key " .. k)
 		end
 
-		if not conf["r_init"] then
-			c_config_init(conf)
+		if cheats_table[kt] or (type(kt == "string" and kt:find('%.') and cheats_table[kt:substr(kt:find('%.'))]) then
+			io:stdout.write(kt, " is cheat protected")
+			return
 		end
 
 		if type(k) ~= "string" then
@@ -194,12 +211,13 @@ function c_config_init()
 			if type(conf[k:sub(1, pos - 1)]) ~= "table" then
 				conf[k:sub(1, pos - 1)] = {}
 			end
-			c_config_set(k:sub(pos + 1, -1), v, conf[k:sub(1, pos - 1)])
+			c_config_set(k:sub(pos + 1, -1), v, conf[k:sub(1, pos - 1)], kt)
 		end
 	end
 
-	function c_config_get(k, conf, nilOnError)
+	function c_config_get(k, conf, nilOnError, kt)
 		conf = conf or config
+		kt = kt or k
 
 		if k == nil then
 			error("no key for config retrieval")
@@ -210,19 +228,19 @@ function c_config_init()
 		end
 
 		if not (type(k) == "string" and k:find('%.')) and conf[k] == nil then
-			if type(k) == "string" then
+			if type(kt) == "string" then
 				if not nilOnError then
-					error("config value doesn't exist - config " .. k .. " requested")
+					error("config value doesn't exist - config " .. kt .. " requested")
 				end
 				return nil
-			elseif type(k) == "number" then
+			elseif type(kt) == "number" then
 				if not nilOnError then
-					error("config value doesn't exist - id #" .. tostring(tonumber(k)) .. " requested")
+					error("config value doesn't exist - id #" .. tostring(tonumber(kt)) .. " requested")
 				end
 				return nil
 			else
 				if not nilOnError then
-					error("config value doesn't exist - " .. type(k) .. " requested")
+					error("config value doesn't exist - " .. type(kt) .. " requested")
 				end
 				return nil
 			end
@@ -234,7 +252,7 @@ function c_config_init()
 			if pos == nil then
 				return trim(conf[k])
 			else
-				return c_config_get(k:sub(pos + 1, -1), conf[k:sub(1, pos - 1)])
+				return c_config_get(k:sub(pos + 1, -1), conf[k:sub(1, pos - 1)], nilOnError, kt)
 			end
 		end
 	end
@@ -331,6 +349,8 @@ function c_config_init()
 		f:flush()
 		f:close()
 	end
+
+	function c_config_cheats_set(v)
 end
 
 function c_config_done()

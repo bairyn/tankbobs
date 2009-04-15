@@ -55,7 +55,7 @@ format:
 4 bytes number of playerSpawnPoints
 4 bytes number of powerupSpawnPoints
 walls, ...
- -4 bytes id (unique only to other walls)
+ -4 bytes id (unique only to other walls)  -- NOTE: every enitity's id must increment consecutively
  -1 byte: if non-zero, the 4th coordinates are used
  -8 bytes x1 double float
  -8 bytes y1 double float
@@ -119,16 +119,7 @@ end
 
 c_tcm_set =
 {
-	new = function (self, o)
-		o = o or {}
-		common_clone(self, o)
-		if self.init then
-			self.init(o)
-		end
-		setmetatable(o, {__index = self})
-		self.__index = self
-		return o
-	end,
+	new = common_new,
 
 	maps = {},  -- table of maps.  All maps are loaded once
 	name = "",  -- internal name.
@@ -138,16 +129,7 @@ c_tcm_set =
 
 c_tcm_map =
 {
-	new = function (self, o)
-		o = o or {}
-		common_clone(self, o)
-		if self.init then
-			self.init(o)
-		end
-		setmetatable(o, {__index = self})
-		self.__index = self
-		return o
-	end,
+	new = common_new,
 
 	map = "",  -- the filename
 
@@ -172,16 +154,7 @@ c_tcm_map =
 
 c_tcm_wall =
 {
-	new = function (self, o)
-		o = o or {}
-		common_clone(self, o)
-		if self.init then
-			self.init(o)
-		end
-		setmetatable(o, {__index = self})
-		self.__index = self
-		return o
-	end,
+	new = common_new,
 
 	init = function (o)
 		o.p[1] = c_vec2:new()
@@ -200,16 +173,7 @@ c_tcm_wall =
 
 c_tcm_teleporter =
 {
-	new = function (self, o)
-		o = o or {}
-		common_clone(self, o)
-		if self.init then
-			self.init(o)
-		end
-		setmetatable(o, {__index = self})
-		self.__index = self
-		return o
-	end,
+	new = common_new,
 
 	init = function (o)
 		o.p[1] = c_vec2:new()
@@ -222,16 +186,7 @@ c_tcm_teleporter =
 
 c_tcm_playerSpawnPoint =
 {
-	new = function (self, o)
-		o = o or {}
-		common_clone(self, o)
-		if self.init then
-			self.init(o)
-		end
-		setmetatable(o, {__index = self})
-		self.__index = self
-		return o
-	end,
+	new = common_new,
 
 	init = function (o)
 		o.p[1] = c_vec2:new()
@@ -243,16 +198,7 @@ c_tcm_playerSpawnPoint =
 
 c_tcm_powerupSpawnPoint =
 {
-	new = function (self, o)
-		o = o or {}
-		common_clone(self, o)
-		if self.init then
-			self.init(o)
-		end
-		setmetatable(o, {__index = self})
-		self.__index = self
-		return o
-	end,
+	new = common_new,
 
 	init = function (o)
 		o.p[1] = c_vec2:new()
@@ -469,6 +415,12 @@ function c_tcm_read_map(map)
 	end
 
 	i:close()
+
+	-- sort entities based on their id's, so that wall[i] has an id of i - 1
+	table.sort(r.walls, function (e1, e2) return e1.id < e2.id end)
+	table.sort(r.teleporters, function (e1, e2) return e1.id < e2.id end)
+	table.sort(r.playerSpawnPoint, function (e1, e2) return e1.id < e2.id end)
+	table.sort(r.powerupSpawnPoint, function (e1, e2) return e1.id < e2.id end)
 
 	return r;
 end
