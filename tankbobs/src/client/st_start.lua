@@ -37,13 +37,13 @@ function st_start_done()
 end
 
 function st_start_click(button, pressed, x, y)
-	if pressed == 1 then
+	if pressed then
 		c_state_advance()
 	end
 end
 
 function st_start_button(button, pressed)
-	if pressed == 1 then
+	if pressed then
 		if button == 0x1B or button == c_config_get("config.key.quit") then
 			c_state_advance()
 		elseif button == 0x0D or button == c_config_get("config.key.select") then

@@ -71,11 +71,13 @@ function st_options_done()
 end
 
 function st_options_click(button, pressed, x, y)
-	gui_click(x, y)
+	if pressed then
+		gui_click(x, y)
+	end
 end
 
 function st_options_button(button, pressed)
-	if pressed == 0 and options_key then
+	if not pressed and options_key then
 		if button == 0x0D then
 		elseif button == 0x1B then
 			options_key = nil
@@ -86,7 +88,7 @@ function st_options_button(button, pressed)
 			c_config_set(options_key, button)
 			options_key = nil
 		end
-	elseif pressed == 1 and not options_key then
+	elseif pressed and not options_key then
 		if button == c_config_get("config.key.exit") then
 			c_state_new(exit_state)
 		elseif button == 0x1B or button == c_config_get("config.key.quit") then

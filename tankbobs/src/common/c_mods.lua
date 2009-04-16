@@ -73,7 +73,8 @@ function common_clone_except_special(i, o, e)
 						clone_level(v, o[k], e, s .. k)
 					end
 				--+++++++++++++++++++++++++++++++++++++++++++++++--
-				elseif type(v) == "function" then  -- handle functions specially
+				--elseif type(v) == "function" then  -- handle functions specially
+				elseif false then  -- TODO: FIXME: this is broken; mods aren't safe until this is fixed!
 					local do_f = v
 
 					o[k] = function (...)

@@ -59,9 +59,9 @@ function main_init()
 					x = 100 * x / c_config_get("config.renderer.width")
 					y = 100 * y / c_config_get("config.renderer.height")
 					if tankbobs.in_getEventData(lastevent, "intData0") >= 1 and tankbobs.in_getEventData(lastevent, "intData0") <= 5 then
-						c_state_click(tankbobs.in_getEventData(lastevent, "intData0"), 1, x, y)
+						c_state_click(tankbobs.in_getEventData(lastevent, "intData0"), true, x, y)
 					else
-						c_state_click(tankbobs.in_getEventData(lastevent, "intData3"), 1, x, y)
+						c_state_click(tankbobs.in_getEventData(lastevent, "intData3"), true, x, y)
 					end
 				elseif tankbobs.in_getEventData(lastevent, "type") == "mouseup" then
 					local x, y = tankbobs.in_getEventData(lastevent, "intData1"), tankbobs.in_getEventData(lastevent, "intData2")
@@ -69,14 +69,14 @@ function main_init()
 					x = 100 * x / c_config_get("config.renderer.width")
 					y = 100 * y / c_config_get("config.renderer.height")
 					if tankbobs.in_getEventData(lastevent, "intData0") >= 1 and tankbobs.in_getEventData(lastevent, "intData0") <= 5 then
-						c_state_click(tankbobs.in_getEventData(lastevent, "intData0"), 0, x, y)
+						c_state_click(tankbobs.in_getEventData(lastevent, "intData0"), false, x, y)
 					else
-						c_state_click(tankbobs.in_getEventData(lastevent, "intData3"), 0, x, y)
+						c_state_click(tankbobs.in_getEventData(lastevent, "intData3"), false, x, y)
 					end
 				elseif tankbobs.in_getEventData(lastevent, "type") == "keydown" then
-					c_state_button(tankbobs.in_getEventData(lastevent, "intData0"), 1)
+					c_state_button(tankbobs.in_getEventData(lastevent, "intData0"), true)
 				elseif tankbobs.in_getEventData(lastevent, "type") == "keyup" then
-					c_state_button(tankbobs.in_getEventData(lastevent, "intData0"), 0)
+					c_state_button(tankbobs.in_getEventData(lastevent, "intData0"), false)
 				elseif tankbobs.in_getEventData(lastevent, "type") == "mousemove" then
 					local x, y, xrel, yrel = tankbobs.in_getEventData(lastevent, "intData0"), tankbobs.in_getEventData(lastevent, "intData1"), tankbobs.in_getEventData(lastevent, "intData2"), tankbobs.in_getEventData(lastevent, "intData3")
 					yrel = -yrel

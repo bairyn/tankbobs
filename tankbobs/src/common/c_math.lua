@@ -39,7 +39,7 @@ function c_math_degrees(radians)
 	return radians * 180 / math.pi
 end
 
-c_vec2 =
+c_math_vec2 =
 {
 	self =
 	{
@@ -126,31 +126,63 @@ c_vec2 =
 		a:x(va:x() - b:vx())
 		a:y(va:y() - b:vy())
 	end,
+	mul = function (a, b)  -- multiply by scalar
+		a:vx(a:vx() * b)
+		a:vy(a:vy() * b)
+	end,
+	div = function (a, b)
+		a:vx(a:vx() / b)
+		a:vy(a:vy() / b)
+	end,
 	inv = function (self)
 		self:vx(-self:vx())
 		self:vy(-self:vy())
 	end,
 	unit = function (self)
-		r = c_vec2:new()
+		r = c_math_vec2:new()
 		r:vx(self:vx())
 		r:vy(self:vy())
 		r:R(1)
 		return r
 	end,
 	__add = function (a, b)
-		r = c_vec2:new()
+		r = c_math_vec2:new()
 		r:vx(a:vx() + b:vx())
 		r:vy(a:vy() + b:vy())
 		return r
 	end,
+	__mul = function (a, b)
+		if type(b) == "number" then
+			-- scalar multiplication
+			r = c_math_vec2:new()
+			r:vx(a:vx() * b)
+			r:vy(a:vy() * b)
+			return r
+		elseif type(a) == "number" then
+			-- scalar multiplication
+			r = c_math_vec2:new()
+			r:vx(a * b:vx())
+			r:vy(a * b:vy())
+			return r
+		else
+			-- the dot product
+			return a:vx() * b:vx() + a:vy() * b:vy()
+		end
+	end,
+	__div = function (a, b)
+		r = c_math_vec2:new()
+		r:vx(a:vx() / b)
+		r:vy(a:vy() / b)
+		return r
+	end,
 	__sub = function (a, b)
-		r = c_vec2:new()
+		r = c_math_vec2:new()
 		r:vx(a:vx() - b:vx())
 		r:vy(a:vy() - b:vy())
 		return r
 	end,
 	__unm = function (a)
-		r = c_vec2:new()
+		r = c_math_vec2:new()
 		r:vx(-a:vx())
 		r:vy(-a:vy())
 		return r
@@ -205,9 +237,9 @@ c_vec2 =
 	end
 }
 
--- example_vector = c_vec2:new()
+-- example_vector = c_math_vec2:new()
 -- example_vector.vx(2.5)
 -- example_vector(3, 4)
 -- example_vector.x = 5
--- other_vector = c_vec2:new()
+-- other_vector = c_math_vec2:new()
 -- other_vector(example_vector)

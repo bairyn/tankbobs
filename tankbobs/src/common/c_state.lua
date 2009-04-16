@@ -82,11 +82,11 @@ function c_state_done()
 
 	if res ~= nil then
 		if type(res) == "number" or type(res) == "boolean" or type(res) == "string" then
-			error("c_state_done: destroying state " .. c_state_state.cur.name .. " returned an error value: " .. tostring(res))
+			error("c_state_done: state " .. c_state_state.cur.name .. " returned an error value: " .. tostring(res))
 		elseif tostring(res) then
-			error("c_state_done: destroying state " .. c_state_state.cur.name .. " returned an error value (info loss): " .. tostring(res))
+			error("c_state_done: state " .. c_state_state.cur.name .. " returned an error value: " .. tostring(res))
 		else
-			error("c_state_done: destroying state " .. c_state_state.cur.name .. " returned an error value of type: " .. type(res))
+			error("c_state_done: state " .. c_state_state.cur.name .. " returned an error value of type: " .. type(res))
 		end
 	end
 end
@@ -145,7 +145,7 @@ function c_state_click(button, pressed, x, y)  -- should only be called from the
 		if type(res) == "number" or type(res) == "boolean" or type(res) == "string" then
 			error("c_state_click: state " .. c_state_state.cur.name .. " returned an error value: " .. tostring(res))
 		elseif tostring(res) then
-			error("c_state_click: state " .. c_state_state.cur.name .. " returned an error value (info loss): " .. tostring(res))
+			error("c_state_click: state " .. c_state_state.cur.name .. " returned an error value: " .. tostring(res))
 		else
 			error("c_state_click: state " .. c_state_state.cur.name .. " returned an error value of type: " .. type(res))
 		end
@@ -166,7 +166,7 @@ function c_state_button(button, pressed)  -- should only be called from the main
 		if type(res) == "number" or type(res) == "boolean" or type(res) == "string" then
 			error("c_state_button: state " .. c_state_state.cur.name .. " returned an error value: " .. tostring(res))
 		elseif tostring(res) then
-			error("c_state_button: state " .. c_state_state.cur.name .. " returned an error value (info loss): " .. tostring(res))
+			error("c_state_button: state " .. c_state_state.cur.name .. " returned an error value: " .. tostring(res))
 		else
 			error("c_state_button: state " .. c_state_state.cur.name .. " returned an error value of type: " .. type(res))
 		end
@@ -187,7 +187,7 @@ function c_state_mouse(x, y, xrel, yrel)  -- should only be called from the main
 		if type(res) == "number" or type(res) == "boolean" or type(res) == "string" then
 			error("c_state_mouse: state " .. c_state_state.cur.name .. " returned an error value: " .. tostring(res))
 		elseif tostring(res) then
-			error("c_state_mouse: state " .. c_state_state.cur.name .. " returned an error value (info loss): " .. tostring(res))
+			error("c_state_mouse: state " .. c_state_state.cur.name .. " returned an error value: " .. tostring(res))
 		else
 			error("c_state_mouse: state " .. c_state_state.cur.name .. " returned an error value of type: " .. type(res))
 		end
@@ -235,11 +235,11 @@ function c_state_new(state)
 		local res = cur.done()
 		if res ~= nil then
 			if type(res) == "number" or type(res) == "boolean" or type(res) == "string" then
-				error("c_state_new: destroying state " .. cur.name .. " returned an error value: " .. tostring(res))
+				error("c_state_init: state " .. c_state_state.cur.name .. " returned an error value: " .. tostring(res))
 			elseif tostring(res) then
-				error("c_state_new: destroying state " .. cur.name .. " returned an error value (info loss): " .. tostring(res))
+				error("c_state_init: state " .. c_state_state.cur.name .. " returned an error value: " .. tostring(res))
 			else
-				error("c_state_new: destroying state " .. cur.name .. " returned an error value of type: " .. type(res))
+				error("c_state_init: state " .. c_state_state.cur.name .. " returned an error value of type: " .. type(res))
 			end
 		end
 	end
@@ -249,11 +249,11 @@ function c_state_new(state)
 	local res = state.init()
 	if res ~= nil then
 		if type(res) == "number" or type(res) == "boolean" or type(res) == "string" then
-			error("c_state_new: initializing state " .. state.name .. " returned an error value: " .. tostring(res))
+			error("c_state_init: state " .. c_state_state.cur.name .. " returned an error value: " .. tostring(res))
 		elseif tostring(res) then
-			error("c_state_new: initializing state " .. state.name .. " returned an error value (info loss): " .. tostring(res))
+			error("c_state_init: state " .. c_state_state.cur.name .. " returned an error value: " .. tostring(res))
 		else
-			error("c_state_new: initializing state " .. state.name .. " returned an error value of type: " .. type(res))
+			error("c_state_init: state " .. c_state_state.cur.name .. " returned an error value of type: " .. type(res))
 		end
 	end
 

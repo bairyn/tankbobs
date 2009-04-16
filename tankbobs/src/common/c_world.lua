@@ -30,15 +30,21 @@ function c_world_init()
 
 	c_const_set("world_time", 1000)  -- everything is relative to change and seconds.  A speed of 5 means 5 units per second
 
+	-- hull of tank facing right
 	c_const_set("tank_health", 100, 1)
-	c_const_set("tank_hullx1", -1.75, 1)
+	c_const_set("tank_hullx1", -2.0, 1)
 	c_const_set("tank_hully1",  2.0, 1)
 	c_const_set("tank_hullx2", -2.0, 1)
 	c_const_set("tank_hully2", -2.0, 1)
 	c_const_set("tank_hullx3",  2.0, 1)
-	c_const_set("tank_hully3", -2.0, 1)
+	c_const_set("tank_hully3", -1.75, 1)
 	c_const_set("tank_hullx4",  2.0, 1)
 	c_const_set("tank_hully4",  1.75, 1)
+	c_const_set("tank_acceleration", 1, 1)  -- acceleration 1 unit / second
+	c_const_set("tank_friction", 0.125, 1)  -- deceleration caused by friction
+	c_const_set("tank_rotationVelocitySpeed", 0.75, 1)  -- for every second, velocity matches 3/4
+	c_const_set("tank_rotationSpeed", c_math_radians(135), 1)  -- 135 degrees per second
+	c_const_set("tank_defaultRotation", c_math_radians(90), 1)  -- up
 
 	c_world_tanks = {}
 end
@@ -52,12 +58,12 @@ c_world_tank =
 
 	init = function (o)
 		name = "UnnamedPlayer"
-		o.p[1] = c_vec2:new()
-		o.v[1] = c_vec2:new()
-		o.h[1] = c_vec2:new()
-		o.h[2] = c_vec2:new()
-		o.h[3] = c_vec2:new()
-		o.h[4] = c_vec2:new()
+		o.p[1] = c_math_vec2:new()
+		o.v[1] = c_math_vec2:new()
+		o.h[1] = c_math_vec2:new()
+		o.h[2] = c_math_vec2:new()
+		o.h[3] = c_math_vec2:new()
+		o.h[4] = c_math_vec2:new()
 		o.h[1].x = c_const_get("tank_hullx1")
 		o.h[1].y = c_const_get("tank_hully1")
 		o.h[2].x = c_const_get("tank_hullx2")
@@ -72,6 +78,7 @@ c_world_tank =
 	p = {},
 	v = {},
 	h = {},  -- physical box: four vectors of offsets for tanks
+	r = 0,  -- tank's rotation
 	name = "",
 	exists = false,
 	spawning = false,
@@ -87,7 +94,8 @@ c_world_tank_state =
 	forward = false,
 	back = false,
 	right = false,
-	left = false
+	left = false,
+	special = false  -- special causes stronger turning but prevent acceleration or deceleration
 }
 
 function c_world_tank_spawn(tank)
@@ -128,6 +136,7 @@ function c_world_tank_checkSpawn(tank)
 	end
 
 	-- spawn
+	tank.r = c_const_get("tank_defaultRotation")
 	tank.v[1].R = 0  -- no velocity
 	tank.p[1](playerSpawnPoint.p[1])
 	tank.health = c_const_get("tank_health")
@@ -135,9 +144,72 @@ function c_world_tank_checkSpawn(tank)
 	return true
 end
 
+function c_world_intersection(p1, p2)
+	-- test if two polygons intersect.  p1 and p2 both must be convex.  p1's and p2's points are represented by vectors in their table
+end
+
+function c_world_tank_hull(tank)
+	-- return a table of coordinates of tank's hull
+	local c = {}
+
+	for _, v in ipairs(tank.h) do
+		local v = c_math_vec2:new()
+		v(tank.p[1].x + v.x, tank.p[1].y + v.y)
+		table.insert(c, v)
+	end
+
+	return c
+end
+
 function c_world_tank_canSpawn(tank)
-	-- test if spawning interfere with another tank
-	return c_tcm_current_map.playerSpawnPoints[tank.lastSpawnPoint]  -- for now, TMP, only test if the spawn point exists
+	-- see if the spawn point exists
+	if not c_tcm_current_map.playerSpawnPoints[tank.lastSpawnPoint] then
+		return false
+	end
+
+	-- test if spawning interferes with another tank
+	for _, v in pairs(c_world_tanks) do
+		if c_world_intersection(c_world_tank_hull(tank), c_world_tank_hull(v)) then
+			return false
+		end
+	end
+
+	return true
+end
+
+function c_world_tank_step(d, tank)
+	if tank.state.special then
+		if tank.state.left then
+			tank.r = tank.r - d * c_const_get("tank_rotationSpeed") * tank.v[1]
+		end
+
+		if tank.state.right then
+			tank.r = tank.r + d * c_const_get("tank_rotationSpeed") * tank.v[1]  -- turns are related to the velocity of the tank in special mode
+		end
+
+		tank.v[1].t = tank.r
+	else
+		if tank.state.forward then
+			tank.v[1].R = tank.v[1].R + d * c_const_get("tank_acceleration")
+		elseif tank.state.forward then
+			tank.v[1].R = tank.v[1].R + d * c_const_get("tank_deceleration")
+		else
+			-- deceleration is really only caused when the tank isn't accelerating or decelerating.  If it seems strange, you should realize that the tanks have an anti-friction system built into them ;) - note that if friction was always applied then tanks would have a maximum speed
+			tank.v[1].R = tank.v[1].R / 1 + d * c_const_get("tank_friction")
+		end
+
+		if tank.state.left then
+			tank.r = tank.r - d * c_const_get("tank_rotationSpeed")
+		end
+
+		if tank.state.right then
+			tank.r = tank.r + d * c_const_get("tank_rotationSpeed")
+		end
+
+		tank.v[1].t = tank.v[1].t - d * c_const_get("tank_rotationVelocitySpeed") * (tank.v[1].t - tank.r)
+	end
+
+	tank.p[1]:add(tank.v[1] * d)
 end
 
 function c_world_step()
@@ -150,7 +222,8 @@ function c_world_step()
 	lastTime = tankbobs.t_getTicks()
 
 	-- check for tanks needing spawn
-	for k, v in pairs(c_world_tanks) do
+	for _, v in pairs(c_world_tanks) do
 		c_world_tank_checkSpawn(v)
+		c_world_tank_step(d, v)
 	end
 end

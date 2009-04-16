@@ -52,45 +52,58 @@ function st_play_done()
 end
 
 function st_play_click(button, pressed, x, y)
-	gui_click(x, y)
+	if pressed then
+		gui_click(x, y)
+	end
 end
 
 function st_play_button(button, pressed)
-	if pressed == 1 then
+	if pressed then
 		if button == 0x1B or button == c_config_get("config.key.quit") then
 			c_state_advance()
 		elseif button == c_config_get("config.key.exit") then
 			c_state_new(exit_state)
-		else
-			for i = 1, c_config_get("config.game.players") + c_config_get("config.game.computers") do
-				if not (c_config_get("config.key.player" .. tostring(i) .. ".forward", nil, true)) then
-					c_config_set("config.key.player" .. tostring(i) .. ".forward", false)
-				end
-				if not (c_config_get("config.key.player" .. tostring(i) .. ".back", nil, true)) then
-					c_config_set("config.key.player" .. tostring(i) .. ".back", false)
-				end
-				if not (c_config_get("config.key.player" .. tostring(i) .. ".right", nil, true)) then
-					c_config_set("config.key.player" .. tostring(i) .. ".right", false)
-				end
-				if not (c_config_get("config.key.player" .. tostring(i) .. ".left", nil, true)) then
-					c_config_set("config.key.player" .. tostring(i) .. ".left", false)
-				end
-
-				if button == c_config_get("config.key.player" .. tostring(i) .. ".forward") then
-					c_world_tanks[i].state.forward = pressed
-				end
-				if button == c_config_get("config.key.player" .. tostring(i) .. ".back") then
-					c_world_tanks[i].state.back = pressed
-				end
-				if button == c_config_get("config.key.player" .. tostring(i) .. ".left") then
-					c_world_tanks[i].state.left = pressed
-				end
-				if button == c_config_get("config.key.player" .. tostring(i) .. ".right") then
-					c_world_tanks[i].state.right = pressed
-				end
-			end
 		end
 		gui_button(button)
+	end
+
+	for i = 1, c_config_get("config.game.players") + c_config_get("config.game.computers") do
+		if not (c_config_get("config.key.player" .. tostring(i) .. ".forward", nil, true)) then
+			c_config_set("config.key.player" .. tostring(i) .. ".forward", false)
+		end
+		if not (c_config_get("config.key.player" .. tostring(i) .. ".back", nil, true)) then
+			c_config_set("config.key.player" .. tostring(i) .. ".back", false)
+		end
+		if not (c_config_get("config.key.player" .. tostring(i) .. ".right", nil, true)) then
+			c_config_set("config.key.player" .. tostring(i) .. ".right", false)
+		end
+		if not (c_config_get("config.key.player" .. tostring(i) .. ".left", nil, true)) then
+			c_config_set("config.key.player" .. tostring(i) .. ".left", false)
+		end
+		if not (c_config_get("config.key.player" .. tostring(i) .. ".special", nil, true)) then
+			c_config_set("config.key.player" .. tostring(i) .. ".special", false)
+		end
+
+		if button == c_config_get("config.key.player" .. tostring(i) .. ".forward") then
+print("forward", pressed)
+			c_world_tanks[i].state.forward = pressed
+		end
+		if button == c_config_get("config.key.player" .. tostring(i) .. ".back") then
+print("back", pressed)
+			c_world_tanks[i].state.back = pressed
+		end
+		if button == c_config_get("config.key.player" .. tostring(i) .. ".left") then
+print("left", pressed)
+			c_world_tanks[i].state.left = pressed
+		end
+		if button == c_config_get("config.key.player" .. tostring(i) .. ".right") then
+print("right", pressed)
+			c_world_tanks[i].state.right = pressed
+		end
+		if button == c_config_get("config.key.player" .. tostring(i) .. ".special") then
+print("special", pressed)
+			c_world_tanks[i].state.special = pressed
+		end
 	end
 end
 
@@ -111,12 +124,16 @@ function st_play_step()
 				-- TMP: aoeu
 				for k, v in pairs(c_world_tanks) do
 					if(v.exists) then
-						gl.Begin("QUADS")
-							gl.Vertex(v.p[1].x + v.h[1].x, v.p[1].y + v.h[1].y)
-							gl.Vertex(v.p[1].x + v.h[2].x, v.p[1].y + v.h[2].y)
-							gl.Vertex(v.p[1].x + v.h[3].x, v.p[1].y + v.h[3].y)
-							gl.Vertex(v.p[1].x + v.h[4].x, v.p[1].y + v.h[4].y)
-						gl.End()
+						gl.PushMatrix()
+							gl.Translate(v.p[1].x, v.p[1].y, 0)
+							gl.Rotate(v.r, 0, 0, 1)
+							gl.Begin("QUADS")
+								gl.Vertex(v.h[1].x, v.h[1].y)
+								gl.Vertex(v.h[2].x, v.h[2].y)
+								gl.Vertex(v.h[3].x, v.h[3].y)
+								gl.Vertex(v.h[4].x, v.h[4].y)
+							gl.End()
+						gl.PopMatrix()
 					end
 				end
 			end

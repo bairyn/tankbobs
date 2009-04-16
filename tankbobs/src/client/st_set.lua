@@ -38,11 +38,13 @@ function st_set_done()
 end
 
 function st_set_click(button, pressed, x, y)
-	gui_click(x, y)
+	if pressed then
+		gui_click(x, y)
+	end
 end
 
 function st_set_button(button, pressed)
-	if pressed == 1 then
+	if pressed then
 		if button == 0x1B or button == c_config_get("config.key.quit") then
 			c_state_advance()
 		elseif button == c_config_get("config.key.exit") then

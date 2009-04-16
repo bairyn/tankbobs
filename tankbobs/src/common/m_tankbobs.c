@@ -146,7 +146,7 @@ static const struct luaL_Reg tankbobs[] =
 				intData0: the numerical value of the key pressed, eg decimal 96
 					for the letter 'a'
 				strData0: the string value of the key pressed, eg "a" for the
-				letter 'a'
+					letter 'a'
 			SDL_MOUSEMOTION
 				type: "mousemove"
 				intData0: x absolute cursor position
