@@ -85,23 +85,18 @@ function st_play_button(button, pressed)
 		end
 
 		if button == c_config_get("config.key.player" .. tostring(i) .. ".forward") then
-print("forward", pressed)
 			c_world_tanks[i].state.forward = pressed
 		end
 		if button == c_config_get("config.key.player" .. tostring(i) .. ".back") then
-print("back", pressed)
 			c_world_tanks[i].state.back = pressed
 		end
 		if button == c_config_get("config.key.player" .. tostring(i) .. ".left") then
-print("left", pressed)
 			c_world_tanks[i].state.left = pressed
 		end
 		if button == c_config_get("config.key.player" .. tostring(i) .. ".right") then
-print("right", pressed)
 			c_world_tanks[i].state.right = pressed
 		end
 		if button == c_config_get("config.key.player" .. tostring(i) .. ".special") then
-print("special", pressed)
 			c_world_tanks[i].state.special = pressed
 		end
 	end
@@ -126,7 +121,7 @@ function st_play_step()
 					if(v.exists) then
 						gl.PushMatrix()
 							gl.Translate(v.p[1].x, v.p[1].y, 0)
-							gl.Rotate(v.r, 0, 0, 1)
+							gl.Rotate(c_math_degrees(v.r), 0, 0, 1)
 							gl.Begin("QUADS")
 								gl.Vertex(v.h[1].x, v.h[1].y)
 								gl.Vertex(v.h[2].x, v.h[2].y)

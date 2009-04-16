@@ -34,12 +34,12 @@ function c_world_init()
 	c_const_set("tank_health", 100, 1)
 	c_const_set("tank_hullx1", -2.0, 1)
 	c_const_set("tank_hully1",  2.0, 1)
-	c_const_set("tank_hullx2", -2.0, 1)
+	c_const_set("tank_hullx2", -1.0, 1)
 	c_const_set("tank_hully2", -2.0, 1)
-	c_const_set("tank_hullx3",  2.0, 1)
-	c_const_set("tank_hully3", -1.75, 1)
+	c_const_set("tank_hullx3",  1.0, 1)
+	c_const_set("tank_hully3", -2.0, 1)
 	c_const_set("tank_hullx4",  2.0, 1)
-	c_const_set("tank_hully4",  1.75, 1)
+	c_const_set("tank_hully4",  2.0, 1)
 	c_const_set("tank_acceleration", 1, 1)  -- acceleration 1 unit / second
 	c_const_set("tank_friction", 0.125, 1)  -- deceleration caused by friction
 	c_const_set("tank_rotationVelocitySpeed", 0.75, 1)  -- for every second, velocity matches 3/4
@@ -136,6 +136,7 @@ function c_world_tank_checkSpawn(tank)
 	end
 
 	-- spawn
+	tank.spawning = false
 	tank.r = c_const_get("tank_defaultRotation")
 	tank.v[1].R = 0  -- no velocity
 	tank.p[1](playerSpawnPoint.p[1])
@@ -180,11 +181,11 @@ end
 function c_world_tank_step(d, tank)
 	if tank.state.special then
 		if tank.state.left then
-			tank.r = tank.r - d * c_const_get("tank_rotationSpeed") * tank.v[1]
+			tank.r = tank.r + d * c_const_get("tank_rotationSpeed") * tank.v[1].R
 		end
 
 		if tank.state.right then
-			tank.r = tank.r + d * c_const_get("tank_rotationSpeed") * tank.v[1]  -- turns are related to the velocity of the tank in special mode
+			tank.r = tank.r - d * c_const_get("tank_rotationSpeed") * tank.v[1].R  -- turns are related to the velocity of the tank in special mode
 		end
 
 		tank.v[1].t = tank.r
@@ -199,11 +200,11 @@ function c_world_tank_step(d, tank)
 		end
 
 		if tank.state.left then
-			tank.r = tank.r - d * c_const_get("tank_rotationSpeed")
+			tank.r = tank.r + d * c_const_get("tank_rotationSpeed")
 		end
 
 		if tank.state.right then
-			tank.r = tank.r + d * c_const_get("tank_rotationSpeed")
+			tank.r = tank.r - d * c_const_get("tank_rotationSpeed")
 		end
 
 		tank.v[1].t = tank.v[1].t - d * c_const_get("tank_rotationVelocitySpeed") * (tank.v[1].t - tank.r)
