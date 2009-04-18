@@ -146,6 +146,7 @@ function c_world_tank_checkSpawn(tank)
 	-- spawn
 	tank.spawning = false
 	tank.r = c_const_get("tank_defaultRotation")
+	tank.v[1].t = c_const_get("tank_defaultRotation")
 	tank.v[1].R = 0  -- no velocity
 	tank.p[1](playerSpawnPoint.p[1])
 	tank.health = c_const_get("tank_health")
