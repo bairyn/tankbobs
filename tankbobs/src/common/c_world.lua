@@ -23,6 +23,9 @@ c_world.lua
 world and physics
 --]]
 
+--TODO: knockback and damage for hitting world.  A powerup will protect the front.  another will protect the back and sides.  Each will do so in exchange for a slight decrease in acceleration.
+--TODO: damage is noticeably higher in special mode.
+
 local lastTime = 0
 
 function c_world_init()
@@ -34,13 +37,19 @@ function c_world_init()
 	c_const_set("tank_health", 100, 1)
 	c_const_set("tank_hullx1", -2.0, 1)
 	c_const_set("tank_hully1",  2.0, 1)
-	c_const_set("tank_hullx2", -1.0, 1)
+	c_const_set("tank_hullx2", -2.0, 1)
 	c_const_set("tank_hully2", -2.0, 1)
-	c_const_set("tank_hullx3",  1.0, 1)
-	c_const_set("tank_hully3", -2.0, 1)
+	c_const_set("tank_hullx3",  2.0, 1)
+	c_const_set("tank_hully3", -1.0, 1)
 	c_const_set("tank_hullx4",  2.0, 1)
-	c_const_set("tank_hully4",  2.0, 1)
-	c_const_set("tank_acceleration", 1, 1)  -- acceleration 1 unit / second
+	c_const_set("tank_hully4",  1.0, 1)
+	c_const_set("tank_deceleration", -0.875, 1)
+	c_const_set("tank_acceleration1", 4, 1)
+	c_const_set("tank_acceleration2", 2, 1)
+	c_const_set("tank_acceleration3", 1, 1)  -- acceleration 1 unit / second
+	c_const_set("tank_acceleration3Speed", 4, 1)
+	c_const_set("tank_acceleration2Speed", 2, 1)
+	--NEXT: 3 different acceleration speeds
 	c_const_set("tank_friction", 0.125, 1)  -- deceleration caused by friction
 	c_const_set("tank_rotationVelocitySpeed", 0.75, 1)  -- for every second, velocity matches 3/4
 	c_const_set("tank_rotationSpeed", c_math_radians(135), 1)  -- 135 degrees per second
@@ -58,12 +67,12 @@ c_world_tank =
 
 	init = function (o)
 		name = "UnnamedPlayer"
-		o.p[1] = c_math_vec2:new()
-		o.v[1] = c_math_vec2:new()
-		o.h[1] = c_math_vec2:new()
-		o.h[2] = c_math_vec2:new()
-		o.h[3] = c_math_vec2:new()
-		o.h[4] = c_math_vec2:new()
+		o.p[1] = tankbobs.m_vec2()
+		o.v[1] = tankbobs.m_vec2()
+		o.h[1] = tankbobs.m_vec2()
+		o.h[2] = tankbobs.m_vec2()
+		o.h[3] = tankbobs.m_vec2()
+		o.h[4] = tankbobs.m_vec2()
 		o.h[1].x = c_const_get("tank_hullx1")
 		o.h[1].y = c_const_get("tank_hully1")
 		o.h[2].x = c_const_get("tank_hullx2")
@@ -154,7 +163,7 @@ function c_world_tank_hull(tank)
 	local c = {}
 
 	for _, v in ipairs(tank.h) do
-		local v = c_math_vec2:new()
+		local v = tankbobs.m_vec2()
 		v(tank.p[1].x + v.x, tank.p[1].y + v.y)
 		table.insert(c, v)
 	end
@@ -181,18 +190,24 @@ end
 function c_world_tank_step(d, tank)
 	if tank.state.special then
 		if tank.state.left then
-			tank.r = tank.r + d * c_const_get("tank_rotationSpeed") * tank.v[1].R
+			tank.r = tank.r + d * c_const_get("tank_rotationSpeed") * tank.v[1].R / c_math_degrees(1)
 		end
 
 		if tank.state.right then
-			tank.r = tank.r - d * c_const_get("tank_rotationSpeed") * tank.v[1].R  -- turns are related to the velocity of the tank in special mode
+			tank.r = tank.r - d * c_const_get("tank_rotationSpeed") * tank.v[1].R / c_math_degrees(1)  -- turns are related to the velocity of the tank in special mode
 		end
 
 		tank.v[1].t = tank.r
 	else
 		if tank.state.forward then
-			tank.v[1].R = tank.v[1].R + d * c_const_get("tank_acceleration")
-		elseif tank.state.forward then
+			if tank.v[1].R >= c_const_get("tank_acceleration3Speed") then
+				tank.v[1].R = tank.v[1].R + d * c_const_get("tank_acceleration3")
+			elseif tank.v[1].R >= c_const_get("tank_acceleration2Speed") then
+				tank.v[1].R = tank.v[1].R + d * c_const_get("tank_acceleration2")
+			else
+				tank.v[1].R = tank.v[1].R + d * c_const_get("tank_acceleration1")
+			end
+		elseif tank.state.back then
 			tank.v[1].R = tank.v[1].R + d * c_const_get("tank_deceleration")
 		else
 			-- deceleration is really only caused when the tank isn't accelerating or decelerating.  If it seems strange, you should realize that the tanks have an anti-friction system built into them ;) - note that if friction was always applied then tanks would have a maximum speed

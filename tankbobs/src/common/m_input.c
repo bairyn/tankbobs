@@ -59,6 +59,10 @@ typedef struct
 	void  *next;
 } in_sdlevent;
 
+void in_init(lua_State *L)
+{
+}
+
 /* TODO: remove unnecessary triple and double pointers */
 static void in_private_sdleventInit(in_sdlevent ***pE)
 {

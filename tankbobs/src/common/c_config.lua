@@ -297,7 +297,9 @@ function c_config_init()
 
 		local f, message = os.remove(c_const_get("user_conf"))
 		if not f then
-			io.stderr:write("Warning: could not remove '", c_const_get("user_dir"), c_const_get("user_conf"), " for new config file (this will happen on the first run) - ", message, '\n')
+			if c_const_get("debug") then
+				io.stderr:write("Warning: could not remove the configuration file: '", c_const_get("user_dir"), c_const_get("user_conf"), "'", message, '\n')
+			end
 		end
 
 		local f, message = io.open(c_const_get("user_conf"), "w+")

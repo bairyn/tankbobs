@@ -37,6 +37,10 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 
 extern Uint8 init;
 
+void io_init(lua_State *l)
+{
+}
+
 int io_getHomeDirectory(lua_State *L)
 {
 	const char *userdir;

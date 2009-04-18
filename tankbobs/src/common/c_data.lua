@@ -54,6 +54,8 @@ function c_data_init()
 		"done$",
 		"^io$",
 		"^tankbobs$",
+		"^tankbobs.vec2Meta$",
+		"^tankbobs",
 		"^string$",
 		"^debug$",
 		"^c_conf",

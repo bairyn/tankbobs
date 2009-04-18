@@ -30,40 +30,51 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 #include "common.h"
 
 #if defined(__FILE) && defined(__LINE) && defined(TDEBUG)
-#define CHECKINIT(i, L)                                                        \
-if(!i)                                                                         \
-{                                                                              \
-	char buf[1024];                                                            \
-	sprintf(buf, "module used before module initialization on line %d of %s.", \
-		__LINE, __FILE);                                                       \
-	lua_pushstring(L, buf);                                                    \
-	lua_error(L);                                                              \
-}
+#define CHECKINIT(i, L)                                                            \
+do                                                                                 \
+{                                                                                  \
+	if(!i)                                                                         \
+	{                                                                              \
+		char buf[1024];                                                            \
+		sprintf(buf, "module used before module initialization on line %d of %s.", \
+			__LINE, __FILE);                                                       \
+		lua_pushstring(L, buf);                                                    \
+		lua_error(L);                                                              \
+	}                                                                              \
+} while(0)
 #elif defined(__FILE__) && defined(__LINE__) && defined(TDEBUG)
-#define CHECKINIT(i, L)                                                        \
-if(!i)                                                                         \
-{                                                                              \
-	char buf[1024];                                                            \
-	sprintf(buf, "module used before module initialization on line %d of %s.", \
-		__LINE__, __FILE__);                                                   \
-	lua_pushstring(L, buf);                                                    \
-	lua_error(L);                                                              \
-}
+#define CHECKINIT(i, L)                                                            \
+do                                                                                 \
+{                                                                                  \
+	if(!i)                                                                         \
+	{                                                                              \
+		char buf[1024];                                                            \
+		sprintf(buf, "module used before module initialization on line %d of %s.", \
+			__LINE__, __FILE__);                                                   \
+		lua_pushstring(L, buf);                                                    \
+		lua_error(L);                                                              \
+	}                                                                              \
+} while(0)
 #else
-#define CHECKINIT(i, L)                                                        \
-if(!i)                                                                         \
-{                                                                              \
-	lua_pushstring(L, "module used before module initialization.");            \
-	lua_error(L);                                                              \
-}
+#define CHECKINIT(i, L)                                                            \
+do                                                                                 \
+{                                                                                  \
+	if(!i)                                                                         \
+	{                                                                              \
+		lua_pushstring(L, "module used before module initialization.");            \
+		lua_error(L);                                                              \
+	}                                                                              \
+} while(0)
 #endif
 
 /* m_tankbobs.c */
+void t_init(lua_State *L);
 int t_initialize(lua_State *L);
 int t_quit(lua_State *L);
 int t_getTicks(lua_State *L);
 
 /* m_input.c */
+void in_init(lua_State *L);
 int in_getEvents(lua_State *L);
 int in_getEventData(lua_State *L);
 int in_nextEvent(lua_State *L);
@@ -73,6 +84,7 @@ int in_grabMouse(lua_State *L);
 int in_isGrabbed(lua_State *L);
 
 /* m_io.c */
+void io_init(lua_State *L);
 int io_getHomeDirectory(lua_State *L);
 int io_getInt(lua_State *L);
 int io_getShort(lua_State *L);
@@ -83,6 +95,7 @@ int io_getStr(lua_State *L);
 int io_getStrL(lua_State *L);
 
 /* m_renderer.c */
+void r_init(lua_State *L);
 int r_initialize(lua_State *L);
 int r_checkRenderer(lua_State *L);
 int r_newWindow(lua_State *L);
@@ -92,5 +105,27 @@ int r_newFont(lua_State *L);
 int r_freeFont(lua_State *L);
 int r_drawCharacter(lua_State *L);
 void r_quitFreeType(void);
+
+/* m_math.c */
+void m_init(lua_State *L);
+int m_vec2(lua_State *L);
+int m_vec2_index(lua_State *L);
+int m_vec2_newindex(lua_State *L);
+int m_vec2_unify(lua_State *L);
+int m_vec2_unit(lua_State *L);
+int m_vec2___add(lua_State *L);
+int m_vec2_add(lua_State *L);
+int m_vec2___sub(lua_State *L);
+int m_vec2_sub(lua_State *L);
+int m_vec2___mul(lua_State *L);
+int m_vec2_mul(lua_State *L);
+int m_vec2___div(lua_State *L);
+int m_vec2_div(lua_State *L);
+int m_vec2_unm(lua_State *L);
+int m_vec2_len(lua_State *L);
+int m_vec2_call(lua_State *L);
+int m_vec2_inv(lua_State *L);
+int m_radians(lua_State *L);
+int m_degrees(lua_State *L);
 
 #endif

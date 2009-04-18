@@ -47,6 +47,10 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 
 Uint8 init = false;
 
+void t_init(lua_State *L)
+{
+}
+
 int t_initialize(lua_State *L)
 {
 	int extra = lua_toboolean(L, -1);
@@ -292,11 +296,22 @@ static const struct luaL_Reg tankbobs[] =
 	{"in_isGrabbed", in_isGrabbed}, /* is cursor grabbed */
 		/* no args, 1 and only return is boolean of whether or not cursor is
 			grabbed */
+
+	/* math.c */
+	{"m_vec2", m_vec2}, /* new vector */
+		/* no arguments are passed; the vector is returned */
+	{"m_radians", m_radians}, /* convert from degrees to radians */
+		/* the 1st argument is the degrees; the radians is returned */
 	{NULL, NULL}
 };
 
 int luaopen_tankbobs(lua_State *L)
 {
+	t_init(L);
+	in_init(L);
+	io_init(L);
+	r_init(L);
+	m_init(L);
 	luaL_register(L, "tankbobs", tankbobs);
 	return 1;
 }

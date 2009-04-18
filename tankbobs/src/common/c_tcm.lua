@@ -157,10 +157,10 @@ c_tcm_wall =
 	new = common_new,
 
 	init = function (o)
-		o.p[1] = c_math_vec2:new()
-		o.p[2] = c_math_vec2:new()
-		o.p[3] = c_math_vec2:new()
-		o.p[4] = c_math_vec2:new()
+		o.p[1] = tankbobs.m_vec2()
+		o.p[2] = tankbobs.m_vec2()
+		o.p[3] = tankbobs.m_vec2()
+		o.p[4] = tankbobs.m_vec2()
 		o.l = c_const_get("tcm_tankLevel")
 	end,
 
@@ -176,7 +176,7 @@ c_tcm_teleporter =
 	new = common_new,
 
 	init = function (o)
-		o.p[1] = c_math_vec2:new()
+		o.p[1] = tankbobs.m_vec2()
 	end,
 
 	id = 0,
@@ -189,7 +189,7 @@ c_tcm_playerSpawnPoint =
 	new = common_new,
 
 	init = function (o)
-		o.p[1] = c_math_vec2:new()
+		o.p[1] = tankbobs.m_vec2()
 	end,
 
 	id = 0,
@@ -201,7 +201,7 @@ c_tcm_powerupSpawnPoint =
 	new = common_new,
 
 	init = function (o)
-		o.p[1] = c_math_vec2:new()
+		o.p[1] = tankbobs.m_vec2()
 		o.enabledPowerups.foo = false
 	end,
 

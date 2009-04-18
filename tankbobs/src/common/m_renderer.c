@@ -57,6 +57,10 @@ typedef struct
 
 static FT_Library ft;
 
+void r_init(lua_State *L)
+{
+}
+
 int r_initialize(lua_State *L)
 {
 	CHECKINIT(init, L);
