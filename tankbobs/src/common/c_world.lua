@@ -10,7 +10,6 @@ This file is part of Tankbobs.
 
 	Tankbobs is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	GNU General Public License for more details.
 
 	You should have received a copy of the GNU General Public License
@@ -43,16 +42,16 @@ function c_world_init()
 	c_const_set("tank_hully3", -1.0, 1)
 	c_const_set("tank_hullx4",  2.0, 1)
 	c_const_set("tank_hully4",  1.0, 1)
-	c_const_set("tank_deceleration", -0.875, 1)
-	c_const_set("tank_acceleration1", 4, 1)
-	c_const_set("tank_acceleration2", 2, 1)
-	c_const_set("tank_acceleration3", 1, 1)  -- acceleration 1 unit / second
+	c_const_set("tank_deceleration", -1.75, 1)
+	c_const_set("tank_acceleration1", 16, 1)
+	c_const_set("tank_acceleration2", 4, 1)
+	c_const_set("tank_acceleration3", 2, 1)  -- acceleration 1 unit / second
 	c_const_set("tank_acceleration3Speed", 4, 1)
 	c_const_set("tank_acceleration2Speed", 2, 1)
-	--NEXT: 3 different acceleration speeds
-	c_const_set("tank_friction", 0.125, 1)  -- deceleration caused by friction
-	c_const_set("tank_rotationVelocitySpeed", 0.75, 1)  -- for every second, velocity matches 3/4
+	c_const_set("tank_friction", 0.75, 1)  -- deceleration caused by friction (~speed *= 1 - friction)
+	c_const_set("tank_rotationVelocitySpeed", 0.75, 1)  -- for every second, velocity matches 3/4 rotation
 	c_const_set("tank_rotationSpeed", c_math_radians(135), 1)  -- 135 degrees per second
+	c_const_set("tank_rotationSpecialSpeed", c_math_degrees(1) / 3.5, 1)
 	c_const_set("tank_defaultRotation", c_math_radians(90), 1)  -- up
 
 	c_world_tanks = {}
@@ -190,11 +189,11 @@ end
 function c_world_tank_step(d, tank)
 	if tank.state.special then
 		if tank.state.left then
-			tank.r = tank.r + d * c_const_get("tank_rotationSpeed") * tank.v[1].R / c_math_degrees(1)
+			tank.r = tank.r + d * c_const_get("tank_rotationSpeed") * tank.v[1].R / c_const_get("tank_rotationSpecialSpeed")
 		end
 
 		if tank.state.right then
-			tank.r = tank.r - d * c_const_get("tank_rotationSpeed") * tank.v[1].R / c_math_degrees(1)  -- turns are related to the velocity of the tank in special mode
+			tank.r = tank.r - d * c_const_get("tank_rotationSpeed") * tank.v[1].R / c_const_get("tank_rotationSpecialSpeed")  -- turns are related to the velocity of the tank in special mode
 		end
 
 		tank.v[1].t = tank.r
@@ -211,7 +210,7 @@ function c_world_tank_step(d, tank)
 			tank.v[1].R = tank.v[1].R + d * c_const_get("tank_deceleration")
 		else
 			-- deceleration is really only caused when the tank isn't accelerating or decelerating.  If it seems strange, you should realize that the tanks have an anti-friction system built into them ;) - note that if friction was always applied then tanks would have a maximum speed
-			tank.v[1].R = tank.v[1].R / 1 + d * c_const_get("tank_friction")
+			tank.v[1].R = tank.v[1].R / (1 + d * (1 - c_const_get("tank_friction")))
 		end
 
 		if tank.state.left then
