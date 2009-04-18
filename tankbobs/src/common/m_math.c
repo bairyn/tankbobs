@@ -170,6 +170,8 @@ int m_vec2_index(lua_State *L)
 	v = CHECKVEC(L, 1);
 	index_s = luaL_checkstring(L, 2);
 	index = *index_s;
+	if(index == 'v')
+		index = *(index_s + 1);
 
 	switch(index)
 	{
@@ -207,7 +209,7 @@ int m_vec2_index(lua_State *L)
 				message = CDLL_FUNCTION("tstr", "tstr_new", tstr *(*)(void))
 					();
 				CDLL_FUNCTION("tstr", "tstr_base_set", void(*)(tstr *, const char *))
-					(message, "m_vec2_newindex: invalid index for vec2: ");
+					(message, "m_vec2_index: invalid index for vec2: ");
 				CDLL_FUNCTION("tstr", "tstr_cat", void(*)(tstr *, const char *))
 					(message, index_s);
 				CDLL_FUNCTION("tstr", "tstr_base_cat", void(*)(tstr *, const char *))
@@ -236,6 +238,8 @@ int m_vec2_newindex(lua_State *L)
 	v = CHECKVEC(L, 1);
 	index = *luaL_checkstring(L, 2);
 	val = luaL_checknumber(L, 3);
+	if(index == 'v')
+		index = *(luaL_checkstring(L, 2) + 1);
 
 	switch(index)
 	{
@@ -659,4 +663,131 @@ int m_vec2_inv(lua_State *L)
 	v->R = -v->R;
 
 	return 0;
+}
+
+static double m_private_determinant(double v1x, double v1y, double v2x, double v2y)
+{
+	return v1x * v2y - v1y * v2x;
+}
+
+int m_edge(lua_State *L)
+{
+	double det, t, u;
+	vec2_t *l1p1, *l1p2, *l2p1, *l2p2, *v;
+
+	CHECKINIT(init, L);
+
+	l1p1 = CHECKVEC(L, 1);
+	l1p2 = CHECKVEC(L, 2);
+	l2p1 = CHECKVEC(L, 3);
+	l2p2 = CHECKVEC(L, 4);
+
+	det = m_private_determinant(l1p2->x - l1p1->x, l1p2->y - l1p1->y, l2p1->x - l2p2->x, l2p1->y - l2p2->y);
+	t = m_private_determinant(l2p1->x - l1p1->x, l2p1->y - l1p1->y, l2p1->x - l2p2->x, l2p1->y - l2p2->y);
+	u = m_private_determinant(l1p2->x - l1p1->x, l1p2->y - l1p1->y, l2p1->x - l1p1->x, l2p1->y - l1p1->y);
+
+	if(t < 0 || t > 0 || u < 0 || u > 1)
+	{
+		lua_pushboolean(L, false);
+		return 1;
+	}
+
+	lua_pushboolean(L, true);
+
+	v = lua_newuserdata(L, sizeof(vec2_t));
+
+	luaL_getmetatable(L, MATH_METATABLE);
+	lua_setmetatable(L, -2);
+
+	v->x = (1 - t) * l1p1->x + t * l1p2->x;
+	v->y = (1 - t) * l1p1->y + t * l1p2->y;
+	v->R = sqrt(v->x * v->x + v->y * v->y);
+	v->t = atan(v->y / v->x);
+	if(v->x < 0.0 && v->y < 0.0)
+		v->t += 180;
+	else if(v->x < 0.0)
+		v->t += 90;
+	else if(v->y < 0.0)
+		v->t += 270;
+
+	return 2;
+}
+
+static int m_private_edge(vec2_t *l1p1, vec2_t *l1p2, vec2_t *l2p1, vec2_t *l2p2)  /* non-Lua version */
+{
+	double det, t, u;
+
+	det = m_private_determinant(l1p2->x - l1p1->x, l1p2->y - l1p1->y, l2p1->x - l2p2->x, l2p1->y - l2p2->y);
+	t = m_private_determinant(l2p1->x - l1p1->x, l2p1->y - l1p1->y, l2p1->x - l2p2->x, l2p1->y - l2p2->y);
+	u = m_private_determinant(l1p2->x - l1p1->x, l1p2->y - l1p1->y, l2p1->x - l1p1->x, l2p1->y - l1p1->y);
+
+	if(t < 0 || t > 0 || u < 0 || u > 1)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+#define MAX_VERTICES 12
+
+int m_polygon(lua_State *L)
+{
+	int i, j;
+
+	CHECKINIT(init, L);
+
+	{
+		int num1 = ((lua_objlen(L, 1)) > (1) ? (lua_objlen(L, 1)) : (1));
+		int num2 = ((lua_objlen(L, 2)) > (1) ? (lua_objlen(L, 2)) : (1));
+		vec2_t *p1_b[MAX_VERTICES];
+		vec2_t *p2_b[MAX_VERTICES];
+		vec2_t **p1 = &p1_b[0];
+		vec2_t **p2 = &p2_b[0];
+
+		if(num1 > sizeof(p1_b))
+			p1 = malloc(num1 * sizeof(vec2_t *));
+		if(num2 > sizeof(p2_b))
+			p2 = malloc(num2 * sizeof(vec2_t *));
+
+		i = 0;
+		lua_pushnil(L);
+		while(lua_next(L, 1))
+		{
+			p1[i++] = CHECKVEC(L, -1);
+
+			lua_pop(L, 1);
+		}
+
+		i = 0;
+		lua_pushnil(L);
+		while(lua_next(L, 2))
+		{
+			p2[i++] = CHECKVEC(L, -1);
+
+			lua_pop(L, 1);
+		}
+
+		for(i = 1; i < num1; i++)
+		{
+			for(j = 1; j < num2; j++)
+			{
+				if(m_private_edge(p1[i - 1], p1[i], p2[j - 1], p2[j]))
+				{
+					lua_pushboolean(L, true);
+
+					return 1;
+				}
+			}
+		}
+
+		if(num1 > sizeof(p1_b))
+			free(p1);
+		if(num2 > sizeof(p2_b))
+			free(p2);
+	}
+
+	lua_pushboolean(L, false);
+
+	return 1;
 }

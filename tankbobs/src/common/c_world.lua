@@ -44,10 +44,11 @@ function c_world_init()
 	c_const_set("tank_hully4",  1.0, 1)
 	c_const_set("tank_deceleration", -1.75, 1)
 	c_const_set("tank_acceleration1", 16, 1)
-	c_const_set("tank_acceleration2", 4, 1)
+	c_const_set("tank_acceleration2", 8, 1)
 	c_const_set("tank_acceleration3", 2, 1)  -- acceleration 1 unit / second
 	c_const_set("tank_acceleration3Speed", 4, 1)
 	c_const_set("tank_acceleration2Speed", 2, 1)
+	-- TODO: dynamic table of accelerations
 	c_const_set("tank_friction", 0.75, 1)  -- deceleration caused by friction (~speed *= 1 - friction)
 	c_const_set("tank_rotationVelocitySpeed", 0.75, 1)  -- for every second, velocity matches 3/4 rotation
 	c_const_set("tank_rotationSpeed", c_math_radians(135), 1)  -- 135 degrees per second
@@ -110,7 +111,7 @@ function c_world_tank_spawn(tank)
 	tank.spawning = true
 end
 
-function c_world_tank_checkSpawn(tank)
+function c_world_tank_checkSpawn(d, tank)
 	if not tank.spawning then
 		return
 	end
@@ -122,7 +123,7 @@ function c_world_tank_checkSpawn(tank)
 	local sp = tank.lastSpawnPoint
 	local playerSpawnPoint = c_tcm_current_map.playerSpawnPoints[tank.lastSpawnPoint]
 
-	while not c_world_tank_canSpawn(tank) do
+	while not c_world_tank_canSpawn(d, tank) do
 		tank.lastSpawnPoint = tank.lastSpawnPoint + 1
 
 		playerSpawnPoint = c_tcm_current_map.playerSpawnPoints[tank.lastSpawnPoint]
@@ -154,8 +155,12 @@ function c_world_tank_checkSpawn(tank)
 	return true
 end
 
-function c_world_intersection(p1, p2)
-	-- test if two polygons intersect.  p1 and p2 both must be convex.  p1's and p2's points are represented by vectors in their table
+function c_world_intersection(d, p1, p2, v1, v2)
+	-- test if two polygons intersect.  p1 and p2 both must be convex.  p1's and p2's points are represented by vectors in a table
+	-- returns false if no intercection or collision will occur, or true, normal, point of collision
+
+	-- TODO
+	--return tankbobs.m_polygon(p1, p2)
 end
 
 function c_world_tank_hull(tank)
@@ -163,15 +168,15 @@ function c_world_tank_hull(tank)
 	local c = {}
 
 	for _, v in ipairs(tank.h) do
-		local v = tankbobs.m_vec2()
-		v(tank.p[1].x + v.x, tank.p[1].y + v.y)
+		local v = tankbobs.m_vec2(tank.p[1].x + v.x, tank.p[1].y + v.y)
+		v.t = v.t + tank.r
 		table.insert(c, v)
 	end
 
 	return c
 end
 
-function c_world_tank_canSpawn(tank)
+function c_world_tank_canSpawn(d, tank)
 	-- see if the spawn point exists
 	if not c_tcm_current_map.playerSpawnPoints[tank.lastSpawnPoint] then
 		return false
@@ -179,7 +184,7 @@ function c_world_tank_canSpawn(tank)
 
 	-- test if spawning interferes with another tank
 	for _, v in pairs(c_world_tanks) do
-		if c_world_intersection(c_world_tank_hull(tank), c_world_tank_hull(v)) then
+		if c_world_intersection(d, c_world_tank_hull(tank), c_world_tank_hull(v), tankbobs.m_vec2(0, 0), v.v[1]) then
 			return false
 		end
 	end
@@ -239,7 +244,7 @@ function c_world_step()
 
 	-- check for tanks needing spawn
 	for _, v in pairs(c_world_tanks) do
-		c_world_tank_checkSpawn(v)
+		c_world_tank_checkSpawn(d, v)
 		c_world_tank_step(d, v)
 	end
 end

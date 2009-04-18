@@ -20,7 +20,7 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 --[[
 math.lua
 
-math
+a slower alternative to the module's math for mods.
 --]]
 
 function c_math_init()
@@ -57,6 +57,7 @@ c_math_vec2 =
 		o.self.x, o.self.y, o.self.R, o.self.t = 0, 0, 0, 0  -- initialize the values
 		return o
 	end,
+	-- never call vx, etc. directly.  use v.x
 	vx = function (self, v)
 		if v then
 			self.self.x = v
@@ -237,8 +238,29 @@ c_math_vec2 =
 	end
 }
 
+local function c_math_private_determinant(v1, v2)
+	return v1.x * v2.y - v1.y * v2.x
+end
+
+function c_math_edge(l1p1, l1p2, l2p1, l2p2) -- line1point1, ...
+	local det = c_math_private_determinant(l1p2 - l1p1, l2p1 - l2p2)
+	local t = c_math_private_determinant(l2p1 - l1p1, l2p1 - l2p2) / det
+	local u = c_math_private_determinant(l1p2 - l1p1, l2p1 - l1p1) / det
+
+	if t < 0 or t > 1 or u < 0 or u > 1 then
+		return false
+	end
+
+	-- return the point of collision
+	return true, (1 - t) * l1p1 + t * l1p2
+end
+
+function c_math_polygon(p1, p2)
+	-- no lua implementation yet
+	return tankbobs.m_polygon(p1, p2)
+end
+
 -- example_vector = c_math_vec2:new()
--- example_vector.vx(2.5)
 -- example_vector(3, 4)
 -- example_vector.x = 5
 -- other_vector = c_math_vec2:new()
