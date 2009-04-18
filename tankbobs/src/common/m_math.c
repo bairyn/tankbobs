@@ -479,9 +479,9 @@ int m_vec2___mul(lua_State *L)
 		luaL_getmetatable(L, MATH_METATABLE);
 		lua_setmetatable(L, -2);
 
-		v->x *= scalar;
-		v->y *= scalar;
-		v->R *= scalar;
+		v->x = v2->x * scalar;
+		v->y = v2->y * scalar;
+		v->R = v2->R * scalar;
 	}
 	else if(lua_isnumber(L, 2))
 	{
@@ -494,9 +494,9 @@ int m_vec2___mul(lua_State *L)
 		luaL_getmetatable(L, MATH_METATABLE);
 		lua_setmetatable(L, -2);
 
-		v->x *= scalar;
-		v->y *= scalar;
-		v->R *= scalar;
+		v->x = v2->x * scalar;
+		v->y = v2->y * scalar;
+		v->R = v2->R * scalar;
 	}
 	else
 	{
@@ -545,9 +545,9 @@ int m_vec2___div(lua_State *L)
 		luaL_getmetatable(L, MATH_METATABLE);
 		lua_setmetatable(L, -2);
 
-		v->x /= scalar;
-		v->y /= scalar;
-		v->R /= scalar;
+		v->x = v2->x * scalar;
+		v->y = v2->y * scalar;
+		v->R = v2->R * scalar;
 	}
 	else
 	{
@@ -559,9 +559,9 @@ int m_vec2___div(lua_State *L)
 		luaL_getmetatable(L, MATH_METATABLE);
 		lua_setmetatable(L, -2);
 
-		v->x /= scalar;
-		v->y /= scalar;
-		v->R /= scalar;
+		v->x = v2->x * scalar;
+		v->y = v2->y * scalar;
+		v->R = v2->x * scalar;
 	}
 
 	return 1;

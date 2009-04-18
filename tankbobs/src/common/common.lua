@@ -41,8 +41,6 @@ function common_init()
 	end
 
 	c_module_init()
-c_module_load("profiler")
-profiler.start()
 
 	c_config_init()
 
@@ -71,7 +69,6 @@ function common_done()
 
 	c_config_done()
 
-profiler.start()
 	c_module_done()
 
 	c_data_done()
