@@ -184,8 +184,10 @@ function c_world_tank_canSpawn(d, tank)
 
 	-- test if spawning interferes with another tank
 	for _, v in pairs(c_world_tanks) do
-		if c_world_intersection(d, c_world_tank_hull(tank), c_world_tank_hull(v), tankbobs.m_vec2(0, 0), v.v[1]) then
-			return false
+		if v.exists then
+			if c_world_intersection(d, c_world_tank_hull(tank), c_world_tank_hull(v), tankbobs.m_vec2(0, 0), v.v[1]) then
+				return false
+			end
 		end
 	end
 
