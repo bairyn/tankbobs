@@ -128,6 +128,7 @@ int m_vec2_inv(lua_State *L);
 int m_radians(lua_State *L);
 int m_degrees(lua_State *L);
 int m_edge(lua_State *L);
+int m_line(lua_State *L);
 int m_polygon(lua_State *L);
 
 #endif

@@ -42,13 +42,20 @@ function c_world_init()
 	c_const_set("tank_hully3", -1.0, 1)
 	c_const_set("tank_hullx4",  2.0, 1)
 	c_const_set("tank_hully4",  1.0, 1)
-	c_const_set("tank_deceleration", -1.75, 1)
-	c_const_set("tank_acceleration1", 16, 1)
-	c_const_set("tank_acceleration2", 8, 1)
-	c_const_set("tank_acceleration3", 2, 1)  -- acceleration 1 unit / second
-	c_const_set("tank_acceleration3Speed", 4, 1)
-	c_const_set("tank_acceleration2Speed", 2, 1)
-	-- TODO: dynamic table of accelerations
+	c_const_set("tank_deceleration", -24, 1)
+	c_const_set("tank_decelerationMinSpeed", -4, 1)
+	c_const_set("tank_acceleration",
+	{
+		{64},  -- acceleration of 64 units per second by default
+		{48, 8},  -- unless the tank's speed is at least 8 units per second, in which case the acceleration is dropped to 48
+		{32, 12},
+		{16, 16},
+		{8, 24},
+		{4, 32},
+		{2, 48},
+		{1.75, 50},
+		{1.5, 55}
+	}, 1)
 	c_const_set("tank_friction", 0.75, 1)  -- deceleration caused by friction (~speed *= 1 - friction)
 	c_const_set("tank_rotationVelocitySpeed", 0.75, 1)  -- for every second, velocity matches 3/4 rotation
 	c_const_set("tank_rotationSpeed", c_math_radians(135), 1)  -- 135 degrees per second
@@ -160,7 +167,7 @@ function c_world_intersection(d, p1, p2, v1, v2)
 	-- returns false if no intercection or collision will occur, or true, normal, point of collision
 
 	-- TODO
-	--return tankbobs.m_polygon(p1, p2)
+	return tankbobs.m_polygon(p1, p2)
 end
 
 function c_world_tank_hull(tank)
@@ -194,6 +201,21 @@ function c_world_tank_canSpawn(d, tank)
 	return true
 end
 
+--test against each edge
+--or even better, do a polygon test
+--take the vector of the tanks position and find the normal (or whatever it is) relative to the wall
+--not-so-great physics
+--take into account time as well
+--damage can be calculated by the tanks speed for easy things; or maybe still, but probably not, penetration depth of the collision which might be inaccurae
+--aoeuaoeu
+
+function c_world_tank_testWalls(d, tank)
+	-- generate polygon covering the hull of the tank before and after it's veloctiy movement
+	local hull = {}
+
+	-- test the hull for an intersection against each wall.  When a wall is found, run a line of the velocity of the tank from its position and find all the edges that intersect this line.  The edge whose intersection point is closest on the line is used.  The new velocity is set.  The bigger the angle is of the original angle of velocity in comparison to the new angle of velocity, the less damage and knockback there is (the tank could be scraping against the side of a wall)
+end
+
 function c_world_tank_step(d, tank)
 	if tank.state.special then
 		if tank.state.left then
@@ -207,17 +229,25 @@ function c_world_tank_step(d, tank)
 		tank.v[1].t = tank.r
 	else
 		if tank.state.forward then
-			if tank.v[1].R >= c_const_get("tank_acceleration3Speed") then
-				tank.v[1].R = tank.v[1].R + d * c_const_get("tank_acceleration3")
-			elseif tank.v[1].R >= c_const_get("tank_acceleration2Speed") then
-				tank.v[1].R = tank.v[1].R + d * c_const_get("tank_acceleration2")
-			else
-				tank.v[1].R = tank.v[1].R + d * c_const_get("tank_acceleration1")
+			local vel, acceleration = tank.v[1].R
+
+			for _, v in pairs(c_const_get("tank_acceleration")) do
+				if v[2] then
+					if vel >= v[2] then
+						acceleration = v[1]
+					end
+				elseif not acceleration then
+					acceleration = v[1]
+				end
 			end
+
+			tank.v[1].R = vel + d * acceleration
 		elseif tank.state.back then
-			tank.v[1].R = tank.v[1].R + d * c_const_get("tank_deceleration")
+			if tank.v[1].R >= c_const_get("tank_decelerationMinSpeed") then
+				tank.v[1].R = tank.v[1].R + d * c_const_get("tank_deceleration")
+			end
 		else
-			-- deceleration is really only caused when the tank isn't accelerating or decelerating.  If it seems strange, you should realize that the tanks have an anti-friction system built into them ;) - note that if friction was always applied then tanks would have a maximum speed
+			-- deceleration is really only caused when the tank isn't accelerating or decelerating.  If it seems strange, you should realize that the tanks have an anti-friction system built into them ;) - note that if friction was always applied then tanks would have a maximum speed limit.
 			tank.v[1].R = tank.v[1].R / (1 + d * (1 - c_const_get("tank_friction")))
 		end
 
@@ -231,6 +261,8 @@ function c_world_tank_step(d, tank)
 
 		tank.v[1].t = tank.v[1].t - d * c_const_get("tank_rotationVelocitySpeed") * (tank.v[1].t - tank.r)
 	end
+
+	c_world_tank_testWalls(d, tank)
 
 	tank.p[1]:add(tank.v[1] * d)
 end

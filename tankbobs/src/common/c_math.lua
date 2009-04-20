@@ -238,26 +238,12 @@ c_math_vec2 =
 	end
 }
 
-local function c_math_private_determinant(v1, v2)
-	return v1.x * v2.y - v1.y * v2.x
-end
-
 function c_math_edge(l1p1, l1p2, l2p1, l2p2) -- line1point1, ...
-	local det = c_math_private_determinant(l1p2 - l1p1, l2p1 - l2p2)
-	local t = c_math_private_determinant(l2p1 - l1p1, l2p1 - l2p2) / det
-	local u = c_math_private_determinant(l1p2 - l1p1, l2p1 - l1p1) / det
-
-	if t < 0 or t > 1 or u < 0 or u > 1 then
-		return false
-	end
-
-	-- return the point of collision
-	return true, (1 - t) * l1p1 + t * l1p2
+	error("c_math_edge: no Lua implementation")
 end
 
 function c_math_polygon(p1, p2)
-	-- no lua implementation yet
-	return tankbobs.m_polygon(p1, p2)
+	error("c_math_edge: no Lua implementation")
 end
 
 -- example_vector = c_math_vec2:new()

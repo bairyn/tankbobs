@@ -665,15 +665,29 @@ int m_vec2_inv(lua_State *L)
 	return 0;
 }
 
-static double m_private_determinant(double v1x, double v1y, double v2x, double v2y)
+#define TM_CW 1
+#define TM_CCW -1
+
+static inline int m_edge_triDir(vec2_t *p1, vec2_t *p2, vec2_t *p3)
 {
-	return v1x * v2y - v1y * v2x;
+	double dir = (p2->x - p1->x) * (p3->y - p1->y) - (p3->x - p1->x) * (p2->y - p1->y);
+	if(dir > 0) return TM_CW;
+	if(dir < 0) return TM_CCW;
+	return 0;
 }
 
-int m_edge(lua_State *L)
+static inline int m_private_line(vec2_t *l1p1, vec2_t *l1p2, vec2_t *l2p1, vec2_t *l2p2)  /* non-Lua version */
 {
-	double det, t, u;
-	vec2_t *l1p1, *l1p2, *l2p1, *l2p2, *v;
+	if(m_edge_triDir(l1p1, l1p2, l2p1) != m_edge_triDir(l1p1, l1p2, l2p2))  /* && */
+	if(m_edge_triDir(l2p1, l2p2, l1p1) != m_edge_triDir(l2p1, l2p2, l1p2))
+		return 1;
+
+	return 0;
+}
+
+int m_line(lua_State *L)  /* algorithm, by Christopher Barlett, at http://angelfire.com/fl/houseofbarlett/solutions/lineinter2d.html */
+{
+	vec2_t *l1p1, *l1p2, *l2p1, *l2p2;
 
 	CHECKINIT(init, L);
 
@@ -682,15 +696,176 @@ int m_edge(lua_State *L)
 	l2p1 = CHECKVEC(L, 3);
 	l2p2 = CHECKVEC(L, 4);
 
-	det = m_private_determinant(l1p2->x - l1p1->x, l1p2->y - l1p1->y, l2p1->x - l2p2->x, l2p1->y - l2p2->y);
-	t = m_private_determinant(l2p1->x - l1p1->x, l2p1->y - l1p1->y, l2p1->x - l2p2->x, l2p1->y - l2p2->y);
-	u = m_private_determinant(l1p2->x - l1p1->x, l1p2->y - l1p1->y, l2p1->x - l1p1->x, l2p1->y - l1p1->y);
-
-	if(t < 0 || t > 0 || u < 0 || u > 1)
+	/* don't accept any 0-length lines */
+	if((l1p1->x == l1p2->x && l1p1->y == l1p2->y) || (l2p1->x == l2p2->x && l2p1->y == l2p2->y))
 	{
 		lua_pushboolean(L, false);
 		return 1;
 	}
+
+	if(m_edge_triDir(l1p1, l1p2, l2p1) != m_edge_triDir(l1p1, l1p2, l2p2))  /* && */
+	if(m_edge_triDir(l2p1, l2p2, l1p1) != m_edge_triDir(l2p1, l2p2, l1p2))
+	{
+		lua_pushboolean(L, true);
+		return 1;
+	}
+
+	lua_pushboolean(L, false);
+	return 1;
+}
+
+int m_edge(lua_State *L)  /* algorithm, by Darel Rex Finley, 2006, can be found at http://alienryderflex.com/intersect/ */
+{
+	vec2_t *l1p1, *l1p2, *l2p1, *l2p2, *v;
+	double l1p1x, l1p1y;
+	double l1p2x, l1p2y;
+	double l2p1x, l2p1y;
+	double l2p2x, l2p2y;
+	double l1c, l1s;
+	double l1d;
+	double x;
+	double intersection;
+
+	CHECKINIT(init, L);
+
+	l1p1 = CHECKVEC(L, 1);
+	l1p2 = CHECKVEC(L, 2);
+	l2p1 = CHECKVEC(L, 3);
+	l2p2 = CHECKVEC(L, 4);
+
+	l1p1x = l1p1->x; l1p1y = l1p1->y;
+	l1p2x = l1p2->x; l1p2y = l1p2->y;
+	l2p1x = l2p1->x; l2p1y = l2p1->y;
+	l2p2x = l2p2->x; l2p2y = l2p2->y;
+
+	/* don't accept any 0-length lines */
+	if((l1p1x == l1p2x && l1p1y == l1p2y) || (l2p1x == l2p2x && l2p1y == l2p2y))
+	{
+		lua_pushboolean(L, false);
+		return 1;
+	}
+
+	/* algorithm might run into issues if we don't test for shared vertices */
+	if(l1p1x == l2p1x && l1p1y == l2p1y)
+	{
+		v = lua_newuserdata(L, sizeof(vec2_t));
+
+		luaL_getmetatable(L, MATH_METATABLE);
+		lua_setmetatable(L, -2);
+
+		v->x = l1p1x;
+		v->y = l1p1y;
+		v->R = sqrt(v->x * v->x + v->y * v->y);
+		v->t = atan(v->y / v->x);
+		if(v->x < 0.0 && v->y < 0.0)
+			v->t += 180;
+		else if(v->x < 0.0)
+			v->t += 90;
+		else if(v->y < 0.0)
+			v->t += 270;
+
+		return 1;
+	}
+	else if(l1p1x == l2p2x && l1p1y == l2p2y)
+	{
+		v = lua_newuserdata(L, sizeof(vec2_t));
+
+		luaL_getmetatable(L, MATH_METATABLE);
+		lua_setmetatable(L, -2);
+
+		v->x = l1p1x;
+		v->y = l1p1y;
+		v->R = sqrt(v->x * v->x + v->y * v->y);
+		v->t = atan(v->y / v->x);
+		if(v->x < 0.0 && v->y < 0.0)
+			v->t += 180;
+		else if(v->x < 0.0)
+			v->t += 90;
+		else if(v->y < 0.0)
+			v->t += 270;
+
+		return 1;
+	}
+	else if(l1p2x == l2p1x && l1p2y == l2p1y)
+	{
+		v = lua_newuserdata(L, sizeof(vec2_t));
+
+		luaL_getmetatable(L, MATH_METATABLE);
+		lua_setmetatable(L, -2);
+
+		v->x = l1p2x;
+		v->y = l1p2y;
+		v->R = sqrt(v->x * v->x + v->y * v->y);
+		v->t = atan(v->y / v->x);
+		if(v->x < 0.0 && v->y < 0.0)
+			v->t += 180;
+		else if(v->x < 0.0)
+			v->t += 90;
+		else if(v->y < 0.0)
+			v->t += 270;
+
+		return 1;
+	}
+	else if(l1p2x == l2p2x && l1p2y == l2p2y)
+	{
+		v = lua_newuserdata(L, sizeof(vec2_t));
+
+		luaL_getmetatable(L, MATH_METATABLE);
+		lua_setmetatable(L, -2);
+
+		v->x = l1p2x;
+		v->y = l1p2y;
+		v->R = sqrt(v->x * v->x + v->y * v->y);
+		v->t = atan(v->y / v->x);
+		if(v->x < 0.0 && v->y < 0.0)
+			v->t += 180;
+		else if(v->x < 0.0)
+			v->t += 90;
+		else if(v->y < 0.0)
+			v->t += 270;
+
+		return 1;
+	}
+
+	/* no shared vertices */
+
+	/* translate the lines so that l1p1 is on the origin */
+	/* note that l1p1 itself isn't interally changed */
+	l1p2x -= l1p1x; l1p2y -= l1p1y;
+	l2p1x -= l1p1x; l2p1y -= l1p1y;
+	l2p2x -= l1p1x; l2p2y -= l1p1y;
+
+	/* find the sine and cosine of the line to prepare for rotation */
+	l1d = sqrt(l1p1x * l1p1x + l1p1y * l1p1y);
+	l1c = l1p2x / l1d;
+	l1s = l1p2y / l1d;
+
+	/* rotate the lines so that l1p2 lies on positive side of the X axis */
+	x = l1c * l2p1x + l1s * l2p1y;
+	l2p1y = l1c * l2p1y - l1s * l2p1x;
+	l2p1x = x;
+	x = l1c * l2p2x + l1s * l2p2y;
+	l2p2y = l1c * l2p2y - l1s * l2p2x;
+	l2p2x = x;
+
+	/* if line 2 doesn't cross the X axis, then they don't intersect */
+	if((l2p1y < 0.0 && l2p2y < 0.0) || (l2p1y > 0.0 && l2p2y > 0.0))
+	{
+		lua_pushboolean(L, false);
+		return 1;
+	}
+
+	/* find the intersection along the X axis */
+	intersection = l2p2x + (l2p1x - l2p1x) * l2p2y / (l2p2y - l2p1y);
+
+	/* make sure the second line intersects the first line */
+	if(intersection < 0 || intersection > l1d)
+	{
+		lua_pushboolean(L, false);
+		return 1;
+	}
+
+	/* the lines intersect.  Push a vector of the coordinates of the intersection in the original coordinate system */
 
 	lua_pushboolean(L, true);
 
@@ -699,8 +874,11 @@ int m_edge(lua_State *L)
 	luaL_getmetatable(L, MATH_METATABLE);
 	lua_setmetatable(L, -2);
 
-	v->x = (1 - t) * l1p1->x + t * l1p2->x;
-	v->y = (1 - t) * l1p1->y + t * l1p2->y;
+	/* coordinates of intersection (remember that l1p1 remains untranslated) */
+	v->x = l1p1x + l1c * intersection;
+	v->y = l1p1y + l1s * intersection;
+
+	/* calculate polar coordinates */
 	v->R = sqrt(v->x * v->x + v->y * v->y);
 	v->t = atan(v->y / v->x);
 	if(v->x < 0.0 && v->y < 0.0)
@@ -711,22 +889,6 @@ int m_edge(lua_State *L)
 		v->t += 270;
 
 	return 2;
-}
-
-static int m_private_edge(vec2_t *l1p1, vec2_t *l1p2, vec2_t *l2p1, vec2_t *l2p2)  /* non-Lua version */
-{
-	double det, t, u;
-
-	det = m_private_determinant(l1p2->x - l1p1->x, l1p2->y - l1p1->y, l2p1->x - l2p2->x, l2p1->y - l2p2->y);
-	t = m_private_determinant(l2p1->x - l1p1->x, l2p1->y - l1p1->y, l2p1->x - l2p2->x, l2p1->y - l2p2->y);
-	u = m_private_determinant(l1p2->x - l1p1->x, l1p2->y - l1p1->y, l2p1->x - l1p1->x, l2p1->y - l1p1->y);
-
-	if(t < 0 || t > 0 || u < 0 || u > 1)
-	{
-		return false;
-	}
-
-	return true;
 }
 
 #define MAX_VERTICES 12
@@ -772,7 +934,7 @@ int m_polygon(lua_State *L)
 		{
 			for(j = 1; j < num2; j++)
 			{
-				if(m_private_edge(p1[i - 1], p1[i], p2[j - 1], p2[j]))
+				if(m_private_line(p1[i - 1], p1[i], p2[j - 1], p2[j]))
 				{
 					lua_pushboolean(L, true);
 
