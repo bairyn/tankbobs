@@ -55,6 +55,10 @@
 		<height>600</height>
 	</renderer>
 
+	<server>
+		<minFrameLatency>1</minFrameLatency>  1 can be used to make sure at least one msec passes between each frame.  0 can also be used to remove the limit but strange things might happen
+	</server>
+
 	<mods>
 		<unsafe>false</unsafe>
 	</mods>

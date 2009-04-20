@@ -893,7 +893,7 @@ int m_edge(lua_State *L)  /* algorithm, by Darel Rex Finley, 2006, can be found 
 
 #define MAX_VERTICES 12
 
-int m_polygon(lua_State *L)
+int m_polygon(lua_State *L)  /* brute force line test */
 {
 	int i, j;
 

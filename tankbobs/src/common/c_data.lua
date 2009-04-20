@@ -69,6 +69,8 @@ function c_data_init()
 	c_const_set("hidden_globals", hidden_globals)
 	c_const_set("protected_globals", protected_globals)
 
+	c_const_set("server_mlf", 1, 0)
+
 	c_const_set("module_dir", c_const_get("data_dir") .. "modules/", 1)
 	c_const_set("textures_dir",  c_const_get("data_dir") .. "textures/", 1)
 	c_const_set("textures_default_dir", c_const_get("textures_dir") .. "global/", 1)

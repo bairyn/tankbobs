@@ -32,6 +32,8 @@ function c_world_init()
 
 	c_const_set("world_time", 1000)  -- everything is relative to change and seconds.  A speed of 5 means 5 units per second
 
+	c_const_set("world_timeWrapTest", -99999)
+
 	-- hull of tank facing right
 	c_const_set("tank_health", 100, 1)
 	c_const_set("tank_hullx1", -2.0, 1)
@@ -57,7 +59,9 @@ function c_world_init()
 		{1.5, 55}
 	}, 1)
 	c_const_set("tank_friction", 0.75, 1)  -- deceleration caused by friction (~speed *= 1 - friction)
-	c_const_set("tank_rotationVelocitySpeed", 0.75, 1)  -- for every second, velocity matches 3/4 rotation
+	c_const_set("tank_rotationVelocitySpeed", 0.75, 1)  -- for every second, velocity matches 3/4 rotation  -- FIXME: the actual rotation turning speed is about a quarter of this
+	c_const_set("tank_rotationVelocityMinSpeed", 24, 1)  -- if at least 24 ups
+	c_const_set("tank_rotationVelocityCatchUpSpeed", 0.875, 1)  -- FIXME: as well
 	c_const_set("tank_rotationSpeed", c_math_radians(135), 1)  -- 135 degrees per second
 	c_const_set("tank_rotationSpecialSpeed", c_math_degrees(1) / 3.5, 1)
 	c_const_set("tank_defaultRotation", c_math_radians(90), 1)  -- up
@@ -130,6 +134,8 @@ function c_world_tank_checkSpawn(d, tank)
 	local sp = tank.lastSpawnPoint
 	local playerSpawnPoint = c_tcm_current_map.playerSpawnPoints[tank.lastSpawnPoint]
 
+	tank.p[1](playerSpawnPoint.p[1])
+
 	while not c_world_tank_canSpawn(d, tank) do
 		tank.lastSpawnPoint = tank.lastSpawnPoint + 1
 
@@ -149,6 +155,8 @@ function c_world_tank_checkSpawn(d, tank)
 			-- no spawn points can be used
 			return false
 		end
+
+		tank.p[1](playerSpawnPoint.p[1])
 	end
 
 	-- spawn
@@ -156,7 +164,6 @@ function c_world_tank_checkSpawn(d, tank)
 	tank.r = c_const_get("tank_defaultRotation")
 	tank.v[1].t = c_const_get("tank_defaultRotation")
 	tank.v[1].R = 0  -- no velocity
-	tank.p[1](playerSpawnPoint.p[1])
 	tank.health = c_const_get("tank_health")
 	tank.exists = true
 	return true
@@ -171,13 +178,14 @@ function c_world_intersection(d, p1, p2, v1, v2)
 end
 
 function c_world_tank_hull(tank)
+	-- FIXME: wrong coordinates are sometimes generated
 	-- return a table of coordinates of tank's hull
 	local c = {}
 
-	for _, v in ipairs(tank.h) do
-		local v = tankbobs.m_vec2(tank.p[1].x + v.x, tank.p[1].y + v.y)
-		v.t = v.t + tank.r
-		table.insert(c, v)
+	for _, v in pairs(tank.h) do
+		local vec = tankbobs.m_vec2(tank.p[1].x + v.x, tank.p[1].y + v.y)
+		vec.t = vec.t + tank.r
+		table.insert(c, vec)
 	end
 
 	return c
@@ -217,19 +225,29 @@ function c_world_tank_testWalls(d, tank)
 end
 
 function c_world_tank_step(d, tank)
+	local vel = tank.v[1].R
+
 	if tank.state.special then
 		if tank.state.left then
-			tank.r = tank.r + d * c_const_get("tank_rotationSpeed") * tank.v[1].R / c_const_get("tank_rotationSpecialSpeed")
+			if vel < 0 then  -- rotation needs to be inversed if the tank is traveling backwards to stay conistent
+				tank.r = tank.r - d * c_const_get("tank_rotationSpeed") * tank.v[1].R / c_const_get("tank_rotationSpecialSpeed")
+			else
+				tank.r = tank.r + d * c_const_get("tank_rotationSpeed") * tank.v[1].R / c_const_get("tank_rotationSpecialSpeed")
+			end
 		end
 
 		if tank.state.right then
-			tank.r = tank.r - d * c_const_get("tank_rotationSpeed") * tank.v[1].R / c_const_get("tank_rotationSpecialSpeed")  -- turns are related to the velocity of the tank in special mode
+			if vel < 0 then
+				tank.r = tank.r + d * c_const_get("tank_rotationSpeed") * tank.v[1].R / c_const_get("tank_rotationSpecialSpeed")  -- turns are related to the velocity of the tank in special mode
+			else
+				tank.r = tank.r - d * c_const_get("tank_rotationSpeed") * tank.v[1].R / c_const_get("tank_rotationSpecialSpeed")  -- turns are related to the velocity of the tank in special mode
+			end
 		end
 
 		tank.v[1].t = tank.r
 	else
 		if tank.state.forward then
-			local vel, acceleration = tank.v[1].R
+			local acceleration
 
 			for _, v in pairs(c_const_get("tank_acceleration")) do
 				if v[2] then
@@ -259,7 +277,11 @@ function c_world_tank_step(d, tank)
 			tank.r = tank.r - d * c_const_get("tank_rotationSpeed")
 		end
 
-		tank.v[1].t = tank.v[1].t - d * c_const_get("tank_rotationVelocitySpeed") * (tank.v[1].t - tank.r)
+		if tank.v[1].R >= c_const_get("tank_rotationVelocityMinSpeed") then
+			tank.v[1].t = tank.v[1].t - ((tank.v[1].t - tank.r) * d * c_const_get("tank_rotationVelocitySpeed"))
+		else
+			tank.v[1].t = tank.v[1].t - ((tank.v[1].t - tank.r) * d * c_const_get("tank_rotationVelocityCatchUpSpeed"))
+		end
 	end
 
 	c_world_tank_testWalls(d, tank)
@@ -273,8 +295,26 @@ function c_world_step()
 		return
 	end
 
+	if c_config_get("config.server.minFrameLatency") < c_const_get("server_mlf") then
+		c_config_set("config.server.minFrameLatency", c_const_get("server_mlf"))
+	end
+
+	if tankbobs.t_getTicks() - lastTime < c_const_get("world_timeWrapTest") then
+		--handle time wrap here
+		lastTime = tankbobs.t_getTicks()
+		return;
+	end
+
+	if tankbobs.t_getTicks() - lastTime < c_config_get("config.server.minFrameLatency") then
+		return;
+	end
+
 	local d = (tankbobs.t_getTicks() - lastTime) / (c_const_get("world_time") * c_config_get("config.game.timescale"))
 	lastTime = tankbobs.t_getTicks()
+
+	if d == 0 then
+		d = 1.0E-6  -- make a very inaccurate accurate guess
+	end
 
 	-- check for tanks needing spawn
 	for _, v in pairs(c_world_tanks) do
