@@ -716,7 +716,8 @@ int m_line(lua_State *L)  /* algorithm, by Christopher Barlett, at http://angelf
 
 int m_edge(lua_State *L)  /* algorithm, by Darel Rex Finley, 2006, can be found at http://alienryderflex.com/intersect/ */
 {
-	vec2_t *l1p1, *l1p2, *l2p1, *l2p2, *v;
+	vec2_t *v;
+	vec2_t *l1p1, *l1p2, *l2p1, *l2p2;
 	double l1p1x, l1p1y;
 	double l1p2x, l1p2y;
 	double l2p1x, l2p1y;
@@ -888,12 +889,21 @@ int m_edge(lua_State *L)  /* algorithm, by Darel Rex Finley, 2006, can be found 
 	else if(v->y < 0.0)
 		v->t += 270;
 
-	return 2;
+	/* coordinates of intersection in transformed system */
+	v = lua_newuserdata(L, sizeof(vec2_t));
+
+	luaL_getmetatable(L, MATH_METATABLE);
+	lua_setmetatable(L, -2);
+
+	v->y = v->t = 0.0;
+	v->x = v->R = intersection;
+
+	return 3;
 }
 
 #define MAX_VERTICES 12
 
-int m_polygon(lua_State *L)  /* brute force line test */
+int m_polygon(lua_State *L)  /* brute force line test; will NOT detect an intersection if one polygon lies entirely inside the other polygon */
 {
 	int i, j;
 
@@ -941,6 +951,14 @@ int m_polygon(lua_State *L)  /* brute force line test */
 					return 1;
 				}
 			}
+		}
+
+		/* test the last line */
+		if(m_private_line(p1[num1 - 1], p1[0], p2[num2 - 1], p2[0]))
+		{
+			lua_pushboolean(L, true);
+
+			return 1;
 		}
 
 		if(num1 > sizeof(p1_b))

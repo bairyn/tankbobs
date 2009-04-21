@@ -34,6 +34,8 @@ function c_world_init()
 
 	c_const_set("world_timeWrapTest", -99999)
 
+	c_const_set("tank_maxCollisionVectorLength", 975)  -- 975 units
+
 	-- hull of tank facing right
 	c_const_set("tank_health", 100, 1)
 	c_const_set("tank_hullx1", -2.0, 1)
@@ -115,7 +117,7 @@ c_world_tank_state =
 	back = false,
 	right = false,
 	left = false,
-	special = false  -- special causes stronger turning but prevent acceleration or deceleration
+	special = false  -- special causes stronger turning but prevent acceleration or deceleration and the damage from a collision is increased
 }
 
 function c_world_tank_spawn(tank)
@@ -133,8 +135,6 @@ function c_world_tank_checkSpawn(d, tank)
 
 	local sp = tank.lastSpawnPoint
 	local playerSpawnPoint = c_tcm_current_map.playerSpawnPoints[tank.lastSpawnPoint]
-
-	tank.p[1](playerSpawnPoint.p[1])
 
 	while not c_world_tank_canSpawn(d, tank) do
 		tank.lastSpawnPoint = tank.lastSpawnPoint + 1
@@ -155,13 +155,12 @@ function c_world_tank_checkSpawn(d, tank)
 			-- no spawn points can be used
 			return false
 		end
-
-		tank.p[1](playerSpawnPoint.p[1])
 	end
 
 	-- spawn
 	tank.spawning = false
 	tank.r = c_const_get("tank_defaultRotation")
+	tank.p[1](playerSpawnPoint.p[1])
 	tank.v[1].t = c_const_get("tank_defaultRotation")
 	tank.v[1].R = 0  -- no velocity
 	tank.health = c_const_get("tank_health")
@@ -178,24 +177,32 @@ function c_world_intersection(d, p1, p2, v1, v2)
 end
 
 function c_world_tank_hull(tank)
-	-- FIXME: wrong coordinates are sometimes generated
 	-- return a table of coordinates of tank's hull
 	local c = {}
+	local p = tank.p[1]
 
 	for _, v in pairs(tank.h) do
-		local vec = tankbobs.m_vec2(tank.p[1].x + v.x, tank.p[1].y + v.y)
-		vec.t = vec.t + tank.r
-		table.insert(c, vec)
+		local h = tankbobs.m_vec2(v)
+		h.t = h.t + tank.r
+		table.insert(c, p + h)
 	end
 
 	return c
 end
 
 function c_world_tank_canSpawn(d, tank)
+	-- make sure the tank hasn't already spawned
+	if tank.exists then
+		return false
+	end
+
 	-- see if the spawn point exists
 	if not c_tcm_current_map.playerSpawnPoints[tank.lastSpawnPoint] then
 		return false
 	end
+
+	-- set the tank's position for proper testing (this won't interfere with anything else since the exists flag isn't set)
+	tank.p[1](c_tcm_current_map.playerSpawnPoints[tank.lastSpawnPoint].p[1])
 
 	-- test if spawning interferes with another tank
 	for _, v in pairs(c_world_tanks) do
@@ -217,11 +224,82 @@ end
 --damage can be calculated by the tanks speed for easy things; or maybe still, but probably not, penetration depth of the collision which might be inaccurae
 --aoeuaoeu
 
-function c_world_tank_testWalls(d, tank)
+function c_world_tank_testWorld(d, tank)  -- test tanks against the world
 	-- generate polygon covering the hull of the tank before and after it's veloctiy movement
 	local hull = {}
 
 	-- test the hull for an intersection against each wall.  When a wall is found, run a line of the velocity of the tank from its position and find all the edges that intersect this line.  The edge whose intersection point is closest on the line is used.  The new velocity is set.  The bigger the angle is of the original angle of velocity in comparison to the new angle of velocity, the less damage and knockback there is (the tank could be scraping against the side of a wall)
+
+	common_clone(c_world_tank_hull(tank), hull)
+
+	-- HACK: temporarily update tank and then add future points
+	tank.p[1]:add(d * tank.v[1])
+
+	common_clone(c_world_tank_hull(tank), hull)
+
+	-- reset tank
+	tank.p[1]:sub(d * tank.v[1])
+
+	-- test against every wall
+	for _, v in pairs(c_tcm_current_map.walls) do
+		if tankbobs.m_polygon(hull, v.p) then
+			-- find which edge of the wall
+			local l = {p1, p2}
+			local di
+			local llp
+
+			for _, v in pairs(v.p) do
+				local clp = v
+
+				if llp then
+					local vec = tankbobs.m_vec2()
+					vec.t = tank.p[1].t
+					vec.R = math.abs(tank.p[1].R) + c_const_get("tank_maxCollisionVectorLength")
+					if tank.p[1].R < 0 then
+						vec.R = -vec.R
+					end
+					local li, _, lt = tankbobs.m_edge(tank.p[1], vec, clp, llp)
+
+					if li then
+						if not l.p1 or not l.p2 or not di or lt.x < d then
+							di = lt.x
+							l.p1 = clp
+							l.p2 = llp
+						end
+					end
+				end
+
+				llp = clp
+			end
+
+			-- check the last edge
+			if llp and llp ~= v.p[1] then
+				local vec = tankbobs.m_vec2()
+				vec.t = tank.p[1].t
+				vec.R = math.abs(tank.p[1].R) + c_const_get("tank_maxCollisionVectorLength")
+				if tank.p[1].R < 0 then
+					vec.R = -vec.R
+				end
+				local li, _, lt = tankbobs.m_edge(tank.p[1], vec, llp, v.p[1])
+
+				if li then
+					if not l.p1 or not l.p2 or not di or lt.x < d then
+						di = lt.x
+						l.p1 = clp
+						l.p2 = llp
+					end
+				end
+			end
+
+			if not l.p1 or not l.p2 then
+				if c_const_get("debug") then
+					io.stderr:write("c_world_testWorld: Warning: no edge detected for collision\n")
+					-- reset tank's velocity
+					tank.v[1].R = 0
+				end
+			end
+		end
+	end
 end
 
 function c_world_tank_step(d, tank)
@@ -284,7 +362,7 @@ function c_world_tank_step(d, tank)
 		end
 	end
 
-	c_world_tank_testWalls(d, tank)
+	c_world_tank_testWorld(d, tank)
 
 	tank.p[1]:add(tank.v[1] * d)
 end
