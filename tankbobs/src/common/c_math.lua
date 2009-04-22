@@ -119,6 +119,9 @@ c_math_vec2 =
 	unify = function (self)
 		self:R(1)
 	end,
+	normalize = function (self)
+		self:R(1)
+	end,
 	add = function (a, b)
 		a:vx(a:vx() + b:vx())
 		a:vy(a:vy() + b:vy())
@@ -140,14 +143,14 @@ c_math_vec2 =
 		self:vy(-self:vy())
 	end,
 	unit = function (self)
-		r = c_math_vec2:new()
+		local r = c_math_vec2:new()
 		r:vx(self:vx())
 		r:vy(self:vy())
 		r:R(1)
 		return r
 	end,
 	__add = function (a, b)
-		r = c_math_vec2:new()
+		local r = c_math_vec2:new()
 		r:vx(a:vx() + b:vx())
 		r:vy(a:vy() + b:vy())
 		return r
@@ -155,13 +158,13 @@ c_math_vec2 =
 	__mul = function (a, b)
 		if type(b) == "number" then
 			-- scalar multiplication
-			r = c_math_vec2:new()
+			local r = c_math_vec2:new()
 			r:vx(a:vx() * b)
 			r:vy(a:vy() * b)
 			return r
 		elseif type(a) == "number" then
 			-- scalar multiplication
-			r = c_math_vec2:new()
+			local r = c_math_vec2:new()
 			r:vx(a * b:vx())
 			r:vy(a * b:vy())
 			return r
@@ -171,19 +174,19 @@ c_math_vec2 =
 		end
 	end,
 	__div = function (a, b)
-		r = c_math_vec2:new()
+		local r = c_math_vec2:new()
 		r:vx(a:vx() / b)
 		r:vy(a:vy() / b)
 		return r
 	end,
 	__sub = function (a, b)
-		r = c_math_vec2:new()
+		local r = c_math_vec2:new()
 		r:vx(a:vx() - b:vx())
 		r:vy(a:vy() - b:vy())
 		return r
 	end,
 	__unm = function (a)
-		r = c_math_vec2:new()
+		local r = c_math_vec2:new()
 		r:vx(-a:vx())
 		r:vy(-a:vy())
 		return r
@@ -223,6 +226,13 @@ c_math_vec2 =
 			rawset(self, key, value)
 		end
 	end,
+	normalof = function (self)
+		local r = c_math_vec2:new()
+		r:vx(-self:vy())
+		r:vy(self:vx())
+		r:unify(1)
+		return r;
+	end,
 	__call = function (self, x, y)
 		-- rectangular coordinates
 		-- an argument check might be good here if it does't impede performance
@@ -235,6 +245,11 @@ c_math_vec2 =
 			self:vx(x:vx())
 			self:vy(x:vy())
 		end
+	end,
+	project = function (a, b)
+		-- r = (-a * b) * b
+		local r = (-a * b) * b
+		return r;
 	end
 }
 

@@ -130,5 +130,7 @@ int m_degrees(lua_State *L);
 int m_edge(lua_State *L);
 int m_line(lua_State *L);
 int m_polygon(lua_State *L);
+int m_vec2_normalto(lua_State *L);
+int m_vec2_project(lua_State *L);
 
 #endif

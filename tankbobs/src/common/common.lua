@@ -167,10 +167,6 @@ function common_clone_except(i, o, e)
 						clone_level(v, o[k], e, s .. k)
 					end
 				else
-					if c_const_get("debug") and type(v) == "userdata" then
-						common_print("Warning: cloning table containing a member of the userdata type")
-					end
-
 					o[k] = v
 				end
 			end

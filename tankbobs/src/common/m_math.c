@@ -55,6 +55,7 @@ static const struct luaL_Reg m_vec2_m[] =
 	{"__index", m_vec2_index},
 	{"__newindex", m_vec2_newindex},
 	{"unify", m_vec2_unify},
+		{"normalize", m_vec2_unify},
 	{"unit", m_vec2_unit},
 	{"__add", m_vec2___add},
 	{"add", m_vec2_add},
@@ -68,6 +69,9 @@ static const struct luaL_Reg m_vec2_m[] =
 	{"__call", m_vec2_call},
 	{"__unm", m_vec2_unm},
 	{"inv", m_vec2_inv},
+	{"normalto", m_vec2_normalto},  /* returns a new vector; the vector returned is a normalised vector */
+		{"normalof", m_vec2_normalto},
+	{"project", m_vec2_project},  /* takes two vectors as arguments and returns a new vector.  Like before, the original vectors passed remain unmodified.  The second argument might be used as a wall against which the first vector is projected */
 	{NULL, NULL}
 };
 
@@ -93,7 +97,7 @@ void m_init(lua_State *L)
 	luaL_register(L, NULL, m_vec2_m);
 }
 
-int m_vec2(lua_State *L)
+int m_vec2(lua_State *L)  /* similar to c_math.lua's vec2:new() but can take arguments for initialization */
 {
 	vec2_t *v;
 
@@ -160,7 +164,7 @@ int m_degrees(lua_State *L)
 
 int m_vec2_index(lua_State *L)
 {
-	vec2_t *v;
+	const vec2_t *v;
 	char index;
 	const char *index_s;
 	tstr *message;
@@ -334,7 +338,8 @@ int m_vec2_unify(lua_State *L)
 
 int m_vec2_unit(lua_State *L)
 {
-	vec2_t *v, *v2;
+	vec2_t *v;
+	const vec2_t *v2;
 
 	CHECKINIT(init, L);
 
@@ -346,18 +351,19 @@ int m_vec2_unit(lua_State *L)
 	v2 = CHECKVEC(L, 1);
 
 	v->t = v2->t;
-	v2->R = 1.0;
+	v->R = 1.0;
 
 	/* calculate rectangular coordinates */
-	v2->x = v2->R * cos(v2->t);
-	v2->y = v2->R * sin(v2->t);
+	v->x = v->R * cos(v2->t);
+	v->y = v->R * sin(v2->t);
 
 	return 1;
 }
 
 int m_vec2___add(lua_State *L)
 {
-	vec2_t *v, *v2, *v3;
+	vec2_t *v;
+	const vec2_t *v2, *v3;
 
 	CHECKINIT(init, L);
 
@@ -387,7 +393,8 @@ int m_vec2___add(lua_State *L)
 
 int m_vec2_add(lua_State *L)
 {
-	vec2_t *v, *v2;
+	vec2_t *v;
+	const vec2_t *v2;
 
 	CHECKINIT(init, L);
 
@@ -412,7 +419,8 @@ int m_vec2_add(lua_State *L)
 
 int m_vec2___sub(lua_State *L)
 {
-	vec2_t *v, *v2, *v3;
+	vec2_t *v;
+	const vec2_t *v2, *v3;
 
 	CHECKINIT(init, L);
 
@@ -442,7 +450,8 @@ int m_vec2___sub(lua_State *L)
 
 int m_vec2_sub(lua_State *L)
 {
-	vec2_t *v, *v2;
+	vec2_t *v;
+	const vec2_t *v2;
 
 	CHECKINIT(init, L);
 
@@ -467,7 +476,8 @@ int m_vec2_sub(lua_State *L)
 
 int m_vec2___mul(lua_State *L)
 {
-	vec2_t *v, *v2, *v3;
+	vec2_t *v;
+	const vec2_t *v2, *v3;
 	double scalar;
 
 	CHECKINIT(init, L);
@@ -533,7 +543,8 @@ int m_vec2_mul(lua_State *L)
 
 int m_vec2___div(lua_State *L)
 {
-	vec2_t *v, *v2;
+	vec2_t *v;
+	const vec2_t *v2;
 	double scalar;
 
 	CHECKINIT(init, L);
@@ -591,7 +602,7 @@ int m_vec2_div(lua_State *L)
 
 int m_vec2_len(lua_State *L)
 {
-	vec2_t *v;
+	const vec2_t *v;
 
 	CHECKINIT(init, L);
 
@@ -604,7 +615,8 @@ int m_vec2_len(lua_State *L)
 
 int m_vec2_call(lua_State *L)
 {
-	vec2_t *v, *v2;
+	vec2_t *v;
+	const vec2_t *v2;
 
 	CHECKINIT(init, L);
 
@@ -632,7 +644,8 @@ int m_vec2_call(lua_State *L)
 
 int m_vec2_unm(lua_State *L)
 {
-	vec2_t *v, *v2;
+	vec2_t *v;
+	const vec2_t *v2;
 
 	CHECKINIT(init, L);
 
@@ -643,9 +656,9 @@ int m_vec2_unm(lua_State *L)
 
 	v = CHECKVEC(L, 1);
 
-	v2->x = -v->x;
-	v2->y = -v->y;
-	v2->R = -v->R;
+	v->x = -v2->x;
+	v->y = -v2->y;
+	v->R = -v2->R;
 
 	return 1;
 }
@@ -668,7 +681,7 @@ int m_vec2_inv(lua_State *L)
 #define TM_CW 1
 #define TM_CCW -1
 
-static inline int m_edge_triDir(vec2_t *p1, vec2_t *p2, vec2_t *p3)
+static inline int m_edge_triDir(const vec2_t *p1, const vec2_t *p2, const vec2_t *p3)
 {
 	double dir = (p2->x - p1->x) * (p3->y - p1->y) - (p3->x - p1->x) * (p2->y - p1->y);
 	if(dir > 0) return TM_CW;
@@ -676,7 +689,7 @@ static inline int m_edge_triDir(vec2_t *p1, vec2_t *p2, vec2_t *p3)
 	return 0;
 }
 
-static inline int m_private_line(vec2_t *l1p1, vec2_t *l1p2, vec2_t *l2p1, vec2_t *l2p2)  /* non-Lua version */
+static inline int m_private_line(const vec2_t *l1p1, const vec2_t *l1p2, const vec2_t *l2p1, const vec2_t *l2p2)  /* non-Lua version */
 {
 	if(m_edge_triDir(l1p1, l1p2, l2p1) != m_edge_triDir(l1p1, l1p2, l2p2))  /* && */
 	if(m_edge_triDir(l2p1, l2p2, l1p1) != m_edge_triDir(l2p1, l2p2, l1p2))
@@ -687,7 +700,7 @@ static inline int m_private_line(vec2_t *l1p1, vec2_t *l1p2, vec2_t *l2p1, vec2_
 
 int m_line(lua_State *L)  /* algorithm, by Christopher Barlett, at http://angelfire.com/fl/houseofbarlett/solutions/lineinter2d.html */
 {
-	vec2_t *l1p1, *l1p2, *l2p1, *l2p2;
+	const vec2_t *l1p1, *l1p2, *l2p1, *l2p2;
 
 	CHECKINIT(init, L);
 
@@ -717,7 +730,7 @@ int m_line(lua_State *L)  /* algorithm, by Christopher Barlett, at http://angelf
 int m_edge(lua_State *L)  /* algorithm, by Darel Rex Finley, 2006, can be found at http://alienryderflex.com/intersect/ */
 {
 	vec2_t *v;
-	vec2_t *l1p1, *l1p2, *l2p1, *l2p2;
+	const vec2_t *l1p1, *l1p2, *l2p1, *l2p2;
 	double l1p1x, l1p1y;
 	double l1p2x, l1p2y;
 	double l2p1x, l2p1y;
@@ -831,13 +844,13 @@ int m_edge(lua_State *L)  /* algorithm, by Darel Rex Finley, 2006, can be found 
 	/* no shared vertices */
 
 	/* translate the lines so that l1p1 is on the origin */
-	/* note that l1p1 itself isn't interally changed */
+	/* note that l1p1 itself isn't changed */
 	l1p2x -= l1p1x; l1p2y -= l1p1y;
 	l2p1x -= l1p1x; l2p1y -= l1p1y;
 	l2p2x -= l1p1x; l2p2y -= l1p1y;
 
 	/* find the sine and cosine of the line to prepare for rotation */
-	l1d = sqrt(l1p1x * l1p1x + l1p1y * l1p1y);
+	l1d = sqrt(l1p2x * l1p2x + l1p2y * l1p2y);
 	l1c = l1p2x / l1d;
 	l1s = l1p2y / l1d;
 
@@ -968,6 +981,60 @@ int m_polygon(lua_State *L)  /* brute force line test; will NOT detect an inters
 	}
 
 	lua_pushboolean(L, false);
+
+	return 1;
+}
+
+int m_vec2_normalto(lua_State *L)
+{
+	vec2_t *v;
+	const vec2_t *v2;
+
+	CHECKINIT(init, L);
+
+	v2 = CHECKVEC(L, 1);
+
+	v = lua_newuserdata(L, sizeof(vec2_t));
+
+	luaL_getmetatable(L, MATH_METATABLE);
+	lua_setmetatable(L, -2);
+
+	v->x = -v2->y / v2->R;
+	v->y = v2->x / v2->R;
+	v->R = 1.0;
+	v->t = atan(v->y / v->x);
+	if(v->x < 0.0 && v->y < 0.0)
+		v->t += 180;
+	else if(v->x < 0.0)
+		v->t += 90;
+	else if(v->y < 0.0)
+		v->t += 270;
+
+	return 1;
+}
+
+int m_vec2_project(lua_State *L)
+{
+	vec2_t *v;
+	const vec2_t *v2, *v3;
+	double dot;
+
+	CHECKINIT(init, L);
+
+	v2 = CHECKVEC(L, 1);
+	v3 = CHECKVEC(L, 2);
+
+	v = lua_newuserdata(L, sizeof(vec2_t));
+
+	luaL_getmetatable(L, MATH_METATABLE);
+	lua_setmetatable(L, -2);
+
+	/* r = (-(L1) * L2) * L2 */
+	dot = (-v2->x * v3->x) + (-v2->y * v3->y);
+
+	v->x = v3->x * dot;
+	v->y = v3->y * dot;
+	v->R = v3->R * dot;
 
 	return 1;
 }

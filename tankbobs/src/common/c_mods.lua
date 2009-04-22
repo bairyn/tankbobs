@@ -107,10 +107,6 @@ function common_clone_except_special(i, o, e)
 					end
 				--+++++++++++++++++++++++++++++++++++++++++++++++--
 				else
-					if c_const_get("debug") and type(v) == "userdata" then
-						common_print("Warning: cloning table containing a member of the userdata type")
-					end
-
 					o[k] = v
 				end
 			end
