@@ -727,18 +727,12 @@ int m_line(lua_State *L)  /* algorithm, by Christopher Barlett, at http://angelf
 	return 1;
 }
 
-int m_edge(lua_State *L)  /* algorithm, by Darel Rex Finley, 2006, can be found at http://alienryderflex.com/intersect/ */
+int m_edge(lua_State *L)  /* thanks to http://pastebin.com/f28510ac9 */
 {
 	vec2_t *v;
 	const vec2_t *l1p1, *l1p2, *l2p1, *l2p2;
-	double l1p1x, l1p1y;
-	double l1p2x, l1p2y;
-	double l2p1x, l2p1y;
-	double l2p2x, l2p2y;
-	double l1c, l1s;
-	double l1d;
-	double x;
-	double intersection;
+	vec2_t l1, l2, l2t1;
+	double r, s, d;
 
 	CHECKINIT(init, L);
 
@@ -747,171 +741,62 @@ int m_edge(lua_State *L)  /* algorithm, by Darel Rex Finley, 2006, can be found 
 	l2p1 = CHECKVEC(L, 3);
 	l2p2 = CHECKVEC(L, 4);
 
-	l1p1x = l1p1->x; l1p1y = l1p1->y;
-	l1p2x = l1p2->x; l1p2y = l1p2->y;
-	l2p1x = l2p1->x; l2p1y = l2p1->y;
-	l2p2x = l2p2->x; l2p2y = l2p2->y;
-
 	/* don't accept any 0-length lines */
-	if((l1p1x == l1p2x && l1p1y == l1p2y) || (l2p1x == l2p2x && l2p1y == l2p2y))
+	if((l1p1->x == l1p2->x && l1p1->y == l1p2->y) || (l2p1->x == l2p2->x && l2p1->y == l2p2->y))
 	{
 		lua_pushboolean(L, false);
 		return 1;
 	}
 
-	/* algorithm might run into issues if we don't test for shared vertices */
-	if(l1p1x == l2p1x && l1p1y == l2p1y)
+	l1.x = l1p2->x - l1p1->x;
+	l1.y = l1p2->y - l1p1->y;
+	l2.x = l2p2->x - l2p1->x;
+	l2.y = l2p2->y - l2p1->y;
+	/* the polar coordinates of l1 and l2 aren't used, so don't bother setting them */
+
+	/* make sure they aren't parallel */
+	if(l1.y / l1.x != l2.y / l2.x)
 	{
-		v = lua_newuserdata(L, sizeof(vec2_t));
+		d = l1.x * l2.y - l1.y * l2.x;
 
-		luaL_getmetatable(L, MATH_METATABLE);
-		lua_setmetatable(L, -2);
+		if(d)
+		{
+			l2t1.x = l1p1->x - l2p1->x;
+			l2t1.y = l1p1->y - l2p1->y;
 
-		v->x = l1p1x;
-		v->y = l1p1y;
-		v->R = sqrt(v->x * v->x + v->y * v->y);
-		v->t = atan(v->y / v->x);
-		if(v->x < 0.0 && v->y < 0.0)
-			v->t += 180;
-		else if(v->x < 0.0)
-			v->t += 90;
-		else if(v->y < 0.0)
-			v->t += 270;
+			r = (l2t1.y * l2.x - l2t1.x * l2.y) / d;
+			s = (l2t1.y * l1.x - l2t1.x * l1.y) / d;
 
-		return 1;
-	}
-	else if(l1p1x == l2p2x && l1p1y == l2p2y)
-	{
-		v = lua_newuserdata(L, sizeof(vec2_t));
+			if(r >= 0.0 && r <= 1.0 && s >= 0.0 && s < 1.0)
+			{
+				lua_pushboolean(L, true);
 
-		luaL_getmetatable(L, MATH_METATABLE);
-		lua_setmetatable(L, -2);
+				v = lua_newuserdata(L, sizeof(vec2_t));
 
-		v->x = l1p1x;
-		v->y = l1p1y;
-		v->R = sqrt(v->x * v->x + v->y * v->y);
-		v->t = atan(v->y / v->x);
-		if(v->x < 0.0 && v->y < 0.0)
-			v->t += 180;
-		else if(v->x < 0.0)
-			v->t += 90;
-		else if(v->y < 0.0)
-			v->t += 270;
+				luaL_getmetatable(L, MATH_METATABLE);
+				lua_setmetatable(L, -2);
 
-		return 1;
-	}
-	else if(l1p2x == l2p1x && l1p2y == l2p1y)
-	{
-		v = lua_newuserdata(L, sizeof(vec2_t));
+				v->x = l1p1->x + (l1p2->x - l1p1->x) * r;
+				v->y = l1p1->y + (l1p2->y - l1p1->y) * r;
 
-		luaL_getmetatable(L, MATH_METATABLE);
-		lua_setmetatable(L, -2);
+				/* calculate polar coordinates */
+				v->R = sqrt(v->x * v->x + v->y * v->y);
+				v->t = atan(v->y / v->x);
+				if(v->x < 0.0 && v->y < 0.0)
+					v->t += 180;
+				else if(v->x < 0.0)
+					v->t += 90;
+				else if(v->y < 0.0)
+					v->t += 270;
 
-		v->x = l1p2x;
-		v->y = l1p2y;
-		v->R = sqrt(v->x * v->x + v->y * v->y);
-		v->t = atan(v->y / v->x);
-		if(v->x < 0.0 && v->y < 0.0)
-			v->t += 180;
-		else if(v->x < 0.0)
-			v->t += 90;
-		else if(v->y < 0.0)
-			v->t += 270;
-
-		return 1;
-	}
-	else if(l1p2x == l2p2x && l1p2y == l2p2y)
-	{
-		v = lua_newuserdata(L, sizeof(vec2_t));
-
-		luaL_getmetatable(L, MATH_METATABLE);
-		lua_setmetatable(L, -2);
-
-		v->x = l1p2x;
-		v->y = l1p2y;
-		v->R = sqrt(v->x * v->x + v->y * v->y);
-		v->t = atan(v->y / v->x);
-		if(v->x < 0.0 && v->y < 0.0)
-			v->t += 180;
-		else if(v->x < 0.0)
-			v->t += 90;
-		else if(v->y < 0.0)
-			v->t += 270;
-
-		return 1;
+				return 2;
+			}
+		}
 	}
 
-	/* no shared vertices */
+	lua_pushboolean(L, false);
 
-	/* translate the lines so that l1p1 is on the origin */
-	/* note that l1p1 itself isn't changed */
-	l1p2x -= l1p1x; l1p2y -= l1p1y;
-	l2p1x -= l1p1x; l2p1y -= l1p1y;
-	l2p2x -= l1p1x; l2p2y -= l1p1y;
-
-	/* find the sine and cosine of the line to prepare for rotation */
-	l1d = sqrt(l1p2x * l1p2x + l1p2y * l1p2y);
-	l1c = l1p2x / l1d;
-	l1s = l1p2y / l1d;
-
-	/* rotate the lines so that l1p2 lies on positive side of the X axis */
-	x = l1c * l2p1x + l1s * l2p1y;
-	l2p1y = l1c * l2p1y - l1s * l2p1x;
-	l2p1x = x;
-	x = l1c * l2p2x + l1s * l2p2y;
-	l2p2y = l1c * l2p2y - l1s * l2p2x;
-	l2p2x = x;
-
-	/* if line 2 doesn't cross the X axis, then they don't intersect */
-	if((l2p1y < 0.0 && l2p2y < 0.0) || (l2p1y > 0.0 && l2p2y > 0.0))
-	{
-		lua_pushboolean(L, false);
-		return 1;
-	}
-
-	/* find the intersection along the X axis */
-	intersection = l2p2x + (l2p1x - l2p1x) * l2p2y / (l2p2y - l2p1y);
-
-	/* make sure the second line intersects the first line */
-	if(intersection < 0 || intersection > l1d)
-	{
-		lua_pushboolean(L, false);
-		return 1;
-	}
-
-	/* the lines intersect.  Push a vector of the coordinates of the intersection in the original coordinate system */
-
-	lua_pushboolean(L, true);
-
-	v = lua_newuserdata(L, sizeof(vec2_t));
-
-	luaL_getmetatable(L, MATH_METATABLE);
-	lua_setmetatable(L, -2);
-
-	/* coordinates of intersection (remember that l1p1 remains untranslated) */
-	v->x = l1p1x + l1c * intersection;
-	v->y = l1p1y + l1s * intersection;
-
-	/* calculate polar coordinates */
-	v->R = sqrt(v->x * v->x + v->y * v->y);
-	v->t = atan(v->y / v->x);
-	if(v->x < 0.0 && v->y < 0.0)
-		v->t += 180;
-	else if(v->x < 0.0)
-		v->t += 90;
-	else if(v->y < 0.0)
-		v->t += 270;
-
-	/* coordinates of intersection in transformed system */
-	v = lua_newuserdata(L, sizeof(vec2_t));
-
-	luaL_getmetatable(L, MATH_METATABLE);
-	lua_setmetatable(L, -2);
-
-	v->y = v->t = 0.0;
-	v->x = v->R = intersection;
-
-	return 3;
+	return 1;
 }
 
 #define MAX_VERTICES 12

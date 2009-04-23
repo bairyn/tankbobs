@@ -254,11 +254,11 @@ function c_world_tank_testWorld(d, tank)  -- test tanks against the world
 				if llp then
 					local vec = tankbobs.m_vec2(tank.p[1])
 					vec.R = c_const_get("tank_maxCollisionVectorLength")
-					local li, _, lt = tankbobs.m_edge(tank.p[1], vec, clp, llp)
+					local li, lt = tankbobs.m_edge(tank.p[1], vec, clp, llp)
 
 					if li then
-						if not l.p1 or not l.p2 or not di or lt.x < d then
-							di = lt.x
+						if not l.p1 or not l.p2 or not di or math.abs((lt - tank.p[1]).R) < d then
+							di = math.abs((lt - tank.p[1]).R)
 							l.p1 = clp
 							l.p2 = llp
 						end
@@ -272,11 +272,11 @@ function c_world_tank_testWorld(d, tank)  -- test tanks against the world
 			if llp and llp ~= v.p[1] then
 				local vec = tankbobs.m_vec2(tank.p[1])
 				vec.R = c_const_get("tank_maxCollisionVectorLength")
-				local li, _, lt = tankbobs.m_edge(tank.p[1], tank.p[1] + vec, llp, v.p[1])
+				local li, lt = tankbobs.m_edge(tank.p[1], tank.p[1] + vec, llp, v.p[1])
 
 				if li then
-					if not l.p1 or not l.p2 or not di or lt.x < d then
-						di = lt.x
+					if not l.p1 or not l.p2 or not di or math.abs((lt - tank.p[1]).R) < d then
+						di = math.abs((lt - tank.p[1]).R)
 						l.p1 = clp
 						l.p2 = llp
 					end
@@ -291,7 +291,7 @@ function c_world_tank_testWorld(d, tank)  -- test tanks against the world
 					io.stderr:write("c_world_testWorld: Warning: no edge detected for collision\n")
 				end
 			else
-				local p = tank.v[1]:project((l.p2 - l.p1):normalof())
+				local p = tank.v[1]:project((l.p1 - l.p2):normalof())
 				tank.v[1]:add(2 * p)
 			end
 		end

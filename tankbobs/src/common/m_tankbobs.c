@@ -306,11 +306,9 @@ static const struct luaL_Reg tankbobs[] =
 		/* the first two arguments passed are vectors of the coordinates of the first line */
 		/* and the third and fourth are the second line (l1p1, l1p2, l2p1, l2p2). */
 		/* If they do not intersect, false is returned.  If they do, */
-		/* true and the point of intersection is returned, and the third return is the point of */
-		/* intersection in the transformed system.  The third argument can be used to test */
-		/* a closest edge / line. */
+		/* true and the point of intersection is returned. */
 	{"m_line", m_line}, /* test if two lines intersect */
-		/* same as above but doesn't return any point of intersection. */
+		/* same as above but doesn't return the point of intersection. */
 		/* this function is faster and should be used wherever possible */
 	{"m_polygon", m_polygon}, /* test if two polygons intersect */
 		/* the first argument is a table of coordinates for the first polygon, second for the second polygon */
