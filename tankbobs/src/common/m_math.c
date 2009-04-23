@@ -759,7 +759,7 @@ int m_edge(lua_State *L)  /* thanks to http://pastebin.com/f28510ac9 */
 	{
 		d = l1.x * l2.y - l1.y * l2.x;
 
-		if(d)
+		if(d != 0.0)
 		{
 			l2t1.x = l1p1->x - l2p1->x;
 			l2t1.y = l1p1->y - l2p1->y;

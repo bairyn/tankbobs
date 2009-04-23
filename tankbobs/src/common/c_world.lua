@@ -216,14 +216,6 @@ function c_world_tank_canSpawn(d, tank)
 	return true
 end
 
---test against each edge
---or even better, do a polygon test
---take the vector of the tanks position and find the normal (or whatever it is) relative to the wall
---not-so-great physics
---take into account time as well
---damage can be calculated by the tanks speed for easy things; or maybe still, but probably not, penetration depth of the collision which might be inaccurae
---aoeuaoeu
-
 function c_world_tank_testWorld(d, tank)  -- test tanks against the world
 	-- generate polygon covering the hull of the tank before and after it's veloctiy movement
 	local hull = {}
@@ -239,6 +231,11 @@ function c_world_tank_testWorld(d, tank)  -- test tanks against the world
 
 	-- reset tank
 	tank.p[1]:sub(d * tank.v[1])
+local a = tankbobs.m_vec2(1, 1)
+local b = tankbobs.m_vec2(2, 9)
+local c = tankbobs.m_vec2(8, 2)
+local d = tankbobs.m_vec2(3, 9)
+print(tankbobs.m_edge(a, b, c, d))
 
 	-- test against every wall
 	for _, v in pairs(c_tcm_current_map.walls) do
