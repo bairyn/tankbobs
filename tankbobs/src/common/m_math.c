@@ -1036,6 +1036,13 @@ int m_vec2_project(lua_State *L)
 	v->x = v3->x * dot;
 	v->y = v3->y * dot;
 	v->R = v3->R * dot;
+	v->t = atan(v->y / v->x);
+	if(v->x < 0.0 && v->y < 0.0)
+		v->t += 180;
+	else if(v->x < 0.0)
+		v->t += 90;
+	else if(v->y < 0.0)
+		v->t += 270;
 
 	return 1;
 }

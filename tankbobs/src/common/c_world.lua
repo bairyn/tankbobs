@@ -253,6 +253,7 @@ function c_world_tank_testWorld(d, tank)  -- test tanks against the world
 					local li, lt = tankbobs.m_edge(tank.p[1], vec, clp, llp)
 
 					if li then
+--print((lt - tank.p[1]).x, (lt - tank.p[1]).y, (lt - tank.p[1]).R)
 						if not l.p1 or not l.p2 or not di or math.abs((lt - tank.p[1]).R) < d then
 							di = math.abs((lt - tank.p[1]).R)
 							l.p1 = clp
@@ -293,6 +294,7 @@ function c_world_tank_testWorld(d, tank)  -- test tanks against the world
 					io.stderr:write("c_world_testWorld: Warning: no edge detected for collision\n")
 				end
 			else
+				-- FIXME: the tank seems to tend to go at an upright angle?  but sometimes the tank evetually goes as if it were in  nge a circle aoeu
 				local p = tank.v[1]:project((l.p1 - l.p2):normalof())
 				tank.v[1]:add(2 * p)
 			end
