@@ -244,9 +244,12 @@ function c_world_tank_testWorld(d, tank)  -- test tanks against the world
 				local clp = v
 
 				if llp then
-					local vec = tankbobs.m_vec2(tank.p[1])
+					local vec = tankbobs.m_vec2()
 					vec.R = c_const_get("tank_maxCollisionVectorLength")
-					-- FIXME: detect collisions *behind* tank
+					vec.t = tank.v[1].t
+					if tank.v[1].R < 0 then
+						vec:inv()
+					end
 					local li, lt = tankbobs.m_edge(tank.p[1], vec, clp, llp)
 
 					if li then
@@ -256,6 +259,7 @@ function c_world_tank_testWorld(d, tank)  -- test tanks against the world
 							l.p2 = llp
 						end
 					end
+--print(tank.p[1].x, tank.p[1].y, vec.x, vec.y, clp.x, clp.y, llp.x, llp.y)
 				end
 
 				llp = clp
@@ -263,18 +267,22 @@ function c_world_tank_testWorld(d, tank)  -- test tanks against the world
 
 			-- check the last edge
 			if llp and llp ~= v.p[1] then
-				local vec = tankbobs.m_vec2(tank.p[1])
+				local vec = tankbobs.m_vec2()
 				vec.R = c_const_get("tank_maxCollisionVectorLength")
-				-- FIXME: detect collisions *behind* tank
+				vec.t = tank.v[1].t
+				if tank.v[1].R < 0 then
+					vec:inv()
+				end
 				local li, lt = tankbobs.m_edge(tank.p[1], tank.p[1] + vec, llp, v.p[1])
 
 				if li then
 					if not l.p1 or not l.p2 or not di or math.abs((lt - tank.p[1]).R) < d then
 						di = math.abs((lt - tank.p[1]).R)
-						l.p1 = clp
-						l.p2 = llp
+						l.p1 = llp
+						l.p2 = v.p[1]
 					end
 				end
+--print(tank.p[1].x, tank.p[1].y, vec.x, vec.y, llp.x, llp.y, v.p[1].x, v.p[1].y)
 			end
 
 			if not l.p1 or not l.p2 then
