@@ -231,11 +231,6 @@ function c_world_tank_testWorld(d, tank)  -- test tanks against the world
 
 	-- reset tank
 	tank.p[1]:sub(d * tank.v[1])
-local a = tankbobs.m_vec2(1, 1)
-local b = tankbobs.m_vec2(2, 9)
-local c = tankbobs.m_vec2(8, 2)
-local d = tankbobs.m_vec2(3, 9)
-print(tankbobs.m_edge(a, b, c, d))
 
 	-- test against every wall
 	for _, v in pairs(c_tcm_current_map.walls) do
@@ -251,6 +246,7 @@ print(tankbobs.m_edge(a, b, c, d))
 				if llp then
 					local vec = tankbobs.m_vec2(tank.p[1])
 					vec.R = c_const_get("tank_maxCollisionVectorLength")
+					-- FIXME: detect collisions *behind* tank
 					local li, lt = tankbobs.m_edge(tank.p[1], vec, clp, llp)
 
 					if li then
@@ -269,6 +265,7 @@ print(tankbobs.m_edge(a, b, c, d))
 			if llp and llp ~= v.p[1] then
 				local vec = tankbobs.m_vec2(tank.p[1])
 				vec.R = c_const_get("tank_maxCollisionVectorLength")
+				-- FIXME: detect collisions *behind* tank
 				local li, lt = tankbobs.m_edge(tank.p[1], tank.p[1] + vec, llp, v.p[1])
 
 				if li then

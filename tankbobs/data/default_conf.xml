@@ -56,7 +56,7 @@
 	</renderer>
 
 	<server>
-		<minFrameLatency>1</minFrameLatency>  1 can be used to make sure at least one msec passes between each frame.  0 can also be used to remove the limit but strange things might happen
+		<minFrameLatency>1</minFrameLatency>  1 can be used to make sure at least one msec passes between each frame.  0 can also be used to remove the limit but strange things might happen -- this isn't the same as an fps value: it just ensures that at least this amount of time has passed between each frame
 	</server>
 
 	<mods>
