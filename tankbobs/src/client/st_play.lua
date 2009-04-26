@@ -68,6 +68,9 @@ function st_play_button(button, pressed)
 	end
 
 	for i = 1, c_config_get("config.game.players") + c_config_get("config.game.computers") do
+		if not (c_config_get("config.key.firing" .. tostring(i) .. ".firing", nil, true)) then
+			c_config_set("config.key.firing" .. tostring(i) .. ".firing", false)
+		end
 		if not (c_config_get("config.key.player" .. tostring(i) .. ".forward", nil, true)) then
 			c_config_set("config.key.player" .. tostring(i) .. ".forward", false)
 		end
@@ -84,6 +87,9 @@ function st_play_button(button, pressed)
 			c_config_set("config.key.player" .. tostring(i) .. ".special", false)
 		end
 
+		if button == c_config_get("config.key.player" .. tostring(i) .. ".firing") then
+			c_world_tanks[i].state.forward = pressed
+		end
 		if button == c_config_get("config.key.player" .. tostring(i) .. ".forward") then
 			c_world_tanks[i].state.forward = pressed
 		end

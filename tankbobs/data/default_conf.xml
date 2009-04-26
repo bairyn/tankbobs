@@ -34,6 +34,7 @@
 		<quit>0x71</quit> 'q'
 		<pause>0x70</pause> 'p'
 		<player1>
+			<firing>306</firing> 'LCTRL'
 			<forward>0x77</forward> 'w'
 			<back>0x73</back> 's'
 			<left>0x61</left> 'a'
@@ -41,6 +42,7 @@
 			<special>304</special> 'LSHIFT'
 		</player1>
 		<player2>
+			<firing>305</firing> 'RCTRL'
 			<forward>273</forward> 'UP'
 			<back>274</back> 'DOWN'
 			<left>276</left> 'LEFT'

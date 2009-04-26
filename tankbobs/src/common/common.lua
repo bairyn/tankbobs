@@ -51,6 +51,8 @@ function common_init()
 
 	c_state_init()
 
+	c_weapon_init()
+
 	c_tcm_init()
 
 	c_world_init()
@@ -60,6 +62,8 @@ function common_done()
 	c_world_done()
 
 	c_tcm_done()
+
+	c_weapon_done()
 
 	c_state_done()
 

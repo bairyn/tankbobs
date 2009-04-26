@@ -67,6 +67,7 @@ function c_world_init()
 	c_const_set("tank_rotationSpeed", c_math_radians(135), 1)  -- 135 degrees per second
 	c_const_set("tank_rotationSpecialSpeed", c_math_degrees(1) / 3.5, 1)
 	c_const_set("tank_defaultRotation", c_math_radians(90), 1)  -- up
+	c_const_set("tank_projectileLaunchDistance", 3, 1)  -- 2 units from tanks center + 1 more unit
 
 	c_world_tanks = {}
 end
@@ -106,6 +107,8 @@ c_world_tank =
 	spawning = false,
 	lastSpawnPoint = 0,
 	state = nil,
+	weapon = nil,
+	lastFireTime = 0,
 	health = 0
 }
 
@@ -113,6 +116,7 @@ c_world_tank_state =
 {
 	new = common_new,
 
+	firing = false,
 	forward = false,
 	back = false,
 	right = false,
@@ -164,6 +168,7 @@ function c_world_tank_checkSpawn(d, tank)
 	tank.v[1].t = c_const_get("tank_defaultRotation")
 	tank.v[1].R = 0  -- no velocity
 	tank.health = c_const_get("tank_health")
+	tank.weapon = c_weapon:new()
 	tank.exists = true
 	return true
 end
@@ -304,6 +309,7 @@ end
 
 function c_world_tank_step(d, tank)
 	local vel = tank.v[1].R
+	local t = tankbobs.t_getTicks()
 
 	if tank.state.special then
 		if tank.state.left then
@@ -365,6 +371,19 @@ function c_world_tank_step(d, tank)
 	c_world_tank_testWorld(d, tank)
 
 	tank.p[1]:add(tank.v[1] * d)
+
+	-- weapons
+	if tank.state.firing then
+		if t >= tank.lastFireTime + tank.weapon.repeatRate then
+			tank.lastFireTime = t
+
+			-- fire weapon
+			c_weapon_fire(tank)
+		end
+	end
+end
+
+function c_world_projectile_step(d, projectile)
 end
 
 function c_world_step()
@@ -398,5 +417,9 @@ function c_world_step()
 	for _, v in pairs(c_world_tanks) do
 		c_world_tank_checkSpawn(d, v)
 		c_world_tank_step(d, v)
+	end
+
+	for _, v in pairs(c_world_projectiles) do
+		c_world_projectile_step(d, v)
 	end
 end
