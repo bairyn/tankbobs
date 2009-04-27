@@ -171,6 +171,10 @@ c_tcm_wall =
 		o.p[2] = tankbobs.m_vec2()
 		o.p[3] = tankbobs.m_vec2()
 		o.p[4] = tankbobs.m_vec2()
+		o.t[1] = tankbobs.m_vec2()
+		o.t[2] = tankbobs.m_vec2()
+		o.t[3] = tankbobs.m_vec2()
+		o.t[4] = tankbobs.m_vec2()
 		o.l = c_const_get("tcm_tankLevel")
 	end,
 
