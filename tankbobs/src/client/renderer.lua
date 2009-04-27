@@ -41,8 +41,7 @@ function renderer_done()
 end
 
 function renderer_setupNewWindow() -- this should be called once after new window
-	gl.Enable(something)
-	gl.Enable(something_else)
+	-- enable blending and everything else
 
 	gl.ClearColor(0, 0, 0, 0)
 

@@ -18,6 +18,13 @@
 				<b>0.9</b>
 			</color>
 		</player1>
+		<player2>
+			<color>  red
+				<r>0.9</r>
+				<g>0.1</g>
+				<b>0.1</b>
+			</color>
+		</player2>
 	</game>
 
 	These keys might conflict with menu movement:

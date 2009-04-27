@@ -513,7 +513,7 @@ int r_loadImage2D(lua_State *L)
 		lua_error(L);
 	}
 
-	if(!SDL_BlitSurface(img, NULL, converted, NULL))
+	if(SDL_BlitSurface(img, NULL, converted, NULL) != 0)
 	{
 		lua_pushstring(L, "r_loadImage2D: could not blit texture to surface\n");
 		lua_error(L);

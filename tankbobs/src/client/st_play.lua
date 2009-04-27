@@ -37,13 +37,13 @@ function st_play_init()
 	c_const_set("tank_texturex4", 1.0, 1) c_const_set("tank_texturey4", 1.0, 1)
 
 	play_tank_listBase = gl.GenLists(1)
-	play_tank_texture = gl.GenTextures(1)
+	play_tank_textures = gl.GenTextures(1)
 
 	if play_tank_listBase == 0 then
 		error "st_play_init: could not generate lists"
 	end
 
-	gl.BindTexture("TEXTURE_2D", play_tank_texture)
+	gl.BindTexture("TEXTURE_2D", play_tank_textures[1])
 	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_S", "REPEAT")
 	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_T", "REPEAT")
 	gl.TexParameter("TEXTURE_2D", "TEXTURE_MIN_FILTER", "LINEAR")
@@ -52,10 +52,10 @@ function st_play_init()
 
 	gl.NewList(play_tank_listBase, "COMPILE")
 		gl.Begin("QUADS")
-			gl.TexCoord() gl.Vertex(c_const_get("tank_renderx1"), c_const_get("tank_rendery1"))
-			gl.Vertex(c_const_get("tank_renderx2"), c_const_get("tank_rendery2"))
-			gl.Vertex(c_const_get("tank_renderx3"), c_const_get("tank_rendery3"))
-			gl.Vertex(c_const_get("tank_renderx4"), c_const_get("tank_rendery4"))
+			gl.TexCoord(c_const_get("tank_texturex1"), c_const_get("tank_texturex1")) gl.Vertex(c_const_get("tank_renderx1"), c_const_get("tank_rendery1"))
+			gl.TexCoord(c_const_get("tank_texturex1"), c_const_get("tank_texturex1")) gl.Vertex(c_const_get("tank_renderx2"), c_const_get("tank_rendery2"))
+			gl.TexCoord(c_const_get("tank_texturex1"), c_const_get("tank_texturex1")) gl.Vertex(c_const_get("tank_renderx3"), c_const_get("tank_rendery3"))
+			gl.TexCoord(c_const_get("tank_texturex1"), c_const_get("tank_texturex1")) gl.Vertex(c_const_get("tank_renderx4"), c_const_get("tank_rendery4"))
 		gl.End()
 	gl.EndList()
 
@@ -120,13 +120,11 @@ function st_play_done()
 
 	c_world_tanks = {}
 
-	gl.DeleteLists(play_tank_listbase, 1)
+	gl.DeleteLists(play_tank_listBase, 1)
 	gl.DeleteLists(play_wall_listBase, c_tcm_current_map.walls_n)
 
-	gl.DeletTextures(play_tank_texture, 1)
-	for _, v in pairs(c_tcm_current_map.walls) do
-		gl.DeleteTextures(v.m.texture)
-	end
+	gl.DeleteTextures(play_tank_textures)
+	gl.DeleteTextures(play_wall_textures)
 end
 
 function st_play_click(button, pressed, x, y)
@@ -207,7 +205,14 @@ function st_play_step()
 							gl.PushMatrix()
 								gl.Translate(v.p[1].x, v.p[1].y, 0)
 								gl.Rotate(c_math_degrees(v.r), 0, 0, 1)
-								gl.Color(c_config_get("config.game.player" .. tostring(k) .. ".color"))
+								if not (c_config_get("config.game.player" .. tostring(i) .. ".color", nil, true)) then
+									-- default red
+									c_config_set("config.game.player" .. tostring(i) .. ".color.r", 1)
+									c_config_set("config.game.player" .. tostring(i) .. ".color.g", 0)
+									c_config_set("config.game.player" .. tostring(i) .. ".color.b", 0)
+								end
+								gl.Color(c_config_get("config.game.player" .. tostring(k) .. ".color.r"), c_config_get("config.game.player" .. tostring(k) .. ".color.g"), c_config_get("config.game.player" .. tostring(k) .. ".color.b"))
+								-- blend color with tank texture
 								gl.CallList(play_tank_listBase)
 							gl.PopMatrix()
 						gl.PopAttrib()
