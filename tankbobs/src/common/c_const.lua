@@ -57,10 +57,10 @@ function c_const_init()
 			end
 		--[[
 		elseif c~= nil and tonumber(c) then
-			error("attempt to change constant changes and constant '" .. tostring(k) .. "' from '" .. tostring(const_get(k)) .. "' to '" .. tostring(v) .. "'")
+			error("attempt to change constant changes and constant '" .. tostring(k) .. "' from '" .. tostring(c_const_get(k)) .. "' to '" .. tostring(v) .. "'")
 		--]]
 		elseif const[k]["c"] <= 0 and const[k]["c"] ~= -1 then
-			error("attempt to change constant '" .. tostring(k) .. "' from '" .. tostring(const_get(k)) .. "' to '" .. tostring(v) .. "'")
+			error("attempt to change constant '" .. tostring(k) .. "' from '" .. tostring(c_const_get(k)) .. "' to '" .. tostring(v) .. "'")
 		else
 			if const[k]["c"] ~= -1 then
 				const[k]["c"] = const[k]["c"] - 1

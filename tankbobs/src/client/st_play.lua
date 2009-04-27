@@ -32,10 +32,10 @@ function st_play_init()
 	c_const_set("tank_renderx2", -2.0, 1) c_const_set("tank_rendery2", -2.0, 1)
 	c_const_set("tank_renderx3",  2.0, 1) c_const_set("tank_rendery3", -2.0, 1)
 	c_const_set("tank_renderx4",  2.0, 1) c_const_set("tank_rendery4",  2.0, 1)
-	c_const_set("tank_texturex1", 0.0, 1) c_const_set("tank_texturey1", 1.0, 1)
-	c_const_set("tank_texturex2", 0.0, 1) c_const_set("tank_texturey2", 0.0, 1)
-	c_const_set("tank_texturex3", 1.0, 1) c_const_set("tank_texturey3", 0.0, 1)
-	c_const_set("tank_texturex4", 1.0, 1) c_const_set("tank_texturey4", 1.0, 1)
+	c_const_set("tank_texturex1", 1.0, 1) c_const_set("tank_texturey1", 1.0, 1)
+	c_const_set("tank_texturex2", 0.0, 1) c_const_set("tank_texturey2", 1.0, 1)
+	c_const_set("tank_texturex3", 0.0, 1) c_const_set("tank_texturey3", 0.1, 1)  -- eliminate fuzzy top
+	c_const_set("tank_texturex4", 1.0, 1) c_const_set("tank_texturey4", 0.1, 1)  -- eliminate fuzzy top
 
 	play_tank_listBase = gl.GenLists(1)
 	play_tank_textures = gl.GenTextures(1)
@@ -53,7 +53,7 @@ function st_play_init()
 
 	gl.NewList(play_tank_listBase, "COMPILE_AND_EXECUTE")  -- execute to remove "choppy" effect
 		-- blend tank with color
-		gl.TexEnv("TEXTURE_ENV_MODE", "BLEND")
+		gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
 		gl.BindTexture("TEXTURE_2D", play_tank_textures[1])
 		gl.Begin("QUADS")
 			gl.TexCoord(c_const_get("tank_texturex1"), c_const_get("tank_texturey1")) gl.Vertex(c_const_get("tank_renderx1"), c_const_get("tank_rendery1"))

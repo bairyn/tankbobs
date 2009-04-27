@@ -46,6 +46,8 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 #define NUMCHARS       255
 #define TTD            10.0  /* really nice font */
 
+#define RESTRICT_TO_POWER_OF_TWO 1
+
 extern Uint8 init;
 
 typedef struct
@@ -533,8 +535,16 @@ int r_loadImage2D(lua_State *L)
 		lua_error(L);
 	}
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, r_private_powerOfTwo(converted->w), r_private_powerOfTwo(converted->w), 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, converted->w, converted->h, GL_RGBA, GL_UNSIGNED_BYTE, converted->pixels);
+	/* uncomment the next to lines if textures should be restricted to a power of two */
+	if(RESTRICT_TO_POWER_OF_TWO)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, r_private_powerOfTwo(converted->w), r_private_powerOfTwo(converted->w), 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, converted->w, converted->h, GL_RGBA, GL_UNSIGNED_BYTE, converted->pixels);
+	}
+	else
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, converted->w, converted->w, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	}
 
 	if(SDL_MUSTLOCK(converted))
 	{

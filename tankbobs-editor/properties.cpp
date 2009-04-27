@@ -174,56 +174,56 @@ void Properties::tx1Changed(const QString &text)
 {
 	entities::Wall *w = reinterpret_cast<entities::Wall *>(selection);
 
-	w->tx1 = util_atoi(util_qtcp(text).c_str());
+	w->tx1 = atof(util_qtcp(text).c_str());
 }
 
 void Properties::ty1Changed(const QString &text)
 {
 	entities::Wall *w = reinterpret_cast<entities::Wall *>(selection);
 
-	w->ty1 = util_atoi(util_qtcp(text).c_str());
+	w->ty1 = atof(util_qtcp(text).c_str());
 }
 
 void Properties::tx2Changed(const QString &text)
 {
 	entities::Wall *w = reinterpret_cast<entities::Wall *>(selection);
 
-	w->tx2 = util_atoi(util_qtcp(text).c_str());
+	w->tx2 = atof(util_qtcp(text).c_str());
 }
 
 void Properties::ty2Changed(const QString &text)
 {
 	entities::Wall *w = reinterpret_cast<entities::Wall *>(selection);
 
-	w->ty2 = util_atoi(util_qtcp(text).c_str());
+	w->ty2 = atof(util_qtcp(text).c_str());
 }
 
 void Properties::tx3Changed(const QString &text)
 {
 	entities::Wall *w = reinterpret_cast<entities::Wall *>(selection);
 
-	w->tx3 = util_atoi(util_qtcp(text).c_str());
+	w->tx3 = atof(util_qtcp(text).c_str());
 }
 
 void Properties::ty3Changed(const QString &text)
 {
 	entities::Wall *w = reinterpret_cast<entities::Wall *>(selection);
 
-	w->ty3 = util_atoi(util_qtcp(text).c_str());
+	w->ty3 = atof(util_qtcp(text).c_str());
 }
 
 void Properties::tx4Changed(const QString &text)
 {
 	entities::Wall *w = reinterpret_cast<entities::Wall *>(selection);
 
-	w->tx4 = util_atoi(util_qtcp(text).c_str());
+	w->tx4 = atof(util_qtcp(text).c_str());
 }
 
 void Properties::ty4Changed(const QString &text)
 {
 	entities::Wall *w = reinterpret_cast<entities::Wall *>(selection);
 
-	w->ty4 = util_atoi(util_qtcp(text).c_str());
+	w->ty4 = atof(util_qtcp(text).c_str());
 }
 
 void Properties::nameChanged(const QString &text)
