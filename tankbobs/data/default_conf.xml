@@ -1,15 +1,4 @@
 <config>
-	<info>
-		The following keys should not be used:
-		0x08: BACKSPACE
-		0x0D: ENTER
-		0x1B: ESCAPE
-		273: UP (exception: tank movement)
-		274: DOWN (exception: tank movement)
-		276: LEFT (exception: tank movement)
-		275: RIGHT (exception: tank movement)
-	</info>
-
 	<font>
 		<sans>
 			<size>2</size>
@@ -22,8 +11,23 @@
 		<computers>0</computers>
 		<players>2</players>
 		<overview>1</overview>
+		<player1>
+			<color>  blue
+				<r>0.1</r>
+				<g>0.1</g>
+				<b>0.9</b>
+			<color>
+		</player1>
 	</game>
 
+	These keys might conflict with menu movement:
+	0x08: BACKSPACE
+	0x0D: ENTER
+	0x1B: ESCAPE
+	273: UP (exception: tank movement)
+	274: DOWN (exception: tank movement)
+	276: LEFT (exception: tank movement)
+	275: RIGHT (exception: tank movement)
 	<key>
 		<select></select>
 		<up>280</up> 'PGUP'
@@ -45,7 +49,7 @@
 			<firing>305</firing> 'RCTRL'
 			<forward>273</forward> 'UP'
 			<back>274</back> 'DOWN'
-			<left>276</left> 'LEFT'
+			<left>276</left> 'LEFT
 			<right>275</right> 'RIGHT'
 			<special>303</special> 'RSHIFT'
 		</player2>
@@ -58,7 +62,7 @@
 	</renderer>
 
 	<server>
-		<minFrameLatency>1</minFrameLatency>  1 can be used to make sure at least one msec passes between each frame.  0 can also be used to remove the limit but strange things might happen -- this isn't the same as an fps value: it just ensures that at least this amount of time has passed between each frame
+		<minFrameLatency>1</minFrameLatency>  1 can be used to make sure at least one msec passes between each frame.  0 can also be used to remove the limit but strange things might happen -- this isn't the same as an fps value: it just makes sure that at least this amount of time has passed between each frame
 	</server>
 
 	<mods>

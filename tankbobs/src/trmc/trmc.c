@@ -531,16 +531,17 @@ typedef struct wall_s wall_t;
 static struct wall_s
 {
 	int quad;
-	double x1;
-	double y1;
-	double x2;
-	double y2;
-	double x3;
-	double y3;
-	double x4;
-	double y4;
+	double x1; double y1;
+	double x2; double y2;
+	double x3; double y3;
+	double x4; double y4;
+	double tx1; double ty1;
+	double tx2; double ty2;
+	double tx3; double ty3;
+	double tx4; double ty4;
 	char texture[256];  /* hardcoded for format */
 	int level;
+	int detail;
 } walls[MAX_WALLS];
 
 typedef struct teleporter_s teleporter_t;
@@ -548,22 +549,19 @@ static struct teleporter_s
 {
 	char name[MAX_STRING_STRUCT_CHARS];
 	char targetName[MAX_STRING_STRUCT_CHARS];
-	double x1;
-	double y1;
+	double x1; double y1;
 } teleporters[MAX_TELEPORTERS];
 
 typedef struct playerSpawnPoint_s playerSpawnPoint_t;
 static struct playerSpawnPoint_s
 {
-	double x1;
-	double y1;
+	double x1; double y1;
 } playerSpawnPoints[MAX_PLAYERSPAWNPOINTS];
 
 typedef struct powerupSpawnPoint_s powerupSpawnPoint_t;
 static struct powerupSpawnPoint_s
 {
-	double x1;
-	double y1;
+	double x1; double y1;
 	char powerupsToEnable[MAX_STRING_STRUCT_CHARS];
 } powerupSpawnPoints[MAX_POWERUPSPAWNPOINTS];
 
@@ -590,7 +588,7 @@ static void add_map(char *name, char *title, char *description, char *version_s,
 	map->version = version;
 }
 
-static void add_wall(int quad, double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, char *texture, int level)
+static void add_wall(int quad, double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double tx1, double ty1, double tx2, double ty2, double tx3, double ty3, double tx4, double ty4, char *texture, int level, int detail)
 {
 	wall_t *wall = &walls[wc++];
 
@@ -609,8 +607,17 @@ static void add_wall(int quad, double x1, double y1, double x2, double y2, doubl
 	wall->y3 = y3;
 	wall->x4 = x4;
 	wall->y4 = y4;
+	wall->tx1 = tx1;
+	wall->ty1 = ty1;
+	wall->tx2 = tx2;
+	wall->ty2 = ty2;
+	wall->tx3 = tx3;
+	wall->ty3 = ty3;
+	wall->tx4 = tx4;
+	wall->ty4 = ty4;
 	strncpy(wall->texture, texture, sizeof(wall->texture));
 	wall->level = level;
+	wall->detail = detail;
 }
 
 static void add_teleporter(const char *name, const char *targetName, double x1, double y1)
@@ -778,8 +785,13 @@ static int compile(const char *filename)
 					double x2, y2;
 					double x3, y3;
 					double x4, y4;
+					double tx1, ty1;
+					double tx2, ty2;
+					double tx3, ty3;
+					double tx4, ty4;
 					char texture[MAX_STRING_SIZE];
 					int level;
+					int detail;
 
 					quad = read_int();
 					x1 = read_double();
@@ -790,10 +802,19 @@ static int compile(const char *filename)
 					y3 = read_double();
 					x4 = read_double();
 					y4 = read_double();
+					tx1 = read_double();
+					ty1 = read_double();
+					tx2 = read_double();
+					ty2 = read_double();
+					tx3 = read_double();
+					ty3 = read_double();
+					tx4 = read_double();
+					ty4 = read_double();
 					read_string(texture);
 					level = read_int();
+					detail = read_int();
 
-					add_wall(quad, x1, y1, x2, y2, x3, y3, x4, y4, texture, level);
+					add_wall(quad, x1, y1, x2, y2, x3, y3, x4, y4, tx1, ty1, tx2, ty2, tx3, ty3, tx4, ty4, texture, level, detail);
 				}
 				else if(strncmp(entity, "teleporter", sizeof(entity)) == 0)
 				{
@@ -898,8 +919,17 @@ static int compile(const char *filename)
 		put_cdouble(fout, wall->y3);
 		put_cdouble(fout, wall->x4);
 		put_cdouble(fout, wall->y4);
+		put_cdouble(fout, wall->tx1);
+		put_cdouble(fout, wall->ty1);
+		put_cdouble(fout, wall->tx2);
+		put_cdouble(fout, wall->ty2);
+		put_cdouble(fout, wall->tx3);
+		put_cdouble(fout, wall->ty3);
+		put_cdouble(fout, wall->tx4);
+		put_cdouble(fout, wall->ty4);
 		put_str(fout, wall->texture, 256);
 		put_cint(fout, wall->level);
+		put_cchar(fout, ((wall->detail) ? (1) : (0)));
 	}
 
 	for(i = 0; i < tc; i++)

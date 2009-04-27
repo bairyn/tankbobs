@@ -105,6 +105,7 @@ int r_newFont(lua_State *L);
 int r_freeFont(lua_State *L);
 int r_drawCharacter(lua_State *L);
 void r_quitFreeType(void);
+int r_loadImage2D(lua_State *L);
 
 /* m_math.c */
 void m_init(lua_State *L);

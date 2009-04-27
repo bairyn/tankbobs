@@ -746,106 +746,134 @@ static void drawTeleporters(void)
 
 static void drawWalls(void)
 {
-	for(vector<entities::Wall *>::iterator i = wall.begin(); i != wall.end(); ++i)
+	for(int l = 0; l < 23; l++)
 	{
-		entities::Wall *e = *i;
-		glPushAttrib(GL_POLYGON_BIT | GL_CURRENT_BIT);
-			glPushMatrix();
-				if(e == reinterpret_cast<void *>(selection))
-				{
-					glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-					glColor4d(1.0, 0.0, 0.0, 1.0);  // red
-					if(!e->quad)
-					{
-						glBegin(GL_TRIANGLES);
-							glVertex2d(e->x1, e->y1);
-							glVertex2d(e->x2, e->y2);
-							glVertex2d(e->x3, e->y3);
-						glEnd();
-					}
-					else
-					{
-						glBegin(GL_QUADS);
-							glVertex2d(e->x1, e->y1);
-							glVertex2d(e->x2, e->y2);
-							glVertex2d(e->x3, e->y3);
-							glVertex2d(e->x4, e->y4);
-						glEnd();
-					}
-					// -
-					if(ctrl && !shift)
-					{
-						glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-						glColor4d(1.0, 0.5, 0.0, 1.0);
-						// selected vertex is bluish
-						glPushMatrix();
-							glPushAttrib(GL_CURRENT_BIT);
-								if(x_selected == &e->x1 && y_selected == &e->y1)
-								{
-									glColor4d(0.2, 0.1, 0.6, 1.0);
-								}
-								glTranslated(e->x1, e->y1, 0.0);
-								drawCircle(3.0 / ZOOM);
-							glPopAttrib();
-						glPopMatrix();
-						glPushMatrix();
-							glPushAttrib(GL_CURRENT_BIT);
-								if(x_selected == &e->x2 && y_selected == &e->y2)
-								{
-									glColor4d(0.2, 0.1, 0.6, 1.0);
-								}
-								glTranslated(e->x2, e->y2, 0.0);
-								drawCircle(3.0 / ZOOM);
-							glPopAttrib();
-						glPopMatrix();
-						glPushMatrix();
-							glPushAttrib(GL_CURRENT_BIT);
-								if(x_selected == &e->x3 && y_selected == &e->y3)
-								{
-									glColor4d(0.2, 0.1, 0.6, 1.0);
-								}
-								glTranslated(e->x3, e->y3, 0.0);
-								drawCircle(3.0 / ZOOM);
-							glPopAttrib();
-						glPopMatrix();
-						if(e->quad)
+		for(vector<entities::Wall *>::iterator i = wall.begin(); i != wall.end(); ++i)
+		{
+			entities::Wall *e = *i;
+
+			if(l == e->level)
+			{
+				glPushAttrib(GL_POLYGON_BIT | GL_CURRENT_BIT);
+					glPushMatrix();
+						if(e == reinterpret_cast<void *>(selection))
 						{
-							glPushMatrix();
-								glPushAttrib(GL_CURRENT_BIT);
-									if(x_selected == &e->x4 && y_selected == &e->y4)
-									{
-										glColor4d(0.2, 0.1, 0.6, 1.0);
-									}
-									glTranslated(e->x4, e->y4, 0.0);
-									drawCircle(3.0 / zoom);
-								glPopAttrib();
-							glPopMatrix();
+							glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+							glColor4d(1.0, 0.0, 0.0, 1.0);  // red
+							if(!e->quad)
+							{
+								glBegin(GL_TRIANGLES);
+									glVertex2d(e->x1, e->y1);
+									glVertex2d(e->x2, e->y2);
+									glVertex2d(e->x3, e->y3);
+								glEnd();
+							}
+							else
+							{
+								glBegin(GL_QUADS);
+									glVertex2d(e->x1, e->y1);
+									glVertex2d(e->x2, e->y2);
+									glVertex2d(e->x3, e->y3);
+									glVertex2d(e->x4, e->y4);
+								glEnd();
+							}
+							// -
+							if(ctrl && !shift)
+							{
+								glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+								glColor4d(1.0, 0.5, 0.0, 1.0);
+								// selected vertex is bluish
+								glPushMatrix();
+									glPushAttrib(GL_CURRENT_BIT);
+										if(x_selected == &e->x1 && y_selected == &e->y1)
+										{
+											glColor4d(0.2, 0.1, 0.6, 1.0);
+										}
+										glTranslated(e->x1, e->y1, 0.0);
+										drawCircle(3.0 / ZOOM);
+									glPopAttrib();
+								glPopMatrix();
+								glPushMatrix();
+									glPushAttrib(GL_CURRENT_BIT);
+										if(x_selected == &e->x2 && y_selected == &e->y2)
+										{
+											glColor4d(0.2, 0.1, 0.6, 1.0);
+										}
+										glTranslated(e->x2, e->y2, 0.0);
+										drawCircle(3.0 / ZOOM);
+									glPopAttrib();
+								glPopMatrix();
+								glPushMatrix();
+									glPushAttrib(GL_CURRENT_BIT);
+										if(x_selected == &e->x3 && y_selected == &e->y3)
+										{
+											glColor4d(0.2, 0.1, 0.6, 1.0);
+										}
+										glTranslated(e->x3, e->y3, 0.0);
+										drawCircle(3.0 / ZOOM);
+									glPopAttrib();
+								glPopMatrix();
+								if(e->quad)
+								{
+									glPushMatrix();
+										glPushAttrib(GL_CURRENT_BIT);
+											if(x_selected == &e->x4 && y_selected == &e->y4)
+											{
+												glColor4d(0.2, 0.1, 0.6, 1.0);
+											}
+											glTranslated(e->x4, e->y4, 0.0);
+											drawCircle(3.0 / zoom);
+										glPopAttrib();
+									glPopMatrix();
+								}
+							}
 						}
-					}
-				}
-				else
-				{
-					glColor4d(1.0, 0.0, 0.0, 1.0);
-					if(!e->quad)
-					{
-						glBegin(GL_TRIANGLES);
-							glVertex2d(e->x1, e->y1);
-							glVertex2d(e->x2, e->y2);
-							glVertex2d(e->x3, e->y3);
-						glEnd();
-					}
-					else
-					{
-						glBegin(GL_QUADS);
-							glVertex2d(e->x1, e->y1);
-							glVertex2d(e->x2, e->y2);
-							glVertex2d(e->x3, e->y3);
-							glVertex2d(e->x4, e->y4);
-						glEnd();
-					}
-				}
-			glPopMatrix();
-		glPopAttrib();
+						else
+						{
+							glColor4d(1.0, 0.0, 0.0, 1.0);
+							if(!e->quad)
+							{
+								glBegin(GL_TRIANGLES);
+									glVertex2d(e->x1, e->y1);
+									glVertex2d(e->x2, e->y2);
+									glVertex2d(e->x3, e->y3);
+								glEnd();
+							}
+							else
+							{
+								glBegin(GL_QUADS);
+									glVertex2d(e->x1, e->y1);
+									glVertex2d(e->x2, e->y2);
+									glVertex2d(e->x3, e->y3);
+									glVertex2d(e->x4, e->y4);
+								glEnd();
+							}
+
+							// draw a bluish outline
+							glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+							glColor4d(0.2, 0.0, 0.8, 0.3);  // blueish
+							if(!e->quad)
+							{
+								glBegin(GL_TRIANGLES);
+									glVertex2d(e->x1, e->y1);
+									glVertex2d(e->x2, e->y2);
+									glVertex2d(e->x3, e->y3);
+								glEnd();
+							}
+							else
+							{
+								glBegin(GL_QUADS);
+									glVertex2d(e->x1, e->y1);
+									glVertex2d(e->x2, e->y2);
+									glVertex2d(e->x3, e->y3);
+									glVertex2d(e->x4, e->y4);
+								glEnd();
+							}
+						}
+					glPopMatrix();
+				glPopAttrib();
+			}
+		}
 	}
 }
 
@@ -863,13 +891,11 @@ static void drawEntity(int e)
 		drawPowerupSpawnPoints();
 	else if(e == 2)
 		drawTeleporters();
-	else if(e == 3)
-		drawWalls();
 	else
 		TANKBOBSEDITOR_DRAWENTITY_ERROR(e);
 }
 
-const int entityInts[] = {0, 1, 2, 3};
+const int entityInts[] = {0, 1, 2};
 
 typedef struct
 {
@@ -1001,7 +1027,8 @@ void Editor::paintGL()
 		keyReleaseLast = 0;
 	}
 
-	// draw all entities
+	// draw all entities after walls
+	drawWalls();
 	util_fpermutation(editorPaintGLCache.l0, editorPaintGLCache.l1, editorPaintGLCache.l2, order++);
 
 	// draw grid

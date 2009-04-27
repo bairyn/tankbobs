@@ -247,6 +247,14 @@ static const struct luaL_Reg tankbobs[] =
 	{"in_freeEvents", in_freeEvents}, /* free an event queue */
 		/* first and only arg is event queue to be freed, must be called after
 			processing a queue */
+	{"in_grabClear", in_grabClear}, /* frees and shows cursor */
+		/* no args, no returns, frees and shows cursor */
+	{"in_grabMouse", in_grabMouse}, /* grabs and hides cursor */
+		/* 1st arg is width of window, 2nd arg is height, no returns, grabs and
+			hides cursor */
+	{"in_isGrabbed", in_isGrabbed}, /* is cursor grabbed */
+		/* no args, 1 and only return is boolean of whether or not cursor is
+			grabbed */
 
 	/* io.c */
 	{"io_getHomeDirectory", io_getHomeDirectory},  /* function to retrieve the user directory, eg /home/user */
@@ -288,14 +296,10 @@ static const struct luaL_Reg tankbobs[] =
 	{"r_drawCharacter", r_drawCharacter}, /* render a character */
 		/* first arg is x, 2nd y, 3rd w, 4th h, 5th is font, 6th is character to
 			draw.  No returns */
-	{"in_grabClear", in_grabClear}, /* frees and shows cursor */
-		/* no args, no returns, frees and shows cursor */
-	{"in_grabMouse", in_grabMouse}, /* grabs and hides cursor */
-		/* 1st arg is width of window, 2nd arg is height, no returns, grabs and
-			hides cursor */
-	{"in_isGrabbed", in_isGrabbed}, /* is cursor grabbed */
-		/* no args, 1 and only return is boolean of whether or not cursor is
-			grabbed */
+	{"r_loadImage2D", r_loadImage2D}, /* load an image into the currently bound 2D texture */
+		/* the first argument passed is the filename of the image to be loaded.  The second
+			argument is the filename of the default image to load if the first image
+			couldn't be loaded.  Nothing is returned */
 
 	/* math.c */
 	{"m_vec2", m_vec2}, /* new vector */

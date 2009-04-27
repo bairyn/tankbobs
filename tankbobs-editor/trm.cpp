@@ -470,8 +470,13 @@ bool trm_open(const char *filename, bool import)  // Will not confirm lost progr
 					double x2, y2;
 					double x3, y3;
 					double x4, y4;
+					double tx1, ty1;
+					double tx2, ty2;
+					double tx3, ty3;
+					double tx4, ty4;
 					char texture[1024];
 					int level;
+					int detail;
 
 					quad = read_int();
 					x1 = read_double();
@@ -482,10 +487,19 @@ bool trm_open(const char *filename, bool import)  // Will not confirm lost progr
 					y3 = read_double();
 					x4 = read_double();
 					y4 = read_double();
+					tx1 = read_double();
+					ty1 = read_double();
+					tx2 = read_double();
+					ty2 = read_double();
+					tx3 = read_double();
+					ty3 = read_double();
+					tx4 = read_double();
+					ty4 = read_double();
 					read_string(texture);
 					level = read_int();
+					detail = read_int();
 
-					wall.push_back(new entities::Wall(x1, y1, quad, x2, y2, x3, y3, x4, y4, texture, level));
+					wall.push_back(new entities::Wall(x1, y1, quad, x2, y2, x3, y3, x4, y4, tx1, ty1, tx2, ty2, tx3, ty3, tx4, ty4, texture, level, detail));
 				}
 				else if(strncmp(entity, "teleporter", sizeof(entity)) == 0)
 				{
@@ -598,9 +612,27 @@ bool trm_save(const char *filename)
 		<< ", "
 		<< e->y4
 		<< ", "
+		<< e->tx1
+		<< ", "
+		<< e->ty1
+		<< ", "
+		<< e->tx2
+		<< ", "
+		<< e->ty2
+		<< ", "
+		<< e->tx3
+		<< ", "
+		<< e->ty3
+		<< ", "
+		<< e->tx4
+		<< ", "
+		<< e->ty4
+		<< ", "
 		<< e->texture
 		<< ", "
 		<< e->level
+		<< ", "
+		<< e->detail
 		<< endl;
 	}
 

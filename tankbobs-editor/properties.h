@@ -45,12 +45,21 @@ class Properties : public QDialog, private Ui::PropertiesDialog
 		void powerupsChanged(const QString &text);
 		void levelChanged(const QString &text);
 		void textureChanged(const QString &text);
+		void tx1Changed(const QString &text);
+		void ty1Changed(const QString &text);
+		void tx2Changed(const QString &text);
+		void ty2Changed(const QString &text);
+		void tx3Changed(const QString &text);
+		void ty3Changed(const QString &text);
+		void tx4Changed(const QString &text);
+		void ty4Changed(const QString &text);
 		void nameChanged(const QString &text);
 		void targetNameChanged(const QString &text);
 		void fourVerticesChanged(int state);
 		void autoselectChanged(int state);
 		void nomodifyChanged(int state);
 		void autonotextureChanged(int state);
+		void detailChanged(int state);
 };
 
 #endif

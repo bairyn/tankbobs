@@ -454,3 +454,92 @@ void r_quitFreeType(void)
 {
 	FT_Done_FreeType(ft);
 }
+
+static inline int r_private_powerOfTwo(int x)
+{
+	int r = 1;
+
+	while(r < x)
+		r <<= 1;
+
+	return r;
+}
+
+int r_loadImage2D(lua_State *L)
+{
+	const char *filename;
+	SDL_Surface *img, *converted;
+
+	CHECKINIT(init, L);
+
+	filename = luaL_checkstring(L, 1);
+
+	img = IMG_Load(filename);
+	if(!img)
+	{
+		filename = luaL_checkstring(L, 2);
+
+		img = IMG_Load(filename);
+		if(!img)
+		{
+			tstr *message = CDLL_FUNCTION("tstr", "tstr_new", tstr *(*)(void))
+				();
+			CDLL_FUNCTION("tstr", "tstr_base_set", void(*)(tstr *, const char *))
+				(message, "r_loadImage2D: could not load texture `");
+			CDLL_FUNCTION("tstr", "tstr_cat", void(*)(tstr *, const char *))
+				(message, luaL_checkstring(L, 1));
+			CDLL_FUNCTION("tstr", "tstr_base_cat", void(*)(tstr *, const char *))
+				(message, "' or default texture: '");
+			CDLL_FUNCTION("tstr", "tstr_cat", void(*)(tstr *, const char *))
+				(message, filename);
+			CDLL_FUNCTION("tstr", "tstr_base_cat", void(*)(tstr *, const char *))
+				(message, "'\n");
+			lua_pushstring(L, CDLL_FUNCTION("tstr", "tstr_cstr", const char *(*)(tstr *))
+								(message));
+			CDLL_FUNCTION("tstr", "tstr_free", void(*)(tstr *))
+				(message);
+			lua_error(L);
+		}
+	}
+
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+	converted = SDL_CreateRGBSurface(0, r_private_powerOfTwo(img->w), r_private_powerOfTwo(img->h), 32, 0xFF000000, 0x00FF0000, 0x0000FF00, 0x000000FF);
+#else
+	converted = SDL_CreateRGBSurface(0, r_private_powerOfTwo(img->w), r_private_powerOfTwo(img->h), 32, 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
+#endif
+	if(!converted)
+	{
+		lua_pushstring(L, "r_loadImage2D: could not create texture surface\n");
+		lua_error(L);
+	}
+
+	if(!SDL_BlitSurface(img, NULL, converted, NULL))
+	{
+		lua_pushstring(L, "r_loadImage2D: could not blit texture to surface\n");
+		lua_error(L);
+	}
+
+	if(!converted->pixels)
+	{
+		lua_pushstring(L, "r_loadImage2D: could not create texture\n");
+		lua_error(L);
+	}
+
+	if(SDL_MUSTLOCK(converted))
+	{
+		SDL_LockSurface(converted);
+	}
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, r_private_powerOfTwo(converted->w), r_private_powerOfTwo(converted->w), 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, converted->w, converted->h, GL_RGBA, GL_UNSIGNED_BYTE, converted->pixels);
+
+	if(SDL_MUSTLOCK(converted))
+	{
+		SDL_UnlockSurface(converted);
+	}
+
+	SDL_FreeSurface(img);
+	SDL_FreeSurface(converted);
+
+	return 0;
+}

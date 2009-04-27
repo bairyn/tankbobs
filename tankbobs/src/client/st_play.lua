@@ -26,6 +26,76 @@ main play state
 function st_play_init()
 	gui_conserve()
 
+	-- initialize renderer stuff
+	c_const_set("tank_renderx1", -2.0, 1) c_const_set("tank_rendery1",  2.0, 1)
+	c_const_set("tank_renderx2", -2.0, 1) c_const_set("tank_rendery2", -2.0, 1)
+	c_const_set("tank_renderx3",  2.0, 1) c_const_set("tank_rendery3", -1.0, 1)
+	c_const_set("tank_renderx4",  2.0, 1) c_const_set("tank_rendery4",  1.0, 1)
+	c_const_set("tank_texturex1", 0.0, 1) c_const_set("tank_texturey1", 1.0, 1)
+	c_const_set("tank_texturex2", 0.0, 1) c_const_set("tank_texturey2", 0.0, 1)
+	c_const_set("tank_texturex3", 1.0, 1) c_const_set("tank_texturey3", 0.0, 1)
+	c_const_set("tank_texturex4", 1.0, 1) c_const_set("tank_texturey4", 1.0, 1)
+
+	play_tank_listBase = gl.GenLists(1)
+	play_tank_texture = gl.GenTextures(1)
+
+	if play_tank_listBase == 0 then
+		error "st_play_init: could not generate lists"
+	end
+
+	gl.BindTexture("TEXTURE_2D", play_tank_texture)
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_S", "REPEAT")
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_T", "REPEAT")
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_MIN_FILTER", "LINEAR")
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_MAG_FILTER", "LINEAR")
+	tankbobs.r_loadImage2D(c_const_get("tank"), c_const_get("textures_default"))
+
+	gl.NewList(play_tank_listBase, "COMPILE")
+		gl.Begin("QUADS")
+			gl.TexCoord() gl.Vertex(c_const_get("tank_renderx1"), c_const_get("tank_rendery1"))
+			gl.Vertex(c_const_get("tank_renderx2"), c_const_get("tank_rendery2"))
+			gl.Vertex(c_const_get("tank_renderx3"), c_const_get("tank_rendery3"))
+			gl.Vertex(c_const_get("tank_renderx4"), c_const_get("tank_rendery4"))
+		gl.End()
+	gl.EndList()
+
+	local listOffset = 0
+
+	play_wall_listBase = gl.GenLists(c_tcm_current_map.walls_n)
+	play_wall_textures = gl.GenTextures(c_tcm_current_map.walls_n)
+
+	if play_wall_listBase == 0 then
+		error "st_play_init: could not generate lists"
+	end
+
+	for k, v in pairs(c_tcm_current_map.walls) do
+		v.m.list = play_wall_listBase + listOffset
+		v.m.texture = play_wall_textures[k]
+
+		gl.BindTexture("TEXTURE_2D", v.m.texture)
+		gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_S", "REPEAT")
+		gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_T", "REPEAT")
+		gl.TexParameter("TEXTURE_2D", "TEXTURE_MIN_FILTER", "LINEAR")
+		gl.TexParameter("TEXTURE_2D", "TEXTURE_MAG_FILTER", "LINEAR")
+		tankbobs.r_loadImage2D(c_const_get("textures_dir") .. v.texture, c_const_get("textures_default"))
+
+		gl.NewList(v.m.list, "COMPILE")
+			gl.BindTexture("TEXTURE_2D", v.m.texture)
+
+			gl.Begin("POLYGON")
+				for i = 1, #v.p do
+					gl.TexCoord(v.t[i].x, v.t[i].y)
+					gl.Vertex(v.p[i].x, v.p[i].y)
+				end
+				for _, v in pairs(v.p) do
+					gl.Vertex(v.x, v.y)
+				end
+			gl.End()
+		gl.EndList()
+
+		listOffset = listOffset + 1
+	end
+
 	for i = 1, c_config_get("config.game.players") + c_config_get("config.game.computers") do
 		if i > c_const_get("max_tanks") then
 			break
@@ -49,6 +119,14 @@ function st_play_done()
 	gui_finish()
 
 	c_world_tanks = {}
+
+	gl.DeleteLists(play_tank_listbase, 1)
+	gl.DeleteLists(play_wall_listBase, c_tcm_current_map.walls_n)
+
+	gl.DeletTextures(play_tank_texture, 1)
+	for _, v in pairs(c_tcm_current_map.walls) do
+		gl.DeleteTextures(v.m.texture)
+	end
 end
 
 function st_play_click(button, pressed, x, y)
@@ -118,40 +196,27 @@ function st_play_step()
 	c_world_step()
 
 	-- iterate each time from 1 to hard-coded 20 but render tanks before level 9
-	for i = 1, 20 do
+	for i = 1, c_const_get("tcm_maxLevel") do
 		for k, v in pairs(c_tcm_current_map.walls) do
 			if i == c_const_get("tcm_tankLevel") then
 				-- render tanks
 				-- TMP: aoeu
 				for k, v in pairs(c_world_tanks) do
 					if(v.exists) then
-						gl.PushMatrix()
-							gl.Translate(v.p[1].x, v.p[1].y, 0)
-							gl.Rotate(c_math_degrees(v.r), 0, 0, 1)
-							gl.Begin("QUADS")
-								gl.Vertex(v.h[1].x, v.h[1].y)
-								gl.Vertex(v.h[2].x, v.h[2].y)
-								gl.Vertex(v.h[3].x, v.h[3].y)
-								gl.Vertex(v.h[4].x, v.h[4].y)
-							gl.End()
-						gl.PopMatrix()
+						gl.PushAttrib("CURRENT_BIT")
+							gl.PushMatrix()
+								gl.Translate(v.p[1].x, v.p[1].y, 0)
+								gl.Rotate(c_math_degrees(v.r), 0, 0, 1)
+								gl.Color(c_config_get("config.game.player" .. tostring(k) .. ".color"))
+								gl.CallList(play_tank_listBase)
+							gl.PopMatrix()
+						gl.PopAttrib()
 					end
 				end
 			end
 
 			if v.l == i then
-				if v.q then
-					gl.Begin("QUADS")
-				else
-					gl.Begin("TRIANGLES")
-				end
-					gl.Vertex(v.p[1].x, v.p[1].y)
-					gl.Vertex(v.p[2].x, v.p[2].y)
-					gl.Vertex(v.p[3].x, v.p[3].y)
-					if v.q then
-						gl.Vertex(v.p[4].x, v.p[4].y)
-					end
-				gl.End()
+				gl.CallList(v.m.list)
 			end
 		end
 	end

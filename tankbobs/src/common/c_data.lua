@@ -74,7 +74,7 @@ function c_data_init()
 	c_const_set("module_dir", c_const_get("data_dir") .. "modules/", 1)
 	c_const_set("textures_dir",  c_const_get("data_dir") .. "textures/", 1)
 	c_const_set("textures_default_dir", c_const_get("textures_dir") .. "global/", 1)
-	c_const_set("textures_default", c_const_get("textures_default_dir") .. "invisible.png", 1)
+	c_const_set("textures_default", c_const_get("textures_default_dir") .. "null.png", 1)
 	if tankbobs.io_getHomeDirectory() == nil then
 		error(select(2, tankbobs.io_getHomeDirectory()))
 	end
@@ -85,6 +85,7 @@ function c_data_init()
 	c_const_set("default_fontSize", "12", 1)
 	c_const_set("scripts_dir", c_const_get("data_dir") .. "scripts/", 1)
 	c_const_set("icon", c_const_get("data_dir") .. "icon.png", 1)
+	c_const_set("tank", c_const_get("data_dir") .. "tank.png", 1)
 	c_const_set("title", "tankbobs", 1)
 
 	c_const_set("max_tanks", 64, 1)

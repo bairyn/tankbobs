@@ -40,13 +40,16 @@ function renderer_done()
 	renderer_size = nil
 end
 
-function renderer_setupNewWindow() -- this is/should be called once for every new window
+function renderer_setupNewWindow() -- this should be called once after new window
+	gl.Enable(something)
+	gl.Enable(something_else)
+
 	gl.ClearColor(0, 0, 0, 0)
 
 	renderer_updateWindow()
 end
 
-function renderer_updateWindow() -- and this is too, but also for redrawing needs (resize, focus, etc)
+function renderer_updateWindow() -- this should to be called after resize, focus, new window, etc
 	gl.Viewport(0, 0, c_config_get("config.renderer.width"), c_config_get("config.renderer.height"))
 	gl.MatrixMode("PROJECTION")
 	gl.LoadIdentity()

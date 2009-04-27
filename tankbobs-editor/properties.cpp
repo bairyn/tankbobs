@@ -80,7 +80,16 @@ Properties::Properties(QWidget *parent)
 		{
 			fourVertices->setChecked(reinterpret_cast<entities::Wall *>(selection)->quad);
 			level->setText(QString::number(reinterpret_cast<entities::Wall *>(selection)->level));
+			tx1->setText(QString::number(reinterpret_cast<entities::Wall *>(selection)->tx1));
+			ty1->setText(QString::number(reinterpret_cast<entities::Wall *>(selection)->ty1));
+			tx2->setText(QString::number(reinterpret_cast<entities::Wall *>(selection)->tx2));
+			ty2->setText(QString::number(reinterpret_cast<entities::Wall *>(selection)->ty2));
+			tx3->setText(QString::number(reinterpret_cast<entities::Wall *>(selection)->tx3));
+			ty3->setText(QString::number(reinterpret_cast<entities::Wall *>(selection)->ty3));
+			tx4->setText(QString::number(reinterpret_cast<entities::Wall *>(selection)->tx4));
+			ty4->setText(QString::number(reinterpret_cast<entities::Wall *>(selection)->ty4));
 			texture->setText(reinterpret_cast<entities::Wall *>(selection)->texture.c_str());
+			detail->setChecked(reinterpret_cast<entities::Wall *>(selection)->detail);
 
 			selected = true;
 			fourVertices->setEnabled(true);
@@ -88,6 +97,23 @@ Properties::Properties(QWidget *parent)
 			textureLabel->setEnabled(true);
 			level->setEnabled(true);
 			levelLabel->setEnabled(true);
+			tx1->setEnabled(true);
+			ty1->setEnabled(true);
+			t1Label->setEnabled(true);
+			t1cLabel->setEnabled(true);
+			tx2->setEnabled(true);
+			ty2->setEnabled(true);
+			t2Label->setEnabled(true);
+			t2cLabel->setEnabled(true);
+			tx3->setEnabled(true);
+			ty3->setEnabled(true);
+			t3Label->setEnabled(true);
+			t3cLabel->setEnabled(true);
+			tx4->setEnabled(true);
+			ty4->setEnabled(true);
+			t4Label->setEnabled(true);
+			t4cLabel->setEnabled(true);
+			detail->setEnabled(true);
 		}
 	}
 	if(!selected)
@@ -120,6 +146,14 @@ Properties::Properties(QWidget *parent)
 	connect(mapversions, SIGNAL(textChanged(const QString &)), this, SLOT(mapversionsChanged(const QString &)));
 	connect(mapversion, SIGNAL(textChanged(const QString &)), this, SLOT(mapversionChanged(const QString &)));
 	connect(texture, SIGNAL(textChanged(const QString &)), this, SLOT(textureChanged(const QString &)));
+	connect(tx1, SIGNAL(textChanged(const QString &)), this, SLOT(tx1Changed(const QString &)));
+	connect(ty1, SIGNAL(textChanged(const QString &)), this, SLOT(ty1Changed(const QString &)));
+	connect(tx2, SIGNAL(textChanged(const QString &)), this, SLOT(tx2Changed(const QString &)));
+	connect(ty2, SIGNAL(textChanged(const QString &)), this, SLOT(ty2Changed(const QString &)));
+	connect(tx3, SIGNAL(textChanged(const QString &)), this, SLOT(tx3Changed(const QString &)));
+	connect(ty3, SIGNAL(textChanged(const QString &)), this, SLOT(ty3Changed(const QString &)));
+	connect(tx4, SIGNAL(textChanged(const QString &)), this, SLOT(tx4Changed(const QString &)));
+	connect(ty4, SIGNAL(textChanged(const QString &)), this, SLOT(ty4Changed(const QString &)));
 	connect(name, SIGNAL(textChanged(const QString &)), this, SLOT(nameChanged(const QString &)));
 	connect(targetName, SIGNAL(textChanged(const QString &)), this, SLOT(targetNameChanged(const QString &)));
 	connect(powerups, SIGNAL(textChanged(const QString &)), this, SLOT(powerupsChanged(const QString &)));
@@ -128,11 +162,68 @@ Properties::Properties(QWidget *parent)
 	connect(autoselect, SIGNAL(stateChanged(int)), this, SLOT(autoselectChanged(int)));
 	connect(nomodify, SIGNAL(stateChanged(int)), this, SLOT(nomodifyChanged(int)));
 	connect(autonotexture, SIGNAL(stateChanged(int)), this, SLOT(autonotextureChanged(int)));
+	connect(detail, SIGNAL(stateChanged(int)), this, SLOT(detailChanged(int)));
 }
 
 void Properties::textureChanged(const QString &text)
 {
 	reinterpret_cast<entities::Wall *>(selection)->texture = util_qtcp(text);
+}
+
+void Properties::tx1Changed(const QString &text)
+{
+	entities::Wall *w = reinterpret_cast<entities::Wall *>(selection);
+
+	w->tx1 = util_atoi(util_qtcp(text).c_str());
+}
+
+void Properties::ty1Changed(const QString &text)
+{
+	entities::Wall *w = reinterpret_cast<entities::Wall *>(selection);
+
+	w->ty1 = util_atoi(util_qtcp(text).c_str());
+}
+
+void Properties::tx2Changed(const QString &text)
+{
+	entities::Wall *w = reinterpret_cast<entities::Wall *>(selection);
+
+	w->tx2 = util_atoi(util_qtcp(text).c_str());
+}
+
+void Properties::ty2Changed(const QString &text)
+{
+	entities::Wall *w = reinterpret_cast<entities::Wall *>(selection);
+
+	w->ty2 = util_atoi(util_qtcp(text).c_str());
+}
+
+void Properties::tx3Changed(const QString &text)
+{
+	entities::Wall *w = reinterpret_cast<entities::Wall *>(selection);
+
+	w->tx3 = util_atoi(util_qtcp(text).c_str());
+}
+
+void Properties::ty3Changed(const QString &text)
+{
+	entities::Wall *w = reinterpret_cast<entities::Wall *>(selection);
+
+	w->ty3 = util_atoi(util_qtcp(text).c_str());
+}
+
+void Properties::tx4Changed(const QString &text)
+{
+	entities::Wall *w = reinterpret_cast<entities::Wall *>(selection);
+
+	w->tx4 = util_atoi(util_qtcp(text).c_str());
+}
+
+void Properties::ty4Changed(const QString &text)
+{
+	entities::Wall *w = reinterpret_cast<entities::Wall *>(selection);
+
+	w->ty4 = util_atoi(util_qtcp(text).c_str());
 }
 
 void Properties::nameChanged(const QString &text)
@@ -153,6 +244,7 @@ void Properties::powerupsChanged(const QString &text)
 void Properties::fourVerticesChanged(int state)
 {
 	entities::Wall *w = reinterpret_cast<entities::Wall *>(selection);
+
 	if(state)
 	{
 		w->x4 = (w->x1 + w->x2 + w->x3) / 3;
@@ -162,6 +254,20 @@ void Properties::fourVerticesChanged(int state)
 	else
 	{
 		w->quad = false;
+	}
+}
+
+void Properties::detailChanged(int state)
+{
+	entities::Wall *w = reinterpret_cast<entities::Wall *>(selection);
+
+	if(state)
+	{
+		w->detail = true;
+	}
+	else
+	{
+		w->detail = false;
 	}
 }
 

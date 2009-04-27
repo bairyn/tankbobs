@@ -38,14 +38,10 @@ function c_world_init()
 
 	-- hull of tank facing right
 	c_const_set("tank_health", 100, 1)
-	c_const_set("tank_hullx1", -2.0, 1)
-	c_const_set("tank_hully1",  2.0, 1)
-	c_const_set("tank_hullx2", -2.0, 1)
-	c_const_set("tank_hully2", -2.0, 1)
-	c_const_set("tank_hullx3",  2.0, 1)
-	c_const_set("tank_hully3", -1.0, 1)
-	c_const_set("tank_hullx4",  2.0, 1)
-	c_const_set("tank_hully4",  1.0, 1)
+	c_const_set("tank_hullx1", -2.0, 1) c_const_set("tank_hully1",  2.0, 1)
+	c_const_set("tank_hullx2", -2.0, 1) c_const_set("tank_hully2", -2.0, 1)
+	c_const_set("tank_hullx3",  2.0, 1) c_const_set("tank_hully3", -1.0, 1)
+	c_const_set("tank_hullx4",  2.0, 1) c_const_set("tank_hully4",  1.0, 1)
 	c_const_set("tank_deceleration", -24, 1)
 	c_const_set("tank_decelerationMinSpeed", -4, 1)
 	c_const_set("tank_acceleration",
@@ -239,69 +235,71 @@ function c_world_tank_testWorld(d, tank)  -- test tanks against the world
 
 	-- test against every wall
 	for _, v in pairs(c_tcm_current_map.walls) do
-		if tankbobs.m_polygon(hull, v.p) then
-			-- find which edge of the wall
-			local l = {p1, p2}
-			local di
-			local llp
+		if not v.detail then
+			if tankbobs.m_polygon(hull, v.p) then
+				-- find which edge of the wall
+				local l = {p1, p2}
+				local di
+				local llp
 
-			for _, v in pairs(v.p) do
-				local clp = v
+				for _, v in pairs(v.p) do
+					local clp = v
 
-				if llp then
+					if llp then
+						local vec = tankbobs.m_vec2()
+						vec.R = c_const_get("tank_maxCollisionVectorLength")
+						vec.t = tank.v[1].t
+						if tank.v[1].R < 0 then
+							vec:inv()
+						end
+						local li, lt = tankbobs.m_edge(tank.p[1], vec, clp, llp)
+	
+						if li then
+--print((lt - tank.p[1]).x, (lt - tank.p[1]).y, (lt - tank.p[1]).R)
+							if not l.p1 or not l.p2 or not di or math.abs((lt - tank.p[1]).R) < d then
+								di = math.abs((lt - tank.p[1]).R)
+								l.p1 = clp
+								l.p2 = llp
+							end
+						end
+--print(tank.p[1].x, tank.p[1].y, vec.x, vec.y, clp.x, clp.y, llp.x, llp.y)
+					end
+
+					llp = clp
+				end
+
+				-- check the last edge
+				if llp and llp ~= v.p[1] then
 					local vec = tankbobs.m_vec2()
 					vec.R = c_const_get("tank_maxCollisionVectorLength")
 					vec.t = tank.v[1].t
 					if tank.v[1].R < 0 then
 						vec:inv()
 					end
-					local li, lt = tankbobs.m_edge(tank.p[1], vec, clp, llp)
-
+					local li, lt = tankbobs.m_edge(tank.p[1], tank.p[1] + vec, llp, v.p[1])
+	
 					if li then
---print((lt - tank.p[1]).x, (lt - tank.p[1]).y, (lt - tank.p[1]).R)
 						if not l.p1 or not l.p2 or not di or math.abs((lt - tank.p[1]).R) < d then
 							di = math.abs((lt - tank.p[1]).R)
-							l.p1 = clp
-							l.p2 = llp
+							l.p1 = llp
+							l.p2 = v.p[1]
 						end
 					end
---print(tank.p[1].x, tank.p[1].y, vec.x, vec.y, clp.x, clp.y, llp.x, llp.y)
-				end
-
-				llp = clp
-			end
-
-			-- check the last edge
-			if llp and llp ~= v.p[1] then
-				local vec = tankbobs.m_vec2()
-				vec.R = c_const_get("tank_maxCollisionVectorLength")
-				vec.t = tank.v[1].t
-				if tank.v[1].R < 0 then
-					vec:inv()
-				end
-				local li, lt = tankbobs.m_edge(tank.p[1], tank.p[1] + vec, llp, v.p[1])
-
-				if li then
-					if not l.p1 or not l.p2 or not di or math.abs((lt - tank.p[1]).R) < d then
-						di = math.abs((lt - tank.p[1]).R)
-						l.p1 = llp
-						l.p2 = v.p[1]
-					end
-				end
 --print(tank.p[1].x, tank.p[1].y, vec.x, vec.y, llp.x, llp.y, v.p[1].x, v.p[1].y)
-			end
-
-			if not l.p1 or not l.p2 then
-				-- reset tank's velocity
-				tank.v[1].R = 0
-
-				if c_const_get("debug") then
-					io.stderr:write("c_world_testWorld: Warning: no edge detected for collision\n")
 				end
-			else
-				-- FIXME: the tank seems to tend to go at an upright angle?  but sometimes the tank evetually goes as if it were in  nge a circle aoeu
-				local p = tank.v[1]:project((l.p1 - l.p2):normalof())
-				tank.v[1]:add(2 * p)
+
+				if not l.p1 or not l.p2 then
+					-- reset tank's velocity
+					tank.v[1].R = 0
+	
+					if c_const_get("debug") then
+						io.stderr:write("c_world_testWorld: Warning: no edge detected for collision\n")
+					end
+				else
+					-- FIXME: the tank seems to tend to go at an upright angle?  but sometimes the tank evetually goes as if it were in  nge a circle aoeu
+					local p = tank.v[1]:project((l.p1 - l.p2):normalof())
+					tank.v[1]:add(2 * p)
+				end
 			end
 		end
 	end

@@ -28,7 +28,7 @@ Any whitespace before or after any commas is ignored.  Trailing whitespace at th
 
 Entities
 map, string name, string title, string description, string authors, string version, integer version - the result is undefined if multiple map entities exist.  The concept of the "map" entity is similar to Quake's "worldspawn" entity.
-wall, integer quad, double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, string texture, integer level / layer of wall
+wall, integer quad, double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double tx1, double ty1, double tx2, double ty2, double tx3, double ty3, double tx4, double ty4, string texture, integer level / layer of wall, integer detail
 teleporter, string name, string targetName, double x1, double y1
 playerSpawnPoint, double x1, double y1
 powerupSpawnPoint, double x1, double y1, string stringPowerupsToEnable - stringPowerupsToEnable will be searched for and will be tested if it has the name of any powerups
@@ -65,9 +65,18 @@ walls, ...
  -8 bytes y3 double float
  -8 bytes x4 double float
  -8 bytes y4 double float
+ -8 bytes texture x1 double float
+ -8 bytes texture y1 double float
+ -8 bytes texture x2 double float
+ -8 bytes texture y2 double float
+ -8 bytes texture x3 double float
+ -8 bytes texture y3 double float
+ -8 bytes texture x4 double float
+ -8 bytes texture y4 double float
  -256 bytes texture
  -4 bytes level of wall (tanks are level 9)
- - 329 total bytes, this amount for each wall
+ -1 byte detail
+ - 362 total bytes, this amount for each wall
 teleporters, ...
  -4 bytes id
  -4 bytes target id
@@ -107,6 +116,7 @@ function c_tcm_init()
 	c_const_set("tcm_spawnpointWidth",  5, 1)
 	c_const_set("tcm_spawnpointHeight", 5, 1)
 	c_const_set("tcm_tankLevel", 9, 1)
+	c_const_set("tcm_maxLevel", 20, 1)
 
 	-- parse every set into memory
 	c_tcm_current_sets = {}
@@ -166,9 +176,12 @@ c_tcm_wall =
 
 	id = 0,
 	p = {},
+	t = {},
 	texture = "",
+	detail = false,
 	l = 0,
-	q = false  -- only for a quick way to see if the 4th point exists
+
+	m = {}  -- extra data
 }
 
 c_tcm_teleporter =
@@ -181,7 +194,9 @@ c_tcm_teleporter =
 
 	id = 0,
 	t = 0,
-	p = {}
+	p = {},
+
+	m = {}  -- extra data
 }
 
 c_tcm_playerSpawnPoint =
@@ -193,7 +208,9 @@ c_tcm_playerSpawnPoint =
 	end,
 
 	id = 0,
-	p = {}
+	p = {},
+
+	m = {}  -- extra data
 }
 
 c_tcm_powerupSpawnPoint =
@@ -207,7 +224,9 @@ c_tcm_powerupSpawnPoint =
 
 	id = 0,
 	p = {},
-	enabledPowerups = {}
+	enabledPowerups = {},
+
+	m = {}  -- extra data
 }
 
 function c_tcm_read_sets(dir, t)
@@ -348,12 +367,13 @@ function c_tcm_read_map(map)
 
 	for it = 1, r.walls_n do
 		local wall = c_tcm_wall:new()
+		local q = false
 
 		wall.id = c_tcm_private_get(tankbobs.io_getInt, i)
 		if c_tcm_private_get(tankbobs.io_getChar, i) ~= 0 then
-			wall.q = true
+			q = true
 		else
-			wall.q = false
+			q = false
 			table.remove(wall.p, 4)
 		end
 		wall.p[1].x = c_tcm_private_get(tankbobs.io_getDouble, i)
@@ -362,7 +382,7 @@ function c_tcm_read_map(map)
 		wall.p[2].y = c_tcm_private_get(tankbobs.io_getDouble, i)
 		wall.p[3].x = c_tcm_private_get(tankbobs.io_getDouble, i)  -- unexpected EOF
 		wall.p[3].y = c_tcm_private_get(tankbobs.io_getDouble, i)
-		if wall.q then
+		if q then
 			wall.p[4].x = c_tcm_private_get(tankbobs.io_getDouble, i)
 			wall.p[4].y = c_tcm_private_get(tankbobs.io_getDouble, i)
 		else
@@ -371,9 +391,30 @@ function c_tcm_read_map(map)
 				--c_tcm_private_get(tankbobs.io_getDouble, i)
 			--end
 		end
+		wall.t[1].x = c_tcm_private_get(tankbobs.io_getDouble, i)
+		wall.t[1].y = c_tcm_private_get(tankbobs.io_getDouble, i)
+		wall.t[2].x = c_tcm_private_get(tankbobs.io_getDouble, i)
+		wall.t[2].y = c_tcm_private_get(tankbobs.io_getDouble, i)
+		wall.t[3].x = c_tcm_private_get(tankbobs.io_getDouble, i)  -- unexpected EOF
+		wall.t[3].y = c_tcm_private_get(tankbobs.io_getDouble, i)
+		if q then
+			wall.t[4].x = c_tcm_private_get(tankbobs.io_getDouble, i)
+			wall.t[4].y = c_tcm_private_get(tankbobs.io_getDouble, i)
+		else
+			i:seek("cur", 16)
+			--for its = 1, 2 do
+				--c_tcm_private_get(tankbobs.io_getDouble, i)
+			--end
+		end
+
 		wall.texture = c_tcm_private_get(tankbobs.io_getStrL, i, false, 256)
 		wall.texture = wall.texture:gsub("%z*$", "")
 		wall.l = c_tcm_private_get(tankbobs.io_getInt, i)
+		if c_tcm_private_get(tankbobs.io_getChar, i) ~= 0 then
+			wall.detail = true
+		else
+			wall.detail = false
+		end
 
 		table.insert(r.walls, wall)
 	end
