@@ -1,3 +1,4 @@
+--BLENDING IS BROKEN
 --[[
 Copyright (C) 2008 Byron James Johnson
 
@@ -29,8 +30,8 @@ function st_play_init()
 	-- initialize renderer stuff
 	c_const_set("tank_renderx1", -2.0, 1) c_const_set("tank_rendery1",  2.0, 1)
 	c_const_set("tank_renderx2", -2.0, 1) c_const_set("tank_rendery2", -2.0, 1)
-	c_const_set("tank_renderx3",  2.0, 1) c_const_set("tank_rendery3", -1.0, 1)
-	c_const_set("tank_renderx4",  2.0, 1) c_const_set("tank_rendery4",  1.0, 1)
+	c_const_set("tank_renderx3",  2.0, 1) c_const_set("tank_rendery3", -2.0, 1)
+	c_const_set("tank_renderx4",  2.0, 1) c_const_set("tank_rendery4",  2.0, 1)
 	c_const_set("tank_texturex1", 0.0, 1) c_const_set("tank_texturey1", 1.0, 1)
 	c_const_set("tank_texturex2", 0.0, 1) c_const_set("tank_texturey2", 0.0, 1)
 	c_const_set("tank_texturex3", 1.0, 1) c_const_set("tank_texturey3", 0.0, 1)
@@ -50,15 +51,15 @@ function st_play_init()
 	gl.TexParameter("TEXTURE_2D", "TEXTURE_MAG_FILTER", "LINEAR")
 	tankbobs.r_loadImage2D(c_const_get("tank"), c_const_get("textures_default"))
 
-	gl.NewList(play_tank_listBase, "COMPILE")
+	gl.NewList(play_tank_listBase, "COMPILE_AND_EXECUTE")  -- execute to remove "choppy" effect
+		-- blend tank with color
+		gl.TexEnv("TEXTURE_ENV_MODE", "BLEND")
+		gl.BindTexture("TEXTURE_2D", play_tank_textures[1])
 		gl.Begin("QUADS")
-			-- blend tank with color
-			gl.TexEnv("TEXTURE_ENV_MODE", "BLEND")
-			gl.BindTexture("TEXTURE_2D", play_tank_textures[1])
-			gl.TexCoord(c_const_get("tank_texturex1"), c_const_get("tank_texturex1")) gl.Vertex(c_const_get("tank_renderx1"), c_const_get("tank_rendery1"))
-			gl.TexCoord(c_const_get("tank_texturex1"), c_const_get("tank_texturex1")) gl.Vertex(c_const_get("tank_renderx2"), c_const_get("tank_rendery2"))
-			gl.TexCoord(c_const_get("tank_texturex1"), c_const_get("tank_texturex1")) gl.Vertex(c_const_get("tank_renderx3"), c_const_get("tank_rendery3"))
-			gl.TexCoord(c_const_get("tank_texturex1"), c_const_get("tank_texturex1")) gl.Vertex(c_const_get("tank_renderx4"), c_const_get("tank_rendery4"))
+			gl.TexCoord(c_const_get("tank_texturex1"), c_const_get("tank_texturey1")) gl.Vertex(c_const_get("tank_renderx1"), c_const_get("tank_rendery1"))
+			gl.TexCoord(c_const_get("tank_texturex2"), c_const_get("tank_texturey2")) gl.Vertex(c_const_get("tank_renderx2"), c_const_get("tank_rendery2"))
+			gl.TexCoord(c_const_get("tank_texturex3"), c_const_get("tank_texturey3")) gl.Vertex(c_const_get("tank_renderx3"), c_const_get("tank_rendery3"))
+			gl.TexCoord(c_const_get("tank_texturex4"), c_const_get("tank_texturey4")) gl.Vertex(c_const_get("tank_renderx4"), c_const_get("tank_rendery4"))
 		gl.End()
 	gl.EndList()
 
@@ -82,17 +83,16 @@ function st_play_init()
 		gl.TexParameter("TEXTURE_2D", "TEXTURE_MAG_FILTER", "LINEAR")
 		tankbobs.r_loadImage2D(c_const_get("textures_dir") .. v.texture, c_const_get("textures_default"))
 
-		gl.NewList(v.m.list, "COMPILE")
-			gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
+		gl.NewList(v.m.list, "COMPILE_AND_EXECUTE")
+			gl.Color(1, 1, 1, 1)
+			gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, 1)
 			gl.BindTexture("TEXTURE_2D", v.m.texture)
+			gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
 
 			gl.Begin("POLYGON")
 				for i = 1, #v.p do
 					gl.TexCoord(v.t[i].x, v.t[i].y)
 					gl.Vertex(v.p[i].x, v.p[i].y)
-				end
-				for _, v in pairs(v.p) do
-					gl.Vertex(v.x, v.y)
 				end
 			gl.End()
 		gl.EndList()
@@ -129,6 +129,9 @@ function st_play_done()
 
 	gl.DeleteTextures(play_tank_textures)
 	gl.DeleteTextures(play_wall_textures)
+
+	-- reset texenv to avoid messing the GUI up
+	gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
 end
 
 function st_play_click(button, pressed, x, y)
@@ -197,7 +200,6 @@ function st_play_step()
 
 	c_world_step()
 
-	-- iterate each time from 1 to hard-coded 20 but render tanks before level 9
 	for i = 1, c_const_get("tcm_maxLevel") do
 		for k, v in pairs(c_tcm_current_map.walls) do
 			if i == c_const_get("tcm_tankLevel") then
@@ -215,8 +217,8 @@ function st_play_step()
 									c_config_set("config.game.player" .. tostring(i) .. ".color.g", 0)
 									c_config_set("config.game.player" .. tostring(i) .. ".color.b", 0)
 								end
-								gl.Color(c_config_get("config.game.player" .. tostring(k) .. ".color.r"), c_config_get("config.game.player" .. tostring(k) .. ".color.g"), c_config_get("config.game.player" .. tostring(k) .. ".color.b"))
-								gl.TexEnv("TEXTURE_ENV_COLOR", c_config_get("config.game.player" .. tostring(k) .. ".color.r"), c_config_get("config.game.player" .. tostring(k) .. ".color.g"), c_config_get("config.game.player" .. tostring(k) .. ".color.b"))
+								gl.Color(c_config_get("config.game.player" .. tostring(k) .. ".color.r"), c_config_get("config.game.player" .. tostring(k) .. ".color.g"), c_config_get("config.game.player" .. tostring(k) .. ".color.b"), 1)
+								gl.TexEnv("TEXTURE_ENV_COLOR", c_config_get("config.game.player" .. tostring(k) .. ".color.r"), c_config_get("config.game.player" .. tostring(k) .. ".color.g"), c_config_get("config.game.player" .. tostring(k) .. ".color.b"), 1)
 								-- blend color with tank texture
 								gl.CallList(play_tank_listBase)
 							gl.PopMatrix()
@@ -230,7 +232,17 @@ function st_play_step()
 			end
 		end
 	end
-	
+
+	-- teleporters are drawn on top everything above
+	--gl.CallLists(play_teleporter_listsMultiple)
+
+	-- powerups are drawn next
+	--gl.
+
+	-- projectiles
+
+	-- HUD and text
+
 	gui_paint()
 end
 

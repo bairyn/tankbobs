@@ -469,6 +469,7 @@ int r_loadImage2D(lua_State *L)
 {
 	const char *filename;
 	SDL_Surface *img, *converted;
+	SDL_PixelFormat fmt;
 
 	CHECKINIT(init, L);
 
@@ -502,32 +503,34 @@ int r_loadImage2D(lua_State *L)
 		}
 	}
 
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-	converted = SDL_CreateRGBSurface(0, r_private_powerOfTwo(img->w), r_private_powerOfTwo(img->h), 32, 0xFF000000, 0x00FF0000, 0x0000FF00, 0x000000FF);
-#else
-	converted = SDL_CreateRGBSurface(0, r_private_powerOfTwo(img->w), r_private_powerOfTwo(img->h), 32, 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
-#endif
-	if(!converted)
-	{
-		lua_pushstring(L, "r_loadImage2D: could not create texture surface\n");
-		lua_error(L);
-	}
+	memcpy(&fmt, img->format, sizeof(SDL_PixelFormat));
 
-	if(SDL_BlitSurface(img, NULL, converted, NULL) != 0)
+	fmt.BitsPerPixel = 32;
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+	fmt.Rmask = 0xFF000000;
+	fmt.Gmask = 0x00FF0000;
+	fmt.Bmask = 0x0000FF00;
+	fmt.Amask = 0x000000FF;
+#else
+	fmt.Rmask = 0x000000FF;
+	fmt.Gmask = 0x0000FF00;
+	fmt.Bmask = 0x00FF0000;
+	fmt.Amask = 0xFF000000;
+#endif
+	fmt.colorkey = SDL_MapRGB(img->format, 237, 77, 207);
+	fmt.alpha = 255;
+
+	converted = SDL_ConvertSurface(img, &fmt, SDL_SWSURFACE | SDL_SRCALPHA);
+
+	if(SDL_MUSTLOCK(converted))
 	{
-		lua_pushstring(L, "r_loadImage2D: could not blit texture to surface\n");
-		lua_error(L);
+		SDL_LockSurface(converted);
 	}
 
 	if(!converted->pixels)
 	{
 		lua_pushstring(L, "r_loadImage2D: could not create texture\n");
 		lua_error(L);
-	}
-
-	if(SDL_MUSTLOCK(converted))
-	{
-		SDL_LockSurface(converted);
 	}
 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, r_private_powerOfTwo(converted->w), r_private_powerOfTwo(converted->w), 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
