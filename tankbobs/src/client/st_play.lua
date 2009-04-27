@@ -52,6 +52,9 @@ function st_play_init()
 
 	gl.NewList(play_tank_listBase, "COMPILE")
 		gl.Begin("QUADS")
+			-- blend tank with color
+			gl.TexEnv("TEXTURE_ENV_MODE", "BLEND")
+			gl.BindTexture("TEXTURE_2D", play_tank_textures[1])
 			gl.TexCoord(c_const_get("tank_texturex1"), c_const_get("tank_texturex1")) gl.Vertex(c_const_get("tank_renderx1"), c_const_get("tank_rendery1"))
 			gl.TexCoord(c_const_get("tank_texturex1"), c_const_get("tank_texturex1")) gl.Vertex(c_const_get("tank_renderx2"), c_const_get("tank_rendery2"))
 			gl.TexCoord(c_const_get("tank_texturex1"), c_const_get("tank_texturex1")) gl.Vertex(c_const_get("tank_renderx3"), c_const_get("tank_rendery3"))
@@ -80,6 +83,7 @@ function st_play_init()
 		tankbobs.r_loadImage2D(c_const_get("textures_dir") .. v.texture, c_const_get("textures_default"))
 
 		gl.NewList(v.m.list, "COMPILE")
+			gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
 			gl.BindTexture("TEXTURE_2D", v.m.texture)
 
 			gl.Begin("POLYGON")
@@ -164,7 +168,7 @@ function st_play_button(button, pressed)
 		end
 
 		if button == c_config_get("config.key.player" .. tostring(i) .. ".firing") then
-			c_world_tanks[i].state.forward = pressed
+			c_world_tanks[i].state.firing = pressed
 		end
 		if button == c_config_get("config.key.player" .. tostring(i) .. ".forward") then
 			c_world_tanks[i].state.forward = pressed
@@ -212,6 +216,7 @@ function st_play_step()
 									c_config_set("config.game.player" .. tostring(i) .. ".color.b", 0)
 								end
 								gl.Color(c_config_get("config.game.player" .. tostring(k) .. ".color.r"), c_config_get("config.game.player" .. tostring(k) .. ".color.g"), c_config_get("config.game.player" .. tostring(k) .. ".color.b"))
+								gl.TexEnv("TEXTURE_ENV_COLOR", c_config_get("config.game.player" .. tostring(k) .. ".color.r"), c_config_get("config.game.player" .. tostring(k) .. ".color.g"), c_config_get("config.game.player" .. tostring(k) .. ".color.b"))
 								-- blend color with tank texture
 								gl.CallList(play_tank_listBase)
 							gl.PopMatrix()
