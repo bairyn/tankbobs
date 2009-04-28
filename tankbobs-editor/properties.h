@@ -44,6 +44,7 @@ class Properties : public QDialog, private Ui::PropertiesDialog
 		void mapversionChanged(const QString &text);
 		void powerupsChanged(const QString &text);
 		void levelChanged(const QString &text);
+		void timeChanged(const QString &text);
 		void textureChanged(const QString &text);
 		void tx1Changed(const QString &text);
 		void ty1Changed(const QString &text);
@@ -59,7 +60,9 @@ class Properties : public QDialog, private Ui::PropertiesDialog
 		void autoselectChanged(int state);
 		void nomodifyChanged(int state);
 		void autonotextureChanged(int state);
+		void hideDetailChanged(int state);
 		void detailChanged(int state);
+		void enabledChanged(int state);
 };
 
 #endif

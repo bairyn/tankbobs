@@ -31,6 +31,7 @@ extern vector<entities::PlayerSpawnPoint *>  playerSpawnPoint;
 extern vector<entities::PowerupSpawnPoint *> powerupSpawnPoint;
 extern vector<entities::Teleporter *>        teleporter;
 extern vector<entities::Wall *>              wall;
+extern vector<entities::Path *>              path;
 extern void *selection;
 
 Properties::Properties(QWidget *parent)
@@ -40,6 +41,7 @@ Properties::Properties(QWidget *parent)
 	autoselect->setChecked(config_get_int(c_autoSelect));
 	nomodify->setChecked(config_get_int(c_noModify));
 	autonotexture->setChecked(config_get_int(c_autoNoTexture));
+	hideDetail->setChecked(config_get_int(c_hideDetail));
 
 	bool selected;
 	for(vector<entities::PlayerSpawnPoint *>::iterator i = playerSpawnPoint.begin(); i != playerSpawnPoint.end(); ++i)
@@ -66,12 +68,14 @@ Properties::Properties(QWidget *parent)
 		{
 			name->setText(QString(reinterpret_cast<entities::Teleporter *>(selection)->name.c_str()));
 			targetName->setText(QString(reinterpret_cast<entities::Teleporter *>(selection)->targetName.c_str()));
+			enabled->setChecked(reinterpret_cast<entities::Teleporter *>(selection)->enabled);
 
 			selected = true;
 			name->setEnabled(true);
 			nameLabel->setEnabled(true);
 			targetName->setEnabled(true);
 			targetNameLabel->setEnabled(true);
+			enabled->setEnabled(true);
 		}
 	}
 	for(vector<entities::Wall *>::iterator i = wall.begin(); i != wall.end(); ++i)
@@ -97,6 +101,7 @@ Properties::Properties(QWidget *parent)
 			textureLabel->setEnabled(true);
 			level->setEnabled(true);
 			levelLabel->setEnabled(true);
+			txLabel->setEnabled(true);
 			tx1->setEnabled(true);
 			ty1->setEnabled(true);
 			t1Label->setEnabled(true);
@@ -114,6 +119,25 @@ Properties::Properties(QWidget *parent)
 			t4Label->setEnabled(true);
 			t4cLabel->setEnabled(true);
 			detail->setEnabled(true);
+		}
+	}
+	for(vector<entities::Path *>::iterator i = path.begin(); i != path.end(); ++i)
+	{
+		if(selection == reinterpret_cast<void *>(static_cast<entities::Path *>(*i)))
+		{
+			name->setText(QString(reinterpret_cast<entities::Path *>(selection)->name.c_str()));
+			targetName->setText(QString(reinterpret_cast<entities::Path *>(selection)->targetName.c_str()));
+			time->setText(QString::number(reinterpret_cast<entities::Path *>(selection)->time));
+			enabled->setChecked(reinterpret_cast<entities::Path *>(selection)->enabled);
+
+			selected = true;
+			name->setEnabled(true);
+			nameLabel->setEnabled(true);
+			targetName->setEnabled(true);
+			targetNameLabel->setEnabled(true);
+			time->setEnabled(true);
+			timeLabel->setEnabled(true);
+			enabled->setEnabled(true);
 		}
 	}
 	if(!selected)
@@ -158,10 +182,13 @@ Properties::Properties(QWidget *parent)
 	connect(targetName, SIGNAL(textChanged(const QString &)), this, SLOT(targetNameChanged(const QString &)));
 	connect(powerups, SIGNAL(textChanged(const QString &)), this, SLOT(powerupsChanged(const QString &)));
 	connect(fourVertices, SIGNAL(stateChanged(int)), this, SLOT(fourVerticesChanged(int)));
+	connect(enabled, SIGNAL(stateChanged(int)), this, SLOT(enabledChanged(int)));
 	connect(level, SIGNAL(textChanged(const QString &)), this, SLOT(levelChanged(const QString &)));
+	connect(time, SIGNAL(textChanged(const QString &)), this, SLOT(timeChanged(const QString &)));
 	connect(autoselect, SIGNAL(stateChanged(int)), this, SLOT(autoselectChanged(int)));
 	connect(nomodify, SIGNAL(stateChanged(int)), this, SLOT(nomodifyChanged(int)));
 	connect(autonotexture, SIGNAL(stateChanged(int)), this, SLOT(autonotextureChanged(int)));
+	connect(hideDetail, SIGNAL(stateChanged(int)), this, SLOT(hideDetailChanged(int)));
 	connect(detail, SIGNAL(stateChanged(int)), this, SLOT(detailChanged(int)));
 }
 
@@ -257,6 +284,23 @@ void Properties::fourVerticesChanged(int state)
 	}
 }
 
+void Properties::enabledChanged(int state)
+{
+	if(trm_isPath(selection))
+	{
+		entities::Path *p = reinterpret_cast<entities::Path *>(selection);
+
+		p->enabled = state;
+	}
+	if(trm_isTeleporter(selection))
+	{
+		entities::Teleporter *t = reinterpret_cast<entities::Teleporter *>(selection);
+
+		t->enabled = state;
+	}
+}
+
+
 void Properties::detailChanged(int state)
 {
 	entities::Wall *w = reinterpret_cast<entities::Wall *>(selection);
@@ -278,6 +322,13 @@ void Properties::levelChanged(const QString &text)
 	w->level = util_atoi(util_qtcp(text).c_str());
 }
 
+void Properties::timeChanged(const QString &text)
+{
+	entities::Path *p = reinterpret_cast<entities::Path *>(selection);
+
+	p->time = atof(util_qtcp(text).c_str());
+}
+
 void Properties::autoselectChanged(int state)
 {
 	config_set_int(c_autoSelect, state);
@@ -291,6 +342,11 @@ void Properties::nomodifyChanged(int state)
 void Properties::autonotextureChanged(int state)
 {
 	config_set_int(c_autoNoTexture, state);
+}
+
+void Properties::hideDetailChanged(int state)
+{
+	config_set_int(c_hideDetail, state);
 }
 
 void Properties::mapnameChanged(const QString &text)

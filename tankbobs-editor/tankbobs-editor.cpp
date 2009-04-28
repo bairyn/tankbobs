@@ -35,6 +35,7 @@ extern vector<entities::PlayerSpawnPoint *>  playerSpawnPoint;
 extern vector<entities::PowerupSpawnPoint *> powerupSpawnPoint;
 extern vector<entities::Teleporter *>        teleporter;
 extern vector<entities::Wall *>              wall;
+extern vector<entities::Path *>              path;
 //extern vector<void *> selection;
 
 double *x_selected = NULL, *y_selected = NULL;
@@ -77,6 +78,7 @@ Tankbobs_editor::Tankbobs_editor(QWidget *parent)
 	connect(playerSpawnPoint, SIGNAL(clicked()), this, SLOT(selectionPlayerSpawnPoint()));
 	connect(powerupSpawnPoint, SIGNAL(clicked()), this, SLOT(selectionPowerupSpawnPoint()));
 	connect(teleporter, SIGNAL(clicked()), this, SLOT(selectionTeleporter()));
+	connect(path, SIGNAL(clicked()), this, SLOT(selectionPath()));
 	connect(actionImport, SIGNAL(triggered()), this, SLOT(import()));
 	connect(actionOpen, SIGNAL(triggered()), this, SLOT(open()));
 	connect(actionSave, SIGNAL(triggered()), this, SLOT(save()));
@@ -111,6 +113,11 @@ void Tankbobs_editor::selectionPowerupSpawnPoint()
 void Tankbobs_editor::selectionTeleporter()
 {
 	selectionType = e_selectionTeleporter;
+}
+
+void Tankbobs_editor::selectionPath()
+{
+	selectionType = e_selectionPath;
 }
 
 void Tankbobs_editor::tsaveAs(void)
@@ -397,6 +404,25 @@ void Editor::mousePressEvent(QMouseEvent *e)
 				}
 			}
 			if(!selected)
+			for(vector<entities::Path *>::iterator i = path.begin(); i != path.end(); ++i)
+			{
+				entities::Path *e = *i;
+
+				if(trm_isSelected(e))
+				{
+					if(config_get_int(c_noModify))
+					{
+						trm_modifyAttempted();
+						return;
+					}
+
+					modified = true;
+
+					selected = true;
+				}
+			}
+
+			if(!selected)
 			for(vector<entities::Wall *>::iterator i = wall.begin(); i != wall.end(); ++i)
 			{
 				entities::Wall *e = *i;
@@ -488,6 +514,10 @@ void Editor::mouseReleaseEvent(QMouseEvent *e)
 
 				case e_selectionTeleporter:
 					trm_newTeleporter(x_end - x_scroll, y_end - y_scroll);
+					break;
+
+				case e_selectionPath:
+					trm_newPath(x_end - x_scroll, y_end - y_scroll);
 					break;
 
 				default:
@@ -661,6 +691,25 @@ void Editor::mouseMoveEvent(QMouseEvent *e)
 					e->y4 += y_end - y_last_scroll;
 				}
 			}
+			for(vector<entities::Path *>::iterator i = path.begin(); i != path.end(); ++i)
+			{
+				entities::Path *e = *i;
+
+				if(trm_isSelected(e))
+				{
+					if(config_get_int(c_noModify))
+					{
+						trm_modifyAttempted();
+						return;
+					}
+
+					modified = true;
+
+					e->x += x_end - x_last_scroll;
+					e->y += y_end - y_last_scroll;
+				}
+			}
+
 		}
 	}
 }
@@ -828,7 +877,7 @@ static void drawWalls(void)
 								}
 							}
 						}
-						else
+						else if(!config_get_int(c_hideDetail) || !e->detail)  // don't draw detail walls if hideDetail is set
 						{
 							glColor4d(1.0, 0.0, 0.0, 1.0);
 							if(!e->quad)
@@ -877,6 +926,30 @@ static void drawWalls(void)
 	}
 }
 
+static void drawPaths(void)
+{
+	for(vector<entities::Path *>::iterator i = path.begin(); i != path.end(); ++i)
+	{
+		entities::Path *e = *i;
+
+		glPushMatrix();
+			glPushAttrib(GL_POLYGON_BIT | GL_CURRENT_BIT);
+				glTranslated(e->x, e->y, 0.0);
+				if(glIsList(entBase + e_selectionTeleporter))
+					glCallList(entBase + e_selectionTeleporter);
+				if(e == reinterpret_cast<void *>(selection))
+				{
+					glScaled(1.1 / ZOOM, 1.1 / ZOOM, 1.0);
+					glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+					glColor4d(1.0, 0.0, 0.0, 1.0);
+					if(glIsList(entBase + e_selectionPath))
+						glCallList(entBase + e_selectionPath);
+				}
+			glPopAttrib();
+		glPopMatrix();
+	}
+}
+
 static void drawEntity(int e)
 {
 	#define TANKBOBSEDITOR_DRAWENTITY_ERROR(e) \
@@ -891,11 +964,13 @@ static void drawEntity(int e)
 		drawPowerupSpawnPoints();
 	else if(e == 2)
 		drawTeleporters();
+	else if(e == 3)
+		drawPaths();
 	else
 		TANKBOBSEDITOR_DRAWENTITY_ERROR(e);
 }
 
-const int entityInts[] = {0, 1, 2};
+const int entityInts[] = {0, 1, 2, 3};
 
 typedef struct
 {
@@ -995,6 +1070,18 @@ void Editor::initializeGL()
 				glVertex2d(-TELEPORTER_WIDTH * 0.5, -TELEPORTER_HEIGHT * 0.5);
 				glVertex2d(+TELEPORTER_WIDTH * 0.5, -TELEPORTER_HEIGHT * 0.5);
 				glVertex2d(+TELEPORTER_WIDTH * 0.5, +TELEPORTER_HEIGHT * 0.5);
+			glEnd();
+		glPopAttrib();
+	glEndList();
+
+	glNewList(entBase + e_selectionPath, GL_COMPILE);
+		glPushAttrib(GL_CURRENT_BIT);
+			glColor4d(1.0, 0.0, 0.0, 1.0);
+			glBegin(GL_QUADS);
+				glVertex2d(-PATH_WIDTH * 0.5, +PATH_HEIGHT * 0.5);
+				glVertex2d(-PATH_WIDTH * 0.5, -PATH_HEIGHT * 0.5);
+				glVertex2d(+PATH_WIDTH * 0.5, -PATH_HEIGHT * 0.5);
+				glVertex2d(+PATH_WIDTH * 0.5, +PATH_HEIGHT * 0.5);
 			glEnd();
 		glPopAttrib();
 	glEndList();
@@ -1101,6 +1188,23 @@ void Editor::paintGL()
 				glPopMatrix();
 			glPopAttrib();
 		}
+		if(x_begin >= 0 && y_begin >= 0 && selectionType == e_selectionPath)
+		{
+			glPushAttrib(GL_POLYGON_BIT | GL_CURRENT_BIT);
+				glColor4d(1.0 * 0.225, 0.0 * 0.2, 0.0 * 0.25, 1.0);
+				glCullFace(GL_FRONT_AND_BACK);
+				glPushMatrix();
+					glTranslated(x_end - x_scroll, y_end - y_scroll, 0.0);
+					glBegin(GL_QUADS);
+						glVertex2d(-PATH_WIDTH * 0.5, +PATH_HEIGHT * 0.5);
+						glVertex2d(-PATH_WIDTH * 0.5, -PATH_HEIGHT * 0.5);
+						glVertex2d(+PATH_WIDTH * 0.5, -PATH_HEIGHT * 0.5);
+						glVertex2d(+PATH_WIDTH * 0.5, +PATH_HEIGHT * 0.5);
+					glEnd();
+				glPopMatrix();
+			glPopAttrib();
+		}
+
 	}
 	TE_GLE;
 }

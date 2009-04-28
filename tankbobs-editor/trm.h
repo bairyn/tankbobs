@@ -30,9 +30,15 @@ void trm_newPlayerSpawnPoint(int x, int y);
 void trm_newPowerupSpawnPoint(int x, int y);
 void trm_newTeleporter(int x, int y);
 void trm_newWall(int xs, int ys, int xe, int ye);
+void trm_newPath(int x, int y);
 int  trm_keypress(int key, bool initial, QKeyEvent *e);
 int  trm_keyrelease(int key, QKeyEvent *e);
 void trm_modifyAttempted();
+bool trm_isWall(void *e);
+bool trm_isTeleporter(void *e);
+bool trm_isPlayerSpawnPoint(void *e);
+bool trm_isPowerupSpawnPoint(void *e);
+bool trm_isPath(void *e);
 
 //#define TEMAXBUF 1024
 #define TEMAXBUF 100000

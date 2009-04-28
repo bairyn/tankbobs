@@ -253,7 +253,7 @@ function c_world_tank_testWorld(d, tank)  -- test tanks against the world
 							vec:inv()
 						end
 						local li, lt = tankbobs.m_edge(tank.p[1], vec, clp, llp)
-	
+
 						if li then
 --print((lt - tank.p[1]).x, (lt - tank.p[1]).y, (lt - tank.p[1]).R)
 							if not l.p1 or not l.p2 or not di or math.abs((lt - tank.p[1]).R) < d then
@@ -382,6 +382,44 @@ function c_world_tank_step(d, tank)
 end
 
 function c_world_projectile_step(d, projectile)
+	local hull = {}
+	local min_wallDistance, min_tankDistance, min_teleporterDistance
+	-- TODO: projectiles can go through teleporters
+
+	common_clone(c_world_projectile_hull(projectile), hull)
+
+	projectile.p[1]:add(d * projectile.v[1])
+
+	common_clone(c_world_projectile_hull(projectile), hull)
+	for _, v in pairs(c_tcm_current_map.walls) do
+		if not v.detail then
+			if tankbobs.m_polygon(hull, v.p) then
+				-- find which edge of the wall
+				local l = {p1, p2}
+				local di
+				local llp
+
+				for _, v in pairs(v.p) do
+					local clp = v
+
+					if llp then
+						local vec = tankbobs.m_vec2()
+						vec.R = c_const_get("tank_maxCollisionVectorLength")
+						vec.t = tank.v[1].t
+						if tank.v[1].R < 0 then
+							vec:inv()
+						end
+						local li, lt = tankbobs.m_edge(tank.p[1], vec, clp, llp)
+
+						if li then
+--print((lt - tank.p[1]).x, (lt - tank.p[1]).y, (lt - tank.p[1]).R)
+							if not l.p1 or not l.p2 or not di or math.abs((lt - tank.p[1]).R) < d then
+								di = math.abs((lt - tank.p[1]).R)
+								l.p1 = clp
+								l.p2 = llp
+							end
+						end
+
 end
 
 function c_world_step()

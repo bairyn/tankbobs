@@ -515,6 +515,7 @@ static int read_reset(const char *line)
 #define MAX_TELEPORTERS 528
 #define MAX_PLAYERSPAWNPOINTS 256
 #define MAX_POWERUPSPAWNPOINTS 528
+#define MAX_PATHS 528
 
 typedef struct map_s map_t;
 static struct map_s
@@ -550,6 +551,7 @@ static struct teleporter_s
 	char name[MAX_STRING_STRUCT_CHARS];
 	char targetName[MAX_STRING_STRUCT_CHARS];
 	double x1; double y1;
+	int enabled;
 } teleporters[MAX_TELEPORTERS];
 
 typedef struct playerSpawnPoint_s playerSpawnPoint_t;
@@ -565,11 +567,22 @@ static struct powerupSpawnPoint_s
 	char powerupsToEnable[MAX_STRING_STRUCT_CHARS];
 } powerupSpawnPoints[MAX_POWERUPSPAWNPOINTS];
 
+typedef struct path_s path_t;
+static struct path_s
+{
+	char name[MAX_STRING_STRUCT_CHARS];
+	char targetName[MAX_STRING_STRUCT_CHARS];
+	double x1; double y1;
+	int enabled;
+	double time;
+} path[MAX_PATHS];
+
 static int mc = 0;
 static int wc = 0;
 static int tc = 0;
 static int lc = 0;
 static int oc = 0;
+static int pc = 0;
 
 static void add_map(char *name, char *title, char *description, char *version_s, int version)
 {
@@ -620,7 +633,7 @@ static void add_wall(int quad, double x1, double y1, double x2, double y2, doubl
 	wall->detail = detail;
 }
 
-static void add_teleporter(const char *name, const char *targetName, double x1, double y1)
+static void add_teleporter(const char *name, const char *targetName, double x1, double y1, int enabled)
 {
 	teleporter_t *teleporter = &teleporters[tc++];
 
@@ -664,6 +677,25 @@ static void add_powerupSpawnPoint(double x1, double y1, const char *powerupsToEn
 	powerupSpawnPoint->y1 = y1;
 	strncpy(powerupSpawnPoint->powerupsToEnable, powerupsToEnable, sizeof(powerupSpawnPoint->powerupsToEnable));
 }
+
+static void add_path(const char *name, const char *targetName, double x1, double y1, int enabled, double time)
+{
+	path_t *path = &paths[pc++];
+
+	if(pc > MAX_PATHS)
+	{
+		fprintf(stderr, "Error: path overflow (%d)\n", MAX_PATHS);
+		exit(1);
+	}
+
+	strncpy(path->name, name, sizeof(path->name));
+	strncpy(path->targetName, targetName, sizeof(path->targetName));
+	path->x1 = x1;
+	path->y1 = y1;
+	path->enabled = enabled;
+	path->time = time;
+}
+
 
 static char hidden(const char *filename)
 {
@@ -821,13 +853,15 @@ static int compile(const char *filename)
 					char name[MAX_STRING_SIZE];
 					char targetName[MAX_STRING_SIZE];
 					double x1, y1;
+					int enabled;
 
 					read_string(name);
 					read_string(targetName);
 					x1 = read_double();
 					y1 = read_double();
+					enabled = read_int();
 
-					add_teleporter(name, targetName, x1, y1);
+					add_teleporter(name, targetName, x1, y1, enabled);
 				}
 				else if(strncmp(entity, "playerSpawnPoint", sizeof(entity)) == 0)
 				{
@@ -849,6 +883,24 @@ static int compile(const char *filename)
 
 					add_powerupSpawnPoint(x1, y1, powerupsToEnable);
 				}
+				else if(strncmp(entity, "path", sizeof(entity)) == 0)
+				{
+					char name[MAX_STRING_SIZE];
+					char targetName[MAX_STRING_SIZE];
+					double x1, y1;
+					int enabled;
+					double time;
+
+					read_string(name);
+					read_string(targetName);
+					x1 = read_double();
+					y1 = read_double();
+					enabled = read_int();
+					time = read_double();
+
+					add_path(name, targetName, x1, y1, enabled, time);
+				}
+
 				else
 				{
 					fclose(fin);
@@ -937,7 +989,7 @@ static int compile(const char *filename)
 		int id = 0;
 		teleporter_t *teleporter = &teleporters[i];
 
-		/* find the target */
+		/* find the target (it might not exist) */
 		for(j = 0; j < tc; j++)
 		{
 			teleporter_t *teleporter2 = &teleporters[j];
@@ -953,6 +1005,7 @@ static int compile(const char *filename)
 		put_cint(fout, id);
 		put_cdouble(fout, teleporter->x1);
 		put_cdouble(fout, teleporter->y1);
+		put_cchar(fout, ((teleporter->enabled) ? (1) : (0)));
 	}
 
 	for(i = 0; i < lc; i++)
@@ -985,6 +1038,31 @@ static int compile(const char *filename)
 		{
 			put_cint(fout, powerups[j]);
 		}
+	}
+
+	for(i = 0; i < pc; i++)
+	{
+		int id = 0;
+		path_t *path = &paths[i];
+
+		/* find the target (it might not exist) */
+		for(j = 0; j < pc; j++)
+		{
+			path_t *path2 = &paths[j];
+
+			if(strcmp(path->targetName, path2->name) == 0)
+			{
+				id = j;
+				break;
+			}
+		}
+
+		put_cint(fout, i);
+		put_cdouble(fout, path->x1);
+		put_cdouble(fout, path->y1);
+		put_cchar(fout, ((path->enabled) ? (1) : (0)));
+		put_cdouble(path->time);
+		put_cint(id);
 	}
 
 	fclose(fout);

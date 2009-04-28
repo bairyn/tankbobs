@@ -33,6 +33,7 @@ static void config_init()
 	config_set_int(c_autoSelect, c_autoSelectDefault);
 	config_set_int(c_noModify, c_noModifyDefault);
 	config_set_int(c_autoNoTexture, c_autoNoTextureDefault);
+	config_set_int(c_hideDetail, c_hideDetailDefault);
 }
 
 int config_get_int(int c)

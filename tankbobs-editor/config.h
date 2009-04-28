@@ -29,12 +29,14 @@ enum
 	c_autoSelect,
 	c_noModify,
 	c_autoNoTexture,
+	c_hideDetail,
 
 	c_numConfig,
 
 	c_autoSelectDefault    = 1,
 	c_noModifyDefault      = 0,
 	c_autoNoTextureDefault = 1,
+	c_hideDetailDefault    = 0,
 
 	c_null
 };

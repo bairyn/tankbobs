@@ -41,6 +41,7 @@ vector<entities::PlayerSpawnPoint *>  playerSpawnPoint;
 vector<entities::PowerupSpawnPoint *> powerupSpawnPoint;
 vector<entities::Teleporter *>        teleporter;
 vector<entities::Wall *>              wall;
+vector<entities::Path *>              path;
 vector<void *>                        selections;  // list of _previously_ selected
 //vector<void *>                        selection;  // actual selection
 
@@ -420,6 +421,7 @@ bool trm_open(const char *filename, bool import)  // Will not confirm lost progr
 		powerupSpawnPoint.clear();
 		teleporter.clear();
 		wall.clear();
+		path.clear();
 	}
 	else
 	{
@@ -506,13 +508,15 @@ bool trm_open(const char *filename, bool import)  // Will not confirm lost progr
 					char name[1024];
 					char targetName[1024];
 					double x1, y1;
+					int enabled;
 
 					read_string(name);
 					read_string(targetName);
 					x1 = read_double();
 					y1 = read_double();
+					enabled = read_int();
 
-					teleporter.push_back(new entities::Teleporter(x1, y1, name, targetName));
+					teleporter.push_back(new entities::Teleporter(x1, y1, name, targetName, enabled));
 				}
 				else if(strncmp(entity, "playerSpawnPoint", sizeof(entity)) == 0)
 				{
@@ -534,6 +538,24 @@ bool trm_open(const char *filename, bool import)  // Will not confirm lost progr
 
 					powerupSpawnPoint.push_back(new entities::PowerupSpawnPoint(x1, y1, powerupsToEnable));
 				}
+				else if(strncmp(entity, "path", sizeof(entity)) == 0)
+				{
+					char name[1024];
+					char targetName[1024];
+					double x1, y1;
+					int enabled;
+					double time;
+
+					read_string(name);
+					read_string(targetName);
+					x1 = read_double();
+					y1 = read_double();
+					enabled = read_int();
+					time = read_double();
+
+					path.push_back(new entities::Path(x1, y1, name, targetName, enabled, time));
+				}
+
 				else
 				{
 					fclose(fin);
@@ -648,6 +670,8 @@ bool trm_save(const char *filename)
 		<< e->x
 		<< ", "
 		<< e->y
+		<< ", "
+		<< e->enabled
 		<< endl;
 	}
 
@@ -675,11 +699,75 @@ bool trm_save(const char *filename)
 		<< endl;
 	}
 
+	for(vector<entities::Path *>::iterator i = path.begin(); i != path.end(); ++i)
+	{
+		entities::Path *e = *i;
+
+		fout << "path, "
+		<< e->name
+		<< ", "
+		<< e->targetName
+		<< ", "
+		<< e->x
+		<< ", "
+		<< e->y
+		<< ", "
+		<< e->enabled
+		<< ", "
+		<< e->time
+		<< endl;
+	}
+
 	fout.close();
 	if(fout.fail())
 		return false;
 
 	return true;
+}
+
+bool trm_isWall(void *e)
+{
+	for(vector<entities::Wall *>::iterator i = wall.begin(); i != wall.end(); ++i)
+		if(e == *i)
+			return true;
+
+	return false;
+}
+
+bool trm_isTeleporter(void *e)
+{
+	for(vector<entities::Teleporter *>::iterator i = teleporter.begin(); i != teleporter.end(); ++i)
+		if(e == *i)
+			return true;
+
+	return false;
+}
+
+bool trm_isPlayerSpawnPoint(void *e)
+{
+	for(vector<entities::PlayerSpawnPoint *>::iterator i = playerSpawnPoint.begin(); i != playerSpawnPoint.end(); ++i)
+		if(e == *i)
+			return true;
+
+	return false;
+}
+
+bool trm_isPowerupSpawnPoint(void *e)
+{
+	for(vector<entities::PowerupSpawnPoint *>::iterator i = powerupSpawnPoint.begin(); i != powerupSpawnPoint.end(); ++i)
+		if(e == *i)
+			return true;
+
+	return false;
+}
+
+bool trm_isPath(void *e)
+{
+	for(vector<entities::Path *>::iterator i = path.begin(); i != path.end(); ++i)
+		if(e == *i)
+			return true;
+
+	return false;
 }
 
 void trm_select(int x, int y)//, int multiple)
@@ -766,6 +854,7 @@ void trm_select(int x, int y)//, int multiple)
 			}
 		}
 	}
+
 	for(vector<entities::Wall *>::iterator i = wall.begin(); i != wall.end(); ++i)
 	{
 		/*
@@ -775,10 +864,37 @@ void trm_select(int x, int y)//, int multiple)
 			ns = reinterpret_cast<void *>(e);
 		*/
 		entities::Wall *e = *i;
+		if(config_get_int(c_hideDetail) && e->detail)  // don't select detail walls if hideDetail is set
+			continue;
 		void *ve = reinterpret_cast<void *>(e);
 		float ex[4] = {e->x1, e->x2, e->x3, e->x4};
 		float ey[4] = {e->y1, e->y2, e->y3, e->y4};
 		if(util_pip(((!e->quad) ? (3) : (4)), ex, ey, x, y))
+		{
+			// the entity is under the cursor
+			bool listed = false;
+			for(vector<void *>::iterator i = selections.begin(); i != selections.end(); ++i)
+			{
+				if(*i == ve)
+				{
+					listed = true;
+					break;
+				}
+			}
+			if(!listed)
+			{
+				selections.push_back((selection = ve));
+				return;
+			}
+		}
+	}
+
+	for(vector<entities::Path *>::iterator i = path.begin(); i != path.end(); ++i)
+	{
+		entities::Path *e = *i;
+
+		void *ve = reinterpret_cast<void *>(e);
+		if(x < e->x + PATH_WIDTH && x > e->x - PATH_WIDTH && y < e->y + PATH_HEIGHT && y > e->y - PATH_HEIGHT)
 		{
 			// the entity is under the cursor
 			bool listed = false;
@@ -860,6 +976,20 @@ void trm_newWall(int xs, int ys, int xe, int ye)
 	selection = reinterpret_cast<void *>(wall[wall.size() - 1]);
 }
 
+void trm_newPath(int x, int y)
+{
+	if(config_get_int(c_noModify))
+	{
+		trm_modifyAttempted();
+		return;
+	}
+
+	modified = true;
+
+	path.push_back(new entities::Path(x, y));
+	selection = reinterpret_cast<void *>(path[path.size() - 1]);
+}
+
 int trm_keypress(int key, bool initial, QKeyEvent *e)
 {
 	if(key == Qt::Key_Backspace)
@@ -930,6 +1060,22 @@ int trm_keypress(int key, bool initial, QKeyEvent *e)
 					return 0;
 				}
 			}
+			for(vector<entities::Path *>::iterator i = path.begin(); i != path.end(); ++i)
+			{
+				if(selection == reinterpret_cast<void *>(static_cast<entities::Path *>(*i)))
+				{
+					if(config_get_int(c_noModify))
+					{
+						trm_modifyAttempted();
+						return 0;
+					}
+
+					modified = true;
+					selection = NULL;
+					path.erase(i);
+					return 0;
+				}
+			}
 		}
 	}
 	else if(key == Qt::Key_Escape)
@@ -961,6 +1107,10 @@ int trm_keypress(int key, bool initial, QKeyEvent *e)
 	else if(key == Qt::Key_E)
 	{
 		selectionType = e_selectionTeleporter;
+	}
+	else if(key == Qt::Key_P)
+	{
+		selectionType = e_selectionPath;
 	}
 	else if(key == Qt::Key_S && initial)
 	{

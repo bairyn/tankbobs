@@ -130,6 +130,8 @@ function st_play_done()
 	gl.DeleteTextures(play_tank_textures)
 	gl.DeleteTextures(play_wall_textures)
 
+	c_tcm_unload_extra_data()
+
 	-- reset texenv to avoid messing the GUI up
 	gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
 end

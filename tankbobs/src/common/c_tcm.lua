@@ -29,9 +29,10 @@ Any whitespace before or after any commas is ignored.  Trailing whitespace at th
 Entities
 map, string name, string title, string description, string authors, string version, integer version - the result is undefined if multiple map entities exist.  The concept of the "map" entity is similar to Quake's "worldspawn" entity.
 wall, integer quad, double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double tx1, double ty1, double tx2, double ty2, double tx3, double ty3, double tx4, double ty4, string texture, integer level / layer of wall, integer detail
-teleporter, string name, string targetName, double x1, double y1
+teleporter, string name, string targetName, double x1, double y1, int enabled
 playerSpawnPoint, double x1, double y1
 powerupSpawnPoint, double x1, double y1, string stringPowerupsToEnable - stringPowerupsToEnable will be searched for and will be tested if it has the name of any powerups
+path, string name, string targetName, double x1, double y1, int enabled, time
 
 TankCompiledMap (compiled TankRawMap)
 format:
@@ -54,6 +55,7 @@ format:
 4 bytes number of teleporters
 4 bytes number of playerSpawnPoints
 4 bytes number of powerupSpawnPoints
+4 bytes number of paths
 walls, ...
  -4 bytes id (unique only to other walls)  -- NOTE: every enitity's id must increment consecutively
  -1 byte: if non-zero, the 4th coordinates are used
@@ -76,12 +78,15 @@ walls, ...
  -256 bytes texture
  -4 bytes level of wall (tanks are level 9)
  -1 byte detail
- - 362 total bytes, this amount for each wall
+ -4 bytes path id
+ -1 byte path (whether or not the wall follows a path)
+ - 367 total bytes, this amount for each wall
 teleporters, ...
  -4 bytes id
  -4 bytes target id
  -8 bytes x1 double float
  -8 bytes y1 double float
+ -1 byte enabled
  - 24 total bytes
 playerSpawnPoints
  -4 bytes id
@@ -98,6 +103,14 @@ powerupSpawnPoints
  -4 bytes more powerups to enable
  -another 4 groups of powerups - altogether 64 bytes
  - 52 total bytes
+paths
+ -4 bytes id
+ -8 bytes x1 double float
+ -8 bytes y1 double float
+ -1 byte enabled
+ -8 bytes double float time to reach other path
+ -4 bites target id
+ - 20 total bytes
 --]]
 
 function c_tcm_init()
@@ -154,11 +167,13 @@ c_tcm_map =
 	teleporters_n = 0,
 	playerSpawnPoints_n = 0,
 	powerupSpawnPoints_n = 0,
+	paths_n = 0,
 
 	walls = {},  -- table of walls
-	teleporters = {},  -- table of walls
-	playerSpawnPoints = {},  -- table of walls
-	powerupSpawnPoints = {},  -- table of walls
+	teleporters = {},
+	playerSpawnPoints = {},
+	powerupSpawnPoints = {},
+	paths = {},
 	message = ""  -- the level message
 }
 
@@ -185,7 +200,10 @@ c_tcm_wall =
 	detail = false,
 	l = 0,
 
-	m = {}  -- extra data
+	pid = 0,
+	path = false,
+
+	m = {}  -- extra data (data not in tcm; eg position if on a path)
 }
 
 c_tcm_teleporter =
@@ -229,6 +247,23 @@ c_tcm_powerupSpawnPoint =
 	id = 0,
 	p = {},
 	enabledPowerups = {},
+
+	m = {}  -- extra data
+}
+
+c_tcm_path =
+{
+	new = common_new,
+
+	init = function (o)
+		o.p[1] = tankbobs.m_vec2()
+	end,
+
+	id = 0,
+	p = {},
+	t = 0,
+	time = 0,
+	enabled = false,
 
 	m = {}  -- extra data
 }
@@ -420,6 +455,13 @@ function c_tcm_read_map(map)
 			wall.detail = false
 		end
 
+		wall.pid = c_tcm_private_get(tankbobs.io_getInt, i)
+		if c_tcm_private_get(tankbobs.io_getChar, i) ~= 0 then
+			wall.path = true
+		else
+			wall.path = false
+		end
+
 		table.insert(r.walls, wall)
 	end
 
@@ -430,6 +472,11 @@ function c_tcm_read_map(map)
 		teleporter.t = c_tcm_private_get(tankbobs.io_getInt, i)
 		teleporter.p[1].x = c_tcm_private_get(tankbobs.io_getDouble, i)
 		teleporter.p[1].y = c_tcm_private_get(tankbobs.io_getDouble, i)
+		if c_tcm_private_get(tankbobs.io_getChar, i) ~= 0 then
+			teleporter.enabled = true
+		else
+			teleporter.enabled = false
+		end
 
 		table.insert(r.teleporters, teleporter)
 	end
@@ -458,6 +505,27 @@ function c_tcm_read_map(map)
 		-- powerupSpawnPoint.enabledPowerups.x = true | false will be set when more powerups exist
 
 		table.insert(r.powerupSpawnPoints, powerupSpawnPoint)
+	end
+ 
+	for it = 1, r.paths_n do
+		local path = c_tcm_path:new()
+
+		path.id = c_tcm_private_get(tankbobs.io_getInt, i)
+		path.p[1].x = c_tcm_private_get(tankbobs.io_getDouble, i)
+		path.p[1].y = c_tcm_private_get(tankbobs.io_getDouble, i)
+		if c_tcm_private_get(tankbobs.io_getChar, i) ~= 0 then
+			path.enabled = true
+		else
+			path.enabled = false
+		end
+		path.time = c_tcm_private_get(tankbobs.io_getDouble, i)
+		path.t = c_tcm_private_get(tankbobs.io_getInt, i)
+
+		table.insert(r.teleporters, teleporter)
+	end
+
+	for it = 1, r.paths_n do
+		local path = c_tcm_path:new()
 	end
 
 	i:close()
@@ -491,4 +559,26 @@ function c_tcm_select_map(name)
 	end
 
 	error("c_tcm_select_map: map '" .. name .. "' not found")
+end
+
+function c_tcm_unload_extra_data()
+	for _, v in pairs(c_tcm_current_map.walls) do
+		v.m = {}
+	end
+
+	for _, v in pairs(c_tcm_current_map.teleporters) do
+		v.m = {}
+	end
+
+	for _, v in pairs(c_tcm_current_map.playerSpawnPoints) do
+		v.m = {}
+	end
+
+	for _, v in pairs(c_tcm_current_map.powerupSpawnPoints) do
+		v.m = {}
+	end
+
+	for _, v in pairs(c_tcm_current_map.paths) do
+		v.m = {}
+	end
 end
