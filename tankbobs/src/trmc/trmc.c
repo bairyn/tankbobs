@@ -337,8 +337,8 @@ static double read_double(void)
 	char c;
 	double sign = 1;
 	double value = 0;
-	double fraction = 0;
-	char decimal = 0;
+	double fraction = 0.1;
+	int decimal = 0;
 
 	if(!read_line)
 	{
@@ -405,7 +405,8 @@ static double read_double(void)
 			}
 			else
 			{
-				fraction = fraction * 0.1 + c - '0';
+				value += fraction * (c - '0');
+				fraction *= 0.1;
 			}
 		}
 		else
@@ -423,7 +424,7 @@ static double read_double(void)
 
 	read_pos++;
 
-	return (value + fraction) * sign;
+	return sign * value;
 }
 
 static void read_string(char *s)
@@ -542,14 +543,17 @@ static struct wall_s
 	double tx4; double ty4;
 	char texture[256];  /* hardcoded for format */
 	int level;
+	char target[MAX_STRING_STRUCT_CHARS];
+	int path;
 	int detail;
+	int staticW;
 } walls[MAX_WALLS];
 
 typedef struct teleporter_s teleporter_t;
 static struct teleporter_s
 {
-	char name[MAX_STRING_STRUCT_CHARS];
 	char targetName[MAX_STRING_STRUCT_CHARS];
+	char target[MAX_STRING_STRUCT_CHARS];
 	double x1; double y1;
 	int enabled;
 } teleporters[MAX_TELEPORTERS];
@@ -570,12 +574,12 @@ static struct powerupSpawnPoint_s
 typedef struct path_s path_t;
 static struct path_s
 {
-	char name[MAX_STRING_STRUCT_CHARS];
 	char targetName[MAX_STRING_STRUCT_CHARS];
+	char target[MAX_STRING_STRUCT_CHARS];
 	double x1; double y1;
 	int enabled;
 	double time;
-} path[MAX_PATHS];
+} paths[MAX_PATHS];
 
 static int mc = 0;
 static int wc = 0;
@@ -584,7 +588,7 @@ static int lc = 0;
 static int oc = 0;
 static int pc = 0;
 
-static void add_map(char *name, char *title, char *description, char *version_s, int version)
+static void add_map(const char *name, const char *title, const char *description, const char *version_s, int version)
 {
 	map_t *map = &maps[mc++];
 
@@ -601,7 +605,7 @@ static void add_map(char *name, char *title, char *description, char *version_s,
 	map->version = version;
 }
 
-static void add_wall(int quad, double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double tx1, double ty1, double tx2, double ty2, double tx3, double ty3, double tx4, double ty4, char *texture, int level, int detail)
+static void add_wall(int quad, double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double tx1, double ty1, double tx2, double ty2, double tx3, double ty3, double tx4, double ty4, const char *texture, int level, const char *target, int path, int detail, int staticW)
 {
 	wall_t *wall = &walls[wc++];
 
@@ -630,10 +634,13 @@ static void add_wall(int quad, double x1, double y1, double x2, double y2, doubl
 	wall->ty4 = ty4;
 	strncpy(wall->texture, texture, sizeof(wall->texture));
 	wall->level = level;
+	strncpy(wall->target, texture, sizeof(wall->target));
+	wall->path = path;
 	wall->detail = detail;
+	wall->staticW = staticW;
 }
 
-static void add_teleporter(const char *name, const char *targetName, double x1, double y1, int enabled)
+static void add_teleporter(const char *targetName, const char *target, double x1, double y1, int enabled)
 {
 	teleporter_t *teleporter = &teleporters[tc++];
 
@@ -643,8 +650,8 @@ static void add_teleporter(const char *name, const char *targetName, double x1, 
 		exit(1);
 	}
 
-	strncpy(teleporter->name, name, sizeof(teleporter->name));
 	strncpy(teleporter->targetName, targetName, sizeof(teleporter->targetName));
+	strncpy(teleporter->target, target, sizeof(teleporter->target));
 	teleporter->x1 = x1;
 	teleporter->y1 = y1;
 }
@@ -678,7 +685,7 @@ static void add_powerupSpawnPoint(double x1, double y1, const char *powerupsToEn
 	strncpy(powerupSpawnPoint->powerupsToEnable, powerupsToEnable, sizeof(powerupSpawnPoint->powerupsToEnable));
 }
 
-static void add_path(const char *name, const char *targetName, double x1, double y1, int enabled, double time)
+static void add_path(const char *targetName, const char *target, double x1, double y1, int enabled, double time)
 {
 	path_t *path = &paths[pc++];
 
@@ -688,8 +695,8 @@ static void add_path(const char *name, const char *targetName, double x1, double
 		exit(1);
 	}
 
-	strncpy(path->name, name, sizeof(path->name));
 	strncpy(path->targetName, targetName, sizeof(path->targetName));
+	strncpy(path->target, target, sizeof(path->target));
 	path->x1 = x1;
 	path->y1 = y1;
 	path->enabled = enabled;
@@ -823,7 +830,10 @@ static int compile(const char *filename)
 					double tx4, ty4;
 					char texture[MAX_STRING_SIZE];
 					int level;
+					char target[MAX_STRING_SIZE];
+					int path;
 					int detail;
+					int staticW;
 
 					quad = read_int();
 					x1 = read_double();
@@ -844,24 +854,27 @@ static int compile(const char *filename)
 					ty4 = read_double();
 					read_string(texture);
 					level = read_int();
+					read_string(target);
+					path = read_int();
 					detail = read_int();
+					staticW = read_int();
 
-					add_wall(quad, x1, y1, x2, y2, x3, y3, x4, y4, tx1, ty1, tx2, ty2, tx3, ty3, tx4, ty4, texture, level, detail);
+					add_wall(quad, x1, y1, x2, y2, x3, y3, x4, y4, tx1, ty1, tx2, ty2, tx3, ty3, tx4, ty4, texture, level, target, path, detail, staticW);
 				}
 				else if(strncmp(entity, "teleporter", sizeof(entity)) == 0)
 				{
-					char name[MAX_STRING_SIZE];
 					char targetName[MAX_STRING_SIZE];
+					char target[MAX_STRING_SIZE];
 					double x1, y1;
 					int enabled;
 
-					read_string(name);
 					read_string(targetName);
+					read_string(target);
 					x1 = read_double();
 					y1 = read_double();
 					enabled = read_int();
 
-					add_teleporter(name, targetName, x1, y1, enabled);
+					add_teleporter(targetName, target, x1, y1, enabled);
 				}
 				else if(strncmp(entity, "playerSpawnPoint", sizeof(entity)) == 0)
 				{
@@ -885,20 +898,20 @@ static int compile(const char *filename)
 				}
 				else if(strncmp(entity, "path", sizeof(entity)) == 0)
 				{
-					char name[MAX_STRING_SIZE];
 					char targetName[MAX_STRING_SIZE];
+					char target[MAX_STRING_SIZE];
 					double x1, y1;
 					int enabled;
 					double time;
 
-					read_string(name);
 					read_string(targetName);
+					read_string(target);
 					x1 = read_double();
 					y1 = read_double();
 					enabled = read_int();
 					time = read_double();
 
-					add_path(name, targetName, x1, y1, enabled, time);
+					add_path(targetName, target, x1, y1, enabled, time);
 				}
 
 				else
@@ -956,10 +969,24 @@ static int compile(const char *filename)
 	put_cint(fout, tc);
 	put_cint(fout, lc);
 	put_cint(fout, oc);
+	put_cint(fout, pc);
 
 	for(i = 0; i < wc; i++)
 	{
+		int id = 0;
 		wall_t *wall = &walls[i];
+
+		/* find the target (it might not exist) */
+		for(j = 0; j < tc; j++)
+		{
+			teleporter_t *teleporter = &teleporters[j];
+
+			if(strcmp(wall->target, teleporter->targetName) == 0)
+			{
+				id = j;
+				break;
+			}
+		}
 
 		put_cint(fout, i);
 		put_cchar(fout, ((wall->quad) ? (1) : (0)));
@@ -981,7 +1008,10 @@ static int compile(const char *filename)
 		put_cdouble(fout, wall->ty4);
 		put_str(fout, wall->texture, 256);
 		put_cint(fout, wall->level);
+		put_cint(fout, id);
+		put_cchar(fout, ((wall->path) ? (1) : (0)));
 		put_cchar(fout, ((wall->detail) ? (1) : (0)));
+		put_cchar(fout, ((wall->staticW) ? (1) : (0)));
 	}
 
 	for(i = 0; i < tc; i++)
@@ -994,7 +1024,7 @@ static int compile(const char *filename)
 		{
 			teleporter_t *teleporter2 = &teleporters[j];
 
-			if(strcmp(teleporter->targetName, teleporter2->name) == 0)
+			if(strcmp(teleporter->target, teleporter2->targetName) == 0)
 			{
 				id = j;
 				break;
@@ -1050,7 +1080,7 @@ static int compile(const char *filename)
 		{
 			path_t *path2 = &paths[j];
 
-			if(strcmp(path->targetName, path2->name) == 0)
+			if(strcmp(path->target, path2->targetName) == 0)
 			{
 				id = j;
 				break;
@@ -1061,8 +1091,8 @@ static int compile(const char *filename)
 		put_cdouble(fout, path->x1);
 		put_cdouble(fout, path->y1);
 		put_cchar(fout, ((path->enabled) ? (1) : (0)));
-		put_cdouble(path->time);
-		put_cint(id);
+		put_cdouble(fout, path->time);
+		put_cint(fout, id);
 	}
 
 	fclose(fout);

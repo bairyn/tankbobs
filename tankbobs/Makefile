@@ -1,4 +1,5 @@
 # Simple makefile for Tankbobs
+# TODO: remove this hack makefile
 
 CC = gcc
 LD = ld
@@ -19,6 +20,7 @@ SERVEROBJS := `$(FIND) ./src/server -name \*\.lua`
 CLIENTOBJS := `$(shell) $(FIND) ./src/client -name \*\.lua`
 COMMONOBJS := ./src/common/common.lua `$(shell) $(FIND) ./src/common -name \*\.lua` # common.lua needs to be firrst
 COMMONSRCS := `$(shell) $(FIND) ./src/common -name m_\*\.c`
+COMMONPPSRCS := `$(shell) $(FIND) ./src/common -name m_\*\.cpp`
 SHAREDSRCS := `$(shell) $(FIND) ./src/common -name \*\.c | $(EGREP) -v "m_"`
 SHAREDOBJS := `$(shell) $(FIND) ./src/common -name \*\.o | $(EGREP) -v "m_"`
 COMMONOUTS := `$(shell) $(FIND) ./src/common -name m_\*\.o`

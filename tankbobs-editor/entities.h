@@ -73,10 +73,10 @@ namespace entities
 			//string name;  // these can't go here for C++ class initilazation order issues
 			//string targetName;
 			double x, y;
-			string name;
 			string targetName;
+			string target;
 			bool enabled;
-			Teleporter(double Teleporter_x = 0.0, double Teleporter_y = 0.0, string Teleporter_name = "teleporter", string Teleporter_targetName = "teleporter", bool Teleporter_enabled = false) : x(Teleporter_x), y(Teleporter_y), name(Teleporter_name), targetName(Teleporter_targetName), enabled(Teleporter_enabled) {}
+			Teleporter(double Teleporter_x = 0.0, double Teleporter_y = 0.0, string Teleporter_targetName = "", string Teleporter_target = "", bool Teleporter_enabled = false) : x(Teleporter_x), y(Teleporter_y), targetName(Teleporter_targetName), target(Teleporter_target), enabled(Teleporter_enabled) {}
 	};
 
 	class Wall : private Entity
@@ -102,21 +102,22 @@ namespace entities
 			double ty4;
 			string texture;
 			int level;
+			string target;
+			bool path;
 			bool detail;
-			Wall(double Wall_x1 = 0.0, double Wall_y1 = 0.0, bool Wall_quad = false, double Wall_x2 = 0.0, double Wall_y2 = 0.0, double Wall_x3 = 0.0, double Wall_y3 = 0.0, double Wall_x4 = 0.0, double Wall_y4 = 0.0, double Wall_tx1 = 0.0, double Wall_ty1 = 1.0, double Wall_tx2 = 0.0, double Wall_ty2 = 0.0, double Wall_tx3 = 0.0, double Wall_ty3 = 1.0, double Wall_tx4 = 1.0, double Wall_ty4 = 1.0, string Wall_texture = "", int Wall_level = 0, bool Wall_detail = false) : x1(Wall_x1), y1(Wall_y1), quad(Wall_quad), x2(Wall_x2), y2(Wall_y2), x3(Wall_x3), y3(Wall_y3), x4(Wall_x4), y4(Wall_y4), tx1(Wall_tx1), ty1(Wall_ty1), tx2(Wall_tx2), ty2(Wall_ty2), tx3(Wall_tx3), ty3(Wall_ty3), tx4(Wall_tx4), ty4(Wall_ty4), texture(Wall_texture), level(Wall_level), detail(Wall_detail) {}
+			bool staticW;
+			Wall(double Wall_x1 = 0.0, double Wall_y1 = 0.0, bool Wall_quad = false, double Wall_x2 = 0.0, double Wall_y2 = 0.0, double Wall_x3 = 0.0, double Wall_y3 = 0.0, double Wall_x4 = 0.0, double Wall_y4 = 0.0, double Wall_tx1 = 0.0, double Wall_ty1 = 1.0, double Wall_tx2 = 0.0, double Wall_ty2 = 0.0, double Wall_tx3 = 0.0, double Wall_ty3 = 1.0, double Wall_tx4 = 1.0, double Wall_ty4 = 1.0, string Wall_texture = "", int Wall_level = 0, string Wall_target = "", bool Wall_path = false, bool Wall_detail = false, bool Wall_staticW = true) : x1(Wall_x1), y1(Wall_y1), quad(Wall_quad), x2(Wall_x2), y2(Wall_y2), x3(Wall_x3), y3(Wall_y3), x4(Wall_x4), y4(Wall_y4), tx1(Wall_tx1), ty1(Wall_ty1), tx2(Wall_tx2), ty2(Wall_ty2), tx3(Wall_tx3), ty3(Wall_ty3), tx4(Wall_tx4), ty4(Wall_ty4), texture(Wall_texture), level(Wall_level), target(Wall_target), path(Wall_path), detail(Wall_detail), staticW(Wall_staticW) {}  // note that static walls are default
 	};
 
 	class Path : private Entity
 	{
 		public:
-			//string name;  // these can't go here for C++ class initilazation issues
-			//string targetName;
 			double x, y;
-			string name;
 			string targetName;
+			string target;
 			bool enabled;
 			double time;
-			Path(double Path_x = 0.0, double Path_y = 0.0, string Path_name = "teleporter", string Path_targetName = "teleporter", bool Path_enabled = false, double Path_time = 0) : x(Path_x), y(Path_y), name(Path_name), targetName(Path_targetName), enabled(Path_enabled), time(Path_time) {}
+			Path(double Path_x = 0.0, double Path_y = 0.0, string Path_targetName = "", string Path_target = "", bool Path_enabled = false, double Path_time = 0) : x(Path_x), y(Path_y), targetName(Path_targetName), target(Path_target), enabled(Path_enabled), time(Path_time) {}
 
 	};
 }

@@ -66,15 +66,15 @@ Properties::Properties(QWidget *parent)
 	{
 		if(selection == reinterpret_cast<void *>(static_cast<entities::Teleporter *>(*i)))
 		{
-			name->setText(QString(reinterpret_cast<entities::Teleporter *>(selection)->name.c_str()));
 			targetName->setText(QString(reinterpret_cast<entities::Teleporter *>(selection)->targetName.c_str()));
+			target->setText(QString(reinterpret_cast<entities::Teleporter *>(selection)->target.c_str()));
 			enabled->setChecked(reinterpret_cast<entities::Teleporter *>(selection)->enabled);
 
 			selected = true;
-			name->setEnabled(true);
-			nameLabel->setEnabled(true);
 			targetName->setEnabled(true);
 			targetNameLabel->setEnabled(true);
+			target->setEnabled(true);
+			targetLabel->setEnabled(true);
 			enabled->setEnabled(true);
 		}
 	}
@@ -93,12 +93,17 @@ Properties::Properties(QWidget *parent)
 			tx4->setText(QString::number(reinterpret_cast<entities::Wall *>(selection)->tx4));
 			ty4->setText(QString::number(reinterpret_cast<entities::Wall *>(selection)->ty4));
 			texture->setText(reinterpret_cast<entities::Wall *>(selection)->texture.c_str());
+			target->setText(reinterpret_cast<entities::Wall *>(selection)->target.c_str());
+			path->setChecked(reinterpret_cast<entities::Wall *>(selection)->path);
 			detail->setChecked(reinterpret_cast<entities::Wall *>(selection)->detail);
+			staticW->setChecked(reinterpret_cast<entities::Wall *>(selection)->staticW);
 
 			selected = true;
 			fourVertices->setEnabled(true);
 			texture->setEnabled(true);
 			textureLabel->setEnabled(true);
+			target->setEnabled(true);
+			targetLabel->setEnabled(true);
 			level->setEnabled(true);
 			levelLabel->setEnabled(true);
 			txLabel->setEnabled(true);
@@ -119,22 +124,24 @@ Properties::Properties(QWidget *parent)
 			t4Label->setEnabled(true);
 			t4cLabel->setEnabled(true);
 			detail->setEnabled(true);
+			path->setEnabled(true);
+			staticW->setEnabled(true);
 		}
 	}
-	for(vector<entities::Path *>::iterator i = path.begin(); i != path.end(); ++i)
+	for(vector<entities::Path *>::iterator i = ::path.begin(); i != ::path.end(); ++i)
 	{
 		if(selection == reinterpret_cast<void *>(static_cast<entities::Path *>(*i)))
 		{
-			name->setText(QString(reinterpret_cast<entities::Path *>(selection)->name.c_str()));
 			targetName->setText(QString(reinterpret_cast<entities::Path *>(selection)->targetName.c_str()));
+			target->setText(QString(reinterpret_cast<entities::Path *>(selection)->target.c_str()));
 			time->setText(QString::number(reinterpret_cast<entities::Path *>(selection)->time));
 			enabled->setChecked(reinterpret_cast<entities::Path *>(selection)->enabled);
 
 			selected = true;
-			name->setEnabled(true);
-			nameLabel->setEnabled(true);
 			targetName->setEnabled(true);
 			targetNameLabel->setEnabled(true);
+			target->setEnabled(true);
+			targetLabel->setEnabled(true);
 			time->setEnabled(true);
 			timeLabel->setEnabled(true);
 			enabled->setEnabled(true);
@@ -178,8 +185,8 @@ Properties::Properties(QWidget *parent)
 	connect(ty3, SIGNAL(textChanged(const QString &)), this, SLOT(ty3Changed(const QString &)));
 	connect(tx4, SIGNAL(textChanged(const QString &)), this, SLOT(tx4Changed(const QString &)));
 	connect(ty4, SIGNAL(textChanged(const QString &)), this, SLOT(ty4Changed(const QString &)));
-	connect(name, SIGNAL(textChanged(const QString &)), this, SLOT(nameChanged(const QString &)));
 	connect(targetName, SIGNAL(textChanged(const QString &)), this, SLOT(targetNameChanged(const QString &)));
+	connect(target, SIGNAL(textChanged(const QString &)), this, SLOT(targetChanged(const QString &)));
 	connect(powerups, SIGNAL(textChanged(const QString &)), this, SLOT(powerupsChanged(const QString &)));
 	connect(fourVertices, SIGNAL(stateChanged(int)), this, SLOT(fourVerticesChanged(int)));
 	connect(enabled, SIGNAL(stateChanged(int)), this, SLOT(enabledChanged(int)));
@@ -189,7 +196,9 @@ Properties::Properties(QWidget *parent)
 	connect(nomodify, SIGNAL(stateChanged(int)), this, SLOT(nomodifyChanged(int)));
 	connect(autonotexture, SIGNAL(stateChanged(int)), this, SLOT(autonotextureChanged(int)));
 	connect(hideDetail, SIGNAL(stateChanged(int)), this, SLOT(hideDetailChanged(int)));
+	connect(path, SIGNAL(stateChanged(int)), this, SLOT(pathChanged(int)));
 	connect(detail, SIGNAL(stateChanged(int)), this, SLOT(detailChanged(int)));
+	connect(staticW, SIGNAL(stateChanged(int)), this, SLOT(staticWChanged(int)));
 }
 
 void Properties::textureChanged(const QString &text)
@@ -253,14 +262,32 @@ void Properties::ty4Changed(const QString &text)
 	w->ty4 = atof(util_qtcp(text).c_str());
 }
 
-void Properties::nameChanged(const QString &text)
-{
-	reinterpret_cast<entities::Teleporter *>(selection)->name = util_atoi(util_qtcp(text).c_str());
-}
-
 void Properties::targetNameChanged(const QString &text)
 {
-	reinterpret_cast<entities::Teleporter *>(selection)->targetName = util_atoi(util_qtcp(text).c_str());
+	if(trm_isPath(selection))
+	{
+		reinterpret_cast<entities::Path *>(selection)->targetName = util_atoi(util_qtcp(text).c_str());
+	}
+	if(trm_isTeleporter(selection))
+	{
+		reinterpret_cast<entities::Teleporter *>(selection)->targetName = util_atoi(util_qtcp(text).c_str());
+	}
+}
+
+void Properties::targetChanged(const QString &text)
+{
+	if(trm_isPath(selection))
+	{
+		reinterpret_cast<entities::Path *>(selection)->target= util_atoi(util_qtcp(text).c_str());
+	}
+	if(trm_isTeleporter(selection))
+	{
+		reinterpret_cast<entities::Teleporter *>(selection)->target= util_atoi(util_qtcp(text).c_str());
+	}
+	if(trm_isWall(selection))
+	{
+		reinterpret_cast<entities::Wall *>(selection)->target= util_atoi(util_qtcp(text).c_str());
+	}
 }
 
 void Properties::powerupsChanged(const QString &text)
@@ -300,7 +327,6 @@ void Properties::enabledChanged(int state)
 	}
 }
 
-
 void Properties::detailChanged(int state)
 {
 	entities::Wall *w = reinterpret_cast<entities::Wall *>(selection);
@@ -312,6 +338,35 @@ void Properties::detailChanged(int state)
 	else
 	{
 		w->detail = false;
+	}
+}
+
+void Properties::pathChanged(int state)
+{
+	entities::Wall *w = reinterpret_cast<entities::Wall *>(selection);
+
+	if(state)
+	{
+		w->path = true;
+	}
+	else
+	{
+		w->path = false;
+	}
+}
+
+
+void Properties::staticWChanged(int state)
+{
+	entities::Wall *w = reinterpret_cast<entities::Wall *>(selection);
+
+	if(state)
+	{
+		w->staticW = true;
+	}
+	else
+	{
+		w->staticW = false;
 	}
 }
 

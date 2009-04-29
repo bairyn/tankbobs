@@ -28,7 +28,7 @@ Any whitespace before or after any commas is ignored.  Trailing whitespace at th
 
 Entities
 map, string name, string title, string description, string authors, string version, integer version - the result is undefined if multiple map entities exist.  The concept of the "map" entity is similar to Quake's "worldspawn" entity.
-wall, integer quad, double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double tx1, double ty1, double tx2, double ty2, double tx3, double ty3, double tx4, double ty4, string texture, integer level / layer of wall, integer detail
+wall, integer quad, double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double tx1, double ty1, double tx2, double ty2, double tx3, double ty3, double tx4, double ty4, string texture, integer level / layer of wall, string target, integer path, integer detail, integer static - target is the path
 teleporter, string name, string targetName, double x1, double y1, int enabled
 playerSpawnPoint, double x1, double y1
 powerupSpawnPoint, double x1, double y1, string stringPowerupsToEnable - stringPowerupsToEnable will be searched for and will be tested if it has the name of any powerups
@@ -78,6 +78,7 @@ walls, ...
  -256 bytes texture
  -4 bytes level of wall (tanks are level 9)
  -1 byte detail
+ -1 byte static
  -4 bytes path id
  -1 byte path (whether or not the wall follows a path)
  - 367 total bytes, this amount for each wall
@@ -198,6 +199,7 @@ c_tcm_wall =
 	t = {},
 	texture = "",
 	detail = false,
+	static = false,
 	l = 0,
 
 	pid = 0,
@@ -403,6 +405,7 @@ function c_tcm_read_map(map)
 	r.teleporters_n = c_tcm_private_get(tankbobs.io_getInt, i)
 	r.playerSpawnPoints_n = c_tcm_private_get(tankbobs.io_getInt, i)
 	r.powerupSpawnPoints_n = c_tcm_private_get(tankbobs.io_getInt, i)
+	r.paths_n = c_tcm_private_get(tankbobs.io_getInt, i)
 
 	for it = 1, r.walls_n do
 		local wall = c_tcm_wall:new()
@@ -449,17 +452,23 @@ function c_tcm_read_map(map)
 		wall.texture = c_tcm_private_get(tankbobs.io_getStrL, i, false, 256)
 		wall.texture = wall.texture:gsub("%z*$", "")
 		wall.l = c_tcm_private_get(tankbobs.io_getInt, i)
-		if c_tcm_private_get(tankbobs.io_getChar, i) ~= 0 then
-			wall.detail = true
-		else
-			wall.detail = false
-		end
 
 		wall.pid = c_tcm_private_get(tankbobs.io_getInt, i)
 		if c_tcm_private_get(tankbobs.io_getChar, i) ~= 0 then
 			wall.path = true
 		else
 			wall.path = false
+		end
+
+		if c_tcm_private_get(tankbobs.io_getChar, i) ~= 0 then
+			wall.detail = true
+		else
+			wall.detail = false
+		end
+		if c_tcm_private_get(tankbobs.io_getChar, i) ~= 0 then
+			wall.static = true
+		else
+			wall.static = false
 		end
 
 		table.insert(r.walls, wall)
@@ -521,11 +530,7 @@ function c_tcm_read_map(map)
 		path.time = c_tcm_private_get(tankbobs.io_getDouble, i)
 		path.t = c_tcm_private_get(tankbobs.io_getInt, i)
 
-		table.insert(r.teleporters, teleporter)
-	end
-
-	for it = 1, r.paths_n do
-		local path = c_tcm_path:new()
+		table.insert(r.paths, path)
 	end
 
 	i:close()
@@ -535,6 +540,7 @@ function c_tcm_read_map(map)
 	table.sort(r.teleporters, function (e1, e2) return e1.id < e2.id end)
 	table.sort(r.playerSpawnPoints, function (e1, e2) return e1.id < e2.id end)
 	table.sort(r.powerupSpawnPoints, function (e1, e2) return e1.id < e2.id end)
+	table.sort(r.paths, function (e1, e2) return e1.id < e2.id end)
 
 	return r;
 end

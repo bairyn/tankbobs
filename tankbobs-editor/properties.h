@@ -54,14 +54,16 @@ class Properties : public QDialog, private Ui::PropertiesDialog
 		void ty3Changed(const QString &text);
 		void tx4Changed(const QString &text);
 		void ty4Changed(const QString &text);
-		void nameChanged(const QString &text);
+		void targetChanged(const QString &text);
 		void targetNameChanged(const QString &text);
 		void fourVerticesChanged(int state);
 		void autoselectChanged(int state);
 		void nomodifyChanged(int state);
 		void autonotextureChanged(int state);
 		void hideDetailChanged(int state);
+		void pathChanged(int state);
 		void detailChanged(int state);
+		void staticWChanged(int state);
 		void enabledChanged(int state);
 };
 

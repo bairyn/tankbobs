@@ -386,6 +386,7 @@ function c_world_projectile_step(d, projectile)
 	local min_wallDistance, min_tankDistance, min_teleporterDistance
 	-- TODO: projectiles can go through teleporters
 
+	--[[
 	common_clone(c_world_projectile_hull(projectile), hull)
 
 	projectile.p[1]:add(d * projectile.v[1])
@@ -420,6 +421,7 @@ function c_world_projectile_step(d, projectile)
 							end
 						end
 
+	--]]
 end
 
 function c_world_step()

@@ -935,8 +935,8 @@ static void drawPaths(void)
 		glPushMatrix();
 			glPushAttrib(GL_POLYGON_BIT | GL_CURRENT_BIT);
 				glTranslated(e->x, e->y, 0.0);
-				if(glIsList(entBase + e_selectionTeleporter))
-					glCallList(entBase + e_selectionTeleporter);
+				if(glIsList(entBase + e_selectionPath))
+					glCallList(entBase + e_selectionPath);
 				if(e == reinterpret_cast<void *>(selection))
 				{
 					glScaled(1.1 / ZOOM, 1.1 / ZOOM, 1.0);

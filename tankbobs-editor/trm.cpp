@@ -229,8 +229,8 @@ static double read_double(void)
 	char c;
 	double sign = 1;
 	double value = 0;
-	double fraction = 0;
-	char decimal = 0;
+	double fraction = 0.1;
+	int decimal = 0;
 
 	if(!read_line)
 	{
@@ -297,7 +297,8 @@ static double read_double(void)
 			}
 			else
 			{
-				fraction = fraction * 0.1 + c - '0';
+				value += fraction * (c - '0');
+				fraction *= 0.1;
 			}
 		}
 		else
@@ -315,7 +316,7 @@ static double read_double(void)
 
 	read_pos++;
 
-	return (value + fraction) * sign;
+	return sign * value;
 }
 
 static void read_string(char *s)
@@ -478,7 +479,10 @@ bool trm_open(const char *filename, bool import)  // Will not confirm lost progr
 					double tx4, ty4;
 					char texture[1024];
 					int level;
+					char target[1024];
+					int path;
 					int detail;
+					int staticW;
 
 					quad = read_int();
 					x1 = read_double();
@@ -499,24 +503,27 @@ bool trm_open(const char *filename, bool import)  // Will not confirm lost progr
 					ty4 = read_double();
 					read_string(texture);
 					level = read_int();
+					read_string(target);
+					path = read_int();
 					detail = read_int();
+					staticW = read_int();
 
-					wall.push_back(new entities::Wall(x1, y1, quad, x2, y2, x3, y3, x4, y4, tx1, ty1, tx2, ty2, tx3, ty3, tx4, ty4, texture, level, detail));
+					wall.push_back(new entities::Wall(x1, y1, quad, x2, y2, x3, y3, x4, y4, tx1, ty1, tx2, ty2, tx3, ty3, tx4, ty4, texture, level, target, path, detail, staticW));
 				}
 				else if(strncmp(entity, "teleporter", sizeof(entity)) == 0)
 				{
-					char name[1024];
 					char targetName[1024];
+					char target[1024];
 					double x1, y1;
 					int enabled;
 
-					read_string(name);
 					read_string(targetName);
+					read_string(target);
 					x1 = read_double();
 					y1 = read_double();
 					enabled = read_int();
 
-					teleporter.push_back(new entities::Teleporter(x1, y1, name, targetName, enabled));
+					teleporter.push_back(new entities::Teleporter(x1, y1, targetName, target, enabled));
 				}
 				else if(strncmp(entity, "playerSpawnPoint", sizeof(entity)) == 0)
 				{
@@ -540,20 +547,20 @@ bool trm_open(const char *filename, bool import)  // Will not confirm lost progr
 				}
 				else if(strncmp(entity, "path", sizeof(entity)) == 0)
 				{
-					char name[1024];
 					char targetName[1024];
+					char target[1024];
 					double x1, y1;
 					int enabled;
 					double time;
 
-					read_string(name);
 					read_string(targetName);
+					read_string(target);
 					x1 = read_double();
 					y1 = read_double();
 					enabled = read_int();
 					time = read_double();
 
-					path.push_back(new entities::Path(x1, y1, name, targetName, enabled, time));
+					path.push_back(new entities::Path(x1, y1, targetName, target, enabled, time));
 				}
 
 				else
@@ -652,9 +659,15 @@ bool trm_save(const char *filename)
 		<< ", "
 		<< e->texture
 		<< ", "
+		<< e->target
+		<< ", "
+		<< e->path
+		<< ", "
 		<< e->level
 		<< ", "
 		<< e->detail
+		<< ", "
+		<< e->staticW
 		<< endl;
 	}
 
@@ -663,9 +676,9 @@ bool trm_save(const char *filename)
 		entities::Teleporter *e = *i;
 
 		fout << "teleporter, "
-		<< e->name
-		<< ", "
 		<< e->targetName
+		<< ", "
+		<< e->target
 		<< ", "
 		<< e->x
 		<< ", "
@@ -704,9 +717,9 @@ bool trm_save(const char *filename)
 		entities::Path *e = *i;
 
 		fout << "path, "
-		<< e->name
-		<< ", "
 		<< e->targetName
+		<< ", "
+		<< e->target
 		<< ", "
 		<< e->x
 		<< ", "
