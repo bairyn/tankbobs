@@ -28,7 +28,7 @@ function common_nil(...)
 end
 
 function common_init()
-	require "tankbobs"
+	require "libmtankbobs"
 	tankbobs.t_initialize(client and not server);
 
 	c_const_init()

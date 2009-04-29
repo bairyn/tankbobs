@@ -35,7 +35,7 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 static const char *extension = ".dll";
 #else
 #include <dlfcn.h>
-static const char *extension = ".so";
+static const char *extension = ".a";
 #endif
 
 static int cdll_initialized = 0;
