@@ -46,10 +46,10 @@
 		<pause>0x70</pause> 'p'
 		<player1>
 			<firing>306</firing> 'LCTRL'
-			<forward>0x77</forward> 'w'
-			<back>0x73</back> 's'
-			<left>0x61</left> 'a'
-			<right>0x64</right> 'd'
+			<forward>119</forward> 'w'
+			<back>115</back> 's'
+			<left>97</left> 'a'
+			<right>100</right> 'd'
 			<special>304</special> 'LSHIFT'
 		</player1>
 		<player2>
@@ -61,6 +61,8 @@
 			<special>303</special> 'RSHIFT'
 		</player2>
 	</key>
+
+	<keyLayout>default</keyLayout>
 
 	<renderer>
 		<fullscreen>0</fullscreen>

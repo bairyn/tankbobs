@@ -24,6 +24,8 @@ base configuration settings - mods should not need to redefine anything here
 all keys should be strings.  Numbers and other types are untested
 --]]
 
+-- TODO: cache
+
 function c_config_init()
 	c_config_init = nil
 
@@ -182,6 +184,31 @@ function c_config_init()
 		table.insert(cheats_table, k)
 	end
 
+	local function c_config_keyLayoutGet(key)
+		if c_config_get("config.keyLayout", nil, true) then
+			for _, v in pairs(c_const_get("keyLayout_" .. c_config_get("config.keyLayout"))) do
+				if key == v.from then
+					return v.to
+				end
+			end
+		end
+
+		return key
+	end
+
+	local function c_config_keyLayoutSet(key)
+		if c_config_get("config.keyLayout", nil, true) then
+			for _, v in pairs(c_const_get("keyLayout_" .. c_config_get("config.keyLayout"))) do
+				-- reversed
+				if key == v.to then
+					return v.from
+				end
+			end
+		end
+
+		return key
+	end
+
 	function c_config_set(k, v, conf, kt)
 		conf = conf or config
 		kt = kt or k
@@ -206,7 +233,12 @@ function c_config_init()
 		end
 		local pos = k:find('%.')
 		if pos == nil then
-			conf[k] = v
+			-- special case for config.key
+			if kt:find("^config%.key%.") then
+				conf[k] = c_config_keyLayoutSet(v)
+			else
+				conf[k] = v
+			end
 		else
 			if type(conf[k:sub(1, pos - 1)]) ~= "table" then
 				conf[k:sub(1, pos - 1)] = {}
@@ -250,7 +282,14 @@ function c_config_init()
 			end
 			local pos = k:find('%.')
 			if pos == nil then
-				return trim(conf[k])
+				local v = trim(conf[k])
+
+				-- special case for config.key
+				if kt:find("^config%.key%.") then
+					return c_config_keyLayoutGet(v)
+				else
+					return v
+				end
 			else
 				return c_config_get(k:sub(pos + 1, -1), conf[k:sub(1, pos - 1)], nilOnError, kt)
 			end

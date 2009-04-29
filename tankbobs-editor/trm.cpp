@@ -659,11 +659,11 @@ bool trm_save(const char *filename)
 		<< ", "
 		<< e->texture
 		<< ", "
+		<< e->level
+		<< ", "
 		<< e->target
 		<< ", "
 		<< e->path
-		<< ", "
-		<< e->level
 		<< ", "
 		<< e->detail
 		<< ", "
