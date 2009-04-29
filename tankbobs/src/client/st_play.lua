@@ -91,7 +91,6 @@ function st_play_init()
 
 			gl.Begin("POLYGON")
 				for i = 1, #v.p do
-print(v.t[i].x, v.t[i].y)
 					gl.TexCoord(v.t[i].x, v.t[i].y)
 					gl.Vertex(v.p[i].x, v.p[i].y)
 				end
@@ -191,7 +190,6 @@ function st_play_button(button, pressed)
 		if button == c_config_get("config.key.player" .. tostring(i) .. ".special") then
 			c_world_tanks[i].state.special = pressed
 		end
-print(i, button)
 	end
 end
 
