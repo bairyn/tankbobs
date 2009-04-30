@@ -3,12 +3,35 @@
 # wrapper for cmake
 # use ./build.sh make etc
 
+skipBaseDirCheck=0  # change this to one to stop checking for "tankbobs" as the basename of pwd
+
 SERVER_SRCS="src/common/common.lua src/common/c_config.lua src/common/c_const.lua src/common/c_data.lua src/common/c_math.lua src/common/c_mods.lua src/common/c_module.lua src/common/c_state.lua src/common/c_tcm.lua src/common/c_weapon.lua src/common/c_world.lua src/common/lom.lua src/server/init.lua"
 CLIENT_SRCS="src/common/common.lua src/common/c_config.lua src/common/c_const.lua src/common/c_data.lua src/common/c_math.lua src/common/c_mods.lua src/common/c_module.lua src/common/c_state.lua src/common/c_tcm.lua src/common/c_weapon.lua src/common/c_world.lua src/common/lom.lua src/client/gui.lua src/client/init.lua src/client/main.lua src/client/renderer.lua src/client/st_exit.lua src/client/st_help.lua src/client/st_level.lua src/client/st_license.lua src/client/st_manual.lua src/client/st_options.lua src/client/st_play.lua src/client/st_set.lua src/client/st_start.lua src/client/st_title.lua"
 DATA="CHANGELOG COPYING data mod-client mod-server NOTICE"
-CMAKEFLAGS="-D PEDANTIC=TRUE"
 
-if ! [ -d ./build ]; then
+if [ `basename ${PWD}` == "build" ]; then
+	cd ./../
+fi
+
+if [ $skipBaseDirCheck == 0 ]; then
+	if ! [ `basename ${PWD}` == "tankbobs" ]; then
+		if [ "$1" == "-f" ]; then
+			shift
+		else
+			echo -ne "Not in "tankbobs/".  Use -f as the first argument to conitune anyway\n"
+			exit 1
+		fi
+	fi
+fi
+
+if [ -e "/usr/bin/gcc" ]; then
+	# try to link with C compiler
+	CMAKEFLAGS="-D PEDANTIC=TRUE -D CMAKE_CXX_LINKER=/usr/bin/gcc"
+else
+	CMAKEFLAGS="-D PEDANTIC=TRUE"
+fi
+
+if ! [ -d "./build" ]; then
 	mkdir ./build
 fi
 
@@ -30,14 +53,6 @@ fi
 if [ "$1" == "-d" ]; then
 	debug=1
 	shift
-fi
-
-if [ $skipc == 0 ]; then
-	if [ $debug == 0 ]; then
-		cmake -D CMAKE_BUILD_TYPE=Release ${CMAKEFLAGS} ./../
-	else
-		cmake -D CMAKE_BUILD_TYPE=Debug ${CMAKEFLAGS} ./../
-	fi
 fi
 
 if [ "$1" == "make" ]; then
@@ -62,7 +77,25 @@ if [ "$1" == "make" ]; then
 		fi
 	fi
 
+	# build Box2D manually
+	make -C ./src/lib/Box2D/Source
+
+	# build tankbobs
+	cd ./build/
+	if [ $skipc == 0 ]; then
+		if [ $debug == 0 ]; then
+			if ! cmake -D CMAKE_BUILD_TYPE=Release ${CMAKEFLAGS} ./../; then
+				exit 1
+			fi
+		else
+			if ! cmake -D CMAKE_BUILD_TYPE=Debug ${CMAKEFLAGS} ./../; then
+				exit 1
+			fi
+		fi
+	fi
+
 	# copy data
+	cd ./../
 	cp -R --preserve=all -t ./build/ ${DATA}
 
 	cd ./build/
@@ -78,4 +111,18 @@ if [ "$1" == "make" ]; then
 	fi
 elif [ "$1" == "-h" ]; then
 	echo -ne "Usage: $0 (-d to debug) (-n to skip cmake) make options\nuse make VERBOSE=1 for verbose output\n"
+else
+	# just cmake
+
+	if [ $skipc == 0 ]; then
+		if [ $debug == 0 ]; then
+			if ! cmake -D CMAKE_BUILD_TYPE=Release ${CMAKEFLAGS} ./../; then
+				exit 1
+			fi
+		else
+			if ! cmake -D CMAKE_BUILD_TYPE=Debug ${CMAKEFLAGS} ./../; then
+				exit 1
+			fi
+		fi
+	fi
 fi

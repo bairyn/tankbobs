@@ -24,6 +24,8 @@
 #include <memory>
 #include <new>
 
+#include <cstring>  // this line is not part of the original Box2D source package
+
 b2Contact* b2PolygonContact::Create(b2Shape* shape1, b2Shape* shape2, b2BlockAllocator* allocator)
 {
 	void* mem = allocator->Allocate(sizeof(b2PolygonContact));

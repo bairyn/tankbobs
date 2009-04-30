@@ -20,6 +20,11 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef TANKBOBS_H
 #define TANKBOBS_H
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 #include <stdlib.h>
 #include <lua.h>
 #include <lauxlib.h>
@@ -155,5 +160,9 @@ int w_setTimeStep(lua_State *L);
 int w_getIterations(lua_State *L);
 int w_setIterations(lua_State *L);
 int w_addBody(lua_State *L);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -1,3 +1,9 @@
 Box2D v2.0.1 (this file is not a part of the original package)
 
 Some files in the original package do not exist here.  Examples, Documentation, TODO.txt, Readme.txt, etc. were removed.
+
+Lines 26 and 27 were added to Source/Dynamics/Contacts/b2PolyContact.cpp.
+Lines 26 and 27 were added to Source/Dynamics/Contacts/b2CircleContact.cpp.
+Lines 26 and 27 were added to Source/Dynamics/Contacts/b2PolyAndCircleContact.cpp
+Lines 23 and 24 were added to Source/Common/b2BlockAllocator.cpp.
+Lines 23 and 24 were added to Source/Collision/b2BroadPhase.cpp.

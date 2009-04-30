@@ -19,6 +19,8 @@
 #include "b2BroadPhase.h"
 #include <algorithm>
 
+#include <cstring>  // this line is not part of the original Box2D source package
+
 // Notes:
 // - we use bound arrays instead of linked lists for cache coherence.
 // - we use quantized integral values for fast compares.

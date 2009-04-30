@@ -34,8 +34,8 @@ function c_world_init()
 
 	c_const_set("world_timeWrapTest", -99999)
 
-	c_const_set("world_lowerBoundx", -99999, 1) c_const_set("world_lowerBoundy", -99999, 1)
-	c_const_set("world_upperBoundx", -299999, 1) c_const_set("world_upperBoundy", -299999, 1)
+	c_const_set("world_lowerBoundx", -9999, 1) c_const_set("world_lowerBoundy", -9999, 1)
+	c_const_set("world_upperBoundx", -9999, 1) c_const_set("world_upperBoundy", -9999, 1)
 	c_const_set("world_gravityx", 0, 1) c_const_set("world_gravityy", 0, 1)
 	c_const_set("world_allowSleep", true, 1)
 
@@ -72,7 +72,7 @@ function c_world_init()
 
 	c_world_tanks = {}
 
-	tankbobs.m_newWorld(tankbobs.m_vec2(c_const_get("world_lowerBoundx"), c_const_get("world_lowerBoundy")), tankbobs.m_vec2(c_const_get("world_upperBoundx"), c_const_get("world_upperBoundy")), tankbobs.m_vec2(c_const_get("world_gravityx"), c_const_get("world_gravityy")), c_const_get("world_allowSleep"))
+	tankbobs.w_newWorld(tankbobs.m_vec2(c_const_get("world_lowerBoundx"), c_const_get("world_lowerBoundy")), tankbobs.m_vec2(c_const_get("world_upperBoundx"), c_const_get("world_upperBoundy")), tankbobs.m_vec2(c_const_get("world_gravityx"), c_const_get("world_gravityy")), c_const_get("world_allowSleep"))
 end
 
 function c_world_done()
