@@ -32,6 +32,8 @@ function c_data_init()
 	c_const_set("client-mods_dir", "./mod-client/")
 	c_const_set("server-mods_dir", "./mod-server/")
 
+	c_const_set("const_setError", true, 9)
+
 	local hidden_globals =
 	{
 		"init$",

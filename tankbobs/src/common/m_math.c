@@ -35,20 +35,7 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 #include "tstr.h"
 #include "crossdll.h"
 
-#define MATH_METATABLE "tankbobs.vec2Meta"
-
-#define CHECKVEC(L, i) (vec2_t *) luaL_checkudata(L, i, MATH_METATABLE)
-
 extern Uint8 init;
-
-typedef struct vec2_s vec2_t;
-struct vec2_s
-{
-	double x;
-	double y;
-	double R;
-	double t;
-};
 
 static const struct luaL_Reg m_vec2_m[] =
 {

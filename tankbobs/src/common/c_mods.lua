@@ -197,3 +197,9 @@ function c_mods_preArgParse(arg, args, index)  -- same as above, but instead
 													-- the argument table
 	return nil
 end
+
+function c_mods_start()  -- This is called after everything is initialized.  This can be useful for resetting constant data.
+end
+
+function c_mods_finish()  -- This function is called before the cleanup code is called.
+end

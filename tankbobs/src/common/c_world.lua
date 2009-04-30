@@ -34,6 +34,11 @@ function c_world_init()
 
 	c_const_set("world_timeWrapTest", -99999)
 
+	c_const_set("world_lowerBoundx", -99999, 1) c_const_set("world_lowerBoundy", -99999, 1)
+	c_const_set("world_upperBoundx", -299999, 1) c_const_set("world_upperBoundy", -299999, 1)
+	c_const_set("world_gravityx", 0, 1) c_const_set("world_gravityy", 0, 1)
+	c_const_set("world_allowSleep", true, 1)
+
 	c_const_set("tank_maxCollisionVectorLength", 975)  -- 975 units
 
 	-- hull of tank facing right
@@ -66,9 +71,12 @@ function c_world_init()
 	c_const_set("tank_projectileLaunchDistance", 3, 1)  -- 2 units from tanks center + 1 more unit
 
 	c_world_tanks = {}
+
+	tankbobs.m_newWorld(tankbobs.m_vec2(c_const_get("world_lowerBoundx"), c_const_get("world_lowerBoundy")), tankbobs.m_vec2(c_const_get("world_upperBoundx"), c_const_get("world_upperBoundy")), tankbobs.m_vec2(c_const_get("world_gravityx"), c_const_get("world_gravityy")), c_const_get("world_allowSleep"))
 end
 
 function c_world_done()
+	tankbobs.w_freeWorld()
 end
 
 c_world_tank =
@@ -460,4 +468,20 @@ function c_world_step()
 	for _, v in pairs(c_world_projectiles) do
 		c_world_projectile_step(d, v)
 	end
+end
+
+function c_world_setTimeStep(x)
+	tankbobs.w_setTimeStep(x)
+end
+
+function c_world_setTimeStep()
+	return tankbobs.w_getTimeStep()
+end
+
+function c_world_setIterations(x)
+	tankbobs.w_setIterations(x)
+end
+
+function c_world_setIterations()
+	return tankbobs.w_getIterations()
 end

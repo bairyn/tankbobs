@@ -24,7 +24,7 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 #include <string.h>
 #else
 #include <cstdlib>
-#include <QApplication>
+// #include <QApplication>
 #include <string>
 #include <cstring.h>
 
@@ -33,11 +33,11 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
  *
  * convert QString to string and return it
  */
-std::string util_qtcp(const QString &s)
-{
-	std::string cps(s.toLatin1().constData());
-	return cps;
-}
+// std::string util_qtcp(const QString &s)
+// {
+// 	std::string cps(s.toLatin1().constData());
+// 	return cps;
+// }
 #endif
 
 /*

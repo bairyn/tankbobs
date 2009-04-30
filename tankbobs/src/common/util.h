@@ -3,8 +3,8 @@
 
 #ifdef __cplusplus
 #include <string>
-#include <QApplication>
-std::string util_qtcp(const QString &s);
+// #include <QApplication>
+// std::string util_qtcp(const QString &s);
 #endif
 int         util_strncmp(const char *s1, const char *s2, int len);
 int         util_atoi(const char *s);

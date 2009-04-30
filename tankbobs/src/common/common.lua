@@ -56,9 +56,13 @@ function common_init()
 	c_tcm_init()
 
 	c_world_init()
+
+	c_mods_start()
 end
 
 function common_done()
+	c_mods_finish()
+
 	c_world_done()
 
 	c_tcm_done()

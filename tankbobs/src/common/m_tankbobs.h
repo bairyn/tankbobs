@@ -108,6 +108,19 @@ void r_quitFreeType(void);
 int r_loadImage2D(lua_State *L);
 
 /* m_math.c */
+#define MATH_METATABLE "tankbobs.vec2Meta"
+
+#define CHECKVEC(L, i) (vec2_t *) luaL_checkudata(L, i, MATH_METATABLE)
+
+typedef struct vec2_s vec2_t;
+struct vec2_s
+{
+	double x;
+	double y;
+	double R;
+	double t;
+};
+
 void m_init(lua_State *L);
 int m_vec2(lua_State *L);
 int m_vec2_index(lua_State *L);
@@ -133,5 +146,14 @@ int m_line(lua_State *L);
 int m_polygon(lua_State *L);
 int m_vec2_normalto(lua_State *L);
 int m_vec2_project(lua_State *L);
+
+/* m_world.cpp */
+int w_newWorld(lua_State *L);
+int w_freeWorld(lua_State *L);
+int w_getTimeStep(lua_State *L);
+int w_setTimeStep(lua_State *L);
+int w_getIterations(lua_State *L);
+int w_setIterations(lua_State *L);
+int w_addBody(lua_State *L);
 
 #endif

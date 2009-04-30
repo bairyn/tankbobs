@@ -1,0 +1,3 @@
+Box2D v2.0.1 (this file is not a part of the original package)
+
+Some files in the original package do not exist here.  Examples, Documentation, TODO.txt, Readme.txt, etc. were removed.

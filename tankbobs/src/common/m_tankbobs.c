@@ -317,6 +317,22 @@ static const struct luaL_Reg tankbobs[] =
 	{"m_polygon", m_polygon}, /* test if two polygons intersect */
 		/* the first argument is a table of coordinates for the first polygon, second for the second polygon */
 		/* returns a boolean only. */
+
+	/* world.c */
+	{"w_newWorld", w_newWorld}, /* initialize a new world */
+		/* nothing is returned; the first argument is a vector of the lower bounds.  The second
+			argument is of the upper bounds.  The third argument is the gravity vector (should always
+			be a zero-factor.  The fourth argument is a boolean of whether bodies can sleep. */
+	{"w_freeWorld", w_freeWorld}, /* free the current world */
+		/* no arguments are passed and nothing is returned.  The current world is freed. */
+	{"w_getTimeStep", w_getTimeStep}, /* get time step */
+		/* returns the time step */
+	{"w_setTimeStep", w_getTimeStep}, /* set time step */
+		/* sets the time step to the first argument */
+	{"w_getIterations", w_getIterations}, /* get iterations */
+		/* returns the iterations */
+	{"w_setIterations", w_getIterations}, /* set iterations */
+		/* sets the iterations to the first argument */
 	{NULL, NULL}
 };
 
