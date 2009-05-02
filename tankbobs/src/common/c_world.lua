@@ -61,6 +61,7 @@ function c_world_init()
 		{1.75, 50},
 		{1.5, 55}
 	}, 1)
+	c_const_set("tank_forceSpeedK", 5, 1)
 	c_const_set("tank_density", 2, 1)
 	c_const_set("tank_friction", 0.25, 1)  -- deceleration caused by friction (~speed *= 1 - friction)
 	c_const_set("tank_restitution", 0.4, 1)
@@ -134,7 +135,6 @@ c_world_tank =
 	h = {},  -- physical box: four vectors of offsets for tanks
 	r = 0,  -- tank's rotation
 	w = 0,  -- tank's rotation
-	acceleration = 0,  -- tank's acceleration
 	name = "",
 	exists = false,
 	spawning = false,
@@ -324,6 +324,12 @@ function c_world_tank_step(d, tank)
 		end
 
 		tank.w = tank.r
+
+		local v = tankbobs.m_vec2()
+		v.R = abs(vel)
+		v.t = tank.w
+
+		tankbobs.w_setLinearVelocity(tank.body, v)
 	else
 		if tank.state.forward then
 			-- determine the degree of acceleration
@@ -331,20 +337,35 @@ function c_world_tank_step(d, tank)
 
 			for _, v in pairs(c_const_get("tank_acceleration")) do
 				if v[2] then
-					if vel >= v[2] then
+					if vel >= v[2] * c_const_get("tank_forceSpeedK") then
 						acceleration = v[1]
 					end
 				elseif not acceleration then
-					acceleration = v[1]
+					acceleration = v[1] * c_const_get("tank_forceSpeedK")
 				end
 			end
 
-			tank.acceleration = tank.acceleration + d * acceleration
+			-- apply a force
+			local point = tankbobs.w_getCenterOfMass(tank.body)
+			local force = tankbobs.m_vec2()
+			force.R = vel + acceleration
+			force.t = tankbobs.w_getAngle(tank.body)
+			tankbobs.w_applyForce(tank.body, force, point)
 		elseif tank.state.back then
-			tank.acceleration = tank.acceleration + d * c_const_get("tank_deceleration")
+			-- apply deceleration to the tank
+			local point = tankbobs.w_getCenterOfMass(tank.body)
+			local force = tankbobs.m_vec2()
+			force.R = c_const_get("tank_deceleration") * c_const_get("tank_forceSpeedK")
+			force.t = tankbobs.w_getAngle(tank.body)
+			tankbobs.w_applyForce(tank.body, force, point)
 		else
 			-- deceleration is really only caused when the tank isn't accelerating or decelerating.  If it seems strange, you should realize that the tanks have an anti-friction system built into them ;) - note that if friction was always applied then tanks would have a maximum speed limit.
-			tank.acceleration = tank.acceleration / (1 + d * (1 - c_const_get("tank_friction")))
+			-- apply a force slowing it down
+			local point = tankbobs.w_getCenterOfMass(tank.body)
+			local force = tankbobs.m_vec2()
+			force.R = vel * c_const_get("tank_friction")
+			force.t = tankbobs.w_getAngle(tank.body)
+			tankbobs.w_applyForce(tank.body, force, point)
 		end
 
 		if tank.state.left then
@@ -355,7 +376,7 @@ function c_world_tank_step(d, tank)
 			tank.r = tank.r - d * c_const_get("tank_rotationSpeed")
 		end
 
-		if vel >= c_const_get("tank_rotationVelocityMinSpeed") then
+		if vel >= c_const_get("tank_rotationVelocityMinSpeed") * c_const_get("tank_forceSpeedK") then
 			tank.w = w - ((w - tank.r) * d * c_const_get("tank_rotationVelocitySpeed"))
 		else
 			tank.w = w - ((w - tank.r) * d * c_const_get("tank_rotationVelocityCatchUpSpeed"))
@@ -363,11 +384,6 @@ function c_world_tank_step(d, tank)
 	end
 
 	tankbobs.w_setAngle(tank.body, tank.w)
-
-	local v = tankbobs.m_vec2()
-	v.t = tank.w
-	v.R = tank.acceleration
-	tankbobs.w_setLinearVelocity(tank.body, v)
 
 	-- weapons
 	if tank.state.firing then
