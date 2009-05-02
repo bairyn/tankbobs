@@ -60,9 +60,10 @@ function c_const_init()
 			error("attempt to change constant changes and constant '" .. tostring(k) .. "' from '" .. tostring(c_const_get(k)) .. "' to '" .. tostring(v) .. "'")
 		--]]
 		elseif const[k]["c"] <= 0 and const[k]["c"] ~= -1 then
-			if c_const_get("const_setError") then
-				error("attempt to change constant '" .. tostring(k) .. "' from '" .. tostring(c_const_get(k)) .. "' to '" .. tostring(v) .. "'")
-			elseif c_const_get("debug") then
+			--if c_const_get("const_setError") then
+				--error("attempt to change constant '" .. tostring(k) .. "' from '" .. tostring(c_const_get(k)) .. "' to '" .. tostring(v) .. "'")
+			--end
+			if c_const_get("debug") then
 				io.stderr:write("Warning: attempt to change constant '" .. tostring(k) .. "' from '" .. tostring(c_const_get(k)) .. "' to '" .. tostring(v) .. "'")
 			end
 		else

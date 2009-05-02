@@ -65,11 +65,11 @@ c_math_vec2 =
 			self.self.R = math.sqrt(self.self.x^2 + self.self.y^2)
 			self.self.t = math.atan(self.self.y / self.self.x)
 			if self.self.x < 0 and self.self.y < 0 then
-				self.self.t = self.self.t + 180
+				self.self.t = self.self.t c_math_radians(180)
 			elseif self.self.x < 0 then
-				self.self.t = self.self.t + 90
+				self.self.t = self.self.t c_math_radians(90)
 			elseif self.self.y < 0 then
-				self.self.t = self.self.t + 270
+				self.self.t = self.self.t c_math_radians(270)
 			end
 			return self.self.x
 		else
@@ -83,11 +83,11 @@ c_math_vec2 =
 			self.self.R = math.sqrt(self.self.x^2 + self.self.y^2)
 			self.self.t = math.atan(self.self.y / self.self.x)
 			if self.self.x < 0 and self.self.y < 0 then
-				self.self.t = self.self.t + 180
+				self.self.t = self.self.t c_math_radians(180)
 			elseif self.self.x < 0 then
-				self.self.t = self.self.t + 90
+				self.self.t = self.self.t c_math_radians(90)
 			elseif self.self.y < 0 then
-				self.self.t = self.self.t + 270
+				self.self.t = self.self.t c_math_radians(270)
 			end
 			return self.self.y
 		else

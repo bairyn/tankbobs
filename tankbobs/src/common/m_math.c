@@ -84,6 +84,16 @@ void m_init(lua_State *L)
 	luaL_register(L, NULL, m_vec2_m);
 }
 
+double m_degreesNL(double radians)
+{
+	return radians * 180 / M_PI;
+}
+
+double m_radiansNL(double degrees)
+{
+	return degrees * M_PI / 180;
+}
+
 int m_vec2(lua_State *L)  /* similar to c_math.lua's vec2:new() but can take arguments for initialization */
 {
 	vec2_t *v;
@@ -100,11 +110,11 @@ int m_vec2(lua_State *L)  /* similar to c_math.lua's vec2:new() but can take arg
 		v->R = sqrt(v->x * v->x + v->y * v->y);
 		v->t = atan(v->y / v->x);
 		if(v->x < 0.0 && v->y < 0.0)
-			v->t += 180;
+			v->t += m_radiansNL(180);
 		else if(v->x < 0.0)
-			v->t += 90;
+			v->t += m_radiansNL(90);
 		else if(v->y < 0.0)
-			v->t += 270;
+			v->t += m_radiansNL(270);
 	}
 	else if(lua_isuserdata(L, 1))
 	{
@@ -241,11 +251,11 @@ int m_vec2_newindex(lua_State *L)
 			v->R = sqrt(v->x * v->x + v->y * v->y);
 			v->t = atan(v->y / v->x);
 			if(v->x < 0.0 && v->y < 0.0)
-				v->t += 180;
+				v->t += m_radiansNL(180);
 			else if(v->x < 0.0)
-				v->t += 90;
+				v->t += m_radiansNL(90);
 			else if(v->y < 0.0)
-				v->t += 270;
+				v->t += m_radiansNL(270);
 
 			return 0;
 			break;
@@ -257,11 +267,11 @@ int m_vec2_newindex(lua_State *L)
 			v->R = sqrt(v->x * v->x + v->y * v->y);
 			v->t = atan(v->y / v->x);
 			if(v->x < 0.0 && v->y < 0.0)
-				v->t += 180;
+				v->t += m_radiansNL(180);
 			else if(v->x < 0.0)
-				v->t += 90;
+				v->t += m_radiansNL(90);
 			else if(v->y < 0.0)
-				v->t += 270;
+				v->t += m_radiansNL(270);
 
 			return 0;
 			break;
@@ -369,11 +379,11 @@ int m_vec2___add(lua_State *L)
 	v->R = sqrt(v->x * v->x + v->y * v->y);
 	v->t = atan(v->y / v->x);
 	if(v->x < 0.0 && v->y < 0.0)
-		v->t += 180;
+		v->t += m_radiansNL(180);
 	else if(v->x < 0.0)
-		v->t += 90;
+		v->t += m_radiansNL(90);
 	else if(v->y < 0.0)
-		v->t += 270;
+		v->t += m_radiansNL(270);
 
 	return 1;
 }
@@ -395,11 +405,11 @@ int m_vec2_add(lua_State *L)
 	v->R = sqrt(v->x * v->x + v->y * v->y);
 	v->t = atan(v->y / v->x);
 	if(v->x < 0.0 && v->y < 0.0)
-		v->t += 180;
+		v->t += m_radiansNL(180);
 	else if(v->x < 0.0)
-		v->t += 90;
+		v->t += m_radiansNL(90);
 	else if(v->y < 0.0)
-		v->t += 270;
+		v->t += m_radiansNL(270);
 
 	return 0;
 }
@@ -426,11 +436,11 @@ int m_vec2___sub(lua_State *L)
 	v->R = sqrt(v->x * v->x + v->y * v->y);
 	v->t = atan(v->y / v->x);
 	if(v->x < 0.0 && v->y < 0.0)
-		v->t += 180;
+		v->t += m_radiansNL(180);
 	else if(v->x < 0.0)
-		v->t += 90;
+		v->t += m_radiansNL(90);
 	else if(v->y < 0.0)
-		v->t += 270;
+		v->t += m_radiansNL(270);
 
 	return 1;
 }
@@ -452,11 +462,11 @@ int m_vec2_sub(lua_State *L)
 	v->R = sqrt(v->x * v->x + v->y * v->y);
 	v->t = atan(v->y / v->x);
 	if(v->x < 0.0 && v->y < 0.0)
-		v->t += 180;
+		v->t += m_radiansNL(180);
 	else if(v->x < 0.0)
-		v->t += 90;
+		v->t += m_radiansNL(90);
 	else if(v->y < 0.0)
-		v->t += 270;
+		v->t += m_radiansNL(270);
 
 	return 0;
 }
@@ -759,11 +769,11 @@ int m_edge(lua_State *L)  /* algorithm, by Darel Rex Finley, 2006, can be found 
 		v->R = sqrt(v->x * v->x + v->y * v->y);
 		v->t = atan(v->y / v->x);
 		if(v->x < 0.0 && v->y < 0.0)
-			v->t += 180;
+			v->t += m_radiansNL(180);
 		else if(v->x < 0.0)
-			v->t += 90;
+			v->t += m_radiansNL(90);
 		else if(v->y < 0.0)
-			v->t += 270;
+			v->t += m_radiansNL(270);
 
 		return 1;
 	}
@@ -779,11 +789,11 @@ int m_edge(lua_State *L)  /* algorithm, by Darel Rex Finley, 2006, can be found 
 		v->R = sqrt(v->x * v->x + v->y * v->y);
 		v->t = atan(v->y / v->x);
 		if(v->x < 0.0 && v->y < 0.0)
-			v->t += 180;
+			v->t += m_radiansNL(180);
 		else if(v->x < 0.0)
-			v->t += 90;
+			v->t += m_radiansNL(90);
 		else if(v->y < 0.0)
-			v->t += 270;
+			v->t += m_radiansNL(270);
 
 		return 1;
 	}
@@ -799,11 +809,11 @@ int m_edge(lua_State *L)  /* algorithm, by Darel Rex Finley, 2006, can be found 
 		v->R = sqrt(v->x * v->x + v->y * v->y);
 		v->t = atan(v->y / v->x);
 		if(v->x < 0.0 && v->y < 0.0)
-			v->t += 180;
+			v->t += m_radiansNL(180);
 		else if(v->x < 0.0)
-			v->t += 90;
+			v->t += m_radiansNL(90);
 		else if(v->y < 0.0)
-			v->t += 270;
+			v->t += m_radiansNL(270);
 
 		return 1;
 	}
@@ -819,11 +829,11 @@ int m_edge(lua_State *L)  /* algorithm, by Darel Rex Finley, 2006, can be found 
 		v->R = sqrt(v->x * v->x + v->y * v->y);
 		v->t = atan(v->y / v->x);
 		if(v->x < 0.0 && v->y < 0.0)
-			v->t += 180;
+			v->t += m_radiansNL(180);
 		else if(v->x < 0.0)
-			v->t += 90;
+			v->t += m_radiansNL(90);
 		else if(v->y < 0.0)
-			v->t += 270;
+			v->t += m_radiansNL(270);
 
 		return 1;
 	}
@@ -884,11 +894,11 @@ int m_edge(lua_State *L)  /* algorithm, by Darel Rex Finley, 2006, can be found 
 	v->R = sqrt(v->x * v->x + v->y * v->y);
 	v->t = atan(v->y / v->x);
 	if(v->x < 0.0 && v->y < 0.0)
-		v->t += 180;
+		v->t += m_radiansNL(180);
 	else if(v->x < 0.0)
-		v->t += 90;
+		v->t += m_radiansNL(90);
 	else if(v->y < 0.0)
-		v->t += 270;
+		v->t += m_radiansNL(270);
 
 	/* coordinates of intersection in transformed system */
 	v = lua_newuserdata(L, sizeof(vec2_t));
@@ -992,11 +1002,11 @@ int m_vec2_normalto(lua_State *L)
 	v->R = 1.0;
 	v->t = atan(v->y / v->x);
 	if(v->x < 0.0 && v->y < 0.0)
-		v->t += 180;
+		v->t += m_radiansNL(180);
 	else if(v->x < 0.0)
-		v->t += 90;
+		v->t += m_radiansNL(90);
 	else if(v->y < 0.0)
-		v->t += 270;
+		v->t += m_radiansNL(270);
 
 	return 1;
 }
@@ -1025,11 +1035,11 @@ int m_vec2_project(lua_State *L)
 	v->R = v3->R * dot;
 	v->t = atan(v->y / v->x);
 	if(v->x < 0.0 && v->y < 0.0)
-		v->t += 180;
+		v->t += m_radiansNL(180);
 	else if(v->x < 0.0)
-		v->t += 90;
+		v->t += m_radiansNL(90);
 	else if(v->y < 0.0)
-		v->t += 270;
+		v->t += m_radiansNL(270);
 
 	return 1;
 }
@@ -1037,49 +1047,32 @@ int m_vec2_project(lua_State *L)
 // this function assumes that the vertices are already ordered either in a clockwise order or a counterclockwise order.  This function alsa assumes that the polygon is convex
 void m_orderVertices(const vec2_t *vertices[], int numVertices, int dir)
 {
-	vec2_t center, v0, v1;
+	vec2_t v0, v1;
 	int currentDir;
 	int i;
 
-	if(numVertices < 2)
+	if(numVertices < 3)
 		return;
 
-	center.x = center.y = 0;
-	for(i = 0; i < numVertices; i++)
-	{
-		center.x += vertices[i]->x; center.y += vertices[i]->y;
-	}
-	center.x /= numVertices; center.y /= numVertices;
-	center.R = sqrt(center.x * center.x + center.y * center.y);
-	center.t = atan(center.y / center.x);
-	if(center.x < 0.0 && center.y < 0.0)
-		center.t += 180;
-	else if(center.x < 0.0)
-		center.t += 90;
-	else if(center.y < 0.0)
-		center.t += 270;
-
-	memcpy(&v0, vertices[0], sizeof(vec2_t));
-	memcpy(&v1, vertices[1], sizeof(vec2_t));
-
-	v0.x -= center.x; v0.y -= center.y;
+	v0.x = vertices[0]->x - vertices[1]->x; v0.y = vertices[0]->y - vertices[1]->y;
 	v0.R = sqrt(v0.x * v0.x + v0.y * v0.y);
 	v0.t = atan(v0.y / v0.x);
 	if(v0.x < 0.0 && v0.y < 0.0)
-		v0.t += 180;
+		v0.t += m_radiansNL(180);
 	else if(v0.x < 0.0)
-		v0.t += 90;
+		v0.t += m_radiansNL(90);
 	else if(v0.y < 0.0)
-		v0.t += 270;
-	v1.x -= center.x; v1.y -= center.y;
+		v0.t += m_radiansNL(270);
+
+	v1.x = vertices[1]->x - vertices[2]->x; v1.y = vertices[1]->y - vertices[2]->y;
 	v1.R = sqrt(v1.x * v1.x + v1.y * v1.y);
 	v1.t = atan(v1.y / v1.x);
 	if(v1.x < 0.0 && v1.y < 0.0)
-		v1.t += 180;
+		v1.t += m_radiansNL(180);
 	else if(v1.x < 0.0)
-		v1.t += 90;
+		v1.t += m_radiansNL(90);
 	else if(v1.y < 0.0)
-		v1.t += 270;
+		v1.t += m_radiansNL(270);
 
 	if(v1.t < v0.t)
 		currentDir = CLOCKWISE;
@@ -1089,9 +1082,11 @@ void m_orderVertices(const vec2_t *vertices[], int numVertices, int dir)
 	if(currentDir != dir)
 	{
 		// reverse order of vertices
-		for(i = 0; i < numVertices; i++)
+		for(i = 0; i < numVertices / 2; i++)
 		{
-			SWAP_VEC2S(vertices[i], vertices[numVertices - i - 1]);
+			const vec2_t *tmp = vertices[i];
+			vertices[i] = vertices[numVertices - i - 1];
+			vertices[numVertices - i - 1] = tmp;
 		}
 	}
 }

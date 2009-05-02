@@ -130,21 +130,12 @@ struct vec2_s
 	double t;
 };
 
-#define SWAP_VEC2S(v0, v1) \
-do \
-{ \
-	if(v0->x != v1->x || v0->y != v1->y) \
-	{ \
-		const vec2_t *tmp = v1; \
-		v1 = v0; \
-		v0 = tmp; \
-	} \
-} while(0)
-
 #define CLOCKWISE 1
 #define COUNTERCLOCKWISE 2
 
 void m_orderVertices(const vec2_t *vertices[], int numVertices, int dir);
+double m_degreesNL(double radians);
+double m_radiansNL(double degrees);
 
 void m_init(lua_State *L);
 int m_vec2(lua_State *L);
