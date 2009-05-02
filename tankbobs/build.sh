@@ -101,11 +101,15 @@ if [ "$1" == "make" ]; then
 	cd ./build/
 
 	# make it
-	eval $*
+	if ! eval $*; then
+		exit 1
+	fi
 
 	# compile maps
 	if [ -f "./trmc" ] && [ -d "./data/tcm/" ]; then
-		find ./data/tcm/ -name "*.trm" -exec ./trmc -f {} +
+		if ! find ./data/tcm/ -name "*.trm" -exec ./trmc -f {} +; then
+			exit 1
+		fi
 	else
 		echo -ne "Warning: level compiler not built\n"
 	fi

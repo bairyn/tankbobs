@@ -115,7 +115,11 @@ int r_loadImage2D(lua_State *L);
 /* m_math.c */
 #define MATH_METATABLE "tankbobs.vec2Meta"
 
+#ifdef __cplusplus
+#define CHECKVEC(L, i) reinterpret_cast<vec2_t *>(luaL_checkudata(L, i, MATH_METATABLE))
+#else
 #define CHECKVEC(L, i) (vec2_t *) luaL_checkudata(L, i, MATH_METATABLE)
+#endif
 
 typedef struct vec2_s vec2_t;
 struct vec2_s
@@ -125,6 +129,22 @@ struct vec2_s
 	double R;
 	double t;
 };
+
+#define SWAP_VEC2S(v0, v1) \
+do \
+{ \
+	if(v0->x != v1->x || v0->y != v1->y) \
+	{ \
+		const vec2_t *tmp = v1; \
+		v1 = v0; \
+		v0 = tmp; \
+	} \
+} while(0)
+
+#define CLOCKWISE 1
+#define COUNTERCLOCKWISE 2
+
+void m_orderVertices(const vec2_t *vertices[], int numVertices, int dir);
 
 void m_init(lua_State *L);
 int m_vec2(lua_State *L);
@@ -160,6 +180,26 @@ int w_setTimeStep(lua_State *L);
 int w_getIterations(lua_State *L);
 int w_setIterations(lua_State *L);
 int w_addBody(lua_State *L);
+int w_removeBody(lua_State *L);
+int w_bodies(lua_State *L);
+int w_isBullet(lua_State *L);
+int w_setBullet(lua_State *L);
+int w_isStatic(lua_State *L);
+int w_isDynamic(lua_State *L);
+int w_isSleeping(lua_State *L);
+int w_allowSleeping(lua_State *L);
+int w_wakeUp(lua_State *L);
+int w_getPosition(lua_State *L);
+int w_getAngle(lua_State *L);
+int w_setLinearVelocity(lua_State *L);
+int w_getLinearVelocity(lua_State *L);
+int w_setAngularVelocity(lua_State *L);
+int w_getAngularVelocity(lua_State *L);
+int w_setPosition(lua_State *L);
+int w_setAngle(lua_State *L);
+int w_applyForce(lua_State *L);
+int w_applyTorque(lua_State *L);
+int w_applyImpulse(lua_State *L);
 
 #ifdef __cplusplus
 }

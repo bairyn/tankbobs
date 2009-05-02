@@ -100,6 +100,9 @@ function st_play_init()
 		listOffset = listOffset + 1
 	end
 
+	-- initialize the world
+	c_world_newWorld()
+
 	for i = 1, c_config_get("config.game.players") + c_config_get("config.game.computers") do
 		if i > c_const_get("max_tanks") then
 			break
@@ -134,6 +137,9 @@ function st_play_done()
 
 	-- reset texenv to avoid messing the GUI up
 	gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
+
+	-- free the world
+	c_world_freeWorld()
 end
 
 function st_play_click(button, pressed, x, y)

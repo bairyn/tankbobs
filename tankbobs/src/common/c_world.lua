@@ -35,7 +35,7 @@ function c_world_init()
 	c_const_set("world_timeWrapTest", -99999)
 
 	c_const_set("world_lowerBoundx", -9999, 1) c_const_set("world_lowerBoundy", -9999, 1)
-	c_const_set("world_upperBoundx", -9999, 1) c_const_set("world_upperBoundy", -9999, 1)
+	c_const_set("world_upperBoundx",  9999, 1) c_const_set("world_upperBoundy",  9999, 1)
 	c_const_set("world_gravityx", 0, 1) c_const_set("world_gravityy", 0, 1)
 	c_const_set("world_allowSleep", true, 1)
 
@@ -61,7 +61,22 @@ function c_world_init()
 		{1.75, 50},
 		{1.5, 55}
 	}, 1)
-	c_const_set("tank_friction", 0.75, 1)  -- deceleration caused by friction (~speed *= 1 - friction)
+	c_const_set("tank_density", 2, 1)
+	c_const_set("tank_friction", 0.25, 1)  -- deceleration caused by friction (~speed *= 1 - friction)
+	c_const_set("tank_restitution", 0.4, 1)
+	c_const_set("tank_canSleep", true, 1)
+	c_const_set("tank_isBullet", true, 1)
+	c_const_set("tank_linearDamping", 2, 1)
+	c_const_set("tank_angularDamping", 2, 1)
+	c_const_set("tank_accelerationVectorPointTest", -90, 1)  -- the origin of acceleration force
+	c_const_set("tank_decelerationVectorPointTest", 90, 1)
+	c_const_set("wall_density", 1, 1)
+	c_const_set("wall_friction", 0.25, 1)  -- deceleration caused by friction (~speed *= 1 - friction)
+	c_const_set("wall_restitution", 0.2, 1)
+	c_const_set("wall_canSleep", true, 1)
+	c_const_set("wall_isBullet", true, 1)
+	c_const_set("wall_linearDamping", 0, 1)
+	c_const_set("wall_angularDamping", 0, 1)
 	c_const_set("tank_rotationVelocitySpeed", 0.75, 1)  -- for every second, velocity matches 3/4 rotation  -- FIXME: the actual rotation turning speed is about a quarter of this
 	c_const_set("tank_rotationVelocityMinSpeed", 24, 1)  -- if at least 24 ups
 	c_const_set("tank_rotationVelocityCatchUpSpeed", 0.875, 1)  -- FIXME: as well
@@ -71,11 +86,27 @@ function c_world_init()
 	c_const_set("tank_projectileLaunchDistance", 3, 1)  -- 2 units from tanks center + 1 more unit
 
 	c_world_tanks = {}
-
-	tankbobs.w_newWorld(tankbobs.m_vec2(c_const_get("world_lowerBoundx"), c_const_get("world_lowerBoundy")), tankbobs.m_vec2(c_const_get("world_upperBoundx"), c_const_get("world_upperBoundy")), tankbobs.m_vec2(c_const_get("world_gravityx"), c_const_get("world_gravityy")), c_const_get("world_allowSleep"))
 end
 
 function c_world_done()
+end
+
+function c_world_newWorld()
+	tankbobs.w_newWorld(tankbobs.m_vec2(c_const_get("world_lowerBoundx"), c_const_get("world_lowerBoundy")), tankbobs.m_vec2(c_const_get("world_upperBoundx"), c_const_get("world_upperBoundy")), tankbobs.m_vec2(c_const_get("world_gravityx"), c_const_get("world_gravityy")), c_const_get("world_allowSleep"))
+
+	for _, v in pairs(c_tcm_current_map.walls) do
+		-- add walls to the world
+		local vertices = {}
+
+		for i = 2, #v.p do
+			table.insert(vertices, v.p[i] - v.p[1])
+		end
+
+		v.m.body = tankbobs.w_addBody(v.p[1], 0, c_const_get("wall_canSleep"), c_const_get("wall_isBullet"), c_const_get("wall_linearDamping"), c_const_get("wall_angularDamping"), vertices, c_const_get("wall_density"), c_const_get("wall_friction"), c_const_get("wall_restitution"), v.static)
+	end
+end
+
+function c_world_freeWorld()
 	tankbobs.w_freeWorld()
 end
 
@@ -86,7 +117,6 @@ c_world_tank =
 	init = function (o)
 		name = "UnnamedPlayer"
 		o.p[1] = tankbobs.m_vec2()
-		o.v[1] = tankbobs.m_vec2()
 		o.h[1] = tankbobs.m_vec2()
 		o.h[2] = tankbobs.m_vec2()
 		o.h[3] = tankbobs.m_vec2()
@@ -103,9 +133,9 @@ c_world_tank =
 	end,
 
 	p = {},
-	v = {},
 	h = {},  -- physical box: four vectors of offsets for tanks
 	r = 0,  -- tank's rotation
+	w = 0,  -- tank's rotation
 	name = "",
 	exists = false,
 	spawning = false,
@@ -113,6 +143,7 @@ c_world_tank =
 	state = nil,
 	weapon = nil,
 	lastFireTime = 0,
+	body = nil,  -- physical body
 	health = 0
 }
 
@@ -130,6 +161,12 @@ c_world_tank_state =
 
 function c_world_tank_spawn(tank)
 	tank.spawning = true
+end
+
+function c_world_tank_die(tank)
+	-- this function is called when a tank dies.  Don't call this function if the tank hasn't spawned yet.
+	tank.exists = false
+	tankbobs.w_removeBody(tank.body)
 end
 
 function c_world_tank_checkSpawn(d, tank)
@@ -168,21 +205,43 @@ function c_world_tank_checkSpawn(d, tank)
 	-- spawn
 	tank.spawning = false
 	tank.r = c_const_get("tank_defaultRotation")
+	tank.w = tank.r
 	tank.p[1](playerSpawnPoint.p[1])
 	tank.v[1].t = c_const_get("tank_defaultRotation")
 	tank.v[1].R = 0  -- no velocity
 	tank.health = c_const_get("tank_health")
 	tank.weapon = c_weapon:new()
 	tank.exists = true
+
+	-- add a physical body
+	tank.body = tankbobs.w_addBody(tank.v[1].p[1], tank.r, c_const_get("tank_canSleep"), c_const_get("tank_isBullet"), c_const_get("tank_linearDamping"), c_const_get("tank_angularDamping"), c_world_tank_hull(tank), c_const_get("tank_density"), c_const_get("tank_friction"), c_const_get("tank_restitution"))
 	return true
 end
 
 function c_world_intersection(d, p1, p2, v1, v2)
-	-- test if two polygons intersect.  p1 and p2 both must be convex.  p1's and p2's points are represented by vectors in a table
-	-- returns false if no intercection or collision will occur, or true, normal, point of collision
+	-- detects if two polygons ever collide
 
-	-- TODO
-	return tankbobs.m_polygon(p1, p2)
+	local p1h = {}
+	local p2h = {}
+	local p1a = {}
+	local p2a = {}
+
+	common_clone(p1, p1h)
+	common_clone(p2, p2h)
+	common_clone(p1h, p1a)
+	common_clone(p2h, p2a)
+
+	for _, v in pairs(p1a) do
+		v = v + d * v1
+	end
+	for _, v in pairs(p2a) do
+		v = v + d * v2
+	end
+
+	common_clone(p1a, p1h)
+	common_clone(p2a, p2h)
+
+	return tankbobs.m_polygon(p1h, p2h)
 end
 
 function c_world_tank_hull(tank)
@@ -225,119 +284,40 @@ function c_world_tank_canSpawn(d, tank)
 	return true
 end
 
-function c_world_tank_testWorld(d, tank)  -- test tanks against the world
-	-- generate polygon covering the hull of the tank before and after it's veloctiy movement
-	local hull = {}
-
-	-- test the hull for an intersection against each wall.  When a wall is found, run a line of the velocity of the tank from its position and find all the edges that intersect this line.  The edge whose intersection point is closest on the line is used.  The new velocity is set.  The bigger the angle is of the original angle of velocity in comparison to the new angle of velocity, the less damage and knockback there is (the tank could be scraping against the side of a wall)
-
-	common_clone(c_world_tank_hull(tank), hull)
-
-	-- HACK: temporarily update tank and then add future points
-	tank.p[1]:add(d * tank.v[1])
-
-	common_clone(c_world_tank_hull(tank), hull)
-
-	-- reset tank
-	tank.p[1]:sub(d * tank.v[1])
-
-	-- test against every wall
-	for _, v in pairs(c_tcm_current_map.walls) do
-		if not v.detail then
-			if tankbobs.m_polygon(hull, v.p) then
-				-- find which edge of the wall
-				local l = {p1, p2}
-				local di
-				local llp
-
-				for _, v in pairs(v.p) do
-					local clp = v
-
-					if llp then
-						local vec = tankbobs.m_vec2()
-						vec.R = c_const_get("tank_maxCollisionVectorLength")
-						vec.t = tank.v[1].t
-						if tank.v[1].R < 0 then
-							vec:inv()
-						end
-						local li, lt = tankbobs.m_edge(tank.p[1], vec, clp, llp)
-
-						if li then
---print((lt - tank.p[1]).x, (lt - tank.p[1]).y, (lt - tank.p[1]).R)
-							if not l.p1 or not l.p2 or not di or math.abs((lt - tank.p[1]).R) < d then
-								di = math.abs((lt - tank.p[1]).R)
-								l.p1 = clp
-								l.p2 = llp
-							end
-						end
---print(tank.p[1].x, tank.p[1].y, vec.x, vec.y, clp.x, clp.y, llp.x, llp.y)
-					end
-
-					llp = clp
-				end
-
-				-- check the last edge
-				if llp and llp ~= v.p[1] then
-					local vec = tankbobs.m_vec2()
-					vec.R = c_const_get("tank_maxCollisionVectorLength")
-					vec.t = tank.v[1].t
-					if tank.v[1].R < 0 then
-						vec:inv()
-					end
-					local li, lt = tankbobs.m_edge(tank.p[1], tank.p[1] + vec, llp, v.p[1])
-	
-					if li then
-						if not l.p1 or not l.p2 or not di or math.abs((lt - tank.p[1]).R) < d then
-							di = math.abs((lt - tank.p[1]).R)
-							l.p1 = llp
-							l.p2 = v.p[1]
-						end
-					end
---print(tank.p[1].x, tank.p[1].y, vec.x, vec.y, llp.x, llp.y, v.p[1].x, v.p[1].y)
-				end
-
-				if not l.p1 or not l.p2 then
-					-- reset tank's velocity
-					tank.v[1].R = 0
-	
-					if c_const_get("debug") then
-						io.stderr:write("c_world_testWorld: Warning: no edge detected for collision\n")
-					end
-				else
-					-- FIXME: the tank seems to tend to go at an upright angle?  but sometimes the tank evetually goes as if it were in  nge a circle aoeu
-					local p = tank.v[1]:project((l.p1 - l.p2):normalof())
-					tank.v[1]:add(2 * p)
-				end
-			end
-		end
-	end
-end
-
 function c_world_tank_step(d, tank)
-	local vel = tank.v[1].R
+	local w = tank.w
 	local t = tankbobs.t_getTicks()
+
+	if not tank.exists then
+		return
+	end
+
+	tank.p[1] = tankbobs.GetPosition(tank.body)
+
+	local vel = tankbobs.w_getLinearVelocity(tank.body)
 
 	if tank.state.special then
 		if tank.state.left then
-			if vel < 0 then  -- rotation needs to be inversed if the tank is traveling backwards to stay conistent
-				tank.r = tank.r - d * c_const_get("tank_rotationSpeed") * tank.v[1].R / c_const_get("tank_rotationSpecialSpeed")
+			if vel < 0 then  -- inverse rotation
+				tank.r = tank.r - d * c_const_get("tank_rotationSpeed") * vel / c_const_get("tank_rotationSpecialSpeed")
 			else
-				tank.r = tank.r + d * c_const_get("tank_rotationSpeed") * tank.v[1].R / c_const_get("tank_rotationSpecialSpeed")
+				tank.r = tank.r + d * c_const_get("tank_rotationSpeed") * vel / c_const_get("tank_rotationSpecialSpeed")
 			end
 		end
 
 		if tank.state.right then
-			if vel < 0 then
-				tank.r = tank.r + d * c_const_get("tank_rotationSpeed") * tank.v[1].R / c_const_get("tank_rotationSpecialSpeed")  -- turns are related to the velocity of the tank in special mode
+			if vel < 0 then  -- inverse rotation
+				tank.r = tank.r + d * c_const_get("tank_rotationSpeed") * vel / c_const_get("tank_rotationSpecialSpeed")
 			else
-				tank.r = tank.r - d * c_const_get("tank_rotationSpeed") * tank.v[1].R / c_const_get("tank_rotationSpecialSpeed")  -- turns are related to the velocity of the tank in special mode
+				tank.r = tank.r - d * c_const_get("tank_rotationSpeed") * vel / c_const_get("tank_rotationSpecialSpeed")
 			end
 		end
 
-		tank.v[1].t = tank.r
+		tank.w = tank.r
 	else
 		if tank.state.forward then
-			local acceleration
+			-- determine the degree of acceleration
+			local acceleration = 0
 
 			for _, v in pairs(c_const_get("tank_acceleration")) do
 				if v[2] then
@@ -349,11 +329,23 @@ function c_world_tank_step(d, tank)
 				end
 			end
 
-			tank.v[1].R = vel + d * acceleration
+			-- apply acceleration to the tank
+			local point = tankbobs.m_vec2()
+			point.t = tank.p[1].t
+			point.R = c_const_get("tank_accelerationVectorPointTest")
+			local impulse = tankbobs.m_vec2()
+			impulse.R = acceleration
+			impulse.t = tankbobs.getAngle(tank.body)
+			tankbobs.w_applyImpulse(tank.body, impulse, tank.p[1] - point)
 		elseif tank.state.back then
-			if tank.v[1].R >= c_const_get("tank_decelerationMinSpeed") then
-				tank.v[1].R = tank.v[1].R + d * c_const_get("tank_deceleration")
-			end
+			-- apply deceleration to the tank
+			local point = tankbobs.m_vec2()
+			point.t = tank.p[1].t
+			point.R = c_const_get("tank_decelerationVectorPointTest")
+			local impulse = tankbobs.m_vec2()
+			impulse.R = c_const_get("tank_deceleration")
+			impulse.t = tankbobs.getAngle(tank.body)
+			tankbobs.w_applyImpulse(tank.body, impulse, tank.p[1] - point)
 		else
 			-- deceleration is really only caused when the tank isn't accelerating or decelerating.  If it seems strange, you should realize that the tanks have an anti-friction system built into them ;) - note that if friction was always applied then tanks would have a maximum speed limit.
 			tank.v[1].R = tank.v[1].R / (1 + d * (1 - c_const_get("tank_friction")))
@@ -367,12 +359,14 @@ function c_world_tank_step(d, tank)
 			tank.r = tank.r - d * c_const_get("tank_rotationSpeed")
 		end
 
-		if tank.v[1].R >= c_const_get("tank_rotationVelocityMinSpeed") then
-			tank.v[1].t = tank.v[1].t - ((tank.v[1].t - tank.r) * d * c_const_get("tank_rotationVelocitySpeed"))
+		if vel >= c_const_get("tank_rotationVelocityMinSpeed") then
+			tank.w = w[1].t - ((w[1].t - tank.r) * d * c_const_get("tank_rotationVelocitySpeed"))
 		else
-			tank.v[1].t = tank.v[1].t - ((tank.v[1].t - tank.r) * d * c_const_get("tank_rotationVelocityCatchUpSpeed"))
+			tank.w = w[1].t - ((w[1].t - tank.r) * d * c_const_get("tank_rotationVelocityCatchUpSpeed"))
 		end
 	end
+
+	tankbobs.w_setAngle(tank.body, tank.w)
 
 	c_world_tank_testWorld(d, tank)
 
@@ -456,7 +450,7 @@ function c_world_step()
 	lastTime = tankbobs.t_getTicks()
 
 	if d == 0 then
-		d = 1.0E-6  -- make a very inaccurate accurate guess
+		d = 1.0E-6  -- make an inaccurate accurate guess
 	end
 
 	-- check for tanks needing spawn

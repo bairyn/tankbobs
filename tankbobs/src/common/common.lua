@@ -98,6 +98,8 @@ function common_endsIn(str, match)
 	return match == "" or str:sub(-match:len()) == match
 end
 
+-- traverse i into o
+-- if the output table exists, any values that are not overwritten from the input table will remain unchanged
 function common_clone(i, o)
 	local cloned_tables = {}
 

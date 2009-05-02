@@ -1033,3 +1033,65 @@ int m_vec2_project(lua_State *L)
 
 	return 1;
 }
+
+// this function assumes that the vertices are already ordered either in a clockwise order or a counterclockwise order.  This function alsa assumes that the polygon is convex
+void m_orderVertices(const vec2_t *vertices[], int numVertices, int dir)
+{
+	vec2_t center, v0, v1;
+	int currentDir;
+	int i;
+
+	if(numVertices < 2)
+		return;
+
+	center.x = center.y = 0;
+	for(i = 0; i < numVertices; i++)
+	{
+		center.x += vertices[i]->x; center.y += vertices[i]->y;
+	}
+	center.x /= numVertices; center.y /= numVertices;
+	center.R = sqrt(center.x * center.x + center.y * center.y);
+	center.t = atan(center.y / center.x);
+	if(center.x < 0.0 && center.y < 0.0)
+		center.t += 180;
+	else if(center.x < 0.0)
+		center.t += 90;
+	else if(center.y < 0.0)
+		center.t += 270;
+
+	memcpy(&v0, vertices[0], sizeof(vec2_t));
+	memcpy(&v1, vertices[1], sizeof(vec2_t));
+
+	v0.x -= center.x; v0.y -= center.y;
+	v0.R = sqrt(v0.x * v0.x + v0.y * v0.y);
+	v0.t = atan(v0.y / v0.x);
+	if(v0.x < 0.0 && v0.y < 0.0)
+		v0.t += 180;
+	else if(v0.x < 0.0)
+		v0.t += 90;
+	else if(v0.y < 0.0)
+		v0.t += 270;
+	v1.x -= center.x; v1.y -= center.y;
+	v1.R = sqrt(v1.x * v1.x + v1.y * v1.y);
+	v1.t = atan(v1.y / v1.x);
+	if(v1.x < 0.0 && v1.y < 0.0)
+		v1.t += 180;
+	else if(v1.x < 0.0)
+		v1.t += 90;
+	else if(v1.y < 0.0)
+		v1.t += 270;
+
+	if(v1.t < v0.t)
+		currentDir = CLOCKWISE;
+	else
+		currentDir = COUNTERCLOCKWISE;
+
+	if(currentDir != dir)
+	{
+		// reverse order of vertices
+		for(i = 0; i < numVertices; i++)
+		{
+			SWAP_VEC2S(vertices[i], vertices[numVertices - i - 1]);
+		}
+	}
+}

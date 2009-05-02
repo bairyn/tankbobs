@@ -333,6 +333,62 @@ static const struct luaL_Reg tankbobs[] =
 		/* returns the iterations */
 	{"w_setIterations", w_getIterations}, /* set iterations */
 		/* sets the iterations to the first argument */
+	{"w_addBody", w_addBody}, /* add a body to the world */
+		/* The first argument is the position of the body represented by a vector.
+			The second argument is the body's rotation in radians
+			The third argument is whether the body can sleep.  The fourth argument is
+			whether the body is a bullet.  The fifth and sixth arguments are the body's
+			linear and angular daming.
+			The seventh argument is a table of the vertices *relative to the position
+			of the body.  The eighth argument is the shape's density.  The ninth is the friction.
+			The tenth is the restitution.  The eleventh argument is whether the body to be added is static.
+			A pointer to the body to use for other functions is the only value returned.
+			The returned value can be safely ignored. */
+	{"w_removeBody", w_removeBody}, /* remove a body from the world */
+		/* Nothing is returned.  The first argument is the pointer to the body returned from w_addBody. */
+	{"w_bodies", w_bodies}, /* generate a table of pointers to bodies */
+		/* nothing is passed.  A table of bodies is generated. */
+	{"w_isBullet", w_isBullet}, /* whether the body is a bullet */
+		/* The body is the only value passed.  A boolean is returned. */
+	{"w_setBullet", w_setBullet}, /* set a body as bullet or not */
+		/* The body is the first value passed.  The second argument is the value of whether the body is a
+			bullet.  Nothing is returned. */
+	{"w_isStatic", w_isBullet}, /* whether the body is static */
+		/* The body is the only value passed.  A boolean is returned. */
+	{"w_isDynamic", w_isDynamic}, /* whether the body is dynamic */
+		/* The body is the only value passed.  A boolean is returned. */
+	{"w_isSleeping", w_isSleeping}, /* whether the body is sleeping */
+		/* The body is the only value passed.  A boolean is returned. */
+	{"w_allowSleeping", w_allowSleeping}, /* whether the body is sleeping */
+		/* The body is the first value passed.  The second argument is whether the body will ever sleep. */
+	{"w_wakeUp", w_wakeUp}, /* wake a body up */
+		/* The body is the only value passed.  Nothing is returned. */
+	{"w_getPosition", w_getPosition}, /* get a body's position */
+		/* The body is the first argument passed.  The returned value is a vector of the body's position */
+	{"w_getAngle", w_getAngle}, /* get a body's angle */
+		/* The body is the first argument passed.  The returned value is the body's angle */
+	{"w_setLinearVelocity", w_setLinearVelocity}, /* set a body's linear velocity */
+		/* The body is the first argument passed.  The second argument is the linear velocity to be set (in a vector). */
+	{"w_getLinearVelocity", w_getLinearVelocity}, /* get a body's linear velocity */
+		/* The body is the first argument passed.  The returned value is the body's linear velocity (in a vector) */
+	{"w_setAngularVelocity", w_setAngularVelocity}, /* set a body's angular velocity */
+		/* The body is the first argument passed.  The second argument is the angular velocity to be set. */
+	{"w_getAngularVelocity", w_getAngularVelocity}, /* get a body's angular velocity */
+		/* The body is the first argument passed.  The returned value is the body's angular velocity */
+	{"w_setPosition", w_setPosition}, /* set a body's position without simulation */
+		/* The body is the first argument, and the position is the second argument */
+	{"w_setAngle", w_setAngle}, /* set a body's angle without simulation */
+		/* The body is the first argument, and the angle is the second argument */
+	{"w_applyForce", w_applyForce}, /* apply a force to a body */
+		/* The first argument is the body.  The second argument is the force to apply, and the third
+			argument is the point of the force. */
+	{"w_applyTorque", w_applyTorque}, /* apply a torque to a body */
+		/* The first argument is the body.  The second argument is the torque to apply, and the third
+			argument is the point of the torque. */
+	{"w_applyImpulse", w_applyImpulse}, /* apply an impulse to a body */
+		/* The first argument is the body.  The second argument is the impulse to apply, and the third
+			argument is the point of the impulse. */
+
 	{NULL, NULL}
 };
 
