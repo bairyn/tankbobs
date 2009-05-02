@@ -326,7 +326,7 @@ function c_world_tank_step(d, tank)
 		tank.w = tank.r
 
 		local v = tankbobs.m_vec2()
-		v.R = abs(vel)
+		v.R = vel
 		v.t = tank.w
 
 		tankbobs.w_setLinearVelocity(tank.body, v)
