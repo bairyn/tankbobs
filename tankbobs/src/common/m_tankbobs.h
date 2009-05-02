@@ -173,6 +173,7 @@ int m_vec2_normalto(lua_State *L);
 int m_vec2_project(lua_State *L);
 
 /* m_world.cpp */
+int w_step(lua_State *L);
 int w_newWorld(lua_State *L);
 int w_freeWorld(lua_State *L);
 int w_getTimeStep(lua_State *L);
@@ -200,6 +201,7 @@ int w_setAngle(lua_State *L);
 int w_applyForce(lua_State *L);
 int w_applyTorque(lua_State *L);
 int w_applyImpulse(lua_State *L);
+int w_getCenterOfMass(lua_State *L);
 
 #ifdef __cplusplus
 }

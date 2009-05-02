@@ -319,6 +319,8 @@ static const struct luaL_Reg tankbobs[] =
 		/* returns a boolean only. */
 
 	/* world.c */
+	{"w_step", w_step}, /* world step */
+		/* Nothing is returned or passed */
 	{"w_newWorld", w_newWorld}, /* initialize a new world */
 		/* nothing is returned; the first argument is a vector of the lower bounds.  The second
 			argument is of the upper bounds.  The third argument is the gravity vector (should always
@@ -388,6 +390,9 @@ static const struct luaL_Reg tankbobs[] =
 	{"w_applyImpulse", w_applyImpulse}, /* apply an impulse to a body */
 		/* The first argument is the body.  The second argument is the impulse to apply, and the third
 			argument is the point of the impulse. */
+	{"w_getCenterOfMass", w_getCenterOfMass}, /* get a body's center of mass */
+		/* The first and only argument is the body.  A vector of the position of the body's
+			center of mass is returned */
 
 	{NULL, NULL}
 };

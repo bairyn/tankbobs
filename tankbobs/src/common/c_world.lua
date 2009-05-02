@@ -95,14 +95,18 @@ function c_world_newWorld()
 	tankbobs.w_newWorld(tankbobs.m_vec2(c_const_get("world_lowerBoundx"), c_const_get("world_lowerBoundy")), tankbobs.m_vec2(c_const_get("world_upperBoundx"), c_const_get("world_upperBoundy")), tankbobs.m_vec2(c_const_get("world_gravityx"), c_const_get("world_gravityy")), c_const_get("world_allowSleep"))
 
 	for _, v in pairs(c_tcm_current_map.walls) do
+		if v.detail then
+			return  -- the wall isn't part of the physical world
+		end
+
 		-- add walls to the world
 		local vertices = {}
 
-		for i = 2, #v.p do
+		for i = 1, #v.p do
 			table.insert(vertices, v.p[i] - v.p[1])
 		end
 
-		v.m.body = tankbobs.w_addBody(v.p[1], 0, c_const_get("wall_canSleep"), c_const_get("wall_isBullet"), c_const_get("wall_linearDamping"), c_const_get("wall_angularDamping"), vertices, c_const_get("wall_density"), c_const_get("wall_friction"), c_const_get("wall_restitution"), v.static)
+		--v.m.body = tankbobs.w_addBody(v.p[1], 0, c_const_get("wall_canSleep"), c_const_get("wall_isBullet"), c_const_get("wall_linearDamping"), c_const_get("wall_angularDamping"), vertices, c_const_get("wall_density"), c_const_get("wall_friction"), c_const_get("wall_restitution"), v.static)
 	end
 end
 
@@ -207,14 +211,12 @@ function c_world_tank_checkSpawn(d, tank)
 	tank.r = c_const_get("tank_defaultRotation")
 	tank.w = tank.r
 	tank.p[1](playerSpawnPoint.p[1])
-	tank.v[1].t = c_const_get("tank_defaultRotation")
-	tank.v[1].R = 0  -- no velocity
 	tank.health = c_const_get("tank_health")
 	tank.weapon = c_weapon:new()
 	tank.exists = true
 
 	-- add a physical body
-	tank.body = tankbobs.w_addBody(tank.v[1].p[1], tank.r, c_const_get("tank_canSleep"), c_const_get("tank_isBullet"), c_const_get("tank_linearDamping"), c_const_get("tank_angularDamping"), c_world_tank_hull(tank), c_const_get("tank_density"), c_const_get("tank_friction"), c_const_get("tank_restitution"))
+	tank.body = tankbobs.w_addBody(tank.p[1], tank.r, c_const_get("tank_canSleep"), c_const_get("tank_isBullet"), c_const_get("tank_linearDamping"), c_const_get("tank_angularDamping"), c_world_tank_hull(tank), c_const_get("tank_density"), c_const_get("tank_friction"), c_const_get("tank_restitution"))
 	return true
 end
 
@@ -275,7 +277,7 @@ function c_world_tank_canSpawn(d, tank)
 	-- test if spawning interferes with another tank
 	for _, v in pairs(c_world_tanks) do
 		if v.exists then
-			if c_world_intersection(d, c_world_tank_hull(tank), c_world_tank_hull(v), tankbobs.m_vec2(0, 0), v.v[1]) then
+			if c_world_intersection(d, c_world_tank_hull(tank), c_world_tank_hull(v), tankbobs.m_vec2(0, 0), tankbobs.w_getLinearVelocity(v.body)) then
 				return false
 			end
 		end
@@ -292,9 +294,9 @@ function c_world_tank_step(d, tank)
 		return
 	end
 
-	tank.p[1] = tankbobs.GetPosition(tank.body)
+	tank.p[1] = tankbobs.w_getPosition(tank.body)
 
-	local vel = tankbobs.w_getLinearVelocity(tank.body)
+	local vel = tankbobs.w_getLinearVelocity(tank.body).R
 
 	if tank.state.special then
 		if tank.state.left then
@@ -333,22 +335,24 @@ function c_world_tank_step(d, tank)
 			local point = tankbobs.m_vec2()
 			point.t = tank.p[1].t
 			point.R = c_const_get("tank_accelerationVectorPointTest")
-			local impulse = tankbobs.m_vec2()
-			impulse.R = acceleration
-			impulse.t = tankbobs.getAngle(tank.body)
-			tankbobs.w_applyImpulse(tank.body, impulse, tank.p[1] - point)
+			point = tank.p[1] * 2
+			local force = tankbobs.m_vec2()
+			force.R = acceleration
+			force.t = tankbobs.w_getAngle(tank.body)
+			tankbobs.w_applyForce(tank.body, force, tank.p[1] - point)
+tankbobs.w_applyForce(tank.body, tankbobs.m_vec2(33, 333), tankbobs.w_getCenterOfMass(tank.body))
 		elseif tank.state.back then
 			-- apply deceleration to the tank
 			local point = tankbobs.m_vec2()
 			point.t = tank.p[1].t
 			point.R = c_const_get("tank_decelerationVectorPointTest")
-			local impulse = tankbobs.m_vec2()
-			impulse.R = c_const_get("tank_deceleration")
-			impulse.t = tankbobs.getAngle(tank.body)
-			tankbobs.w_applyImpulse(tank.body, impulse, tank.p[1] - point)
+			local force = tankbobs.m_vec2()
+			force.R = c_const_get("tank_deceleration")
+			force.t = tankbobs.w_getAngle(tank.body)
+			tankbobs.w_applyForce(tank.body, force, tank.p[1] - point)
 		else
 			-- deceleration is really only caused when the tank isn't accelerating or decelerating.  If it seems strange, you should realize that the tanks have an anti-friction system built into them ;) - note that if friction was always applied then tanks would have a maximum speed limit.
-			tank.v[1].R = tank.v[1].R / (1 + d * (1 - c_const_get("tank_friction")))
+			-- damping is now handled by the physics engine
 		end
 
 		if tank.state.left then
@@ -360,17 +364,13 @@ function c_world_tank_step(d, tank)
 		end
 
 		if vel >= c_const_get("tank_rotationVelocityMinSpeed") then
-			tank.w = w[1].t - ((w[1].t - tank.r) * d * c_const_get("tank_rotationVelocitySpeed"))
+			tank.w = w - ((w - tank.r) * d * c_const_get("tank_rotationVelocitySpeed"))
 		else
-			tank.w = w[1].t - ((w[1].t - tank.r) * d * c_const_get("tank_rotationVelocityCatchUpSpeed"))
+			tank.w = w - ((w - tank.r) * d * c_const_get("tank_rotationVelocityCatchUpSpeed"))
 		end
 	end
 
 	tankbobs.w_setAngle(tank.body, tank.w)
-
-	c_world_tank_testWorld(d, tank)
-
-	tank.p[1]:add(tank.v[1] * d)
 
 	-- weapons
 	if tank.state.firing then
@@ -462,6 +462,8 @@ function c_world_step()
 	for _, v in pairs(c_world_projectiles) do
 		c_world_projectile_step(d, v)
 	end
+
+	tankbobs.w_step()
 end
 
 function c_world_setTimeStep(x)
