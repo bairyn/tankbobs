@@ -83,6 +83,7 @@ function st_play_init()
 		gl.TexParameter("TEXTURE_2D", "TEXTURE_MAG_FILTER", "LINEAR")
 		tankbobs.r_loadImage2D(c_const_get("textures_dir") .. v.texture, c_const_get("textures_default"))
 
+		-- TODO: use vertex buffers to render dynamic walls.  Static walls will always be drawn in their initial location until then
 		gl.NewList(v.m.list, "COMPILE_AND_EXECUTE")
 			gl.Color(1, 1, 1, 1)
 			gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, 1)
