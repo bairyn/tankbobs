@@ -311,9 +311,11 @@ function st_play_step()
 
 	-- projectiles
 	for _, v in pairs(c_world_projectiles) do
-		gl.Translate(v.p[1].x, v.p[1].y, 0)
-		gl.Rotate(c_math_degrees(v.r), 0, 0, 1)
-		gl.CallList(v.weapon.m.projectileList)
+		gl.PushMatrix()
+			gl.Translate(v.p[1].x, v.p[1].y, 0)
+			gl.Rotate(c_math_degrees(v.r), 0, 0, 1)
+			gl.CallList(v.weapon.m.projectileList)
+		gl.PopMatrix()
 	end
 
 	-- HUD and text
