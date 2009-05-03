@@ -41,13 +41,14 @@ function c_weapon_init()
 
 	weapon.name = "shotgun"
 	weapon.altName = "default"  -- this is temporary since we only have one gun
-	weapon.damage = 5  -- 5 hp per bullet
-	weapon.pellets = 3
+	weapon.damage = 15  -- 5 hp per bullet
+	weapon.pellets = 5
 	weapon.speed = 1024
-	weapon.spread = tankbobs.m_radians(25)  -- the angle between each pellet
+	weapon.spread = tankbobs.m_radians(12)  -- the angle between each pellet
 	weapon.repeatRate = 0.5  -- twice a second
 	weapon.knockback = 512  -- (per pellet)
 	weapon.texture = "shotgun.png"
+	weapon.launchDistance = 6  -- normally 3, but an extra unit to prevent the bullets from colliding before they spread
 
 	weapon.texturer[1](0, 1)
 	weapon.texturer[2](0, 0)
@@ -114,6 +115,7 @@ c_weapon =
 	repeatRate = 0,
 	speed = 0,
 	knockBack = 0,
+	launchDistance = 0,
 
 	texture = "",
 
@@ -144,6 +146,8 @@ c_weapon_projectile =
 	p = {},
 	weapon = nil,  -- type of the weapon which created the bolt
 	r = 0,  -- rotation
+	collided = false,  -- whether it needs to be removed
+	owner = nil,  -- tank which fired it
 
 	m = {}
 }
@@ -176,14 +180,16 @@ function c_weapon_fire(tank)
 		projectile.weapon = weapon
 
 		vec.t = tank.r + angle
-		vec.R = c_const_get("tank_projectileLaunchDistance")
+		vec.R = weapon.launchDistance
 		projectile.p[1](tank.p[1] + vec)
+
+		projectile.owner = tank
 
 		projectile.r = vec.t
 
-		projectile.body = tankbobs.w_addBody(projectile.p[1], projectile.r, c_const_get("projectile_canSleep"), c_const_get("projectile_isBullet"), c_const_get("projectile_linearDamping"), c_const_get("projectile_angularDamping"), weapon.projectileHull, weapon.projectileDensity, c_const_get("projectile_friction"), weapon.projectileRestitution, true)
+		projectile.m.body = tankbobs.w_addBody(projectile.p[1], projectile.r, c_const_get("projectile_canSleep"), c_const_get("projectile_isBullet"), c_const_get("projectile_linearDamping"), c_const_get("projectile_angularDamping"), weapon.projectileHull, weapon.projectileDensity, c_const_get("projectile_friction"), weapon.projectileRestitution, true)
 		vec.R = weapon.speed
-		tankbobs.w_setLinearVelocity(projectile.body, vec)
+		tankbobs.w_setLinearVelocity(projectile.m.body, vec)
 
 		table.insert(c_world_projectiles, projectile)
 
@@ -203,5 +209,17 @@ function c_weapon_clear()
 
 	for _, v in pairs(c_weapons) do
 		v.m = {}
+	end
+end
+
+function c_weapon_hit(tank, projectile)
+	c_world_tankDamage(tank, projectile.weapon.damage)
+end
+
+function c_weapon_projectileRemove(projectile)
+	for k, v in pairs(c_world_projectiles) do
+		if v == projectile then
+			table.remove(c_world_projectiles, k)
+		end
 	end
 end

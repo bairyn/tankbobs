@@ -67,6 +67,83 @@ static bool allowSleep;
 static double timeStep = 1.0 / 128.0;
 static int iterations = 24;
 
+static char clName[1024];
+static lua_State *clState = NULL;
+
+class w_private_worldListener : public b2ContactListener
+{
+	public:
+	void Add(const b2ContactPoint *point)
+	{
+		if(clName[0] && clState)
+		{
+			if(point->shape1->GetBody() && point->shape2->GetBody())
+			{
+				lua_getfield(clState, LUA_GLOBALSINDEX, clName);
+				lua_pushlightuserdata(clState, point->shape1);
+				lua_pushlightuserdata(clState, point->shape2);
+				lua_pushlightuserdata(clState, point->shape1->GetBody());
+				lua_pushlightuserdata(clState, point->shape2->GetBody());
+				vec2_t *v = reinterpret_cast<vec2_t *>(lua_newuserdata(clState, sizeof(vec2_t)));
+
+				luaL_getmetatable(clState, MATH_METATABLE);
+				lua_setmetatable(clState, -2);
+				v->x = point->position.x;
+				v->y = point->position.y;
+				v->R = sqrt(v->x * v->x + v->y * v->y);
+				v->t = atan(v->y / v->x);
+				if(v->x < 0.0 && v->y < 0.0)
+					v->t += m_radiansNL(180);
+				else if(v->x < 0.0)
+					v->t += m_radiansNL(90);
+				else if(v->y < 0.0)
+					v->t += m_radiansNL(270);
+				lua_pushnumber(clState, point->separation);
+
+				v = reinterpret_cast<vec2_t *>(lua_newuserdata(clState, sizeof(vec2_t)));
+
+				luaL_getmetatable(clState, MATH_METATABLE);
+				lua_setmetatable(clState, -2);
+				v->x = point->normal.x;
+				v->y = point->normal.y;
+				v->R = sqrt(v->x * v->x + v->y * v->y);
+				v->t = atan(v->y / v->x);
+				if(v->x < 0.0 && v->y < 0.0)
+					v->t += m_radiansNL(180);
+				else if(v->x < 0.0)
+					v->t += m_radiansNL(90);
+				else if(v->y < 0.0)
+					v->t += m_radiansNL(270);
+
+				lua_call(clState, 7, 0);
+			}
+		}
+	}
+
+	void Persist(const b2ContactPoint *point)
+	{
+		if(clName[0] && clState)
+		{
+		}
+	}
+
+	void Remove(const b2ContactPoint *point)
+	{
+		if(clName[0] && clState)
+		{
+		}
+	}
+
+	void Result(const b2ContactPoint *point)
+	{
+		if(clName[0] && clState)
+		{
+		}
+	}
+};
+
+static w_private_worldListener w_private_contactListener;
+
 int w_newWorld(lua_State *L)
 {
 	CHECKINIT(init, L);
@@ -96,6 +173,11 @@ int w_newWorld(lua_State *L)
 
 	world = new b2World(worldAABB, worldGravity, allowSleep);
 
+	world->SetContactListener(&w_private_contactListener);
+
+	strncpy(clName, luaL_checkstring(L, 5), sizeof(clName));
+	clState = L;
+
 	return 0;
 }
 
@@ -118,6 +200,9 @@ int w_freeWorld(lua_State *L)
 
 	delete world;
 	world = NULL;
+
+	clName[0] = 0;
+	clState = NULL;
 
 	return 0;
 }
@@ -376,11 +461,11 @@ int w_getPosition(lua_State *L)
 	v->R = sqrt(v->x * v->x + v->y * v->y);
 	v->t = atan(v->y / v->x);
 	if(v->x < 0.0 && v->y < 0.0)
-		v->t += 180;
+		v->t += m_radiansNL(180);
 	else if(v->x < 0.0)
-		v->t += 90;
+		v->t += m_radiansNL(90);
 	else if(v->y < 0.0)
-		v->t += 270;
+		v->t += m_radiansNL(270);
 
 	return 1;
 }
@@ -435,11 +520,11 @@ int w_getLinearVelocity(lua_State *L)
 	v->R = sqrt(v->x * v->x + v->y * v->y);
 	v->t = atan(v->y / v->x);
 	if(v->x < 0.0 && v->y < 0.0)
-		v->t += 180;
+		v->t += m_radiansNL(180);
 	else if(v->x < 0.0)
-		v->t += 90;
+		v->t += m_radiansNL(90);
 	else if(v->y < 0.0)
-		v->t += 270;
+		v->t += m_radiansNL(270);
 
 	return 1;
 }
@@ -566,11 +651,11 @@ int w_getCenterOfMass(lua_State *L)
 	v->R = sqrt(v->x * v->x + v->y * v->y);
 	v->t = atan(v->y / v->x);
 	if(v->x < 0.0 && v->y < 0.0)
-		v->t += 180;
+		v->t += m_radiansNL(180);
 	else if(v->x < 0.0)
-		v->t += 90;
+		v->t += m_radiansNL(90);
 	else if(v->y < 0.0)
-		v->t += 270;
+		v->t += m_radiansNL(270);
 
 	return 1;
 }

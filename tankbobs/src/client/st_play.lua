@@ -270,7 +270,6 @@ function st_play_step()
 		for k, v in pairs(c_tcm_current_map.walls) do
 			if i == c_const_get("tcm_tankLevel") then
 				-- render tanks
-				-- TMP: aoeu
 				for k, v in pairs(c_world_tanks) do
 					if(v.exists) then
 						gl.PushAttrib("CURRENT_BIT")

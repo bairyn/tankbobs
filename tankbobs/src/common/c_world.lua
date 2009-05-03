@@ -42,11 +42,14 @@ function c_world_init()
 	c_const_set("tank_maxCollisionVectorLength", 975)  -- 975 units
 
 	-- hull of tank facing right
-	c_const_set("tank_health", 100, 1)
 	c_const_set("tank_hullx1", -2.0, 1) c_const_set("tank_hully1",  2.0, 1)
 	c_const_set("tank_hullx2", -2.0, 1) c_const_set("tank_hully2", -2.0, 1)
 	c_const_set("tank_hullx3",  2.0, 1) c_const_set("tank_hully3", -1.0, 1)
 	c_const_set("tank_hullx4",  2.0, 1) c_const_set("tank_hully4",  1.0, 1)
+	c_const_set("tank_health", 100, 1)
+	c_const_set("tank_damageK", 2, 1)  -- damage relative to speed before a collision: 2 hp / 1 ups
+	c_const_set("tank_damageMinSpeed", 20, 1)
+	c_const_set("tank_collideMinDamage", 5, 1)
 	c_const_set("tank_deceleration", -24, 1)
 	c_const_set("tank_decelerationMinSpeed", -4, 1)
 	c_const_set("tank_acceleration",
@@ -72,6 +75,7 @@ function c_world_init()
 	c_const_set("tank_angularDamping", 0, 1)
 	c_const_set("tank_accelerationVectorPointTest", -90, 1)  -- the origin of acceleration force
 	c_const_set("tank_decelerationVectorPointTest", 90, 1)
+	c_const_set("tank_spawnTime", 0.75, 1)
 	c_const_set("wall_density", 1, 1)
 	c_const_set("wall_friction", 0.25, 1)  -- deceleration caused by friction (~speed *= 1 - friction)
 	c_const_set("wall_restitution", 0.2, 1)
@@ -85,7 +89,6 @@ function c_world_init()
 	c_const_set("tank_rotationSpeed", c_math_radians(135), 1)  -- 135 degrees per second
 	c_const_set("tank_rotationSpecialSpeed", c_math_degrees(1) / 3.5, 1)
 	c_const_set("tank_defaultRotation", c_math_radians(90), 1)  -- up
-	c_const_set("tank_projectileLaunchDistance", 3, 1)  -- 2 units from tanks center + 1 more unit
 
 	c_world_tanks = {}
 end
@@ -94,7 +97,7 @@ function c_world_done()
 end
 
 function c_world_newWorld()
-	tankbobs.w_newWorld(tankbobs.m_vec2(c_const_get("world_lowerBoundx"), c_const_get("world_lowerBoundy")), tankbobs.m_vec2(c_const_get("world_upperBoundx"), c_const_get("world_upperBoundy")), tankbobs.m_vec2(c_const_get("world_gravityx"), c_const_get("world_gravityy")), c_const_get("world_allowSleep"))
+	tankbobs.w_newWorld(tankbobs.m_vec2(c_const_get("world_lowerBoundx"), c_const_get("world_lowerBoundy")), tankbobs.m_vec2(c_const_get("world_upperBoundx"), c_const_get("world_upperBoundy")), tankbobs.m_vec2(c_const_get("world_gravityx"), c_const_get("world_gravityy")), c_const_get("world_allowSleep"), "c_world_contactListener")
 
 	for _, v in pairs(c_tcm_current_map.walls) do
 		if v.detail then
@@ -148,7 +151,8 @@ c_world_tank =
 	weapon = nil,
 	lastFireTime = 0,
 	body = nil,  -- physical body
-	health = 0
+	health = 0,
+	nextSpawnTime = 0
 }
 
 c_world_tank_state =
@@ -277,8 +281,14 @@ function c_world_wallShape(wall)
 end
 
 function c_world_tank_canSpawn(d, tank)
+	local t = tankbobs.t_getTicks()
+
 	-- make sure the tank hasn't already spawned
 	if tank.exists then
+		return false
+	end
+
+	if tank.nextSpawnTime > t then
 		return false
 	end
 
@@ -307,6 +317,14 @@ function c_world_tank_step(d, tank)
 	local t = tankbobs.t_getTicks()
 
 	if not tank.exists then
+		return
+	end
+
+	if tank.health <= 0 then
+		tankbobs.w_removeBody(tank.body)
+		tank.nextSpawnTime = t + c_const_get("world_time") * c_config_get("config.game.timescale") * c_const_get("tank_spawnTime")
+		tank.exists = false
+		tank.spawning = true
 		return
 	end
 
@@ -403,8 +421,106 @@ end
 
 function c_world_projectile_step(d, projectile)
 	-- TODO: projectiles can go through teleporters
-	projectile.p[1] = tankbobs.w_getPosition(projectile.body)
-	projectile.r = tankbobs.w_getAngle(projectile.body)
+	if projectile.collided then
+		tankbobs.w_removeBody(projectile.m.body)
+		c_weapon_projectileRemove(projectile)
+		return
+	end
+
+	projectile.p[1] = tankbobs.w_getPosition(projectile.m.body)
+	projectile.r = tankbobs.w_getAngle(projectile.m.body)
+end
+
+function c_world_isTank(body)
+	for _, v in pairs(c_world_tanks) do
+		if v.body == body then
+			return true, v
+		end
+	end
+
+	return false
+end
+
+function c_world_isProjectile(body)
+	for _, v in pairs(c_world_projectiles) do
+		if v.m.body == body then
+			return true, v
+		end
+	end
+
+	return false
+end
+
+function c_world_tankDamage(tank, damage)
+	tank.health = tank.health - damage
+end
+
+function c_world_collide(tank, normal)
+	local vel = tankbobs.w_getLinearVelocity(tank.body).R
+
+	if vel >= c_const_get("tank_damageMinSpeed") then
+		local damage = c_const_get("tank_damageK") * (vel - c_const_get("tank_damageMinSpeed"))
+
+		damage = damage / (1 + math.abs(normal.t - tank.w) / tankbobs.m_radians(180))
+
+		if damage >= c_const_get("tank_collideMinDamage") then
+			c_world_tankDamage(tank, damage)
+		end
+	end
+end
+
+function c_world_contactListener(shape1, shape2, body1, body2, position, separation, normal)
+	local b, p
+
+	if c_world_isProjectile(body1) or c_world_isProjectile(body2) then
+		-- remove the projectile
+		local projectile, projectile2
+
+		projectile = select(2, c_world_isProjectile(body1))
+		projectile2 = select(2, c_world_isProjectile(body2))
+
+		if projectile then
+			projectile.collided = true
+		end
+
+		if projectile2 then
+			projectile2.collided = true
+		end
+
+		-- test if the projectile hit a tank
+		local tank, tank2
+
+		tank = select(2, c_world_isTank(body1))
+		tank2 = select(2, c_world_isTank(body2))
+
+		-- only one of them can be a tank (and if one of them is, only one them can be a projectile)
+		if tank then
+			if projectile then
+				c_weapon_hit(tank, projectile)
+			else
+				c_weapon_hit(tank, projectile2)
+			end
+		elseif tank2 then
+			if projectile then
+				c_weapon_hit(tank2, projectile)
+			else
+				c_weapon_hit(tank2, projectile2)
+			end
+		end
+	elseif c_world_isTank(body1) or c_world_isTank(body2) then
+		local tank, tank2
+
+		tank = select(2, c_world_isTank(body1))
+		tank2 = select(2, c_world_isTank(body2))
+
+		if tank then
+			c_world_collide(tank, normal)
+		end
+
+		if tank2 then
+			c_world_collide(tank2, normal)
+		end
+	end
 end
 
 function c_world_step()
