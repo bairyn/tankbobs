@@ -191,6 +191,7 @@ function st_play_done()
 	end
 
 	c_tcm_unload_extra_data()
+	c_weapon_clear()
 
 	-- reset texenv to avoid messing the GUI up
 	gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
@@ -311,6 +312,7 @@ function st_play_step()
 	-- projectiles
 	for _, v in pairs(c_world_projectiles) do
 		gl.Translate(v.p[1].x, v.p[1].y, 0)
+		gl.Rotate(c_math_degrees(v.r), 0, 0, 1)
 		gl.CallList(v.weapon.m.projectileList)
 	end
 
