@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.6)
 project(tankbobs)
 
-set(include_dirs ./src/lib ./src/lib/tstr ./src/common ./src/lib/Box2D/Include /usr/include/lua5.1)
+set(include_dirs ./src/lib ./src/lib/tstr ./src/common ./src/lib/Box2D/Include /usr/include/lua5.1 /usr/include/freetype2)
 
 include_directories(${include_dirs})
 
