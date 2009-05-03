@@ -3,26 +3,11 @@
 # wrapper for cmake
 # use ./build.sh make etc
 
-skipBaseDirCheck=0  # change this to one to stop checking for "tankbobs" as the basename of pwd
-
 SERVER_SRCS="src/common/common.lua src/common/c_config.lua src/common/c_const.lua src/common/c_data.lua src/common/c_math.lua src/common/c_mods.lua src/common/c_module.lua src/common/c_state.lua src/common/c_tcm.lua src/common/c_weapon.lua src/common/c_world.lua src/common/lom.lua src/server/init.lua"
 CLIENT_SRCS="src/common/common.lua src/common/c_config.lua src/common/c_const.lua src/common/c_data.lua src/common/c_math.lua src/common/c_mods.lua src/common/c_module.lua src/common/c_state.lua src/common/c_tcm.lua src/common/c_weapon.lua src/common/c_world.lua src/common/lom.lua src/client/gui.lua src/client/init.lua src/client/main.lua src/client/renderer.lua src/client/st_exit.lua src/client/st_help.lua src/client/st_level.lua src/client/st_license.lua src/client/st_manual.lua src/client/st_options.lua src/client/st_play.lua src/client/st_set.lua src/client/st_start.lua src/client/st_title.lua"
 DATA="CHANGELOG COPYING data mod-client mod-server NOTICE"
 
-if [ `basename ${PWD}` == "build" ]; then
-	cd ./../
-fi
-
-if [ $skipBaseDirCheck == 0 ]; then
-	if ! [ `basename ${PWD}` == "tankbobs" ]; then
-		if [ "$1" == "-f" ]; then
-			shift
-		else
-			echo -ne "Not in "tankbobs/".  Use -f as the first argument to conitune anyway\n"
-			exit 1
-		fi
-	fi
-fi
+cd `dirname $0`
 
 if [ -e "/usr/bin/gcc" ]; then
 	# try to link with C compiler
