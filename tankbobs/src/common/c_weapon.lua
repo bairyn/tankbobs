@@ -181,7 +181,7 @@ function c_weapon_fire(tank)
 
 		projectile.r = vec.t
 
-		projectile.body = tankbobs.w_addBody(projectile.p[1], 0, c_const_get("projectile_canSleep"), c_const_get("projectile_isBullet"), c_const_get("projectile_linearDamping"), c_const_get("projectile_angularDamping"), weapon.projectileHull, weapon.projectileDensity, c_const_get("projectile_friction"), weapon.projectileRestitution, true)
+		projectile.body = tankbobs.w_addBody(projectile.p[1], projectile.r, c_const_get("projectile_canSleep"), c_const_get("projectile_isBullet"), c_const_get("projectile_linearDamping"), c_const_get("projectile_angularDamping"), weapon.projectileHull, weapon.projectileDensity, c_const_get("projectile_friction"), weapon.projectileRestitution, true)
 		vec.R = weapon.speed
 		tankbobs.w_setLinearVelocity(projectile.body, vec)
 

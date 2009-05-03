@@ -404,6 +404,7 @@ end
 function c_world_projectile_step(d, projectile)
 	-- TODO: projectiles can go through teleporters
 	projectile.p[1] = tankbobs.w_getPosition(projectile.body)
+	projectile.r = tankbobs.w_getAngle(projectile.body)
 end
 
 function c_world_step()
