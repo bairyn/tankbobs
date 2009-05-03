@@ -46,7 +46,7 @@ function c_weapon_init()
 	weapon.speed = 1024
 	weapon.spread = tankbobs.m_radians(25)  -- the angle between each pellet
 	weapon.repeatRate = 0.5  -- twice a second
-	weapon.knockback = 4  -- 4 ups backwards
+	weapon.knockback = 512  -- (per pellet)
 	weapon.texture = "shotgun.png"
 
 	weapon.texturer[1](0, 1)
@@ -187,7 +187,14 @@ function c_weapon_fire(tank)
 
 		table.insert(c_world_projectiles, projectile)
 
-		angle = angle + tank.weapon.spread
+		angle = angle + weapon.spread
+
+		-- apply knockback to the tank
+		local point = tankbobs.w_getCenterOfMass(tank.body)
+		local force = tankbobs.m_vec2()
+		force.R = -weapon.knockback * c_const_get("tank_forceSpeedK")
+		force.t = tankbobs.w_getAngle(tank.body)
+		tankbobs.w_applyForce(tank.body, force, point)
 	end
 end
 

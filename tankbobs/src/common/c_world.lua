@@ -63,7 +63,8 @@ function c_world_init()
 	}, 1)
 	c_const_set("tank_forceSpeedK", 5, 1)
 	c_const_set("tank_density", 2, 1)
-	c_const_set("tank_friction", 0.25, 1)  -- deceleration caused by friction (~speed *= 1 - friction)
+	c_const_set("tank_friction", 0.25, 1)
+	c_const_set("tank_worldFriction", 0.25, 1)  -- damping
 	c_const_set("tank_restitution", 0.4, 1)
 	c_const_set("tank_canSleep", true, 1)
 	c_const_set("tank_isBullet", true, 1)
@@ -367,12 +368,9 @@ function c_world_tank_step(d, tank)
 			tankbobs.w_applyForce(tank.body, force, point)
 		else
 			-- deceleration is really only caused when the tank isn't accelerating or decelerating.  If it seems strange, you should realize that the tanks have an anti-friction system built into them ;) - note that if friction was always applied then tanks would have a maximum speed limit.
-			-- apply a force slowing it down
-			local point = tankbobs.w_getCenterOfMass(tank.body)
-			local force = tankbobs.m_vec2()
-			force.R = vel * c_const_get("tank_friction")
-			force.t = tankbobs.w_getAngle(tank.body)
-			tankbobs.w_applyForce(tank.body, force, point)
+			local v = tankbobs.m_vec2(tankbobs.w_getLinearVelocity(tank.body))
+			--v.R = v.R / (1 + d * c_const_get("tank_worldFriction"))  -- FIXME: fix deceleration
+			tankbobs.w_setLinearVelocity(tank.body, v)
 		end
 
 		if tank.state.left then
