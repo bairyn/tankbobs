@@ -187,7 +187,7 @@ function c_weapon_fire(tank)
 
 		table.insert(c_world_projectiles, projectile)
 
-		angle = angle + weapon.spread
+		angle = angle - weapon.spread
 
 		-- apply knockback to the tank
 		local point = tankbobs.w_getCenterOfMass(tank.body)
