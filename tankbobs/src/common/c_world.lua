@@ -101,7 +101,11 @@ function c_world_newWorld()
 		end
 
 		-- add wall to world
-		v.m.body = tankbobs.w_addBody(v.p[1], 0, c_const_get("wall_canSleep"), c_const_get("wall_isBullet"), c_const_get("wall_linearDamping"), c_const_get("wall_angularDamping"), c_world_wallShape(v), c_const_get("wall_density"), c_const_get("wall_friction"), c_const_get("wall_restitution"), v.static)
+		local b = c_world_wallShape(v)
+		v.m.body = tankbobs.w_addBody(b[1], 0, c_const_get("wall_canSleep"), c_const_get("wall_isBullet"), c_const_get("wall_linearDamping"), c_const_get("wall_angularDamping"), b[2], c_const_get("wall_density"), c_const_get("wall_friction"), c_const_get("wall_restitution"), not v.static)
+		if not v.m.body then
+			error "c_world_newWorld: could not add a wall to the physical world"
+		end
 	end
 end
 
@@ -207,11 +211,10 @@ function c_world_tank_checkSpawn(d, tank)
 	tank.w = tank.r
 	tank.p[1](playerSpawnPoint.p[1])
 	tank.health = c_const_get("tank_health")
-	tank.weapon = c_weapon:new()
+	tank.weapon = c_weapon_getByAltName("default")
 	tank.exists = true
 
 	-- add a physical body
-print("tank", tank.p[1].x, tank.p[1].y)
 	tank.body = tankbobs.w_addBody(tank.p[1], tank.r, c_const_get("tank_canSleep"), c_const_get("tank_isBullet"), c_const_get("tank_linearDamping"), c_const_get("tank_angularDamping"), tank.h, c_const_get("tank_density"), c_const_get("tank_friction"), c_const_get("tank_restitution"), true)
 	return true
 end
@@ -257,15 +260,19 @@ function c_world_tankHull(tank)
 end
 
 function c_world_wallShape(wall)
-	-- return a table of coordinates of wall's shape
-	local c = {}
-	local p = wall.p[1]
+	local average = tankbobs.m_vec2()
+	local offsets = {}
 
-	for _, v in ipairs(wall.p) do  -- ipairs to make sure of proper order
-		table.insert(c, v - p)
+	for _, v in pairs(wall.p) do
+		average = average + v
+	end
+	average = average / #wall.p
+
+	for _, v in ipairs(wall.p) do
+		table.insert(offsets, v - average)
 	end
 
-	return c
+	return {average, offsets}
 end
 
 function c_world_tank_canSpawn(d, tank)
@@ -387,7 +394,7 @@ function c_world_tank_step(d, tank)
 
 	-- weapons
 	if tank.state.firing then
-		if t >= tank.lastFireTime + tank.weapon.repeatRate then
+		if t >= tank.lastFireTime + (c_const_get("world_time") * c_config_get("config.game.timescale") * tank.weapon.repeatRate) then
 			tank.lastFireTime = t
 
 			-- fire weapon
@@ -397,46 +404,8 @@ function c_world_tank_step(d, tank)
 end
 
 function c_world_projectile_step(d, projectile)
-	local hull = {}
-	local min_wallDistance, min_tankDistance, min_teleporterDistance
 	-- TODO: projectiles can go through teleporters
-
-	--[[
-	common_clone(c_world_projectile_hull(projectile), hull)
-
-	projectile.p[1]:add(d * projectile.v[1])
-
-	common_clone(c_world_projectile_hull(projectile), hull)
-	for _, v in pairs(c_tcm_current_map.walls) do
-		if not v.detail then
-			if tankbobs.m_polygon(hull, v.p) then
-				-- find which edge of the wall
-				local l = {p1, p2}
-				local di
-				local llp
-
-				for _, v in pairs(v.p) do
-					local clp = v
-
-					if llp then
-						local vec = tankbobs.m_vec2()
-						vec.R = c_const_get("tank_maxCollisionVectorLength")
-						vec.t = tank.v[1].t
-						if tank.v[1].R < 0 then
-							vec:inv()
-						end
-						local li, lt = tankbobs.m_edge(tank.p[1], vec, clp, llp)
-
-						if li then
---print((lt - tank.p[1]).x, (lt - tank.p[1]).y, (lt - tank.p[1]).R)
-							if not l.p1 or not l.p2 or not di or math.abs((lt - tank.p[1]).R) < d then
-								di = math.abs((lt - tank.p[1]).R)
-								l.p1 = clp
-								l.p2 = llp
-							end
-						end
-
-	--]]
+	projectile.p[1] = tankbobs.w_getPosition(projectile.body)
 end
 
 function c_world_step()

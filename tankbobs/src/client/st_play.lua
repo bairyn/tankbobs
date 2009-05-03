@@ -100,6 +100,55 @@ function st_play_init()
 		listOffset = listOffset + 1
 	end
 
+	for _, v in pairs(c_weapons) do
+		v.m.list = gl.GenLists(1)
+		v.m.projectileList = gl.GenLists(1)
+
+		v.m.texture = gl.GenTextures(1)
+		v.m.projectileTexture = gl.GenTextures(1)
+
+		gl.BindTexture("TEXTURE_2D", v.m.texture[1])
+		gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_S", "REPEAT")
+		gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_T", "REPEAT")
+		gl.TexParameter("TEXTURE_2D", "TEXTURE_MIN_FILTER", "LINEAR")
+		gl.TexParameter("TEXTURE_2D", "TEXTURE_MAG_FILTER", "LINEAR")
+		tankbobs.r_loadImage2D(c_const_get("weaponTextures_dir") .. v.texture, c_const_get("textures_default"))
+		gl.BindTexture("TEXTURE_2D", v.m.projectileTexture[1])
+		gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_S", "REPEAT")
+		gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_T", "REPEAT")
+		gl.TexParameter("TEXTURE_2D", "TEXTURE_MIN_FILTER", "LINEAR")
+		gl.TexParameter("TEXTURE_2D", "TEXTURE_MAG_FILTER", "LINEAR")
+		tankbobs.r_loadImage2D(c_const_get("weaponTextures_dir") .. v.projectileTexture, c_const_get("textures_default"))
+
+		gl.NewList(v.m.list, "COMPILE_AND_EXECUTE")
+			gl.Color(1, 1, 1, 1)
+			gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, 1)
+			gl.BindTexture("TEXTURE_2D", v.m.texture[1])
+			gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
+
+			gl.Begin("POLYGON")
+				for i = 1, #v.render do
+					gl.TexCoord(v.texturer[i].x, v.texturer[i].y)
+					gl.Vertex(v.render[i].x, v.render[i].y)
+				end
+			gl.End()
+		gl.EndList()
+
+		gl.NewList(v.m.projectileList, "COMPILE_AND_EXECUTE")
+			gl.Color(1, 1, 1, 1)
+			gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, 1)
+			gl.BindTexture("TEXTURE_2D", v.m.projectileTexture[1])
+			gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
+
+			gl.Begin("POLYGON")
+				for i = 1, #v.projectileRender do
+					gl.TexCoord(v.projectileTexturer[i].x, v.projectileTexturer[i].y)
+					gl.Vertex(v.projectileRender[i].x, v.projectileRender[i].y)
+				end
+			gl.End()
+		gl.EndList()
+	end
+
 	-- initialize the world
 	c_world_newWorld()
 
@@ -132,6 +181,13 @@ function st_play_done()
 
 	gl.DeleteTextures(play_tank_textures)
 	gl.DeleteTextures(play_wall_textures)
+
+	for _, v in pairs(c_weapons) do
+		gl.DeleteLists(v.m.list, 1)
+		gl.DeleteLists(v.m.projectileList, 1)
+		gl.DeleteTextures(v.m.texture, 1)
+		gl.DeleteTextures(v.m.projectileTexture, 1)
+	end
 
 	c_tcm_unload_extra_data()
 
@@ -229,6 +285,10 @@ function st_play_step()
 								gl.TexEnv("TEXTURE_ENV_COLOR", c_config_get("config.game.player" .. tostring(k) .. ".color.r"), c_config_get("config.game.player" .. tostring(k) .. ".color.g"), c_config_get("config.game.player" .. tostring(k) .. ".color.b"), 1)
 								-- blend color with tank texture
 								gl.CallList(play_tank_listBase)
+
+								if v.weapon then
+									gl.CallList(v.weapon.m.list)
+								end
 							gl.PopMatrix()
 						gl.PopAttrib()
 					end
@@ -248,6 +308,10 @@ function st_play_step()
 	--gl.
 
 	-- projectiles
+	for _, v in pairs(c_world_projectiles) do
+		gl.Translate(v.p[1].x, v.p[1].y, 0)
+		gl.CallList(v.weapon.m.projectileList)
+	end
 
 	-- HUD and text
 

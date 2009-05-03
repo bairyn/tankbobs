@@ -77,6 +77,7 @@ function c_data_init()
 	c_const_set("textures_dir",  c_const_get("data_dir") .. "textures/", 1)
 	c_const_set("textures_default_dir", c_const_get("textures_dir") .. "global/", 1)
 	c_const_set("textures_default", c_const_get("textures_default_dir") .. "null.png", 1)
+	c_const_set("weaponTextures_dir", c_const_get("textures_dir") .. "weapons/", 1)
 	if tankbobs.io_getHomeDirectory() == nil then
 		error(select(2, tankbobs.io_getHomeDirectory()))
 	end
