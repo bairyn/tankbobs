@@ -52,6 +52,8 @@ function c_world_init()
 	c_const_set("tank_collideMinDamage", 5, 1)
 	c_const_set("tank_deceleration", -24, 1)
 	c_const_set("tank_decelerationMinSpeed", -4, 1)
+	c_const_set("tank_highHealth", 66, 1)
+	c_const_set("tank_lowHealth", 33, 1)
 	c_const_set("tank_acceleration",
 	{
 		{64},  -- acceleration of 64 units per second by default
@@ -152,7 +154,9 @@ c_world_tank =
 	lastFireTime = 0,
 	body = nil,  -- physical body
 	health = 0,
-	nextSpawnTime = 0
+	nextSpawnTime = 0,
+	killer = nil,
+	score = 0
 }
 
 c_world_tank_state =
@@ -323,6 +327,12 @@ function c_world_tank_step(d, tank)
 	if tank.health <= 0 then
 		tankbobs.w_removeBody(tank.body)
 		tank.nextSpawnTime = t + c_const_get("world_time") * c_config_get("config.game.timescale") * c_const_get("tank_spawnTime")
+		if tank.killer then
+			tank.killer.score = tank.killer.score + 1
+		else
+			tank.score = tank.score - 1
+		end
+		tank.killer = nil
 		tank.exists = false
 		tank.spawning = true
 		return

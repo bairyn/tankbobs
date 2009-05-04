@@ -150,6 +150,67 @@ function st_play_init()
 		gl.EndList()
 	end
 
+	play_healthbar_listBase = gl.GenLists(1)
+	play_healthbarBorder_listBase = gl.GenLists(1)
+	play_healthbar_texture = gl.GenTextures(1)
+	play_healthbarBorder_texture = gl.GenTextures(1)
+
+	gl.BindTexture("TEXTURE_2D", play_healthbar_texture[1])
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_S", "REPEAT")
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_T", "REPEAT")
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_MIN_FILTER", "LINEAR")
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_MAG_FILTER", "LINEAR")
+	tankbobs.r_loadImage2D(c_const_get("healthbar_texture"), c_const_get("textures_default"))
+	gl.BindTexture("TEXTURE_2D", play_healthbarBorder_texture[1])
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_S", "REPEAT")
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_T", "REPEAT")
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_MIN_FILTER", "LINEAR")
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_MAG_FILTER", "LINEAR")
+	tankbobs.r_loadImage2D(c_const_get("healthbarBorder_texture"), c_const_get("texturesBorder_default"))
+
+	c_const_set("healthbar_texture", "", 1)
+	c_const_set("healthbar_renderx1", -0.875, 1) c_const_set("healthbar_rendery1", -2.875, 1)
+	c_const_set("healthbar_renderx2", -0.875, 1) c_const_set("healthbar_rendery2", -2.5, 1)
+	c_const_set("healthbar_renderx3",  0.875, 1) c_const_set("healthbar_rendery3", -2.5, 1)
+	c_const_set("healthbar_renderx4",  0.875, 1) c_const_set("healthbar_rendery4", -2.875, 1)
+	c_const_set("healthbar_texturex1", 0, 1) c_const_set("healthbar_texturey1", 1, 1)
+	c_const_set("healthbar_texturex2", 0, 1) c_const_set("healthbar_texturey2", 0, 1)
+	c_const_set("healthbar_texturex3", 1, 1) c_const_set("healthbar_texturey3", 0, 1)
+	c_const_set("healthbar_texturex4", 1, 1) c_const_set("healthbar_texturey4", 1, 1)
+	c_const_set("healthbarBorder_renderx1", -1, 1) c_const_set("healthbarBorder_rendery1", -3, 1)
+	c_const_set("healthbarBorder_renderx2", -1, 1) c_const_set("healthbarBorder_rendery2", -2.25, 1)
+	c_const_set("healthbarBorder_renderx3",  1, 1) c_const_set("healthbarBorder_rendery3", -2.25, 1)
+	c_const_set("healthbarBorder_renderx4",  1, 1) c_const_set("healthbarBorder_rendery4", -3, 1)
+	c_const_set("healthbarBorder_texturex1", 0, 1) c_const_set("healthbarBorder_texturey1", 1, 1)
+	c_const_set("healthbarBorder_texturex2", 0, 1) c_const_set("healthbarBorder_texturey2", 0, 1)
+	c_const_set("healthbarBorder_texturex3", 1, 1) c_const_set("healthbarBorder_texturey3", 0, 1)
+	c_const_set("healthbarBorder_texturex4", 1, 1) c_const_set("healthbarBorder_texturey4", 1, 1)
+	c_const_set("healthbar_rotation", 270, 1)
+
+	gl.NewList(play_healthbar_listBase, "COMPILE_AND_EXECUTE")
+		gl.BindTexture("TEXTURE_2D", play_healthbar_texture[1])
+		gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
+
+		gl.Begin("QUADS")
+			for i = 1, 4 do
+				gl.TexCoord(c_const_get("healthbar_texturex" .. i), c_const_get("healthbar_texturey" .. i))
+				gl.Vertex(c_const_get("healthbar_renderx" .. i), c_const_get("healthbar_rendery" .. i))
+			end
+		gl.End()
+	gl.EndList()
+
+	gl.NewList(play_healthbarBorder_listBase, "COMPILE_AND_EXECUTE")
+		gl.BindTexture("TEXTURE_2D", play_healthbarBorder_texture[1])
+		gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
+
+		gl.Begin("QUADS")
+			for i = 1, 4 do
+				gl.TexCoord(c_const_get("healthbarBorder_texturex" .. i), c_const_get("healthbarBorder_texturey" .. i))
+				gl.Vertex(c_const_get("healthbarBorder_renderx" .. i), c_const_get("healthbarBorder_rendery" .. i))
+			end
+		gl.End()
+	gl.EndList()
+
 	-- initialize the world
 	c_world_newWorld()
 
@@ -189,6 +250,11 @@ function st_play_done()
 		gl.DeleteTextures(v.m.texture, 1)
 		gl.DeleteTextures(v.m.projectileTexture, 1)
 	end
+
+	gl.DeleteLists(play_healthbar_listBase, 1)
+	gl.DeleteLists(play_healthbarBorder_listBase, 1)
+	gl.DeleteTextures(play_healthbar_texture)
+	gl.DeleteTextures(play_healthbarBorder_texture)
 
 	c_tcm_unload_extra_data()
 	c_weapon_clear()
@@ -275,7 +341,7 @@ function st_play_step()
 						gl.PushAttrib("CURRENT_BIT")
 							gl.PushMatrix()
 								gl.Translate(v.p[1].x, v.p[1].y, 0)
-								gl.Rotate(c_math_degrees(v.r), 0, 0, 1)
+								gl.Rotate(tankbobs.m_degrees(v.r), 0, 0, 1)
 								if not (c_config_get("config.game.player" .. tostring(i) .. ".color", nil, true)) then
 									-- default red
 									c_config_set("config.game.player" .. tostring(i) .. ".color.r", 1)
@@ -312,12 +378,56 @@ function st_play_step()
 	for _, v in pairs(c_world_projectiles) do
 		gl.PushMatrix()
 			gl.Translate(v.p[1].x, v.p[1].y, 0)
-			gl.Rotate(c_math_degrees(v.r), 0, 0, 1)
+			gl.Rotate(tankbobs.m_degrees(v.r), 0, 0, 1)
 			gl.CallList(v.weapon.m.projectileList)
 		gl.PopMatrix()
 	end
 
+	-- healthbars
+	for k, v in pairs(c_world_tanks) do
+		if v.exists then
+			gl.PushMatrix()
+				gl.Translate(v.p[1].x, v.p[1].y, 0)
+				gl.Rotate(tankbobs.m_degrees(v.r) + c_const_get("healthbar_rotation"), 0, 0, 1)
+				gl.Color(c_config_get("config.game.player" .. tostring(k) .. ".color.r"), c_config_get("config.game.player" .. tostring(k) .. ".color.g"), c_config_get("config.game.player" .. tostring(k) .. ".color.b"), 1)
+				gl.TexEnv("TEXTURE_ENV_COLOR", c_config_get("config.game.player" .. tostring(k) .. ".color.r"), c_config_get("config.game.player" .. tostring(k) .. ".color.g"), c_config_get("config.game.player" .. tostring(k) .. ".color.b"), 1)
+				gl.CallList(play_healthbarBorder_listBase)
+				if v.health >= c_const_get("tank_highHealth") then
+					gl.Color(0.1, 1, 0.1, 1)
+					gl.TexEnv("TEXTURE_ENV_COLOR", 0.1, 1, 0.1, 1)
+				elseif v.health > c_const_get("tank_lowHealth") then
+					gl.Color(1, 1, 0.1, 1)
+					gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 0.1, 1)
+				else
+					gl.Color(1, 0.1, 0.1, 1)
+					gl.TexEnv("TEXTURE_ENV_COLOR", 1, 0.1, 0.1, 1)
+				end
+				gl.Scale(v.health / c_const_get("tank_health"), 1, 1)
+				gl.CallList(play_healthbar_listBase)
+			gl.PopMatrix()
+		end
+	end
+
 	-- HUD and text
+	local w, h = 1, 1
+	local wSpacing, hSpacing = 0.1, 0.1
+
+	local y = 5
+	for k, v in pairs(c_world_tanks) do
+		local x = 5
+		local name = tostring(tostring(c_config_get("config.game.player" .. tostring(i) .. ".name", nil, true)) .. tostring(" ") .. tostring(v.score))
+
+		gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
+		gl.Color(c_config_get("config.game.player" .. tostring(k) .. ".color.r"), c_config_get("config.game.player" .. tostring(k) .. ".color.g"), c_config_get("config.game.player" .. tostring(k) .. ".color.b"), c_config_get("config.game.scoresAlpha"))
+		gl.TexEnv("TEXTURE_ENV_COLOR", c_config_get("config.game.player" .. tostring(k) .. ".color.r"), c_config_get("config.game.player" .. tostring(k) .. ".color.g"), c_config_get("config.game.player" .. tostring(k) .. ".color.b"), c_config_get("config.game.scoresAlpha"))
+		for i = 1, #name do
+			tankbobs.r_drawCharacter(x, y, w, h, renderer_font.sans, name:sub(i, i))
+
+			x = x + w + wSpacing
+		end
+
+		y = y + h + hSpacing
+	end
 
 	gui_paint()
 end

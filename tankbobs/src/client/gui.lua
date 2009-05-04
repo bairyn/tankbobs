@@ -21,7 +21,7 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 gui.lua
 
 Graphical User Interface
-TODO: better ui?
+TODO: rewrite
 --]]
 
 function gui_init()

@@ -306,6 +306,8 @@ static const struct luaL_Reg tankbobs[] =
 		/* no arguments are passed; the vector is returned */
 	{"m_radians", m_radians}, /* convert from degrees to radians */
 		/* the 1st argument is the degrees; the radians is returned */
+	{"m_degrees", m_degrees}, /* convert from radians to degrees */
+		/* the 1st argument is the radians; the degrees is returned */
 	{"m_edge", m_edge}, /* test if and where two lines intersect */
 		/* the first two arguments passed are vectors of the coordinates of the first line */
 		/* and the third and fourth are the second line (l1p1, l1p2, l2p1, l2p2). */

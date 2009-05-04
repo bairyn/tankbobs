@@ -81,6 +81,8 @@ function c_data_init()
 	if tankbobs.io_getHomeDirectory() == nil then
 		error(select(2, tankbobs.io_getHomeDirectory()))
 	end
+	c_const_set("healthbar_texture",  c_const_get("textures_dir") .. "healthbar.png", 1)
+	c_const_set("healthbarBorder_texture",  c_const_get("textures_dir") .. "healthbarBorder.png", 1)
 	c_const_set("user_dir", tankbobs.io_getHomeDirectory() .. "/.tankbobs/", 1)
 	c_const_set("data_conf", c_const_get("data_dir") .. "default_conf.xml", 1)
 	c_const_set("user_conf", c_const_get("user_dir") .. "rc.xml", 1)

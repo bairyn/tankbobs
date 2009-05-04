@@ -50,13 +50,13 @@ function c_weapon_init()
 	weapon.texture = "shotgun.png"
 	weapon.launchDistance = 6  -- normally 3, but an extra unit to prevent the bullets from colliding before they spread
 
-	weapon.texturer[1](0, 1)
-	weapon.texturer[2](0, 0)
-	weapon.texturer[3](1, 0)
+	weapon.texturer[1](-1, 1)
+	weapon.texturer[2](-1, -1)
+	weapon.texturer[3](1, -1)
 	weapon.texturer[4](1, 1)
-	weapon.render[1](0, 1)
-	weapon.render[2](0, 0)
-	weapon.render[3](1, 0)
+	weapon.render[1](-1, 1)
+	weapon.render[2](-1, -1)
+	weapon.render[3](1, -1)
 	weapon.render[4](1, 1)
 
 	weapon.projectileTexture = "shotgun-projectile.png"
@@ -214,6 +214,10 @@ end
 
 function c_weapon_hit(tank, projectile)
 	c_world_tankDamage(tank, projectile.weapon.damage)
+
+	if tank.health <= 0 then
+		tank.killer = projectile.owner
+	end
 end
 
 function c_weapon_projectileRemove(projectile)

@@ -7,11 +7,13 @@
 	</font>
 
 	<game>
+		<scoresAlpha>0.875</scoresAlpha>
 		<timescale>1</timescale>
 		<computers>0</computers>
 		<players>2</players>
 		<overview>1</overview>
 		<player1>
+			<name>Player1</name>
 			<color>  blue
 				<r>0.1</r>
 				<g>0.1</g>
@@ -19,6 +21,7 @@
 			</color>
 		</player1>
 		<player2>
+			<name>Player2</name>
 			<color>  red
 				<r>0.9</r>
 				<g>0.1</g>
