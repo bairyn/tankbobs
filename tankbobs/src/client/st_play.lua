@@ -368,6 +368,40 @@ function st_play_step()
 		end
 	end
 
+	-- aiming aids
+	gl.EnableClientState("VERTEX_ARRAY")
+	for _, v in pairs(c_world_tanks) do
+		if v.exists then
+			if v.weapon and v.weapon.aimAid then
+				local a = {}
+				local b
+				local vec = tankbobs.m_vec2()
+				local start, endP = tankbobs.m_vec2(v.p[1]), tankbobs.m_vec2()
+
+				vec.t = v.r
+				vec.R = c_const_get("aimAid_startDistance")
+				start:add(vec)
+
+				endP(start)
+				vec.R = c_const_get("aimAid_maxDistance")
+				endP:add(vec)
+
+				b, vec = c_world_findClosestIntersection(start, endP)
+				if b then
+					endP = vec
+				end
+
+				table.insert(a, {start.x, start.y})
+				table.insert(a, {endP.x, endP.y})
+				gl.Color(0.9, 0.1, 0.1, 1)
+				gl.VertexPointer(a)
+				gl.LineWidth(c_const_get("aimAid_width"))
+				gl.DrawArrays("LINES", 0, 2)
+			end
+		end
+	end
+	gl.DisableClientState("VERTEX_ARRAY")
+
 	-- teleporters are drawn on top everything above
 	--gl.CallLists(play_teleporter_listsMultiple)
 
@@ -408,7 +442,7 @@ function st_play_step()
 		end
 	end
 
-	-- HUD and text
+	-- scores
 	local w, h = 1, 1
 	local wSpacing, hSpacing = 0.1, 0.1
 
@@ -429,6 +463,7 @@ function st_play_step()
 		y = y + h + hSpacing
 	end
 
+	-- nothing here
 	gui_paint()
 end
 

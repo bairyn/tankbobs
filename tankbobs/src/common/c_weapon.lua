@@ -28,6 +28,9 @@ function c_weapon_init()
 	c_const_set("projectile_linearDamping", 0, 1)
 	c_const_set("projectile_angularDamping", 0, 1)
 	c_const_set("projectile_friction", 0, 1)
+	c_const_set("aimAid_startDistance", 2.1, 1)  -- distance from where the aid begins
+	c_const_set("aimAid_maxDistance", 4096, 1)
+	c_const_set("aimAid_width", 0.75, 1)
 
 	c_world_projectiles = {}
 
@@ -48,7 +51,8 @@ function c_weapon_init()
 	weapon.repeatRate = 0.5  -- twice a second
 	weapon.knockback = 512  -- (per pellet)
 	weapon.texture = "shotgun.png"
-	weapon.launchDistance = 6  -- normally 3, but an extra unit to prevent the bullets from colliding before they spread
+	weapon.launchDistance = 6  -- typically 3, but an extra unit to prevent the bullets from colliding before they spread
+	weapon.aimAid = false
 
 	weapon.texturer[1](-1, 1)
 	weapon.texturer[2](-1, -1)
@@ -62,6 +66,8 @@ function c_weapon_init()
 	weapon.projectileTexture = "shotgun-projectile.png"
 	weapon.projectileDensity = 1
 	weapon.projectileRestitution = 0.1
+	weapon.projectileMaxCollisions = 0
+	weapon.projectileEndOnBody = true
 
 	weapon.projectileHull[1](0, 1)
 	weapon.projectileHull[2](0, 0)
@@ -75,6 +81,8 @@ function c_weapon_init()
 	weapon.projectileRender[2](0, 0)
 	weapon.projectileRender[3](1, 0)
 	weapon.projectileRender[4](1, 1)
+
+	-- TODO: machinegun which can reflect off a wall once (default gun is weaker machinegun)
 end
 
 function c_weapon_done()
@@ -116,6 +124,7 @@ c_weapon =
 	speed = 0,
 	knockBack = 0,
 	launchDistance = 0,
+	aimAid = false,
 
 	texture = "",
 
@@ -125,6 +134,8 @@ c_weapon =
 	-- projectiles
 	projectileDensity = 0,
 	projectileRestitution = 0,
+	projectileMaxCollisions = 0,
+	projectileEndOnBody = false,
 
 	projectileTexture = "",
 
@@ -147,6 +158,7 @@ c_weapon_projectile =
 	weapon = nil,  -- type of the weapon which created the bolt
 	r = 0,  -- rotation
 	collided = false,  -- whether it needs to be removed
+	collisions = 0,
 	owner = nil,  -- tank which fired it
 
 	m = {}
@@ -225,5 +237,19 @@ function c_weapon_projectileRemove(projectile)
 		if v == projectile then
 			table.remove(c_world_projectiles, k)
 		end
+	end
+end
+
+function c_weapon_projectileCollided(projectile, body)
+	projectile.collisions = projectile.collisions + 1
+
+	if projectile.collisions > projectile.weapon.projectileMaxCollisions then
+		projectile.collided = true
+		return
+	end
+
+	if c_world_isTank(body) and projectile.weapon.projectileEndOnBody then
+		projectile.collided = true
+		return
 	end
 end

@@ -58,17 +58,17 @@ int t_initialize(lua_State *L)
 	atexit(SDL_Quit);
 	if(SDL_Init((extra ? (SDL_INIT_VIDEO | SDL_INIT_AUDIO) : 0) | SDL_INIT_TIMER) != 0)
 	{
-		tstr *message = CDLL_FUNCTION("tstr", "tstr_new", tstr *(*)(void))
+		tstr *message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
 			();
-		CDLL_FUNCTION("tstr", "tstr_base_set", void(*)(tstr *, const char *))
+		CDLL_FUNCTION("libtstr", "tstr_base_set", void(*)(tstr *, const char *))
 			(message, "Error initializing SDL: ");
-		CDLL_FUNCTION("tstr", "tstr_cat", void(*)(tstr *, const char *))
+		CDLL_FUNCTION("libtstr", "tstr_cat", void(*)(tstr *, const char *))
 			(message, SDL_GetError());
-		CDLL_FUNCTION("tstr", "tstr_base_cat", void(*)(tstr *, const char *))
+		CDLL_FUNCTION("libtstr", "tstr_base_cat", void(*)(tstr *, const char *))
 			(message, "\n");
-		lua_pushstring(L, CDLL_FUNCTION("tstr", "tstr_cstr", const char *(*)(tstr *))
+		lua_pushstring(L, CDLL_FUNCTION("libtstr", "tstr_cstr", const char *(*)(tstr *))
 							(message));
-		CDLL_FUNCTION("tstr", "tstr_free", void(*)(tstr *))
+		CDLL_FUNCTION("libtstr", "tstr_free", void(*)(tstr *))
 			(message);
 		lua_error(L);
 	}

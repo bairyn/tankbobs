@@ -268,6 +268,19 @@ function c_world_tankHull(tank)
 	return c
 end
 
+function c_world_projectileHull(projectile)
+	local c = {}
+	local p = projectile.p[1]
+
+	for _, v in ipairs(projectile.weapon.projectileHull) do  -- ipairs to make sure of proper order
+		local h = tankbobs.m_vec2(v)
+		h.t = h.t + projectile.r
+		table.insert(c, p + h)
+	end
+
+	return c
+end
+
 function c_world_wallShape(wall)
 	local average = tankbobs.m_vec2()
 	local offsets = {}
@@ -490,11 +503,11 @@ function c_world_contactListener(shape1, shape2, body1, body2, position, separat
 		projectile2 = select(2, c_world_isProjectile(body2))
 
 		if projectile then
-			projectile.collided = true
+			c_weapon_projectileCollided(projectile, body2)
 		end
 
 		if projectile2 then
-			projectile2.collided = true
+			c_weapon_projectileCollided(projectile2, body1)
 		end
 
 		-- test if the projectile hit a tank
@@ -531,6 +544,101 @@ function c_world_contactListener(shape1, shape2, body1, body2, position, separat
 			c_world_collide(tank2, normal)
 		end
 	end
+end
+
+function c_world_findClosestIntersection(start, endP)
+	-- test against the world and find the closest intersection point
+	local lastPoint, currentPoint = nil
+	local minDistance, minIntersection
+	local hull
+	local b, intersection
+
+	-- walls
+	for _, v in pairs(c_tcm_current_map.walls) do
+		if not v.detail then
+			hull = v.p
+			for _, v in pairs(hull) do
+				currentPoint = v
+				if not lastPoint then
+					lastPoint = hull[#hull]
+				end
+
+				b, intersection = tankbobs.m_edge(lastPoint, currentPoint, start, endP)
+				if b then
+					if not minDistance then
+						minIntersection = intersection
+						minDistance = math.abs((intersection - start).R)
+					elseif math.abs((intersection - start).R) < minDistance then
+						minIntersection = intersection
+						minDistance = math.abs((intersection - start).R)
+					end
+				end
+
+				lastPoint = currentPoint
+			end
+			lastPoint = nil
+		end
+	end
+
+	-- tanks
+	for _, v in pairs(c_world_tanks) do
+		if v.exists then
+			hull = c_world_tankHull(v)
+			for _, v in pairs(hull) do
+				currentPoint = v
+				if not lastPoint then
+					lastPoint = hull[#hull]
+				end
+
+				b, intersection = tankbobs.m_edge(lastPoint, currentPoint, start, endP)
+				if b then
+					if not minDistance then
+						minIntersection = intersection
+						minDistance = math.abs((intersection - start).R)
+					elseif math.abs((intersection - start).R) < minDistance then
+						minIntersection = intersection
+						minDistance = math.abs((intersection - start).R)
+					end
+				end
+
+				lastPoint = currentPoint
+			end
+			lastPoint = nil
+		end
+	end
+
+	-- projectiles
+	for _, v in pairs(c_world_projectiles) do
+		if not v.collided then
+			hull = c_world_projectileHull(v)
+			for _, v in pairs(hull) do
+				currentPoint = v
+				if not lastPoint then
+					lastPoint = hull[#hull]
+				end
+
+				b, intersection = tankbobs.m_edge(lastPoint, currentPoint, start, endP)
+				if b then
+					if not minDistance then
+						minIntersection = intersection
+						minDistance = math.abs((intersection - start).R)
+					elseif math.abs((intersection - start).R) < minDistance then
+						minIntersection = intersection
+						minDistance = math.abs((intersection - start).R)
+					end
+				end
+
+				lastPoint = currentPoint
+			end
+			lastPoint = nil
+		end
+	end
+
+	-- teleporters
+
+	-- powerups
+
+	return minDistance, minIntersection
 end
 
 function c_world_step()

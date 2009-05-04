@@ -45,13 +45,13 @@ do \
 { \
 	if(!world) \
 	{ \
-		tstr *message = CDLL_FUNCTION("tstr", "tstr_new", tstr *(*)(void)) \
+		tstr *message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void)) \
 			(); \
-		CDLL_FUNCTION("tstr", "tstr_base_set", void(*)(tstr *, const char *)) \
+		CDLL_FUNCTION("libtstr", "tstr_base_set", void(*)(tstr *, const char *)) \
 			(message, "world is unintialized\n"); \
-		lua_pushstring(L, CDLL_FUNCTION("tstr", "tstr_cstr", const char *(*)(tstr *)) \
+		lua_pushstring(L, CDLL_FUNCTION("libtstr", "tstr_cstr", const char *(*)(tstr *)) \
 							(message)); \
-		CDLL_FUNCTION("tstr", "tstr_free", void(*)(tstr *)) \
+		CDLL_FUNCTION("libtstr", "tstr_free", void(*)(tstr *)) \
 			(message); \
 		lua_error(L); \
 	} \
@@ -160,13 +160,13 @@ int w_newWorld(lua_State *L)
 
 	if(world)
 	{
-		tstr *message = CDLL_FUNCTION("tstr", "tstr_new", tstr *(*)(void))
+		tstr *message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
 			();
-		CDLL_FUNCTION("tstr", "tstr_base_set", void(*)(tstr *, const char *))
+		CDLL_FUNCTION("libtstr", "tstr_base_set", void(*)(tstr *, const char *))
 			(message, "w_newWorld: memory leak detected: world wasn't freed properly\n");
-		lua_pushstring(L, CDLL_FUNCTION("tstr", "tstr_cstr", const char *(*)(tstr *))
+		lua_pushstring(L, CDLL_FUNCTION("libtstr", "tstr_cstr", const char *(*)(tstr *))
 							(message));
-		CDLL_FUNCTION("tstr", "tstr_free", void(*)(tstr *))
+		CDLL_FUNCTION("libtstr", "tstr_free", void(*)(tstr *))
 			(message);
 		lua_error(L);
 	}
@@ -187,13 +187,13 @@ int w_freeWorld(lua_State *L)
 
 	if(!world)
 	{
-		tstr *message = CDLL_FUNCTION("tstr", "tstr_new", tstr *(*)(void))
+		tstr *message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
 			();
-		CDLL_FUNCTION("tstr", "tstr_base_set", void(*)(tstr *, const char *))
+		CDLL_FUNCTION("libtstr", "tstr_base_set", void(*)(tstr *, const char *))
 			(message, "w_freeWorld: freeing unitialized world\n");
-		lua_pushstring(L, CDLL_FUNCTION("tstr", "tstr_cstr", const char *(*)(tstr *))
+		lua_pushstring(L, CDLL_FUNCTION("libtstr", "tstr_cstr", const char *(*)(tstr *))
 							(message));
-		CDLL_FUNCTION("tstr", "tstr_free", void(*)(tstr *))
+		CDLL_FUNCTION("libtstr", "tstr_free", void(*)(tstr *))
 			(message);
 		lua_error(L);
 	}
@@ -273,13 +273,13 @@ int w_addBody(lua_State *L)
 
 	if((!lua_istable(L, 7)) || !(lua_objlen(L, 7) > 0))
 	{
-		tstr *message = CDLL_FUNCTION("tstr", "tstr_new", tstr *(*)(void))
+		tstr *message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
 			();
-		CDLL_FUNCTION("tstr", "tstr_base_set", void(*)(tstr *, const char *))
+		CDLL_FUNCTION("libtstr", "tstr_base_set", void(*)(tstr *, const char *))
 			(message, "w_addBody: invalid polygon table\n");
-		lua_pushstring(L, CDLL_FUNCTION("tstr", "tstr_cstr", const char *(*)(tstr *))
+		lua_pushstring(L, CDLL_FUNCTION("libtstr", "tstr_cstr", const char *(*)(tstr *))
 							(message));
-		CDLL_FUNCTION("tstr", "tstr_free", void(*)(tstr *))
+		CDLL_FUNCTION("libtstr", "tstr_free", void(*)(tstr *))
 			(message);
 		lua_error(L);
 	}

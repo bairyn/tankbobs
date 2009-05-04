@@ -66,17 +66,17 @@ void m_init(lua_State *L)
 {
 	if(!(luaL_newmetatable(L, MATH_METATABLE)))
 	{
-		tstr *message = CDLL_FUNCTION("tstr", "tstr_new", tstr *(*)(void))
+		tstr *message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
 			();
-		CDLL_FUNCTION("tstr", "tstr_base_set", void(*)(tstr *, const char *))
+		CDLL_FUNCTION("libtstr", "tstr_base_set", void(*)(tstr *, const char *))
 			(message, "Error setting vector userdata metatable: ");
-		CDLL_FUNCTION("tstr", "tstr_cat", void(*)(tstr *, const char *))
+		CDLL_FUNCTION("libtstr", "tstr_cat", void(*)(tstr *, const char *))
 			(message, MATH_METATABLE);
-		CDLL_FUNCTION("tstr", "tstr_base_cat", void(*)(tstr *, const char *))
+		CDLL_FUNCTION("libtstr", "tstr_base_cat", void(*)(tstr *, const char *))
 			(message, "\n");
-		lua_pushstring(L, CDLL_FUNCTION("tstr", "tstr_cstr", const char *(*)(tstr *))
+		lua_pushstring(L, CDLL_FUNCTION("libtstr", "tstr_cstr", const char *(*)(tstr *))
 							(message));
-		CDLL_FUNCTION("tstr", "tstr_free", void(*)(tstr *))
+		CDLL_FUNCTION("libtstr", "tstr_free", void(*)(tstr *))
 			(message);
 		lua_error(L);
 	}
@@ -207,17 +207,17 @@ int m_vec2_index(lua_State *L)
 			else
 			{
 				lua_pop(L, 1);
-				message = CDLL_FUNCTION("tstr", "tstr_new", tstr *(*)(void))
+				message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
 					();
-				CDLL_FUNCTION("tstr", "tstr_base_set", void(*)(tstr *, const char *))
+				CDLL_FUNCTION("libtstr", "tstr_base_set", void(*)(tstr *, const char *))
 					(message, "m_vec2_index: invalid index for vec2: ");
-				CDLL_FUNCTION("tstr", "tstr_cat", void(*)(tstr *, const char *))
+				CDLL_FUNCTION("libtstr", "tstr_cat", void(*)(tstr *, const char *))
 					(message, index_s);
-				CDLL_FUNCTION("tstr", "tstr_base_cat", void(*)(tstr *, const char *))
+				CDLL_FUNCTION("libtstr", "tstr_base_cat", void(*)(tstr *, const char *))
 					(message, "\n");
-				lua_pushstring(L, CDLL_FUNCTION("tstr", "tstr_cstr", const char *(*)(tstr *))
+				lua_pushstring(L, CDLL_FUNCTION("libtstr", "tstr_cstr", const char *(*)(tstr *))
 					(message));
-				CDLL_FUNCTION("tstr", "tstr_free", void(*)(tstr *))
+				CDLL_FUNCTION("libtstr", "tstr_free", void(*)(tstr *))
 					(message);
 				lua_error(L);
 			}
@@ -297,17 +297,17 @@ int m_vec2_newindex(lua_State *L)
 			break;
 
 		default:
-			message = CDLL_FUNCTION("tstr", "tstr_new", tstr *(*)(void))
+			message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
 				();
-			CDLL_FUNCTION("tstr", "tstr_base_set", void(*)(tstr *, const char *))
+			CDLL_FUNCTION("libtstr", "tstr_base_set", void(*)(tstr *, const char *))
 				(message, "m_vec2_newindex: invalid index for vec2: ");
-			CDLL_FUNCTION("tstr", "tstr_cat", void(*)(tstr *, const char *))
+			CDLL_FUNCTION("libtstr", "tstr_cat", void(*)(tstr *, const char *))
 				(message, luaL_checkstring(L, 2));
-			CDLL_FUNCTION("tstr", "tstr_base_cat", void(*)(tstr *, const char *))
+			CDLL_FUNCTION("libtstr", "tstr_base_cat", void(*)(tstr *, const char *))
 				(message, "\n");
-			lua_pushstring(L, CDLL_FUNCTION("tstr", "tstr_cstr", const char *(*)(tstr *))
+			lua_pushstring(L, CDLL_FUNCTION("libtstr", "tstr_cstr", const char *(*)(tstr *))
 				(message));
-			CDLL_FUNCTION("tstr", "tstr_free", void(*)(tstr *))
+			CDLL_FUNCTION("libtstr", "tstr_free", void(*)(tstr *))
 				(message);
 			lua_error(L);
 			break;

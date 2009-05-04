@@ -90,13 +90,13 @@ int r_initialize(lua_State *L)
 
 	if(FT_Init_FreeType(&ft))
 	{
-		tstr *message = CDLL_FUNCTION("tstr", "tstr_new", tstr *(*)(void))
+		tstr *message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
 			();
-		CDLL_FUNCTION("tstr", "tstr_base_set", void(*)(tstr *, const char *))
+		CDLL_FUNCTION("libtstr", "tstr_base_set", void(*)(tstr *, const char *))
 			(message, "Error initializing FreeType\n");
-		lua_pushstring(L, CDLL_FUNCTION("tstr", "tstr_cstr", const char *(*)(tstr *))
+		lua_pushstring(L, CDLL_FUNCTION("libtstr", "tstr_cstr", const char *(*)(tstr *))
 							(message));
-		CDLL_FUNCTION("tstr", "tstr_free", void(*)(tstr *))
+		CDLL_FUNCTION("libtstr", "tstr_free", void(*)(tstr *))
 			(message);
 		lua_error(L);
 	}
@@ -308,30 +308,30 @@ int r_newFont(lua_State *L)
 
 	if(FT_New_Face(ft, filename, 0, &font->f))
 	{
-		tstr *message = CDLL_FUNCTION("tstr", "tstr_new", tstr *(*)(void))
+		tstr *message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
 			();
-		CDLL_FUNCTION("tstr", "tstr_base_set", void(*)(tstr *, const char *))
+		CDLL_FUNCTION("libtstr", "tstr_base_set", void(*)(tstr *, const char *))
 			(message, "missing or corrupt font file `");
-		CDLL_FUNCTION("tstr", "tstr_cat", void(*)(tstr *, const char *))
+		CDLL_FUNCTION("libtstr", "tstr_cat", void(*)(tstr *, const char *))
 			(message, filename);
-		CDLL_FUNCTION("tstr", "tstr_base_cat", void(*)(tstr *, const char *))
+		CDLL_FUNCTION("libtstr", "tstr_base_cat", void(*)(tstr *, const char *))
 			(message, "'\n");
-		lua_pushstring(L, CDLL_FUNCTION("tstr", "tstr_cstr", const char *(*)(tstr *))
+		lua_pushstring(L, CDLL_FUNCTION("libtstr", "tstr_cstr", const char *(*)(tstr *))
 							(message));
-		CDLL_FUNCTION("tstr", "tstr_free", void(*)(tstr *))
+		CDLL_FUNCTION("libtstr", "tstr_free", void(*)(tstr *))
 			(message);
 		lua_error(L);
 	}
 
 	if(FT_Set_Char_Size(font->f, 16 << 6, 16 << 6, 0, 0))
 	{
-		tstr *message = CDLL_FUNCTION("tstr", "tstr_new", tstr *(*)(void))
+		tstr *message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
 			();
-		CDLL_FUNCTION("tstr", "tstr_base_set", void(*)(tstr *, const char *))
+		CDLL_FUNCTION("libtstr", "tstr_base_set", void(*)(tstr *, const char *))
 			(message, "cannot set font size\n");
-		lua_pushstring(L, CDLL_FUNCTION("tstr", "tstr_cstr", const char *(*)(tstr *))
+		lua_pushstring(L, CDLL_FUNCTION("libtstr", "tstr_cstr", const char *(*)(tstr *))
 							(message));
-		CDLL_FUNCTION("tstr", "tstr_free", void(*)(tstr *))
+		CDLL_FUNCTION("libtstr", "tstr_free", void(*)(tstr *))
 			(message);
 		lua_error(L);
 	}
@@ -340,12 +340,12 @@ int r_newFont(lua_State *L)
 	font->chars = glGenLists(NUMCHARS);
 	if(!font->chars)
 	{
-		tstr *message = CDLL_FUNCTION("tstr", "tstr_new", tstr *(*)(void))();
-		CDLL_FUNCTION("tstr", "tstr_base_set", void(*)(tstr *, const char *))
+		tstr *message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))();
+		CDLL_FUNCTION("libtstr", "tstr_base_set", void(*)(tstr *, const char *))
 			(message, "could not enough memory font\n");
-		lua_pushstring(L, CDLL_FUNCTION("tstr", "tstr_cstr", const char *(*)(tstr *))
+		lua_pushstring(L, CDLL_FUNCTION("libtstr", "tstr_cstr", const char *(*)(tstr *))
 							(message));
-		CDLL_FUNCTION("tstr", "tstr_free", void(*)(tstr *))
+		CDLL_FUNCTION("libtstr", "tstr_free", void(*)(tstr *))
 			(message);
 		lua_error(L);
 	}
@@ -354,25 +354,25 @@ int r_newFont(lua_State *L)
 		glBindTexture(GL_TEXTURE_2D, font->textures[i]);
 		if(FT_Load_Glyph(font->f, FT_Get_Char_Index(font->f, i), FT_LOAD_DEFAULT))
 		{
-			tstr *message = CDLL_FUNCTION("tstr", "tstr_new", tstr *(*)(void))
+			tstr *message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
 				();
-			CDLL_FUNCTION("tstr", "tstr_base_set", void(*)(tstr *, const char *))
+			CDLL_FUNCTION("libtstr", "tstr_base_set", void(*)(tstr *, const char *))
 				(message, "cannot set font size\n");
-			lua_pushstring(L, CDLL_FUNCTION("tstr", "tstr_cstr", const char *(*)(tstr *))
+			lua_pushstring(L, CDLL_FUNCTION("libtstr", "tstr_cstr", const char *(*)(tstr *))
 								(message));
-			CDLL_FUNCTION("tstr", "tstr_free", void(*)(tstr *))
+			CDLL_FUNCTION("libtstr", "tstr_free", void(*)(tstr *))
 				(message);
 			lua_error(L);
 		}
 		if(FT_Get_Glyph(font->f->glyph, &g))
 		{
-			tstr *message = CDLL_FUNCTION("tstr", "tstr_new", tstr *(*)(void))
+			tstr *message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
 				();
-			CDLL_FUNCTION("tstr", "tstr_base_set", void(*)(tstr *, const char *))
+			CDLL_FUNCTION("libtstr", "tstr_base_set", void(*)(tstr *, const char *))
 				(message, "cannot set font glyph\n");
-			lua_pushstring(L, CDLL_FUNCTION("tstr", "tstr_cstr", const char *(*)(tstr *))
+			lua_pushstring(L, CDLL_FUNCTION("libtstr", "tstr_cstr", const char *(*)(tstr *))
 								(message));
-			CDLL_FUNCTION("tstr", "tstr_free", void(*)(tstr *))
+			CDLL_FUNCTION("libtstr", "tstr_free", void(*)(tstr *))
 				(message);
 			lua_error(L);
 		}
@@ -485,21 +485,21 @@ int r_loadImage2D(lua_State *L)
 		img = IMG_Load(filename);
 		if(!img)
 		{
-			tstr *message = CDLL_FUNCTION("tstr", "tstr_new", tstr *(*)(void))
+			tstr *message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
 				();
-			CDLL_FUNCTION("tstr", "tstr_base_set", void(*)(tstr *, const char *))
+			CDLL_FUNCTION("libtstr", "tstr_base_set", void(*)(tstr *, const char *))
 				(message, "r_loadImage2D: could not load texture `");
-			CDLL_FUNCTION("tstr", "tstr_cat", void(*)(tstr *, const char *))
+			CDLL_FUNCTION("libtstr", "tstr_cat", void(*)(tstr *, const char *))
 				(message, luaL_checkstring(L, 1));
-			CDLL_FUNCTION("tstr", "tstr_base_cat", void(*)(tstr *, const char *))
+			CDLL_FUNCTION("libtstr", "tstr_base_cat", void(*)(tstr *, const char *))
 				(message, "' or default texture: '");
-			CDLL_FUNCTION("tstr", "tstr_cat", void(*)(tstr *, const char *))
+			CDLL_FUNCTION("libtstr", "tstr_cat", void(*)(tstr *, const char *))
 				(message, filename);
-			CDLL_FUNCTION("tstr", "tstr_base_cat", void(*)(tstr *, const char *))
+			CDLL_FUNCTION("libtstr", "tstr_base_cat", void(*)(tstr *, const char *))
 				(message, "'\n");
-			lua_pushstring(L, CDLL_FUNCTION("tstr", "tstr_cstr", const char *(*)(tstr *))
+			lua_pushstring(L, CDLL_FUNCTION("libtstr", "tstr_cstr", const char *(*)(tstr *))
 								(message));
-			CDLL_FUNCTION("tstr", "tstr_free", void(*)(tstr *))
+			CDLL_FUNCTION("libtstr", "tstr_free", void(*)(tstr *))
 				(message);
 			lua_error(L);
 		}

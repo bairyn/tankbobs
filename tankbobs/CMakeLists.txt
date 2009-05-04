@@ -29,4 +29,4 @@ target_link_libraries(tankbobs-server lua5.1)
 
 set(tstr_srcs src/lib/tstr/tstr.c)
 
-add_library(tstr ${tstr_srcs})
+add_library(tstr SHARED ${tstr_srcs})
