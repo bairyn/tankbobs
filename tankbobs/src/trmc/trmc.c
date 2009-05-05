@@ -581,14 +581,14 @@ static struct path_s
 	double time;
 } paths[MAX_PATHS];
 
-static int mc = 0;
-static int wc = 0;
-static int tc = 0;
-static int lc = 0;
-static int oc = 0;
-static int pc = 0;
+static int mc;
+static int wc;
+static int tc;
+static int lc;
+static int oc;
+static int pc;
 
-static void add_map(const char *name, const char *title, const char *description, const char *version_s, int version)
+static void add_map(const char *name, const char *title, const char *description, const char *authors, const char *version_s, int version)
 {
 	map_t *map = &maps[mc++];
 
@@ -601,6 +601,7 @@ static void add_map(const char *name, const char *title, const char *description
 	strncpy(map->name, name, sizeof(map->name));
 	strncpy(map->title, title, sizeof(map->title));
 	strncpy(map->description, description, sizeof(map->description));
+	strncpy(map->authors, description, sizeof(map->authors));
 	strncpy(map->version_s, version_s, sizeof(map->version_s));
 	map->version = version;
 }
@@ -726,6 +727,9 @@ static int compile(const char *filename)
 	int j;
 	char line[MAX_LINE_SIZE] = {""};
 
+	/* reset counters */
+	mc = wc = tc = lc = oc = pc = 0;
+
 	if(hidden(filename))
 	{
 		fprintf(stderr, "Warning: ignoring hidden file: '%s'\n", filename);
@@ -806,16 +810,18 @@ static int compile(const char *filename)
 					char name[MAX_STRING_SIZE];
 					char title[MAX_STRING_SIZE];
 					char description[MAX_STRING_SIZE];
+					char authors[MAX_STRING_SIZE];
 					char version_s[MAX_STRING_SIZE];
 					int version;
 
 					read_string(name);
 					read_string(title);
 					read_string(description);
+					read_string(authors);
 					read_string(version_s);
 					version = read_int();
 
-					add_map(name, title, description, version_s, version);
+					add_map(name, title, description, authors, version_s, version);
 				}
 				else if(strncmp(entity, "wall", sizeof(entity)) == 0)
 				{
@@ -1052,13 +1058,29 @@ static int compile(const char *filename)
 		int powerups[16] = {0};
 		powerupSpawnPoint_t *powerupSpawnPoint = &powerupSpawnPoints[i];
 
-		if(strstr(powerupSpawnPoint->powerupsToEnable, "foo"))
+		if(strstr(powerupSpawnPoint->powerupsToEnable, "machinegun"))
 		{
 			powerups[0] |= 0x00000001;
 		}
-		if(strstr(powerupSpawnPoint->powerupsToEnable, "bar"))
+		if(strstr(powerupSpawnPoint->powerupsToEnable, "shotgun"))
 		{
 			powerups[0] |= 0x00000002;
+		}
+		if(strstr(powerupSpawnPoint->powerupsToEnable, "railgun"))
+		{
+			powerups[0] |= 0x00000004;
+		}
+		if(strstr(powerupSpawnPoint->powerupsToEnable, "coilgun"))
+		{
+			powerups[0] |= 0x00000008;
+		}
+		if(strstr(powerupSpawnPoint->powerupsToEnable, "saw"))
+		{
+			powerups[0] |= 0x00000010;
+		}
+		if(strstr(powerupSpawnPoint->powerupsToEnable, "ammo"))
+		{
+			powerups[0] |= 0x00000020;
 		}
 
 		put_cint(fout, i);

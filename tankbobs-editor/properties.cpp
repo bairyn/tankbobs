@@ -278,15 +278,15 @@ void Properties::targetChanged(const QString &text)
 {
 	if(trm_isPath(selection))
 	{
-		reinterpret_cast<entities::Path *>(selection)->target= util_atoi(util_qtcp(text).c_str());
+		reinterpret_cast<entities::Path *>(selection)->target = util_atoi(util_qtcp(text).c_str());
 	}
 	if(trm_isTeleporter(selection))
 	{
-		reinterpret_cast<entities::Teleporter *>(selection)->target= util_atoi(util_qtcp(text).c_str());
+		reinterpret_cast<entities::Teleporter *>(selection)->target = util_atoi(util_qtcp(text).c_str());
 	}
 	if(trm_isWall(selection))
 	{
-		reinterpret_cast<entities::Wall *>(selection)->target= util_atoi(util_qtcp(text).c_str());
+		reinterpret_cast<entities::Wall *>(selection)->target = util_atoi(util_qtcp(text).c_str());
 	}
 }
 

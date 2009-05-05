@@ -63,6 +63,40 @@ function st_play_init()
 		gl.End()
 	gl.EndList()
 
+	play_powerup_listBase = gl.GenLists(1)
+	play_powerup_textures = gl.GenTextures(1)
+
+	if play_powerup_listBase == 0 then
+		error "st_play_init: could not generate lists"
+	end
+
+	c_const_set("powerup_renderx1",  0, 1) c_const_set("powerup_rendery1",  1, 1)
+	c_const_set("powerup_renderx2",  0, 1) c_const_set("powerup_rendery2",  0, 1)
+	c_const_set("powerup_renderx3",  1, 1) c_const_set("powerup_rendery3",  0, 1)
+	c_const_set("powerup_renderx4",  1, 1) c_const_set("powerup_rendery4",  1, 1)
+	c_const_set("powerup_texturex1", 0, 1) c_const_set("powerup_texturey1", 1, 1)
+	c_const_set("powerup_texturex2", 0, 1) c_const_set("powerup_texturey2", 0, 1)
+	c_const_set("powerup_texturex3", 1, 1) c_const_set("powerup_texturey3", 0, 1)
+	c_const_set("powerup_texturex4", 1, 1) c_const_set("powerup_texturey4", 1, 1)
+
+	gl.BindTexture("TEXTURE_2D", play_powerup_textures[1])
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_S", "REPEAT")
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_T", "REPEAT")
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_MIN_FILTER", "LINEAR")
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_MAG_FILTER", "LINEAR")
+	tankbobs.r_loadImage2D(c_const_get("powerup"), c_const_get("textures_default"))
+
+	gl.NewList(play_powerup_listBase, "COMPILE_AND_EXECUTE")
+		gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
+		gl.BindTexture("TEXTURE_2D", play_powerup_textures[1])
+		gl.Begin("QUADS")
+			gl.TexCoord(c_const_get("powerup_texturex1"), c_const_get("powerup_texturey1")) gl.Vertex(c_const_get("powerup_renderx1"), c_const_get("powerup_rendery1"))
+			gl.TexCoord(c_const_get("powerup_texturex2"), c_const_get("powerup_texturey2")) gl.Vertex(c_const_get("powerup_renderx2"), c_const_get("powerup_rendery2"))
+			gl.TexCoord(c_const_get("powerup_texturex3"), c_const_get("powerup_texturey3")) gl.Vertex(c_const_get("powerup_renderx3"), c_const_get("powerup_rendery3"))
+			gl.TexCoord(c_const_get("powerup_texturex4"), c_const_get("powerup_texturey4")) gl.Vertex(c_const_get("powerup_renderx4"), c_const_get("powerup_rendery4"))
+		gl.End()
+	gl.EndList()
+
 	local listOffset = 0
 
 	play_wall_listBase = gl.GenLists(c_tcm_current_map.walls_n)
@@ -240,9 +274,11 @@ function st_play_done()
 
 	gl.DeleteLists(play_tank_listBase, 1)
 	gl.DeleteLists(play_wall_listBase, c_tcm_current_map.walls_n)
+	gl.DeleteLists(play_powerup_listBase, 1)
 
 	gl.DeleteTextures(play_tank_textures)
 	gl.DeleteTextures(play_wall_textures)
+	gl.DeleteTextures(play_powerup_textures)
 
 	for _, v in pairs(c_weapons) do
 		gl.DeleteLists(v.m.list, 1)
@@ -406,7 +442,15 @@ function st_play_step()
 	--gl.CallLists(play_teleporter_listsMultiple)
 
 	-- powerups are drawn next
-	--gl.
+	for _, v in pairs(c_world_powerups) do
+		gl.PushMatrix()
+			gl.Color(v.c.r, v.c.g, v.c.b, v.c.a)
+			gl.TexEnv("TEXTURE_ENV_COLOR", v.c.r, v.c.g, v.c.b, v.c.a)
+			gl.Translate(v.p[1].x, v.p[1].y, 0)
+			gl.Rotate(tankbobs.m_degrees(v.r), 0, 0, 1)
+			gl.CallList(play_powerup_listBase)
+		gl.PopMatrix()
+	end
 
 	-- projectiles
 	for _, v in pairs(c_world_projectiles) do

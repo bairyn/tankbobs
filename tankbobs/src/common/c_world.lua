@@ -39,6 +39,9 @@ function c_world_init()
 	c_const_set("world_gravityx", 0, 1) c_const_set("world_gravityy", 0, 1)
 	c_const_set("world_allowSleep", true, 1)
 
+	c_const_set("powerupSpawnPoint_initialPowerupTime", 30, 1)
+	c_const_set("powerupSpawnPoint_powerupTime", 30, 1)
+
 	c_const_set("tank_maxCollisionVectorLength", 975)  -- 975 units
 
 	-- hull of tank facing right
@@ -93,17 +96,112 @@ function c_world_init()
 	c_const_set("tank_defaultRotation", c_math_radians(90), 1)  -- up
 
 	c_world_tanks = {}
+
+	c_const_set("powerup_hullx1",  0, 1) c_const_set("powerup_hully1",  1, 1)
+	c_const_set("powerup_hullx2",  0, 1) c_const_set("powerup_hully2",  0, 1)
+	c_const_set("powerup_hullx3",  1, 1) c_const_set("powerup_hully3",  0, 1)
+	c_const_set("powerup_hullx4",  1, 1) c_const_set("powerup_hully4",  1, 1)
+
+	-- powerups
+	c_powerupTypes = {}
+
+	-- weapons are bluish
+
+	-- machinegun
+	local powerupType = c_world_powerupType:new()
+
+	table.insert(c_powerupTypes, powerupType)
+
+	powerupType.name = "machinegun"
+	powerupType.c.r, powerupType.c.g, powerupType.c.b, powerupType.c.a = 0.3, 0.6, 1, 1
+
+	-- shotgun
+	local powerupType = c_world_powerupType:new()
+
+	table.insert(c_powerupTypes, powerupType)
+
+	powerupType.name = "shotgun"
+	powerupType.c.r, powerupType.c.g, powerupType.c.b, powerupType.c.a = 0.25, 0.25, 0.75, 1
+
+	-- railgun
+	local powerupType = c_world_powerupType:new()
+
+	table.insert(c_powerupTypes, powerupType)
+
+	powerupType.name = "railgun"
+	powerupType.c.r, powerupType.c.g, powerupType.c.b, powerupType.c.a = 0, 0, 1, 1
+
+	-- coilgun
+	local powerupType = c_world_powerupType:new()
+
+	table.insert(c_powerupTypes, powerupType)
+
+	powerupType.name = "coilgun"
+	powerupType.c.r, powerupType.c.g, powerupType.c.b, powerupType.c.a = 0.25, 0.25, 1, 0.875
+
+	-- saw
+	local powerupType = c_world_powerupType:new()
+
+	table.insert(c_powerupTypes, powerupType)
+
+	powerupType.name = "saw"
+	powerupType.c.r, powerupType.c.g, powerupType.c.b, powerupType.c.a = 0, 0, 0.6, 0.875
+
+	-- ammo
+	local powerupType = c_world_powerupType:new()
+
+	table.insert(c_powerupTypes, powerupType)
+
+	powerupType.name = "ammo"
+	powerupType.c.r, powerupType.c.g, powerupType.c.b, powerupType.c.a = 0.05, 0.4, 0.1, 0.5
+
+	-- TODO: health with light green
 end
 
 function c_world_done()
 end
 
+c_world_powerupType =
+{
+	new = common_new,
+
+	name = "",
+	c = {r = 0, g = 0, b = 0, a = 0},
+}
+
+c_world_powerup =
+{
+	new = common_new,
+
+	init = function (o)
+		o.p[1] = tankbobs.m_vec2()
+	end,
+
+	p = {},
+	r = 0,  -- rotation
+	c = {r = 0, g = 0, b = 0, a = 0},
+	collided = false,  -- whether it needs to be removed
+	type = nil,  -- the type of powerup (shotgun, ammo, speed enhancement, etc)
+
+	m = {}
+}
+
+function c_world_getPowerupTypeByName(name)
+	for k, v in pairs(c_powerupTypes) do
+		if v.name == name then
+			return v
+		end
+	end
+end
+
 function c_world_newWorld()
+	local t = tankbobs.t_getTicks()
+
 	tankbobs.w_newWorld(tankbobs.m_vec2(c_const_get("world_lowerBoundx"), c_const_get("world_lowerBoundy")), tankbobs.m_vec2(c_const_get("world_upperBoundx"), c_const_get("world_upperBoundy")), tankbobs.m_vec2(c_const_get("world_gravityx"), c_const_get("world_gravityy")), c_const_get("world_allowSleep"), "c_world_contactListener")
 
 	for _, v in pairs(c_tcm_current_map.walls) do
 		if v.detail then
-			return  -- the wall isn't part of the physical world
+			break  -- the wall isn't part of the physical world
 		end
 
 		-- add wall to world
@@ -113,10 +211,29 @@ function c_world_newWorld()
 			error "c_world_newWorld: could not add a wall to the physical world"
 		end
 	end
+
+	for k, v in pairs(c_tcm_current_map.powerupSpawnPoints) do
+		v.m.nextPowerupTime = t + c_const_get("world_time") * c_config_get("config.game.timescale") * c_const_get("powerupSpawnPoint_initialPowerupTime")
+		local enabled = false
+		for k, vs in pairs(v.enabledPowerups) do
+			if vs then
+				enabled = true
+				v.m.lastSpawnPoint = k
+			end
+		end
+		if not enabled then
+			-- tankbobs assumes that at least one powerup is enabled, so remove the psp
+			c_tcm_current_map.powerupSpawnPoints[k] = nil
+		end
+	end
+
+	c_world_powerups = {}
 end
 
 function c_world_freeWorld()
 	tankbobs.w_freeWorld()
+
+	c_world_powerups = {}
 end
 
 c_world_tank =
@@ -156,7 +273,8 @@ c_world_tank =
 	health = 0,
 	nextSpawnTime = 0,
 	killer = nil,
-	score = 0
+	score = 0,
+	ammo = 0
 }
 
 c_world_tank_state =
@@ -281,6 +399,32 @@ function c_world_projectileHull(projectile)
 	return c
 end
 
+function c_world_powerupHull(powerup)
+	local c = {}
+	local p = powerup.p[1]
+
+	for i = 1, 4 do
+		local h = tankbobs.m_vec2(c_const_get("powerup_hullx" .. tostring(i)), c_const_get("powerup_hully" .. tostring(i)))
+		h.t = h.t + powerup.r
+		table.insert(c, p + h)
+	end
+
+	return c
+end
+
+function c_world_powerupSpawnPointHull(powerupSpawnPoint)
+	local c = {}
+	local p = powerupSpawnPoint.p[1]
+
+	for i = 1, 4 do
+		local h = tankbobs.m_vec2(c_const_get("powerup_hullx" .. tostring(i)), c_const_get("powerup_hully" .. tostring(i)))
+		h.t = 0  --
+		table.insert(c, p + h)
+	end
+
+	return c
+end
+
 function c_world_wallShape(wall)
 	local average = tankbobs.m_vec2()
 	local offsets = {}
@@ -295,6 +439,19 @@ function c_world_wallShape(wall)
 	end
 
 	return {average, offsets}
+end
+
+function c_world_canPowerupSpawn(d, powerupSpawnPoint)
+	-- make sure it doesn't interfere with another powerup or wall
+	for _, v in pairs(c_tcm_current_map.walls) do
+		if not v.detail then
+			if c_world_intersection(d, c_world_powerupSpawnPointHull(powerupSpawnPoint), v.p, tankbobs.m_vec2(0, 0), v.static and tankbobs.m_vec2(0, 0) or tankbobs.w_getLinearVelocity(v.body)) then
+				return false
+			end
+		end
+	end
+
+	return true
 end
 
 function c_world_tank_canSpawn(d, tank)
@@ -329,9 +486,122 @@ function c_world_tank_canSpawn(d, tank)
 	return true
 end
 
+function c_world_findClosestIntersection(start, endP)
+	-- test against the world and find the closest intersection point
+	-- returns false; or true, intersectionPoint, typeOfTarget, target
+	local lastPoint, currentPoint = nil
+	local minDistance, minIntersection, typeOfTarget, target
+	local hull
+	local b, intersection
+
+	-- walls
+	for _, v in pairs(c_tcm_current_map.walls) do
+		if not v.detail then
+			hull = v.p
+			local t = v
+			for _, v in pairs(hull) do
+				currentPoint = v
+				if not lastPoint then
+					lastPoint = hull[#hull]
+				end
+
+				b, intersection = tankbobs.m_edge(lastPoint, currentPoint, start, endP)
+				if b then
+					if not minDistance then
+						minIntersection = intersection
+						minDistance = math.abs((intersection - start).R)
+						typeOfTarget = "wall"
+						target = t
+					elseif math.abs((intersection - start).R) < minDistance then
+						minIntersection = intersection
+						minDistance = math.abs((intersection - start).R)
+						typeOfTarget = "wall"
+						target = t
+					end
+				end
+
+				lastPoint = currentPoint
+			end
+			lastPoint = nil
+		end
+	end
+
+	-- tanks
+	for _, v in pairs(c_world_tanks) do
+		if v.exists then
+			hull = c_world_tankHull(v)
+			local t = v
+			for _, v in pairs(hull) do
+				currentPoint = v
+				if not lastPoint then
+					lastPoint = hull[#hull]
+				end
+
+				b, intersection = tankbobs.m_edge(lastPoint, currentPoint, start, endP)
+				if b then
+					if not minDistance then
+						minIntersection = intersection
+						minDistance = math.abs((intersection - start).R)
+						typeOfTarget = "tank"
+						target = t
+					elseif math.abs((intersection - start).R) < minDistance then
+						minIntersection = intersection
+						minDistance = math.abs((intersection - start).R)
+						typeOfTarget = "tank"
+						target = t
+					end
+				end
+
+				lastPoint = currentPoint
+			end
+			lastPoint = nil
+		end
+	end
+
+	-- projectiles
+	for _, v in pairs(c_world_projectiles) do
+		if not v.collided then
+			hull = c_world_projectileHull(v)
+			local t = v
+			for _, v in pairs(hull) do
+				currentPoint = v
+				if not lastPoint then
+					lastPoint = hull[#hull]
+				end
+
+				b, intersection = tankbobs.m_edge(lastPoint, currentPoint, start, endP)
+				if b then
+					if not minDistance then
+						minIntersection = intersection
+						minDistance = math.abs((intersection - start).R)
+						typeOfTarget = "projectile"
+						target = t
+					elseif math.abs((intersection - start).R) < minDistance then
+						minIntersection = intersection
+						minDistance = math.abs((intersection - start).R)
+						typeOfTarget = "projectile"
+						target = t
+					end
+				end
+
+				lastPoint = currentPoint
+			end
+			lastPoint = nil
+		end
+	end
+
+	-- teleporters
+
+	-- powerups
+
+	return minDistance, minIntersection, typeOfTarget, target
+end
+
 function c_world_tank_step(d, tank)
 	local w = tank.w
 	local t = tankbobs.t_getTicks()
+
+	c_world_tank_checkSpawn(d, tank)
 
 	if not tank.exists then
 		return
@@ -454,6 +724,105 @@ function c_world_projectile_step(d, projectile)
 	projectile.r = tankbobs.w_getAngle(projectile.m.body)
 end
 
+function c_world_powerupSpawnPoint_step(d, powerupSpawnPoint)
+	local t = tankbobs.t_getTicks()
+
+	if t >= powerupSpawnPoint.m.nextPowerupTime then
+		powerupSpawnPoint.m.nextPowerupTime = t + c_const_get("world_time") * c_config_get("config.game.timescale") * c_const_get("powerupSpawnPoint_powerupTime")
+
+		if c_world_canPowerupSpawn(d, powerupSpawnPoint) then
+			-- spawn a powerup
+			local powerup = c_world_powerup:new()
+
+			table.insert(c_world_powerups, powerup)
+
+			powerup.typeName = nil
+
+			local found = false
+			for k, v in pairs(powerupSpawnPoint.enabledPowerups) do
+				if v then
+					if found then
+						powerup.typeName = k
+						break
+					end
+	
+					if k == powerupSpawnPoint.m.lastSpawnPoint then
+						found = true
+					end
+				end
+			end
+			if not powerup.typeName then
+				for k, v in pairs(powerupSpawnPoint.enabledPowerups) do
+					if v then
+						if found then
+							powerup.typeName = k
+							break
+						end
+					end
+				end
+			end
+
+			powerup.p[1](powerupSpawnPoint.p[1])
+
+			--powerup.m.body = tankbobs.m_addBody()
+		end
+	end
+end
+
+function c_world_powerupRemove(powerup)
+	for k, v in pairs(c_world_powerups) do
+		if v == powerup then
+			c_world_powerups[k] = nil
+		end
+	end
+end
+
+function c_world_powerup_pickUp(tank, powerup)
+	local powerupType = c_world_getPowerupTypeByName(powerup.typeName)
+
+	powerup.collided = true
+
+	if powerupType.name == "machinegun" then
+		c_weapon_pickUp(tank, powerupType.name)
+	end
+	if powerupType.name == "shotgun" then
+		c_weapon_pickUp(tank, powerupType.name)
+	end
+	if powerupType.name == "railgun" then
+		c_weapon_pickUp(tank, powerupType.name)
+	end
+	if powerupType.name == "coilgun" then
+		c_weapon_pickUp(tank, powerupType.name)
+	end
+	if powerupType.name == "saw" then
+		c_weapon_pickUp(tank, powerupType.name)
+	end
+	if powerupType.name == "ammo" then
+		tank.ammo = tank.ammo + tank.weapon.capacity
+	end
+end
+
+function c_world_powerup_step(d, powerup)
+	if powerup.collided then
+		--tankbobs.w_removeBody(powerup.m.body)
+		c_world_powerupRemove(powerup)
+		return
+	end
+
+	--powerup.p[1] = tankbobs.w_getPosition(powerup.m.body)
+	--tankbobs.w_setAngle(projectile)
+	--powerup.r = tankbobs.w_getAngle(powerup.m.body)
+
+	-- TODO: use physics.  Until then, test for each tank
+	for _, v in pairs(c_world_tanks) do
+		if v.exists then
+			if c_world_intersection(d, c_world_powerupHull(powerup), c_world_tankHull(v), tankbobs.m_vec2(0, 0), tankbobs.w_getLinearVelocity(v.body)) then
+				c_world_powerup_pickUp(v, powerup)
+			end
+		end
+	end
+end
+
 function c_world_isTank(body)
 	for _, v in pairs(c_world_tanks) do
 		if v.body == body then
@@ -502,14 +871,6 @@ function c_world_contactListener(shape1, shape2, body1, body2, position, separat
 		projectile = select(2, c_world_isProjectile(body1))
 		projectile2 = select(2, c_world_isProjectile(body2))
 
-		if projectile then
-			c_weapon_projectileCollided(projectile, body2)
-		end
-
-		if projectile2 then
-			c_weapon_projectileCollided(projectile2, body1)
-		end
-
 		-- test if the projectile hit a tank
 		local tank, tank2
 
@@ -530,6 +891,15 @@ function c_world_contactListener(shape1, shape2, body1, body2, position, separat
 				c_weapon_hit(tank2, projectile2)
 			end
 		end
+
+		-- this must be after the weapon hits the tank
+		if projectile then
+			c_weapon_projectileCollided(projectile, body2)
+		end
+
+		if projectile2 then
+			c_weapon_projectileCollided(projectile2, body1)
+		end
 	elseif c_world_isTank(body1) or c_world_isTank(body2) then
 		local tank, tank2
 
@@ -544,101 +914,6 @@ function c_world_contactListener(shape1, shape2, body1, body2, position, separat
 			c_world_collide(tank2, normal)
 		end
 	end
-end
-
-function c_world_findClosestIntersection(start, endP)
-	-- test against the world and find the closest intersection point
-	local lastPoint, currentPoint = nil
-	local minDistance, minIntersection
-	local hull
-	local b, intersection
-
-	-- walls
-	for _, v in pairs(c_tcm_current_map.walls) do
-		if not v.detail then
-			hull = v.p
-			for _, v in pairs(hull) do
-				currentPoint = v
-				if not lastPoint then
-					lastPoint = hull[#hull]
-				end
-
-				b, intersection = tankbobs.m_edge(lastPoint, currentPoint, start, endP)
-				if b then
-					if not minDistance then
-						minIntersection = intersection
-						minDistance = math.abs((intersection - start).R)
-					elseif math.abs((intersection - start).R) < minDistance then
-						minIntersection = intersection
-						minDistance = math.abs((intersection - start).R)
-					end
-				end
-
-				lastPoint = currentPoint
-			end
-			lastPoint = nil
-		end
-	end
-
-	-- tanks
-	for _, v in pairs(c_world_tanks) do
-		if v.exists then
-			hull = c_world_tankHull(v)
-			for _, v in pairs(hull) do
-				currentPoint = v
-				if not lastPoint then
-					lastPoint = hull[#hull]
-				end
-
-				b, intersection = tankbobs.m_edge(lastPoint, currentPoint, start, endP)
-				if b then
-					if not minDistance then
-						minIntersection = intersection
-						minDistance = math.abs((intersection - start).R)
-					elseif math.abs((intersection - start).R) < minDistance then
-						minIntersection = intersection
-						minDistance = math.abs((intersection - start).R)
-					end
-				end
-
-				lastPoint = currentPoint
-			end
-			lastPoint = nil
-		end
-	end
-
-	-- projectiles
-	for _, v in pairs(c_world_projectiles) do
-		if not v.collided then
-			hull = c_world_projectileHull(v)
-			for _, v in pairs(hull) do
-				currentPoint = v
-				if not lastPoint then
-					lastPoint = hull[#hull]
-				end
-
-				b, intersection = tankbobs.m_edge(lastPoint, currentPoint, start, endP)
-				if b then
-					if not minDistance then
-						minIntersection = intersection
-						minDistance = math.abs((intersection - start).R)
-					elseif math.abs((intersection - start).R) < minDistance then
-						minIntersection = intersection
-						minDistance = math.abs((intersection - start).R)
-					end
-				end
-
-				lastPoint = currentPoint
-			end
-			lastPoint = nil
-		end
-	end
-
-	-- teleporters
-
-	-- powerups
-
-	return minDistance, minIntersection
 end
 
 function c_world_step()
@@ -665,17 +940,23 @@ function c_world_step()
 	lastTime = tankbobs.t_getTicks()
 
 	if d == 0 then
-		d = 1.0E-6  -- make an inaccurate accurate guess
+		d = 1.0E-6  -- make an inaccurate guess
 	end
 
-	-- check for tanks needing spawn
 	for _, v in pairs(c_world_tanks) do
-		c_world_tank_checkSpawn(d, v)
 		c_world_tank_step(d, v)
 	end
 
 	for _, v in pairs(c_world_projectiles) do
 		c_world_projectile_step(d, v)
+	end
+
+	for _, v in pairs(c_tcm_current_map.powerupSpawnPoints) do
+		c_world_powerupSpawnPoint_step(d, v)
+	end
+
+	for _, v in pairs(c_world_powerups) do
+		c_world_powerup_step(d, v)
 	end
 
 	tankbobs.w_setTimeStep(d)

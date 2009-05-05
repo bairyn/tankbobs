@@ -107,6 +107,14 @@ int t_isDebug(lua_State *L)
 	return 1;
 }
 
+int t_testAND(lua_State *L)
+{
+	CHECKINIT(init, L);
+
+	lua_pushboolean(L, (luaL_checkinteger(L, 1)) & (luaL_checkinteger(L, 2)));
+	return 1;
+}
+
 static const struct luaL_Reg tankbobs[] =
 {
 	/* tankbobs.c */
@@ -119,6 +127,7 @@ static const struct luaL_Reg tankbobs[] =
 		/* no args, 1st and only return value is number of milliseconds since
 			app start (note that this value may wrap over every week) */
 	{"t_isDebug", t_isDebug}, /* if debugging is enabled, return true, if not, return false */
+	{"t_testAND", t_testAND}, /* test two integers (both are arguments) and return the bool of & */
 
 	/* input.c */
 	{"in_getEvents", in_getEvents}, /* store events in a userdata */

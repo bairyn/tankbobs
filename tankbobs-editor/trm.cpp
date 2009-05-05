@@ -451,18 +451,21 @@ bool trm_open(const char *filename, bool import)  // Will not confirm lost progr
 					char name[1024];
 					char title[1024];
 					char description[1024];
+					char authors[1024];
 					char version_s[1024];
 					int version;
 
 					read_string(name);
 					read_string(title);
 					read_string(description);
+					read_string(authors);
 					read_string(version_s);
 					version = read_int();
 
 					tmap.name = string(name);
 					tmap.title = string(title);
 					tmap.description = string(description);
+					tmap.authors = string(authors);
 					tmap.version_s = string(version_s);
 					tmap.version = version;
 				}
@@ -621,6 +624,9 @@ bool trm_save(const char *filename)
 	for(vector<entities::Wall *>::iterator i = wall.begin(); i != wall.end(); ++i)
 	{
 		entities::Wall *e = *i;
+
+		if(!e->target[0])
+			e->target = "";
 
 		fout << "wall, "
 		<< static_cast<int>(e->quad)

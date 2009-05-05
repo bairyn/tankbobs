@@ -95,6 +95,11 @@ if [ "$1" == "make" ]; then
 		if ! find ./data/tcm/ -name "*.trm" -exec ./trmc -f {} +; then
 			exit 1
 		fi
+
+		# remove source maps
+		if ! find ./data/tcm/ -name "*.trm" -exec rm {} +; then
+			exit 1
+		fi
 	else
 		echo -ne "Warning: level compiler not built\n"
 	fi

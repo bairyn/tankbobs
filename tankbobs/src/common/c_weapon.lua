@@ -38,13 +38,109 @@ function c_weapon_init()
 
 	c_weapons = {}
 
+	-- weak machinegun
+	weapon = c_weapon:new()
+	table.insert(c_weapons, weapon)
+
+	weapon.name = "weak-machinegun"
+	weapon.altName = "default"
+	weapon.damage = 4
+	weapon.pellets = 1
+	weapon.speed = 768
+	weapon.spread = tankbobs.m_radians(0)
+	weapon.repeatRate = 0.2
+
+	weapon.knockback = 256
+	weapon.texture = "machinegun.png"
+	weapon.launchDistance = 3
+	weapon.aimAid = false
+	weapon.capacity = 0
+	weapon.range = 0
+	weapon.width = 0
+
+	weapon.texturer[2](0, 1)
+	weapon.texturer[3](0, 0)
+	weapon.texturer[4](1, 0)
+	weapon.texturer[1](1, 1)
+	weapon.render[1](-1, 1)
+	weapon.render[2](-1, -1)
+	weapon.render[3](1, -1)
+	weapon.render[4](1, 1)
+
+	weapon.projectileTexture = "weak-machinegun-projectile.png"
+	weapon.projectileDensity = 0.2
+	weapon.projectileRestitution = 0.1
+	weapon.projectileMaxCollisions = 0
+	weapon.projectileEndOnBody = true
+
+	weapon.projectileHull[1](0, 1)
+	weapon.projectileHull[2](0, 0)
+	weapon.projectileHull[3](1, 0)
+	weapon.projectileHull[4](1, 1)
+	weapon.projectileTexturer[1](0, 1)
+	weapon.projectileTexturer[2](0, 0)
+	weapon.projectileTexturer[3](1, 0)
+	weapon.projectileTexturer[4](1, 1)
+	weapon.projectileRender[1](-0.5, 0.5)
+	weapon.projectileRender[2](-0.5, -0.5)
+	weapon.projectileRender[3](0.5, -0.5)
+	weapon.projectileRender[4](0.5, -0.5)
+
+	-- string machinegun
+	weapon = c_weapon:new()
+	table.insert(c_weapons, weapon)
+
+	weapon.name = "machinegun"
+	weapon.altName = "default"
+	weapon.damage = 4
+	weapon.pellets = 1
+	weapon.speed = 1536
+	weapon.spread = tankbobs.m_radians(0)
+	weapon.repeatRate = 0.2
+
+	weapon.knockback = 384
+	weapon.texture = "machinegun.png"
+	weapon.launchDistance = 3
+	weapon.aimAid = true
+	weapon.capacity = 64
+	weapon.range = 0
+	weapon.width = 0
+
+	weapon.texturer[2](0, 1)
+	weapon.texturer[3](0, 0)
+	weapon.texturer[4](1, 0)
+	weapon.texturer[1](1, 1)
+	weapon.render[1](-1, 1)
+	weapon.render[2](-1, -1)
+	weapon.render[3](1, -1)
+	weapon.render[4](1, 1)
+
+	weapon.projectileTexture = "machinegun-projectile.png"
+	weapon.projectileDensity = 1.25
+	weapon.projectileRestitution = 0.1
+	weapon.projectileMaxCollisions = 1
+	weapon.projectileEndOnBody = true
+
+	weapon.projectileHull[1](0, 1)
+	weapon.projectileHull[2](0, 0)
+	weapon.projectileHull[3](1, 0)
+	weapon.projectileHull[4](1, 1)
+	weapon.projectileTexturer[1](0, 1)
+	weapon.projectileTexturer[2](0, 0)
+	weapon.projectileTexturer[3](1, 0)
+	weapon.projectileTexturer[4](1, 1)
+	weapon.projectileRender[1](-0.5, 0.5)
+	weapon.projectileRender[2](-0.5, -0.5)
+	weapon.projectileRender[3](0.5, -0.5)
+	weapon.projectileRender[4](0.5, -0.5)
+
 	-- shotgun
 	weapon = c_weapon:new()
 	table.insert(c_weapons, weapon)
 
 	weapon.name = "shotgun"
-	weapon.altName = "default"  -- this is temporary since we only have one gun
-	weapon.damage = 15  -- 5 hp per bullet
+	weapon.altName = "shotgun"
+	weapon.damage = 25
 	weapon.pellets = 5
 	weapon.speed = 1024
 	weapon.spread = tankbobs.m_radians(12)  -- the angle between each pellet
@@ -53,11 +149,14 @@ function c_weapon_init()
 	weapon.texture = "shotgun.png"
 	weapon.launchDistance = 6  -- typically 3, but an extra unit to prevent the bullets from colliding before they spread
 	weapon.aimAid = false
+	weapon.capacity = 6
+	weapon.range = 0
+	weapon.width = 0
 
-	weapon.texturer[1](-1, 1)
-	weapon.texturer[2](-1, -1)
-	weapon.texturer[3](1, -1)
-	weapon.texturer[4](1, 1)
+	weapon.texturer[2](0, 1)
+	weapon.texturer[3](0, 0)
+	weapon.texturer[4](1, 0)
+	weapon.texturer[1](1, 1)
 	weapon.render[1](-1, 1)
 	weapon.render[2](-1, -1)
 	weapon.render[3](1, -1)
@@ -77,12 +176,159 @@ function c_weapon_init()
 	weapon.projectileTexturer[2](0, 0)
 	weapon.projectileTexturer[3](1, 0)
 	weapon.projectileTexturer[4](1, 1)
+	weapon.projectileRender[1](-0.5, 0.5)
+	weapon.projectileRender[2](-0.5, -0.5)
+	weapon.projectileRender[3](0.5, -0.5)
+	weapon.projectileRender[4](0.5, -0.5)
+
+	-- railgun
+	weapon = c_weapon:new()
+	table.insert(c_weapons, weapon)
+
+	weapon.name = "railgun"
+	weapon.altName = "railgun"
+	weapon.damage = 70
+	weapon.pellets = 1
+	weapon.speed = 524288
+	weapon.spread = tankbobs.m_radians(0)
+	weapon.repeatRate = 2
+
+	weapon.knockback = 1024
+	weapon.texture = "railgun.png"
+	weapon.launchDistance = 3
+	weapon.aimAid = false
+	weapon.capacity = 3
+	weapon.range = 0
+	weapon.width = 0
+
+	weapon.texturer[2](0, 1)
+	weapon.texturer[3](0, 0)
+	weapon.texturer[4](1, 0)
+	weapon.texturer[1](1, 1)
+	weapon.render[1](-1, 1)
+	weapon.render[2](-1, -1)
+	weapon.render[3](1, -1)
+	weapon.render[4](1, 1)
+
+	weapon.projectileTexture = "railgun-projectile.png"
+	weapon.projectileDensity = 12
+	weapon.projectileRestitution = 0.1
+	weapon.projectileMaxCollisions = 0
+	weapon.projectileEndOnBody = true
+
+	weapon.projectileHull[1](0, 1)
+	weapon.projectileHull[2](0, 0)
+	weapon.projectileHull[3](1, 0)
+	weapon.projectileHull[4](1, 1)
+	weapon.projectileTexturer[1](0, 1)
+	weapon.projectileTexturer[2](0, 0)
+	weapon.projectileTexturer[3](1, 0)
+	weapon.projectileTexturer[4](1, 1)
+	weapon.projectileRender[1](-0.5, 0.5)
+	weapon.projectileRender[2](-0.5, -0.5)
+	weapon.projectileRender[3](0.5, -0.5)
+	weapon.projectileRender[4](0.5, -0.5)
+
+	-- coilgun
+	weapon = c_weapon:new()
+	table.insert(c_weapons, weapon)
+
+	weapon.name = "coilgun"
+	weapon.altName = "coilgun"
+	weapon.damage = 69
+	weapon.pellets = 1
+	weapon.speed = 524288
+	weapon.spread = tankbobs.m_radians(0)
+	weapon.repeatRate = 2
+
+	weapon.knockback = 16384
+	weapon.texture = "coilgun.png"
+	weapon.launchDistance = 3
+	weapon.aimAid = true
+	weapon.capacity = 3
+	weapon.range = 0
+	weapon.width = 0
+
+	weapon.texturer[2](0, 1)
+	weapon.texturer[3](0, 0)
+	weapon.texturer[4](1, 0)
+	weapon.texturer[1](1, 1)
+	weapon.render[1](-1, 1)
+	weapon.render[2](-1, -1)
+	weapon.render[3](1, -1)
+	weapon.render[4](1, 1)
+
+	weapon.projectileTexture = "coilgun-projectile.png"
+	weapon.projectileDensity = 4
+	weapon.projectileRestitution = 0.1
+	weapon.projectileMaxCollisions = 0
+	weapon.projectileEndOnBody = true
+
+	weapon.projectileHull[1](0, 1)
+	weapon.projectileHull[2](0, 0)
+	weapon.projectileHull[3](1, 0)
+	weapon.projectileHull[4](1, 1)
+	weapon.projectileTexturer[1](0, 1)
+	weapon.projectileTexturer[2](0, 0)
+	weapon.projectileTexturer[3](1, 0)
+	weapon.projectileTexturer[4](1, 1)
+	weapon.projectileRender[1](-0.5, 0.5)
+	weapon.projectileRender[2](-0.5, -0.5)
+	weapon.projectileRender[3](0.5, -0.5)
+	weapon.projectileRender[4](0.5, -0.5)
+
+	-- saw
+	weapon = c_weapon:new()
+	table.insert(c_weapons, weapon)
+
+	weapon.name = "saw"
+	weapon.altName = "saw"
+	weapon.damage = 69
+	weapon.pellets = 1
+	weapon.speed = 0
+	weapon.spread = tankbobs.m_radians(0)
+	weapon.repeatRate = 0.125  -- 1 / 8
+
+	weapon.knockback = 16384
+	weapon.texture = "saw.png"
+	weapon.launchDistance = 3
+	weapon.aimAid = true
+	weapon.capacity = 64  -- can be used for 8 seconds
+	weapon.range = 2
+	weapon.width = 0.75
+
+	weapon.texturer[2](0, 1)
+	weapon.texturer[3](0, 0)
+	weapon.texturer[4](1, 0)
+	weapon.texturer[1](1, 1)
+	weapon.render[1](-1, 1)
+	weapon.render[2](-1, -1)
+	weapon.render[3](1, -1)
+	weapon.render[4](1, 1)
+
+	weapon.projectileTexture = "saw-projectile.png"
+	weapon.projectileDensity = 0
+	weapon.projectileRestitution = 0.1
+	weapon.projectileMaxCollisions = 0
+	weapon.projectileEndOnBody = true
+
+	weapon.projectileHull[1](0, 1)
+	weapon.projectileHull[2](0, 0)
+	weapon.projectileHull[3](1, 0)
+	weapon.projectileHull[4](1, 1)
+	weapon.projectileTexturer[1](0, 1)
+	weapon.projectileTexturer[2](0, 0)
+	weapon.projectileTexturer[3](1, 0)
+	weapon.projectileTexturer[4](1, 1)
+	weapon.projectileRender[1](-0.75, 2)
+	weapon.projectileRender[2](-0.75, 0)
+	weapon.projectileRender[3](0.75, 0)
+	weapon.projectileRender[4](0.75, 2)
+
 	weapon.projectileRender[1](0, 1)
 	weapon.projectileRender[2](0, 0)
 	weapon.projectileRender[3](1, 0)
 	weapon.projectileRender[4](1, 1)
-
-	-- TODO: machinegun which can reflect off a wall once (default gun is weaker machinegun)
 end
 
 function c_weapon_done()
@@ -125,6 +371,9 @@ c_weapon =
 	knockBack = 0,
 	launchDistance = 0,
 	aimAid = false,
+	capacity = 0,
+	range = 0,
+	width = 0,
 
 	texture = "",
 
@@ -180,10 +429,46 @@ function c_weapon_getByAltName(name)
 	end
 end
 
+function c_weapon_outOfAmmo(tank)
+	-- return to default weapon
+	tank.weapon = c_weapon_getByAltName("default")
+end
+
+function c_weapon_pickUp(tank, weaponName)
+	local weapon
+
+	tank.weapon = nil
+
+	weapon = c_weapon_getByName(weaponName)
+	if not weapon then
+		weapon = c_weapon_getByAltName(weaponName)
+	end
+
+	if not weapon then
+		io.stderr:write("c_weapon_pickUp: weapon '", tostring(weaponName), "' doesn't exist")
+		return
+	end
+
+	tank.weapon = weapon
+	tank.ammo = weapon.capacity
+end
+
+function c_weapon_fireRangeWeapon(tank)
+	print("TODO")
+end
+
 function c_weapon_fire(tank)
 	local weapon = tank.weapon
 
 	local angle = weapon.spread * (weapon.pellets - 1) / 2
+
+	if tank.ammo <= 0 and weapon.capacity ~= 0 then
+		return c_weapon_outOfAmmo(tank)
+	end
+
+	if weapon.range ~= 0 then
+		return c_weapon_fireRangeWeapon(tank)
+	end
 
 	for i = 1, weapon.pellets do
 		local projectile = c_weapon_projectile:new()
@@ -214,6 +499,12 @@ function c_weapon_fire(tank)
 		force.t = tankbobs.w_getAngle(tank.body)
 		tankbobs.w_applyForce(tank.body, force, point)
 	end
+
+	tank.ammo = tank.ammo - 1
+
+	if tank.ammo < 0 then
+		tank.ammo = 0
+	end
 end
 
 function c_weapon_clear()
@@ -225,10 +516,12 @@ function c_weapon_clear()
 end
 
 function c_weapon_hit(tank, projectile)
-	c_world_tankDamage(tank, projectile.weapon.damage)
+	if not projectile.collided then
+		c_world_tankDamage(tank, projectile.weapon.damage)
 
-	if tank.health <= 0 then
-		tank.killer = projectile.owner
+		if tank.health <= 0 then
+			tank.killer = projectile.owner
+		end
 	end
 end
 

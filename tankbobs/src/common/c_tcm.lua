@@ -243,7 +243,6 @@ c_tcm_powerupSpawnPoint =
 
 	init = function (o)
 		o.p[1] = tankbobs.m_vec2()
-		o.enabledPowerups.foo = false
 	end,
 
 	id = 0,
@@ -511,7 +510,38 @@ function c_tcm_read_map(map)
 		for it = 1, 16 do  -- the format includes 16 ints for different powerup possibilities
 			table.insert(powerups, c_tcm_private_get(tankbobs.io_getInt, i))
 		end
+
 		-- powerupSpawnPoint.enabledPowerups.x = true | false will be set when more powerups exist
+		if tankbobs.t_testAND(powerups[1], 0x00000001) then
+			powerupSpawnPoint.enabledPowerups.machinegun = true
+		else
+			powerupSpawnPoint.enabledPowerups.machinegun = false
+		end
+		if tankbobs.t_testAND(powerups[1], 0x00000002) then
+			powerupSpawnPoint.enabledPowerups.shotgun = true
+		else
+			powerupSpawnPoint.enabledPowerups.shotgun = false
+		end
+		if tankbobs.t_testAND(powerups[1], 0x00000004) then
+			powerupSpawnPoint.enabledPowerups.railgun = true
+		else
+			powerupSpawnPoint.enabledPowerups.railgun = false
+		end
+		if tankbobs.t_testAND(powerups[1], 0x00000008) then
+			powerupSpawnPoint.enabledPowerups.coilgun = true
+		else
+			powerupSpawnPoint.enabledPowerups.coilgun = false
+		end
+		if tankbobs.t_testAND(powerups[1], 0x00000010) then
+			powerupSpawnPoint.enabledPowerups.saw = true
+		else
+			powerupSpawnPoint.enabledPowerups.saw = false
+		end
+		if tankbobs.t_testAND(powerups[1], 0x00000020) then
+			powerupSpawnPoint.enabledPowerups.ammo = true
+		else
+			powerupSpawnPoint.enabledPowerups.ammo = false
+		end
 
 		table.insert(r.powerupSpawnPoints, powerupSpawnPoint)
 	end
