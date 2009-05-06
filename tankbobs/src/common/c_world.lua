@@ -217,7 +217,7 @@ function c_world_newWorld()
 		for k, vs in pairs(v.enabledPowerups) do
 			if vs then
 				enabled = true
-				v.m.lastSpawnPoint = k
+				v.m.lastPowerup = k
 			end
 		end
 		if not enabled then
@@ -749,11 +749,12 @@ function c_world_powerupSpawnPoint_step(d, powerupSpawnPoint)
 			for k, v in pairs(powerupSpawnPoint.enabledPowerups) do
 				if v then
 					if found then
+						powerupSpawnPoint.m.lastPowerup = k
 						powerup.typeName = k
 						break
 					end
 	
-					if k == powerupSpawnPoint.m.lastSpawnPoint then
+					if k == powerupSpawnPoint.m.lastPowerup then
 						found = true
 					end
 				end
@@ -762,6 +763,7 @@ function c_world_powerupSpawnPoint_step(d, powerupSpawnPoint)
 				for k, v in pairs(powerupSpawnPoint.enabledPowerups) do
 					if v then
 						if found then
+							powerupSpawnPoint.m.lastPowerup = k
 							powerup.typeName = k
 							break
 						end
