@@ -451,8 +451,8 @@ function c_world_canPowerupSpawn(d, powerupSpawnPoint)
 	end
 
 	for _, v in pairs(c_world_powerups) do
-		if not v.detail then
-			if c_world_intersection(d, c_world_powerupSpawnPointHull(powerupSpawnPoint), c_world_getPowerupHull, tankbobs.m_vec2(0, 0), v.static and tankbobs.m_vec2(0, 0) or tankbobs.w_getLinearVelocity(v.body)) then
+		if not v.collided then
+			if c_world_intersection(d, c_world_powerupSpawnPointHull(powerupSpawnPoint), c_world_powerupHull(v), tankbobs.m_vec2(0, 0), not v.body and tankbobs.m_vec2(0, 0) or tankbobs.w_getLinearVelocity(v.body)) then  -- remove check for v.body after powerups move
 				return false
 			end
 		end

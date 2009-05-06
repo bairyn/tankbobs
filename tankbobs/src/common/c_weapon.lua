@@ -445,7 +445,7 @@ function c_weapon_pickUp(tank, weaponName)
 	end
 
 	if not weapon then
-		io.stderr:write("c_weapon_pickUp: weapon '", tostring(weaponName), "' doesn't exist")
+		io.stderr:write("c_weapon_pickUp: weapon '", tostring(weaponName), "' doesn't exist\n")
 		return
 	end
 
