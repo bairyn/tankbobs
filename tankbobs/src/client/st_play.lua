@@ -408,7 +408,7 @@ function st_play_step()
 	gl.EnableClientState("VERTEX_ARRAY")
 	for _, v in pairs(c_world_tanks) do
 		if v.exists then
-			if v.weapon and v.weapon.aimAid then
+			if (v.weapon and v.weapon.aimAid) or (v.cd.aimAid) then
 				local a = {}
 				local b
 				local vec = tankbobs.m_vec2()

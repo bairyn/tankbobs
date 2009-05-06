@@ -105,7 +105,7 @@ function c_world_init()
 	-- powerups
 	c_powerupTypes = {}
 
-	-- weapons are bluish
+	-- weapons are bluish, weapon enhancements are yellowish, tank enhancements are greenish, extreme powerups are reddish
 
 	-- machinegun
 	local powerupType = c_world_powerupType:new()
@@ -154,6 +154,14 @@ function c_world_init()
 
 	powerupType.name = "ammo"
 	powerupType.c.r, powerupType.c.g, powerupType.c.b, powerupType.c.a = 0.05, 0.4, 0.1, 0.5
+
+	-- aim aid
+	local powerupType = c_world_powerupType:new()
+
+	table.insert(c_powerupTypes, powerupType)
+
+	powerupType.name = "aim-aid"
+	powerupType.c.r, powerupType.c.g, powerupType.c.b, powerupType.c.a = 0.5, 0.75, 0.1, 0.5
 
 	-- TODO: health with light green
 end
@@ -273,7 +281,9 @@ c_world_tank =
 	nextSpawnTime = 0,
 	killer = nil,
 	score = 0,
-	ammo = 0
+	ammo = 0,
+
+	cd = {}  -- data cleared on death
 }
 
 c_world_tank_state =
@@ -339,6 +349,7 @@ function c_world_tank_checkSpawn(d, tank)
 	tank.health = c_const_get("tank_health")
 	tank.weapon = c_weapon_getByAltName("default")
 	tank.exists = true
+	tank.cd = {}
 
 	-- add a physical body
 	tank.body = tankbobs.w_addBody(tank.p[1], tank.r, c_const_get("tank_canSleep"), c_const_get("tank_isBullet"), c_const_get("tank_linearDamping"), c_const_get("tank_angularDamping"), tank.h, c_const_get("tank_density"), c_const_get("tank_friction"), c_const_get("tank_restitution"), true)
@@ -604,6 +615,21 @@ function c_world_findClosestIntersection(start, endP)
 	return minDistance, minIntersection, typeOfTarget, target
 end
 
+function c_world_tankDie(d, tank, t)
+	tankbobs.w_removeBody(tank.body)
+	tank.nextSpawnTime = t + c_const_get("world_time") * c_config_get("config.game.timescale") * c_const_get("tank_spawnTime")
+	if tank.killer then
+		tank.killer.score = tank.killer.score + 1
+	else
+		tank.score = tank.score - 1
+	end
+	tank.killer = nil
+	tank.exists = false
+	tank.spawning = true
+
+	tank.cd = {}
+end
+
 function c_world_tank_step(d, tank)
 	local w = tank.w
 	local t = tankbobs.t_getTicks()
@@ -615,17 +641,7 @@ function c_world_tank_step(d, tank)
 	end
 
 	if tank.health <= 0 then
-		tankbobs.w_removeBody(tank.body)
-		tank.nextSpawnTime = t + c_const_get("world_time") * c_config_get("config.game.timescale") * c_const_get("tank_spawnTime")
-		if tank.killer then
-			tank.killer.score = tank.killer.score + 1
-		else
-			tank.score = tank.score - 1
-		end
-		tank.killer = nil
-		tank.exists = false
-		tank.spawning = true
-		return
+		return c_world_tankDie(d, tank, t)
 	end
 
 	tank.p[1] = tankbobs.w_getPosition(tank.body)
@@ -808,6 +824,9 @@ function c_world_powerup_pickUp(tank, powerup)
 	end
 	if powerupType.name == "ammo" then
 		tank.ammo = tank.ammo + tank.weapon.capacity
+	end
+	if powerupType.name == "aim-aid" then
+		tank.cd.aimAid = not not tank.cd.aimAid
 	end
 end
 

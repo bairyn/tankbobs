@@ -542,6 +542,11 @@ function c_tcm_read_map(map)
 		else
 			powerupSpawnPoint.enabledPowerups.ammo = false
 		end
+		if tankbobs.t_testAND(powerups[1], 0x00000040) then
+			powerupSpawnPoint.enabledPowerups["aim-aid"] = true
+		else
+			powerupSpawnPoint.enabledPowerups["aim-aid"] = false
+		end
 
 		table.insert(r.powerupSpawnPoints, powerupSpawnPoint)
 	end

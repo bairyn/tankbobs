@@ -10,4 +10,4 @@ wall, 1, 1, 90, 1, 24, 99, 24, 99, 91, 0, 1, 0, 0, 1, 0, 1, 1, global/abstract.p
 playerSpawnPoint, 10, 57
 playerSpawnPoint, 86, 56
 powerupSpawnPoint, 34, 57, railgun coilgun
-powerupSpawnPoint, 58, 58, shotgun machinegun ammo
+powerupSpawnPoint, 58, 58, shotgun machinegun ammo aim-aid

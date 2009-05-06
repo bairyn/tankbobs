@@ -1082,6 +1082,10 @@ static int compile(const char *filename)
 		{
 			powerups[0] |= 0x00000020;
 		}
+		if(strstr(powerupSpawnPoint->powerupsToEnable, "aim-aid"))
+		{
+			powerups[0] |= 0x00000040;
+		}
 
 		put_cint(fout, i);
 		put_cdouble(fout, powerupSpawnPoint->x1);

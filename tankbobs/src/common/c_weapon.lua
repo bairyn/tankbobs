@@ -91,7 +91,7 @@ function c_weapon_init()
 	table.insert(c_weapons, weapon)
 
 	weapon.name = "machinegun"
-	weapon.altName = "default"
+	weapon.altName = "machinegun"
 	weapon.damage = 4
 	weapon.pellets = 1
 	weapon.speed = 1536
@@ -129,10 +129,10 @@ function c_weapon_init()
 	weapon.projectileTexturer[2](0, 0)
 	weapon.projectileTexturer[3](1, 0)
 	weapon.projectileTexturer[4](1, 1)
-	weapon.projectileRender[1](-0.5, 0.5)
-	weapon.projectileRender[2](-0.5, -0.5)
-	weapon.projectileRender[3](0.5, -0.5)
-	weapon.projectileRender[4](0.5, -0.5)
+	weapon.projectileRender[1](-1, 1)
+	weapon.projectileRender[2](-1, -1)
+	weapon.projectileRender[3](1, -1)
+	weapon.projectileRender[4](1, -1)
 
 	-- shotgun
 	weapon = c_weapon:new()
@@ -176,10 +176,10 @@ function c_weapon_init()
 	weapon.projectileTexturer[2](0, 0)
 	weapon.projectileTexturer[3](1, 0)
 	weapon.projectileTexturer[4](1, 1)
-	weapon.projectileRender[1](-0.5, 0.5)
-	weapon.projectileRender[2](-0.5, -0.5)
-	weapon.projectileRender[3](0.5, -0.5)
-	weapon.projectileRender[4](0.5, -0.5)
+	weapon.projectileRender[1](-0.8, 0.8)
+	weapon.projectileRender[2](-0.8, -0.8)
+	weapon.projectileRender[3](0.8, -0.8)
+	weapon.projectileRender[4](0.8, -0.8)
 
 	-- railgun
 	weapon = c_weapon:new()
@@ -415,7 +415,7 @@ c_weapon_projectile =
 
 function c_weapon_getByName(name)
 	for k, v in pairs(c_weapons) do
-		if v.altName == name then
+		if v.name == name then
 			return v
 		end
 	end
