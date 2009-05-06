@@ -444,8 +444,9 @@ function st_play_step()
 	-- powerups are drawn next
 	for _, v in pairs(c_world_powerups) do
 		gl.PushMatrix()
-			gl.Color(v.c.r, v.c.g, v.c.b, v.c.a)
-			gl.TexEnv("TEXTURE_ENV_COLOR", v.c.r, v.c.g, v.c.b, v.c.a)
+			local c = c_world_getPowerupTypeByName(v.typeName).c
+			gl.Color(c.r, c.g, c.b, c.a)
+			gl.TexEnv("TEXTURE_ENV_COLOR", c.r, c.g, c.b, c.a)
 			gl.Translate(v.p[1].x, v.p[1].y, 0)
 			gl.Rotate(tankbobs.m_degrees(v.r), 0, 0, 1)
 			gl.CallList(play_powerup_listBase)

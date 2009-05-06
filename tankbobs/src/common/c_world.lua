@@ -179,7 +179,6 @@ c_world_powerup =
 
 	p = {},
 	r = 0,  -- rotation
-	c = {r = 0, g = 0, b = 0, a = 0},
 	collided = false,  -- whether it needs to be removed
 	type = nil,  -- the type of powerup (shotgun, ammo, speed enhancement, etc)
 
@@ -446,6 +445,14 @@ function c_world_canPowerupSpawn(d, powerupSpawnPoint)
 	for _, v in pairs(c_tcm_current_map.walls) do
 		if not v.detail then
 			if c_world_intersection(d, c_world_powerupSpawnPointHull(powerupSpawnPoint), v.p, tankbobs.m_vec2(0, 0), v.static and tankbobs.m_vec2(0, 0) or tankbobs.w_getLinearVelocity(v.body)) then
+				return false
+			end
+		end
+	end
+
+	for _, v in pairs(c_world_powerups) do
+		if not v.detail then
+			if c_world_intersection(d, c_world_powerupSpawnPointHull(powerupSpawnPoint), c_world_getPowerupHull, tankbobs.m_vec2(0, 0), v.static and tankbobs.m_vec2(0, 0) or tankbobs.w_getLinearVelocity(v.body)) then
 				return false
 			end
 		end

@@ -1086,7 +1086,7 @@ static int compile(const char *filename)
 		put_cint(fout, i);
 		put_cdouble(fout, powerupSpawnPoint->x1);
 		put_cdouble(fout, powerupSpawnPoint->y1);
-		for(j = 0; j < sizeof(powerups); j++)
+		for(j = 0; j < sizeof(powerups) / sizeof(powerups[0]); j++)
 		{
 			put_cint(fout, powerups[j]);
 		}
