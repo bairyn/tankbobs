@@ -42,6 +42,16 @@ function c_world_init()
 	c_const_set("powerupSpawnPoint_initialPowerupTime", 30, 1)
 	c_const_set("powerupSpawnPoint_powerupTime", 30, 1)
 
+	c_const_set("powerup_density", 1E-123, 1)
+	c_const_set("powerup_friction", 0, 1)
+	c_const_set("powerup_restitution", 1, 1)
+	c_const_set("powerup_canSleep", false, 1)
+	c_const_set("powerup_isBullet", true, 1)
+	c_const_set("powerup_linearDamping", 0, 1)
+	c_const_set("powerup_angularDamping", 0, 1)
+	c_const_set("powerup_pushStrength", 128, 1)
+	c_const_set("powerup_pushAngle", tankbobs.m_degrees(45), 1)
+
 	c_const_set("tank_maxCollisionVectorLength", 975)  -- 975 units
 
 	-- hull of tank facing right
@@ -789,7 +799,12 @@ function c_world_powerupSpawnPoint_step(d, powerupSpawnPoint)
 
 			powerup.p[1](powerupSpawnPoint.p[1])
 
-			--powerup.m.body = tankbobs.m_addBody()
+			powerup.m.body = tankbobs.w_addBody(powerup.p[1], 0, c_const_get("powerup_canSleep"), c_const_get("powerup_isBullet"), c_const_get("powerup_linearDamping"), c_const_get("powerup_angularDamping"), c_world_powerupHull(powerup), c_const_get("wall_density"), c_const_get("wall_friction"), c_const_get("wall_restitution"), true)
+			-- add some initial push to the powerup
+			local push = tankbobs.m_vec2()
+			push.R = c_const_get("powerup_pushStrength")
+			push.t = c_const_get("powerup_pushAngle")
+			tankbobs.m_setLinearVelocity(powerup.m.body, push)
 		end
 	end
 end
@@ -832,14 +847,14 @@ end
 
 function c_world_powerup_step(d, powerup)
 	if powerup.collided then
-		--tankbobs.w_removeBody(powerup.m.body)
+		tankbobs.w_removeBody(powerup.m.body)
 		c_world_powerupRemove(powerup)
 		return
 	end
 
-	--powerup.p[1] = tankbobs.w_getPosition(powerup.m.body)
-	--tankbobs.w_setAngle(projectile)
-	--powerup.r = tankbobs.w_getAngle(powerup.m.body)
+	powerup.p[1] = tankbobs.w_getPosition(powerup.m.body)
+	tankbobs.w_setAngle(projectile, 0)
+	powerup.r = tankbobs.w_getAngle(powerup.m.body)
 
 	-- TODO: use physics.  Until then, test for each tank
 	for _, v in pairs(c_world_tanks) do
