@@ -88,9 +88,9 @@ function c_world_init()
 	c_const_set("wall_isBullet", true, 1)
 	c_const_set("wall_linearDamping", 0, 1)
 	c_const_set("wall_angularDamping", 0, 1)
-	c_const_set("tank_rotationVelocitySpeed", 0.75, 1)  -- for every second, velocity matches 3/4 rotation  -- FIXME: the actual rotation turning speed is about a quarter of this
+	c_const_set("tank_rotationVelocitySpeed", 64, 1)  -- for every second, velocity matches 3/4 rotation  -- FIXME: the actual rotation turning speed is about a quarter of this
 	c_const_set("tank_rotationVelocityMinSpeed", 24, 1)  -- if at least 24 ups
-	c_const_set("tank_rotationVelocityCatchUpSpeed", 0.875, 1)  -- FIXME: as well
+	c_const_set("tank_rotationVelocityCatchUpSpeed", 128, 1)  -- FIXME: as well
 	c_const_set("tank_rotationSpeed", c_math_radians(135), 1)  -- 135 degrees per second
 	c_const_set("tank_rotationSpecialSpeed", c_math_degrees(1) / 3.5, 1)
 	c_const_set("tank_defaultRotation", c_math_radians(90), 1)  -- up
@@ -945,6 +945,8 @@ function c_world_contactListener(shape1, shape2, body1, body2, position, separat
 end
 
 function c_world_step()
+	local t = tankbobs.t_getTicks()
+
 	if lastTime == 0 then
 		lastTime = tankbobs.t_getTicks()
 		return
@@ -964,8 +966,8 @@ function c_world_step()
 		return;
 	end
 
-	local d = (tankbobs.t_getTicks() - lastTime) / (c_const_get("world_time") * c_config_get("config.game.timescale"))
-	lastTime = tankbobs.t_getTicks()
+	local d = (t - lastTime) / (c_const_get("world_time") * c_config_get("config.game.timescale"))
+	lastTime = t
 
 	if d == 0 then
 		d = 1.0E-6  -- make an inaccurate guess
