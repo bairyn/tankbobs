@@ -826,7 +826,7 @@ function c_world_powerup_pickUp(tank, powerup)
 		tank.ammo = tank.ammo + tank.weapon.capacity
 	end
 	if powerupType.name == "aim-aid" then
-		tank.cd.aimAid = not not tank.cd.aimAid
+		tank.cd.aimAid = not tank.cd.aimAid
 	end
 end
 
