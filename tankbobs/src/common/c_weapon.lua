@@ -51,7 +51,7 @@ function c_weapon_init()
 	weapon.repeatRate = 0.2
 
 	weapon.knockback = 256
-	weapon.texture = "machinegun.png"
+	weapon.texture = "weak-machinegun.png"
 	weapon.launchDistance = 3
 	weapon.aimAid = false
 	weapon.capacity = 0
@@ -81,10 +81,10 @@ function c_weapon_init()
 	weapon.projectileTexturer[2](0, 0)
 	weapon.projectileTexturer[3](1, 0)
 	weapon.projectileTexturer[4](1, 1)
-	weapon.projectileRender[1](-0.5, 0.5)
-	weapon.projectileRender[2](-0.5, -0.5)
-	weapon.projectileRender[3](0.5, -0.5)
+	weapon.projectileRender[2](-0.5, 0.5)
+	weapon.projectileRender[3](-0.5, -0.5)
 	weapon.projectileRender[4](0.5, -0.5)
+	weapon.projectileRender[1](0.5, -0.5)
 
 	-- string machinegun
 	weapon = c_weapon:new()
@@ -117,7 +117,7 @@ function c_weapon_init()
 
 	weapon.projectileTexture = "machinegun-projectile.png"
 	weapon.projectileDensity = 1.25
-	weapon.projectileRestitution = 0.1
+	weapon.projectileRestitution = 1
 	weapon.projectileMaxCollisions = 1
 	weapon.projectileEndOnBody = true
 
@@ -129,10 +129,10 @@ function c_weapon_init()
 	weapon.projectileTexturer[2](0, 0)
 	weapon.projectileTexturer[3](1, 0)
 	weapon.projectileTexturer[4](1, 1)
-	weapon.projectileRender[1](-1, 1)
-	weapon.projectileRender[2](-1, -1)
-	weapon.projectileRender[3](1, -1)
+	weapon.projectileRender[2](-1, 1)
+	weapon.projectileRender[3](-1, -1)
 	weapon.projectileRender[4](1, -1)
+	weapon.projectileRender[1](1, -1)
 
 	-- shotgun
 	weapon = c_weapon:new()
@@ -176,10 +176,10 @@ function c_weapon_init()
 	weapon.projectileTexturer[2](0, 0)
 	weapon.projectileTexturer[3](1, 0)
 	weapon.projectileTexturer[4](1, 1)
-	weapon.projectileRender[1](-0.8, 0.8)
-	weapon.projectileRender[2](-0.8, -0.8)
-	weapon.projectileRender[3](0.8, -0.8)
+	weapon.projectileRender[2](-0.8, 0.8)
+	weapon.projectileRender[3](-0.8, -0.8)
 	weapon.projectileRender[4](0.8, -0.8)
+	weapon.projectileRender[1](0.8, -0.8)
 
 	-- railgun
 	weapon = c_weapon:new()
@@ -224,10 +224,10 @@ function c_weapon_init()
 	weapon.projectileTexturer[2](0, 0)
 	weapon.projectileTexturer[3](1, 0)
 	weapon.projectileTexturer[4](1, 1)
-	weapon.projectileRender[1](-0.5, 0.5)
-	weapon.projectileRender[2](-0.5, -0.5)
-	weapon.projectileRender[3](0.5, -0.5)
+	weapon.projectileRender[2](-0.5, 0.5)
+	weapon.projectileRender[3](-0.5, -0.5)
 	weapon.projectileRender[4](0.5, -0.5)
+	weapon.projectileRender[1](0.5, -0.5)
 
 	-- coilgun
 	weapon = c_weapon:new()
@@ -272,10 +272,10 @@ function c_weapon_init()
 	weapon.projectileTexturer[2](0, 0)
 	weapon.projectileTexturer[3](1, 0)
 	weapon.projectileTexturer[4](1, 1)
-	weapon.projectileRender[1](-0.5, 0.5)
-	weapon.projectileRender[2](-0.5, -0.5)
-	weapon.projectileRender[3](0.5, -0.5)
+	weapon.projectileRender[2](-0.5, 0.5)
+	weapon.projectileRender[3](-0.5, -0.5)
 	weapon.projectileRender[4](0.5, -0.5)
+	weapon.projectileRender[1](0.5, -0.5)
 
 	-- saw
 	weapon = c_weapon:new()
@@ -320,15 +320,10 @@ function c_weapon_init()
 	weapon.projectileTexturer[2](0, 0)
 	weapon.projectileTexturer[3](1, 0)
 	weapon.projectileTexturer[4](1, 1)
-	weapon.projectileRender[1](-0.75, 2)
-	weapon.projectileRender[2](-0.75, 0)
-	weapon.projectileRender[3](0.75, 0)
-	weapon.projectileRender[4](0.75, 2)
-
-	weapon.projectileRender[1](0, 1)
-	weapon.projectileRender[2](0, 0)
-	weapon.projectileRender[3](1, 0)
-	weapon.projectileRender[4](1, 1)
+	weapon.projectileRender[2](0, 1)
+	weapon.projectileRender[3](0, 0)
+	weapon.projectileRender[4](1, 0)
+	weapon.projectileRender[1](1, 1)
 end
 
 function c_weapon_done()
@@ -534,15 +529,19 @@ function c_weapon_projectileRemove(projectile)
 end
 
 function c_weapon_projectileCollided(projectile, body)
-	projectile.collisions = projectile.collisions + 1
+	if body ~= projectile.m.lastBody then
+		projectile.m.lastBody = body
 
-	if projectile.collisions > projectile.weapon.projectileMaxCollisions then
-		projectile.collided = true
-		return
-	end
+		projectile.collisions = projectile.collisions + 1
 
-	if c_world_isTank(body) and projectile.weapon.projectileEndOnBody then
-		projectile.collided = true
-		return
+		if projectile.collisions > projectile.weapon.projectileMaxCollisions then
+			projectile.collided = true
+			return
+		end
+
+		if c_world_isTank(body) and projectile.weapon.projectileEndOnBody then
+			projectile.collided = true
+			return
+		end
 	end
 end
