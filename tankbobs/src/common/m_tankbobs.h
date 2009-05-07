@@ -122,6 +122,31 @@ int r_loadImage2D(lua_State *L);
 #define CHECKVEC(L, i) (vec2_t *) luaL_checkudata(L, i, MATH_METATABLE)
 #endif
 
+#define MATH_POLAR(v) \
+do \
+{ \
+	(v).R = sqrt((v).x * (v).x + (v).y * (v).y); \
+	if((v).x == 0) \
+		(v).t = m_radiansNL(90); \
+	else \
+		(v).t = atan((v).y / (v).x); \
+	if((v).x < 0.0 && (v).y < 0.0) \
+		(v).t += m_radiansNL(180); \
+	else if((v).x < 0.0) \
+		(v).t += m_radiansNL(90); \
+	else if((v).y < 0.0) \
+		(v).t += m_radiansNL(270); \
+} while(0)
+
+#define MATH_RECTANGULAR(v) \
+do \
+{ \
+	(v).x = (v).R * cos((v).t); \
+	(v).y = (v).R * sin((v).t); \
+} while(0)
+
+#define MATH_RECTANGLE
+
 typedef struct vec2_s vec2_t;
 struct vec2_s
 {

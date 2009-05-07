@@ -90,14 +90,7 @@ class w_private_worldListener : public b2ContactListener
 				lua_setmetatable(clState, -2);
 				v->x = point->position.x;
 				v->y = point->position.y;
-				v->R = sqrt(v->x * v->x + v->y * v->y);
-				v->t = atan(v->y / v->x);
-				if(v->x < 0.0 && v->y < 0.0)
-					v->t += m_radiansNL(180);
-				else if(v->x < 0.0)
-					v->t += m_radiansNL(90);
-				else if(v->y < 0.0)
-					v->t += m_radiansNL(270);
+				MATH_POLAR(*v);
 				lua_pushnumber(clState, point->separation);
 
 				v = reinterpret_cast<vec2_t *>(lua_newuserdata(clState, sizeof(vec2_t)));
@@ -106,14 +99,7 @@ class w_private_worldListener : public b2ContactListener
 				lua_setmetatable(clState, -2);
 				v->x = point->normal.x;
 				v->y = point->normal.y;
-				v->R = sqrt(v->x * v->x + v->y * v->y);
-				v->t = atan(v->y / v->x);
-				if(v->x < 0.0 && v->y < 0.0)
-					v->t += m_radiansNL(180);
-				else if(v->x < 0.0)
-					v->t += m_radiansNL(90);
-				else if(v->y < 0.0)
-					v->t += m_radiansNL(270);
+				MATH_POLAR(*v);
 
 				lua_call(clState, 7, 0);
 			}
@@ -458,14 +444,7 @@ int w_getPosition(lua_State *L)
 
 	v->x = pos.x;
 	v->y = pos.y;
-	v->R = sqrt(v->x * v->x + v->y * v->y);
-	v->t = atan(v->y / v->x);
-	if(v->x < 0.0 && v->y < 0.0)
-		v->t += m_radiansNL(180);
-	else if(v->x < 0.0)
-		v->t += m_radiansNL(90);
-	else if(v->y < 0.0)
-		v->t += m_radiansNL(270);
+	MATH_POLAR(*v);
 
 	return 1;
 }
@@ -517,14 +496,7 @@ int w_getLinearVelocity(lua_State *L)
 
 	v->x = vel.x;
 	v->y = vel.y;
-	v->R = sqrt(v->x * v->x + v->y * v->y);
-	v->t = atan(v->y / v->x);
-	if(v->x < 0.0 && v->y < 0.0)
-		v->t += m_radiansNL(180);
-	else if(v->x < 0.0)
-		v->t += m_radiansNL(90);
-	else if(v->y < 0.0)
-		v->t += m_radiansNL(270);
+	MATH_POLAR(*v);
 
 	return 1;
 }
@@ -648,14 +620,7 @@ int w_getCenterOfMass(lua_State *L)
 	lua_setmetatable(L, -2);
 
 	v->x = vec.x; v->y = vec.y;
-	v->R = sqrt(v->x * v->x + v->y * v->y);
-	v->t = atan(v->y / v->x);
-	if(v->x < 0.0 && v->y < 0.0)
-		v->t += m_radiansNL(180);
-	else if(v->x < 0.0)
-		v->t += m_radiansNL(90);
-	else if(v->y < 0.0)
-		v->t += m_radiansNL(270);
+	MATH_POLAR(*v);
 
 	return 1;
 }

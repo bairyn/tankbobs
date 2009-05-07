@@ -107,14 +107,7 @@ int m_vec2(lua_State *L)  /* similar to c_math.lua's vec2:new() but can take arg
 
 		v->x = lua_tonumber(L, 1);
 		v->y = lua_tonumber(L, 2);
-		v->R = sqrt(v->x * v->x + v->y * v->y);
-		v->t = atan(v->y / v->x);
-		if(v->x < 0.0 && v->y < 0.0)
-			v->t += m_radiansNL(180);
-		else if(v->x < 0.0)
-			v->t += m_radiansNL(90);
-		else if(v->y < 0.0)
-			v->t += m_radiansNL(270);
+		MATH_POLAR(*v);
 	}
 	else if(lua_isuserdata(L, 1))
 	{
@@ -247,15 +240,7 @@ int m_vec2_newindex(lua_State *L)
 		case 'x':
 			v->x = val;
 
-			/* calculate polar coordinates */
-			v->R = sqrt(v->x * v->x + v->y * v->y);
-			v->t = atan(v->y / v->x);
-			if(v->x < 0.0 && v->y < 0.0)
-				v->t += m_radiansNL(180);
-			else if(v->x < 0.0)
-				v->t += m_radiansNL(90);
-			else if(v->y < 0.0)
-				v->t += m_radiansNL(270);
+			MATH_POLAR(*v);
 
 			return 0;
 			break;
@@ -263,15 +248,7 @@ int m_vec2_newindex(lua_State *L)
 		case 'y':
 			v->y = val;
 
-			/* calculate polar coordinates */
-			v->R = sqrt(v->x * v->x + v->y * v->y);
-			v->t = atan(v->y / v->x);
-			if(v->x < 0.0 && v->y < 0.0)
-				v->t += m_radiansNL(180);
-			else if(v->x < 0.0)
-				v->t += m_radiansNL(90);
-			else if(v->y < 0.0)
-				v->t += m_radiansNL(270);
+			MATH_POLAR(*v);
 
 			return 0;
 			break;
@@ -279,9 +256,7 @@ int m_vec2_newindex(lua_State *L)
 		case 'R':
 			v->R = val;
 
-			/* calculate rectangular coordinates */
-			v->x = v->R * cos(v->t);
-			v->y = v->R * sin(v->t);
+			MATH_RECTANGULAR(*v);
 
 			return 0;
 			break;
@@ -289,9 +264,7 @@ int m_vec2_newindex(lua_State *L)
 		case 't':
 			v->t = val;
 
-			/* calculate rectangular coordinates */
-			v->x = v->R * cos(v->t);
-			v->y = v->R * sin(v->t);
+			MATH_RECTANGULAR(*v);
 
 			return 0;
 			break;
@@ -326,9 +299,7 @@ int m_vec2_unify(lua_State *L)
 
 	v->R = 1.0;
 
-	/* calculate rectangular coordinates */
-	v->x = v->R * cos(v->t);
-	v->y = v->R * sin(v->t);
+	MATH_RECTANGULAR(*v);
 
 	return 0;
 }
@@ -350,9 +321,7 @@ int m_vec2_unit(lua_State *L)
 	v->t = v2->t;
 	v->R = 1.0;
 
-	/* calculate rectangular coordinates */
-	v->x = v->R * cos(v2->t);
-	v->y = v->R * sin(v2->t);
+	MATH_RECTANGULAR(*v);
 
 	return 1;
 }
@@ -375,15 +344,7 @@ int m_vec2___add(lua_State *L)
 	v->x = v2->x + v3->x;
 	v->y = v2->y + v3->y;
 
-	/* calculate polar coordinates */
-	v->R = sqrt(v->x * v->x + v->y * v->y);
-	v->t = atan(v->y / v->x);
-	if(v->x < 0.0 && v->y < 0.0)
-		v->t += m_radiansNL(180);
-	else if(v->x < 0.0)
-		v->t += m_radiansNL(90);
-	else if(v->y < 0.0)
-		v->t += m_radiansNL(270);
+	MATH_POLAR(*v);
 
 	return 1;
 }
@@ -401,15 +362,7 @@ int m_vec2_add(lua_State *L)
 	v->x += v2->x;
 	v->y += v2->y;
 
-	/* calculate polar coordinates */
-	v->R = sqrt(v->x * v->x + v->y * v->y);
-	v->t = atan(v->y / v->x);
-	if(v->x < 0.0 && v->y < 0.0)
-		v->t += m_radiansNL(180);
-	else if(v->x < 0.0)
-		v->t += m_radiansNL(90);
-	else if(v->y < 0.0)
-		v->t += m_radiansNL(270);
+	MATH_POLAR(*v);
 
 	return 0;
 }
@@ -432,15 +385,7 @@ int m_vec2___sub(lua_State *L)
 	v->x = v2->x - v3->x;
 	v->y = v2->y - v3->y;
 
-	/* calculate polar coordinates */
-	v->R = sqrt(v->x * v->x + v->y * v->y);
-	v->t = atan(v->y / v->x);
-	if(v->x < 0.0 && v->y < 0.0)
-		v->t += m_radiansNL(180);
-	else if(v->x < 0.0)
-		v->t += m_radiansNL(90);
-	else if(v->y < 0.0)
-		v->t += m_radiansNL(270);
+	MATH_POLAR(*v);
 
 	return 1;
 }
@@ -458,15 +403,7 @@ int m_vec2_sub(lua_State *L)
 	v->x -= v2->x;
 	v->y -= v2->y;
 
-	/* calculate polar coordinates */
-	v->R = sqrt(v->x * v->x + v->y * v->y);
-	v->t = atan(v->y / v->x);
-	if(v->x < 0.0 && v->y < 0.0)
-		v->t += m_radiansNL(180);
-	else if(v->x < 0.0)
-		v->t += m_radiansNL(90);
-	else if(v->y < 0.0)
-		v->t += m_radiansNL(270);
+	MATH_POLAR(*v);
 
 	return 0;
 }
@@ -890,15 +827,7 @@ int m_edge(lua_State *L)  /* algorithm, by Darel Rex Finley, 2006, can be found 
 	v->x = l1p1x + l1c * intersection;
 	v->y = l1p1y + l1s * intersection;
 
-	/* calculate polar coordinates */
-	v->R = sqrt(v->x * v->x + v->y * v->y);
-	v->t = atan(v->y / v->x);
-	if(v->x < 0.0 && v->y < 0.0)
-		v->t += m_radiansNL(180);
-	else if(v->x < 0.0)
-		v->t += m_radiansNL(90);
-	else if(v->y < 0.0)
-		v->t += m_radiansNL(270);
+	MATH_POLAR(*v);
 
 	/* coordinates of intersection in transformed system */
 	v = lua_newuserdata(L, sizeof(vec2_t));

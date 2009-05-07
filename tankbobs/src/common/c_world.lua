@@ -713,7 +713,8 @@ function c_world_tank_step(d, tank)
 		else
 			-- deceleration is really only caused when the tank isn't accelerating or decelerating.  If it seems strange, you should realize that the tanks have an anti-friction system built into them ;) - note that if friction was always applied then tanks would have a maximum speed limit.
 			local v = tankbobs.m_vec2(tankbobs.w_getLinearVelocity(tank.body))
-			--v.R = v.R / (1 + d * c_const_get("tank_worldFriction"))  -- FIXME: fix deceleration
+
+			v.R = v.R / (1 + d * c_const_get("tank_worldFriction"))
 			tankbobs.w_setLinearVelocity(tank.body, v)
 		end
 
@@ -804,7 +805,7 @@ function c_world_powerupSpawnPoint_step(d, powerupSpawnPoint)
 			local push = tankbobs.m_vec2()
 			push.R = c_const_get("powerup_pushStrength")
 			push.t = c_const_get("powerup_pushAngle")
-			tankbobs.m_setLinearVelocity(powerup.m.body, push)
+			tankbobs.w_setLinearVelocity(powerup.m.body, push)
 		end
 	end
 end
