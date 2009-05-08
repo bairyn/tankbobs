@@ -130,11 +130,11 @@ do \
 		(v).t = 0; \
 	else \
 		(v).t = atan((v).y / (v).x); \
-	if((v).x < 0.0 && (v).y < 0.0) \
+	if((v).x <= 0.0 && (v).y <= 0.0) \
 		(v).t += m_radiansNL(180); \
-	else if((v).x < 0.0) \
+	else if((v).x <= 0.0) \
 		(v).t += m_radiansNL(90); \
-	else if((v).y < 0.0) \
+	else if((v).y <= 0.0) \
 		(v).t += m_radiansNL(270); \
 } while(0)
 

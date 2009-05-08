@@ -1,4 +1,3 @@
---BLENDING IS BROKEN
 --[[
 Copyright (C) 2008 Byron James Johnson
 

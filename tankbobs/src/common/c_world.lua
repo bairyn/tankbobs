@@ -98,14 +98,11 @@ function c_world_init()
 	c_const_set("wall_isBullet", true, 1)
 	c_const_set("wall_linearDamping", 0, 1)
 	c_const_set("wall_angularDamping", 0, 1)
-	c_const_set("tank_rotationVelocitySpeed", 64, 1)  -- for every second, velocity matches 3/4 rotation  -- FIXME: the actual rotation turning speed is about a quarter of this
-	c_const_set("tank_rotationVelocityMinSpeed", 24, 1)  -- if at least 24 ups
-	c_const_set("tank_rotationVelocityCatchUpSpeed", 128, 1)  -- FIXME: as well
+	c_const_set("tank_rotationVelocitySpeed", 128, 1)  -- for every second, velocity matches 3/4 rotation  -- FIXME: the actual rotation turning speed is about a quarter of this
+	c_const_set("tank_rotationVelocityMinSpeed", 0.5, 1)  -- if at least 24 ups
 	c_const_set("tank_rotationSpeed", c_math_radians(135), 1)  -- 135 degrees per second
 	c_const_set("tank_rotationSpecialSpeed", c_math_degrees(1) / 3.5, 1)
 	c_const_set("tank_defaultRotation", c_math_radians(90), 1)  -- up
-
-	c_world_tanks = {}
 
 	c_const_set("powerup_hullx1",  0, 1) c_const_set("powerup_hully1",  1, 1)
 	c_const_set("powerup_hullx2",  0, 1) c_const_set("powerup_hully2",  0, 1)
@@ -245,12 +242,14 @@ function c_world_newWorld()
 	end
 
 	c_world_powerups = {}
+	c_world_tanks = {}
 end
 
 function c_world_freeWorld()
 	tankbobs.w_freeWorld()
 
 	c_world_powerups = {}
+	c_world_tanks = {}
 end
 
 c_world_tank =
@@ -729,7 +728,7 @@ function c_world_tank_step(d, tank)
 		if vel >= c_const_get("tank_rotationVelocityMinSpeed") * c_const_get("tank_forceSpeedK") then
 			tank.w = w - ((w - tank.r) * d * c_const_get("tank_rotationVelocitySpeed"))
 		else
-			tank.w = w - ((w - tank.r) * d * c_const_get("tank_rotationVelocityCatchUpSpeed"))
+			tank.w = tank.r
 		end
 	end
 
