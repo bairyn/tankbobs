@@ -30,7 +30,7 @@ local lastTime = 0
 function c_world_init()
 	c_config_cheat_protect("config.game.timescale")
 
-	c_const_set("world_time", 1000)  -- everything is relative to change and seconds.  A speed of 5 means 5 units per second
+	c_const_set("world_time", 1000)  -- relative to change in seconds
 
 	c_const_set("world_timeWrapTest", -99999)
 
@@ -39,20 +39,19 @@ function c_world_init()
 	c_const_set("world_gravityx", 0, 1) c_const_set("world_gravityy", 0, 1)
 	c_const_set("world_allowSleep", true, 1)
 
-	c_const_set("powerupSpawnPoint_initialPowerupTime", 30, 1)
-	c_const_set("powerupSpawnPoint_powerupTime", 30, 1)
+	c_const_set("powerupSpawnPoint_initialPowerupTime", 3, 1)
+	c_const_set("powerupSpawnPoint_powerupTime", 3, 1)
 
-	c_const_set("powerup_density", 1E-123, 1)
+	c_const_set("powerup_density", 1E-5, 1)
 	c_const_set("powerup_friction", 0, 1)
 	c_const_set("powerup_restitution", 1, 1)
 	c_const_set("powerup_canSleep", false, 1)
 	c_const_set("powerup_isBullet", true, 1)
 	c_const_set("powerup_linearDamping", 0, 1)
 	c_const_set("powerup_angularDamping", 0, 1)
-	c_const_set("powerup_pushStrength", 128, 1)
-	c_const_set("powerup_pushAngle", tankbobs.m_degrees(45), 1)
-
-	c_const_set("tank_maxCollisionVectorLength", 975)  -- 975 units
+	c_const_set("powerup_pushStrength", 48, 1)
+	c_const_set("powerup_pushAngle", tankbobs.m_radians(45), 1)
+	c_const_set("powerup_static", false, 1)
 
 	-- hull of tank facing right
 	c_const_set("tank_hullx1", -2.0, 1) c_const_set("tank_hully1",  2.0, 1)
@@ -91,6 +90,7 @@ function c_world_init()
 	c_const_set("tank_accelerationVectorPointTest", -90, 1)  -- the origin of acceleration force
 	c_const_set("tank_decelerationVectorPointTest", 90, 1)
 	c_const_set("tank_spawnTime", 0.75, 1)
+	c_const_set("tank_static", false, 1)
 	c_const_set("wall_density", 1, 1)
 	c_const_set("wall_friction", 0.25, 1)  -- deceleration caused by friction (~speed *= 1 - friction)
 	c_const_set("wall_restitution", 0.2, 1)
@@ -361,7 +361,7 @@ function c_world_tank_checkSpawn(d, tank)
 	tank.cd = {}
 
 	-- add a physical body
-	tank.body = tankbobs.w_addBody(tank.p[1], tank.r, c_const_get("tank_canSleep"), c_const_get("tank_isBullet"), c_const_get("tank_linearDamping"), c_const_get("tank_angularDamping"), tank.h, c_const_get("tank_density"), c_const_get("tank_friction"), c_const_get("tank_restitution"), true)
+	tank.body = tankbobs.w_addBody(tank.p[1], tank.r, c_const_get("tank_canSleep"), c_const_get("tank_isBullet"), c_const_get("tank_linearDamping"), c_const_get("tank_angularDamping"), tank.h, c_const_get("tank_density"), c_const_get("tank_friction"), c_const_get("tank_restitution"), not c_const_get("tank_static"))
 	return true
 end
 
@@ -464,7 +464,7 @@ function c_world_canPowerupSpawn(d, powerupSpawnPoint)
 	-- make sure it doesn't interfere with another powerup or wall
 	for _, v in pairs(c_tcm_current_map.walls) do
 		if not v.detail then
-			if c_world_intersection(d, c_world_powerupSpawnPointHull(powerupSpawnPoint), v.p, tankbobs.m_vec2(0, 0), v.static and tankbobs.m_vec2(0, 0) or tankbobs.w_getLinearVelocity(v.body)) then
+			if c_world_intersection(d, c_world_powerupSpawnPointHull(powerupSpawnPoint), v.p, tankbobs.m_vec2(0, 0), v.static and tankbobs.m_vec2(0, 0) or tankbobs.w_getLinearVelocity(v.m.body)) then
 				return false
 			end
 		end
@@ -472,7 +472,7 @@ function c_world_canPowerupSpawn(d, powerupSpawnPoint)
 
 	for _, v in pairs(c_world_powerups) do
 		if not v.collided then
-			if c_world_intersection(d, c_world_powerupSpawnPointHull(powerupSpawnPoint), c_world_powerupHull(v), tankbobs.m_vec2(0, 0), not v.body and tankbobs.m_vec2(0, 0) or tankbobs.w_getLinearVelocity(v.body)) then  -- remove check for v.body after powerups move
+			if c_world_intersection(d, c_world_powerupSpawnPointHull(powerupSpawnPoint), c_world_powerupHull(v), tankbobs.m_vec2(0, 0), not v.m.body and tankbobs.m_vec2(0, 0) or tankbobs.w_getLinearVelocity(v.m.body)) then
 				return false
 			end
 		end
@@ -711,7 +711,7 @@ function c_world_tank_step(d, tank)
 			tankbobs.w_applyForce(tank.body, force, point)
 		else
 			-- deceleration is really only caused when the tank isn't accelerating or decelerating.  If it seems strange, you should realize that the tanks have an anti-friction system built into them ;) - note that if friction was always applied then tanks would have a maximum speed limit.
-			local v = tankbobs.m_vec2(tankbobs.w_getLinearVelocity(tank.body))
+			local v = tankbobs.w_getLinearVelocity(tank.body)
 
 			v.R = v.R / (1 + d * c_const_get("tank_worldFriction"))
 			tankbobs.w_setLinearVelocity(tank.body, v)
@@ -799,7 +799,7 @@ function c_world_powerupSpawnPoint_step(d, powerupSpawnPoint)
 
 			powerup.p[1](powerupSpawnPoint.p[1])
 
-			powerup.m.body = tankbobs.w_addBody(powerup.p[1], 0, c_const_get("powerup_canSleep"), c_const_get("powerup_isBullet"), c_const_get("powerup_linearDamping"), c_const_get("powerup_angularDamping"), c_world_powerupHull(powerup), c_const_get("wall_density"), c_const_get("wall_friction"), c_const_get("wall_restitution"), true)
+			powerup.m.body = tankbobs.w_addBody(powerup.p[1], 0, c_const_get("powerup_canSleep"), c_const_get("powerup_isBullet"), c_const_get("powerup_linearDamping"), c_const_get("powerup_angularDamping"), c_world_powerupHull(powerup), c_const_get("powerup_density"), c_const_get("powerup_friction"), c_const_get("powerup_restitution"), not c_const_get("powerup_static"))
 			-- add some initial push to the powerup
 			local push = tankbobs.m_vec2()
 			push.R = c_const_get("powerup_pushStrength")
@@ -853,10 +853,9 @@ function c_world_powerup_step(d, powerup)
 	end
 
 	powerup.p[1] = tankbobs.w_getPosition(powerup.m.body)
-	tankbobs.w_setAngle(projectile, 0)
+	tankbobs.w_setAngle(powerup.m.body, 0)
 	powerup.r = tankbobs.w_getAngle(powerup.m.body)
 
-	-- TODO: use physics.  Until then, test for each tank
 	for _, v in pairs(c_world_tanks) do
 		if v.exists then
 			if c_world_intersection(d, c_world_powerupHull(powerup), c_world_tankHull(v), tankbobs.m_vec2(0, 0), tankbobs.w_getLinearVelocity(v.body)) then
@@ -973,6 +972,7 @@ function c_world_step()
 
 	if tankbobs.t_getTicks() - lastTime < c_const_get("world_timeWrapTest") then
 		--handle time wrap here
+		io.stdlog:write("Time wrapped\n")
 		lastTime = tankbobs.t_getTicks()
 		return;
 	end
