@@ -1,4 +1,8 @@
 <config>
+	<client>
+		<minFrameLatency>1</minFrameLatency>
+	</client>
+
 	<font>
 		<sans>
 			<size>2</size>

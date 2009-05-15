@@ -71,12 +71,12 @@ function main_loop()
 		d = 1.0E-6  -- make an inaccurate guess
 	end
 
-	if c_config_get("config.server.minFrameLatency") < c_const_get("server_mlf") then
-		c_config_set("config.server.minFrameLatency", c_const_get("server_mlf"))
+	if c_config_get("config.client.minFrameLatency") < c_const_get("client_mlf") then
+		c_config_set("config.client.minFrameLatency", c_const_get("client_mlf"))
 	end
 
-	if tankbobs.t_getTicks() - lastTime < c_config_get("config.server.minFrameLatency") then
-		tankbobs.t_delay(c_config_get("config.server.minFrameLatency"))
+	if tankbobs.t_getTicks() - lastTime < c_config_get("config.client.minFrameLatency") then
+		tankbobs.t_delay(c_config_get("config.client.minFrameLatency"))
 		return
 	end
 
