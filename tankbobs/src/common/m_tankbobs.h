@@ -130,12 +130,6 @@ do \
 		(v).t = m_radiansNL(0); \
 	else \
 		(v).t = atan2((v).y, (v).x); \
-	if((v).x < 0.0 && (v).y < 0.0) \
-		(v).t += m_radiansNL(180); \
-	else if((v).x < 0.0) \
-		(v).t += m_radiansNL(90); \
-	else if((v).y < 0.0) \
-		(v).t += m_radiansNL(270); \
 } while(0)
 
 #define MATH_RECTANGULAR(v) \
