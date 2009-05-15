@@ -65,7 +65,7 @@ function st_license_mouse(x, y, xrel, yrel)
 	gui_mouse(x, y)
 end
 
-function st_license_step()
+function st_license_step(d)
 	gui_paint()
 end
 

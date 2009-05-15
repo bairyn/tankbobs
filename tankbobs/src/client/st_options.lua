@@ -102,7 +102,7 @@ function st_options_mouse(x, y, xrel, yrel)
 	gui_mouse(x, y)
 end
 
-function st_options_step()
+function st_options_step(d)
 	gui_paint()
 end
 

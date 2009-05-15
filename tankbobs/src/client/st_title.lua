@@ -54,7 +54,7 @@ function st_title_mouse(x, y, xrel, yrel)
 	gui_mouse(x, y)
 end
 
-function st_title_step()
+function st_title_step(d)
 	gui_paint()
 end
 

@@ -57,7 +57,7 @@ end
 function st_start_mouse(x, y, xrel, yrel)
 end
 
-function st_start_step()
+function st_start_step(d)
 	if tankbobs.t_getTicks() >= start_countdowntime + 1000 then
 		start_countdowntime = tankbobs.t_getTicks()
 		if start_countdown == nil then

@@ -958,35 +958,8 @@ function c_world_contactListener(shape1, shape2, body1, body2, position, separat
 	end
 end
 
-function c_world_step()
+function c_world_step(d)
 	local t = tankbobs.t_getTicks()
-
-	if lastTime == 0 then
-		lastTime = tankbobs.t_getTicks()
-		return
-	end
-
-	if c_config_get("config.server.minFrameLatency") < c_const_get("server_mlf") then
-		c_config_set("config.server.minFrameLatency", c_const_get("server_mlf"))
-	end
-
-	if tankbobs.t_getTicks() - lastTime < c_const_get("world_timeWrapTest") then
-		--handle time wrap here
-		io.stdlog:write("Time wrapped\n")
-		lastTime = tankbobs.t_getTicks()
-		return;
-	end
-
-	if tankbobs.t_getTicks() - lastTime < c_config_get("config.server.minFrameLatency") then
-		return;
-	end
-
-	local d = (t - lastTime) / (c_const_get("world_time") * c_config_get("config.game.timescale"))
-	lastTime = t
-
-	if d == 0 then
-		d = 1.0E-6  -- make an inaccurate guess
-	end
 
 	for _, v in pairs(c_world_tanks) do
 		c_world_tank_step(d, v)

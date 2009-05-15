@@ -362,10 +362,10 @@ function st_play_mouse(x, y, xrel, yrel)
 	gui_mouse(x, y)
 end
 
-function st_play_step()
+function st_play_step(d)
 	-- TODO: use display lists and find a better algorithm for "depth"
 
-	c_world_step()
+	c_world_step(d)
 
 	for i = 1, c_const_get("tcm_maxLevel") do
 		for k, v in pairs(c_tcm_current_map.walls) do

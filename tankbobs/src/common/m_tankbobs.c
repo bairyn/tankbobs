@@ -95,6 +95,14 @@ int t_getTicks(lua_State *L)
 	return 1;
 }
 
+int t_delay(lua_State *L)
+{
+	CHECKINIT(init, L);
+
+	SDL_Delay(luaL_checkinteger(L, 1));
+	return 1;
+}
+
 int t_isDebug(lua_State *L)
 {
 	CHECKINIT(init, L);
@@ -125,7 +133,9 @@ static const struct luaL_Reg tankbobs[] =
 		/* no args, no returns, quits general module */
 	{"t_getTicks", t_getTicks}, /* SDL_GetTicks() */
 		/* no args, 1st and only return value is number of milliseconds since
-			app start (note that this value may wrap over every week) */
+			app start */
+	{"t_delay", t_delay}, /* SDL_Delay() */
+		/* 1st arg is the ms to delay.  Nothing is returned. */
 	{"t_isDebug", t_isDebug}, /* if debugging is enabled, return true, if not, return false */
 	{"t_testAND", t_testAND}, /* test two integers (both are arguments) and return the bool of & */
 

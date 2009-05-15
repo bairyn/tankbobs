@@ -260,7 +260,7 @@ function c_state_new(state)
 	c_state_state.cur = state
 end
 
-function c_state_step()
+function c_state_step(d)
 	if not c_state_state then
 		error("c_state_step: state not initialized or state table lost")
 	end
@@ -269,7 +269,7 @@ function c_state_step()
 		error("c_state_step: no valid state")
 	end
 
-	local res = c_state_state.cur.main()
+	local res = c_state_state.cur.main(d)
 	if res ~= nil then
 		if type(res) == "number" or type(res) == "boolean" or type(res) == "string" then
 			error("c_state_step: state " .. c_state_state.cur.name .. " returned an error value: " .. tostring(res))

@@ -54,7 +54,7 @@ function st_help_mouse(x, y, xrel, yrel)
 	gui_mouse(x, y)
 end
 
-function st_help_step()
+function st_help_step(d)
 	gui_paint()
 end
 
