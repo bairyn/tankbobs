@@ -36,9 +36,9 @@ end
 function c_module_load(mod)
 	if t.t_isWindows() then
 		if t.t_is64Bit() then
-			package.cpath = package.cpath .. ";" .. c_const_get("module64-win_dir") .. "?.so"
+			package.cpath = package.cpath .. ";" .. c_const_get("module64-win_dir") .. "?.dll"
 		else
-			package.cpath = package.cpath .. ";" .. c_const_get("module-win_dir") .. "?.so"
+			package.cpath = package.cpath .. ";" .. c_const_get("module-win_dir") .. "?.dll"
 		end
 
 		if t.t_is64Bit() then
