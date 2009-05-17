@@ -20,12 +20,12 @@ target_link_libraries(mtankbobs ${tankbobs_libs})
 set(client_srcs src/client/client.c)
 
 add_executable(tankbobs ${client_srcs})
-target_link_libraries(tankbobs lua)
+target_link_libraries(tankbobs lua m)
 
 set(server_srcs src/server/server.c)
 
 add_executable(tankbobs-server ${server_srcs})
-target_link_libraries(tankbobs-server lua)
+target_link_libraries(tankbobs-server lua m)
 
 set(tstr_srcs src/lib/tstr/tstr.c)
 
