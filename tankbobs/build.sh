@@ -63,7 +63,7 @@ if [ "$1" == "make" ]; then
 	fi
 
 	# build Box2D manually
-	make -C ./src/lib/Box2D/Source
+	make -C ./src/lib/Box2D/Source CXXFLAGS="-g -O2 -fPIC"
 
 	# build tankbobs
 	cd ./build/
