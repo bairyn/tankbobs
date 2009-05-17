@@ -115,6 +115,30 @@ int t_isDebug(lua_State *L)
 	return 1;
 }
 
+int t_is64Bit(lua_State *L)
+{
+	CHECKINIT(init, L);
+
+#if defined(__x86_64) || defined(__x86_64__) || defined(__ia64) || defined(__ia64__) || defined(__IA64) || defined(__IA64__) || defined(__M_IA64) || defined(__M_IA64__) || defined(_WIN64)
+	lua_pushboolean(L, true);
+#else
+	lua_pushboolean(L, false);
+#endif
+	return 1;
+}
+
+int t_isWindows(lua_State *L)
+{
+	CHECKINIT(init, L);
+
+#if defined (_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__TOS_WINDOWS__) || defined(__WINDOWS__)
+	lua_pushboolean(L, true);
+#else
+	lua_pushboolean(L, false);
+#endif
+	return 1;
+}
+
 int t_testAND(lua_State *L)
 {
 	CHECKINIT(init, L);
@@ -138,6 +162,8 @@ static const struct luaL_Reg tankbobs[] =
 		/* 1st arg is the ms to delay.  Nothing is returned. */
 	{"t_isDebug", t_isDebug}, /* if debugging is enabled, return true, if not, return false */
 	{"t_testAND", t_testAND}, /* test two integers (both are arguments) and return the bool of & */
+	{"t_is64Bit", t_is64Bit}, /* if the machine is running 64-bit, return true, if not, return false */
+	{"t_isWindows", t_isWindows}, /* if the machine is running Windows, return true, if not, return false */
 
 	/* input.c */
 	{"in_getEvents", in_getEvents}, /* store events in a userdata */

@@ -34,6 +34,18 @@ function c_module_done()
 end
 
 function c_module_load(mod)
-	package.cpath = package.cpath .. ";" .. c_const_get("module_dir") .. "?.so"
+	if t.t_isWindows() then
+		if t.t_is64Bit() then
+			package.cpath = package.cpath .. ";" .. c_const_get("module64-win_dir") .. "?.so"
+		else
+			package.cpath = package.cpath .. ";" .. c_const_get("module-win_dir") .. "?.so"
+		end
+
+		if t.t_is64Bit() then
+			package.cpath = package.cpath .. ";" .. c_const_get("module64_dir") .. "?.so"
+		else
+			package.cpath = package.cpath .. ";" .. c_const_get("module_dir") .. "?.so"
+		end
+	end
 	require(mod)
 end
