@@ -78,8 +78,8 @@ int t_initialize(lua_State *L);
 int t_quit(lua_State *L);
 int t_getTicks(lua_State *L);
 int t_delay(lua_State *L);
-int t_isDebug(lua_State *L)
-int t_is64Bit(lua_State *L)
+int t_isDebug(lua_State *L);
+int t_is64Bit(lua_State *L);
 int t_isWindows(lua_State *L)
 int t_testAND(lua_State *L);
 
