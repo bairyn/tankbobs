@@ -39,8 +39,8 @@ function c_world_init()
 	c_const_set("world_gravityx", 0, 1) c_const_set("world_gravityy", 0, 1)
 	c_const_set("world_allowSleep", true, 1)
 
-	c_const_set("powerupSpawnPoint_initialPowerupTime", 3, 1)
-	c_const_set("powerupSpawnPoint_powerupTime", 3, 1)
+	c_const_set("powerupSpawnPoint_initialPowerupTime", 30, 1)
+	c_const_set("powerupSpawnPoint_powerupTime", 30, 1)
 
 	c_const_set("powerup_density", 1E-5, 1)
 	c_const_set("powerup_friction", 0, 1)
