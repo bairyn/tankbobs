@@ -36,15 +36,15 @@ end
 function c_module_load(mod)
 	if tankbobs.t_isWindows() then
 		if tankbobs.t_is64Bit() then
-			package.cpath = package.cpath .. ";" .. c_const_get("module64-win_dir") .. "?.dll"
+			package.cpath = c_const_get("module64-win_dir") .. "?.dll" .. ";" .. package.cpath
 		else
-			package.cpath = package.cpath .. ";" .. c_const_get("module-win_dir") .. "?.dll"
+			package.cpath = c_const_get("module-win_dir") .. "?.dll" .. ";" .. package.cpath
 		end
 	else
 		if tankbobs.t_is64Bit() then
-			package.cpath = package.cpath .. ";" .. c_const_get("module64_dir") .. "?.so"
+			package.cpath = c_const_get("module64_dir") .. "?.so" .. ";" .. package.cpath
 		else
-			package.cpath = package.cpath .. ";" .. c_const_get("module_dir") .. "?.so"
+			package.cpath = c_const_get("module_dir") .. "?.so" .. ";" .. package.cpath
 		end
 	end
 	require(mod)
