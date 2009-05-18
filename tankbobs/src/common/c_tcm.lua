@@ -361,7 +361,7 @@ local function c_tcm_check_true_header(i)
 		error "Invalid map header"
 	elseif c_tcm_private_get(tankbobs.io_getChar, i) ~= 0x01 then
 		error "Invalid map header"
-	elseif string.format("%X", c_tcm_private_get(tankbobs.io_getInt, i)):sub(-32) ~= string.format("%X", c_const_get("tcm_magic")):sub(-32) then
+	elseif string.format("%X", c_tcm_private_get(tankbobs.io_getInt, i)):sub(-8) ~= string.format("%X", c_const_get("tcm_magic")):sub(-8) then
 		error "Invalid map header"
 	elseif c_tcm_private_get(tankbobs.io_getChar, i) ~= c_const_get("tcm_version") then
 		i:seek("cur", -1)
