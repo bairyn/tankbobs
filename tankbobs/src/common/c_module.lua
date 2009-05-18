@@ -34,14 +34,14 @@ function c_module_done()
 end
 
 function c_module_load(mod)
-	if t.t_isWindows() then
-		if t.t_is64Bit() then
+	if tankbobs.t_isWindows() then
+		if tankbobs.t_is64Bit() then
 			package.cpath = package.cpath .. ";" .. c_const_get("module64-win_dir") .. "?.dll"
 		else
 			package.cpath = package.cpath .. ";" .. c_const_get("module-win_dir") .. "?.dll"
 		end
-
-		if t.t_is64Bit() then
+	else
+		if tankbobs.t_is64Bit() then
 			package.cpath = package.cpath .. ";" .. c_const_get("module64_dir") .. "?.so"
 		else
 			package.cpath = package.cpath .. ";" .. c_const_get("module_dir") .. "?.so"
