@@ -24,7 +24,7 @@ Graphical User Interface
 --]]
 
 function gui_init()
-	gui_widgets = {labels = {}, actions = {}, cycles = {}}
+	gui_widgets = {labels = {}, actions = {}, cycles = {}, selection = 1, selectionType = nil}
 
 	c_const_set("label_r", 0.8, 1)
 	c_const_set("label_g", 0.5, 1)
