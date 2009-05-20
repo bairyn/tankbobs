@@ -80,11 +80,6 @@ struct r_fontCache_s
 	GLuint texture;
 	vec2_t r;
 	char string[BUFSIZE];
-	vec2_t p;
-	int c_r;
-	int c_g;
-	int c_b;
-	int c_a;
 };
 
 typedef struct r_fontCache_t r_fontCache;
@@ -477,7 +472,7 @@ int r_drawString(lua_State *L)
 	vec2_t *v;
 	const vec2_t *v2;
 	const char *draw;
-	SDL_Color c;
+	SDL_Color c = {255, 255, 255, 255};
 	SDL_Surface *s, *screen;
 	SDL_Rect p;
 	int i;
@@ -485,6 +480,7 @@ int r_drawString(lua_State *L)
 	r_fontCache_t *fc;
 	int oldestTime = 0;
 	double scalex, scaley;
+	GLfloat fill[4];
 
 	CHECKINIT(init, L);
 
@@ -495,10 +491,10 @@ int r_drawString(lua_State *L)
 	draw = luaL_checkstring(L, 1);
 	v2 = CHECKVEC(L, 2);
 
-	c.r = luaL_checkinteger(L, 3);
-	c.g = luaL_checkinteger(L, 4);
-	c.b = luaL_checkinteger(L, 5);
-	/* c.a = luaL_checkinteger(L, 6); */
+	fill[0] = luaL_checknumber(L, 3);
+	fill[1] = luaL_checknumber(L, 4);
+	fill[2] = luaL_checknumber(L, 5);
+	fill[3] = luaL_checknumber(L, 6);
 
 	scalex = luaL_checknumber(L, 7);
 	scaley = luaL_checknumber(L, 8);
@@ -514,13 +510,15 @@ int r_drawString(lua_State *L)
 
 		if(fc->active)
 		{
-			if(glIsList(fc->list) && glIsTexture(fc->texture) && strcmp(draw, fc->string) == 0 && c.r == fc->c_r && c.g == fc->c_g && c.b == fc->c_b && p.x == fc->p.x && p.y == fc->p.y)
+			if(glIsList(fc->list) && glIsTexture(fc->texture) && strcmp(draw, fc->string) == 0)
 			{
 				fc->lastUsedTime = SDL_GetTicks();
 
 				glPushMatrix();
 					glTranslated(p.x, p.y, 0.0);
 					glScalef(scalex, scaley, 1.0);
+					glTexEnvfv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_COLOR, fill);
+					glColor4dv(fill);
 					glCallList(fc->list);
 				glPopMatrix();
 
@@ -576,18 +574,10 @@ int r_drawString(lua_State *L)
 	{
 		SDL_Surface *converted;
 		SDL_PixelFormat fmt;
-		GLfloat full[4] = {1.0f, 1.0f, 1.0f, 1.0f};
 
 		/* generate texture and list */
 
 		strncpy(fc->string, draw, sizeof(fc->string));
-		fc->p.x = p.x;
-		fc->p.y = p.y;
-		MATH_POLAR(fc->p);
-		fc->c_r = c.r;
-		fc->c_g = c.g;
-		fc->c_b = c.b;
-		/* c->c_a = c.a; */
 
 		fc->active = 1;
 
@@ -685,10 +675,10 @@ int r_drawString(lua_State *L)
 		glPushMatrix();
 			glTranslated(p.x, p.y, 0.0);
 			glScalef(scalex, scaley, 1.0);
+			glTexEnvfv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_COLOR, fill);
+			glColor4dv(fill);
 			glNewList(fc->list, GL_COMPILE_AND_EXECUTE);  /* execute it so that text won't only be rendered after being placed in cache */
-				glTexEnvfv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_COLOR, full);
 				glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-				glColor4d(1.0, 1.0, 1.0, 1.0);
 				glBindTexture(GL_TEXTURE_2D, fc->texture);
 				glBegin(GL_QUADS);
 					/* x texcoords are inverted */
