@@ -118,7 +118,6 @@ function gui_action(text, p, updateTextCallBack, actionCallBack)
 end
 
 function gui_paint(d)
-c_const_set("label_scaley", c_const_get("label_scaley") * 1.001)
 	for k, v in pairs(gui_widgets.labels) do
 		if v.updateTextCallBack then
 			v:updateTextCallBack(d)
