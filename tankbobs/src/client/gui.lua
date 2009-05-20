@@ -30,22 +30,22 @@ function gui_init()
 	c_const_set("label_g", 0.5, 1)
 	c_const_set("label_b", 0.1, 1)
 	c_const_set("label_a", 1.0, 1)
-	c_const_set("label_scalex", 0.25, 1)
-	c_const_set("label_scaley", 0.40, 1)
+	c_const_set("label_scalex", 1 / 20, -1)
+	c_const_set("label_scaley", 1 / 20, -1)
 
 	c_const_set("action_r", 0.92, 1)
 	c_const_set("action_g", 0.94, 1)
 	c_const_set("action_b", 0.98, 1)
 	c_const_set("action_a", 1.0, 1)
-	c_const_set("action_scalex", 0.25, 1)
-	c_const_set("action_scaley", 0.40, 1)
+	c_const_set("action_scalex", 1 / 40, -1)
+	c_const_set("action_scaley", 1 / 40, -1)
 
 	c_const_set("actionSelected_r", 0.6, 1)
 	c_const_set("actionSelected_g", 0.4, 1)
 	c_const_set("actionSelected_b", 0.2, 1)
 	c_const_set("actionSelected_a", 1.0, 1)
-	c_const_set("actionSelected_scalex", 0.25, 1)
-	c_const_set("actionSelected_scaley", 0.40, 1)
+	c_const_set("actionSelected_scalex", 1 / 30, -1)
+	c_const_set("actionSelected_scaley", 1 / 30, -1)
 end
 
 function gui_done()
@@ -118,6 +118,7 @@ function gui_action(text, p, updateTextCallBack, actionCallBack)
 end
 
 function gui_paint(d)
+c_const_set("label_scaley", c_const_get("label_scaley") * 1.001)
 	for k, v in pairs(gui_widgets.labels) do
 		if v.updateTextCallBack then
 			v:updateTextCallBack(d)

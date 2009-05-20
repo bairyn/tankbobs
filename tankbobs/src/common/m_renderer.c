@@ -713,10 +713,10 @@ int r_drawString(lua_State *L)
 				glBindTexture(GL_TEXTURE_2D, fc->texture);
 				glBegin(GL_QUADS);
 					/* x texcoords are inverted */
-					glTexCoord2d(0, 0); glVertex2d(0.0, s->h);
-					glTexCoord2d(0, 1); glVertex2d(0.0, 0.0);
-					glTexCoord2d(1, 1); glVertex2d(s->w, 0.0);
-					glTexCoord2d(1, 0); glVertex2d(s->w, s->h);
+					glTexCoord2d(0, 0); glVertex2d(0.0, converted->h);
+					glTexCoord2d(0, 1); glVertex2d(0.0, -converted->h * 6);
+					glTexCoord2d(1, 1); glVertex2d(converted->w, -converted->h * 6);
+					glTexCoord2d(1, 0); glVertex2d(converted->w, converted->h);
 				glEnd();
 			glEndList();
 		glPopMatrix();
