@@ -345,7 +345,8 @@ static const struct luaL_Reg tankbobs[] =
 	{"r_drawString", r_drawString}, /* draw a string */
 		/* The first argument is the string to be drawn.  The second is the position (lower
 			left.  The third is the red, fourth green, fifth blue, and sixth alpha.  The seventh
-			argument is the x scale of the text, and the eighth is the y scale.  The position
+			argument is the x scale of the text, and the eighth is the y scale.  The ninth argument
+			is a boolean of whether the cache should be prioritized.  The position
 			of the upper right corner is returned. */
 	{"r_freeFont", r_freeFont}, /* free a font */
 		/* no return, 1st and only arg is userdata of font */

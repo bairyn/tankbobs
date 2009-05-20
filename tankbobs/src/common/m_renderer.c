@@ -75,6 +75,7 @@ struct r_fontCache_s
 	int active;
 
 	int lastUsedTime;
+	int prioritized;
 
 	GLuint list;
 	GLuint texture;
@@ -481,6 +482,7 @@ int r_drawString(lua_State *L)
 	int oldestTime = 0;
 	double scalex, scaley;
 	GLfloat fill[4];
+	int priority = 0;
 
 	CHECKINIT(init, L);
 
@@ -499,6 +501,8 @@ int r_drawString(lua_State *L)
 	scalex = luaL_checknumber(L, 7);
 	scaley = luaL_checknumber(L, 8);
 
+	priority = lua_toboolean(L, 9);
+
 	p.x = v2->x;
 	p.y = v2->y;
 
@@ -513,6 +517,7 @@ int r_drawString(lua_State *L)
 			if(glIsList(fc->list) && glIsTexture(fc->texture) && strcmp(draw, fc->string) == 0)
 			{
 				fc->lastUsedTime = SDL_GetTicks();
+				fc->prioritized = priority;
 
 				glPushMatrix();
 					glTranslated(p.x, p.y, 0.0);
@@ -549,7 +554,29 @@ int r_drawString(lua_State *L)
 		}
 	}
 
-	/* use the oldest cache (and delete old texture and list) */
+	/* use the non-prioritized oldest cache (and delete old texture and list) */
+	if(!fc)
+	{
+		for(i = 0; i < FONTCACHES; i++)
+		{
+			if(!fc->prioritized && (!oldestTime || r_fontCaches[i].lastUsedTime < oldestTime))
+			{
+				fc = &r_fontCaches[i];
+
+				oldestTime = fc->lastUsedTime;
+
+				if(glIsList(fc->list))
+					glDeleteLists(fc->list, 1);
+				if(glIsTexture(fc->texture))
+					glDeleteTextures(1, &fc->texture);
+
+				memset(fc, 0, sizeof(r_fontCache_t));
+
+				break;
+			}
+		}
+	}
+
 	if(!fc)
 	{
 		for(i = 0; i < FONTCACHES; i++)
@@ -564,6 +591,8 @@ int r_drawString(lua_State *L)
 					glDeleteLists(fc->list, 1);
 				if(glIsTexture(fc->texture))
 					glDeleteTextures(1, &fc->texture);
+
+				memset(fc, 0, sizeof(r_fontCache_t));
 
 				break;
 			}
@@ -580,6 +609,8 @@ int r_drawString(lua_State *L)
 		strncpy(fc->string, draw, sizeof(fc->string));
 
 		fc->active = 1;
+
+		fc->prioritized = priority;
 
 		fc->list = glGenLists(1);
 		glGenTextures(1, &fc->texture);
@@ -619,8 +650,8 @@ int r_drawString(lua_State *L)
 		v->y = p.y + s->h * scaley;
 		MATH_POLAR(*v);
 
-		fc->r.x = p.x + s->w * scalex;
-		fc->r.y = p.y + s->h * scaley;
+		fc->r.x = p.x + s->w;
+		fc->r.y = p.y + s->h;
 		MATH_POLAR(fc->r);
 
 		memcpy(&fmt, s->format, sizeof(SDL_PixelFormat));
@@ -682,10 +713,10 @@ int r_drawString(lua_State *L)
 				glBindTexture(GL_TEXTURE_2D, fc->texture);
 				glBegin(GL_QUADS);
 					/* x texcoords are inverted */
-					glTexCoord2d(0, 0); glVertex2d(0.0, fc->r.y - p.y);
+					glTexCoord2d(0, 0); glVertex2d(0.0, s->h);
 					glTexCoord2d(0, 1); glVertex2d(0.0, 0.0);
-					glTexCoord2d(1, 1); glVertex2d(fc->r.x - p.x, 0.0);
-					glTexCoord2d(1, 0); glVertex2d(fc->r.x - p.x, fc->r.y - p.y);
+					glTexCoord2d(1, 1); glVertex2d(s->w, 0.0);
+					glTexCoord2d(1, 0); glVertex2d(s->w, s->h);
 				glEnd();
 			glEndList();
 		glPopMatrix();

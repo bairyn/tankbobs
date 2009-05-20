@@ -123,7 +123,7 @@ function gui_paint(d)
 			v:updateTextCallBack(d)
 		end
 
-		tankbobs.r_drawString(v.text, v.p, c_const_get("label_r"), c_const_get("label_g"), c_const_get("label_b"), c_const_get("label_a"), c_const_get("label_scalex"), c_const_get("label_scaley"))
+		tankbobs.r_drawString(v.text, v.p, c_const_get("label_r"), c_const_get("label_g"), c_const_get("label_b"), c_const_get("label_a"), c_const_get("label_scalex"), c_const_get("label_scaley"), false)
 	end
 
 	for k, v in pairs(gui_widgets.actions) do
@@ -131,7 +131,7 @@ function gui_paint(d)
 			v:updateTextCallBack(d)
 		end
 
-		v.r = tankbobs.r_drawString(v.text, v.p, c_const_get("action_r"), c_const_get("action_g"), c_const_get("action_b"), c_const_get("action_a"), c_const_get("action_scalex"), c_const_get("action_scaley"))
+		v.r = tankbobs.r_drawString(v.text, v.p, c_const_get("action_r"), c_const_get("action_g"), c_const_get("action_b"), c_const_get("action_a"), c_const_get("action_scalex"), c_const_get("action_scaley"), false)
 	end
 end
 
