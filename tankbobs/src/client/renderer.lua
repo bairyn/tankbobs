@@ -30,11 +30,7 @@ function renderer_init()
 end
 
 function renderer_done()
-	for _, v in pairs(renderer_font) do
-		if type(v) == "userdata" then
-			tankbobs.r_freeFont(v)
-		end
-	end
+	-- tankbobs module frees fonts for us
 
 	renderer_font = nil
 	renderer_size = nil
@@ -57,26 +53,23 @@ function renderer_updateWindow() -- this should to be called after resize, focus
 	gl.MatrixMode("MODELVIEW")
 	gl.LoadIdentity()
 
-	if not renderer_font then
-		renderer_font = {}
-		renderer_size = {}
+	-- settings for text
+	gl.ShadeModel("SMOOTH")
+	gl.Enable("TEXTURE_2D")
+	gl.Enable("POINT_SMOOTH")
+	gl.Enable("LINE_SMOOTH")
+	gl.Enable("POLYGON_SMOOTH")
+	gl.Hint("POINT_SMOOTH_HINT", "NICEST")
+	gl.Hint("LINE_SMOOTH_HINT", "NICEST")
+	gl.Hint("POLYGON_SMOOTH_HINT", "NICEST")
 
-		gl.ShadeModel("SMOOTH")
-		gl.Enable("TEXTURE_2D")
-		gl.Enable("POINT_SMOOTH")
-		gl.Enable("LINE_SMOOTH")
-		gl.Enable("POLYGON_SMOOTH")
-		gl.Hint("POINT_SMOOTH_HINT", "NICEST")
-		gl.Hint("LINE_SMOOTH_HINT", "NICEST")
-		gl.Hint("POLYGON_SMOOTH_HINT", "NICEST")
-
-		for k, v in pairs(c_config_get("config.font")) do
-			if type(v) == "table" then
-				renderer_font[k] = tankbobs.r_newFont(c_const_get("ttf_dir") .. c_config_get("ttf", v))
-				renderer_size[k] = c_config_get("size", v)
-			end
+	for k, v in pairs(c_config_get("config.fonts")) do
+		if type(v) == "table" then
+			tankbobs.r_newFont(k, c_const_get("ttf_dir") .. c_config_get("ttf", v), c_config_get("size", v))
 		end
 	end
+
+	tankbobs.r_selectFont(c_config_get("config.font"))
 end
 
 function renderer_start()

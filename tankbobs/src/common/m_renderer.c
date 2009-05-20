@@ -23,6 +23,7 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
 #include <SDL/SDL_mixer.h>
+#include <SDL/SDL_ttf.h>
 #include <SDL/SDL_endian.h>
 #include <lua.h>
 #include <lauxlib.h>
@@ -32,9 +33,6 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 #include <zlib.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
-#include <ft2build.h>
-#include FT_FREETYPE_H
-#include FT_GLYPH_H
 
 #include "common.h"
 #include "m_tankbobs.h"
@@ -42,25 +40,63 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 #include "tstr.h"
 
 #define MIN_VID_MEM    256
-#define CHECK_INTERVAL 3000
-#define NUMCHARS       255
-#define TTD            10.0  /* really nice font */
 
 #define RESTRICT_TO_POWER_OF_TWO 1
 
+#define CHECKCURRENTFONT(L) \
+do \
+{ \
+	if(!r_currentFont) \
+	{ \
+		lua_pushstring(L, "no font selected yet\n"); \
+		lua_error(L); \
+	} \
+} while(0)
+
 extern Uint8 init;
 
-typedef struct
-{
-	GLuint chars;
-	GLuint *textures;
-	FT_Face f;
-} freefont;
+/* #define FONT_USEBLIT */
 
-static FT_Library ft;
+typedef struct r_font_s r_font_t;
+struct r_font_s
+{
+	TTF_Font *font;
+	char name[BUFSIZE];
+	char filename[BUFSIZE];
+	int size;
+	r_font_t *next;
+};
+
+typedef struct r_font_t r_font;
+
+typedef struct r_fontCache_s r_fontCache_t;
+struct r_fontCache_s
+{
+	int active;
+
+	int lastUsedTime;
+
+	GLuint list;
+	GLuint texture;
+	vec2_t r;
+	char string[BUFSIZE];
+	vec2_t p;
+	int c_r;
+	int c_g;
+	int c_b;
+	int c_a;
+};
+
+typedef struct r_fontCache_t r_fontCache;
+
+static r_font_t *r_fonts = NULL;
+static r_font_t *r_currentFont = NULL;
+#define FONTCACHES 30
+static r_fontCache_t r_fontCaches[FONTCACHES];
 
 void r_init(lua_State *L)
 {
+	memset(r_fontCaches, 0, sizeof(r_fontCaches));
 }
 
 int r_initialize(lua_State *L)
@@ -88,12 +124,16 @@ int r_initialize(lua_State *L)
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 16);
 
-	if(FT_Init_FreeType(&ft))
+	if(TTF_Init() == -1)
 	{
 		tstr *message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
 			();
 		CDLL_FUNCTION("libtstr", "tstr_base_set", void(*)(tstr *, const char *))
-			(message, "Error initializing FreeType\n");
+			(message, "Error initializing SDL_ttf: ");
+		CDLL_FUNCTION("libtstr", "tstr_cat", void(*)(tstr *, const char *))
+			(message, TTF_GetError());
+		CDLL_FUNCTION("libtstr", "tstr_base_cat", void(*)(tstr *, const char *))
+			(message, "\n");
 		lua_pushstring(L, CDLL_FUNCTION("libtstr", "tstr_cstr", const char *(*)(tstr *))
 							(message));
 		CDLL_FUNCTION("libtstr", "tstr_free", void(*)(tstr *))
@@ -176,32 +216,52 @@ int r_newWindow(lua_State *L)
 
 	SDL_FreeSurface(SDL_GetVideoSurface());
 
+#ifdef FONT_USEBLIT
+	if(!SDL_SetVideoMode(w, h, 0, SDL_OPENGL | ((f) ? (SDL_FULLSCREEN) : (0)) | SDL_OPENGLBLIT))
+#else
 	if(!SDL_SetVideoMode(w, h, 0, SDL_OPENGL | ((f) ? (SDL_FULLSCREEN) : (0))))
+#endif
 	{
 #ifdef TDEBUG
 		fprintf(stdout, "Warning: could not init video mode.  Trying again with lower antialias multisampling\n");
 #endif
 		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 8);
+#ifdef FONT_USEBLIT
+		if(!SDL_SetVideoMode(w, h, 0, SDL_OPENGL | ((f) ? (SDL_FULLSCREEN) : (0)) | SDL_OPENGLBLIT))
+#else
 		if(!SDL_SetVideoMode(w, h, 0, SDL_OPENGL | ((f) ? (SDL_FULLSCREEN) : (0))))
+#endif
 		{
 #ifdef TDEBUG
 			fprintf(stdout, "Warning: could not init video mode.  Trying again with lower antialias multisampling\n");
 #endif
 			SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
+#ifdef FONT_USEBLIT
+			if(!SDL_SetVideoMode(w, h, 0, SDL_OPENGL | ((f) ? (SDL_FULLSCREEN) : (0)) | SDL_OPENGLBLIT))
+#else
 			if(!SDL_SetVideoMode(w, h, 0, SDL_OPENGL | ((f) ? (SDL_FULLSCREEN) : (0))))
+#endif
 			{
 #ifdef TDEBUG
 				fprintf(stdout, "Warning: could not init video mode.  Trying again again with no antialias multisampling\n");
 #endif
 				SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 0);
 				SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 0);
+#ifdef FONT_USEBLIT
+				if(!SDL_SetVideoMode(w, h, 0, SDL_OPENGL | ((f) ? (SDL_FULLSCREEN) : (0)) | SDL_OPENGLBLIT))
+#else
 				if(!SDL_SetVideoMode(w, h, 0, SDL_OPENGL | ((f) ? (SDL_FULLSCREEN) : (0))))
+#endif
 				{
 #ifdef TDEBUG
 					fprintf(stdout, "Warning: could not init video mode.  Trying again again again with no doublebuffer\n");
 #endif
 					SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 0);
+#ifdef FONT_USEBLIT
+					if(!SDL_SetVideoMode(w, h, 0, SDL_OPENGL | ((f) ? (SDL_FULLSCREEN) : (0)) | SDL_OPENGLBLIT))
+#else
 					if(!SDL_SetVideoMode(w, h, 0, SDL_OPENGL | ((f) ? (SDL_FULLSCREEN) : (0))))
+#endif
 					{
 #ifdef TDEBUG
 						fprintf(stderr, "Video mode failed: %s\n", SDL_GetError());
@@ -275,186 +335,131 @@ int r_swapBuffers(lua_State *L)
 
 int r_newFont(lua_State *L)
 {
-	Uint32 i, j, k;
-	freefont *font = NULL;
-	const char *filename = luaL_checkstring(L, 1);
-	FT_Glyph g;
-	FT_BitmapGlyph bg;
-	GLint bufs, samples;
-	/* GLfloat def[] = {1.0f, 1.0f, 1.0f, 0.0f}; */
-	GLubyte *data;
+	r_font_t *font;
+
+	font = malloc(sizeof(r_font_t));
+	memset(font, 0, sizeof(r_font_t));
+
+	strncpy(font->name, luaL_checkstring(L, 1), sizeof(font->name));
+	strncpy(font->filename, luaL_checkstring(L, 2), sizeof(font->filename));
+	font->size = luaL_checkinteger(L, 3);
+	font->next = NULL;
+
+#ifndef FONT_USEBLIT
+	memset(r_fontCaches, 0, sizeof(r_fontCaches));
+#endif
+
+	font->font = TTF_OpenFont(font->filename, font->size);
+	if(!font->font)
+	{
+		tstr *message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
+			();
+		CDLL_FUNCTION("libtstr", "tstr_base_set", void(*)(tstr *, const char *))
+			(message, "Error loading font '");
+		if(font->filename[0])
+		{
+			CDLL_FUNCTION("libtstr", "tstr_cat", void(*)(tstr *, const char *))
+				(message, font->filename);
+		}
+		CDLL_FUNCTION("libtstr", "tstr_base_cat", void(*)(tstr *, const char *))
+			(message, "': ");
+		CDLL_FUNCTION("libtstr", "tstr_cat", void(*)(tstr *, const char *))
+			(message, TTF_GetError());
+		CDLL_FUNCTION("libtstr", "tstr_base_cat", void(*)(tstr *, const char *))
+			(message, "\n");
+		lua_pushstring(L, CDLL_FUNCTION("libtstr", "tstr_cstr", const char *(*)(tstr *))
+							(message));
+		CDLL_FUNCTION("libtstr", "tstr_free", void(*)(tstr *))
+			(message);
+		lua_error(L);
+	}
+
+	if(!r_fonts)
+	{
+		r_fonts = r_currentFont = font;
+	}
+	else
+	{
+		r_font_t *i = r_fonts;
+
+		while(i->next) i = i->next;
+
+		i->next = font;
+	}
+
+	return 0;
+}
+
+int r_selectFont(lua_State *L)
+{
+	r_font_t *i;
+	const char *name;
 
 	CHECKINIT(init, L);
 
-	glGetIntegerv(GL_SAMPLE_BUFFERS, &bufs);
-	glGetIntegerv(GL_SAMPLES, &samples);
-	if(bufs > 0 && samples > 1)
+	name = luaL_checkstring(L, 1);
+
+	for(i = r_fonts; i; i = i->next)
 	{
-		glEnable(GL_MULTISAMPLE);
+		if(strcmp(i->name, name) == 0)
+		{
+			r_currentFont = i;
+
+			return 0;
+		}
 	}
-	/* glTexEnvfv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_COLOR, def); */
-	/* glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_BLEND); */  /* This, above and def all make a really nice look,
-		but it's awfully hard to tell the colors apart for the typical player. */
-	/* glBlendFuncSeparate(GL_ONE, GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA, GL_DST_ALPHA); */
-	/* glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA, GL_DST_ALPHA); */
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);  /* >:/ */
-	glEnable(GL_BLEND);
-	glEnable(GL_TEXTURE_2D);
 
-	data = malloc(2 * 64 * 64);
-
-	font = malloc(sizeof(freefont));
-	font->textures = malloc(sizeof(GLuint) * NUMCHARS);
-
-	if(FT_New_Face(ft, filename, 0, &font->f))
+	tstr *message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
+		();
+	CDLL_FUNCTION("libtstr", "tstr_base_set", void(*)(tstr *, const char *))
+		(message, "r_selectFont: couldn't find font with name '");
+	if(name)
 	{
-		tstr *message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
-			();
-		CDLL_FUNCTION("libtstr", "tstr_base_set", void(*)(tstr *, const char *))
-			(message, "missing or corrupt font file `");
 		CDLL_FUNCTION("libtstr", "tstr_cat", void(*)(tstr *, const char *))
-			(message, filename);
-		CDLL_FUNCTION("libtstr", "tstr_base_cat", void(*)(tstr *, const char *))
-			(message, "'\n");
-		lua_pushstring(L, CDLL_FUNCTION("libtstr", "tstr_cstr", const char *(*)(tstr *))
-							(message));
-		CDLL_FUNCTION("libtstr", "tstr_free", void(*)(tstr *))
-			(message);
-		lua_error(L);
+			(message, name);
 	}
+	CDLL_FUNCTION("libtstr", "tstr_base_cat", void(*)(tstr *, const char *))
+		(message, "'\n");
+	lua_pushstring(L, CDLL_FUNCTION("libtstr", "tstr_cstr", const char *(*)(tstr *))
+						(message));
+	CDLL_FUNCTION("libtstr", "tstr_free", void(*)(tstr *))
+		(message);
+	lua_error(L);
 
-	if(FT_Set_Char_Size(font->f, 16 << 6, 16 << 6, 0, 0))
-	{
-		tstr *message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
-			();
-		CDLL_FUNCTION("libtstr", "tstr_base_set", void(*)(tstr *, const char *))
-			(message, "cannot set font size\n");
-		lua_pushstring(L, CDLL_FUNCTION("libtstr", "tstr_cstr", const char *(*)(tstr *))
-							(message));
-		CDLL_FUNCTION("libtstr", "tstr_free", void(*)(tstr *))
-			(message);
-		lua_error(L);
-	}
+	return 0;
+}
 
-	glGenTextures(NUMCHARS, font->textures);
-	font->chars = glGenLists(NUMCHARS);
-	if(!font->chars)
-	{
-		tstr *message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))();
-		CDLL_FUNCTION("libtstr", "tstr_base_set", void(*)(tstr *, const char *))
-			(message, "could not enough memory font\n");
-		lua_pushstring(L, CDLL_FUNCTION("libtstr", "tstr_cstr", const char *(*)(tstr *))
-							(message));
-		CDLL_FUNCTION("libtstr", "tstr_free", void(*)(tstr *))
-			(message);
-		lua_error(L);
-	}
-	for(i = 0; i < NUMCHARS; i++)
-	{
-		glBindTexture(GL_TEXTURE_2D, font->textures[i]);
-		if(FT_Load_Glyph(font->f, FT_Get_Char_Index(font->f, i), FT_LOAD_DEFAULT))
-		{
-			tstr *message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
-				();
-			CDLL_FUNCTION("libtstr", "tstr_base_set", void(*)(tstr *, const char *))
-				(message, "cannot set font size\n");
-			lua_pushstring(L, CDLL_FUNCTION("libtstr", "tstr_cstr", const char *(*)(tstr *))
-								(message));
-			CDLL_FUNCTION("libtstr", "tstr_free", void(*)(tstr *))
-				(message);
-			lua_error(L);
-		}
-		if(FT_Get_Glyph(font->f->glyph, &g))
-		{
-			tstr *message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
-				();
-			CDLL_FUNCTION("libtstr", "tstr_base_set", void(*)(tstr *, const char *))
-				(message, "cannot set font glyph\n");
-			lua_pushstring(L, CDLL_FUNCTION("libtstr", "tstr_cstr", const char *(*)(tstr *))
-								(message));
-			CDLL_FUNCTION("libtstr", "tstr_free", void(*)(tstr *))
-				(message);
-			lua_error(L);
-		}
-		FT_Glyph_To_Bitmap(&g, FT_RENDER_MODE_NORMAL, 0, 1);
-		bg = (FT_BitmapGlyph)g;
-		for(j = 0; j < 64; j++)
-		{
-			for(k = 0; k < 64; k++)
-			{
-				data[2 * (k + j * 64)] = data[2 * (k + j * 64) + 1] = ((k >= bg->bitmap.width || j >= bg->bitmap.rows) ? (0) : (bg->bitmap.buffer[k + bg->bitmap.width * j]));
-			}
-		}
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 64, 64, 0, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, data);
-		glNewList(font->chars + i, GL_COMPILE);
-		{
-			glPushAttrib(GL_ENABLE_BIT | GL_TEXTURE_BIT);
-			{
-				glBindTexture(GL_TEXTURE_2D, font->textures[i]);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+int r_fontName(lua_State *L)
+{
+	CHECKINIT(init, L);
 
-				glBegin(GL_QUADS);
-				{
-					glTexCoord2d(0.0, 0.0);
-						glVertex2d(-0.5 * TTD,  0.5 * TTD);
-					glTexCoord2d(0.0, (double)bg->bitmap.rows / 64.0);
-						glVertex2d(-0.5 * TTD, -0.5 * TTD);
-					glTexCoord2d((double)bg->bitmap.width / 64.0, (double)bg->bitmap.rows / 64.0);
-						glVertex2d( 0.5 * TTD, -0.5 * TTD);
-					glTexCoord2d((double)bg->bitmap.width / 64.0, 0.0);
-						glVertex2d( 0.5 * TTD,  0.5 * TTD);
-				}
-				glEnd();
-			}
-			glPopAttrib();
-		}
-		glEndList();
-	}
+	CHECKCURRENTFONT(L);
 
-	free(data);
+	lua_pushstring(L, r_currentFont->name);
 
-	lua_pushlightuserdata(L, font);
 	return 1;
 }
 
-int r_freeFont(lua_State *L)
+int r_fontSize(lua_State *L)
 {
-	freefont *font = lua_touserdata(L, -1);
-
 	CHECKINIT(init, L);
 
-	FT_Done_Face(font->f);
-	glDeleteLists(font->chars, NUMCHARS);
-	glDeleteTextures(NUMCHARS, font->textures);
-	free(font->textures);
-	free(font);
+	CHECKCURRENTFONT(L);
 
-	return 0;
+	lua_pushinteger(L, r_currentFont->size);
+
+	return 1;
 }
 
-int r_drawCharacter(lua_State *L)
+int r_fontFilename(lua_State *L)
 {
-	double x = luaL_checknumber(L, 1), y = luaL_checknumber(L, 2), w = luaL_checknumber(L, 3), h = luaL_checknumber(L, 4);
-	freefont *font = lua_touserdata(L, 5);
-	char c = ((lua_type(L, 6) == LUA_TNUMBER) ? (luaL_checkinteger(L, 6)) : (*luaL_checkstring(L, 6)));
-
 	CHECKINIT(init, L);
 
-	glPushMatrix();
-	{
-		glTranslated(x, y, 0);
-		glScaled(w / TTD, h / TTD, 1.0);
-		glCallList(font->chars + c);
-	}
-	glPopMatrix();
+	CHECKCURRENTFONT(L);
 
-	return 0;
-}
+	lua_pushstring(L, r_currentFont->filename);
 
-void r_quitFreeType(void)
-{
-	FT_Done_FreeType(ft);
+	return 1;
 }
 
 static inline int r_private_powerOfTwo(int x)
@@ -465,6 +470,336 @@ static inline int r_private_powerOfTwo(int x)
 		r <<= 1;
 
 	return r;
+}
+
+int r_drawString(lua_State *L)
+{
+	vec2_t *v;
+	const vec2_t *v2;
+	const char *draw;
+	SDL_Color c;
+	SDL_Surface *s, *screen;
+	SDL_Rect p;
+	int i;
+	int found = 0;
+	r_fontCache_t *fc;
+	int oldestTime = 0;
+	double scalex, scaley;
+
+	CHECKINIT(init, L);
+
+	CHECKCURRENTFONT(L);
+
+	screen = SDL_GetVideoSurface();
+
+	draw = luaL_checkstring(L, 1);
+	v2 = CHECKVEC(L, 2);
+
+	c.r = luaL_checkinteger(L, 3);
+	c.g = luaL_checkinteger(L, 4);
+	c.b = luaL_checkinteger(L, 5);
+	/* c.a = luaL_checkinteger(L, 6); */
+
+	scalex = luaL_checknumber(L, 7);
+	scaley = luaL_checknumber(L, 8);
+
+	p.x = v2->x;
+	p.y = v2->y;
+
+#ifndef FONT_USEBLIT
+	/* look for text in cache */
+	for(i = 0; i < FONTCACHES; i++)
+	{
+		fc = &r_fontCaches[i];
+
+		if(fc->active)
+		{
+			if(glIsList(fc->list) && glIsTexture(fc->texture) && strcmp(draw, fc->string) == 0 && c.r == fc->c_r && c.g == fc->c_g && c.b == fc->c_b && p.x == fc->p.x && p.y == fc->p.y)
+			{
+				fc->lastUsedTime = SDL_GetTicks();
+
+				glPushMatrix();
+					glTranslated(p.x, p.y, 0.0);
+					glScalef(scalex, scaley, 1.0);
+					glCallList(fc->list);
+				glPopMatrix();
+
+				v = (vec2_t *) lua_newuserdata(L, sizeof(vec2_t));
+
+				luaL_getmetatable(L, MATH_METATABLE);
+				lua_setmetatable(L, -2);
+
+				v->x = fc->r.x * scalex;
+				v->y = fc->r.y * scaley;
+				MATH_POLAR(*v);
+
+				return 1;
+			}
+		}
+	}
+
+	/* text not in cache */
+	/* look for an unused cache slot first */
+	fc = NULL;
+
+	for(i = 0; i < FONTCACHES; i++)
+	{
+		if(!r_fontCaches[i].active)
+		{
+			fc = &r_fontCaches[i];
+			break;
+		}
+	}
+
+	/* use the oldest cache (and delete old texture and list) */
+	if(!fc)
+	{
+		for(i = 0; i < FONTCACHES; i++)
+		{
+			if(!oldestTime || r_fontCaches[i].lastUsedTime < oldestTime)
+			{
+				fc = &r_fontCaches[i];
+
+				oldestTime = fc->lastUsedTime;
+
+				if(glIsList(fc->list))
+					glDeleteLists(fc->list, 1);
+				if(glIsTexture(fc->texture))
+					glDeleteTextures(1, &fc->texture);
+
+				break;
+			}
+		}
+	}
+
+	if(fc)
+	{
+		SDL_Surface *converted;
+		SDL_PixelFormat fmt;
+		GLfloat full[4] = {1.0f, 1.0f, 1.0f, 1.0f};
+
+		/* generate texture and list */
+
+		strncpy(fc->string, draw, sizeof(fc->string));
+		fc->p.x = p.x;
+		fc->p.y = p.y;
+		MATH_POLAR(fc->p);
+		fc->c_r = c.r;
+		fc->c_g = c.g;
+		fc->c_b = c.b;
+		/* c->c_a = c.a; */
+
+		fc->active = 1;
+
+		fc->list = glGenLists(1);
+		glGenTextures(1, &fc->texture);
+
+		/* update texture */
+		glBindTexture(GL_TEXTURE_2D, fc->texture);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		/* load texture and upper right corner */
+		s = TTF_RenderText_Blended(r_currentFont->font, draw, c);
+		if(!s)
+		{
+			tstr *message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
+				();
+			CDLL_FUNCTION("libtstr", "tstr_base_set", void(*)(tstr *, const char *))
+				(message, "r_drawString: could not render text: ");
+			CDLL_FUNCTION("libtstr", "tstr_cat", void(*)(tstr *, const char *))
+				(message, TTF_GetError());
+			CDLL_FUNCTION("libtstr", "tstr_base_cat", void(*)(tstr *, const char *))
+				(message, "\n");
+			lua_pushstring(L, CDLL_FUNCTION("libtstr", "tstr_cstr", const char *(*)(tstr *))
+								(message));
+			CDLL_FUNCTION("libtstr", "tstr_free", void(*)(tstr *))
+				(message);
+			lua_error(L);
+		}
+
+		v = (vec2_t *) lua_newuserdata(L, sizeof(vec2_t));
+
+		luaL_getmetatable(L, MATH_METATABLE);
+		lua_setmetatable(L, -2);
+
+		v->x = p.x + s->w * scalex;
+		v->y = p.y + s->h * scaley;
+		MATH_POLAR(*v);
+
+		fc->r.x = p.x + s->w * scalex;
+		fc->r.y = p.y + s->h * scaley;
+		MATH_POLAR(fc->r);
+
+		memcpy(&fmt, s->format, sizeof(SDL_PixelFormat));
+
+		fmt.BitsPerPixel = 32;
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+		fmt.Rmask = 0xFF000000;
+		fmt.Gmask = 0x00FF0000;
+		fmt.Bmask = 0x0000FF00;
+		fmt.Amask = 0x000000FF;
+#else
+		fmt.Rmask = 0x000000FF;
+		fmt.Gmask = 0x0000FF00;
+		fmt.Bmask = 0x00FF0000;
+		fmt.Amask = 0xFF000000;
+#endif
+		fmt.colorkey = SDL_MapRGB(s->format, 237, 77, 207);
+		fmt.alpha = 255;
+
+		converted = SDL_ConvertSurface(s, &fmt, SDL_SWSURFACE | SDL_SRCALPHA);
+
+		if(SDL_MUSTLOCK(converted))
+		{
+			SDL_LockSurface(converted);
+		}
+
+		if(!converted->pixels)
+		{
+			lua_pushstring(L, "r_drawString: could not create texture\n");
+			lua_error(L);
+		}
+
+		if(RESTRICT_TO_POWER_OF_TWO)
+		{
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, r_private_powerOfTwo(converted->w), r_private_powerOfTwo(converted->w), 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, converted->w, converted->h, GL_RGBA, GL_UNSIGNED_BYTE, converted->pixels);
+		}
+		else
+		{
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, converted->w, converted->w, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+		}
+
+		if(SDL_MUSTLOCK(converted))
+		{
+			SDL_UnlockSurface(converted);
+		}
+
+		SDL_FreeSurface(s);
+		SDL_FreeSurface(converted);
+
+		/* compile list */
+		glPushMatrix();
+			glTranslated(p.x, p.y, 0.0);
+			glScalef(scalex, scaley, 1.0);
+			glNewList(fc->list, GL_COMPILE_AND_EXECUTE);  /* execute it so that text won't only be rendered after being placed in cache */
+				glTexEnvfv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_COLOR, full);
+				glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+				glColor4d(1.0, 1.0, 1.0, 1.0);
+				glBindTexture(GL_TEXTURE_2D, fc->texture);
+				glBegin(GL_QUADS);
+					/* x texcoords are inverted */
+					glTexCoord2d(0, 0); glVertex2d(0.0, fc->r.y - p.y);
+					glTexCoord2d(0, 1); glVertex2d(0.0, 0.0);
+					glTexCoord2d(1, 1); glVertex2d(fc->r.x - p.x, 0.0);
+					glTexCoord2d(1, 0); glVertex2d(fc->r.x - p.x, fc->r.y - p.y);
+				glEnd();
+			glEndList();
+		glPopMatrix();
+	}
+#else
+	s = TTF_RenderText_Blended(r_currentFont->font, draw, c);
+	if(!s)
+	{
+		tstr *message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
+			();
+		CDLL_FUNCTION("libtstr", "tstr_base_set", void(*)(tstr *, const char *))
+			(message, "r_drawString: could not render text: ");
+		CDLL_FUNCTION("libtstr", "tstr_cat", void(*)(tstr *, const char *))
+			(message, TTF_GetError());
+		CDLL_FUNCTION("libtstr", "tstr_base_cat", void(*)(tstr *, const char *))
+			(message, "\n");
+		lua_pushstring(L, CDLL_FUNCTION("libtstr", "tstr_cstr", const char *(*)(tstr *))
+							(message));
+		CDLL_FUNCTION("libtstr", "tstr_free", void(*)(tstr *))
+			(message);
+		lua_error(L);
+	}
+
+	v = (vec2_t *) lua_newuserdata(L, sizeof(vec2_t));
+
+	luaL_getmetatable(L, MATH_METATABLE);
+	lua_setmetatable(L, -2);
+
+	v->x = p.x + s->w * scalex;
+	v->y = p.y + s->h * scaley;
+	MATH_POLAR(*v);
+
+	SDL_BlitSurface(screen, NULL, s, &p); 
+	SDL_FreeSurface(s);
+#endif
+
+	return 1;
+}
+
+int r_freeFont(lua_State *L)
+{
+	r_font_t *i;
+	r_font_t *f;
+	const char *name;
+	int j;
+
+	CHECKINIT(init, L);
+
+	name = luaL_checkstring(L, 1);
+
+	for(i = r_fonts; i; i = i->next)
+	{
+		if(strcmp(i->next->name, name) == 0)
+		{
+			f = i->next;
+
+			i->next = f->next;
+
+			TTF_CloseFont(i->font);
+#ifndef FONT_USEBLIT
+			for(j = 0; j < FONTCACHES; j++)
+			{
+				r_fontCache_t *c = &r_fontCaches[j];
+
+				if(c->active)
+				{
+					if(glIsList(c->list))
+						glDeleteLists(c->list, 1);
+					if(glIsTexture(c->texture))
+						glDeleteLists(c->texture, 1);
+				}
+			}
+
+			memset(r_fontCaches, 0, sizeof(r_fontCaches));
+#endif
+			free(i);
+
+			return 0;
+		}
+	}
+
+	tstr *message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
+		();
+	CDLL_FUNCTION("libtstr", "tstr_base_set", void(*)(tstr *, const char *))
+		(message, "r_freeFont: couldn't find font with name '");
+	if(name)
+	{
+		CDLL_FUNCTION("libtstr", "tstr_cat", void(*)(tstr *, const char *))
+			(message, name);
+	}
+	CDLL_FUNCTION("libtstr", "tstr_base_cat", void(*)(tstr *, const char *))
+		(message, "'\n");
+	lua_pushstring(L, CDLL_FUNCTION("libtstr", "tstr_cstr", const char *(*)(tstr *))
+						(message));
+	CDLL_FUNCTION("libtstr", "tstr_free", void(*)(tstr *))
+		(message);
+	lua_error(L);
+
+	return 0;
+}
+
+void r_quitFont(void)
+{
+	TTF_Quit();
 }
 
 int r_loadImage2D(lua_State *L)
@@ -535,7 +870,6 @@ int r_loadImage2D(lua_State *L)
 		lua_error(L);
 	}
 
-	/* uncomment the next to lines if textures should be restricted to a power of two */
 	if(RESTRICT_TO_POWER_OF_TWO)
 	{
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, r_private_powerOfTwo(converted->w), r_private_powerOfTwo(converted->w), 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);

@@ -21,551 +21,172 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 gui.lua
 
 Graphical User Interface
-TODO: rewrite
 --]]
 
 function gui_init()
-	gui_data = {}
-	gui_colors = {{0.95, 0.5, 0.25, 1.0}, {1.0, 1.0, 1.0, 1.0}, {0.8, 0.8, 0.8, 0.6}, {0.9, 0.8, 0.1, 0.8}}
-	gui_selection = nil
+	gui_widgets = {labels = {}, actions = {}, cycles = {}}
+
+	c_const_set("label_r", 230, 1)
+	c_const_set("label_g", 125, 1)
+	c_const_set("label_b", 80, 1)
+	c_const_set("label_a", 255, 1)
+	c_const_set("label_scalex", 0.25, 1)
+	c_const_set("label_scaley", 0.40, 1)
+
+	c_const_set("action_r", 230, 1)
+	c_const_set("action_g", 232, 1)
+	c_const_set("action_b", 235, 1)
+	c_const_set("action_a", 255, 1)
+	c_const_set("action_scalex", 0.25, 1)
+	c_const_set("action_scaley", 0.40, 1)
+
+	c_const_set("actionSelected_r", 230, 1)
+	c_const_set("actionSelected_g", 205, 1)
+	c_const_set("actionSelected_b", 30, 1)
+	c_const_set("actionSelected_a", 255, 1)
+	c_const_set("actionSelected_scalex", 0.25, 1)
+	c_const_set("actionSelected_scaley", 0.40, 1)
 end
 
 function gui_done()
-	gui_finish()
-	gui_data = nil
+	gui_widgets = nil
 end
 
-function gui_selectColor(r, g, b, a)
-	gui_colors[1][1] = r
-	gui_colors[1][2] = g
-	gui_colors[1][3] = b
-	gui_colors[1][4] = a
-end
+gui_widget =
+{
+	new = common_new,
 
-function gui_unselectColor(r, g, b, a)
-	gui_colors[2][1] = r
-	gui_colors[2][2] = g
-	gui_colors[2][3] = b
-	gui_colors[2][4] = a
-end
+	init = function (o)
+		o.p = tankbobs.m_vec2()
+	end,
 
-function gui_buttonColor(r, g, b, a)
-	gui_colors[3][1] = r
-	gui_colors[3][2] = g
-	gui_colors[3][3] = b
-	gui_colors[3][4] = a
-end
+	p = nil,
+	text = "",
+	updateText = nil,
+}
 
-function gui_labelColor(r, g, b, a)
-	gui_colors[4][1] = r
-	gui_colors[4][2] = g
-	gui_colors[4][3] = b
-	gui_colors[4][4] = a
-end
+gui_wlabel =
+{
+	new = common_new,
+
+	init = function (o)
+		o.p = tankbobs.m_vec2()
+	end
+}
+
+gui_waction =
+{
+	new = common_new,
+
+	init = function (o)
+		o.p = tankbobs.m_vec2()
+		o.r = tankbobs.m_vec2()
+	end,
+
+	actionCallback = nil,
+	r = nil  -- position of upper-right coordinates
+}
 
 function gui_finish()
-	gui_selection = nil
-	gui_safe = nil
-	gui_data = nil
-	gui_colors = {{0.95, 0.5, 0.25, 1.0}, {1.0, 1.0, 1.0, 1.0}, {0.8, 0.8, 0.8, 0.6}, {0.9, 0.8, 0.1, 0.8}}
-	gui_data = {}
+	gui_widgets = {labels = {}, actions = {}, cycles = {}, selection = 1, selectionType = nil}
 end
 
-local function gui_private_xpre(c, x)
-	if c == "!" then
-		x = x - 0.50
-	elseif c == "l" then
-		x = x - 0.50
-	elseif c == "i" then
-		x = x - 0.50
-	end
+function gui_label(text, p, updateTextCallBack)
+	local label = gui_wlabel:new(gui_widget)
 
-	return x
+	label.p(p)
+	label.text = text
+	label.updateTextCallBack = updateTextCallBack
+
+	table.insert(gui_widgets.labels, label)
+
+	return label
 end
 
-local function gui_private_xpos(c, x)
-	if c == "!" then
-		x = x + 0.75
-	elseif c == "l" then
-		x = x + 0.75
-	elseif c == "i" then
-		x = x + 0.75
-	end
+function gui_action(text, p, updateTextCallBack, actionCallBack)
+	local action = gui_waction:new(gui_widget)
 
-	return x
+	action.p(p)
+	action.r(p)  -- make sure r is initialized before it is added
+	action.text = text
+	action.updateTextCallBack = updateTextCallBack
+	action.actionCallBack = actionCallBack
+
+	table.insert(gui_widgets.actions, action)
+
+	return action
 end
 
-local function gui_private_ypre(c, y)
-	return y
-end
-
-local function gui_private_ypos(c, y)
-	return y
-end
-
-local function gui_private_wpre(c, w)
-	if c == "!" then
-		w = w * 0.33
-	elseif c == "m" then
-		w = w * 1.25
-	elseif c == "M" then
-		w = w * 1.25
-	elseif c == "l" then
-		w = w * 0.33
-	elseif c == "i" then
-		w = w * 0.33
-	end
-
-	return w
-end
-
-local function gui_private_wpos(c, w)
-	return w
-end
-
-local function gui_private_hpre(c, h)
-	if c == "k" then
-		h = h * 1.25
-	elseif c == "K" then
-		h = h * 1.125
-	end
-
-	return h
-end
-
-local function gui_private_hpos(c, h)
-	return h
-end
-
-function gui_paint()
-	for k, v in ipairs(gui_data) do
-		if v[1] == "label" then
-			gl.Color(gui_colors[4])
-			local x, y = v[3], v[4]
-			for i = 1, type(v[6]) == "function" and v[6]():len() or v[6]:len() do
-				local w, h, c = v[5], v[5], type(v[6]) == "function" and v[6]():sub(i, i) or v[6]:sub(i, i)
-				x = gui_private_xpre(c, x)
-				y = gui_private_ypre(c, y)
-				w = gui_private_wpre(c, w)
-				h = gui_private_hpre(c, h)
-				tankbobs.r_drawCharacter(x, y, w, h, v[2], c)
-				x = x + w
-				x = gui_private_xpos(c, x)
-				y = gui_private_ypos(c, y)
-				w = gui_private_wpos(c, w)
-				h = gui_private_hpos(c, h)
-			end
-		elseif v[1] == "active" then
-			if gui_selection == v then
-				gl.Color(gui_colors[1])
-			else
-				gl.Color(gui_colors[2])
-			end
-			local x, y = v[4], v[5]
-			for i = 1, type(v[7]) == "function" and v[7]():len() or v[7]:len() do
-				local w, h, c = v[6], v[6], type(v[7]) == "function" and v[7]():sub(i, i) or v[7]:sub(i, i)
-				x = gui_private_xpre(c, x)
-				y = gui_private_ypre(c, y)
-				w = gui_private_wpre(c, w)
-				h = gui_private_hpre(c, h)
-				tankbobs.r_drawCharacter(x, y, w, h, v[3], c)
-				x = x + w
-				x = gui_private_xpos(c, x)
-				y = gui_private_ypos(c, y)
-				w = gui_private_wpos(c, w)
-				h = gui_private_hpos(c, h)
-			end
-		elseif v[1] == "option" then
-			if gui_selection == v then
-				gl.Color(gui_colors[1])
-			else
-				gl.Color(gui_colors[2])
-			end
-			local x, y = v[4], v[5]
-			for i = 1, type(v[7]) == "function" and v[7]():len() or v[7]:len() do
-				local w, h, c = v[6], v[6], type(v[7]) == "function" and v[7]():sub(i, i) or v[7]:sub(i, i)
-				x = gui_private_xpre(c, x)
-				y = gui_private_ypre(c, y)
-				w = gui_private_wpre(c, w)
-				h = gui_private_hpre(c, h)
-				tankbobs.r_drawCharacter(x, y, w, h, v[3], c)
-				x = x + w
-				x = gui_private_xpos(c, x)
-				y = gui_private_ypos(c, y)
-				w = gui_private_wpos(c, w)
-				h = gui_private_hpos(c, h)
-			end
-			x = x + v[6] * 3
-			for i = 1, type(v[9]) == "function" and v[9]():len() or v[9]:len() do
-				local w, h, c = v[6], v[6], type(v[9]) == "function" and v[9]():sub(i, i) or v[9]:sub(i, i)
-				x = gui_private_xpre(c, x)
-				y = gui_private_ypre(c, y)
-				w = gui_private_wpre(c, w)
-				h = gui_private_hpre(c, h)
-				tankbobs.r_drawCharacter(x, y, w, h, v[3], c)
-				x = x + w
-				x = gui_private_xpos(c, x)
-				y = gui_private_ypos(c, y)
-				w = gui_private_wpos(c, w)
-				h = gui_private_hpos(c, h)
-			end
+function gui_paint(d)
+	for k, v in pairs(gui_widgets.labels) do
+		if v.updateTextCallBack then
+			v:updateTextCallBack(d)
 		end
+
+		tankbobs.r_drawString(v.text, v.p, c_const_get("label_r"), c_const_get("label_g"), c_const_get("label_b"), c_const_get("label_a"), c_const_get("label_scalex"), c_const_get("label_scaley"))
+	end
+
+	for k, v in pairs(gui_widgets.actions) do
+		if v.updateTextCallBack then
+			v:updateTextCallBack(d)
+		end
+
+		v.r = tankbobs.r_drawString(v.text, v.p, c_const_get("action_r"), c_const_get("action_g"), c_const_get("action_b"), c_const_get("action_a"), c_const_get("action_scalex"), c_const_get("action_scaley"))
 	end
 end
 
 function gui_click(x, y)
-	if gui_safe ~= nil then
-		return nil
-	end
+	for k, v in pairs(gui_widgets.actions) do
+		if x >= v.p.x and x <= v.r.x and y >= v.p.y and y <= v.r.y then
+			if v.actionCallBack then
+				v:actionCallBack(x, y)
+			end
 
-	for k, v in ipairs(gui_data) do
-		if v[1] == "active" then
-			local xp, yp = v[4], v[5]
-			for i = 1, type(v[7]) == "function" and v[7]():len() or v[7]:len() do
-				local w, h, c = v[6], v[6], type(v[7]) == "function" and v[7]():sub(i, i) or v[7]:sub(i, i)
-				xp = gui_private_xpre(c, xp)
-				yp = gui_private_ypre(c, yp)
-				w  = gui_private_ypre(c, w)
-				h  = gui_private_ypre(c, h)
-				if x > xp - w / 2 and x < xp + w / 2 and y > yp - h / 2 and y < yp + h / 2 then
-					gui_selection = v
-					if type(gui_selection[2]) == "table" then
-						for k, v in ipairs(gui_selection[2]) do
-							v(gui_selection[7], gui_selection[8])
-						end
-						for k, v in pairs(gui_selection[2]) do
-							if type(k) ~= "number" then
-								v(gui_selection[7], gui_selection[8])
-							end
-						end
-					else
-						gui_selection[2](gui_selection[7], gui_selection[8])
-					end
-					return
-				end
-				xp = xp + w
-				xp = gui_private_xpos(c, xp)
-				yp = gui_private_ypos(c, yp)
-				w  = gui_private_ypos(c, w)
-				h  = gui_private_ypos(c, h)
-			end
-		elseif v[1] == "option" then
-			local xp, yp = v[4], v[5]
-			for i = 1, type(v[7]) == "function" and v[7]():len() or v[7]:len() do
-				local w, h, c = v[6], v[6], type(v[7]) == "function" and v[7]():sub(i, i) or v[7]:sub(i, i)
-				xp = gui_private_xpre(c, xp)
-				yp = gui_private_ypre(c, yp)
-				w  = gui_private_ypre(c, w)
-				h  = gui_private_ypre(c, h)
-				if x > xp - w / 2 and x < xp + w / 2 and y > yp - h / 2 and y < yp + h / 2 then
-					gui_selection = v
-					if type(gui_selection[2]) == "table" then
-						for k, v in ipairs(selection[2]) do
-							v(true, k)
-						end
-						for k, v in pairs(gui_selection[2]) do
-							if type(k) ~= "number" then
-								v(true, k)
-							end
-						end
-					else
-						gui_selection[2](false)
-					end
-					return
-				end
-				xp = xp + w
-				xp = gui_private_xpos(c, xp)
-				yp = gui_private_ypos(c, yp)
-				w  = gui_private_ypos(c, w)
-				h  = gui_private_ypos(c, h)
-			end
-			xp = xp + v[6] * 3
-			for i = 1, v[9]:len() do
-				local w, h, c = v[6], v[6], v[9]:sub(i, i)
-				xp = gui_private_xpre(c, xp)
-				yp = gui_private_ypre(c, yp)
-				w  = gui_private_ypre(c, w)
-				h  = gui_private_ypre(c, h)
-				if x > xp - w / 2 and x < xp + w / 2 and y > yp - h / 2 and y < yp + h / 2 then
-					gui_selection = v
-					if type(gui_selection[2]) == "table" then
-						for k, v in ipairs(selection[2]) do
-							v(true, k)
-						end
-						for k, v in pairs(gui_selection[2]) do
-							if type(k) ~= "number" then
-								v(true, k)
-							end
-						end
-					else
-						gui_selection[2](false)
-					end
-					return
-				end
-				xp = xp + w
-				xp = gui_private_xpos(c, xp)
-				yp = gui_private_ypos(c, yp)
-				w  = gui_private_ypos(c, w)
-				h  = gui_private_ypos(c, h)
-			end
+			return
 		end
 	end
 end
 
-function gui_mouse(x, y)
-	if gui_safe ~= nil then
-		return nil
-	end
+function gui_mouse(x, y, xrel, yrel)
+	for k, v in pairs(gui_widgets.actions) do
+		if x >= v.p.x and x <= v.r.x and y >= v.p.y and y <= v.r.y then
+			gui_widgets.selection = k
+			gui_widgets.selectionType = gui_widgets.gui_actions
 
-	for k, v in ipairs(gui_data) do
-		if v[1] == "active" then
-			local xp, yp = v[4], v[5]
-			for i = 1, type(v[7]) == "function" and v[7]():len() or v[7]:len() do
-				local w, h, c = v[6], v[6], type(v[7]) == "function" and v[7]():sub(i, i) or v[7]:sub(i, i)
-				xp = gui_private_xpre(c, xp)
-				yp = gui_private_ypre(c, yp)
-				w  = gui_private_ypre(c, w)
-				h  = gui_private_ypre(c, h)
-				if x > xp - w / 2 and x < xp + w / 2 and y > yp - h / 2 and y < yp + h / 2 then
-					gui_selection = v
-					return
-				end
-				xp = xp + w
-				xp = gui_private_xpos(c, xp)
-				yp = gui_private_ypos(c, yp)
-				w  = gui_private_ypos(c, w)
-				h  = gui_private_ypos(c, h)
-			end
-		elseif v[1] == "option" then
-			local xp, yp = v[4], v[5]
-			for i = 1, type(v[7]) == "function" and v[7]():len() or v[7]:len() do
-				local w, h, c = v[6], v[6], type(v[7]) == "function" and v[7]():sub(i, i) or v[7]:sub(i, i)
-				xp = gui_private_xpre(c, xp)
-				yp = gui_private_ypre(c, yp)
-				w  = gui_private_ypre(c, w)
-				h  = gui_private_ypre(c, h)
-				if x > xp - w / 2 and x < xp + w / 2 and y > yp - h / 2 and y < yp + h / 2 then
-					gui_selection = v
-					return
-				end
-				xp = xp + w
-				xp = gui_private_xpos(c, xp)
-				yp = gui_private_ypos(c, yp)
-				w  = gui_private_ypos(c, w)
-				h  = gui_private_ypos(c, h)
-			end
-			xp = xp + v[6] * 3
-			for i = 1, v[9]:len() do
-				local w, h, c = v[6], v[6], v[9]:sub(i, i)
-				xp = gui_private_xpre(c, xp)
-				yp = gui_private_ypre(c, yp)
-				w  = gui_private_ypre(c, w)
-				h  = gui_private_ypre(c, h)
-				if x > xp - w / 2 and x < xp + w / 2 and y > yp - h / 2 and y < yp + h / 2 then
-					gui_selection = v
-					return
-				end
-				xp = xp + w
-				xp = gui_private_xpos(c, xp)
-				yp = gui_private_ypos(c, yp)
-				w  = gui_private_ypos(c, w)
-				h  = gui_private_ypos(c, h)
-			end
+			return
 		end
 	end
 end
 
 function gui_button(button)
-	if gui_safe ~= nil then
-		return nil
+	-- widgets are added in an decending order
+	if button == 0x0D or button == c_config_get("config.key.select") then  -- enter
+		if gui_widgets.selectionType and gui_widgets.selectionType[gui_widgets.selection] then
+			local widget = gui_widgets.selectionType[gui_widgets.selection]
+
+			if widget.actionCallBack then
+				widget:actionCallBack(button)
+			end
+		end
+	elseif button == 273 or button == c_config_get("config.key.up") then  -- up
+		if gui_widgets.selectionType and gui_widgets.selectionType[gui_widgets.selection] then
+			if gui_widgets.selectionType[gui_widgets.selection - 1] then
+				gui_widgets.selection = gui_widgets.selection - 1
+			end
+
+			return
+		end
+	elseif button == 274 or button == c_config_get("config.key.down") then  -- down
+		if gui_widgets.selectionType and gui_widgets.selectionType[gui_widgets.selection] then
+			if gui_widgets.selectionType[gui_widgets.selection + 1] then
+				gui_widgets.selection = gui_widgets.selection + 1
+			end
+
+			return
+		end
+	elseif button == 276 or button == c_config_get("config.key.left") then  -- left
+	elseif button == 275 or button == c_config_get("config.key.right") then  -- right
 	end
-
-	if gui_selection then
-		if button == 0x0D or button == c_config_get("config.key.select") then  -- enter
-			if gui_selection[1] == "label" then
-			elseif gui_selection[1] == "active" or gui_selection[1] == "option" then
-				if type(gui_selection[2]) == "table" then
-					for k, v in ipairs(gui_selection[2]) do
-						v(gui_selection[7], gui_selection[8])
-					end
-					for k, v in pairs(gui_selection[2]) do
-						if type(k) ~= "number" then
-							v(gui_selection[7], gui_selection[8])
-						end
-					end
-				else
-					gui_selection[2](gui_selection[7], gui_selection[8])
-				end
-			end
-		elseif button == 273 or button == c_config_get("config.key.up") then  -- up, pgup
-			local i, pos = 0
-			for k, v in ipairs(gui_data) do
-				if v[1] == "active" or v[1] == "option" then
-					i = i + 1
-					if gui_selection == v then
-						pos = i
-					end
-				end
-			end
-			if i == 0 or pos == nil then
-				return false
-			end
-
-			i = 0
-			for k, v in ipairs(gui_data) do
-				if v[1] == "active" or v[1] == "option" then
-					i = i + 1
-					if pos == i + 1 then
-						gui_selection = v
-					end
-				end
-			end
-		elseif button == 274 or button == c_config_get("config.key.down") then  -- down, pgdown
-			local i, pos = 0
-			for k, v in ipairs(gui_data) do
-				if v[1] == "active" or v[1] == "option" then
-					i = i + 1
-					if gui_selection == v then
-						pos = i
-					end
-				end
-			end
-			if i == 0 or pos == nil then
-				return false
-			end
-
-			i = 0
-			for k, v in ipairs(gui_data) do
-				if v[1] == "active" or v[1] == "option" then
-					i = i + 1
-					if pos == i - 1 then
-						gui_selection = v
-					end
-				end
-			end
-		elseif button == 276 or button == c_config_get("config.key.left") then  -- left
-			if gui_selection[1] == "option" then
-				local pos
-				for k, v in ipairs(gui_selection[8]) do
-					if v[4] == nil then
-						if v[1] == gui_selection[9] then
-							if pos then
-								if v[3] then
-									v[3](v[1])
-								end
-								gui_selection[9] = gui_selection[8][pos][1]
-								gui_selection[8][pos][2](gui_selection[8][pos][1])
-							end
-						end
-						pos = k
-					elseif v[1] == gui_selection[9] then
-						local V = v
-						for k, v in ipairs(gui_selection[8]) do
-							if v[4] == nil then
-								if V[3] then
-									V[3](V[1])
-								end
-								gui_selection[9] = v[1]
-								return true
-							end
-						end
-					end
-				end
-			else
-				return nil
-			end
-		elseif button == 275 or button == c_config_get("config.key.right") then  -- right
-			if gui_selection[1] == "option" then
-				local next = false
-				for k, v in ipairs(gui_selection[8]) do
-					if v[4] == nil then
-						if next then
-							gui_selection[9] = v[1]
-							v[2](v[1])
-							return true
-						end
-						if v[1] == gui_selection[9] then
-							next = true
-							if v[3] and pos > 1 then
-								v[3](v[1])
-							end
-						end
-					elseif v[1] == gui_selection[9] then
-						local V = gui_selection[9]
-						for k, v in ipairs(gui_selection[8]) do
-							if v[4] == nil then
-								gui_selection[9] = v[1]
-							end
-						end
-						for k, v in ipairs(gui_selection[8]) do
-							if v[1] == V then
-								if v[3] then
-									v[3](v[1])
-								end
-								return true
-							end
-						end
-					end
-				end
-			else
-				return nil
-			end
-		else
-			return nil
-		end
-	else
-		return nil
-	end
-
-	return true
-end
-
-function gui_row()
-	error("Debug: dynamic gui isn't supported yet (gui_row() was called)")
-end
-
-function gui_column()
-	error("Debug: dynamic gui isn't supported yet (gui_column() was called)")
-end
-
-function gui_space()
-	error("Debug: dynamic gui isn't supported yet (gui_space() was called)")
-end
-
-function gui_end()
-	error("Debug: dynamic gui isn't supported yet (gui_end() was called)")
-end
-
-function gui_conserve()
-	gui_safe = true
-end
-
-function gui_widget(type, callback, ttffont, x, y, size, text, cycle, ccurrent)
-	if type == "label" then
-		local label
-		if callback == nil then
-			label = {"label", ttffont, x, y, size, text}
-		else
-			label = {"label", callback, ttffont, x, y, size}  -- hack: if callback was ignored
-		end
-		table.insert(gui_data, label)
-	elseif type == "active" then
-		local active = {"active", callback, ttffont, x, y, size, text, cycle}  -- cycle is an extra paramater to be passed to the callback
-		table.insert(gui_data, active)
-		if not gui_selection then
-			gui_selection = active
-		end
-	elseif type == "option" then
-		local option = {"option", callback, ttffont, x, y, size, text, cycle, ccurrent}
-		table.insert(gui_data, option)
-		if not gui_selection then
-			gui_selection = option
-		end
-	end
-end
-
-function gui_layout()
-	error("Debug: dynamic gui isn't supported yet (gui_layout() was called)")
 end
 
 function gui_char(c)
@@ -756,11 +377,11 @@ function gui_char(c)
 	elseif c == 0x5A then
 		return "Z", "Z"
 	elseif c == 0x5B then
-		return "[", "Opening Array Bracket"
+		return "[", "Opening Bracket"
 	elseif c == 0x5C then
 		return "\\", "Backslash"
 	elseif c == 0x5D then
-		return "]", "Closing Array Bracket"
+		return "]", "Closing Bracket"
 	elseif c == 0x5E then
 		return "^", "Carrot"
 	elseif c == 0x5F then

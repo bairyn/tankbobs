@@ -219,8 +219,11 @@ function common_setField(f, v, e)
 end
 
 -- for classes and inheritance
-function common_new(self, o)
+function common_new(self, inh, o)
 	o = o or {}
+	if inh then
+		common_clone(inh, o)
+	end
 	common_clone(self, o)
 	if self.init then
 		self.init(o)

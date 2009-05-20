@@ -36,9 +36,6 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 #include <math.h>
 #include <SDL/SDL_endian.h>
 #include <zlib.h>
-#include <ft2build.h>
-#include FT_FREETYPE_H
-#include FT_GLYPH_H
 
 #include "common.h"
 #include "m_tankbobs.h"
@@ -82,7 +79,7 @@ int t_quit(lua_State *L)
 {
 	CHECKINIT(init, L);
 
-	r_quitFreeType();
+	r_quitFont();
 
 	return 0;
 }
@@ -333,14 +330,25 @@ static const struct luaL_Reg tankbobs[] =
 		/* double arguments to match the function, no return, 4 args */
 	{"r_swapBuffers", r_swapBuffers}, /* swap the double buffer */
 		/* no args, no rets, interface to swap display buffers */
-	{"r_newFont", r_newFont}, /* get a new font */
-		/* 1st arg is string of ttf filename, only return
-			is the font userdata */
+	{"r_newFont", r_newFont}, /* create a new font */
+		/* Nothing is returned.  The first argument is the font's name.
+			The second argument is the font's filenames.  The third is its size
+			(ptsize). */
+	{"r_selectFont", r_selectFont}, /* select a font to use */
+		/* Nothing is returned.  The only argument passed is the name of the  font to be selected. */
+	{"r_fontName", r_fontName}, /* get the current font's name */
+		/* This function takes no arguments.  The currently selected font's name is returned. */
+	{"r_fontFilename", r_fontFilename}, /* get the current font's filename */
+		/* This function takes no arguments.  The currently selected font's filename is returned. */
+	{"r_fontSize", r_fontSize}, /* get the current font's Size */
+		/* This function takes no arguments.  The currently selected font's Size is returned. */
+	{"r_drawString", r_drawString}, /* draw a string */
+		/* The first argument is the string to be drawn.  The second is the position (lower
+			left.  The third is the red, fourth green, fifth blue, and sixth alpha.  The seventh
+			argument is the x scale of the text, and the eighth is the y scale.  The position
+			of the upper right corner is returned. */
 	{"r_freeFont", r_freeFont}, /* free a font */
 		/* no return, 1st and only arg is userdata of font */
-	{"r_drawCharacter", r_drawCharacter}, /* render a character */
-		/* first arg is x, 2nd y, 3rd w, 4th h, 5th is font, 6th is character to
-			draw.  No returns */
 	{"r_loadImage2D", r_loadImage2D}, /* load an image into the currently bound 2D texture */
 		/* the first argument passed is the filename of the image to be loaded.  The second
 			argument is the filename of the default image to load if the first image

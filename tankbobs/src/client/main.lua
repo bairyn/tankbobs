@@ -35,7 +35,7 @@ function main_init()
 
 	renderer_init()
 
-	tankbobs.r_newWindow(c_config_get("config.renderer.width"), c_config_get("config.renderer.height"), not not (c_config_get("config.renderer.fullscreen") and c_config_get("config.renderer.fullscreen") > 0), c_const_get("title"), c_const_get("icon"))
+	tankbobs.r_newWindow(c_config_get("config.renderer.width"), c_config_get("config.renderer.height"), c_config_get("config.renderer.fullscreen"), c_const_get("title"), c_const_get("icon"))
 	renderer_setupNewWindow()
 
 	c_state_new(title_state)
@@ -48,6 +48,24 @@ function main_init()
 end
 
 function main_done()
+end
+
+function main_stt(x, y)
+	-- convert SDL coordinates to tankbobs coordinates and return
+	y = c_config_get("config.renderer.height") - y
+	x = (100 * x) / c_config_get("config.renderer.width")
+	y = (100 * y) / c_config_get("config.renderer.height")
+
+	return x, y
+end
+
+function main_tts(x, y)
+	-- convert tankbobs coordinates to SDL coordinates and return
+	y = y / (100 * c_config_get("config.renderer.height"))
+	x = x / (100 * c_config_get("config.renderer.width"))
+	y = c_config_get("config.renderer.height") - y
+
+	return x, y
 end
 
 local lastTime = 0
@@ -97,9 +115,8 @@ function main_loop()
 				video_updateWindow()
 			elseif tankbobs.in_getEventData(lastevent, "type") == "mousedown" then
 				local x, y = tankbobs.in_getEventData(lastevent, "intData1"), tankbobs.in_getEventData(lastevent, "intData2")
-				y = c_config_get("config.renderer.height") - y
-				x = 100 * x / c_config_get("config.renderer.width")
-				y = 100 * y / c_config_get("config.renderer.height")
+
+				x, y = main_stt(x, y)
 				if tankbobs.in_getEventData(lastevent, "intData0") >= 1 and tankbobs.in_getEventData(lastevent, "intData0") <= 5 then
 					c_state_click(tankbobs.in_getEventData(lastevent, "intData0"), true, x, y)
 				else
@@ -107,9 +124,8 @@ function main_loop()
 				end
 			elseif tankbobs.in_getEventData(lastevent, "type") == "mouseup" then
 				local x, y = tankbobs.in_getEventData(lastevent, "intData1"), tankbobs.in_getEventData(lastevent, "intData2")
-				y = c_config_get("config.renderer.height") - y
-				x = 100 * x / c_config_get("config.renderer.width")
-				y = 100 * y / c_config_get("config.renderer.height")
+
+				x, y = main_stt(x, y)
 				if tankbobs.in_getEventData(lastevent, "intData0") >= 1 and tankbobs.in_getEventData(lastevent, "intData0") <= 5 then
 					c_state_click(tankbobs.in_getEventData(lastevent, "intData0"), false, x, y)
 				else
@@ -121,10 +137,9 @@ function main_loop()
 				c_state_button(tankbobs.in_getEventData(lastevent, "intData0"), false)
 			elseif tankbobs.in_getEventData(lastevent, "type") == "mousemove" then
 				local x, y, xrel, yrel = tankbobs.in_getEventData(lastevent, "intData0"), tankbobs.in_getEventData(lastevent, "intData1"), tankbobs.in_getEventData(lastevent, "intData2"), tankbobs.in_getEventData(lastevent, "intData3")
+
 				yrel = -yrel
-				y = c_config_get("config.renderer.height") - y
-				x = 100 * x / c_config_get("config.renderer.width")
-				y = 100 * y / c_config_get("config.renderer.height")
+				x, y = main_stt(x, y)
 				c_state_mouse(x, y, xrel, yrel)
 			end
 			lastevent = tankbobs.in_nextEvent(lastevent)

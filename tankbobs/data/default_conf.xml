@@ -3,12 +3,18 @@
 		<minFrameLatency>1</minFrameLatency>
 	</client>
 
-	<font>
+	<font>sans</font>
+
+	<fonts>
 		<sans>
-			<size>2</size>
+			<size>144</size>
 			<ttf>DejaVuSans-Bold.ttf</ttf>
 		</sans>
-	</font>
+		<bd>
+			<size>144</size>
+			<ttf>VeraBd.ttf</ttf>
+		</bd>
+	</fonts>
 
 	<game>
 		<scoresAlpha>0.875</scoresAlpha>
@@ -72,7 +78,7 @@
 	<keyLayout>default</keyLayout>
 
 	<renderer>
-		<fullscreen>0</fullscreen>
+		<fullscreen>false</fullscreen>
 		<width>800</width>
 		<height>600</height>
 	</renderer>

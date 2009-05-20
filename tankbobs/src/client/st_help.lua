@@ -24,9 +24,9 @@ game help and information
 --]]
 
 function st_help_init()
-	gui_widget("active", c_state_advance, renderer_font.sans, 25, 87.5, renderer_size.sans, "Back")
-	gui_widget("active", st_help_manual, renderer_font.sans, 50, 70, renderer_size.sans, "Manual")
-	gui_widget("active", st_help_licensing, renderer_font.sans, 50, 67.5, renderer_size.sans, "Copyright Notice")
+	gui_action("Back", tankbobs.m_vec2(25, 87.5), nil, c_state_advance)
+	gui_action("Manual", tankbobs.m_vec2(50, 70), nil, st_help_manual)
+	gui_action("Copyright", tankbobs.m_vec2(50, 67.5), nil, st_help_licensing)
 end
 
 function st_help_done()

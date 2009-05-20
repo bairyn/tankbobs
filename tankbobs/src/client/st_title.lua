@@ -24,11 +24,11 @@ title screen
 --]]
 
 function st_title_init()
-	gui_widget("label", renderer_font.sans, 50, 75, renderer_size.sans, "Main Menu")
-	gui_widget("active", st_title_play, renderer_font.sans, 50, 70, renderer_size.sans, "Play")
-	gui_widget("active", st_title_options, renderer_font.sans, 50, 67.5, renderer_size.sans, "Options")
-	gui_widget("active", st_title_help, renderer_font.sans, 50, 65, renderer_size.sans, "Help")
-	gui_widget("active", c_state_advance, renderer_font.sans, 50, 62.5, renderer_size.sans, "Exit")
+	gui_label("Main Menu", tankbobs.m_vec2(50, 75))
+	gui_action("Play", tankbobs.m_vec2(50, 70), nil, st_title_play)
+	gui_action("Options", tankbobs.m_vec2(50, 67.5), nil, st_title_options)
+	gui_action("Help", tankbobs.m_vec2(50, 65), nil, st_title_help)
+	gui_action("Exit", tankbobs.m_vec2(50, 62.5), nil, c_state_advance)
 end
 
 function st_title_done()
