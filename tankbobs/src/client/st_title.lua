@@ -25,10 +25,10 @@ title screen
 
 function st_title_init()
 	gui_label("Main Menu", tankbobs.m_vec2(50, 75))
-	gui_action("Play", tankbobs.m_vec2(50, 70), nil, st_title_play)
-	gui_action("Options", tankbobs.m_vec2(50, 67.5), nil, st_title_options)
-	gui_action("Help", tankbobs.m_vec2(50, 65), nil, st_title_help)
-	gui_action("Exit", tankbobs.m_vec2(50, 62.5), nil, c_state_advance)
+	gui_action("Play", tankbobs.m_vec2(50, 65), nil, st_title_play)
+	gui_action("Options", tankbobs.m_vec2(50, 60), nil, st_title_options)
+	gui_action("Help", tankbobs.m_vec2(50, 55), nil, st_title_help)
+	gui_action("Exit", tankbobs.m_vec2(50, 50), nil, c_state_advance)
 end
 
 function st_title_done()
@@ -51,11 +51,11 @@ function st_title_button(button, pressed)
 end
 
 function st_title_mouse(x, y, xrel, yrel)
-	gui_mouse(x, y)
+	gui_mouse(x, y, xrel, yrel)
 end
 
 function st_title_step(d)
-	gui_paint()
+	gui_paint(d)
 end
 
 function st_title_play()

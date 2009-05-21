@@ -79,7 +79,7 @@ struct r_fontCache_s
 
 	GLuint list;
 	GLuint texture;
-	vec2_t r;
+	double w, h;
 	char string[BUFSIZE];
 };
 
@@ -532,8 +532,8 @@ int r_drawString(lua_State *L)
 				luaL_getmetatable(L, MATH_METATABLE);
 				lua_setmetatable(L, -2);
 
-				v->x = fc->r.x * scalex;
-				v->y = fc->r.y * scaley;
+				v->x = p.x + fc->w * scalex;
+				v->y = p.y + fc->h * scaley;
 				MATH_POLAR(*v);
 
 				return 1;
@@ -650,9 +650,8 @@ int r_drawString(lua_State *L)
 		v->y = p.y + s->h * scaley;
 		MATH_POLAR(*v);
 
-		fc->r.x = p.x + s->w;
-		fc->r.y = p.y + s->h;
-		MATH_POLAR(fc->r);
+		fc->w = s->w;
+		fc->h = s->h;
 
 		memcpy(&fmt, s->format, sizeof(SDL_PixelFormat));
 
@@ -713,10 +712,10 @@ int r_drawString(lua_State *L)
 				glBindTexture(GL_TEXTURE_2D, fc->texture);
 				glBegin(GL_QUADS);
 					/* x texcoords are inverted */
-					glTexCoord2d(0, 0); glVertex2d(0.0, converted->h);
-					glTexCoord2d(0, 1); glVertex2d(0.0, -converted->h * 6);
-					glTexCoord2d(1, 1); glVertex2d(converted->w, -converted->h * 6);
-					glTexCoord2d(1, 0); glVertex2d(converted->w, converted->h);
+					glTexCoord2d(0, 0); glVertex2d(0.0, s->h);
+					glTexCoord2d(0, 1); glVertex2d(0.0, -s->h * 6);
+					glTexCoord2d(1, 1); glVertex2d(s->w, -s->h * 6);
+					glTexCoord2d(1, 0); glVertex2d(s->w, s->h);
 				glEnd();
 			glEndList();
 		glPopMatrix();

@@ -24,28 +24,31 @@ Graphical User Interface
 --]]
 
 function gui_init()
-	gui_widgets = {labels = {}, actions = {}, cycles = {}, selection = 1, selectionType = nil}
+	gui_widgets = {labels = {}, actions = {}, cycles = {}, selection = 1, selectionType = {}}
+
+	c_const_set("widget_length", 16, 1)
 
 	c_const_set("label_r", 0.8, 1)
 	c_const_set("label_g", 0.5, 1)
 	c_const_set("label_b", 0.1, 1)
 	c_const_set("label_a", 1.0, 1)
-	c_const_set("label_scalex", 1 / 20, -1)
-	c_const_set("label_scaley", 1 / 20, -1)
+	c_const_set("label_scalex", 2 / 15, 1)
+	c_const_set("label_scaley", 3 / 15, 1)
 
 	c_const_set("action_r", 0.92, 1)
 	c_const_set("action_g", 0.94, 1)
 	c_const_set("action_b", 0.98, 1)
 	c_const_set("action_a", 1.0, 1)
-	c_const_set("action_scalex", 1 / 40, -1)
-	c_const_set("action_scaley", 1 / 40, -1)
+	c_const_set("action_scalex", 2 / 25, 1)
+	c_const_set("action_scaley", 3 / 25, 1)
 
 	c_const_set("actionSelected_r", 0.6, 1)
 	c_const_set("actionSelected_g", 0.4, 1)
 	c_const_set("actionSelected_b", 0.2, 1)
 	c_const_set("actionSelected_a", 1.0, 1)
-	c_const_set("actionSelected_scalex", 1 / 30, -1)
-	c_const_set("actionSelected_scaley", 1 / 30, -1)
+
+	c_const_set("select_init", 0.25, 1)
+	c_const_set("select_drop", 1.0, 1)
 end
 
 function gui_done()
@@ -63,6 +66,8 @@ gui_widget =
 	p = nil,
 	text = "",
 	updateText = nil,
+
+	bump = nil
 }
 
 gui_wlabel =
@@ -88,8 +93,9 @@ gui_waction =
 }
 
 function gui_finish()
-	gui_widgets = {labels = {}, actions = {}, cycles = {}, selection = 1, selectionType = nil}
+	gui_widgets = {labels = {}, actions = {}, cycles = {}, selection = 1, selectionType = {}}
 end
+
 
 function gui_label(text, p, updateTextCallBack)
 	local label = gui_wlabel:new(gui_widget)
@@ -117,13 +123,30 @@ function gui_action(text, p, updateTextCallBack, actionCallBack)
 	return action
 end
 
+local length = 0
+
+local function gui_private_text(text)
+	if #text > length then
+		length = #text
+	end
+
+	return text .. string.rep(' ', length - #text)
+end
+
+local function gui_private_scale(scalar)
+	return scalar * length / c_const_get("widget_length")
+end
+
+local selected = nil
+
 function gui_paint(d)
 	for k, v in pairs(gui_widgets.labels) do
 		if v.updateTextCallBack then
 			v:updateTextCallBack(d)
 		end
 
-		tankbobs.r_drawString(v.text, v.p, c_const_get("label_r"), c_const_get("label_g"), c_const_get("label_b"), c_const_get("label_a"), c_const_get("label_scalex"), c_const_get("label_scaley"), false)
+		v.text = gui_private_text(v.text)
+		tankbobs.r_drawString(v.text, v.p, c_const_get("label_r"), c_const_get("label_g"), c_const_get("label_b"), c_const_get("label_a"), gui_private_scale(c_const_get("label_scalex")), gui_private_scale(c_const_get("label_scaley")), false)
 	end
 
 	for k, v in pairs(gui_widgets.actions) do
@@ -131,12 +154,49 @@ function gui_paint(d)
 			v:updateTextCallBack(d)
 		end
 
-		v.r = tankbobs.r_drawString(v.text, v.p, c_const_get("action_r"), c_const_get("action_g"), c_const_get("action_b"), c_const_get("action_a"), c_const_get("action_scalex"), c_const_get("action_scaley"), false)
+		local scalex = c_const_get("action_scalex")
+		local scaley = c_const_get("action_scaley")
+
+		if v.bump then
+			v.bump = v.bump - d * c_const_get("select_drop")
+			if v.bump <= 0 then
+				v.bump = nil
+			else
+				scalex = scalex * (1 + v.bump)
+				scaley = scaley * (1 + v.bump)
+			end
+		end
+
+		v.text = gui_private_text(v.text)
+		if v == gui_widgets.selectionType[gui_widgets.selection] then
+			v.r = tankbobs.r_drawString(v.text, v.p, c_const_get("actionSelected_r"), c_const_get("actionSelected_g"), c_const_get("actionSelected_b"), c_const_get("actionSelected_a"), gui_private_scale(scalex), gui_private_scale(scaley), false)
+		else
+			v.r = tankbobs.r_drawString(v.text, v.p, c_const_get("action_r"), c_const_get("action_g"), c_const_get("action_b"), c_const_get("action_a"), gui_private_scale(scalex), gui_private_scale(scaley), false)
+		end
 	end
+end
+
+local function gui_private_selected(selection, selectionType)
+	gui_widgets.selection = selection or gui_widgets.selection
+	gui_widgets.selectionType = selectionType or gui_widgets.selectionType
+
+	selected = gui_widgets.selectionType[gui_widgets.selection]
+
+	selected.bump = c_const_get("select_init")
 end
 
 function gui_click(x, y)
 	for k, v in pairs(gui_widgets.actions) do
+		if x >= v.p.x and x <= v.r.x and y >= v.p.y and y <= v.r.y then
+			if v.actionCallBack then
+				v:actionCallBack(x, y)
+			end
+
+			return
+		end
+	end
+
+	for k, v in pairs(gui_widgets.cycles) do
 		if x >= v.p.x and x <= v.r.x and y >= v.p.y and y <= v.r.y then
 			if v.actionCallBack then
 				v:actionCallBack(x, y)
@@ -150,10 +210,21 @@ end
 function gui_mouse(x, y, xrel, yrel)
 	for k, v in pairs(gui_widgets.actions) do
 		if x >= v.p.x and x <= v.r.x and y >= v.p.y and y <= v.r.y then
-			gui_widgets.selection = k
-			gui_widgets.selectionType = gui_widgets.gui_actions
+			if v ~= selected then
+				gui_private_selected(k, gui_widgets.actions)
 
-			return
+				return
+			end
+		end
+	end
+
+	for k, v in pairs(gui_widgets.cycles) do
+		if x >= v.p.x and x <= v.r.x and y >= v.p.y and y <= v.r.y then
+			if v ~= selected then
+				gui_private_selected(k, gui_widgets.cycles)
+
+				return
+			end
 		end
 	end
 end
@@ -169,21 +240,81 @@ function gui_button(button)
 			end
 		end
 	elseif button == 273 or button == c_config_get("config.key.up") then  -- up
-		if gui_widgets.selectionType and gui_widgets.selectionType[gui_widgets.selection] then
-			if gui_widgets.selectionType[gui_widgets.selection - 1] then
-				gui_widgets.selection = gui_widgets.selection - 1
-			end
-
+		if not selected then
+			gui_private_selected(math.max(1, #gui_widgets.actions), gui_widgets.actions)
 			return
 		end
+
+		local y, x = 0, 0
+		local selection, selectionType
+
+		for k, v in pairs(gui_widgets.actions) do
+			if v.p.y == selected.p.y then
+				if v.p.x < selected.p.x and v.p.x > x then
+					selection, selectionType = k, gui_widgets.actions
+					y, x = v.p.y, v.p.x
+				end
+			elseif v.p.y > selected.p.y and (v.p.y < y or y == 0) then
+				selection, selectionType = k, gui_widgets.actions
+				y, x = v.p.y, v.p.x
+			end
+		end
+
+		for k, v in pairs(gui_widgets.cycles) do
+			if v.p.y == selected.p.y then
+				if v.p.x < selected.p.x and v.p.x > x then
+					selection, selectionType = k, gui_widgets.cycles
+					y, x = v.p.y, v.p.x
+				end
+			elseif v.p.y > selected.p.y and v.p.y < y then
+				selection, selectionType = k, gui_widgets.cycles
+				y, x = v.p.y, v.p.x
+			end
+		end
+
+		if selection and selectionType then
+			gui_private_selected(selection, selectionType)
+		end
+
+		return
 	elseif button == 274 or button == c_config_get("config.key.down") then  -- down
-		if gui_widgets.selectionType and gui_widgets.selectionType[gui_widgets.selection] then
-			if gui_widgets.selectionType[gui_widgets.selection + 1] then
-				gui_widgets.selection = gui_widgets.selection + 1
-			end
-
+		if not selected then
+			gui_private_selected(1, gui_widgets.actions)
 			return
 		end
+
+		local y, x = 0, 0
+		local selection, selectionType
+
+		for k, v in pairs(gui_widgets.actions) do
+			if v.p.y == selected.p.y then
+				if v.p.x > selected.p.x and (v.p.x < x or x == 0) then
+					selection, selectionType = k, gui_widgets.actions
+					y, x = v.p.y, v.p.x
+				end
+			elseif v.p.y < selected.p.y and v.p.y > y then
+				selection, selectionType = k, gui_widgets.actions
+				y, x = v.p.y, v.p.x
+			end
+		end
+
+		for k, v in pairs(gui_widgets.cycles) do
+			if v.p.y == selected.p.y then
+				if v.p.x > selected.p.x and v.p.x < x then
+					selection, selectionType = k, gui_widgets.cycles
+					y, x = v.p.y, v.p.x
+				end
+			elseif v.p.y < selected.p.y and v.p.y > y then
+				selection, selectionType = k, gui_widgets.cycles
+				y, x = v.p.y, v.p.x
+			end
+		end
+
+		if selection and selectionType then
+			gui_private_selected(selection, selectionType)
+		end
+
+		return
 	elseif button == 276 or button == c_config_get("config.key.left") then  -- left
 	elseif button == 275 or button == c_config_get("config.key.right") then  -- right
 	end

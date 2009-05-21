@@ -24,9 +24,9 @@ game help and information
 --]]
 
 function st_help_init()
-	gui_action("Back", tankbobs.m_vec2(25, 87.5), nil, c_state_advance)
-	gui_action("Manual", tankbobs.m_vec2(50, 70), nil, st_help_manual)
-	gui_action("Copyright", tankbobs.m_vec2(50, 67.5), nil, st_help_licensing)
+	gui_action("Manual", tankbobs.m_vec2(50, 65), nil, st_help_manual)
+
+	gui_action("Back", tankbobs.m_vec2(25, 75), nil, c_state_advance)
 end
 
 function st_help_done()
@@ -51,11 +51,11 @@ function st_help_button(button, pressed)
 end
 
 function st_help_mouse(x, y, xrel, yrel)
-	gui_mouse(x, y)
+	gui_mouse(x, y, xrel, yrel)
 end
 
 function st_help_step(d)
-	gui_paint()
+	gui_paint(d)
 end
 
 function st_help_manual()
