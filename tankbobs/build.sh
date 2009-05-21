@@ -9,12 +9,7 @@ DATA="CHANGELOG COPYING data mod-client mod-server NOTICE"
 
 cd `dirname $0`
 
-if [ -e "/usr/bin/gcc" ]; then
-	# try to link with C compiler
-	CMAKEFLAGS="-D PEDANTIC=TRUE -D CMAKE_CXX_LINKER=/usr/bin/gcc"
-else
-	CMAKEFLAGS="-D PEDANTIC=TRUE"
-fi
+CMAKEFLAGS="-D PEDANTIC=TRUE"
 
 if ! [ -d "./build" ]; then
 	mkdir ./build
