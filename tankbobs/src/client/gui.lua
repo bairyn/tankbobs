@@ -92,10 +92,14 @@ gui_waction =
 	r = nil  -- position of upper-right coordinates
 }
 
+local length = 0
+local selected = nil
+
 function gui_finish()
+	length = 0
+	selected = nil
 	gui_widgets = {labels = {}, actions = {}, cycles = {}, selection = 1, selectionType = {}}
 end
-
 
 function gui_label(text, p, updateTextCallBack)
 	local label = gui_wlabel:new(gui_widget)
@@ -123,8 +127,6 @@ function gui_action(text, p, updateTextCallBack, actionCallBack)
 	return action
 end
 
-local length = 0
-
 local function gui_private_text(text)
 	if #text > length then
 		length = #text
@@ -136,8 +138,6 @@ end
 local function gui_private_scale(scalar)
 	return scalar * length / c_const_get("widget_length")
 end
-
-local selected = nil
 
 function gui_paint(d)
 	for k, v in pairs(gui_widgets.labels) do
