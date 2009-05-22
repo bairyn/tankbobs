@@ -280,6 +280,8 @@ local function gui_private_text(text)
 	end
 
 	return text .. string.rep(' ', length - #text)
+	--TODO: remove the above line and fix y scale issue in renderer.c
+	--return text
 end
 
 local function gui_private_scale(scalar)
@@ -431,7 +433,12 @@ local function gui_private_inputKey(button)
 		return true
 	elseif button >= 32 and button < 127 then
 		if (#selected.text < selected.maxLength) and (not selected.integerOnly or (button >= string.byte('0') and button <= string.byte('9'))) then
-			selected.text = selected.text:sub(1, selected.pos) .. string.char(button) .. selected.text:sub(selected.pos + 1, -1)
+			local add = string.char(button)
+
+			if shift then
+				add = add:upper()
+			end
+			selected.text = selected.text:sub(1, selected.pos) .. add .. selected.text:sub(selected.pos + 1, -1)
 			selected.pos = selected.pos + 1
 
 			if selected.changeCallBack then

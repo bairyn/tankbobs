@@ -21,6 +21,7 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 c_state.lua
 
 states
+TODO: move this to client
 --]]
 
 --[[
@@ -155,6 +156,10 @@ end
 function c_state_button(button, pressed)  -- should only be called from the main loop
 	if not c_state_state then
 		error("c_state_button: state not initialized or state table lost")
+	end
+
+	if button == 303 or button == 304 then  -- right and left shifts
+		shift = pressed and pressed ~= 0
 	end
 
 	if not c_state_validate(c_state_state.cur) then

@@ -458,7 +458,11 @@ int r_fontFilename(lua_State *L)
 	return 1;
 }
 
+#ifdef __cplusplus
 static inline int r_private_powerOfTwo(int x)
+#else
+static int r_private_powerOfTwo(int x)
+#endif
 {
 	int r = 1;
 

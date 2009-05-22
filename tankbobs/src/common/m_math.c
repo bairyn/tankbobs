@@ -615,7 +615,11 @@ int m_vec2_inv(lua_State *L)
 #define TM_CW 1
 #define TM_CCW -1
 
+#ifdef __cplusplus
 static inline int m_edge_triDir(const vec2_t *p1, const vec2_t *p2, const vec2_t *p3)
+#else
+static int m_edge_triDir(const vec2_t *p1, const vec2_t *p2, const vec2_t *p3)
+#endif
 {
 	double dir = (p2->x - p1->x) * (p3->y - p1->y) - (p3->x - p1->x) * (p2->y - p1->y);
 	if(dir > 0) return TM_CW;
@@ -623,7 +627,11 @@ static inline int m_edge_triDir(const vec2_t *p1, const vec2_t *p2, const vec2_t
 	return 0;
 }
 
+#ifdef __cplusplus
 static inline int m_private_line(const vec2_t *l1p1, const vec2_t *l1p2, const vec2_t *l2p1, const vec2_t *l2p2)  /* non-Lua version */
+#else
+static int m_private_line(const vec2_t *l1p1, const vec2_t *l1p2, const vec2_t *l2p1, const vec2_t *l2p2)  /* non-Lua version */
+#endif
 {
 	if(m_edge_triDir(l1p1, l1p2, l2p1) != m_edge_triDir(l1p1, l1p2, l2p2))  /* && */
 	if(m_edge_triDir(l2p1, l2p2, l1p1) != m_edge_triDir(l2p1, l2p2, l1p2))
@@ -973,7 +981,7 @@ int m_vec2_project(lua_State *L)
 	return 1;
 }
 
-// this function assumes that the vertices are already ordered either in a clockwise order or a counterclockwise order.  This function alsa assumes that the polygon is convex
+/* this function assumes that the vertices are already ordered either in a clockwise order or a counterclockwise order.  This function alsa assumes that the polygon is convex */
 void m_orderVertices(const vec2_t *vertices[], int numVertices, int dir)
 {
 	vec2_t v0, v1;
@@ -1010,7 +1018,7 @@ void m_orderVertices(const vec2_t *vertices[], int numVertices, int dir)
 
 	if(currentDir != dir)
 	{
-		// reverse order of vertices
+		/* reverse order of vertices */
 		for(i = 0; i < numVertices / 2; i++)
 		{
 			const vec2_t *tmp = vertices[i];

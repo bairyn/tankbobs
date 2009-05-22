@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 2.6)
 project(tankbobs)
 
+if(UNIX)
+	set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} -ansi)
+	set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -ansi)
+endif(UNIX)
+
 set(include_dirs ./src/lib ./src/lib/tstr ./src/common ./src/lib/Box2D/Include /usr/include/lua)
 
 include_directories(${include_dirs})

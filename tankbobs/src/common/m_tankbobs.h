@@ -164,6 +164,10 @@ struct vec2_s
 #define CLOCKWISE 1
 #define COUNTERCLOCKWISE 2
 
+#ifndef M_PI
+#define M_PI 3.1415926535897932
+#endif
+
 void m_orderVertices(const vec2_t *vertices[], int numVertices, int dir);
 double m_degreesNL(double radians);
 double m_radiansNL(double degrees);
