@@ -41,7 +41,7 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 
 #define MIN_VID_MEM    256
 
-#define RESTRICT_TO_POWER_OF_TWO 1
+#define POWER_OF_TWO 1
 
 #define CHECKCURRENTFONT(L) \
 do \
@@ -459,9 +459,9 @@ int r_fontFilename(lua_State *L)
 }
 
 #ifdef __cplusplus
-static inline int r_private_powerOfTwo(int x)
+static inline int r_private_nextPowerOfTwo(int x)
 #else
-static int r_private_powerOfTwo(int x)
+static int r_private_nextPowerOfTwo(int x)
 #endif
 {
 	int r = 1;
@@ -605,8 +605,9 @@ int r_drawString(lua_State *L)
 
 	if(fc)
 	{
-		SDL_Surface *converted;
+		SDL_Surface *intermediary, *converted;
 		SDL_PixelFormat fmt;
+		int w, h;
 
 		/* generate texture and list */
 
@@ -674,7 +675,21 @@ int r_drawString(lua_State *L)
 		fmt.colorkey = SDL_MapRGB(s->format, 237, 77, 207);
 		fmt.alpha = 255;
 
-		converted = SDL_ConvertSurface(s, &fmt, SDL_SWSURFACE | SDL_SRCALPHA);
+		if(POWER_OF_TWO)
+		{
+			w = r_private_nextPowerOfTwo(s->w);
+			h = r_private_nextPowerOfTwo(s->h);
+		}
+		else
+		{
+			w = s->w;
+			h = s->h;
+		}
+
+		intermediary = SDL_CreateRGBSurface(SDL_SRCALPHA, w, h, fmt.BitsPerPixel, fmt.Rmask, fmt.Gmask, fmt.Bmask, fmt.Amask);
+		SDL_BlitSurface(s, NULL, intermediary, NULL);
+
+		converted = SDL_ConvertSurface(s, &fmt, SDL_SRCALPHA);
 
 		if(SDL_MUSTLOCK(converted))
 		{
@@ -687,14 +702,16 @@ int r_drawString(lua_State *L)
 			lua_error(L);
 		}
 
-		if(RESTRICT_TO_POWER_OF_TWO)
+		if(POWER_OF_TWO)
 		{
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, r_private_powerOfTwo(converted->w), r_private_powerOfTwo(converted->w), 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, converted->w, converted->h, GL_RGBA, GL_UNSIGNED_BYTE, converted->pixels);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, h - converted->h, converted->w, converted->h, GL_RGBA, GL_UNSIGNED_BYTE, converted->pixels);
 		}
 		else
 		{
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, converted->w, converted->w, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+			w = s->w;
+			h = s->h;
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, converted->w, converted->w, 0, GL_RGBA, GL_UNSIGNED_BYTE, converted->pixels);
 		}
 
 		if(SDL_MUSTLOCK(converted))
@@ -716,10 +733,10 @@ int r_drawString(lua_State *L)
 				glBindTexture(GL_TEXTURE_2D, fc->texture);
 				glBegin(GL_QUADS);
 					/* x texcoords are inverted */
-					glTexCoord2d(0, 0); glVertex2d(0.0, s->h);
-					glTexCoord2d(0, 1); glVertex2d(0.0, -s->h * 6);
-					glTexCoord2d(1, 1); glVertex2d(s->w, -s->h * 6);
-					glTexCoord2d(1, 0); glVertex2d(s->w, s->h);
+					glTexCoord2d(0, 0); glVertex2d(0.0, h);
+					glTexCoord2d(0, 1); glVertex2d(0.0, 0.0);
+					glTexCoord2d(1, 1); glVertex2d(w, 0.0);
+					glTexCoord2d(1, 0); glVertex2d(w, h);
 				glEnd();
 			glEndList();
 		glPopMatrix();
@@ -894,9 +911,9 @@ int r_loadImage2D(lua_State *L)
 		lua_error(L);
 	}
 
-	if(RESTRICT_TO_POWER_OF_TWO)
+	if(POWER_OF_TWO)
 	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, r_private_powerOfTwo(converted->w), r_private_powerOfTwo(converted->w), 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, r_private_nextPowerOfTwo(converted->w), r_private_nextPowerOfTwo(converted->w), 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, converted->w, converted->h, GL_RGBA, GL_UNSIGNED_BYTE, converted->pixels);
 	}
 	else
