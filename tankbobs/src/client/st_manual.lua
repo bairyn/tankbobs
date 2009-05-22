@@ -24,10 +24,12 @@ game rules
 --]]
 
 function st_manual_init()
-	gui_widget("active", c_state_advance, renderer_font.sans, 25, 87.5, renderer_size.sans, "Back")
-	gui_widget("label", renderer_font.sans, 50, 85, renderer_size.sans, "Tankbobs")
-	gui_widget("label", renderer_font.sans, 50, 82.5, renderer_size.sans, "Tankbobs is a simple 2d player on player tank game")
-	gui_widget("label", renderer_font.sans, 50, 80, renderer_size.sans, "Rules are not yet")
+	gui_action("Back", tankbobs.m_vec2(25, 75), nil, c_state_advance)
+
+	gui_label("Tankbobs", tankbobs.m_vec2(50, 65))
+
+	gui_label("Tankbobs is a 2D shooter game.", tankbobs.m_vec2(50, 55))
+	gui_label("Your objective is to get the most kills.", tankbobs.m_vec2(50, 65))
 end
 
 function st_manual_done()
@@ -52,11 +54,11 @@ function st_manual_button(button, pressed)
 end
 
 function st_manual_mouse(x, y, xrel, yrel)
-	gui_mouse(x, y)
+	gui_mouse(x, y, xrel, yrel)
 end
 
 function st_manual_step(d)
-	gui_paint()
+	gui_paint(d)
 end
 
 manual_state =

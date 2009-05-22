@@ -24,7 +24,14 @@ configuration screen
 --]]
 
 function st_options_init()
-	options_video = c_config_backup("config.renderer")
+	st_options_renderer = {fullscreen = c_config_get("config.renderer.fullscreen"), width = c_config_get("config.renderer.width"), height = c_config_get("config.renderer.height")}
+
+	gui_action("Back", tankbobs.m_vec2(25, 75), nil, c_state_advance)
+
+	gui_label("Fullscreen", tankbobs.m_vec2(50, 65), nil, 0.5) gui_cycle("Fullscreen", tankbobs.m_vec2(70, 65), nil, st_options_fullscreen, {"No", "Yes"}, c_config_get("config.renderer.fullscreen") and 2 or 1, 0.75)
+	gui_action("Apply", tankbobs.m_vec2(50, 60), nil, st_options_apply, 0.75)
+
+	--[[
 	local fullscreen =
 	{
 		{"No",  st_options_fullscreen},
@@ -64,10 +71,13 @@ function st_options_init()
 
 	gui_widget("active", function () options_key = "config.key.quit" end, renderer_font.sans, 50, 57.5, renderer_size.sans, function () return "Quit   " .. gui_char(c_config_get("config.key.quit")) .. ((options_key == "config.key.quit") and ("-") or ("")) end)
 	gui_widget("active", function () options_key = "config.key.exit" end, renderer_font.sans, 50, 55, renderer_size.sans, function () return "Exit   " .. gui_char(c_config_get("config.key.exit")) .. ((options_key == "config.key.exit") and ("-") or ("")) end)
+	--]]
 end
 
 function st_options_done()
 	gui_finish()
+
+	st_options_renderer = nil
 end
 
 function st_options_click(button, pressed, x, y)
@@ -92,24 +102,38 @@ function st_options_button(button, pressed)
 		if button == c_config_get("config.key.exit") then
 			c_state_new(exit_state)
 		elseif button == 0x1B or button == c_config_get("config.key.quit") then
-			st_options_back()
+			c_state_advance()
 		end
 		gui_button(button)
 	end
 end
 
 function st_options_mouse(x, y, xrel, yrel)
-	gui_mouse(x, y)
+	gui_mouse(x, y, xrel, yrel)
 end
 
 function st_options_step(d)
-	gui_paint()
+	gui_paint(d)
 end
 
-function st_options_back()
-	c_config_restore("config.renderer", options_video)
-	options_video = nil
-	c_state_advance()
+function st_options_apply(widget)
+	c_config_set("config.renderer.fullscreen", st_options_renderer.fullscreen)
+	c_config_set("config.renderer.width", st_options_renderer.width)
+	c_config_set("config.renderer.height", st_options_renderer.height)
+	renderer_updateWindow()  -- in case SDL forgets to send a resize signal
+	tankbobs.r_newWindow(c_config_get("config.renderer.width"), c_config_get("config.renderer.height"), c_config_get("config.renderer.fullscreen"), c_const_get("title"), c_const_get("icon"))
+end
+
+function st_options_fullscreen(widget, option, key)
+	if option == "Yes" then
+		st_options_renderer.fullscreen = true
+	elseif option == "No" then
+		st_options_renderer.fullscreen = false
+	end
+end
+
+function st_options_width(widget, etc)
+	st_options_renderer = {fullscreen = c_config_get("config.renderer.fullscreen"), width = c_config_get("config.renderer.width"), height = c_config_get("config.renderer.height")}
 end
 
 function st_options_fullscreen(v)
@@ -137,12 +161,6 @@ function st_options_resolution(v)
 		c_config_set("config.renderer.width", 1024)
 		c_config_set("config.renderer.height", 1024)
 	end
-end
-
-function st_options_apply()
-	options_video = c_config_backup("config.renderer")
-	renderer_updateWindow()  -- in case SDL forgets to send a resize signal
-	tankbobs.r_newWindow(c_config_get("config.renderer.width"), c_config_get("config.renderer.height"), not not (c_config_get("config.renderer.fullscreen") and c_config_get("config.renderer.fullscreen") > 0), c_const_get("title"), c_const_get("icon"))
 end
 
 options_state =

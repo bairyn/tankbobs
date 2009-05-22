@@ -28,6 +28,8 @@ function gui_init()
 
 	c_const_set("widget_length", 16, 1)
 
+	c_const_set("label_prefix", "", 1)
+	c_const_set("label_suffix", "", 1)
 	c_const_set("label_r", 0.8, 1)
 	c_const_set("label_g", 0.5, 1)
 	c_const_set("label_b", 0.1, 1)
@@ -35,17 +37,31 @@ function gui_init()
 	c_const_set("label_scalex", 2 / 15, 1)
 	c_const_set("label_scaley", 3 / 15, 1)
 
+	c_const_set("action_prefix", "", 1)
+	c_const_set("action_suffix", "", 1)
 	c_const_set("action_r", 0.92, 1)
 	c_const_set("action_g", 0.94, 1)
 	c_const_set("action_b", 0.98, 1)
 	c_const_set("action_a", 1.0, 1)
 	c_const_set("action_scalex", 2 / 25, 1)
 	c_const_set("action_scaley", 3 / 25, 1)
-
 	c_const_set("actionSelected_r", 0.6, 1)
 	c_const_set("actionSelected_g", 0.4, 1)
 	c_const_set("actionSelected_b", 0.2, 1)
 	c_const_set("actionSelected_a", 1.0, 1)
+
+	c_const_set("cycle_prefix", "[", 1)
+	c_const_set("cycle_suffix", "]", 1)
+	c_const_set("cycle_r", 0.92, 1)
+	c_const_set("cycle_g", 0.94, 1)
+	c_const_set("cycle_b", 0.98, 1)
+	c_const_set("cycle_a", 1.0, 1)
+	c_const_set("cycle_scalex", 2 / 25, 1)
+	c_const_set("cycle_scaley", 3 / 25, 1)
+	c_const_set("cycleSelected_r", 0.2, 1)
+	c_const_set("cycleSelected_g", 0.6, 1)
+	c_const_set("cycleSelected_b", 0.4, 1)
+	c_const_set("cycleSelected_a", 1.0, 1)
 
 	c_const_set("select_init", 0.25, 1)
 	c_const_set("select_drop", 1.0, 1)
@@ -61,11 +77,15 @@ gui_widget =
 
 	init = function (o)
 		o.p = tankbobs.m_vec2()
+		o.scale = 1
 	end,
 
 	p = nil,
 	text = "",
 	updateText = nil,
+	scale = 0,
+	color = {},
+	altColor = {},
 
 	bump = nil
 }
@@ -76,6 +96,11 @@ gui_wlabel =
 
 	init = function (o)
 		o.p = tankbobs.m_vec2()
+		o.scale = 1
+		o.color.r = c_const_get("label_r") o.altColor.r = c_const_get("label_r")
+		o.color.g = c_const_get("label_g") o.altColor.g = c_const_get("label_g")
+		o.color.b = c_const_get("label_b") o.altColor.b = c_const_get("label_b")
+		o.color.a = c_const_get("label_a") o.altColor.a = c_const_get("label_a")
 	end
 }
 
@@ -86,10 +111,35 @@ gui_waction =
 	init = function (o)
 		o.p = tankbobs.m_vec2()
 		o.r = tankbobs.m_vec2()
+		o.scale = 1
+		o.color.r = c_const_get("action_r") o.altColor.r = c_const_get("actionSelected_r")
+		o.color.g = c_const_get("action_g") o.altColor.g = c_const_get("actionSelected_g")
+		o.color.b = c_const_get("action_b") o.altColor.b = c_const_get("actionSelected_b")
+		o.color.a = c_const_get("action_a") o.altColor.a = c_const_get("actionSelected_a")
 	end,
 
 	actionCallback = nil,
 	r = nil  -- position of upper-right coordinates
+}
+
+gui_wcycle =
+{
+	new = common_new,
+
+	init = function (o)
+		o.p = tankbobs.m_vec2()
+		o.r = tankbobs.m_vec2()
+		o.scale = 1
+		o.color.r = c_const_get("cycle_r") o.altColor.r = c_const_get("cycleSelected_r")
+		o.color.g = c_const_get("cycle_g") o.altColor.g = c_const_get("cycleSelected_g")
+		o.color.b = c_const_get("cycle_b") o.altColor.b = c_const_get("cycleSelected_b")
+		o.color.a = c_const_get("cycle_a") o.altColor.a = c_const_get("cycleSelected_a")
+	end,
+
+	r = nil,
+	cycleCallBack = nil,
+	list = {},
+	current = 0
 }
 
 local length = 0
@@ -101,19 +151,24 @@ function gui_finish()
 	gui_widgets = {labels = {}, actions = {}, cycles = {}, selection = 1, selectionType = {}}
 end
 
-function gui_label(text, p, updateTextCallBack)
+function gui_label(text, p, updateTextCallBack, scale, color_r, color_g, color_b, color_a, altColor_r, altColor_g, altColor_b, altColor_a)
 	local label = gui_wlabel:new(gui_widget)
 
 	label.p(p)
 	label.text = text
 	label.updateTextCallBack = updateTextCallBack
+	label.scale = scale or 1
+	label.color.r = color_r or label.color.r label.altColor.r = altColor_r or label.altColor.r
+	label.color.g = color_g or label.color.g label.altColor.g = altColor_g or label.altColor.g
+	label.color.b = color_b or label.color.b label.altColor.b = altColor_b or label.altColor.b
+	label.color.a = color_a or label.color.a label.altColor.a = altColor_a or label.altColor.a
 
 	table.insert(gui_widgets.labels, label)
 
 	return label
 end
 
-function gui_action(text, p, updateTextCallBack, actionCallBack)
+function gui_action(text, p, updateTextCallBack, actionCallBack, scale, color_r, color_g, color_b, color_a, altColor_r, altColor_g, altColor_b, altColor_a)
 	local action = gui_waction:new(gui_widget)
 
 	action.p(p)
@@ -121,10 +176,36 @@ function gui_action(text, p, updateTextCallBack, actionCallBack)
 	action.text = text
 	action.updateTextCallBack = updateTextCallBack
 	action.actionCallBack = actionCallBack
+	action.scale = scale or 1
+	action.color.r = color_r or action.color.r action.altColor.r = altColor_r or action.altColor.r
+	action.color.g = color_g or action.color.g action.altColor.g = altColor_g or action.altColor.g
+	action.color.b = color_b or action.color.b action.altColor.b = altColor_b or action.altColor.b
+	action.color.a = color_a or action.color.a action.altColor.a = altColor_a or action.altColor.a
 
 	table.insert(gui_widgets.actions, action)
 
 	return action
+end
+
+function gui_cycle(text, p, updateTextCallBack, cycleCallBack, list, default, scale, color_r, color_g, color_b, color_a, altColor_r, altColor_g, altColor_b, altColor_a)
+	local cycle = gui_wcycle:new(gui_widget)
+
+	cycle.p(p)
+	cycle.r(p)
+	cycle.text = text
+	cycle.updateTextCallBack = updateTextCallBack
+	cycle.cycleCallBack = cycleCallBack
+	cycle.list = list
+	cycle.current = default
+	cycle.scale = scale or 1
+	cycle.color.r = color_r or cycle.color.r cycle.altColor.r = altColor_r or cycle.altColor.r
+	cycle.color.g = color_g or cycle.color.g cycle.altColor.g = altColor_g or cycle.altColor.g
+	cycle.color.b = color_b or cycle.color.b cycle.altColor.b = altColor_b or cycle.altColor.b
+	cycle.color.a = color_a or cycle.color.a cycle.altColor.a = altColor_a or cycle.altColor.a
+
+	table.insert(gui_widgets.cycles, cycle)
+
+	return cycle
 end
 
 local function gui_private_text(text)
@@ -145,8 +226,11 @@ function gui_paint(d)
 			v:updateTextCallBack(d)
 		end
 
-		v.text = gui_private_text(v.text)
-		tankbobs.r_drawString(v.text, v.p, c_const_get("label_r"), c_const_get("label_g"), c_const_get("label_b"), c_const_get("label_a"), gui_private_scale(c_const_get("label_scalex")), gui_private_scale(c_const_get("label_scaley")), false)
+		local scalex = c_const_get("label_scalex") * v.scale
+		local scaley = c_const_get("label_scaley") * v.scale
+
+		local text = gui_private_text(c_const_get("label_prefix") .. v.text .. c_const_get("label_suffix"))
+		tankbobs.r_drawString(text, v.p, v.color.r, v.color.g, v.color.b, v.color.a, gui_private_scale(scalex), gui_private_scale(scaley), false)
 	end
 
 	for k, v in pairs(gui_widgets.actions) do
@@ -154,8 +238,8 @@ function gui_paint(d)
 			v:updateTextCallBack(d)
 		end
 
-		local scalex = c_const_get("action_scalex")
-		local scaley = c_const_get("action_scaley")
+		local scalex = c_const_get("action_scalex") * v.scale
+		local scaley = c_const_get("action_scaley") * v.scale
 
 		if v.bump then
 			v.bump = v.bump - d * c_const_get("select_drop")
@@ -167,11 +251,37 @@ function gui_paint(d)
 			end
 		end
 
-		v.text = gui_private_text(v.text)
+		local text = gui_private_text(c_const_get("action_prefix") .. v.text .. c_const_get("action_suffix"))
 		if v == gui_widgets.selectionType[gui_widgets.selection] then
-			v.r = tankbobs.r_drawString(v.text, v.p, c_const_get("actionSelected_r"), c_const_get("actionSelected_g"), c_const_get("actionSelected_b"), c_const_get("actionSelected_a"), gui_private_scale(scalex), gui_private_scale(scaley), false)
+			v.r = tankbobs.r_drawString(text, v.p, v.altColor.r, v.altColor.g, v.altColor.b, v.altColor.a, gui_private_scale(scalex), gui_private_scale(scaley), false)
 		else
-			v.r = tankbobs.r_drawString(v.text, v.p, c_const_get("action_r"), c_const_get("action_g"), c_const_get("action_b"), c_const_get("action_a"), gui_private_scale(scalex), gui_private_scale(scaley), false)
+			v.r = tankbobs.r_drawString(text, v.p, v.color.r, v.color.g, v.color.b, v.color.a, gui_private_scale(scalex), gui_private_scale(scaley), false)
+		end
+	end
+
+	for k, v in pairs(gui_widgets.cycles) do
+		if v.updateTextCallBack then
+			v:updateTextCallBack(d)
+		end
+
+		local scalex = c_const_get("cycle_scalex") * v.scale
+		local scaley = c_const_get("cycle_scaley") * v.scale
+
+		if v.bump then
+			v.bump = v.bump - d * c_const_get("select_drop")
+			if v.bump <= 0 then
+				v.bump = nil
+			else
+				scalex = scalex * (1 + v.bump)
+				scaley = scaley * (1 + v.bump)
+			end
+		end
+
+		local text = gui_private_text(c_const_get("cycle_prefix") .. v.list[v.current] .. c_const_get("cycle_suffix"))
+		if v == gui_widgets.selectionType[gui_widgets.selection] then
+			v.r = tankbobs.r_drawString(text, v.p, v.altColor.r, v.altColor.g, v.altColor.b, v.altColor.a, gui_private_scale(scalex), gui_private_scale(scaley), false)
+		else
+			v.r = tankbobs.r_drawString(text, v.p, v.color.r, v.color.g, v.color.b, v.color.a, gui_private_scale(scalex), gui_private_scale(scaley), false)
 		end
 	end
 end
@@ -198,8 +308,17 @@ function gui_click(x, y)
 
 	for k, v in pairs(gui_widgets.cycles) do
 		if x >= v.p.x and x <= v.r.x and y >= v.p.y and y <= v.r.y then
-			if v.actionCallBack then
-				v:actionCallBack(x, y)
+			-- cycle through
+			if v.list[v.current + 1] then
+				v.current = v.current + 1
+				if v.cycleCallBack then
+					v:cycleCallBack(v, v.list[v.current], v.current)
+				end
+			else
+				v.current = 1
+				if v.cycleCallBack then
+					v:cycleCallBack(v, v.list[v.current], v.current)
+				end
 			end
 
 			return
@@ -233,10 +352,23 @@ function gui_button(button)
 	-- widgets are added in an decending order
 	if button == 0x0D or button == c_config_get("config.key.select") then  -- enter
 		if gui_widgets.selectionType and gui_widgets.selectionType[gui_widgets.selection] then
-			local widget = gui_widgets.selectionType[gui_widgets.selection]
-
-			if widget.actionCallBack then
-				widget:actionCallBack(button)
+		end
+		if selected and gui_widgets.selectionType == gui_widgets.actions then
+			if selected.actionCallBack then
+				selected:actionCallBack(button)
+			end
+		elseif selected and gui_widgets.selectionType == gui_widgets.cycles then
+			-- cycle through
+			if selected.list[selected.current + 1] then
+				selected.current = selected.current + 1
+				if selected.cycleCallBack then
+					selected:cycleCallBack(selected, selected.list[selected.current], selected.current)
+				end
+			else
+				selected.current = 1
+				if selected.cycleCallBack then
+					selected:cycleCallBack(v, selected.list[selected.current], selected.current)
+				end
 			end
 		end
 	elseif button == 273 or button == c_config_get("config.key.up") then  -- up
@@ -275,8 +407,6 @@ function gui_button(button)
 		if selection and selectionType then
 			gui_private_selected(selection, selectionType)
 		end
-
-		return
 	elseif button == 274 or button == c_config_get("config.key.down") then  -- down
 		if not selected then
 			gui_private_selected(1, gui_widgets.actions)
@@ -313,10 +443,24 @@ function gui_button(button)
 		if selection and selectionType then
 			gui_private_selected(selection, selectionType)
 		end
-
-		return
 	elseif button == 276 or button == c_config_get("config.key.left") then  -- left
+		if selected and gui_widgets.selectionType == gui_widgets.cycles then
+			if selected.list[selected.current - 1] then
+				selected.current = selected.current - 1
+				if selected.cycleCallBack then
+					selected:cycleCallBack(selected.list[selected.current], selected.current)
+				end
+			end
+		end
 	elseif button == 275 or button == c_config_get("config.key.right") then  -- right
+		if selected and gui_widgets.selectionType == gui_widgets.cycles then
+			if selected.list[selected.current + 1] then
+				selected.current = selected.current + 1
+				if selected.cycleCallBack then
+					selected:cycleCallBack(selected.list[selected.current], selected.current)
+				end
+			end
+		end
 	end
 end
 
