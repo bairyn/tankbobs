@@ -559,7 +559,7 @@ int r_drawString(lua_State *L)
 	{
 		for(i = 0; i < FONTCACHES; i++)
 		{
-			if(!fc->prioritized && (!oldestTime || r_fontCaches[i].lastUsedTime < oldestTime))
+			if(!r_fontCaches[i].prioritized && (!oldestTime || r_fontCaches[i].lastUsedTime < oldestTime))
 			{
 				fc = &r_fontCaches[i];
 

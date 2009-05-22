@@ -184,6 +184,8 @@ function c_data_init()
 	c_const_set("keyLayout_default", layout_qwerty, 1)
 	c_const_set("keyLayout_qwerty", layout_qwerty, 1)
 	c_const_set("keyLayout_dvorak", layout_dvorak, 1)
+
+	c_const_set("max_nameLength", 32, 1)
 end
 
 function c_data_done()

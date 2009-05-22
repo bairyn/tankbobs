@@ -25,11 +25,24 @@ configuration screen
 
 function st_options_init()
 	st_options_renderer = {fullscreen = c_config_get("config.renderer.fullscreen"), width = c_config_get("config.renderer.width"), height = c_config_get("config.renderer.height")}
+	st_options_player = {}
 
 	gui_action("Back", tankbobs.m_vec2(25, 75), nil, c_state_advance)
 
-	gui_label("Fullscreen", tankbobs.m_vec2(50, 65), nil, 0.5) gui_cycle("Fullscreen", tankbobs.m_vec2(70, 65), nil, st_options_fullscreen, {"No", "Yes"}, c_config_get("config.renderer.fullscreen") and 2 or 1, 0.75)
-	gui_action("Apply", tankbobs.m_vec2(50, 60), nil, st_options_apply, 0.75)
+	gui_label("Fullscreen", tankbobs.m_vec2(50, 65), nil, 0.5) gui_cycle("Fullscreen", tankbobs.m_vec2(75, 65), nil, st_options_fullscreen, {"No", "Yes"}, c_config_get("config.renderer.fullscreen") and 2 or 1, 0.75)
+	gui_label("Width", tankbobs.m_vec2(50, 60), nil, 0.5) gui_input(tostring(c_config_get("config.renderer.width")), tankbobs.m_vec2(75, 60), nil, st_options_width, true, 4, 0.75)
+	gui_label("Height", tankbobs.m_vec2(50, 55), nil, 0.5) gui_input(tostring(c_config_get("config.renderer.height")), tankbobs.m_vec2(75, 55), nil, st_options_height, true, 4, 0.75)
+	gui_action("Apply", tankbobs.m_vec2(50, 50), nil, st_options_apply, 0.75)
+
+	gui_label("Players", tankbobs.m_vec2(50, 40), nil, 0.5) gui_input(tostring(tonumber(c_config_get("config.game.players"))), tankbobs.m_vec2(75, 40), nil, st_options_players, true, 2, 0.75)
+
+	gui_label("Set up player", tankbobs.m_vec2(50, 35), nil, 0.5) gui_input("1", tankbobs.m_vec2(75, 35), nil, st_options_configurePlayer, true, 2, 0.75)
+
+	if not (c_config_get("config.game.player1.name", nil, true)) then
+		c_config_set("config.game.player1.name", "Player1")
+	end
+	gui_label("Name", tankbobs.m_vec2(50, 30), nil, 0.5) st_options_player.name = gui_input(c_config_get("config.game.player1.name"), tankbobs.m_vec2(75, 30), nil, st_options_name, false, c_const_get("max_nameLength"), 0.75)
+
 
 	--[[
 	local fullscreen =
@@ -78,7 +91,10 @@ function st_options_done()
 	gui_finish()
 
 	st_options_renderer = nil
+	st_options_player = nil
 end
+
+local currentPlayer = 1
 
 function st_options_click(button, pressed, x, y)
 	if pressed then
@@ -132,8 +148,34 @@ function st_options_fullscreen(widget, option, key)
 	end
 end
 
-function st_options_width(widget, etc)
-	st_options_renderer = {fullscreen = c_config_get("config.renderer.fullscreen"), width = c_config_get("config.renderer.width"), height = c_config_get("config.renderer.height")}
+function st_options_width(widget)
+	st_options_renderer.width = tonumber(widget.text)
+end
+
+function st_options_height(widget)
+	st_options_renderer.height = tonumber(widget.text)
+end
+
+function st_options_players(widget)
+	c_config_set("config.game.players", tonumber(widget.text))
+end
+
+function st_options_configurePlayer(widget)
+	currentPlayer = tonumber(widget.text) or 1
+
+	if not (c_config_get("config.game.player" .. tonumber(currentPlayer) .. ".name", nil, true)) then
+		c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".name", "Player" .. tonumber(currentPlayer))
+	end
+	local name = c_config_get("config.game.player" .. tonumber(currentPlayer) .. ".name")
+	st_options_player.name:setText(#name <= widget.maxLength and name or "Player" .. tonumber(currentPlayer))
+end
+
+function st_options_name(widget)
+	if not (c_config_get("config.game.player" .. tonumber(currentPlayer) .. ".name", nil, true)) then
+		c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".name", "Player" .. tonumber(currentPlayer))
+	end
+
+	c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".name", tostring(widget.text))
 end
 
 function st_options_fullscreen(v)

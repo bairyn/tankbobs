@@ -43,10 +43,11 @@ end
 
 function st_title_button(button, pressed)
 	if pressed then
-		if button == 0x1B or button == c_config_get("config.key.exit") or button == c_config_get("config.key.quit") then
-			c_state_advance()
+		if not gui_button(button) then
+			if button == 0x1B or button == c_config_get("config.key.exit") or button == c_config_get("config.key.quit") then
+				c_state_advance()
+			end
 		end
-		gui_button(button)
 	end
 end
 
