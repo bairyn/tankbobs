@@ -40,7 +40,7 @@
 		</player2>
 	</game>
 
-	These keys might conflict with menu movement:
+	These keys might conflict with menu:
 	0x08: BACKSPACE
 	0x0D: ENTER
 	0x1B: ESCAPE
@@ -54,11 +54,11 @@
 		<down>281</down> 'PGDOWN'
 		<left></left>
 		<right></right>
+		<quit>98</quit> 'b'
 		<exit></exit>
-		<quit>0x71</quit> 'q'
-		<pause>0x70</pause> 'p'
+		<pause>112</pause> 'p'
 		<player1>
-			<firing>306</firing> 'LCTRL'
+			<fire>306</fire> 'LCTRL'
 			<forward>119</forward> 'w'
 			<back>115</back> 's'
 			<left>97</left> 'a'
@@ -66,7 +66,7 @@
 			<special>304</special> 'LSHIFT'
 		</player1>
 		<player2>
-			<firing>305</firing> 'RCTRL'
+			<fire>305</fire> 'RCTRL'
 			<forward>273</forward> 'UP'
 			<back>274</back> 'DOWN'
 			<left>276</left> 'LEFT

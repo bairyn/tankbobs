@@ -21,6 +21,7 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 st_play.lua
 
 main play state
+TODO: add pause
 --]]
 
 function st_play_init()
@@ -318,8 +319,8 @@ function st_play_button(button, pressed)
 	end
 
 	for i = 1, c_config_get("config.game.players") + c_config_get("config.game.computers") do
-		if not (c_config_get("config.key.firing" .. tostring(i) .. ".firing", nil, true)) then
-			c_config_set("config.key.firing" .. tostring(i) .. ".firing", false)
+		if not (c_config_get("config.key.player" .. tostring(i) .. ".fire", nil, true)) then
+			c_config_set("config.key.player" .. tostring(i) .. ".fire", false)
 		end
 		if not (c_config_get("config.key.player" .. tostring(i) .. ".forward", nil, true)) then
 			c_config_set("config.key.player" .. tostring(i) .. ".forward", false)
@@ -337,7 +338,7 @@ function st_play_button(button, pressed)
 			c_config_set("config.key.player" .. tostring(i) .. ".special", false)
 		end
 
-		if button == c_config_get("config.key.player" .. tostring(i) .. ".firing") then
+		if button == c_config_get("config.key.player" .. tostring(i) .. ".fire") then
 			c_world_tanks[i].state.firing = pressed
 		end
 		if button == c_config_get("config.key.player" .. tostring(i) .. ".forward") then

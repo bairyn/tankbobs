@@ -87,7 +87,7 @@ typedef struct r_fontCache_t r_fontCache;
 
 static r_font_t *r_fonts = NULL;
 static r_font_t *r_currentFont = NULL;
-#define FONTCACHES 30
+#define FONTCACHES 128
 static r_fontCache_t r_fontCaches[FONTCACHES];
 
 void r_init(lua_State *L)
