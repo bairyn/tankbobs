@@ -21,7 +21,6 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 c_state.lua
 
 states
-TODO: move this to client
 --]]
 
 --[[
