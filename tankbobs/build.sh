@@ -42,16 +42,20 @@ if [ "$1" == "make" ]; then
 
 	# build lua manually
 	if [ $debug == 0 ]; then
+		echo "luac -s -o ./build/server ${SERVER_SRCS}"
 		if ! luac -s -o ./build/server ${SERVER_SRCS}; then
 			exit 1
 		fi
+		echo "luac -s -o ./build/server ${CLIENT_SRCS}"
 		if ! luac -s -o ./build/client ${CLIENT_SRCS}; then
 			exit 1
 		fi
 	else
+		echo "luac -o ./build/server ${SERVER_SRCS}"
 		if ! luac -o ./build/server ${SERVER_SRCS}; then
 			exit 1
 		fi
+		echo "luac -o ./build/server ${CLIENT_SRCS}"
 		if ! luac -o ./build/client ${CLIENT_SRCS}; then
 			exit 1
 		fi

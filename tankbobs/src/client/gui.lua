@@ -828,9 +828,9 @@ function gui_char(c)
 	elseif c == 0x07 then
 		return "?", "?"
 	elseif c == 0x08 then
-		return "", "Backspace"
+		return "Backspace" "Backspace"
 	elseif c == 0x09 then
-		return "TAB", "Tab"
+		return "Tab", "Tab"
 	elseif c == 0x0A then
 		return "?", "?"
 	elseif c == 0x0B then
@@ -870,7 +870,7 @@ function gui_char(c)
 	elseif c == 0x1A then
 		return "?", "?"
 	elseif c == 0x1B then
-		return "ESC", "Escape"
+		return "Escape", "Escape"
 	elseif c == 0x1C then
 		return "?", "?"
 	elseif c == 0x1D then
@@ -880,69 +880,69 @@ function gui_char(c)
 	elseif c == 0x1F then
 		return "?", "?"
 	elseif c == 0x20 then
-		return "SPACE", "Space"
+		return "Space", "Space"
 	elseif c == 0x21 then
-		return "!", "Exclamation"
+		return "!", "!"
 	elseif c == 0x22 then
-		return "\"", "Double Quotation"
+		return "\"", "\""
 	elseif c == 0x23 then
-		return "#", "Pound"
+		return "#", "#"
 	elseif c == 0x24 then
-		return "$", "Dollar"
+		return "$", "$"
 	elseif c == 0x25 then
-		return "%", "Percentage"
+		return "%", "%"
 	elseif c == 0x26 then
-		return "&", "Ampersand"
+		return "&", "&"
 	elseif c == 0x27 then
-		return "'", "Single Quotation"
+		return "'", "'"
 	elseif c == 0x28 then
-		return "(", "Left Perinthesis"
+		return "(", "("
 	elseif c == 0x29 then
-		return ")", "Right Perinthesis"
+		return ")", ")"
 	elseif c == 0x2A then
-		return "*", "Asterisk"
+		return "*", "*"
 	elseif c == 0x2B then
-		return "+", "Plus"
+		return "+", "+"
 	elseif c == 0x2C then
-		return ",", "Comma"
+		return ",", ","
 	elseif c == 0x2D then
-		return "-", "hyphen"
+		return "-", "-"
 	elseif c == 0x2E then
-		return ".", "period"
+		return ".", "."
 	elseif c == 0x2F then
-		return "/", "slash"
+		return "/", "/"
 	elseif c == 0x30 then
-		return "0", "Zero"
+		return "0", "0"
 	elseif c == 0x31 then
-		return "1", "One"
+		return "1", "1"
 	elseif c == 0x32 then
-		return "2", "Two"
+		return "2", "2"
 	elseif c == 0x33 then
-		return "3", "Three"
+		return "3", "3"
 	elseif c == 0x34 then
-		return "4", "Four"
+		return "4", "4"
 	elseif c == 0x35 then
-		return "5", "Five"
+		return "5", "5"
 	elseif c == 0x36 then
-		return "6", "Six"
+		return "6", "6"
 	elseif c == 0x37 then
-		return "7", "Seven"
+		return "7", "7"
 	elseif c == 0x38 then
-		return "8", "Eight"
+		return "8", "8"
 	elseif c == 0x39 then
-		return "9", "Nine"
+		return "9", "9"
 	elseif c == 0x3A then
-		return ":", "Colon"
+		return ":", ":"
 	elseif c == 0x3B then
-		return ";", "Semicolon"
+		return ";", ";"
 	elseif c == 0x3C then
-		return "<", "Less Than"
+		return "<", "<"
 	elseif c == 0x3D then
-		return "=", "Equal"
+		return "=", "="
 	elseif c == 0x3E then
-		return ">", "Greater Than"
+		return ">", ">"
 	elseif c == 0x3F then
-		return "?", "Question Mark"
+		return "?", "?"
 	elseif c == 0x40 then
 		return "@", "At"
 	elseif c == 0x41 then
@@ -998,17 +998,17 @@ function gui_char(c)
 	elseif c == 0x5A then
 		return "Z", "Z"
 	elseif c == 0x5B then
-		return "[", "Opening Bracket"
+		return "[", "["
 	elseif c == 0x5C then
-		return "\\", "Backslash"
+		return "\\", "\\"
 	elseif c == 0x5D then
-		return "]", "Closing Bracket"
+		return "]", "]"
 	elseif c == 0x5E then
-		return "^", "Carrot"
+		return "^", "^"
 	elseif c == 0x5F then
-		return "_", "Underscore"
+		return "_", "_"
 	elseif c == 0x60 then
-		return "`", "Apostraphe"
+		return "`", "`"
 	elseif c == 0x61 then
 		return "a", "a"
 	elseif c == 0x62 then
@@ -1071,9 +1071,139 @@ function gui_char(c)
 		return "~", "Tilde"
 	elseif c == 0x7F then
 		return "", "Delete"
-	elseif type(c) == "number" and c >= 0x80 then
-		return "KEY", "Key"
+	elseif c == 8 then
+		return "Backspace", "Backspace"
+	elseif c == 9 then
+		return "Tab", "Tab"
+	elseif c == 39 then
+		return "'", "Quote"
+	elseif c == 256 then
+		return "KP_0", "Keypad 0"
+	elseif c == 257 then
+		return "KP_1", "Keypad 1"
+	elseif c == 258 then
+		return "KP_2", "Keypad 2"
+	elseif c == 259 then
+		return "KP_3", "Keypad 3"
+	elseif c == 260 then
+		return "KP_4", "Keypad 4"
+	elseif c == 261 then
+		return "KP_5", "Keypad 5"
+	elseif c == 262 then
+		return "KP_6", "Keypad 6"
+	elseif c == 263 then
+		return "KP_7", "Keypad 7"
+	elseif c == 264 then
+		return "KP_8", "Keypad 8"
+	elseif c == 265 then
+		return "KP_9", "Keypad 9"
+	elseif c == 266 then
+		return "KP .", "Keypad Period"
+	elseif c == 267 then
+		return "KP /", "Keypad Divide"
+	elseif c == 268 then
+		return "KP *", "Keypad Multyply"
+	elseif c == 269 then
+		return "KP -", "Keypad Minus"
+	elseif c == 270 then
+		return "KP +", "Keypad Plus"
+	elseif c == 271 then
+		return "KP_ENTER", "Keypad Enter"
+	elseif c == 272 then
+		return "KP =", "Keypad Equals"
+	elseif c == 273 then
+		return "Up", "Up"
+	elseif c == 274 then
+		return "Down", "Down"
+	elseif c == 275 then
+		return "Left", "Left"
+	elseif c == 276 then
+		return "Insert", "Insert"
+	elseif c == 277 then
+		return "Home", "Home"
+	elseif c == 278 then
+		return "End", "End"
+	elseif c == 279 then
+		return "Page Up", "Page Up"
+	elseif c == 281 then
+		return "Page Down", "Page Down"
+	elseif c == 282 then
+		return "F1", "F1"
+	elseif c == 283 then
+		return "F2", "F2"
+	elseif c == 284 then
+		return "F3", "F3"
+	elseif c == 285 then
+		return "F4", "F4"
+	elseif c == 286 then
+		return "F5", "F5"
+	elseif c == 287 then
+		return "F6", "F6"
+	elseif c == 288 then
+		return "F7", "F7"
+	elseif c == 289 then
+		return "F8", "F8"
+	elseif c == 290 then
+		return "F9", "F9"
+	elseif c == 291 then
+		return "F10", "F10"
+	elseif c == 292 then
+		return "F11", "F11"
+	elseif c == 293 then
+		return "F12", "F12"
+	elseif c == 294 then
+		return "F13", "F13"
+	elseif c == 295 then
+		return "F14", "F14"
+	elseif c == 296 then
+		return "F15", "F15"
+	elseif c == 300 then
+		return "NumLock", "NumLock"
+	elseif c == 301 then
+		return "CapsLock", "CapsLock"
+	elseif c == 302 then
+		return "ScrollLock", "ScrollLock"
+	elseif c == 303 then
+		return "RShift", "Right Shift"
+	elseif c == 304 then
+		return "LShift", "Left Shift"
+	elseif c == 305 then
+		return "RCtrl", "Right Control"
+	elseif c == 306 then
+		return "LCtrl", "Left Control"
+	elseif c == 307 then
+		return "RAlt", "Right Alt"
+	elseif c == 308 then
+		return "LAlt", "Left Alt"
+	elseif c == 309 then
+		return "RMeta", "Right Meta"
+	elseif c == 310 then
+		return "LMeta", "Left Meta"
+	elseif c == 311 then
+		return "RSuper", "Right Super"
+	elseif c == 312 then
+		return "LSuper", "Left Super"
+	elseif c == 313 then
+		return "Mode", "Mode"
+	elseif c == 314 then
+		return "Compose", "Compose"
+	elseif c == 315 then
+		return "Help", "Help"
+	elseif c == 316 then
+		return "Print", "Print"
+	elseif c == 317 then
+		return "SysReq", "System Request"
+	elseif c == 318 then
+		return "Break", "Break"
+	elseif c == 319 then
+		return "Menu", "Menu"
+	elseif c == 320 then
+		return "Power", "Power"
+	elseif c == 321 then
+		return "Euro", "Euro"
+	elseif c == 322 then
+		return "Undo", "Undo"
 	else
-		return "?", "Unbound"
+		return "?", "?"
 	end
 end
