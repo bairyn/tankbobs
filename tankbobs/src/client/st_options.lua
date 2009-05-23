@@ -27,7 +27,7 @@ function st_options_init()
 	st_options_renderer = {fullscreen = c_config_get("config.renderer.fullscreen"), width = c_config_get("config.renderer.width"), height = c_config_get("config.renderer.height")}
 	st_options_player = {}
 
-	gui_action("Back", tankbobs.m_vec2(25, 95), nil, c_state_advance)
+	gui_action("Back", tankbobs.m_vec2(25, 85), nil, c_state_advance)
 
 	gui_label("Fullscreen", tankbobs.m_vec2(50, 85), nil, 0.33) gui_cycle("Fullscreen", tankbobs.m_vec2(75, 85), nil, st_options_fullscreen, {"No", "Yes"}, c_config_get("config.renderer.fullscreen") and 2 or 1, 0.5)
 	gui_label("Width", tankbobs.m_vec2(50, 81), nil, 0.33) gui_input(tostring(c_config_get("config.renderer.width")), tankbobs.m_vec2(75, 81), nil, st_options_width, true, 4, 0.5)

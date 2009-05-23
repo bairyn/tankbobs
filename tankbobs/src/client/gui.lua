@@ -828,7 +828,7 @@ function gui_char(c)
 	elseif c == 0x07 then
 		return "?", "?"
 	elseif c == 0x08 then
-		return "Backspace" "Backspace"
+		return "Backspace", "Backspace"
 	elseif c == 0x09 then
 		return "Tab", "Tab"
 	elseif c == 0x0A then
