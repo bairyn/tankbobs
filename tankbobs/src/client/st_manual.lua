@@ -24,12 +24,11 @@ game rules
 --]]
 
 function st_manual_init()
-	gui_action("Back", tankbobs.m_vec2(25, 75), nil, c_state_advance)
+	gui_addAction(tankbobs.m_vec2(25, 75), "Back", nil, c_state_advance)
 
-	gui_label("Tankbobs", tankbobs.m_vec2(50, 65))
+	gui_addLabel(tankbobs.m_vec2(50, 65), "Tankbobs", nil, 1/3)
 
-	gui_label("Tankbobs is a 2D shooter game.", tankbobs.m_vec2(50, 55))
-	gui_label("Your objective is to get the most kills.", tankbobs.m_vec2(50, 65))
+	gui_addLabel(tankbobs.m_vec2(50, 55), "No manual yet!", nil, 1/3)  -- TODO
 end
 
 function st_manual_done()

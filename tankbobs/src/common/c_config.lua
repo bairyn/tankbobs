@@ -24,8 +24,6 @@ base configuration settings - mods should not need to redefine anything here
 all keys should be strings.  Numbers and other types are untested
 --]]
 
--- TODO: cache
-
 function c_config_init()
 	c_config_init = nil
 
@@ -37,6 +35,9 @@ function c_config_init()
 
 	local cheats_enabled = false
 	local cheats_table = {}  -- keys of cheat-protected keys
+
+	local config_set
+	local config_get
 
 	local function trim(v)
 		local oldV = v
@@ -68,6 +69,9 @@ function c_config_init()
 	end
 
 	local function c_config_init(config, defaults)
+		config_set = c_config_set
+		config_get = c_config_get
+
 		local function parse(data, config)
 			config["r_init"] = true
 
@@ -82,12 +86,12 @@ function c_config_init()
 				if type(v) == "table" then
 					indeces[data["tag"]] = true
 					local conf = {}
-					if c_config_get(data["tag"], config, true) and type(c_config_get(data["tag"], config, true)) == "table" then
-						conf = c_config_get(data["tag"], config)
+					if config_get(data["tag"], config, true) and type(config_get(data["tag"], config, true)) == "table" then
+						conf = config_get(data["tag"], config)
 					end
 					parse(v, conf)
-					if c_config_get(data["tag"], config, true) ~= table then
-						c_config_set(data["tag"], conf, config)
+					if config_get(data["tag"], config, true) ~= table then
+						config_set(data["tag"], conf, config)
 					end
 				elseif tostring(v) then
 					stringdata = stringdata .. tostring(v)
@@ -107,6 +111,7 @@ function c_config_init()
 		--load default configuration
 		do
 			local f, message = io.open(c_const_get("data_conf"), "r")
+
 			if f == nil then
 				error("cannot establish game data directory - " .. message)
 			end
@@ -185,8 +190,8 @@ function c_config_init()
 	end
 
 	local function c_config_keyLayoutGet(key)
-		if c_config_get("config.keyLayout", nil, true) then
-			for _, v in pairs(c_const_get("keyLayout_" .. c_config_get("config.keyLayout"))) do
+		if config_get("config.keyLayout", nil, true) then
+			for _, v in pairs(c_const_get("keyLayout_" .. config_get("config.keyLayout"))) do
 				if key == v.from then
 					return v.to
 				end
@@ -197,8 +202,8 @@ function c_config_init()
 	end
 
 	local function c_config_keyLayoutSet(key)
-		if c_config_get("config.keyLayout", nil, true) then
-			for _, v in pairs(c_const_get("keyLayout_" .. c_config_get("config.keyLayout"))) do
+		if config_get("config.keyLayout", nil, true) then
+			for _, v in pairs(c_const_get("keyLayout_" .. config_get("config.keyLayout"))) do
 				-- reversed
 				if key == v.to then
 					return v.from
@@ -243,7 +248,7 @@ function c_config_init()
 			if type(conf[k:sub(1, pos - 1)]) ~= "table" then
 				conf[k:sub(1, pos - 1)] = {}
 			end
-			c_config_set(k:sub(pos + 1, -1), v, conf[k:sub(1, pos - 1)], kt)
+			config_set(k:sub(pos + 1, -1), v, conf[k:sub(1, pos - 1)], kt)
 		end
 	end
 
@@ -291,7 +296,7 @@ function c_config_init()
 					return v
 				end
 			else
-				return c_config_get(k:sub(pos + 1, -1), conf[k:sub(1, pos - 1)], nilOnError, kt)
+				return config_get(k:sub(pos + 1, -1), conf[k:sub(1, pos - 1)], nilOnError, kt)
 			end
 		end
 	end
@@ -301,8 +306,8 @@ function c_config_init()
 		k = k or config
 		if type(k) == "table" then
 			common_clone(k, res)
-		elseif type(k) == "string" and type(c_config_get(k)) == "table" then
-			common_clone(c_config_get(k), res)
+		elseif type(k) == "string" and type(config_get(k)) == "table" then
+			common_clone(config_get(k), res)
 		else
 			error("config_backup invalid backup key")
 		end
@@ -316,8 +321,8 @@ function c_config_init()
 		end
 		if type(k) == "table" then
 			common_clone(v, k)
-		elseif type(k) == "string" and type(c_config_get(k)) == "table" then
-			common_clone(v, c_config_get(k))
+		elseif type(k) == "string" and type(config_get(k)) == "table" then
+			common_clone(v, config_get(k))
 		else
 			error("config_restore invalid backup key")
 		end

@@ -23,10 +23,14 @@ gui.lua
 Graphical User Interface
 --]]
 
-function gui_init()
-	gui_widgets = {labels = {}, actions = {}, cycles = {}, inputs = {}, keys = {}, selection = 1, selectionType = {}}
+local c_const_get = c_const_get
+local tankbobs = tankbobs
 
-	c_const_set("widget_length", 16, 1)
+function gui_init()
+	c_const_get = _G.c_const_get
+	tankbobs = _G.tankbobs
+
+	c_const_set("widget_length", 1.5, 1)
 
 	c_const_set("label_prefix", "", 1)
 	c_const_set("label_suffix", "", 1)
@@ -85,6 +89,7 @@ function gui_init()
 	c_const_set("key_a", 1.0, 1)
 	c_const_set("key_scalex", 1 / 12, 1)
 	c_const_set("key_scaley", 1 / 12, 1)
+	c_const_set("key_activeSuffix", " ]", 1)
 	c_const_set("keySelected_r", 0.31, 1)
 	c_const_set("keySelected_g", 0.32, 1)
 	c_const_set("keySelected_b", 0.65333333333333333, 1)
@@ -98,121 +103,70 @@ function gui_done()
 	gui_widgets = nil
 end
 
-gui_widget =
+local widgets = {}
+local selected = nil
+
+local LABEL  = {}
+local ACTION = {}
+local CYCLE  = {}
+local INPUT  = {}
+local KEY    = {}
+
+local widget =
 {
 	new = common_new,
 
 	init = function (o)
 		o.p = tankbobs.m_vec2()
-		o.scale = 1
-	end,
-
-	p = nil,
-	text = "",
-	updateText = nil,
-	scale = 0,
-	color = {},
-	altColor = {},
-
-	bump = nil
-}
-
-gui_wlabel =
-{
-	new = common_new,
-
-	init = function (o)
-		o.p = tankbobs.m_vec2()
+		o.upperRightPos = tankbobs.m_vec2()
 		o.scale = 1
 		o.color.r = c_const_get("label_r") o.altColor.r = c_const_get("label_r")
 		o.color.g = c_const_get("label_g") o.altColor.g = c_const_get("label_g")
 		o.color.b = c_const_get("label_b") o.altColor.b = c_const_get("label_b")
 		o.color.a = c_const_get("label_a") o.altColor.a = c_const_get("label_a")
-	end
-}
-
-gui_waction =
-{
-	new = common_new,
-
-	init = function (o)
-		o.p = tankbobs.m_vec2()
-		o.r = tankbobs.m_vec2()
-		o.scale = 1
-		o.color.r = c_const_get("action_r") o.altColor.r = c_const_get("actionSelected_r")
-		o.color.g = c_const_get("action_g") o.altColor.g = c_const_get("actionSelected_g")
-		o.color.b = c_const_get("action_b") o.altColor.b = c_const_get("actionSelected_b")
-		o.color.a = c_const_get("action_a") o.altColor.a = c_const_get("actionSelected_a")
 	end,
 
-	actionCallback = nil,
-	r = nil  -- position of upper-right coordinates
-}
+	p = nil,
+	type = nil,
+	text = "",
+	updateTextCallBack = nil,  -- This function called every frame.  If the function exists and returns a string, the string returned is the string to which the widget will set its text
+	upperRightPos = nil,
 
-gui_wcycle =
-{
-	new = common_new,
+	misc = {},
 
-	init = function (o)
-		o.p = tankbobs.m_vec2()
-		o.r = tankbobs.m_vec2()
-		o.scale = 1
-		o.color.r = c_const_get("cycle_r") o.altColor.r = c_const_get("cycleSelected_r")
-		o.color.g = c_const_get("cycle_g") o.altColor.g = c_const_get("cycleSelected_g")
-		o.color.b = c_const_get("cycle_b") o.altColor.b = c_const_get("cycleSelected_b")
-		o.color.a = c_const_get("cycle_a") o.altColor.a = c_const_get("cycleSelected_a")
-	end,
+	scale = 0,
+	color = {},
+	altColor = {},
 
-	r = nil,
-	cycleCallBack = nil,
-	list = {},
-	integerOnly = false,
-	current = 0
-}
+	bump = nil,
 
-gui_winput =
-{
-	new = common_new,
+	-- labels
 
-	init = function (o)
-		o.p = tankbobs.m_vec2()
-		o.r = tankbobs.m_vec2()
-		o.scale = 1
-		o.color.r = c_const_get("input_r") o.altColor.r = c_const_get("inputSelected_r")
-		o.color.g = c_const_get("input_g") o.altColor.g = c_const_get("inputSelected_g")
-		o.color.b = c_const_get("input_b") o.altColor.b = c_const_get("inputSelected_b")
-		o.color.a = c_const_get("input_a") o.altColor.a = c_const_get("inputSelected_a")
-	end,
+	-- actions
+	actionCallBack = nil,  -- either actionCallBack(currentWidget, mouseX, mouseY) or actionCallBack(currentWidget, keyButton)
 
+	-- cycles
+	cycleCallBack = nil,  -- called with (currentWidget, elementString, elementIndex) when the user changes the current element in a cycle
+	cycleList = {},  -- a table of strings
+	cyclePos = 0,  -- which element of the table is currently selected (by key / index)
+
+	-- inputs
 	setText = function (self, text)
 		text = tostring(text)
 		if #text >= 1 then
 			text = text:sub(1, self.maxLength)
 			self.text = text
+			self.inputText = text
 			self.pos = #text
 		end
 	end,
-
-	r = nil,
-	changeCallBack = nil,
+	inputText = "",
+	textChangedCallBack = nil,
 	maxLength = 0,
-	pos = 0
-}
+	integerOnly = false,
+	textPos = 0,
 
-gui_wkey =
-{
-	new = common_new,
-
-	init = function (o)
-		o.p = tankbobs.m_vec2()
-		o.r = tankbobs.m_vec2()
-		o.scale = 1
-		o.color.r = c_const_get("key_r") o.altColor.r = c_const_get("keySelected_r")
-		o.color.g = c_const_get("key_g") o.altColor.g = c_const_get("keySelected_g")
-		o.color.b = c_const_get("key_b") o.altColor.b = c_const_get("keySelected_b")
-		o.color.a = c_const_get("key_a") o.altColor.a = c_const_get("keySelected_a")
-	end,
-
+	-- keys
 	setKey = function (self, key)
 		self.key = key
 		if key then
@@ -221,156 +175,189 @@ gui_wkey =
 			self.text = ""
 		end
 	end,
+	keyActive = false,  -- whether or not a key press will set the key
+	keyChangeCallBack = nil,
+	button = nil,
 
-	r = nil,
-	changeCallBack = nil,
-	selected = false,
-	key = nil,
+	selectable = false
 }
 
-local length = 0
-local selected = nil
-
 function gui_finish()
-	length = 0
 	selected = nil
-	gui_widgets = {labels = {}, actions = {}, cycles = {}, inputs = {}, keys = {}, selection = 1, selectionType = {}}
+	widgets = {}
 end
 
-function gui_label(text, p, updateTextCallBack, scale, color_r, color_g, color_b, color_a, altColor_r, altColor_g, altColor_b, altColor_a)
-	local label = gui_wlabel:new(gui_widget)
+--[[--
+-- * gui_addWidget returns a handle to the widget (strictly speaking, the widget itself) which can be used with callbacks
+--]]--
+function gui_addLabel(position, text, updateTextCallBack, scale, color_r, color_g, color_b, color_a, altColor_r, altColor_g, altColor_b, altColor_a)
+	local label = widget:new()
 
-	label.p(p)
+	label.type = LABEL
+	label.selectable = false  -- labels aren't selectable
+
+	label.p(position)
+	label.upperRightPos(position)  -- pre-initialize upperRightPos to avoid issues
 	label.text = text
 	label.updateTextCallBack = updateTextCallBack
-	label.scale = scale or 1
-	label.color.r = color_r or label.color.r label.altColor.r = altColor_r or label.altColor.r
-	label.color.g = color_g or label.color.g label.altColor.g = altColor_g or label.altColor.g
-	label.color.b = color_b or label.color.b label.altColor.b = altColor_b or label.altColor.b
-	label.color.a = color_a or label.color.a label.altColor.a = altColor_a or label.altColor.a
+	label.color.r = color_r or c_const_get("label_r") label.altColor.r = altColor_r or c_const_get("label_r")
+	label.color.g = color_g or c_const_get("label_g") label.altColor.g = altColor_g or c_const_get("label_g")
+	label.color.b = color_b or c_const_get("label_b") label.altColor.b = altColor_b or c_const_get("label_b")
+	label.color.a = color_a or c_const_get("label_a") label.altColor.a = altColor_a or c_const_get("label_a")
+	label.scale = scale or label.scale
 
-	table.insert(gui_widgets.labels, label)
+	table.insert(widgets, label)
 
 	return label
 end
 
-function gui_action(text, p, updateTextCallBack, actionCallBack, scale, color_r, color_g, color_b, color_a, altColor_r, altColor_g, altColor_b, altColor_a)
-	local action = gui_waction:new(gui_widget)
+function gui_addAction(position, text, updateTextCallBack, actionCallBack, scale, color_r, color_g, color_b, color_a, altColor_r, altColor_g, altColor_b, altColor_a)
+	local action = widget:new()
 
-	action.p(p)
-	action.r(p)  -- make sure r is initialized before it is added
+	action.type = ACTION
+	action.selectable = true
+
+	action.p(position)
+	action.upperRightPos(position)  -- pre-initialize upperRightPos to avoid issues
 	action.text = text
 	action.updateTextCallBack = updateTextCallBack
 	action.actionCallBack = actionCallBack
-	action.scale = scale or 1
-	action.color.r = color_r or action.color.r action.altColor.r = altColor_r or action.altColor.r
-	action.color.g = color_g or action.color.g action.altColor.g = altColor_g or action.altColor.g
-	action.color.b = color_b or action.color.b action.altColor.b = altColor_b or action.altColor.b
-	action.color.a = color_a or action.color.a action.altColor.a = altColor_a or action.altColor.a
+	action.color.r = color_r or c_const_get("action_r") action.altColor.r = altColor_r or c_const_get("actionSelected_r")
+	action.color.g = color_g or c_const_get("action_g") action.altColor.g = altColor_g or c_const_get("actionSelected_g")
+	action.color.b = color_b or c_const_get("action_b") action.altColor.b = altColor_b or c_const_get("actionSelected_b")
+	action.color.a = color_a or c_const_get("action_a") action.altColor.a = altColor_a or c_const_get("actionSelected_a")
+	action.scale = scale or action.scale
 
-	table.insert(gui_widgets.actions, action)
+	table.insert(widgets, action)
 
 	return action
 end
 
-function gui_cycle(text, p, updateTextCallBack, cycleCallBack, list, default, scale, color_r, color_g, color_b, color_a, altColor_r, altColor_g, altColor_b, altColor_a)
-	local cycle = gui_wcycle:new(gui_widget)
+function gui_addCycle(position, text, updateTextCallBack, cycleCallBack, cycleList, initialCycleIndex, scale, color_r, color_g, color_b, color_a, altColor_r, altColor_g, altColor_b, altColor_a)
+	local cycle = widget:new()
 
-	cycle.p(p)
-	cycle.r(p)
+	cycle.type = CYCLE
+	cycle.selectable = true
+
+	cycle.p(position)
+	cycle.upperRightPos(position)  -- pre-initialize upperRightPos to avoid issues
 	cycle.text = text
 	cycle.updateTextCallBack = updateTextCallBack
 	cycle.cycleCallBack = cycleCallBack
-	cycle.list = list
-	cycle.current = default
-	cycle.scale = scale or 1
-	cycle.color.r = color_r or cycle.color.r cycle.altColor.r = altColor_r or cycle.altColor.r
-	cycle.color.g = color_g or cycle.color.g cycle.altColor.g = altColor_g or cycle.altColor.g
-	cycle.color.b = color_b or cycle.color.b cycle.altColor.b = altColor_b or cycle.altColor.b
-	cycle.color.a = color_a or cycle.color.a cycle.altColor.a = altColor_a or cycle.altColor.a
+	cycle.cycleList = cycleList
+	cycle.cyclePos = initialCycleIndex
+	cycle.color.r = color_r or c_const_get("cycle_r") cycle.altColor.r = altColor_r or c_const_get("cycleSelected_r")
+	cycle.color.g = color_g or c_const_get("cycle_g") cycle.altColor.g = altColor_g or c_const_get("cycleSelected_g")
+	cycle.color.b = color_b or c_const_get("cycle_b") cycle.altColor.b = altColor_b or c_const_get("cycleSelected_b")
+	cycle.color.a = color_a or c_const_get("cycle_a") cycle.altColor.a = altColor_a or c_const_get("cycleSelected_a")
+	cycle.scale = scale or cycle.scale
 
-	table.insert(gui_widgets.cycles, cycle)
+	table.insert(widgets, cycle)
 
 	return cycle
 end
 
-function gui_input(text, p, updateTextCallBack, changeCallBack, integerOnly, maxLength, scale, color_r, color_g, color_b, color_a, altColor_r, altColor_g, altColor_b, altColor_a)
-	local input = gui_winput:new(gui_widget)
+function gui_addInput(position, text, updateTextCallBack, textChangedCallBack, integerOnly, maxLength, scale, color_r, color_g, color_b, color_a, altColor_r, altColor_g, altColor_b, altColor_a)
+	local input = widget:new()
 
-	input.p(p)
-	input.r(p)  -- make sure r is initialized before it is added
+	input.type = INPUT
+	input.selectable = true
+
+	input.p(position)
+	input.upperRightPos(position)  -- pre-initialize upperRightPos to avoid issues
 	input.text = text
-	input.pos = #text
+	input.inputText = text
+	input.textPos = #text
 	input.updateTextCallBack = updateTextCallBack
-	input.changeCallBack = changeCallBack
+	input.textChangedCallBack = textChangedCallBack
 	input.integerOnly = integerOnly
 	input.maxLength = maxLength
-	input.scale = scale or 1
-	input.color.r = color_r or input.color.r input.altColor.r = altColor_r or input.altColor.r
-	input.color.g = color_g or input.color.g input.altColor.g = altColor_g or input.altColor.g
-	input.color.b = color_b or input.color.b input.altColor.b = altColor_b or input.altColor.b
-	input.color.a = color_a or input.color.a input.altColor.a = altColor_a or input.altColor.a
+	input.color.r = color_r or c_const_get("input_r") input.altColor.r = altColor_r or c_const_get("inputSelected_r")
+	input.color.g = color_g or c_const_get("input_g") input.altColor.g = altColor_g or c_const_get("inputSelected_g")
+	input.color.b = color_b or c_const_get("input_b") input.altColor.b = altColor_b or c_const_get("inputSelected_b")
+	input.color.a = color_a or c_const_get("input_a") input.altColor.a = altColor_a or c_const_get("inputSelected_a")
+	input.scale = scale or input.scale
 
-	table.insert(gui_widgets.inputs, input)
+	table.insert(widgets, input)
 
 	return input
 end
 
-function gui_key(text, p, updateTextCallBack, changeCallBack, button, scale, color_r, color_g, color_b, color_a, altColor_r, altColor_g, altColor_b, altColor_a)
-	local key = gui_wkey:new(gui_widget)
+function gui_addKey(position, text, updateTextCallBack, keyChangeCallBack, initialButton, scale, color_r, color_g, color_b, color_a, altColor_r, altColor_g, altColor_b, altColor_a)
+	local key = widget:new()
 
-	key.p(p)
-	key.r(p)  -- make sure r is initialized before it is added
-	key.button = button
-	key.text = gui_char(button)
+	key.type = KEY
+	key.selectable = true
+
+	key.p(position)
+	key.upperRightPos(position)  -- pre-initialize upperRightPos to avoid issues
+	key.text = text
 	key.updateTextCallBack = updateTextCallBack
-	key.changeCallBack = changeCallBack
-	key.scale = scale or 1
-	key.color.r = color_r or key.color.r key.altColor.r = altColor_r or key.altColor.r
-	key.color.g = color_g or key.color.g key.altColor.g = altColor_g or key.altColor.g
-	key.color.b = color_b or key.color.b key.altColor.b = altColor_b or key.altColor.b
-	key.color.a = color_a or key.color.a key.altColor.a = altColor_a or key.altColor.a
+	key.keyChangeCallBack = keyChangeCallBack
+	key.integerOnly = integerOnly
+	key.maxLength = maxLength
+	key.button = initialButton
+	key.color.r = color_r or c_const_get("key_r") key.altColor.r = altColor_r or c_const_get("keySelected_r")
+	key.color.g = color_g or c_const_get("key_g") key.altColor.g = altColor_g or c_const_get("keySelected_g")
+	key.color.b = color_b or c_const_get("key_b") key.altColor.b = altColor_b or c_const_get("keySelected_b")
+	key.color.a = color_a or c_const_get("key_a") key.altColor.a = altColor_a or c_const_get("keySelected_a")
+	key.scale = scale or key.scale
 
-	table.insert(gui_widgets.keys, key)
+	table.insert(widgets, key)
 
 	return key
 end
 
-local function gui_private_text(text)
-	if #text > length then
-		length = #text
-	end
-
-	return text
-end
-
 local function gui_private_scale(scalar)
-	return scalar * length / c_const_get("widget_length")
+	return scalar / c_const_get("widget_length")
 end
 
 function gui_paint(d)
-	for k, v in pairs(gui_widgets.labels) do
-		if v.updateTextCallBack then
-			v:updateTextCallBack(d)
+	for _, v in pairs(widgets) do
+		local scalex, scaley = 1, 1
+		local prefix, suffix = "", ""
+
+		-- type specific stuff
+		local switch = v.type
+		if switch == nil then
+		elseif switch == LABEL then
+			scalex = c_const_get("label_scalex") scaley = c_const_get("label_scaley")
+			prefix = c_const_get("label_prefix") suffix = c_const_get("label_suffix")
+		elseif switch == ACTION then
+			scalex = c_const_get("action_scalex") scaley = c_const_get("action_scaley")
+			prefix = c_const_get("action_prefix") suffix = c_const_get("action_suffix")
+		elseif switch == CYCLE then
+			scalex = c_const_get("cycle_scalex") scaley = c_const_get("cycle_scaley")
+			prefix = c_const_get("cycle_prefix") suffix = c_const_get("cycle_suffix")
+			v.text = v.cycleList[v.cyclePos]
+		elseif switch == INPUT then
+			scalex = c_const_get("input_scalex") scaley = c_const_get("input_scaley")
+			prefix = c_const_get("input_prefix") suffix = c_const_get("input_suffix")
+			v.text = v.inputText:sub(1, v.textPos) .. c_const_get("input_posCharacter") .. v.inputText:sub(v.textPos + 1)
+		elseif switch == KEY then
+			scalex = c_const_get("key_scalex") scaley = c_const_get("key_scaley")
+			prefix = c_const_get("key_prefix") suffix = c_const_get("key_suffix")
+			if v.keyActive then
+				v.text = gui_char(v.button) .. c_const_get("key_activeSuffix")
+			else
+				v.text = gui_char(v.button)
+			end
 		end
 
-		local scalex = c_const_get("label_scalex") * v.scale
-		local scaley = c_const_get("label_scaley") * v.scale
-
-		local text = gui_private_text(c_const_get("label_prefix") .. v.text .. c_const_get("label_suffix"))
-		tankbobs.r_drawString(text, v.p, v.color.r, v.color.g, v.color.b, v.color.a, gui_private_scale(scalex), gui_private_scale(scaley), false)
-	end
-
-	for k, v in pairs(gui_widgets.actions) do
 		if v.updateTextCallBack then
-			v:updateTextCallBack(d)
+			local text = v:updateTextCallBack(d)
+
+			if text and type(text) == "string" then
+				v.text = text
+			end
 		end
 
-		local scalex = c_const_get("action_scalex") * v.scale
-		local scaley = c_const_get("action_scaley") * v.scale
+		scalex = scalex * v.scale
+		scaley = scaley * v.scale
 
 		if v.bump then
 			v.bump = v.bump - d * c_const_get("select_drop")
+
 			if v.bump <= 0 then
 				v.bump = nil
 			else
@@ -379,160 +366,78 @@ function gui_paint(d)
 			end
 		end
 
-		local text = gui_private_text(c_const_get("action_prefix") .. v.text .. c_const_get("action_suffix"))
-		if v == gui_widgets.selectionType[gui_widgets.selection] then
-			v.r = tankbobs.r_drawString(text, v.p, v.altColor.r, v.altColor.g, v.altColor.b, v.altColor.a, gui_private_scale(scalex), gui_private_scale(scaley), false)
+		local text = prefix .. v.text .. suffix
+
+		if v ~= selected then
+			v.upperRightPos = tankbobs.r_drawString(text, v.p, v.color.r, v.color.g, v.color.b, v.color.a, gui_private_scale(scalex), gui_private_scale(scaley), false)
 		else
-			v.r = tankbobs.r_drawString(text, v.p, v.color.r, v.color.g, v.color.b, v.color.a, gui_private_scale(scalex), gui_private_scale(scaley), false)
-		end
-	end
-
-	for k, v in pairs(gui_widgets.cycles) do
-		if v.updateTextCallBack then
-			v:updateTextCallBack(d)
-		end
-
-		local scalex = c_const_get("cycle_scalex") * v.scale
-		local scaley = c_const_get("cycle_scaley") * v.scale
-
-		if v.bump then
-			v.bump = v.bump - d * c_const_get("select_drop")
-			if v.bump <= 0 then
-				v.bump = nil
-			else
-				scalex = scalex * (1 + v.bump)
-				scaley = scaley * (1 + v.bump)
-			end
-		end
-
-		local text = gui_private_text(c_const_get("cycle_prefix") .. v.list[v.current] .. c_const_get("cycle_suffix"))
-		if v == gui_widgets.selectionType[gui_widgets.selection] then
-			v.r = tankbobs.r_drawString(text, v.p, v.altColor.r, v.altColor.g, v.altColor.b, v.altColor.a, gui_private_scale(scalex), gui_private_scale(scaley), false)
-		else
-			v.r = tankbobs.r_drawString(text, v.p, v.color.r, v.color.g, v.color.b, v.color.a, gui_private_scale(scalex), gui_private_scale(scaley), false)
-		end
-	end
-
-	for k, v in pairs(gui_widgets.inputs) do
-		if v.updateTextCallBack then
-			v:updateTextCallBack(d)
-		end
-
-		local scalex = c_const_get("cycle_scalex") * v.scale
-		local scaley = c_const_get("cycle_scaley") * v.scale
-
-		if v.bump then
-			v.bump = v.bump - d * c_const_get("select_drop")
-			if v.bump <= 0 then
-				v.bump = nil
-			else
-				scalex = scalex * (1 + v.bump)
-				scaley = scaley * (1 + v.bump)
-			end
-		end
-
-		local text = gui_private_text(c_const_get("input_prefix") .. v.text:sub(1, v.pos) .. c_const_get("input_posCharacter") .. v.text:sub(v.pos + 1) .. c_const_get("input_suffix"))
-		if v == gui_widgets.selectionType[gui_widgets.selection] then
-			v.r = tankbobs.r_drawString(text, v.p, v.altColor.r, v.altColor.g, v.altColor.b, v.altColor.a, gui_private_scale(scalex), gui_private_scale(scaley), false)
-		else
-			v.r = tankbobs.r_drawString(text, v.p, v.color.r, v.color.g, v.color.b, v.color.a, gui_private_scale(scalex), gui_private_scale(scaley), false)
-		end
-	end
-
-	for k, v in pairs(gui_widgets.keys) do
-		if v.updateTextCallBack then
-			v:updateTextCallBack(d)
-		end
-
-		local scalex = c_const_get("key_scalex") * v.scale
-		local scaley = c_const_get("key_scaley") * v.scale
-
-		if v.bump then
-			v.bump = v.bump - d * c_const_get("select_drop")
-			if v.bump <= 0 then
-				v.bump = nil
-			else
-				scalex = scalex * (1 + v.bump)
-				scaley = scaley * (1 + v.bump)
-			end
-		end
-
-		local text = c_const_get("key_prefix") .. v.text .. c_const_get("key_suffix")
-		if v.selected then
-			text = text .. " ]"
-		end
-		text = gui_private_text(text)
-		if v == gui_widgets.selectionType[gui_widgets.selection] then
-			v.r = tankbobs.r_drawString(text, v.p, v.altColor.r, v.altColor.g, v.altColor.b, v.altColor.a, gui_private_scale(scalex), gui_private_scale(scaley), false)
-		else
-			v.r = tankbobs.r_drawString(text, v.p, v.color.r, v.color.g, v.color.b, v.color.a, gui_private_scale(scalex), gui_private_scale(scaley), false)
+			-- draw with altColor
+			v.upperRightPos = tankbobs.r_drawString(text, v.p, v.altColor.r, v.altColor.g, v.altColor.b, v.altColor.a, gui_private_scale(scalex), gui_private_scale(scaley), false)
 		end
 	end
 end
 
-local function gui_private_selected(selection, selectionType)
-	gui_widgets.selection = selection or gui_widgets.selection
-	gui_widgets.selectionType = selectionType or gui_widgets.selectionType
-
-	selected = gui_widgets.selectionType[gui_widgets.selection]
+local function gui_private_selected(selection)
+	selected = selection
 
 	selected.bump = c_const_get("select_init")
 end
 
+-- returns true when the pressed key should not be handled further than the input widget
 local function gui_private_inputKey(button)
 	if button == 276 or button == c_config_get("config.key.left") then  -- left
-		if selected.pos > 0 then
-			selected.pos = selected.pos - 1
+		if selected.textPos > 0 then
+			selected.textPos = selected.textPos - 1
 		end
 
 		return true
 	elseif button == 275 or button == c_config_get("config.key.right") then  -- right
-		if selected.pos < #selected.text then
-			selected.pos = selected.pos + 1
+		if selected.textPos < #selected.inputText then
+			selected.textPos = selected.textPos + 1
 		end
 
 		return true
 	elseif button == 8 then  -- backspace
-		if selected.pos >= 0 then
-			selected.text = selected.text:sub(1, selected.pos - 1) .. selected.text:sub(selected.pos + 1, -1)
-			selected.pos = selected.pos - 1
+		if selected.textPos >= 0 then
+			selected.inputText = selected.inputText:sub(1, selected.textPos - 1) .. selected.inputText:sub(selected.textPos + 1, -1)
+			selected.textPos = selected.textPos - 1
 
 			if selected.changeCallBack then
-				selected:changeCallBack()
+				selected:changeCallBack(selected.inputText)
 			end
 		end
 
 		return true
 	elseif button == 127 then  -- delete
-		if selected.pos < #selected.text then
-			selected.text = selected.text:sub(1, selected.pos) .. selected.text:sub(selected.pos + 2, -1)
+		if selected.textPos < #selected.inputText then
+			selected.inputText = selected.inputText:sub(1, selected.textPos) .. selected.inputText:sub(selected.textPos + 2, -1)
 
 			if selected.changeCallBack then
-				selected:changeCallBack()
+				selected:changeCallBack(selected.inputText)
 			end
 		end
 
 		return true
 	elseif button == 278 then  -- home
-		selected.pos = 0
+		selected.textPos = 0
 
 		return true
 	elseif button == 279 then  -- end
-		selected.pos = #selected.text
+		selected.textPos = #selected.inputText
 
 		return true
 	elseif button >= 32 and button < 127 then
-		if (#selected.text < selected.maxLength) and (not selected.integerOnly or (button >= string.byte('0') and button <= string.byte('9'))) then
+		if (#selected.inputText < selected.maxLength) and (not selected.integerOnly or (button >= string.byte('0') and button <= string.byte('9'))) then
 			local add = string.char(button)
 
 			if shift then
 				add = add:upper()
 			end
-			selected.text = selected.text:sub(1, selected.pos) .. add .. selected.text:sub(selected.pos + 1, -1)
-			selected.pos = selected.pos + 1
+			selected.inputText = selected.inputText:sub(1, selected.textPos) .. add .. selected.inputText:sub(selected.textPos + 1, -1)
+			selected.textPos = selected.textPos + 1
 
 			if selected.changeCallBack then
-				selected:changeCallBack()
+				selected:changeCallBack(selected.inputText)
 			end
 		end
 
@@ -545,79 +450,46 @@ local function gui_private_inputKey(button)
 end
 
 function gui_click(x, y)
-	for k, v in pairs(gui_widgets.actions) do
-		if x >= v.p.x and x <= v.r.x and y >= v.p.y and y <= v.r.y then
-			if v.actionCallBack then
-				v:actionCallBack(x, y)
+	for _, v in pairs(widgets) do
+		if x >= v.p.x and x <= v.upperRightPos.x and y >= v.p.y and y <= v.upperRightPos.y then
+			local switch = v.type
+			if switch == nil then
+			elseif switch == LABEL then
+			elseif switch == ACTION then
+				if v.actionCallBack then
+					v:actionCallBack(x, y)
+				end
+			elseif switch == CYCLE then
+				if v.cycleList[v.cyclePos + 1] then
+					-- cycle through
+					v.cyclePos = v.cyclePos + 1
+
+					if v.cycleCallBack then
+						v:cycleCallBack(v.cycleList[v.cyclePos], v.cyclePos)
+					end
+				else
+					-- back to beginning
+					v.cyclePos = 1
+
+					if v.cycleCallBack then
+						v:cycleCallBack(v.cycleList[v.cyclePos], v.cyclePos)
+					end
+				end
+			elseif switch == INPUT then
+			elseif switch == KEY then
+				v.keyActive = true
 			end
 
-			return
-		end
-	end
-
-	for k, v in pairs(gui_widgets.cycles) do
-		if x >= v.p.x and x <= v.r.x and y >= v.p.y and y <= v.r.y then
-			-- cycle through
-			if v.list[v.current + 1] then
-				v.current = v.current + 1
-				if v.cycleCallBack then
-					v:cycleCallBack(v, v.list[v.current], v.current)
-				end
-			else
-				v.current = 1
-				if v.cycleCallBack then
-					v:cycleCallBack(v, v.list[v.current], v.current)
-				end
-			end
-
-			return
-		end
-	end
-
-	for k, v in pairs(gui_widgets.keys) do
-		if x >= v.p.x and x <= v.r.x and y >= v.p.y and y <= v.r.y then
-			v.selected = true
-
-			return
+			return  -- save work by returning
 		end
 	end
 end
 
 function gui_mouse(x, y, xrel, yrel)
-	for k, v in pairs(gui_widgets.actions) do
-		if x >= v.p.x and x <= v.r.x and y >= v.p.y and y <= v.r.y then
-			if v ~= selected then
-				gui_private_selected(k, gui_widgets.actions)
-
-				return
-			end
-		end
-	end
-
-	for k, v in pairs(gui_widgets.cycles) do
-		if x >= v.p.x and x <= v.r.x and y >= v.p.y and y <= v.r.y then
-			if v ~= selected then
-				gui_private_selected(k, gui_widgets.cycles)
-
-				return
-			end
-		end
-	end
-
-	for k, v in pairs(gui_widgets.inputs) do
-		if x >= v.p.x and x <= v.r.x and y >= v.p.y and y <= v.r.y then
-			if v ~= selected then
-				gui_private_selected(k, gui_widgets.inputs)
-
-				return
-			end
-		end
-	end
-
-	for k, v in pairs(gui_widgets.keys) do
-		if x >= v.p.x and x <= v.r.x and y >= v.p.y and y <= v.r.y then
-			if v ~= selected then
-				gui_private_selected(k, gui_widgets.keys)
+	for _, v in pairs(widgets) do
+		if v.selectable and v ~= selected then
+			if x >= v.p.x and x <= v.upperRightPos.x and y >= v.p.y and y <= v.upperRightPos.y then
+				gui_private_selected(v)
 
 				return
 			end
@@ -626,187 +498,229 @@ function gui_mouse(x, y, xrel, yrel)
 end
 
 function gui_button(button)
-	if button == 0x0D or button == c_config_get("config.key.select") then  -- enter
-		if selected and gui_widgets.selectionType == gui_widgets.actions then
-			if selected.actionCallBack then
-				selected:actionCallBack(button)
-			end
-		elseif selected and gui_widgets.selectionType == gui_widgets.cycles then
-			-- cycle through
-			if selected.list[selected.current + 1] then
-				selected.current = selected.current + 1
-				if selected.cycleCallBack then
-					selected:cycleCallBack(selected, selected.list[selected.current], selected.current)
-				end
-			else
-				selected.current = 1
-				if selected.cycleCallBack then
-					selected:cycleCallBack(v, selected.list[selected.current], selected.current)
-				end
-			end
-		elseif selected and gui_widgets.selectionType == gui_widgets.keys then
-			-- select
-			selected.selected = true
-		end
-	elseif selected and gui_widgets.selectionType == gui_widgets.keys and selected.selected then
-		selected.selected = false
-
-		if button == 8 then  -- backspace
-			selected.key = nil
-			selected.text = ""
-			if selected.changeCallBack then
-				selected:changeCallBack(selected)
-			end
-		elseif button == 28 then  -- escape
+	if selected and selected.type == KEY and selected.keyActive then
+		selected.keyActive = false
+		if button == 8 then
+			-- BACKSPACE
+			selected.button = nil
+		elseif button == 27 then
+			-- ESPACE
 		else
-			selected.key = button
-			selected.text = gui_char(button)
-			if selected.changeCallBack then
-				selected:changeCallBack(selected)
+			selected.button = button
+		end
+	elseif button == 0x0D or button == c_config_get("config.key.select") then
+		-- ENTER
+
+		if selected then
+			local switch = selected.type
+			if switch == nil then
+			elseif switch == LABEL then
+			elseif switch == ACTION then
+				if selected.actionCallBack then
+					selected:actionCallBack(button)
+				end
+			elseif switch == CYCLE then
+				-- same as clicking
+				if selected.cycleList[selected.cyclePos + 1] then
+					-- cycle through
+					selected.cyclePos = selected.cyclePos + 1
+
+					if selected.cycleCallBack then
+						selected:cycleCallBack(selected.cycleList[selected.cyclePos], selected.cyclePos)
+					end
+				else
+					-- back to beginning
+					selected.cyclePos = 1
+
+					if selected.cycleCallBack then
+						selected:cycleCallBack(selected.cycleList[selected.cyclePos], selected.cyclePos)
+					end
+				end
+			elseif switch == INPUT then
+			elseif switch == KEY then
+				selected.keyActive = true
 			end
 		end
 
-		return true
-	elseif button == 273 or button == c_config_get("config.key.up") then  -- up
+	elseif button == 273 or button == c_config_get("config.key.up") then
+		-- UP
+
+		local y, x
+		local selection
+
 		if not selected then
-			gui_private_selected(math.max(1, #gui_widgets.actions), gui_widgets.actions)
+			-- select the bottom-most widget
+
+			for _, v in pairs(widgets) do
+				if v.selectable then
+					if not y or v.p.y <= y then
+						selection = v
+						y, x = v.p.y, v.p.x
+					end
+				end
+			end
+
+			for _, v in pairs(widgets) do
+				if v.selectable then
+					if v.p.y == y and v.p.x > x then
+						selection = v
+						x = v.p.x
+					end
+				end
+			end
+
+			if selection then
+				gui_private_selected(selection)
+			end
+
 			return
 		end
 
-		local y, x = 0, 0
-		local selection, selectionType
+		-- a widget is selected, so select the previous if it exists
 
-		for k, v in pairs(gui_widgets.actions) do
-			if v.p.y == selected.p.y then
-				if v.p.x < selected.p.x and v.p.x > x then
-					selection, selectionType = k, gui_widgets.actions
+		for _, v in pairs(widgets) do
+			if v.selectable and v ~= selected then
+				if v.p.y == selected.p.y and (not x or v.p.x >= x) and v.p.x <= selected.p.x then
+					selection = v
 					y, x = v.p.y, v.p.x
 				end
-			elseif v.p.y > selected.p.y and (v.p.y < y or y == 0) then
-				selection, selectionType = k, gui_widgets.actions
-				y, x = v.p.y, v.p.x
 			end
 		end
 
-		for k, v in pairs(gui_widgets.cycles) do
-			if v.p.y == selected.p.y then
-				if v.p.x < selected.p.x and v.p.x > x then
-					selection, selectionType = k, gui_widgets.cycles
+		for _, v in pairs(widgets) do
+			if v.selectable and v ~= selected then
+				if (not y or v.p.y <= y) and v.p.y > selected.p.y then
+					selection = v
 					y, x = v.p.y, v.p.x
 				end
-			elseif v.p.y > selected.p.y and v.p.y < y then
-				selection, selectionType = k, gui_widgets.cycles
-				y, x = v.p.y, v.p.x
 			end
 		end
 
-		for k, v in pairs(gui_widgets.inputs) do
-			if v.p.y == selected.p.y then
-				if v.p.x < selected.p.x and v.p.x > x then
-					selection, selectionType = k, gui_widgets.inputs
-					y, x = v.p.y, v.p.x
+		for _, v in pairs(widgets) do
+			if v.selectable and v ~= selected then
+				if v.p.y == y and v.p.x > x then
+					selection = v
+					x = v.p.x
 				end
-			elseif v.p.y > selected.p.y and v.p.y < y then
-				selection, selectionType = k, gui_widgets.inputs
-				y, x = v.p.y, v.p.x
 			end
 		end
 
-		for k, v in pairs(gui_widgets.keys) do
-			if v.p.y == selected.p.y then
-				if v.p.x < selected.p.x and v.p.x > x then
-					selection, selectionType = k, gui_widgets.keys
-					y, x = v.p.y, v.p.x
-				end
-			elseif v.p.y > selected.p.y and v.p.y < y then
-				selection, selectionType = k, gui_widgets.keys
-				y, x = v.p.y, v.p.x
-			end
+		if selection then
+			gui_private_selected(selection)
 		end
 
-		if selection and selectionType then
-			gui_private_selected(selection, selectionType)
-		end
-	elseif button == 274 or button == c_config_get("config.key.down") then  -- down
+	elseif button == 274 or button == c_config_get("config.key.down") then
+		-- DOWN
+
+		local y, x
+		local selection
+
 		if not selected then
-			gui_private_selected(1, gui_widgets.actions)
+			-- select upper-most widget
+
+			for _, v in pairs(widgets) do
+				if v.selectable then
+					if not y or v.p.y >= y then
+						selection = v
+						y, x = v.p.y, v.p.x
+					end
+				end
+			end
+
+			for _, v in pairs(widgets) do
+				if v.selectable then
+					if v.p.y == y and v.p.x < x then
+						selection = v
+						x = v.p.x
+					end
+				end
+			end
+
+			if selection then
+				gui_private_selected(selection)
+			end
+
 			return
 		end
 
-		local y, x = 0, 0
-		local selection, selectionType
+		-- a widget is selected, so select the next one if it exists
 
-		for k, v in pairs(gui_widgets.actions) do
-			if v.p.y == selected.p.y then
-				if v.p.x > selected.p.x and (v.p.x < x or x == 0) then
-					selection, selectionType = k, gui_widgets.actions
+		for _, v in pairs(widgets) do
+			if v.selectable and v ~= selected then
+				if v.p.y == selected.p.y and (not x or v.p.x <= x) and v.p.x >= selected.p.x then
+					selection = v
 					y, x = v.p.y, v.p.x
 				end
-			elseif v.p.y < selected.p.y and v.p.y > y then
-				selection, selectionType = k, gui_widgets.actions
-				y, x = v.p.y, v.p.x
 			end
 		end
 
-		for k, v in pairs(gui_widgets.cycles) do
-			if v.p.y == selected.p.y then
-				if v.p.x > selected.p.x and v.p.x < x then
-					selection, selectionType = k, gui_widgets.cycles
+		for _, v in pairs(widgets) do
+			if v.selectable and v ~= selected then
+				if (not y or v.p.y >= y) and v.p.y < selected.p.y then
+					selection = v
 					y, x = v.p.y, v.p.x
 				end
-			elseif v.p.y < selected.p.y and v.p.y > y then
-				selection, selectionType = k, gui_widgets.cycles
-				y, x = v.p.y, v.p.x
 			end
 		end
 
-		for k, v in pairs(gui_widgets.inputs) do
-			if v.p.y == selected.p.y then
-				if v.p.x > selected.p.x and v.p.x < x then
-					selection, selectionType = k, gui_widgets.inputs
-					y, x = v.p.y, v.p.x
+		for _, v in pairs(widgets) do
+			if v.selectable and v ~= selected then
+				if v.p.y == y and v.p.x < x then
+					selection = v
+					x = v.p.x
 				end
-			elseif v.p.y < selected.p.y and v.p.y > y then
-				selection, selectionType = k, gui_widgets.inputs
-				y, x = v.p.y, v.p.x
 			end
 		end
 
-		for k, v in pairs(gui_widgets.keys) do
-			if v.p.y == selected.p.y then
-				if v.p.x > selected.p.x and v.p.x < x then
-					selection, selectionType = k, gui_widgets.keys
-					y, x = v.p.y, v.p.x
-				end
-			elseif v.p.y < selected.p.y and v.p.y > y then
-				selection, selectionType = k, gui_widgets.keys
-				y, x = v.p.y, v.p.x
-			end
+		if selection then
+			gui_private_selected(selection)
 		end
 
-		if selection and selectionType then
-			gui_private_selected(selection, selectionType)
-		end
-	elseif selected and gui_widgets.selectionType == gui_widgets.inputs then
+	elseif selected and selected.type == INPUT then
 		return gui_private_inputKey(button)
-	elseif button == 276 or button == c_config_get("config.key.left") then  -- left
-		if selected and gui_widgets.selectionType == gui_widgets.cycles then
-			if selected.list[selected.current - 1] then
-				selected.current = selected.current - 1
-				if selected.cycleCallBack then
-					selected:cycleCallBack(selected.list[selected.current], selected.current)
+
+	elseif button == 276 or button == c_config_get("config.key.left") then
+		-- LEFT
+
+		if selected then
+			local switch = selected.type
+			if switch == nil then
+			elseif switch == LABEL then
+			elseif switch == ACTION then
+			elseif switch == CYCLE then
+				if selected.cycleList[selected.cyclePos - 1] then
+					selected.cyclePos = selected.cyclePos - 1
+
+					if selected.cycleCallBack then
+						selected:cycleCallBack(selected.cycleList[selected.cyclePos], selected.cyclePos)
+					end
 				end
+			elseif switch == INPUT then
+			elseif switch == KEY then
 			end
 		end
-	elseif button == 275 or button == c_config_get("config.key.right") then  -- right
-		if selected and gui_widgets.selectionType == gui_widgets.cycles then
-			if selected.list[selected.current + 1] then
-				selected.current = selected.current + 1
-				if selected.cycleCallBack then
-					selected:cycleCallBack(selected.list[selected.current], selected.current)
+
+	elseif button == 275 or button == c_config_get("config.key.right") then
+		-- RIGHT
+
+		if selected then
+			local switch = selected.type
+			if switch == nil then
+			elseif switch == LABEL then
+			elseif switch == ACTION then
+			elseif switch == CYCLE then
+				if selected.cycleList[selected.cyclePos + 1] then
+					selected.cyclePos = selected.cyclePos + 1
+
+					if selected.cycleCallBack then
+						selected:cycleCallBack(selected.cycleList[selected.cyclePos], selected.cyclePos)
+					end
 				end
+			elseif switch == INPUT then
+			elseif switch == KEY then
 			end
 		end
+
 	end
 end
 

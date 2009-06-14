@@ -128,7 +128,7 @@ int t_isWindows(lua_State *L)
 {
 	CHECKINIT(init, L);
 
-#if defined (_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__TOS_WINDOWS__) || defined(__WINDOWS__)
+#if defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__TOS_WINDOWS__) || defined(__WINDOWS__)
 	lua_pushboolean(L, true);
 #else
 	lua_pushboolean(L, false);

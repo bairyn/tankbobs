@@ -88,7 +88,7 @@ function common_clone_except_special(i, o, e)
 							common_clone(_G, c_mods_env)
 						else
 							common_clone_except(_G, c_mods_env, c_const_get("hidden_globals"))
-							c_mods_env._G = false
+							--c_mods_env._G = false
 						end
 						setfenv(do_f, c_mods_env)
 
@@ -142,7 +142,7 @@ function c_mods_load(dir)
 		common_clone(_G, c_mods_env)
 	else
 		common_clone_except(_G, c_mods_env, c_const_get("hidden_globals"))
-		c_mods_env._G = false
+		--c_mods_env._G = false
 	end
 
 	for _, v in pairs(mods) do

@@ -27,21 +27,21 @@ function st_options_init()
 	st_options_renderer = {fullscreen = c_config_get("config.renderer.fullscreen"), width = c_config_get("config.renderer.width"), height = c_config_get("config.renderer.height")}
 	st_options_player = {}
 
-	gui_action("Back", tankbobs.m_vec2(25, 85), nil, c_state_advance)
+	gui_addAction(tankbobs.m_vec2(25, 85), "Back", nil, c_state_advance)
 
-	gui_label("Fullscreen", tankbobs.m_vec2(50, 85), nil, 0.33) gui_cycle("Fullscreen", tankbobs.m_vec2(75, 85), nil, st_options_fullscreen, {"No", "Yes"}, c_config_get("config.renderer.fullscreen") and 2 or 1, 0.5)
-	gui_label("Width", tankbobs.m_vec2(50, 81), nil, 0.33) gui_input(tostring(c_config_get("config.renderer.width")), tankbobs.m_vec2(75, 81), nil, st_options_width, true, 4, 0.5)
-	gui_label("Height", tankbobs.m_vec2(50, 77), nil, 0.33) gui_input(tostring(c_config_get("config.renderer.height")), tankbobs.m_vec2(75, 77), nil, st_options_height, true, 4, 0.5)
-	gui_action("Apply", tankbobs.m_vec2(50, 73), nil, st_options_apply, 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 85), "Fullscreen", nil, 0.33) gui_addCycle(tankbobs.m_vec2(75, 85), "Fullscreen", nil, st_options_fullscreen, {"No", "Yes"}, c_config_get("config.renderer.fullscreen") and 2 or 1, 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 81), "Width", nil, 0.33) gui_addInput(tankbobs.m_vec2(75, 81), tostring(c_config_get("config.renderer.width")), nil, st_options_width, true, 4, 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 77), "Height", nil, 0.33) gui_addInput(tankbobs.m_vec2(75, 77), tostring(c_config_get("config.renderer.height")), nil, st_options_height, true, 4, 0.5)
+	gui_addAction(tankbobs.m_vec2(50, 73), "Apply", nil, st_options_apply, 0.5)
 
-	gui_label("Pause", tankbobs.m_vec2(50, 65), nil, 0.33) gui_key(c_config_get("config.key.pause"), tankbobs.m_vec2(75, 65), nil, st_options_pause, c_config_get("config.key.pause"), 0.5)
-	gui_label("Back", tankbobs.m_vec2(50, 61), nil, 0.33) gui_key(c_config_get("config.key.quit"), tankbobs.m_vec2(75, 61), nil, st_options_quit, c_config_get("config.key.quit"), 0.5)
-	gui_label("Quit", tankbobs.m_vec2(50, 57), nil, 0.33) gui_key(c_config_get("config.key.exit"), tankbobs.m_vec2(75, 57), nil, st_options_exit, c_config_get("config.key.exit"), 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 65), "Pause", nil, 0.33) gui_addKey(tankbobs.m_vec2(75, 65), c_config_get("config.key.pause"), nil, st_options_pause, c_config_get("config.key.pause"), 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 61), "Back", nil, 0.33) gui_addKey(tankbobs.m_vec2(75, 61), c_config_get("config.key.quit"), nil, st_options_quit, c_config_get("config.key.quit"), 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 57), "Quit", nil, 0.33) gui_addKey(tankbobs.m_vec2(75, 57), c_config_get("config.key.exit"), nil, st_options_exit, c_config_get("config.key.exit"), 0.5)
 
-	gui_label("Computers", tankbobs.m_vec2(50, 49), nil, 0.33) gui_input(tostring(tonumber(c_config_get("config.game.computers"))), tankbobs.m_vec2(75, 49), nil, st_options_computers, true, 1, 0.5)
-	gui_label("Players", tankbobs.m_vec2(50, 45), nil, 0.33) gui_input(tostring(tonumber(c_config_get("config.game.players"))), tankbobs.m_vec2(75, 45), nil, st_options_players, true, 1, 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 49), "Computers", nil, 0.33) gui_addInput(tankbobs.m_vec2(75, 49), tostring(tonumber(c_config_get("config.game.computers"))), nil, st_options_computers, true, 1, 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 45), "Players", nil, 0.33) gui_addInput(tankbobs.m_vec2(75, 45), tostring(tonumber(c_config_get("config.game.players"))), nil, st_options_players, true, 1, 0.5)
 
-	gui_label("Set up player", tankbobs.m_vec2(50, 38), nil, 0.33) gui_input("1", tankbobs.m_vec2(75, 38), nil, st_options_configurePlayer, true, 1, 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 38), "Set up player", nil, 0.33) gui_addInput(tankbobs.m_vec2(75, 38), "1", nil, st_options_configurePlayer, true, 1, 0.5)
 	if not (c_config_get("config.game.player1.name", nil, true)) then
 		c_config_set("config.game.player1.name", "Player1")
 	end
@@ -63,13 +63,13 @@ function st_options_init()
 	if not (c_config_get("config.key.player1.special", nil, true)) then
 		c_config_set("config.key.player1.special", false)
 	end
-	gui_label("Name", tankbobs.m_vec2(50, 34), nil, 0.33) st_options_player.name = gui_input(c_config_get("config.game.player1.name"), tankbobs.m_vec2(75, 34), nil, st_options_name, false, c_const_get("max_nameLength"), 0.5)
-	gui_label("Fire", tankbobs.m_vec2(50, 30), nil, 0.33) st_options_player.fire = gui_key(c_config_get("config.key.player1.fire"), tankbobs.m_vec2(75, 30), nil, st_options_fire, c_config_get("config.key.player1.fire"), 0.5)
-	gui_label("Forward", tankbobs.m_vec2(50, 26), nil, 0.33) st_options_player.forward = gui_key(c_config_get("config.key.player1.forward"), tankbobs.m_vec2(75, 26), nil, st_options_forward, c_config_get("config.key.player1.special"), 0.5)
-	gui_label("Back", tankbobs.m_vec2(50, 22), nil, 0.33) st_options_player.back = gui_key(c_config_get("config.key.player1.back"), tankbobs.m_vec2(75, 30), nil, st_options_back, c_config_get("config.key.player1.back"), 0.5)
-	gui_label("Left", tankbobs.m_vec2(50, 18), nil, 0.33) st_options_player.left = gui_key(c_config_get("config.key.player1.left"), tankbobs.m_vec2(75, 18), nil, st_options_left, c_config_get("config.key.player1.left"), 0.5)
-	gui_label("Right", tankbobs.m_vec2(50, 14), nil, 0.33) st_options_player.right = gui_key(c_config_get("config.key.player1.right"), tankbobs.m_vec2(75, 14), nil, st_options_right, c_config_get("config.key.player1.right"), 0.5)
-	gui_label("Special", tankbobs.m_vec2(50, 10), nil, 0.33) st_options_player.special = gui_key(c_config_get("config.key.player1.special"), tankbobs.m_vec2(75, 10), nil, st_options_special, c_config_get("config.key.player1.special"), 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 34), "Name", nil, 0.33) st_options_player.name = gui_addInput(tankbobs.m_vec2(75, 34), c_config_get("config.game.player1.name"), nil, st_options_name, false, c_const_get("max_nameLength"), 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 30), "Fire", nil, 0.33) st_options_player.fire = gui_addKey(tankbobs.m_vec2(75, 30), c_config_get("config.key.player1.fire"), nil, st_options_fire, c_config_get("config.key.player1.fire"), 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 26), "Forward", nil, 0.33) st_options_player.forward = gui_addKey(tankbobs.m_vec2(75, 26), c_config_get("config.key.player1.forward"), nil, st_options_forward, c_config_get("config.key.player1.special"), 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 22), "Back", nil, 0.33) st_options_player.back = gui_addKey(tankbobs.m_vec2(75, 22), c_config_get("config.key.player1.back"), nil, st_options_back, c_config_get("config.key.player1.back"), 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 18), "Left", nil, 0.33) st_options_player.left = gui_addKey(tankbobs.m_vec2(75, 18), c_config_get("config.key.player1.left"), nil, st_options_left, c_config_get("config.key.player1.left"), 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 14), "Right", nil, 0.33) st_options_player.right = gui_addKey(tankbobs.m_vec2(75, 14), c_config_get("config.key.player1.right"), nil, st_options_right, c_config_get("config.key.player1.right"), 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 10), "Special", nil, 0.33) st_options_player.special = gui_addKey(tankbobs.m_vec2(75, 10), c_config_get("config.key.player1.special"), nil, st_options_special, c_config_get("config.key.player1.special"), 0.5)
 end
 
 function st_options_done()

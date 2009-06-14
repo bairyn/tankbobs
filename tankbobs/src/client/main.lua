@@ -23,7 +23,21 @@ main.lua
 startup and the like
 --]]
 
+local c_const_get  = c_const_get
+local c_const_set  = c_const_set
+local c_state_step = c_state_step
+local c_config_get = c_config_get
+local c_config_set = c_config_set
+
 function main_init()
+	c_const_get = _G.c_const_get
+	c_const_set = _G.c_const_set
+	c_state_step = _G.c_state_step
+	c_config_get = _G.c_config_get
+	c_config_set = _G.c_config_set
+
+	local main_loop = main_loop
+
 	--execution begins here; args are stored in table 'args'; ./tankbobs will generate {"./tankbobs"}
 	main_data = {}
 
@@ -71,6 +85,8 @@ end
 local lastTime = 0
 
 function main_loop()
+	local tankbobs = tankbobs
+
 	local t = tankbobs.t_getTicks()
 
 	if lastTime == 0 then
@@ -225,5 +241,11 @@ function main_parseArgs(args)
 end
 
 function b_mods()
+	c_const_get = _G.c_const_get
+	c_const_set = _G.c_const_set
+	c_state_step = _G.c_state_step
+	c_config_get = _G.c_config_get
+	c_config_set = _G.c_config_set
+
 	c_mods_load(c_const_get("client-mods_dir"))
 end

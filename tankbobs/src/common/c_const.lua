@@ -26,6 +26,8 @@ c_const.lua
 function c_const_init()
 	c_const_init = nil
 
+	local common_clone = common_clone
+
 	local const = {}
 
 	function c_const_get(k)

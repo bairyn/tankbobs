@@ -86,8 +86,14 @@ function common_done()
 	tankbobs.t_quit()
 end
 
+SPECIAL = {}
+
 function common_print(...)
 	print(...)
+end
+
+function common_error(...)
+	error(table.concat({...}))
 end
 
 function common_endsIn(str, match)
@@ -186,6 +192,34 @@ function common_clone_except(i, o, e)
 	end
 
 	clone_level(i, o, e, "")
+end
+
+--[[--
+-- * common_tConcat
+-- *
+-- * concats some tables
+-- * common_tConcat only traverses through one level
+--]]--
+function common_tConcat(t1, t2)
+	local r = {}
+
+	for k, v in pairs(t1) do
+		if type(v) == "table" and debug then
+			common_print("Warning: common_tConcat: copying a reference to a table")
+		end
+
+		table.insert(r, v)
+	end
+
+	for k, v in pairs(t2) do
+		if type(v) == "table" and debug then
+			common_print("Warning: common_tConcat: copying a reference to a table")
+		end
+
+		table.insert(r, v)
+	end
+
+	return r
 end
 
 function common_empty(t)

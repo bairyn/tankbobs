@@ -24,9 +24,9 @@ game help and information
 --]]
 
 function st_help_init()
-	gui_action("Back", tankbobs.m_vec2(25, 75), nil, c_state_advance)
+	gui_addAction(tankbobs.m_vec2(25, 75), "Back", nil, c_state_advance)
 
-	gui_action("Manual", tankbobs.m_vec2(50, 65), nil, st_help_manual)
+	gui_addAction(tankbobs.m_vec2(50, 65), "Manual", nil, st_help_manual)
 end
 
 function st_help_done()
