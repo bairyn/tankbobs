@@ -890,12 +890,11 @@ function c_world_tankDamage(tank, damage)
 end
 
 function c_world_collide(tank, normal)
-	local vel = tankbobs.w_getLinearVelocity(tank.body).R
+	local vel = tankbobs.w_getLinearVelocity(tank.body)
+	local component = (vel * -normal)
 
-	if vel >= c_const_get("tank_damageMinSpeed") then
-		local damage = c_const_get("tank_damageK") * (vel - c_const_get("tank_damageMinSpeed"))
-
-		damage = damage / (1 + math.abs(normal.t - tank.w) / tankbobs.m_radians(180))
+	if component >= c_const_get("tank_damageMinSpeed") then
+		local damage = c_const_get("tank_damageK") * (component - c_const_get("tank_damageMinSpeed"))
 
 		if damage >= c_const_get("tank_collideMinDamage") then
 			c_world_tankDamage(tank, damage)
