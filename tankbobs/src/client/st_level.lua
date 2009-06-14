@@ -24,12 +24,14 @@ level selection
 --]]
 
 function st_level_init()
-	gui_widget("label", renderer_font.sans, 50, 92.5, renderer_size.sans, "Select Level From " .. c_tcm_current_set.title)
-	gui_widget("active", c_state_advance, renderer_font.sans, 25, 87.5, renderer_size.sans, "Back")
-	local x, y = 50, 85
+	gui_addAction(tankbobs.m_vec2(25, 92.5), "Back", nil, c_state_advance)
+
+	gui_addLabel(tankbobs.m_vec2(50, 92.5), "Select Level From\n" .. c_tcm_current_set.title, nil, 0.75)
+
+	local x, y = 50, 75
 	for _, v in pairs(c_tcm_current_set.maps) do
-		gui_widget("active", st_level_select, renderer_font.sans, x, y, renderer_size.sans, v.title, v.name)
-		y = y - 2.5
+		gui_addAction(tankbobs.m_vec2(x, y), v.title, nil, st_level_select).misc.name = v.name
+		y = y - 5
 	end
 end
 
@@ -45,26 +47,27 @@ end
 
 function st_level_button(button, pressed)
 	if pressed then
-		if button == 0x1B or button == c_config_get("config.key.quit") then
-			c_state_advance()
-		elseif button == c_config_get("config.key.exit") then
-			c_state_new(exit_state)
+		if not gui_button(button) then
+			if button == 0x1B or button == c_config_get("config.key.quit") then
+				c_state_advance()
+			elseif button == c_config_get("config.key.exit") then
+				c_state_new(exit_state)
+			end
 		end
-		gui_button(button)
 	end
 end
 
 function st_level_mouse(x, y, xrel, yrel)
-	gui_mouse(x, y)
+	gui_mouse(x, y, xrel, yrel)
 end
 
 function st_level_step(d)
-	gui_paint()
+	gui_paint(d)
 end
 
-function st_level_select(title, name)
-	c_tcm_select_map(name)
-	c_state_new(start_state)
+function st_level_select(widget)
+	c_tcm_select_map(widget.misc.name)
+	c_state_new(play_state)
 end
 
 level_state =

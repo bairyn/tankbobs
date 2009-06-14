@@ -134,23 +134,23 @@ function st_options_fullscreen(widget, option, key)
 end
 
 function st_options_width(widget)
-	st_options_renderer.width = tonumber(widget.text)
+	st_options_renderer.width = tonumber(widget.inputText)
 end
 
 function st_options_height(widget)
-	st_options_renderer.height = tonumber(widget.text)
+	st_options_renderer.height = tonumber(widget.inputText)
 end
 
 function st_options_players(widget)
-	c_config_set("config.game.players", tonumber(widget.text))
+	c_config_set("config.game.players", tonumber(widget.inputText))
 end
 
 function st_options_computers(widget)
-	c_config_set("config.game.computers", tonumber(widget.text))
+	c_config_set("config.game.computers", tonumber(widget.inputText))
 end
 
 function st_options_configurePlayer(widget)
-	currentPlayer = tonumber(widget.text) or 1
+	currentPlayer = tonumber(widget.inputText) or 1
 	if currentPlayer < 1 then
 		currentPlayer = 1
 	end
@@ -203,7 +203,7 @@ function st_options_name(widget)
 		c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".name", "Player" .. tonumber(currentPlayer))
 	end
 
-	c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".name", tostring(widget.text))
+	c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".name", tostring(widget.inputText))
 end
 
 function st_options_fire(widget)

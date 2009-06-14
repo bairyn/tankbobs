@@ -23,10 +23,14 @@ renderer.lua
 drawing output and gl
 --]]
 
+local gl
+
 function renderer_init()
 	c_module_load "opengl"
 
 	tankbobs.r_initialize()
+
+	gl = _G.gl
 end
 
 function renderer_done()

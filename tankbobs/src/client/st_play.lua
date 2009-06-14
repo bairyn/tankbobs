@@ -24,8 +24,21 @@ main play state
 TODO: add pause
 --]]
 
+local tankbobs
+local gl
+local c_world_step
+local gui_paint
+local gui_button
+local gui_mouse
+
 function st_play_init()
-	gui_conserve()
+	-- localize frequently used globals
+	tankbobs = _G.tankbobs
+	gl = _G.gl
+	c_world_step = _G.c_world_step
+	gui_paint = _G.gui_paint
+	gui_button = _G.gui_button
+	gui_mouse = _G.gui_mouse
 
 	-- initialize renderer stuff
 	c_const_set("tank_renderx1", -2.0, 1) c_const_set("tank_rendery1",  2.0, 1)
@@ -245,6 +258,27 @@ function st_play_init()
 		gl.End()
 	gl.EndList()
 
+	-- initialize the scores
+	local function updateScores(widget)
+		widget.text = ""
+
+		for k, v in pairs(c_world_tanks) do
+			local name, between, score
+
+			if widget.text:len() ~= 0 then
+				widget.text = widget.text .. "\n"
+			end
+
+			name = tostring(c_config_get("config.game.player" .. tostring(k) .. ".name"))
+			between = " "
+			score = tostring(v.score)
+
+			widget.text = widget.text .. name .. between .. score
+		end
+	end
+
+	gui_addLabel(tankbobs.m_vec2(7.5, 92.5), "", updateScores, 0.5, nil, nil, nil, c_config_get("config.game.scoresAlpha"), nil, nil, nil, c_config_get("config.game.scoresAlpha"))
+
 	-- initialize the world
 	c_world_newWorld()
 
@@ -310,12 +344,13 @@ end
 
 function st_play_button(button, pressed)
 	if pressed then
-		if button == 0x1B or button == c_config_get("config.key.quit") then
-			c_state_advance()
-		elseif button == c_config_get("config.key.exit") then
-			c_state_new(exit_state)
+		if not gui_button(button) then
+			if button == 0x1B or button == c_config_get("config.key.quit") then
+				c_state_advance()
+			elseif button == c_config_get("config.key.exit") then
+				c_state_new(exit_state)
+			end
 		end
-		gui_button(button)
 	end
 
 	for i = 1, c_config_get("config.game.players") + c_config_get("config.game.computers") do
@@ -360,7 +395,7 @@ function st_play_button(button, pressed)
 end
 
 function st_play_mouse(x, y, xrel, yrel)
-	gui_mouse(x, y)
+	gui_mouse(x, y, xrel, yrel)
 end
 
 function st_play_step(d)
@@ -488,29 +523,8 @@ function st_play_step(d)
 		end
 	end
 
-	-- scores
-	local w, h = 1, 1
-	local wSpacing, hSpacing = 0.1, 0.1
-
-	local y = 5
-	for k, v in pairs(c_world_tanks) do
-		local x = 5
-		local name = tostring(tostring(c_config_get("config.game.player" .. tostring(i) .. ".name", nil, true)) .. tostring(" ") .. tostring(v.score))
-
-		gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
-		gl.Color(c_config_get("config.game.player" .. tostring(k) .. ".color.r"), c_config_get("config.game.player" .. tostring(k) .. ".color.g"), c_config_get("config.game.player" .. tostring(k) .. ".color.b"), c_config_get("config.game.scoresAlpha"))
-		gl.TexEnv("TEXTURE_ENV_COLOR", c_config_get("config.game.player" .. tostring(k) .. ".color.r"), c_config_get("config.game.player" .. tostring(k) .. ".color.g"), c_config_get("config.game.player" .. tostring(k) .. ".color.b"), c_config_get("config.game.scoresAlpha"))
-		for i = 1, #name do
-			tankbobs.r_drawCharacter(x, y, w, h, renderer_font.sans, name:sub(i, i))
-
-			x = x + w + wSpacing
-		end
-
-		y = y + h + hSpacing
-	end
-
 	-- nothing here
-	gui_paint()
+	gui_paint(d)
 end
 
 play_state =

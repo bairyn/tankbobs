@@ -144,6 +144,57 @@ int t_testAND(lua_State *L)
 	return 1;
 }
 
+int t_explode(lua_State *L)
+{
+	int i = 0, j = 0;
+	char delimiter;
+	const char *string;
+	static char lineBuf[BUFSIZE];
+	char *line;
+
+	CHECKINIT(init, L);
+
+	string = luaL_checkstring(L, 1);
+	delimiter = *luaL_checkstring(L, 2);
+
+	if(strlen(string) >= BUFSIZE)
+		line = malloc((strlen(string) + 1) * sizeof(char));
+	else
+		line = &lineBuf[0];
+
+	*line = 0;
+
+	lua_newtable(L);
+
+	while(*string)
+	{
+		if(*string == delimiter)
+		{
+			lua_pushinteger(L, ++i);
+			lua_pushstring(L, line);
+			lua_settable(L, -3);
+
+			*line = j = 0;
+
+			string++;
+		}
+		else
+		{
+			line[j++] = *string++;
+			line[j]   = 0;
+		}
+	}
+
+	lua_pushinteger(L, ++i);
+	lua_pushstring(L, line);
+	lua_settable(L, -3);
+
+	if(strlen(string) >= BUFSIZE)
+		free(line);
+
+	return 1;
+}
+
 static const struct luaL_Reg tankbobs[] =
 {
 	/* tankbobs.c */
@@ -161,6 +212,8 @@ static const struct luaL_Reg tankbobs[] =
 	{"t_testAND", t_testAND}, /* test two integers (both are arguments) and return the bool of & */
 	{"t_is64Bit", t_is64Bit}, /* if the machine is running 64-bit, return true, if not, return false */
 	{"t_isWindows", t_isWindows}, /* if the machine is running Windows, return true, if not, return false */
+	{"t_explode", t_explode}, /* explode the first string argument into a table of substrings which are returned */
+		/* the second argument is the delimiter (only the first character of the string is used) */
 
 	/* input.c */
 	{"in_getEvents", in_getEvents}, /* store events in a userdata */

@@ -31,6 +31,7 @@ function gui_init()
 	tankbobs = _G.tankbobs
 
 	c_const_set("widget_length", 1.5, 1)
+	c_const_set("gui_vspacing", 0.5, 1)
 
 	c_const_set("label_prefix", "", 1)
 	c_const_set("label_suffix", "", 1)
@@ -369,10 +370,34 @@ function gui_paint(d)
 		local text = prefix .. v.text .. suffix
 
 		if v ~= selected then
-			v.upperRightPos = tankbobs.r_drawString(text, v.p, v.color.r, v.color.g, v.color.b, v.color.a, gui_private_scale(scalex), gui_private_scale(scaley), false)
+			local p = tankbobs.m_vec2(v.p)
+			local decrement = v.upperRightPos.y - v.p.y + c_const_get("gui_vspacing")
+
+			for _, vSub in pairs(tankbobs.t_explode(text, '\n')) do
+				local oldR = tankbobs.m_vec2(v.upperRightPos)
+
+				v.upperRightPos = tankbobs.r_drawString(vSub, p, v.color.r, v.color.g, v.color.b, v.color.a, gui_private_scale(scalex), gui_private_scale(scaley), false)
+				if oldR.y > v.upperRightPos.y then
+					v.upperRightPos(oldR)
+				end
+
+				p.y = p.y - decrement
+			end
 		else
 			-- draw with altColor
-			v.upperRightPos = tankbobs.r_drawString(text, v.p, v.altColor.r, v.altColor.g, v.altColor.b, v.altColor.a, gui_private_scale(scalex), gui_private_scale(scaley), false)
+			local p = tankbobs.m_vec2(v.p)
+			local decrement = v.upperRightPos.y - v.p.y + c_const_get("gui_vspacing")
+
+			for _, vSub in pairs(tankbobs.t_explode(text, '\n')) do
+				local oldR = tankbobs.m_vec2(v.upperRightPos)
+
+				v.upperRightPos = tankbobs.r_drawString(vSub, v.p, v.altColor.r, v.altColor.g, v.altColor.b, v.altColor.a, gui_private_scale(scalex), gui_private_scale(scaley), false)
+				if oldR.y > v.upperRightPos.y then
+					v.upperRightPos(oldR)
+				end
+
+				p.y = p.y - decrement
+			end
 		end
 	end
 end
@@ -398,12 +423,12 @@ local function gui_private_inputKey(button)
 
 		return true
 	elseif button == 8 then  -- backspace
-		if selected.textPos >= 0 then
+		if selected.textPos > 0 then
 			selected.inputText = selected.inputText:sub(1, selected.textPos - 1) .. selected.inputText:sub(selected.textPos + 1, -1)
 			selected.textPos = selected.textPos - 1
 
-			if selected.changeCallBack then
-				selected:changeCallBack(selected.inputText)
+			if selected.textChangedCallBack then
+				selected:textChangedCallBack(selected.inputText)
 			end
 		end
 
@@ -412,8 +437,8 @@ local function gui_private_inputKey(button)
 		if selected.textPos < #selected.inputText then
 			selected.inputText = selected.inputText:sub(1, selected.textPos) .. selected.inputText:sub(selected.textPos + 2, -1)
 
-			if selected.changeCallBack then
-				selected:changeCallBack(selected.inputText)
+			if selected.textChangedCallBack then
+				selected:textChangedCallBack(selected.inputText)
 			end
 		end
 
@@ -436,8 +461,8 @@ local function gui_private_inputKey(button)
 			selected.inputText = selected.inputText:sub(1, selected.textPos) .. add .. selected.inputText:sub(selected.textPos + 1, -1)
 			selected.textPos = selected.textPos + 1
 
-			if selected.changeCallBack then
-				selected:changeCallBack(selected.inputText)
+			if selected.textChangedCallBack then
+				selected:textChangedCallBack(selected.inputText)
 			end
 		end
 
