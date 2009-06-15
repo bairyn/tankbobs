@@ -28,6 +28,7 @@ local c_const_set  = c_const_set
 local c_state_step = c_state_step
 local c_config_get = c_config_get
 local c_config_set = c_config_set
+local common_FTM = common_FTM
 
 function main_init()
 	c_const_get = _G.c_const_get
@@ -35,6 +36,7 @@ function main_init()
 	c_state_step = _G.c_state_step
 	c_config_get = _G.c_config_get
 	c_config_set = _G.c_config_set
+	common_FTM = _G.common_FTM
 
 	local main_loop = main_loop
 
@@ -105,12 +107,12 @@ function main_loop()
 		d = 1.0E-6  -- make an inaccurate guess
 	end
 
-	if c_config_get("config.client.minFrameLatency") < c_const_get("client_mlf") then
-		c_config_set("config.client.minFrameLatency", c_const_get("client_mlf"))
+	if c_config_get("config.client.fps") < c_const_get("client_minFPS") then
+		c_config_set("config.client.fps", c_const_get("client_minFPS"))
 	end
 
-	if tankbobs.t_getTicks() - lastTime < c_config_get("config.client.minFrameLatency") then
-		tankbobs.t_delay(c_config_get("config.client.minFrameLatency"))
+	if t - lastTime < common_FTM(c_config_get("config.client.fps")) then
+		tankbobs.t_delay(common_FTM(c_config_get("config.client.fps")) - t + lastTime)
 		return
 	end
 

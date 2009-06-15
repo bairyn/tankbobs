@@ -266,3 +266,13 @@ function common_new(self, inh, o)
 	self.__index = self
 	return o
 end
+
+-- FPS to MS
+function common_FTM(fps)
+	return 1000 / fps
+end
+
+-- MS to FPS
+function common_MTF(ms)
+	return 1000 / ms
+end

@@ -25,10 +25,15 @@ world and physics
 --TODO: knockback and damage for hitting world.  A powerup will protect the front.  another will protect the back and sides.  Each will do so in exchange for a slight decrease in acceleration.
 --TODO: damage is noticeably higher in special mode.
 
+local worldTime = 0
+
 function c_world_init()
 	c_config_cheat_protect("config.game.timescale")
 
 	c_const_set("world_time", 1000)  -- relative to change in seconds
+
+	c_const_set("world_fps", 256)
+	c_const_set("world_timeStep", 1 / 1000)
 
 	c_const_set("world_timeWrapTest", -99999)
 
@@ -96,7 +101,7 @@ function c_world_init()
 	c_const_set("wall_isBullet", true, 1)
 	c_const_set("wall_linearDamping", 0, 1)
 	c_const_set("wall_angularDamping", 0, 1)
-	c_const_set("tank_rotationVelocitySpeed", 128, 1)  -- for every second, velocity matches 3/4 rotation  -- FIXME: the actual rotation turning speed is about a quarter of this
+	c_const_set("tank_rotationVelocitySpeed", 256, 1)  -- higher value for better turning
 	c_const_set("tank_rotationVelocityMinSpeed", 0.5, 1)  -- if at least 24 ups
 	c_const_set("tank_rotationSpeed", c_math_radians(135), 1)  -- 135 degrees per second
 	c_const_set("tank_rotationSpecialSpeed", c_math_degrees(1) / 3.5, 1)
@@ -169,6 +174,8 @@ function c_world_init()
 	powerupType.c.r, powerupType.c.g, powerupType.c.b, powerupType.c.a = 0.5, 0.75, 0.1, 0.5
 
 	-- TODO: health with light green
+
+	tankbobs.w_setTimeStep(c_const_get("world_timeStep"))
 end
 
 function c_world_done()
@@ -208,6 +215,8 @@ end
 
 function c_world_newWorld()
 	local t = tankbobs.t_getTicks()
+
+	wordTime = t
 
 	tankbobs.w_newWorld(tankbobs.m_vec2(c_const_get("world_lowerBoundx"), c_const_get("world_lowerBoundy")), tankbobs.m_vec2(c_const_get("world_upperBoundx"), c_const_get("world_upperBoundy")), tankbobs.m_vec2(c_const_get("world_gravityx"), c_const_get("world_gravityy")), c_const_get("world_allowSleep"), "c_world_contactListener")
 
@@ -974,8 +983,10 @@ function c_world_step(d)
 		c_world_powerup_step(d, v)
 	end
 
-	tankbobs.w_setTimeStep(d)
-	tankbobs.w_step()
+	while worldTime < t do
+		worldTime = worldTime + common_FTM(c_const_get("world_fps"))
+		tankbobs.w_step()
+	end
 end
 
 function c_world_setTimeStep(x)
