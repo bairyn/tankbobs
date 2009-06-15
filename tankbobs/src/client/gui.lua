@@ -168,7 +168,7 @@ local widget =
 	textPos = 0,
 
 	-- keys
-	setKey = function (self, key)
+	setKey = function (self, button)
 		self.button = button
 		if key then
 			self.text = gui_char(key)
