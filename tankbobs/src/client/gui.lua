@@ -169,7 +169,7 @@ local widget =
 
 	-- keys
 	setKey = function (self, key)
-		self.key = key
+		self.button = button
 		if key then
 			self.text = gui_char(key)
 		else

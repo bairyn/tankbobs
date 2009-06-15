@@ -25,8 +25,6 @@ world and physics
 --TODO: knockback and damage for hitting world.  A powerup will protect the front.  another will protect the back and sides.  Each will do so in exchange for a slight decrease in acceleration.
 --TODO: damage is noticeably higher in special mode.
 
-local lastTime = 0
-
 function c_world_init()
 	c_config_cheat_protect("config.game.timescale")
 

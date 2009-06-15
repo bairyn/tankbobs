@@ -277,7 +277,7 @@ function st_play_init()
 		end
 	end
 
-	gui_addLabel(tankbobs.m_vec2(7.5, 92.5), "", updateScores, 0.5, nil, nil, nil, c_config_get("config.game.scoresAlpha"), nil, nil, nil, c_config_get("config.game.scoresAlpha"))
+	gui_addLabel(tankbobs.m_vec2(7.5, 92.5), "", updateScores, 0.5, c_config_get("config.game.scoresRed"), c_config_get("config.game.scoresGreen"), c_config_get("config.game.scoresBlue"), c_config_get("config.game.scoresAlpha"), c_config_get("config.game.scoresRed"), c_config_get("config.game.scoresGreen"), c_config_get("config.game.scoresGreen"), c_config_get("config.game.scoresAlpha"))
 
 	-- initialize the world
 	c_world_newWorld()
