@@ -111,7 +111,7 @@ function main_loop()
 		c_config_set("config.client.fps", c_const_get("client_minFPS"))
 	end
 
-	if t - lastTime < common_FTM(c_config_get("config.client.fps")) then
+	if c_config_get("config.client.fps") > 0 and t - lastTime < common_FTM(c_config_get("config.client.fps")) then
 		tankbobs.t_delay(common_FTM(c_config_get("config.client.fps")) - t + lastTime)
 		return
 	end
