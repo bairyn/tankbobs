@@ -24,12 +24,12 @@ main play state
 TODO: add pause
 --]]
 
-local tankbobs
-local gl
-local c_world_step
-local gui_paint
-local gui_button
-local gui_mouse
+local tankbobs = tankbobs
+local gl = gl
+local c_world_step = c_world_step
+local gui_paint = gui_paint
+local gui_button = gui_button
+local gui_mouse = gui_mouse
 
 function st_play_init()
 	-- localize frequently used globals
@@ -260,7 +260,21 @@ function st_play_init()
 
 	-- initialize the scores
 	local function updateScores(widget)
+		local length = 0
+
 		widget.text = ""
+
+		for k, v in pairs(c_world_tanks) do
+			local name = tostring(c_config_get("config.game.player" .. tostring(k) .. ".name"))
+
+			if #name > length then
+				length = #name
+			end
+		end
+
+		if length < 1 then
+			length = 1
+		end
 
 		for k, v in pairs(c_world_tanks) do
 			local name, between, score
@@ -270,7 +284,7 @@ function st_play_init()
 			end
 
 			name = tostring(c_config_get("config.game.player" .. tostring(k) .. ".name"))
-			between = " "
+			between = string.rep("  ", length - #name + 1)
 			score = tostring(v.score)
 
 			widget.text = widget.text .. name .. between .. score

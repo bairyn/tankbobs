@@ -25,9 +25,26 @@ world and physics
 --TODO: knockback and damage for hitting world.  A powerup will protect the front.  another will protect the back and sides.  Each will do so in exchange for a slight decrease in acceleration.
 --TODO: damage is noticeably higher in special mode.
 
+local c_config_set = c_config_set
+local c_config_get = c_config_get
+local c_const_set  = c_const_set
+local c_const_get  = c_const_get
+local tankbobs = tankbobs
+
+local c_world_tank_step
+local c_world_projectile_step
+local c_world_powerupSpawnPoint_step
+local c_world_powerup_step
+
 local worldTime = 0
 
 function c_world_init()
+	c_config_set = _G.c_config_set
+	c_config_get = _G.c_config_get
+	c_const_set  = _G.c_const_set
+	c_const_get  = _G.c_const_get
+	tankbobs = _G.tankbobs
+
 	c_config_cheat_protect("config.game.timescale")
 
 	c_const_set("world_time", 1000)  -- relative to change in seconds
