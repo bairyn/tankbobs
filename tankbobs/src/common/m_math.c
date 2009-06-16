@@ -583,12 +583,12 @@ int m_vec2_unm(lua_State *L)
 
 	CHECKINIT(init, L);
 
-	v2 = lua_newuserdata(L, sizeof(vec2_t));
+	v = lua_newuserdata(L, sizeof(vec2_t));
 
 	luaL_getmetatable(L, MATH_METATABLE);
 	lua_setmetatable(L, -2);
 
-	v = CHECKVEC(L, 1);
+	v2 = CHECKVEC(L, 1);
 
 	v->x = -v2->x;
 	v->y = -v2->y;

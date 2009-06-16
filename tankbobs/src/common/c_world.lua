@@ -33,6 +33,7 @@ function c_world_init()
 	c_const_set("world_time", 1000)  -- relative to change in seconds
 
 	c_const_set("world_fps", 256)
+	--c_const_set("world_timeStep", common_FTM(c_const_get("world_fps")))
 	c_const_set("world_timeStep", 1 / 1000)
 
 	c_const_set("world_timeWrapTest", -99999)
@@ -898,7 +899,7 @@ end
 
 function c_world_collide(tank, normal)
 	local vel = tankbobs.w_getLinearVelocity(tank.body)
-	local component = (vel * -normal)
+	local component = vel * -normal
 
 	if component >= c_const_get("tank_damageMinSpeed") then
 		local damage = c_const_get("tank_damageK") * (component - c_const_get("tank_damageMinSpeed"))
