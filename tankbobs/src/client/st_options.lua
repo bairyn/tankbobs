@@ -125,10 +125,10 @@ function st_options_apply(widget)
 	tankbobs.r_newWindow(c_config_get("config.renderer.width"), c_config_get("config.renderer.height"), c_config_get("config.renderer.fullscreen"), c_const_get("title"), c_const_get("icon"))
 end
 
-function st_options_fullscreen(widget, option, key)
-	if option == "Yes" then
+function st_options_fullscreen(widget, string, index)
+	if string == "Yes" then
 		st_options_renderer.fullscreen = true
-	elseif option == "No" then
+	elseif string == "No" then
 		st_options_renderer.fullscreen = false
 	end
 end
@@ -299,14 +299,6 @@ function st_options_quit(widget)
 		c_config_set("config.key.quit", widget.key)
 	else
 		c_config_set("config.key.quit", false)
-	end
-end
-
-function st_options_fullscreen(v)
-	if v == "Yes" then
-		c_config_set("config.renderer.fullscreen", 1)
-	elseif v == "No" then
-		c_config_set("config.renderer.fullscreen", 0)
 	end
 end
 
