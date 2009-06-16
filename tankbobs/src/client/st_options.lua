@@ -159,7 +159,7 @@ function st_options_configurePlayer(widget)
 		c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".name", "Player" .. tonumber(currentPlayer))
 	end
 	local name = c_config_get("config.game.player" .. tonumber(currentPlayer) .. ".name")
-	st_options_player.name:setText(#name <= widget.maxLength and name or "Player" .. tonumber(currentPlayer))
+	st_options_player.name:setText(#name <= c_const_get("max_nameLength") and name or "Player" .. tonumber(currentPlayer))
 
 	if not (c_config_get("config.key.player" .. tonumber(currentPlayer) .. ".fire", nil, true)) then
 		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".fire", false)

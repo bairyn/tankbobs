@@ -158,7 +158,7 @@ local widget =
 			text = text:sub(1, self.maxLength)
 			self.text = text
 			self.inputText = text
-			self.pos = #text
+			self.textPos = #text
 		end
 	end,
 	inputText = "",
