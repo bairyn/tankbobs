@@ -29,7 +29,8 @@ local c_config_set = c_config_set
 local c_config_get = c_config_get
 local c_const_set  = c_const_set
 local c_const_get  = c_const_get
-local tankbobs = tankbobs
+local common_FTM   = common_FTM
+local tankbobs     = tankbobs
 
 local c_world_tank_step
 local c_world_projectile_step
@@ -43,7 +44,8 @@ function c_world_init()
 	c_config_get = _G.c_config_get
 	c_const_set  = _G.c_const_set
 	c_const_get  = _G.c_const_get
-	tankbobs = _G.tankbobs
+	common_FTM   = _G.common_FTM
+	tankbobs     = _G.tankbobs
 
 	c_config_cheat_protect("config.game.timescale")
 
@@ -97,12 +99,12 @@ function c_world_init()
 		{1, 9},
 		{0.5, 12},
 		{0.4, 16},
-		{1 / 3, 20}
+		{(1 / 3), 20}
 	}, 1)
 	c_const_set("tank_forceSpeedK", 5, 1)
 	c_const_set("tank_density", 2, 1)
 	c_const_set("tank_friction", 0.25, 1)
-	c_const_set("tank_worldFriction", 0.75, 1)  -- damping
+	c_const_set("tank_worldFriction", 0.75 / 1000, 1)  -- damping
 	c_const_set("tank_restitution", 0.4, 1)
 	c_const_set("tank_canSleep", true, 1)
 	c_const_set("tank_isBullet", true, 1)
@@ -119,9 +121,9 @@ function c_world_init()
 	c_const_set("wall_isBullet", true, 1)
 	c_const_set("wall_linearDamping", 0, 1)
 	c_const_set("wall_angularDamping", 0, 1)
-	c_const_set("tank_rotationVelocitySpeed", 64, 1)  -- higher value for better turning  -- FIXME: this can cause the tanks to "lock up" if this is a high value
+	c_const_set("tank_rotationVelocitySpeed", 64 / 1000, 1)  -- higher value for better turning or less "slickness"  -- FIXME: this can cause the tanks to "lock up" if this is a high value
 	c_const_set("tank_rotationVelocityMinSpeed", 0.5, 1)  -- if at least 24 ups
-	c_const_set("tank_rotationSpeed", c_math_radians(45), 1)  -- 135 degrees per second
+	c_const_set("tank_rotationSpeed", c_math_radians(450) / 1000, 1)  -- 135 degrees per second
 	c_const_set("tank_rotationSpecialSpeed", c_math_degrees(1) / 3.5, 1)
 	c_const_set("tank_defaultRotation", c_math_radians(90), 1)  -- up
 
@@ -685,17 +687,17 @@ function c_world_tank_step(d, tank)
 	if tank.state.special then
 		if tank.state.left then
 			if vel < 0 then  -- inverse rotation
-				tank.r = tank.r - d * c_const_get("tank_rotationSpeed") * vel / c_const_get("tank_rotationSpecialSpeed")
+				tank.r = tank.r - c_const_get("tank_rotationSpeed") * vel / c_const_get("tank_rotationSpecialSpeed")
 			else
-				tank.r = tank.r + d * c_const_get("tank_rotationSpeed") * vel / c_const_get("tank_rotationSpecialSpeed")
+				tank.r = tank.r + c_const_get("tank_rotationSpeed") * vel / c_const_get("tank_rotationSpecialSpeed")
 			end
 		end
 
 		if tank.state.right then
 			if vel < 0 then  -- inverse rotation
-				tank.r = tank.r + d * c_const_get("tank_rotationSpeed") * vel / c_const_get("tank_rotationSpecialSpeed")
+				tank.r = tank.r + c_const_get("tank_rotationSpeed") * vel / c_const_get("tank_rotationSpecialSpeed")
 			else
-				tank.r = tank.r - d * c_const_get("tank_rotationSpeed") * vel / c_const_get("tank_rotationSpecialSpeed")
+				tank.r = tank.r - c_const_get("tank_rotationSpeed") * vel / c_const_get("tank_rotationSpecialSpeed")
 			end
 		end
 
@@ -738,20 +740,20 @@ function c_world_tank_step(d, tank)
 			-- deceleration is really only caused when the tank isn't accelerating or decelerating.  If it seems strange, you should realize that the tanks have an anti-friction system built into them ;) - note that if friction was always applied then tanks would have a maximum speed limit.
 			local v = tankbobs.w_getLinearVelocity(tank.body)
 
-			v.R = v.R / (1 + d * c_const_get("tank_worldFriction"))
+			v.R = v.R / (1 + c_const_get("tank_worldFriction"))
 			tankbobs.w_setLinearVelocity(tank.body, v)
 		end
 
 		if tank.state.left then
-			tank.r = tank.r + d * c_const_get("tank_rotationSpeed")
+			tank.r = tank.r + c_const_get("tank_rotationSpeed")
 		end
 
 		if tank.state.right then
-			tank.r = tank.r - d * c_const_get("tank_rotationSpeed")
+			tank.r = tank.r - c_const_get("tank_rotationSpeed")
 		end
 
 		if vel >= c_const_get("tank_rotationVelocityMinSpeed") * c_const_get("tank_forceSpeedK") then
-			tank.w = w - ((w - tank.r) * d * c_const_get("tank_rotationVelocitySpeed"))
+			tank.w = w - ((w - tank.r) * c_const_get("tank_rotationVelocitySpeed"))
 		else
 			tank.w = tank.r
 		end
@@ -987,19 +989,19 @@ function c_world_step(d)
 
 	while worldTime < t do
 		for _, v in pairs(c_world_tanks) do
-			c_world_tank_step(d, v)
+			c_world_tank_step(common_FTM(c_const_get("world_fps")), v)
 		end
 
 		for _, v in pairs(c_world_projectiles) do
-			c_world_projectile_step(d, v)
+			c_world_projectile_step(common_FTM(c_const_get("world_fps")), v)
 		end
 
 		for _, v in pairs(c_tcm_current_map.powerupSpawnPoints) do
-			c_world_powerupSpawnPoint_step(d, v)
+			c_world_powerupSpawnPoint_step(common_FTM(c_const_get("world_fps")), v)
 		end
 
 		for _, v in pairs(c_world_powerups) do
-			c_world_powerup_step(d, v)
+			c_world_powerup_step(common_FTM(c_const_get("world_fps")), v)
 		end
 
 		tankbobs.w_step()
