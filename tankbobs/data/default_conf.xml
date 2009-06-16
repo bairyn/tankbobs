@@ -1,6 +1,6 @@
 <config>
 	<client>
-		<fps>300</fps>
+		<fps>256</fps>
 	</client>
 
 	<font>sans</font>
@@ -87,7 +87,7 @@
 	</renderer>
 
 	<server>
-		<fps>60</fps>
+		<fps>64</fps>
 	</server>
 
 	<mods>
