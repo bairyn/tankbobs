@@ -72,15 +72,15 @@ function c_world_init()
 	c_const_set("tank_lowHealth", 33, 1)
 	c_const_set("tank_acceleration",
 	{
-		{64},  -- acceleration of 64 units per second by default
-		{48, 8},  -- unless the tank's speed is at least 8 units per second, in which case the acceleration is dropped to 48
-		{32, 12},
-		{16, 16},
-		{8, 24},
-		{4, 32},
-		{2, 48},
-		{1.75, 50},
-		{1.5, 55}
+		{16},  -- acceleration of 16 <strike>units per second</strike> by default
+		{12, 2},  -- unless the tank's speed is at least 8 units per second, in which case the acceleration is dropped to 48
+		{6, 3},
+		{4, 4},
+		{2, 6},
+		{1, 9},
+		{0.5, 12},
+		{0.4, 16},
+		{1 / 3, 20}
 	}, 1)
 	c_const_set("tank_forceSpeedK", 5, 1)
 	c_const_set("tank_density", 2, 1)
@@ -102,9 +102,9 @@ function c_world_init()
 	c_const_set("wall_isBullet", true, 1)
 	c_const_set("wall_linearDamping", 0, 1)
 	c_const_set("wall_angularDamping", 0, 1)
-	c_const_set("tank_rotationVelocitySpeed", 256, 1)  -- higher value for better turning
+	c_const_set("tank_rotationVelocitySpeed", 64, 1)  -- higher value for better turning  -- FIXME: this can cause the tanks to "lock up" if this is a high value
 	c_const_set("tank_rotationVelocityMinSpeed", 0.5, 1)  -- if at least 24 ups
-	c_const_set("tank_rotationSpeed", c_math_radians(135), 1)  -- 135 degrees per second
+	c_const_set("tank_rotationSpeed", c_math_radians(45), 1)  -- 135 degrees per second
 	c_const_set("tank_rotationSpecialSpeed", c_math_degrees(1) / 3.5, 1)
 	c_const_set("tank_defaultRotation", c_math_radians(90), 1)  -- up
 
@@ -968,25 +968,26 @@ end
 function c_world_step(d)
 	local t = tankbobs.t_getTicks()
 
-	for _, v in pairs(c_world_tanks) do
-		c_world_tank_step(d, v)
-	end
-
-	for _, v in pairs(c_world_projectiles) do
-		c_world_projectile_step(d, v)
-	end
-
-	for _, v in pairs(c_tcm_current_map.powerupSpawnPoints) do
-		c_world_powerupSpawnPoint_step(d, v)
-	end
-
-	for _, v in pairs(c_world_powerups) do
-		c_world_powerup_step(d, v)
-	end
-
 	while worldTime < t do
-		worldTime = worldTime + common_FTM(c_const_get("world_fps"))
+		for _, v in pairs(c_world_tanks) do
+			c_world_tank_step(d, v)
+		end
+
+		for _, v in pairs(c_world_projectiles) do
+			c_world_projectile_step(d, v)
+		end
+
+		for _, v in pairs(c_tcm_current_map.powerupSpawnPoints) do
+			c_world_powerupSpawnPoint_step(d, v)
+		end
+
+		for _, v in pairs(c_world_powerups) do
+			c_world_powerup_step(d, v)
+		end
+
 		tankbobs.w_step()
+
+		worldTime = worldTime + common_FTM(c_const_get("world_fps"))
 	end
 end
 
