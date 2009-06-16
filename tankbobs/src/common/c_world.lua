@@ -66,8 +66,8 @@ function c_world_init()
 	c_const_set("tank_damageK", 2, 1)  -- damage relative to speed before a collision: 2 hp / 1 ups
 	c_const_set("tank_damageMinSpeed", 20, 1)
 	c_const_set("tank_collideMinDamage", 5, 1)
-	c_const_set("tank_deceleration", -24, 1)
-	c_const_set("tank_decelerationMinSpeed", -4, 1)
+	c_const_set("tank_deceleration", -6, 1)
+	c_const_set("tank_decelerationMinSpeed", -1, 1)
 	c_const_set("tank_highHealth", 66, 1)
 	c_const_set("tank_lowHealth", 33, 1)
 	c_const_set("tank_acceleration",
