@@ -107,7 +107,7 @@ function main_loop()
 		d = 1.0E-6  -- make an inaccurate guess
 	end
 
-	if c_config_get("config.client.fps") < c_const_get("client_minFPS") then
+	if c_config_get("config.client.fps") < c_const_get("client_minFPS") and c_config_get("config.client.fps") ~= 0 then
 		c_config_set("config.client.fps", c_const_get("client_minFPS"))
 	end
 
