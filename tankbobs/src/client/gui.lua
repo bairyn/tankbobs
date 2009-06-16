@@ -1055,14 +1055,16 @@ function gui_char(c)
 	elseif c == 274 then
 		return "Down", "Down"
 	elseif c == 275 then
-		return "Left", "Left"
+		return "Right", "Right"
 	elseif c == 276 then
-		return "Insert", "Insert"
+		return "Left", "Left"
 	elseif c == 277 then
-		return "Home", "Home"
+		return "Insert", "Insert"
 	elseif c == 278 then
-		return "End", "End"
+		return "Home", "Home"
 	elseif c == 279 then
+		return "End", "End"
+	elseif c == 280 then
 		return "Page Up", "Page Up"
 	elseif c == 281 then
 		return "Page Down", "Page Down"
