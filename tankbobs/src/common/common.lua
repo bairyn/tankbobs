@@ -304,5 +304,5 @@ function common_MTF(ms)
 end
 
 function common_lerp(from, to, value)
-	return from - (value * (to - from))
+	return from - (value * (from - to))
 end

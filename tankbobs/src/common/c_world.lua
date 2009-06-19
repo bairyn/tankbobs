@@ -95,15 +95,15 @@ function c_world_init()
 	c_const_set("tank_lowHealth", 33, 1)
 	c_const_set("tank_acceleration",
 	{
-		{16},  -- acceleration of 16 <strike>units per second</strike> by default
-		{12, 2},  -- unless the tank's speed is at least 8 units per second, in which case the acceleration is dropped to 48
-		{6, 3},
-		{4, 4},
-		{2, 6},
-		{1, 9},
-		{0.5, 12},
-		{0.4, 16},
-		{(1 / 3), 20}
+		{16 / 1000},  -- acceleration of 16 <strike>units per second</strike> by default
+		{12 / 1000, 2},  -- unless the tank's speed is at least 8 units per second, in which case the acceleration is dropped to 48
+		{6 / 1000, 3},
+		{4 / 1000, 4},
+		{2 / 1000, 6},
+		{1 / 1000, 9},
+		{0.5 / 1000, 12},
+		{0.4 / 1000, 16},
+		{(1 / 3) / 1000, 20}
 	}, 1)
 	c_const_set("tank_speedK", 5, 1)
 	c_const_set("tank_density", 2, 1)
@@ -125,7 +125,7 @@ function c_world_init()
 	c_const_set("wall_isBullet", true, 1)
 	c_const_set("wall_linearDamping", 0, 1)
 	c_const_set("wall_angularDamping", 0, 1)
-	c_const_set("tank_rotationChange", 0.05, 1)
+	c_const_set("tank_rotationChange", 0.005, 1)
 	c_const_set("tank_rotationChangeMinSpeed", 0.5, 1)  -- if at least 24 ups
 	c_const_set("tank_rotationSpeed", c_math_radians(450) / 1000, 1)  -- 135 degrees per second
 	c_const_set("tank_rotationSpecialSpeed", c_math_degrees(1) / 3.5, 1)
@@ -738,8 +738,9 @@ function c_world_tank_step(d, tank)
 
 			local newVel = tankbobs.m_vec2(vel)
 			newVel.R = newVel.R + acceleration
+			newVel.t = tank.r
 			if vel.R >= c_const_get("tank_rotationChangeMinSpeed") * c_const_get("tank_speedK") then
-				newVel.t = common_lerp(vel.t, tank.r, c_const_get("tank_rotationChange"))
+				newVel.t = common_lerp(vel.t, newVel.t, c_const_get("tank_rotationChange"))
 			end
 
 			tankbobs.w_setLinearVelocity(tank.body, newVel)
@@ -747,8 +748,9 @@ function c_world_tank_step(d, tank)
 			if vel.R >= c_const_get("tank_decelerationMinSpeed") then
 				local newVel = tankbobs.m_vec2(vel)
 				newVel.R = newVel.R - c_const_get("tank_rotationChangeMinSpeed")
+				newVel.t = tank.r
 				if vel.R >= c_const_get("tank_rotationChangeMinSpeed") * c_const_get("tank_speedK") then
-					newVel.t = common_lerp(vel.t, tank.r, c_const_get("tank_rotationChange"))
+					newVel.t = common_lerp(vel.t, newVel.t, c_const_get("tank_rotationChange"))
 				end
 
 				tankbobs.w_setLinearVelocity(tank.body, newVel)
@@ -770,6 +772,8 @@ function c_world_tank_step(d, tank)
 	end
 
 	tankbobs.w_setAngle(tank.body, tank.r)
+
+	tankbobs.w_setAngularVelocity(tank.body, 0)  -- reset the tank's angular velocity
 
 	-- weapons
 	if tank.state.firing then
