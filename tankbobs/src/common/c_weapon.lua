@@ -22,10 +22,18 @@ c_weapon.lua
 weapons
 --]]
 
+local c_world_tankDamage = c_world_tankDamage
+local c_const_get = c_const_get
+local tankbobs = tankbobs
+
 local c_world_projectiles
 local c_weapons
 
 function c_weapon_init()
+	c_world_tankDamage = _G.c_world_tankDamage
+	c_const_get = _G.c_const_get
+	tankbobs = _G.tankbobs
+
 	c_const_set("projectile_canSleep", false, 1)
 	c_const_set("projectile_isBullet", true, 1)
 	c_const_set("projectile_linearDamping", 0, 1)

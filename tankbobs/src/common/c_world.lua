@@ -25,14 +25,15 @@ world and physics
 --TODO: knockback and damage for hitting world.  A powerup will protect the front.  another will protect the back and sides.  Each will do so in exchange for a slight decrease in acceleration.
 --TODO: damage is noticeably higher in special mode.
 
-local c_config_set = c_config_set
-local c_config_get = c_config_get
-local c_const_set  = c_const_set
-local c_const_get  = c_const_get
+local c_config_set            = c_config_set
+local c_config_get            = c_config_get
+local c_const_set             = c_const_set
+local c_const_get             = c_const_get
 local c_weapon_getProjectiles = c_weapon_getProjectiles
-local common_FTM   = common_FTM
-local common_lerp  = common_lerp
-local tankbobs     = tankbobs
+local common_FTM              = common_FTM
+local common_lerp             = common_lerp
+local c_weapon_fire           = c_weapon_fire
+local tankbobs                = tankbobs
 
 local c_world_tank_step
 local c_world_projectile_step
@@ -45,14 +46,15 @@ local worldTime = 0
 local tank_acceleration
 
 function c_world_init()
-	c_config_set = _G.c_config_set
-	c_config_get = _G.c_config_get
-	c_const_set  = _G.c_const_set
-	c_const_get  = _G.c_const_get
+	c_config_set            = _G.c_config_set
+	c_config_get            = _G.c_config_get
+	c_const_set             = _G.c_const_set
+	c_const_get             = _G.c_const_get
 	c_weapon_getProjectiles = _G.c_weapon_getProjectiles
-	common_FTM   = _G.common_FTM
-	common_lerp  = _G.common_lerp
-	tankbobs     = _G.tankbobs
+	common_FTM              = _G.common_FTM
+	common_lerp             = _G.common_lerp
+	c_weapon_fire           = _G.c_weapon_fire
+	tankbobs                = _G.tankbobs
 
 	c_config_cheat_protect("config.game.timescale")
 
@@ -952,10 +954,11 @@ local function c_world_isProjectile(body)
 	return false
 end
 
-local function c_world_tankDamage(tank, damage)
+function c_world_tankDamage(tank, damage)
 	tank.health = tank.health - damage
 end
 
+local c_world_tankDamage = c_world_tankDamage
 local function c_world_collide(tank, normal)
 	local vel = tankbobs.w_getLinearVelocity(tank.body)
 	local component = vel * -normal

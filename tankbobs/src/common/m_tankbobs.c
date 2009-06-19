@@ -304,7 +304,6 @@ struct table_s
 
 static const void *traversedTables[BUFSIZE];
 static const void **nextTable;
-static table_t *nextDynTable = &moreTraversedTables;
 static table_t *lastDynTable;
 static int tableDynMem = FALSE;
 
@@ -319,7 +318,6 @@ static void t_cloneTable(lua_State *L)
 		if(nextTable - traversedTables >= sizeof(traversedTables) / sizeof(traversedTables[0]))
 		{
 			memset(&moreTraversedTables, 0, sizeof(moreTraversedTables));
-			nextDynTable = &moreTraversedTables;
 			lastDynTable = NULL;
 			tableDynMem = TRUE;
 		}
@@ -328,17 +326,20 @@ static void t_cloneTable(lua_State *L)
 	{
 		table_t *newTable;
 
-		if(lastDynTable)
+		if(moreTraversedTables.address)
 		{
 			newTable = malloc(sizeof(table_t));
 			lastDynTable->next = newTable;
+			lastDynTable = newTable;
 		}
 		else
 		{
-			newTable = &moreTraversedTables;
+			newTable = lastDynTable = &moreTraversedTables;
 		}
 
 		memset(newTable, 0, sizeof(table_t));
+
+		newTable->address = lua_topointer(L, -1);
 	}
 
 	if(!tableDynMem)
@@ -347,7 +348,6 @@ static void t_cloneTable(lua_State *L)
 		if(nextTable - traversedTables >= sizeof(traversedTables) / sizeof(traversedTables[0]))
 		{
 			memset(&moreTraversedTables, 0, sizeof(moreTraversedTables));
-			nextDynTable = &moreTraversedTables;
 			lastDynTable = NULL;
 			tableDynMem = TRUE;
 		}
@@ -356,17 +356,20 @@ static void t_cloneTable(lua_State *L)
 	{
 		table_t *newTable;
 
-		if(lastDynTable)
+		if(moreTraversedTables.address)
 		{
 			newTable = malloc(sizeof(table_t));
 			lastDynTable->next = newTable;
+			lastDynTable = newTable;
 		}
 		else
 		{
-			newTable = &moreTraversedTables;
+			newTable = lastDynTable = &moreTraversedTables;
 		}
 
 		memset(newTable, 0, sizeof(table_t));
+
+		newTable->address = lua_topointer(L, -1);
 	}
 
 	/* iterate over each element of the input table */
@@ -375,14 +378,14 @@ static void t_cloneTable(lua_State *L)
 	{
 		if(lua_istable(L, -1))
 		{
-			const void *i;
-			const void *op = lua_topointer(L, -3), *ip = lua_topointer(L, -4);
+			const void **i;
+			const void *p = lua_topointer(L, -1);
 			int found = FALSE;
 
 			/* skip if either of the tables have been traversed */
-			for(i = &traversedTables; i < *nextTable; i++)
+			for(i = &traversedTables[0]; i < nextTable && i < traversedTables + sizeof(traversedTables) / sizeof(traversedTables[0]); i++)
 			{
-				if(i == op || i == ip)
+				if(*i == p)
 				{
 					found = TRUE;
 
@@ -390,13 +393,13 @@ static void t_cloneTable(lua_State *L)
 				}
 			}
 
-			if(!found && tableDynMem)
+			if(!found && tableDynMem && lastDynTable)
 			{
 				table_t *i;
 
 				for(i = &moreTraversedTables; i; i = i->next)
 				{
-					if(i == op || i == ip)
+					if(i->address == p)
 					{
 						found = TRUE;
 
@@ -414,18 +417,51 @@ static void t_cloneTable(lua_State *L)
 
 			/* copy the table */
 			lua_pushvalue(L, -2);
-			lua_tostring(L, -1);
-			lua_pushvalue(L, -2);
-			lua_remove(L, -3);
-			lua_getfield(L, -4, lua_tostring(L, -2));
-			lua_remove(L, -3);
+			lua_gettable(L, -4);
 			if(!lua_istable(L, -1))
 			{
+				lua_pop(L, 1);
 				lua_newtable(L);
-				lua_pushvalue(L, -1);
-				lua_setfield(L, -7, lua_tostring(L, -5));
-				lua_remove(L, -2);
-				lua_remove(L, -3);
+				lua_pushvalue(L, -3);
+				lua_pushvalue(L, -2);
+				lua_settable(L, -6);
+			}
+			else
+			{
+				/* skip if either of the tables have been traversed */
+				p = lua_topointer(L, -1);
+
+				for(i = &traversedTables[0]; i < nextTable && i < traversedTables + sizeof(traversedTables) / sizeof(traversedTables[0]); i++)
+				{
+					if(*i == p)
+					{
+						found = TRUE;
+
+						break;
+					}
+				}
+
+				if(!found && tableDynMem && lastDynTable)
+				{
+					table_t *i;
+
+					for(i = &moreTraversedTables; i; i = i->next)
+					{
+						if(i->address == p)
+						{
+							found = TRUE;
+
+							break;
+						}
+					}
+				}
+
+				if(found)
+				{
+					lua_pop(L, 3);
+
+					continue;
+				}
 			}
 			t_cloneTable(L);
 			lua_pop(L, 2);
@@ -433,14 +469,10 @@ static void t_cloneTable(lua_State *L)
 		else
 		{
 			lua_pushvalue(L, -2);
-			lua_tostring(L, -1);
 			lua_pushvalue(L, -2);
-			lua_remove(L, -3);
-			lua_setfield(L, -4, lua_tostring(L, -2));
+			lua_settable(L, -5);
 			lua_pop(L, 1);
 		}
-
-		lua_pop(L, 1);
 	}
 
 	/* leave the input and output table on the stack */
