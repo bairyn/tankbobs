@@ -294,6 +294,195 @@ int t_explode(lua_State *L)
 	return 1;
 }
 
+typedef struct table_s table_t;
+struct table_s
+{
+	const void *address;
+
+	table_t *next;
+} moreTraversedTables;
+
+static const void *traversedTables[BUFSIZE];
+static const void **nextTable;
+static table_t *nextDynTable = &moreTraversedTables;
+static table_t *lastDynTable;
+static int tableDynMem = FALSE;
+
+static void t_cloneTable(lua_State *L)
+{
+	/* see if any of the tables has already been traversed to avoid circular references */
+
+	/* add the input and output tables to the list of already traversed tables */
+	if(!tableDynMem)
+	{
+		*nextTable++ = lua_topointer(L, -2);
+		if(nextTable - traversedTables >= sizeof(traversedTables) / sizeof(traversedTables[0]))
+		{
+			memset(&moreTraversedTables, 0, sizeof(moreTraversedTables));
+			nextDynTable = &moreTraversedTables;
+			lastDynTable = NULL;
+			tableDynMem = TRUE;
+		}
+	}
+	else
+	{
+		table_t *newTable;
+
+		if(lastDynTable)
+		{
+			newTable = malloc(sizeof(table_t));
+			lastDynTable->next = newTable;
+		}
+		else
+		{
+			newTable = &moreTraversedTables;
+		}
+
+		memset(newTable, 0, sizeof(table_t));
+	}
+
+	if(!tableDynMem)
+	{
+		*nextTable++ = lua_topointer(L, -1);
+		if(nextTable - traversedTables >= sizeof(traversedTables) / sizeof(traversedTables[0]))
+		{
+			memset(&moreTraversedTables, 0, sizeof(moreTraversedTables));
+			nextDynTable = &moreTraversedTables;
+			lastDynTable = NULL;
+			tableDynMem = TRUE;
+		}
+	}
+	else
+	{
+		table_t *newTable;
+
+		if(lastDynTable)
+		{
+			newTable = malloc(sizeof(table_t));
+			lastDynTable->next = newTable;
+		}
+		else
+		{
+			newTable = &moreTraversedTables;
+		}
+
+		memset(newTable, 0, sizeof(table_t));
+	}
+
+	/* iterate over each element of the input table */
+	lua_pushnil(L);
+	while(lua_next(L, -3))
+	{
+		if(lua_istable(L, -1))
+		{
+			const void *i;
+			const void *op = lua_topointer(L, -3), *ip = lua_topointer(L, -4);
+			int found = FALSE;
+
+			/* skip if either of the tables have been traversed */
+			for(i = &traversedTables; i < *nextTable; i++)
+			{
+				if(i == op || i == ip)
+				{
+					found = TRUE;
+
+					break;
+				}
+			}
+
+			if(!found && tableDynMem)
+			{
+				table_t *i;
+
+				for(i = &moreTraversedTables; i; i = i->next)
+				{
+					if(i == op || i == ip)
+					{
+						found = TRUE;
+
+						break;
+					}
+				}
+			}
+
+			if(found)
+			{
+				lua_pop(L, 1);
+
+				continue;
+			}
+
+			/* copy the table */
+			lua_pushvalue(L, -2);
+			lua_tostring(L, -1);
+			lua_pushvalue(L, -2);
+			lua_remove(L, -3);
+			lua_getfield(L, -4, lua_tostring(L, -2));
+			lua_remove(L, -3);
+			if(!lua_istable(L, -1))
+			{
+				lua_newtable(L);
+				lua_pushvalue(L, -1);
+				lua_setfield(L, -7, lua_tostring(L, -5));
+				lua_remove(L, -2);
+				lua_remove(L, -3);
+			}
+			t_cloneTable(L);
+			lua_pop(L, 2);
+		}
+		else
+		{
+			lua_pushvalue(L, -2);
+			lua_tostring(L, -1);
+			lua_pushvalue(L, -2);
+			lua_remove(L, -3);
+			lua_setfield(L, -4, lua_tostring(L, -2));
+			lua_pop(L, 1);
+		}
+
+		lua_pop(L, 1);
+	}
+
+	/* leave the input and output table on the stack */
+}
+
+int t_clone(lua_State *L)
+{
+	CHECKINIT(init, L);
+
+	if(!lua_istable(L, 1))
+	{
+		lua_pushnil(L);
+		return 1;
+	}
+
+	if(!lua_istable(L, 2))
+	{
+		/* create the output table if it doesn't exist */
+		lua_newtable(L);
+	}
+
+	nextTable = &traversedTables[0];
+
+	t_cloneTable(L);
+
+	if(tableDynMem)
+	{
+		table_t *i, *tmp;
+
+		for(i = moreTraversedTables.next; i; i = tmp)
+		{
+			tmp = i->next;
+
+			free(i);
+		}
+	}
+
+	lua_remove(L, -2);
+
+	return 1;
+}
+
 static const struct luaL_Reg tankbobs[] =
 {
 	/* tankbobs.c */
@@ -322,6 +511,7 @@ static const struct luaL_Reg tankbobs[] =
 			If the fourth argument passed is true, any delimiters between "'s will be ignored.
 			If the fifth argument passed is true, two escape sequences will be recognized:
 			\\ -> \; \" -> ".  This is useful if you want unrecognized "'s in the passed string */
+	{"t_clone", t_clone}, /* clone the first passed table into the second passed table */
 
 	/* input.c */
 	{"in_getEvents", in_getEvents}, /* store events in a userdata */

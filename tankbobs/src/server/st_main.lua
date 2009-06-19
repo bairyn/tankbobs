@@ -28,6 +28,9 @@ local commands_command
 local c_world_setPaused
 local c_world_step
 
+local st_main_init
+local st_main_done
+
 function st_main_init()
 	tankbobs = _G.tankbobs
 	commands_command = _G.commands_command

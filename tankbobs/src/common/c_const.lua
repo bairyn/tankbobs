@@ -26,7 +26,7 @@ c_const.lua
 function c_const_init()
 	c_const_init = nil
 
-	local common_clone = common_clone
+	local clone = tankbobs.t_clone
 
 	local const = {}
 
@@ -38,7 +38,7 @@ function c_const_init()
 		-- return a proxy table so the real table doesn't change (the clone also handles sub-tables)
 		if type(const[k]["v"]) == "table" then
 			local t = {}
-			common_clone(const[k]["v"], t)
+			clone(const[k]["v"], t)
 			return t
 		else
 			return const[k]["v"]

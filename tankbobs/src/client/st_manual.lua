@@ -23,6 +23,13 @@ st_manual.lua
 game rules
 --]]
 
+local st_manual_init
+local st_manual_done
+local st_manual_click
+local st_manual_button
+local st_manual_mouse
+local st_manual_step
+
 function st_manual_init()
 	gui_addAction(tankbobs.m_vec2(25, 75), "Back", nil, c_state_advance)
 

@@ -23,6 +23,13 @@ st_help.lua
 game help and information
 --]]
 
+local st_help_init
+local st_help_done
+local st_help_click
+local st_help_button
+local st_help_mouse
+local st_help_step
+
 function st_help_init()
 	gui_addAction(tankbobs.m_vec2(25, 75), "Back", nil, c_state_advance)
 

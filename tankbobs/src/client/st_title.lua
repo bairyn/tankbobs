@@ -23,6 +23,13 @@ st_title.lua
 title screen
 --]]
 
+local st_title_init
+local st_title_done
+local st_title_click
+local st_title_button
+local st_title_mouse
+local st_title_step
+
 function st_title_init()
 	gui_addLabel (tankbobs.m_vec2(50, 75), "Main Menu")
 	gui_addAction(tankbobs.m_vec2(50, 65), "Play",    nil, st_title_play)

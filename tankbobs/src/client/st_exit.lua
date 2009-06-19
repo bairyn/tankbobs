@@ -23,6 +23,8 @@ st_exit.lua
 exiting
 --]]
 
+local st_exit_init
+
 function st_exit_init()
 	done = true
 end

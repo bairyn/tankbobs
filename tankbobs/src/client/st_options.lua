@@ -23,6 +23,13 @@ st_options.lua
 configuration screen
 --]]
 
+local st_options_init
+local st_options_done
+local st_options_click
+local st_options_button
+local st_options_mouse
+local st_options_step
+
 function st_options_init()
 	st_options_renderer = {fullscreen = c_config_get("config.renderer.fullscreen"), width = c_config_get("config.renderer.width"), height = c_config_get("config.renderer.height")}
 	st_options_player = {}

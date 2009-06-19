@@ -23,6 +23,13 @@ st_level.lua
 level selection
 --]]
 
+local st_level_init
+local st_level_done
+local st_level_click
+local st_level_button
+local st_level_mouse
+local st_level_step
+
 function st_level_init()
 	gui_addAction(tankbobs.m_vec2(25, 92.5), "Back", nil, c_state_advance)
 

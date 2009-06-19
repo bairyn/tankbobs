@@ -23,6 +23,13 @@ st_set.lua
 set selection
 --]]
 
+local st_set_init
+local st_set_done
+local st_set_click
+local st_set_button
+local st_set_mouse
+local st_set_step
+
 function st_set_init()
 	gui_addAction(tankbobs.m_vec2(25, 92.5), "Back", nil, c_state_advance)
 

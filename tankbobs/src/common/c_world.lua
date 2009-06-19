@@ -29,6 +29,7 @@ local c_config_set = c_config_set
 local c_config_get = c_config_get
 local c_const_set  = c_const_set
 local c_const_get  = c_const_get
+local c_weapon_getProjectiles = c_weapon_getProjectiles
 local common_FTM   = common_FTM
 local common_lerp  = common_lerp
 local tankbobs     = tankbobs
@@ -37,14 +38,18 @@ local c_world_tank_step
 local c_world_projectile_step
 local c_world_powerupSpawnPoint_step
 local c_world_powerup_step
+local c_world_tanks
+local c_world_powerups
 
 local worldTime = 0
+local tank_acceleration
 
 function c_world_init()
 	c_config_set = _G.c_config_set
 	c_config_get = _G.c_config_get
 	c_const_set  = _G.c_const_set
 	c_const_get  = _G.c_const_get
+	c_weapon_getProjectiles = _G.c_weapon_getProjectiles
 	common_FTM   = _G.common_FTM
 	common_lerp  = _G.common_lerp
 	tankbobs     = _G.tankbobs
@@ -95,7 +100,7 @@ function c_world_init()
 	c_const_set("tank_lowHealth", 33, 1)
 	c_const_set("tank_acceleration",
 	{
-		{16 / 1000},  -- acceleration of 16 <strike>units per second</strike> by default
+		{16 / 1000},  -- acceleration of 16 by default
 		{12 / 1000, 2},  -- unless the tank's speed is at least 8 units per second, in which case the acceleration is dropped to 48
 		{6 / 1000, 3},
 		{4 / 1000, 4},
@@ -105,6 +110,7 @@ function c_world_init()
 		{0.4 / 1000, 16},
 		{(1 / 3) / 1000, 20}
 	}, 1)
+	tank_acceleration = c_const_get("tank_acceleration")
 	c_const_set("tank_speedK", 5, 1)
 	c_const_set("tank_density", 2, 1)
 	c_const_set("tank_friction", 0.25, 1)
@@ -416,10 +422,10 @@ function c_world_intersection(d, p1, p2, v1, v2)
 	local p1a = {}
 	local p2a = {}
 
-	common_clone(p1, p1h)
-	common_clone(p2, p2h)
-	common_clone(p1h, p1a)
-	common_clone(p2h, p2a)
+	tankbobs.t_clone(p1, p1h)
+	tankbobs.t_clone(p2, p2h)
+	tankbobs.t_clone(p1h, p1a)
+	tankbobs.t_clone(p2h, p2a)
 
 	for _, v in pairs(p1a) do
 		v = v + d * v1
@@ -428,8 +434,8 @@ function c_world_intersection(d, p1, p2, v1, v2)
 		v = v + d * v2
 	end
 
-	common_clone(p1a, p1h)
-	common_clone(p2a, p2h)
+	tankbobs.t_clone(p1a, p1h)
+	tankbobs.t_clone(p2a, p2h)
 
 	return tankbobs.m_polygon(p1h, p2h)
 end
@@ -629,7 +635,7 @@ function c_world_findClosestIntersection(start, endP)
 	end
 
 	-- projectiles
-	for _, v in pairs(c_world_projectiles) do
+	for _, v in pairs(c_weapon_getProjectiles()) do
 		if not v.collided then
 			hull = c_world_projectileHull(v)
 			local t = v
@@ -726,7 +732,7 @@ function c_world_tank_step(d, tank)
 			-- determine the acceleration
 			local acceleration
 
-			for _, v in pairs(c_const_get("tank_acceleration")) do
+			for _, v in pairs(tank_acceleration) do  -- local copy of table for optimization
 				if v[2] then
 					if vel.R >= v[2] * c_const_get("tank_speedK") then
 						acceleration = v[1]
@@ -926,7 +932,7 @@ function c_world_powerup_step(d, powerup)
 	end
 end
 
-function c_world_isTank(body)
+local function c_world_isTank(body)
 	for _, v in pairs(c_world_tanks) do
 		if v.body == body then
 			return true, v
@@ -936,8 +942,8 @@ function c_world_isTank(body)
 	return false
 end
 
-function c_world_isProjectile(body)
-	for _, v in pairs(c_world_projectiles) do
+local function c_world_isProjectile(body)
+	for _, v in pairs(c_weapon_getProjectiles()) do
 		if v.m.body == body then
 			return true, v
 		end
@@ -946,11 +952,11 @@ function c_world_isProjectile(body)
 	return false
 end
 
-function c_world_tankDamage(tank, damage)
+local function c_world_tankDamage(tank, damage)
 	tank.health = tank.health - damage
 end
 
-function c_world_collide(tank, normal)
+local function c_world_collide(tank, normal)
 	local vel = tankbobs.w_getLinearVelocity(tank.body)
 	local component = vel * -normal
 
@@ -1044,6 +1050,26 @@ function c_world_setPaused(set)
 	paused = set
 end
 
+function c_world_getPaused(set)
+	paused = get
+end
+
+function c_world_setTimeStep(x)
+	tankbobs.w_setTimeStep(x)
+end
+
+function c_world_setTimeStep()
+	return tankbobs.w_getTimeStep()
+end
+
+function c_world_setIterations(x)
+	tankbobs.w_setIterations(x)
+end
+
+function c_world_setIterations()
+	return tankbobs.w_getIterations()
+end
+
 function c_world_step(d)
 	local t = tankbobs.t_getTicks()
 
@@ -1056,7 +1082,7 @@ function c_world_step(d)
 					c_world_tank_step(common_FTM(c_const_get("world_fps")), v)
 				end
 
-				for _, v in pairs(c_world_projectiles) do
+				for _, v in pairs(c_weapon_getProjectiles()) do
 					c_world_projectile_step(common_FTM(c_const_get("world_fps")), v)
 				end
 
@@ -1076,18 +1102,10 @@ function c_world_step(d)
 	end
 end
 
-function c_world_setTimeStep(x)
-	tankbobs.w_setTimeStep(x)
+function c_world_getTanks()
+	return c_world_tanks
 end
 
-function c_world_setTimeStep()
-	return tankbobs.w_getTimeStep()
-end
-
-function c_world_setIterations(x)
-	tankbobs.w_setIterations(x)
-end
-
-function c_world_setIterations()
-	return tankbobs.w_getIterations()
+function c_world_getPowerups()
+	return c_world_powerups
 end

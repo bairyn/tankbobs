@@ -22,6 +22,9 @@ c_weapon.lua
 weapons
 --]]
 
+local c_world_projectiles
+local c_weapons
+
 function c_weapon_init()
 	c_const_set("projectile_canSleep", false, 1)
 	c_const_set("projectile_isBullet", true, 1)
@@ -544,4 +547,12 @@ function c_weapon_projectileCollided(projectile, body)
 			return
 		end
 	end
+end
+
+function c_weapon_getProjectiles()
+	return c_world_projectiles
+end
+
+function c_weapon_getWeapons()
+	return c_weapons
 end

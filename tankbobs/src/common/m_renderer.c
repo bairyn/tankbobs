@@ -497,6 +497,22 @@ int r_drawString(lua_State *L)
 	draw = luaL_checkstring(L, 1);
 	v2 = CHECKVEC(L, 2);
 
+	if(!*draw)
+	{
+		/* nothing to draw */
+		v = (vec2_t *) lua_newuserdata(L, sizeof(vec2_t));
+
+		luaL_getmetatable(L, MATH_METATABLE);
+		lua_setmetatable(L, -2);
+
+		v->x = v2->x;
+		v->y = v2->y;
+		v->R = v2->R;
+		v->t = v2->t;
+
+		return 1;
+	}
+
 	fill[0] = luaL_checknumber(L, 3);
 	fill[1] = luaL_checknumber(L, 4);
 	fill[2] = luaL_checknumber(L, 5);

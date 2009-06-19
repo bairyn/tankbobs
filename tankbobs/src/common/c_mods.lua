@@ -85,7 +85,7 @@ function common_clone_except_special(i, o, e)
 						end
 
 						if unsafe then
-							common_clone(_G, c_mods_env)
+							tankbobs.t_clone(_G, c_mods_env)
 						else
 							common_clone_except(_G, c_mods_env, c_const_get("hidden_globals"))
 							--c_mods_env._G = false
@@ -95,7 +95,7 @@ function common_clone_except_special(i, o, e)
 						local result = {do_f(...)}
 
 						if unsafe then
-							common_clone(c_mods_env, _G)
+							tankbobs.t_clone(c_mods_env, _G)
 						else
 							--common_clone_except(c_mods_env, G_t, c_const_get("protected_globals"))
 							-- use a special version of clone so that redefined functions (protected globals can be accessed but not redefined) don't have access to hidden globals
@@ -139,7 +139,7 @@ function c_mods_load(dir)
 	end
 
 	if unsafe then
-		common_clone(_G, c_mods_env)
+		tankbobs.t_clone(_G, c_mods_env)
 	else
 		common_clone_except(_G, c_mods_env, c_const_get("hidden_globals"))
 		--c_mods_env._G = false
@@ -159,7 +159,7 @@ function c_mods_load(dir)
 	end
 
 	if unsafe then
-		common_clone(c_mods_env, _G)
+		tankbobs.t_clone(c_mods_env, _G)
 	else
 		--common_clone_except(c_mods_env, G_t, c_const_get("protected_globals"))
 		-- use a special version of clone so that redefined functions (protected globals can be accessed but not redefined) don't have access to hidden globals

@@ -36,6 +36,8 @@ function c_config_init()
 	local cheats_enabled = false
 	local cheats_table = {}  -- keys of cheat-protected keys
 
+	local clone = tankbobs.t_clone
+
 	local config_set
 	local config_get
 
@@ -305,9 +307,9 @@ function c_config_init()
 		local res = {}
 		k = k or config
 		if type(k) == "table" then
-			common_clone(k, res)
+			clone(k, res)
 		elseif type(k) == "string" and type(config_get(k)) == "table" then
-			common_clone(config_get(k), res)
+			clone(config_get(k), res)
 		else
 			error("config_backup invalid backup key")
 		end
@@ -320,9 +322,9 @@ function c_config_init()
 			error("config_restore invalid value")
 		end
 		if type(k) == "table" then
-			common_clone(v, k)
+			clone(v, k)
 		elseif type(k) == "string" and type(config_get(k)) == "table" then
-			common_clone(v, config_get(k))
+			clone(v, config_get(k))
 		else
 			error("config_restore invalid backup key")
 		end

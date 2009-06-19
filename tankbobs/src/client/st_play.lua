@@ -30,6 +30,33 @@ local c_world_step = c_world_step
 local gui_paint = gui_paint
 local gui_button = gui_button
 local gui_mouse = gui_mouse
+local c_world_getPowerups = c_world_getPowerups
+local c_weapon_getProjectiles = c_weapon_getProjectiles
+local c_world_getTanks = c_world_getTanks
+local c_world_getPaused = c_world_getPaused
+local c_const_get = c_const_get
+local c_const_set = c_const_set
+local c_config_get = c_config_get
+local c_config_set = c_config_set
+local c_weapon_getWeapons = c_weapon_getWeapons
+
+local tank_listBase
+local tank_textures
+local powerup_listBase
+local powerup_textures
+local wall_listBase
+local wall_textures
+local healthbar_listBase
+local healthbarBorder_listBase
+local healthbar_texture
+local healthbarBorder_texture
+
+local st_play_init
+local st_play_done
+local st_play_click
+local st_play_button
+local st_play_mouse
+local st_play_step
 
 function st_play_init()
 	-- localize frequently used globals
@@ -39,6 +66,15 @@ function st_play_init()
 	gui_paint = _G.gui_paint
 	gui_button = _G.gui_button
 	gui_mouse = _G.gui_mouse
+	c_world_getPowerups = _G.c_world_getPowerups
+	c_weapon_getProjectiles = _G.c_weapon_getProjectiles
+	c_world_getTanks = _G.c_world_getTanks
+	c_world_getPaused = _G.c_world_getPaused
+	c_const_get = _G.c_const_get
+	c_const_set = _G.c_const_set
+	c_config_get = _G.c_config_get
+	c_config_set = _G.c_config_set
+	c_weapon_getWeapons = _G.c_weapon_getWeapons
 
 	-- initialize renderer stuff
 	c_const_set("tank_renderx1", -2.0, 1) c_const_set("tank_rendery1",  2.0, 1)
@@ -50,24 +86,24 @@ function st_play_init()
 	c_const_set("tank_texturex3", 0.0, 1) c_const_set("tank_texturey3", 0.1, 1)  -- eliminate fuzzy top
 	c_const_set("tank_texturex4", 1.0, 1) c_const_set("tank_texturey4", 0.1, 1)  -- eliminate fuzzy top
 
-	play_tank_listBase = gl.GenLists(1)
-	play_tank_textures = gl.GenTextures(1)
+	tank_listBase = gl.GenLists(1)
+	tank_textures = gl.GenTextures(1)
 
-	if play_tank_listBase == 0 then
+	if tank_listBase == 0 then
 		error "st_play_init: could not generate lists"
 	end
 
-	gl.BindTexture("TEXTURE_2D", play_tank_textures[1])
+	gl.BindTexture("TEXTURE_2D", tank_textures[1])
 	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_S", "REPEAT")
 	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_T", "REPEAT")
 	gl.TexParameter("TEXTURE_2D", "TEXTURE_MIN_FILTER", "LINEAR")
 	gl.TexParameter("TEXTURE_2D", "TEXTURE_MAG_FILTER", "LINEAR")
 	tankbobs.r_loadImage2D(c_const_get("tank"), c_const_get("textures_default"))
 
-	gl.NewList(play_tank_listBase, "COMPILE_AND_EXECUTE")  -- execute to remove "choppy" effect
+	gl.NewList(tank_listBase, "COMPILE_AND_EXECUTE")  -- execute to remove "choppy" effect
 		-- blend tank with color
 		gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
-		gl.BindTexture("TEXTURE_2D", play_tank_textures[1])
+		gl.BindTexture("TEXTURE_2D", tank_textures[1])
 		gl.Begin("QUADS")
 			gl.TexCoord(c_const_get("tank_texturex1"), c_const_get("tank_texturey1")) gl.Vertex(c_const_get("tank_renderx1"), c_const_get("tank_rendery1"))
 			gl.TexCoord(c_const_get("tank_texturex2"), c_const_get("tank_texturey2")) gl.Vertex(c_const_get("tank_renderx2"), c_const_get("tank_rendery2"))
@@ -76,10 +112,10 @@ function st_play_init()
 		gl.End()
 	gl.EndList()
 
-	play_powerup_listBase = gl.GenLists(1)
-	play_powerup_textures = gl.GenTextures(1)
+	powerup_listBase = gl.GenLists(1)
+	powerup_textures = gl.GenTextures(1)
 
-	if play_powerup_listBase == 0 then
+	if powerup_listBase == 0 then
 		error "st_play_init: could not generate lists"
 	end
 
@@ -92,16 +128,16 @@ function st_play_init()
 	c_const_set("powerup_texturex3", 1, 1) c_const_set("powerup_texturey3", 0, 1)
 	c_const_set("powerup_texturex4", 1, 1) c_const_set("powerup_texturey4", 1, 1)
 
-	gl.BindTexture("TEXTURE_2D", play_powerup_textures[1])
+	gl.BindTexture("TEXTURE_2D", powerup_textures[1])
 	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_S", "REPEAT")
 	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_T", "REPEAT")
 	gl.TexParameter("TEXTURE_2D", "TEXTURE_MIN_FILTER", "LINEAR")
 	gl.TexParameter("TEXTURE_2D", "TEXTURE_MAG_FILTER", "LINEAR")
 	tankbobs.r_loadImage2D(c_const_get("powerup"), c_const_get("textures_default"))
 
-	gl.NewList(play_powerup_listBase, "COMPILE_AND_EXECUTE")
+	gl.NewList(powerup_listBase, "COMPILE_AND_EXECUTE")
 		gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
-		gl.BindTexture("TEXTURE_2D", play_powerup_textures[1])
+		gl.BindTexture("TEXTURE_2D", powerup_textures[1])
 		gl.Begin("QUADS")
 			gl.TexCoord(c_const_get("powerup_texturex1"), c_const_get("powerup_texturey1")) gl.Vertex(c_const_get("powerup_renderx1"), c_const_get("powerup_rendery1"))
 			gl.TexCoord(c_const_get("powerup_texturex2"), c_const_get("powerup_texturey2")) gl.Vertex(c_const_get("powerup_renderx2"), c_const_get("powerup_rendery2"))
@@ -112,16 +148,16 @@ function st_play_init()
 
 	local listOffset = 0
 
-	play_wall_listBase = gl.GenLists(c_tcm_current_map.walls_n)
-	play_wall_textures = gl.GenTextures(c_tcm_current_map.walls_n)
+	wall_listBase = gl.GenLists(c_tcm_current_map.walls_n)
+	wall_textures = gl.GenTextures(c_tcm_current_map.walls_n)
 
-	if play_wall_listBase == 0 then
+	if wall_listBase == 0 then
 		error "st_play_init: could not generate lists"
 	end
 
 	for k, v in pairs(c_tcm_current_map.walls) do
-		v.m.list = play_wall_listBase + listOffset
-		v.m.texture = play_wall_textures[k]
+		v.m.list = wall_listBase + listOffset
+		v.m.texture = wall_textures[k]
 
 		gl.BindTexture("TEXTURE_2D", v.m.texture)
 		gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_S", "REPEAT")
@@ -148,7 +184,7 @@ function st_play_init()
 		listOffset = listOffset + 1
 	end
 
-	for _, v in pairs(c_weapons) do
+	for _, v in pairs(c_weapon_getWeapons()) do
 		v.m.list = gl.GenLists(1)
 		v.m.projectileList = gl.GenLists(1)
 
@@ -197,18 +233,18 @@ function st_play_init()
 		gl.EndList()
 	end
 
-	play_healthbar_listBase = gl.GenLists(1)
-	play_healthbarBorder_listBase = gl.GenLists(1)
-	play_healthbar_texture = gl.GenTextures(1)
-	play_healthbarBorder_texture = gl.GenTextures(1)
+	healthbar_listBase = gl.GenLists(1)
+	healthbarBorder_listBase = gl.GenLists(1)
+	healthbar_texture = gl.GenTextures(1)
+	healthbarBorder_texture = gl.GenTextures(1)
 
-	gl.BindTexture("TEXTURE_2D", play_healthbar_texture[1])
+	gl.BindTexture("TEXTURE_2D", healthbar_texture[1])
 	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_S", "REPEAT")
 	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_T", "REPEAT")
 	gl.TexParameter("TEXTURE_2D", "TEXTURE_MIN_FILTER", "LINEAR")
 	gl.TexParameter("TEXTURE_2D", "TEXTURE_MAG_FILTER", "LINEAR")
 	tankbobs.r_loadImage2D(c_const_get("healthbar_texture"), c_const_get("textures_default"))
-	gl.BindTexture("TEXTURE_2D", play_healthbarBorder_texture[1])
+	gl.BindTexture("TEXTURE_2D", healthbarBorder_texture[1])
 	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_S", "REPEAT")
 	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_T", "REPEAT")
 	gl.TexParameter("TEXTURE_2D", "TEXTURE_MIN_FILTER", "LINEAR")
@@ -234,8 +270,8 @@ function st_play_init()
 	c_const_set("healthbarBorder_texturex4", 1, 1) c_const_set("healthbarBorder_texturey4", 1, 1)
 	c_const_set("healthbar_rotation", 270, 1)
 
-	gl.NewList(play_healthbar_listBase, "COMPILE_AND_EXECUTE")
-		gl.BindTexture("TEXTURE_2D", play_healthbar_texture[1])
+	gl.NewList(healthbar_listBase, "COMPILE_AND_EXECUTE")
+		gl.BindTexture("TEXTURE_2D", healthbar_texture[1])
 		gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
 
 		gl.Begin("QUADS")
@@ -246,8 +282,8 @@ function st_play_init()
 		gl.End()
 	gl.EndList()
 
-	gl.NewList(play_healthbarBorder_listBase, "COMPILE_AND_EXECUTE")
-		gl.BindTexture("TEXTURE_2D", play_healthbarBorder_texture[1])
+	gl.NewList(healthbarBorder_listBase, "COMPILE_AND_EXECUTE")
+		gl.BindTexture("TEXTURE_2D", healthbarBorder_texture[1])
 		gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
 
 		gl.Begin("QUADS")
@@ -264,7 +300,7 @@ function st_play_init()
 
 		widget.text = ""
 
-		for k, v in pairs(c_world_tanks) do
+		for k, v in pairs(c_world_getTanks()) do
 			local name = tostring(c_config_get("config.game.player" .. tostring(k) .. ".name"))
 
 			if #name > length then
@@ -276,7 +312,7 @@ function st_play_init()
 			length = 1
 		end
 
-		for k, v in pairs(c_world_tanks) do
+		for k, v in pairs(c_world_getTanks()) do
 			local name, between, score
 
 			if widget.text:len() ~= 0 then
@@ -300,10 +336,20 @@ function st_play_init()
 		widget.text = tostring(fps - (fps % 1))
 	end
 
-	-- same color as scores
 	if c_config_get("config.game.fpsCounter") then
-		gui_addLabel(tankbobs.m_vec2(92.5, 92.5), "", updateFPS, 0.5, c_config_get("config.game.scoresRed"), c_config_get("config.game.scoresGreen"), c_config_get("config.game.scoresBlue"), c_config_get("config.game.scoresAlpha"), c_config_get("config.game.scoresRed"), c_config_get("config.game.scoresGreen"), c_config_get("config.game.scoresGreen"), c_config_get("config.game.scoresAlpha"))
+		gui_addLabel(tankbobs.m_vec2(92.5, 92.5), "", updateFPS, 0.5, c_config_get("config.game.fpsRed"), c_config_get("config.game.fpsGreen"), c_config_get("config.game.fpsBlue"), c_config_get("config.game.fpsAlpha"), c_config_get("config.game.fpsRed"), c_config_get("config.game.fpsGreen"), c_config_get("config.game.fpsGreen"), c_config_get("config.game.fpsAlpha"))
 	end
+
+	-- pause
+	local function updatePause(widget)
+		if c_world_getPaused() then
+			widget.text = "Paused"
+		else
+			widget.text = ""
+		end
+	end
+
+	gui_addLabel(tankbobs.m_vec2(50, 50), "", updatePause, nil, c_config_get("config.game.pauseRed"), c_config_get("config.game.pauseGreen"), c_config_get("config.game.pauseBlue"), c_config_get("config.game.pauseAlpha"), c_config_get("config.game.pauseRed"), c_config_get("config.game.pauseGreen"), c_config_get("config.game.pauseBlue"), c_config_get("config.game.pauseAlpha"))
 
 	-- initialize the world
 	c_world_newWorld()
@@ -314,7 +360,7 @@ function st_play_init()
 		end
 
 		local tank = c_world_tank:new()
-		table.insert(c_world_tanks, tank)
+		table.insert(c_world_getTanks(), tank)
 
 		if not (c_config_get("config.game.player" .. tostring(i) .. ".name", nil, true)) then
 			c_config_set("config.game.player" .. tostring(i) .. ".name", "Player" .. tostring(i))
@@ -330,27 +376,25 @@ end
 function st_play_done()
 	gui_finish()
 
-	c_world_tanks = {}
+	gl.DeleteLists(tank_listBase, 1)
+	gl.DeleteLists(wall_listBase, c_tcm_current_map.walls_n)
+	gl.DeleteLists(powerup_listBase, 1)
 
-	gl.DeleteLists(play_tank_listBase, 1)
-	gl.DeleteLists(play_wall_listBase, c_tcm_current_map.walls_n)
-	gl.DeleteLists(play_powerup_listBase, 1)
+	gl.DeleteTextures(tank_textures)
+	gl.DeleteTextures(wall_textures)
+	gl.DeleteTextures(powerup_textures)
 
-	gl.DeleteTextures(play_tank_textures)
-	gl.DeleteTextures(play_wall_textures)
-	gl.DeleteTextures(play_powerup_textures)
-
-	for _, v in pairs(c_weapons) do
+	for _, v in pairs(c_weapon_getWeapons()) do
 		gl.DeleteLists(v.m.list, 1)
 		gl.DeleteLists(v.m.projectileList, 1)
 		gl.DeleteTextures(v.m.texture, 1)
 		gl.DeleteTextures(v.m.projectileTexture, 1)
 	end
 
-	gl.DeleteLists(play_healthbar_listBase, 1)
-	gl.DeleteLists(play_healthbarBorder_listBase, 1)
-	gl.DeleteTextures(play_healthbar_texture)
-	gl.DeleteTextures(play_healthbarBorder_texture)
+	gl.DeleteLists(healthbar_listBase, 1)
+	gl.DeleteLists(healthbarBorder_listBase, 1)
+	gl.DeleteTextures(healthbar_texture, 1)
+	gl.DeleteTextures(healthbarBorder_texture, 1)
 
 	c_tcm_unload_extra_data()
 	c_weapon_clear()
@@ -371,13 +415,17 @@ end
 function st_play_button(button, pressed)
 	if pressed then
 		if not gui_button(button) then
-			if button == 0x1B or button == c_config_get("config.key.quit") then
+			if button == c_config_get("config.key.pause") then
+				c_world_setPaused(not c_world_getPaused)
+			elseif button == 0x1B or button == c_config_get("config.key.quit") then
 				c_state_advance()
 			elseif button == c_config_get("config.key.exit") then
 				c_state_new(exit_state)
 			end
 		end
 	end
+
+	local c_world_tanks = c_world_getTanks()
 
 	for i = 1, c_config_get("config.game.players") + c_config_get("config.game.computers") do
 		if not (c_config_get("config.key.player" .. tostring(i) .. ".fire", nil, true)) then
@@ -433,7 +481,7 @@ function st_play_step(d)
 		for k, v in pairs(c_tcm_current_map.walls) do
 			if i == c_const_get("tcm_tankLevel") then
 				-- render tanks
-				for k, v in pairs(c_world_tanks) do
+				for k, v in pairs(c_world_getTanks()) do
 					if(v.exists) then
 						gl.PushAttrib("CURRENT_BIT")
 							gl.PushMatrix()
@@ -441,14 +489,14 @@ function st_play_step(d)
 								gl.Rotate(tankbobs.m_degrees(v.r), 0, 0, 1)
 								if not (c_config_get("config.game.player" .. tostring(i) .. ".color", nil, true)) then
 									-- default red
-									c_config_set("config.game.player" .. tostring(i) .. ".color.r", 1)
-									c_config_set("config.game.player" .. tostring(i) .. ".color.g", 0)
-									c_config_set("config.game.player" .. tostring(i) .. ".color.b", 0)
+									c_config_set("config.game.player" .. tostring(i) .. ".color.r", c_config_get("config.game.defaultTankRed"))
+									c_config_set("config.game.player" .. tostring(i) .. ".color.g", c_config_get("config.game.defaultTankBlue"))
+									c_config_set("config.game.player" .. tostring(i) .. ".color.b", c_config_get("config.game.defaultTankGreen"))
 								end
 								gl.Color(c_config_get("config.game.player" .. tostring(k) .. ".color.r"), c_config_get("config.game.player" .. tostring(k) .. ".color.g"), c_config_get("config.game.player" .. tostring(k) .. ".color.b"), 1)
 								gl.TexEnv("TEXTURE_ENV_COLOR", c_config_get("config.game.player" .. tostring(k) .. ".color.r"), c_config_get("config.game.player" .. tostring(k) .. ".color.g"), c_config_get("config.game.player" .. tostring(k) .. ".color.b"), 1)
 								-- blend color with tank texture
-								gl.CallList(play_tank_listBase)
+								gl.CallList(tank_listBase)
 
 								if v.weapon then
 									gl.CallList(v.weapon.m.list)
@@ -467,7 +515,7 @@ function st_play_step(d)
 
 	-- aiming aids
 	gl.EnableClientState("VERTEX_ARRAY")
-	for _, v in pairs(c_world_tanks) do
+	for _, v in pairs(c_world_getTanks()) do
 		if v.exists then
 			if (v.weapon and v.weapon.aimAid) or (v.cd.aimAid) then
 				local a = {}
@@ -504,19 +552,19 @@ function st_play_step(d)
 	--gl.CallLists(play_teleporter_listsMultiple)
 
 	-- powerups are drawn next
-	for _, v in pairs(c_world_powerups) do
+	for _, v in pairs(c_world_getPowerups()) do
 		gl.PushMatrix()
 			local c = c_world_getPowerupTypeByName(v.typeName).c
 			gl.Color(c.r, c.g, c.b, c.a)
 			gl.TexEnv("TEXTURE_ENV_COLOR", c.r, c.g, c.b, c.a)
 			gl.Translate(v.p[1].x, v.p[1].y, 0)
 			gl.Rotate(tankbobs.m_degrees(v.r), 0, 0, 1)
-			gl.CallList(play_powerup_listBase)
+			gl.CallList(powerup_listBase)
 		gl.PopMatrix()
 	end
 
 	-- projectiles
-	for _, v in pairs(c_world_projectiles) do
+	for _, v in pairs(c_weapon_getProjectiles()) do
 		gl.PushMatrix()
 			gl.Translate(v.p[1].x, v.p[1].y, 0)
 			gl.Rotate(tankbobs.m_degrees(v.r), 0, 0, 1)
@@ -525,14 +573,14 @@ function st_play_step(d)
 	end
 
 	-- healthbars
-	for k, v in pairs(c_world_tanks) do
+	for k, v in pairs(c_world_getTanks()) do
 		if v.exists then
 			gl.PushMatrix()
 				gl.Translate(v.p[1].x, v.p[1].y, 0)
 				gl.Rotate(tankbobs.m_degrees(v.r) + c_const_get("healthbar_rotation"), 0, 0, 1)
 				gl.Color(c_config_get("config.game.player" .. tostring(k) .. ".color.r"), c_config_get("config.game.player" .. tostring(k) .. ".color.g"), c_config_get("config.game.player" .. tostring(k) .. ".color.b"), 1)
 				gl.TexEnv("TEXTURE_ENV_COLOR", c_config_get("config.game.player" .. tostring(k) .. ".color.r"), c_config_get("config.game.player" .. tostring(k) .. ".color.g"), c_config_get("config.game.player" .. tostring(k) .. ".color.b"), 1)
-				gl.CallList(play_healthbarBorder_listBase)
+				gl.CallList(healthbarBorder_listBase)
 				if v.health >= c_const_get("tank_highHealth") then
 					gl.Color(0.1, 1, 0.1, 1)
 					gl.TexEnv("TEXTURE_ENV_COLOR", 0.1, 1, 0.1, 1)
@@ -544,7 +592,7 @@ function st_play_step(d)
 					gl.TexEnv("TEXTURE_ENV_COLOR", 1, 0.1, 0.1, 1)
 				end
 				gl.Scale(v.health / c_const_get("tank_health"), 1, 1)
-				gl.CallList(play_healthbar_listBase)
+				gl.CallList(healthbar_listBase)
 			gl.PopMatrix()
 		end
 	end
