@@ -110,7 +110,7 @@ function c_world_init()
 	c_const_set("tank_friction", 0.25, 1)
 	c_const_set("tank_worldFriction", 0.75 / 1000, 1)  -- damping
 	c_const_set("tank_restitution", 0.4, 1)
-	c_const_set("tank_canSleep", true, 1)
+	c_const_set("tank_canSleep", false, 1)
 	c_const_set("tank_isBullet", true, 1)
 	c_const_set("tank_linearDamping", 0, 1)
 	c_const_set("tank_angularDamping", 0, 1)

@@ -17,13 +17,8 @@
 	</fonts>
 
 	<game>
-		<scoresRed>   0.020 </scoresRed>
-		<scoresGreen> 0.020 </scoresGreen>
-		<scoresBlue>  0.500 </scoresBlue>
-		<scoresAlpha> 0.875 </scoresAlpha>
-		<timescale>1</timescale>
 		<computers>0</computers>
-		<players>2</players>
+		<fpsCounter>  false </fpsCounter>
 		<overview>1</overview>
 		<player1>
 			<name>Player1</name>
@@ -41,9 +36,15 @@
 				<b>0.1</b>
 			</color>
 		</player2>
+		<players>2</players>
+		<scoresRed>   0.020 </scoresRed>
+		<scoresGreen> 0.020 </scoresGreen>
+		<scoresBlue>  0.500 </scoresBlue>
+		<scoresAlpha> 0.875 </scoresAlpha>
+		<timescale>1</timescale>
 	</game>
 
-	These keys might conflict with menu:
+	These keys might conflict with the default menu keys:
 	0x08: BACKSPACE
 	0x0D: ENTER
 	0x1B: ESCAPE
@@ -52,13 +53,9 @@
 	276: LEFT (exception: tank movement)
 	275: RIGHT (exception: tank movement)
 	<key>
-		<select></select>
-		<up>280</up> 'PGUP'
 		<down>281</down> 'PGDOWN'
-		<left></left>
-		<right></right>
-		<quit>98</quit> 'b'
 		<exit></exit>
+		<left></left>
 		<pause>112</pause> 'p'
 		<player1>
 			<fire>306</fire> 'LCTRL'
@@ -76,14 +73,18 @@
 			<right>275</right> 'RIGHT'
 			<special>303</special> 'RSHIFT'
 		</player2>
+		<quit>98</quit> 'b'
+		<select></select>
+		<right></right>
+		<up>280</up> 'PGUP'
 	</key>
 
 	<keyLayout>default</keyLayout>
 
 	<renderer>
 		<fullscreen>false</fullscreen>
-		<width>800</width>
 		<height>600</height>
+		<width>800</width>
 	</renderer>
 
 	<server>

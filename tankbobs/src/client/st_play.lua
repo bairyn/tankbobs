@@ -258,7 +258,7 @@ function st_play_init()
 		gl.End()
 	gl.EndList()
 
-	-- initialize the scores
+	-- scores
 	local function updateScores(widget)
 		local length = 0
 
@@ -292,6 +292,18 @@ function st_play_init()
 	end
 
 	gui_addLabel(tankbobs.m_vec2(7.5, 92.5), "", updateScores, 0.5, c_config_get("config.game.scoresRed"), c_config_get("config.game.scoresGreen"), c_config_get("config.game.scoresBlue"), c_config_get("config.game.scoresAlpha"), c_config_get("config.game.scoresRed"), c_config_get("config.game.scoresGreen"), c_config_get("config.game.scoresGreen"), c_config_get("config.game.scoresAlpha"))
+
+	-- fps counter
+	local function updateFPS(widget)
+		local fps = fps
+
+		widget.text = tostring(fps - (fps % 1))
+	end
+
+	-- same color as scores
+	if c_config_get("config.game.fpsCounter") then
+		gui_addLabel(tankbobs.m_vec2(92.5, 92.5), "", updateFPS, 0.5, c_config_get("config.game.scoresRed"), c_config_get("config.game.scoresGreen"), c_config_get("config.game.scoresBlue"), c_config_get("config.game.scoresAlpha"), c_config_get("config.game.scoresRed"), c_config_get("config.game.scoresGreen"), c_config_get("config.game.scoresGreen"), c_config_get("config.game.scoresAlpha"))
+	end
 
 	-- initialize the world
 	c_world_newWorld()
@@ -537,7 +549,7 @@ function st_play_step(d)
 		end
 	end
 
-	-- nothing here
+	-- scores, FPS, rest of HUD, etc.
 	gui_paint(d)
 end
 

@@ -29,6 +29,7 @@ local c_state_step = c_state_step
 local c_config_get = c_config_get
 local c_config_set = c_config_set
 local common_FTM   = common_FTM
+local common_MTF   = common_MTF
 local tankbobs     = tankbobs
 
 local main_loop
@@ -40,6 +41,7 @@ function main_init()
 	c_config_get = _G.c_config_get
 	c_config_set = _G.c_config_set
 	common_FTM   = _G.common_FTM
+	common_MTF   = _G.common_MTF
 	tankbobs     = _G.tankbobs
 
 	--execution begins here; args are stored in table 'args'; ./tankbobs will generate {"./tankbobs"}
@@ -112,6 +114,8 @@ function main_loop()
 		tankbobs.t_delay(common_FTM(c_config_get("config.client.fps")) - t + lastTime)
 		return
 	end
+
+	fps = common_MTF(t - lastTime)
 
 	local d = (t - lastTime) / (c_const_get("world_time") * c_config_get("config.game.timescale"))
 	lastTime = t
@@ -250,6 +254,7 @@ function b_mods()
 	c_config_get = _G.c_config_get
 	c_config_set = _G.c_config_set
 	common_FTM   = _G.common_FTM
+	common_MTF   = _G.common_MTF
 	tankbobs     = _G.tankbobs
 
 	c_mods_load(c_const_get("client-mods_dir"))
