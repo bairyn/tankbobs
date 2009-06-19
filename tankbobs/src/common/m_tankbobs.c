@@ -36,6 +36,7 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 #include <math.h>
 #include <SDL/SDL_endian.h>
 #include <zlib.h>
+#include <signal.h>
 
 #include "common.h"
 #include "m_tankbobs.h"
@@ -48,9 +49,36 @@ void t_init(lua_State *L)
 {
 }
 
+static char siName[BUFSIZE] = {""};
+static lua_State *siState = NULL;
+
+static void t_private_interrupt(void)
+{
+	if(siName[0] && siState)
+	{
+		lua_getfield(siState, LUA_GLOBALSINDEX, siName);
+		lua_call(siState, 0, 0);
+	}
+}
+
 int t_initialize(lua_State *L)
 {
-	int extra = lua_toboolean(L, -1);
+	int extra = lua_toboolean(L, 2);
+	const char *sif;
+
+	if(lua_isstring(L, 1))
+	{
+		sif = lua_tostring(L, 1);
+
+		strncpy(siName, sif, sizeof(siName));
+
+		siState = L;
+
+		if(siName[0] && siState)
+		{
+			signal(SIGINT, (void *) t_private_interrupt);
+		}
+	}
 
 	atexit(SDL_Quit);
 	if(SDL_Init((extra ? (SDL_INIT_VIDEO | SDL_INIT_AUDIO) : 0) | SDL_INIT_TIMER) != 0)
@@ -144,18 +172,63 @@ int t_testAND(lua_State *L)
 	return 1;
 }
 
+int t_implode(lua_State *L)
+{
+	int i;
+	const char *glue = "";
+	char str[BUFSIZE] = {""};
+
+	CHECKINIT(init, L);
+
+	if(lua_isstring(L, 2))
+		glue = lua_tostring(L, 2);
+
+	i = 0;
+	lua_pushnil(L);
+	while(lua_next(L, 1))
+	{
+		if(lua_isstring(L, -1))
+			strncat(str, lua_tostring(L, -1), sizeof(str) - strlen(str) - 1);
+
+		if(*glue)
+			strncat(str, glue, sizeof(str) - strlen(str) - 1);
+
+		lua_pop(L, 1);
+	}
+
+	lua_pushstring(L, str);
+
+	return 1;
+}
+
+static int t_private_isDelimiter(const char c, const char *delimiters)
+{
+	while(*delimiters)
+		if(c == *delimiters++)
+			return TRUE;
+
+	return FALSE;
+}
+
 int t_explode(lua_State *L)
 {
 	int i = 0, j = 0;
-	char delimiter;
+	int ignoringDelimiterInQuotes = FALSE;  /* this variable has a different name from ignoreDelimiterInQuotes */
+	const char *delimiters;
 	const char *string;
 	static char lineBuf[BUFSIZE];
 	char *line;
+	int noEmptyElements;
+	int ignoreDelimitersInQuotes;  /* this variable has a different name from ignoringDelimiterInQuotes */
+	int escapeSequences;
 
 	CHECKINIT(init, L);
 
 	string = luaL_checkstring(L, 1);
-	delimiter = *luaL_checkstring(L, 2);
+	delimiters = luaL_checkstring(L, 2);
+	noEmptyElements = lua_toboolean(L, 3);
+	ignoreDelimitersInQuotes = lua_toboolean(L, 4);
+	escapeSequences = lua_toboolean(L, 5);
 
 	if(strlen(string) >= BUFSIZE)
 		line = malloc((strlen(string) + 1) * sizeof(char));
@@ -168,20 +241,46 @@ int t_explode(lua_State *L)
 
 	while(*string)
 	{
-		if(*string == delimiter)
+		if(!ignoringDelimiterInQuotes && t_private_isDelimiter(*string, delimiters))
 		{
-			lua_pushinteger(L, ++i);
-			lua_pushstring(L, line);
-			lua_settable(L, -3);
+			if(!noEmptyElements || line[0])
+			{
+				lua_pushinteger(L, ++i);
+				lua_pushstring(L, line);
+				lua_settable(L, -3);
+			}
 
 			*line = j = 0;
 
+			/* do string++; while(noEmptyElements && t_private_isDelimiter(*string, delimiters); */
 			string++;
+
+			if(noEmptyElements)
+			{
+				while(*string && t_private_isDelimiter(*string, delimiters)) string++;
+			}
+		}
+		else if(ignoreDelimitersInQuotes && *string == '"')
+		{
+			ignoringDelimiterInQuotes =! ignoringDelimiterInQuotes;
 		}
 		else
 		{
-			line[j++] = *string++;
-			line[j]   = 0;
+			if(escapeSequences && *string == '\\')
+			{
+				string++;
+
+				if(*string != '"' && *string != '\\')
+					string--;
+
+				line[j++] = *string++;
+				line[j]   = 0;
+			}
+			else
+			{
+				line[j++] = *string++;
+				line[j]   = 0;
+			}
 		}
 	}
 
@@ -198,9 +297,11 @@ int t_explode(lua_State *L)
 static const struct luaL_Reg tankbobs[] =
 {
 	/* tankbobs.c */
-	{"t_initialize", t_initialize}, /* initializes the module */
-		/* init the module, return nothing, no args -  this must be called
-			first */
+	{"t_initialize", t_initialize}, /* initialize the module */
+		/* Nothing is returned.  If the first argument is a string,
+			the string is the number of the function to be called when
+			SIGINT is emitted.  If the second argument is true, the extra
+			sub-systems of SDL are initialized (AUDIO and VIDEO). */
 	{"t_quit", t_quit}, /* clean up */
 		/* no args, no returns, quits general module */
 	{"t_getTicks", t_getTicks}, /* SDL_GetTicks() */
@@ -212,8 +313,15 @@ static const struct luaL_Reg tankbobs[] =
 	{"t_testAND", t_testAND}, /* test two integers (both are arguments) and return the bool of & */
 	{"t_is64Bit", t_is64Bit}, /* if the machine is running 64-bit, return true, if not, return false */
 	{"t_isWindows", t_isWindows}, /* if the machine is running Windows, return true, if not, return false */
+	{"t_implode", t_implode}, /* implode a passed table of strings and return an imploded string */
+		/* The first argument passed is a table of strings, and the optional, second argument passed is
+			a string to insert between each imploded element */
 	{"t_explode", t_explode}, /* explode the first string argument into a table of substrings which are returned */
-		/* the second argument is the delimiter (only the first character of the string is used) */
+		/* the second argument is a string of delimiters
+			If the third argument is true, no empty strings will be passed.
+			If the fourth argument passed is true, any delimiters between "'s will be ignored.
+			If the fifth argument passed is true, two escape sequences will be recognized:
+			\\ -> \; \" -> ".  This is useful if you want unrecognized "'s in the passed string */
 
 	/* input.c */
 	{"in_getEvents", in_getEvents}, /* store events in a userdata */
@@ -503,6 +611,28 @@ static const struct luaL_Reg tankbobs[] =
 	{"w_getCenterOfMass", w_getCenterOfMass}, /* get a body's center of mass */
 		/* The first and only argument is the body.  A vector of the position of the body's
 			center of mass is returned */
+
+	/* console.c */
+	{"c_init", c_init}, /* initialize an ncurses console */
+		/* Nothing is returned; nothing is passed. */
+	{"c_quit", c_quit}, /* close the ncurses console */
+		/* Nothing is returned; nothing is passed. */
+	{"c_input", c_input}, /* test for input from the console */
+		/* nil is returned when no input has been applied.
+			If there is input (the user pressed enter), the input is retutrned as a string. */
+	{"c_setTabFunction", c_setTabFunction}, /* set the auto-complete function name to be called when the user presses tab */
+		/* Nothing is returned.  The name of the function is passed as a string.
+			When the user presses tab, this function is called with the current input text passed as
+			a string.  If the function returns a string, the input is set to the string */
+	{"c_print", c_print}, /* print a string to the console */
+		/* Nothing is returned.  The string to print to the console is passed. */
+	{"c_setHistoryFile", c_setHistoryFile}, /* set the history file for the console */
+		/* Nothing is returned.  The filename of the history file to be used by the console
+			is passed as a string. */
+	{"c_loadHistory", c_loadHistory}, /* load the history file */
+		/* Nothing is returned; nothing is passed. */
+	{"c_saveHistory", c_saveHistory}, /* save the history file */
+		/* Nothing is returned; nothing is passed. */
 
 	{NULL, NULL}
 };

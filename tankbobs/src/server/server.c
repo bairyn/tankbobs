@@ -17,11 +17,6 @@ This file is part of Tankbobs.
 along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*
-tankbobs requires the lua5.1 libs(in this package) and headers, SDL, SDL_image,
-SDL_mixer, GL, and GLU
-*/
-
 #include <stdlib.h>
 #include <lua.h>
 #include <lauxlib.h>

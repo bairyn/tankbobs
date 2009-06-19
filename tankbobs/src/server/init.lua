@@ -28,5 +28,15 @@ function init()
 	server = true
 	client = false
 
-	print("server under development")
+	common_init()
+
+	commands_init()
+
+	main_init()
+
+	main_done()
+
+	commands_done()
+
+	common_done()
 end

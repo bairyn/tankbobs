@@ -67,7 +67,7 @@ static bool allowSleep;
 static double timeStep = 1.0 / 128.0;
 static int iterations = 24;
 
-static char clName[1024];
+static char clName[BUFSIZE] = {""};
 static lua_State *clState = NULL;
 
 class w_private_worldListener : public b2ContactListener

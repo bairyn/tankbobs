@@ -30,6 +30,8 @@ function c_module_init()
 end
 
 function c_module_done()
+	print("Tankbobs v" .. c_const_get("version") .. " shutdown")
+
 	c_module_done = nil
 end
 

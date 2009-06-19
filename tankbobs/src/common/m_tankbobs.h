@@ -84,6 +84,8 @@ int t_isDebug(lua_State *L);
 int t_is64Bit(lua_State *L);
 int t_isWindows(lua_State *L);
 int t_testAND(lua_State *L);
+int t_implode(lua_State *L);
+int t_explode(lua_State *L);
 
 /* m_input.c */
 void in_init(lua_State *L);
@@ -228,6 +230,16 @@ int w_applyForce(lua_State *L);
 int w_applyTorque(lua_State *L);
 int w_applyImpulse(lua_State *L);
 int w_getCenterOfMass(lua_State *L);
+
+/* m_console.c */
+int c_init(lua_State *L);
+int c_quit(lua_State *L);
+int c_input(lua_State *L);
+int c_setTabFunction(lua_State *L);
+int c_print(lua_State *L);
+int c_setHistoryFile(lua_State *L);
+int c_loadHistory(lua_State *L);
+int c_saveHistory(lua_State *L);
 
 #ifdef __cplusplus
 }

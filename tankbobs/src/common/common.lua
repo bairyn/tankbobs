@@ -29,7 +29,7 @@ end
 
 function common_init()
 	require "libmtankbobs"
-	tankbobs.t_initialize(client and not server);
+	tankbobs.t_initialize("common_interrupt", client and not server)
 
 	c_const_init()
 
@@ -87,6 +87,12 @@ function common_done()
 end
 
 SPECIAL = {}
+
+function common_interrupt()
+	--common_done()
+
+	done = true  -- cleanly exit
+end
 
 function common_print(...)
 	print(...)
@@ -246,8 +252,6 @@ function common_setField(f, v, e)
 			end
 			t = t[w]
 		else
-			t[w] = v
-			return t[w]
 		end
 	end
 end
@@ -267,6 +271,28 @@ function common_new(self, inh, o)
 	return o
 end
 
+function common_fileExists(filename)
+	local f, err = io.open(filename, "r")
+
+	if f then
+		io.close(f)
+
+		return true
+	else
+		return false, err
+	end
+end
+
+function common_fileMustExist(filename)
+	local f, err = io.open(filename, "r")
+
+	if f then
+		io.close(f)
+	else
+		error("common_FileMustExist: file '" .. tostring(filename) .. "' could not be opened for reading")
+	end
+end
+
 -- FPS to MS
 function common_FTM(fps)
 	return 1000 / fps
@@ -275,4 +301,8 @@ end
 -- MS to FPS
 function common_MTF(ms)
 	return 1000 / ms
+end
+
+function common_lerp(from, to, value)
+	return from - (value * (to - from))
 end

@@ -26,7 +26,11 @@ drawing output and gl
 local gl
 
 function renderer_init()
-	c_module_load "opengl"
+	if tankbobs.t_isWindows() then
+		c_module_load "luagl"
+	else
+		c_module_load "opengl"
+	end
 
 	tankbobs.r_initialize()
 

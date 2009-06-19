@@ -490,7 +490,7 @@ function c_weapon_fire(tank)
 		-- apply knockback to the tank
 		local point = tankbobs.w_getCenterOfMass(tank.body)
 		local force = tankbobs.m_vec2()
-		force.R = -weapon.knockback * c_const_get("tank_forceSpeedK")
+		force.R = -weapon.knockback * c_const_get("tank_speedK")
 		force.t = tankbobs.w_getAngle(tank.body)
 		tankbobs.w_applyForce(tank.body, force, point)
 	end

@@ -590,9 +590,9 @@ int m_vec2_unm(lua_State *L)
 
 	v2 = CHECKVEC(L, 1);
 
-	v->x = -v2->x;
-	v->y = -v2->y;
-	v->R = -v2->R;
+	v->x =- v2->x;
+	v->y =- v2->y;
+	v->R =- v2->R;
 
 	return 1;
 }
@@ -605,9 +605,9 @@ int m_vec2_inv(lua_State *L)
 
 	v = CHECKVEC(L, 1);
 
-	v->x = -v->x;
-	v->y = -v->y;
-	v->R = -v->R;
+	v->x =- v->x;
+	v->y =- v->y;
+	v->R =- v->R;
 
 	return 0;
 }

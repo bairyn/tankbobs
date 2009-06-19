@@ -28,17 +28,19 @@ local c_const_set  = c_const_set
 local c_state_step = c_state_step
 local c_config_get = c_config_get
 local c_config_set = c_config_set
-local common_FTM = common_FTM
+local common_FTM   = common_FTM
+local tankbobs     = tankbobs
+
+local main_loop
 
 function main_init()
-	c_const_get = _G.c_const_get
-	c_const_set = _G.c_const_set
+	c_const_get  = _G.c_const_get
+	c_const_set  = _G.c_const_set
 	c_state_step = _G.c_state_step
 	c_config_get = _G.c_config_get
 	c_config_set = _G.c_config_set
-	common_FTM = _G.common_FTM
-
-	local main_loop = main_loop
+	common_FTM   = _G.common_FTM
+	tankbobs     = _G.tankbobs
 
 	--execution begins here; args are stored in table 'args'; ./tankbobs will generate {"./tankbobs"}
 	main_data = {}
@@ -87,8 +89,6 @@ end
 local lastTime = 0
 
 function main_loop()
-	local tankbobs = tankbobs
-
 	local t = tankbobs.t_getTicks()
 
 	if lastTime == 0 then
@@ -98,13 +98,10 @@ function main_loop()
 
 	if tankbobs.t_getTicks() - lastTime < c_const_get("world_timeWrapTest") then
 		--handle time wrap here
-		io.stdlog:write("Time wrapped\n")
+		io.stdout:write("Time wrapped\n")
 		lastTime = tankbobs.t_getTicks()
+		c_world_timeWrapped()
 		return
-	end
-
-	if d == 0 then
-		d = 1.0E-6  -- make an inaccurate guess
 	end
 
 	if c_config_get("config.client.fps") < c_const_get("client_minFPS") and c_config_get("config.client.fps") ~= 0 then
@@ -118,6 +115,10 @@ function main_loop()
 
 	local d = (t - lastTime) / (c_const_get("world_time") * c_config_get("config.game.timescale"))
 	lastTime = t
+
+	if d == 0 then
+		d = 1.0E-6  -- make an inaccurate guess
+	end
 
 	local results, eventqueue = tankbobs.in_getEvents()
 	if results ~= nil then
@@ -243,11 +244,13 @@ function main_parseArgs(args)
 end
 
 function b_mods()
-	c_const_get = _G.c_const_get
-	c_const_set = _G.c_const_set
+	c_const_get  = _G.c_const_get
+	c_const_set  = _G.c_const_set
 	c_state_step = _G.c_state_step
 	c_config_get = _G.c_config_get
 	c_config_set = _G.c_config_set
+	common_FTM   = _G.common_FTM
+	tankbobs     = _G.tankbobs
 
 	c_mods_load(c_const_get("client-mods_dir"))
 end
