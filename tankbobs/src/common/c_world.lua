@@ -740,10 +740,19 @@ function c_world_tank_step(d, tank)
 			newVel.R = newVel.R + acceleration
 			newVel.t = tank.r
 			if vel.R >= c_const_get("tank_rotationChangeMinSpeed") * c_const_get("tank_speedK") then
+				-- interpolate in the right direction
+				vel.t    = math.fmod(vel.t, 2 * math.pi)
+				newVel.t = math.fmod(newVel.t, 2 * math.pi)
+				if        vel.t - newVel.t > math.pi then
+					vel.t    =    vel.t - 2 * math.pi
+				elseif newVel.t - vel.t    > math.pi then
+					newVel.t = newVel.t - 2 * math.pi
+				end
 				newVel.t = common_lerp(vel.t, newVel.t, c_const_get("tank_rotationChange"))
 			end
 
 			tankbobs.w_setLinearVelocity(tank.body, newVel)
+			vel(newVel)
 		elseif tank.state.back then
 			if vel.R >= c_const_get("tank_decelerationMinSpeed") then
 				local newVel = tankbobs.m_vec2(vel)

@@ -148,9 +148,6 @@ do \
 #define MATH_RECTANGULAR(v) \
 do \
 { \
-	while((v).t <  0)   (v).t += m_radiansNL(360); \
-	while((v).t >= 360) (v).t -= m_radiansNL(360); \
- \
 	(v).x = (v).R * cos((v).t); \
 	(v).y = (v).R * sin((v).t); \
 } while(0)

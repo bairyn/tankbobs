@@ -266,11 +266,6 @@ int m_vec2_newindex(lua_State *L)
 		case 't':
 			v->t = val;
 
-			inc = m_radiansNL(360);
-
-			while(v->t <    0.0) v->t += inc;
-			while(v->t >= 360.0) v->t -= inc;
-
 			MATH_RECTANGULAR(*v);
 
 			return 0;
