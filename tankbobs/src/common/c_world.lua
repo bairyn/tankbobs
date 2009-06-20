@@ -288,6 +288,8 @@ function c_world_newWorld()
 		end
 	end
 
+	c_world_setPaused(false)  -- clear pause
+
 	c_world_powerups = {}
 	c_world_tanks = {}
 

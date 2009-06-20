@@ -242,6 +242,18 @@ int c_setHistoryFile(lua_State *L);
 int c_loadHistory(lua_State *L);
 int c_saveHistory(lua_State *L);
 
+/* m_audio.c */
+int a_init(lua_State *L);
+int a_quit(lua_State *L);
+int a_initSound(lua_State *L);
+int a_freeSound(lua_State *L);
+int a_startMusic(lua_State *L);
+int a_pauseMusic(lua_State *L);
+int a_stopMusic(lua_State *L);
+int a_playSound(lua_State *L);
+int a_setMusicVolume(lua_State *L);
+int a_setVolume(lua_State *L);
+
 #ifdef __cplusplus
 }
 #endif

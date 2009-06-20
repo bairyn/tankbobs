@@ -74,7 +74,7 @@ end
 
 function st_level_select(widget)
 	c_tcm_select_map(widget.misc.name)
-	c_state_new(play_state)
+	c_state_new(selected_state)
 end
 
 level_state =

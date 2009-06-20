@@ -856,6 +856,31 @@ static const struct luaL_Reg tankbobs[] =
 	{"c_saveHistory", c_saveHistory}, /* save the history file */
 		/* Nothing is returned; nothing is passed. */
 
+	/* audio.c */
+	{"a_init", a_init}, /* initialize the audio */
+		/* Nothing is returned; nothing is passed. */
+	{"a_quit", a_quit}, /* close the audio device */
+		/* Nothing is returned; nothing is passed. */
+	{"a_initSound", a_initSound}, /* initialize a sound */
+		/* The filename of the sound is passed.  Nothing is returned.
+			This function initializes the music */
+	{"a_freeSound", a_freeSound}, /* free a sound from cache */
+		/* This function does not need to be called to free a sound from
+			memory.  This function frees the filename passed as a string
+			from cache.  a_quit() will free the sounds */
+	{"a_startMusic", a_startMusic}, /* start or continued paused music */
+		/* The filename of the music is passed; nothing is returned */
+	{"a_pauseMusic", a_pauseMusic}, /* pause the music */
+		/* The filename of the music is passed; nothing is returned */
+	{"a_stopMusic", a_stopMusic}, /* stop the music (by fading out) */
+		/* Nothing is returned; nothing is passed. */
+	{"a_playSound", a_playSound}, /* play a sound */
+		/* The filename of the sound is passed; nothing is returned */
+	{"a_setMusicVolume", a_setMusicVolume}, /* set the music volume */
+		/* The argument passed is the volume from 0 to 1.  Nothing is returned. */
+	{"a_setVolume", a_setVolume}, /* set the volume */
+		/* The argument passed is the volume from 0 to 1.  Nothing is returned. */
+
 	{NULL, NULL}
 };
 

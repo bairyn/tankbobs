@@ -27,6 +27,7 @@
 		<fpsBlue>  0.500 </fpsBlue>
 		<fpsAlpha> 0.875 </fpsAlpha>
 		<fpsCounter>  false </fpsCounter>
+		<fragLimit>15</fragLimit>
 		<overview>1</overview>
 		<pauseRed>   0.400 </pauseRed>
 		<pauseGreen> 0.400 </pauseGreen>

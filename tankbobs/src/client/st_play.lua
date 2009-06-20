@@ -57,6 +57,8 @@ local st_play_button
 local st_play_mouse
 local st_play_step
 
+local endOfGame
+
 function st_play_init()
 	-- localize frequently used globals
 	tankbobs = _G.tankbobs
@@ -74,6 +76,8 @@ function st_play_init()
 	c_config_get = _G.c_config_get
 	c_config_set = _G.c_config_set
 	c_weapon_getWeapons = _G.c_weapon_getWeapons
+
+	endOfGame = false
 
 	-- initialize renderer stuff
 	c_const_set("tank_renderx1", -2.0, 1) c_const_set("tank_rendery1",  2.0, 1)
@@ -340,7 +344,7 @@ function st_play_init()
 
 	-- pause
 	local function updatePause(widget)
-		if c_world_getPaused() then
+		if c_world_getPaused() and not endOfGame then
 			widget.text = "Paused"
 			tankbobs.in_grabClear()
 		else
@@ -414,16 +418,28 @@ end
 function st_play_click(button, pressed, x, y)
 	if pressed then
 		gui_click(x, y)
+
+		if endOfGame then
+			c_state_new(play_state)
+		end
 	end
 end
 
 function st_play_button(button, pressed)
 	if pressed then
 		if not gui_button(button) then
-			if button == c_config_get("config.key.pause") then
-				c_world_setPaused(not c_world_getPaused())
+			if button == 0x0D and endOfGame then
+				c_state_new(play_state)
+			elseif button == c_config_get("config.key.pause") then
+				if not endOfGame then
+					c_world_setPaused(not c_world_getPaused())
+				end
 			elseif button == 0x1B or button == c_config_get("config.key.quit") then
-				c_state_advance()
+				if endOfGame then
+					c_state_new(play_state)
+				else
+					c_state_advance()
+				end
 			elseif button == c_config_get("config.key.exit") then
 				c_state_new(exit_state)
 			end
@@ -478,7 +494,24 @@ function st_play_mouse(x, y, xrel, yrel)
 end
 
 function st_play_step(d)
-	-- TODO: use display lists and find a better algorithm for "depth"
+	-- test for end of game
+	if endOfGame then
+		c_world_setPaused(true)
+	end
+
+	local fragLimit = c_config_get("config.game.fragLimit")
+	if fragLimit > 0 then
+		for k, v in pairs(c_world_getTanks()) do
+			if v.score >= fragLimit then
+				endOfGame = true
+
+				c_world_setPaused(true)
+
+				local name = tostring(c_config_get("config.game.player" .. tostring(k) .. ".name"))
+				gui_addLabel(tankbobs.m_vec2(35, 50), name .. " wins!", nil, 1.1, c_config_get("config.game.player" .. tostring(k) .. ".color.r"), c_config_get("config.game.player" .. tostring(k) .. ".color.g"), c_config_get("config.game.player" .. tostring(k) .. ".color.b"), 0.75, c_config_get("config.game.player" .. tostring(k) .. ".color.r"), c_config_get("config.game.player" .. tostring(k) .. ".color.g"), c_config_get("config.game.player" .. tostring(k) .. ".color.b"), 0.75)
+			end
+		end
+	end
 
 	c_world_step(d)
 
