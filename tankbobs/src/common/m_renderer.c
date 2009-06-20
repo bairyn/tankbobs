@@ -702,10 +702,12 @@ int r_drawString(lua_State *L)
 			h = s->h;
 		}
 
+		SDL_SetAlpha(s, 0, 0);
+
 		intermediary = SDL_CreateRGBSurface(SDL_SRCALPHA, w, h, fmt.BitsPerPixel, fmt.Rmask, fmt.Gmask, fmt.Bmask, fmt.Amask);
 		SDL_BlitSurface(s, NULL, intermediary, NULL);
 
-		converted = SDL_ConvertSurface(s, &fmt, SDL_SRCALPHA);
+		converted = SDL_ConvertSurface(intermediary, &fmt, SDL_SRCALPHA);
 
 		if(SDL_MUSTLOCK(converted))
 		{
