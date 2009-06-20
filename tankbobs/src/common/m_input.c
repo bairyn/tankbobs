@@ -819,6 +819,9 @@ int in_grabMouse(lua_State *L)
 		SDL_EventState(SDL_MOUSEMOTION, SDL_ENABLE);
 	}
 
+	SDL_WM_GrabInput(SDL_GRAB_ON);
+	SDL_ShowCursor(SDL_DISABLE);
+
 	return 0;
 }
 
@@ -826,7 +829,7 @@ int in_isGrabbed(lua_State *L)
 {
 	CHECKINIT(init, L);
 
-	lua_pushboolean(L, SDL_ShowCursor(SDL_QUERY));
+	lua_pushboolean(L, !SDL_ShowCursor(SDL_QUERY));
 
 	return 1;
 }

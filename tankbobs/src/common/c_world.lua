@@ -93,8 +93,8 @@ function c_world_init()
 	c_const_set("tank_hullx3",  2.0, 1) c_const_set("tank_hully3", -1.0, 1)
 	c_const_set("tank_hullx4",  2.0, 1) c_const_set("tank_hully4",  1.0, 1)
 	c_const_set("tank_health", 100, 1)
-	c_const_set("tank_damageK", 2, 1)  -- damage relative to speed before a collision: 2 hp / 1 ups
-	c_const_set("tank_damageMinSpeed", 20, 1)
+	c_const_set("tank_damageK", 4, 1)  -- damage relative to speed before a collision: 2 hp / 1 ups
+	c_const_set("tank_damageMinSpeed", 6, 1)
 	c_const_set("tank_collideMinDamage", 5, 1)
 	c_const_set("tank_deceleration", 32 / 1000, 1)
 	c_const_set("tank_decelerationMinSpeed", -1, 1)
@@ -103,14 +103,14 @@ function c_world_init()
 	c_const_set("tank_acceleration",
 	{
 		{16 / 1000},  -- acceleration of 16 by default
-		{12 / 1000, 2},  -- unless the tank's speed is at least 8 units per second, in which case the acceleration is dropped to 48
-		{6 / 1000, 3},
-		{4 / 1000, 4},
-		{2 / 1000, 6},
-		{1 / 1000, 9},
-		{0.5 / 1000, 12},
-		{0.4 / 1000, 16},
-		{(1 / 3) / 1000, 20}
+		{12 / 1000, 3},  -- unless the tank's speed is at least 8 units per second, in which case the acceleration is dropped to 48
+		{6 / 1000, 4},
+		{4 / 1000, 8},
+		{2 / 1000, 12},
+		{1 / 1000, 16},
+		{0.5 / 1000, 24},
+		{0.4 / 1000, 32},
+		{(1 / 3) / 1000, 48}
 	}, 1)
 	tank_acceleration = c_const_get("tank_acceleration")
 	c_const_set("tank_speedK", 5, 1)

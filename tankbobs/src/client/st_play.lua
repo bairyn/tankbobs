@@ -342,8 +342,12 @@ function st_play_init()
 	local function updatePause(widget)
 		if c_world_getPaused() then
 			widget.text = "Paused"
+			tankbobs.in_grabClear()
 		else
 			widget.text = ""
+			if not tankbobs.in_isGrabbed() then
+				tankbobs.in_grabMouse(c_config_get("config.renderer.width") / 2, c_config_get("config.renderer.height") / 2)
+			end
 		end
 	end
 
@@ -373,6 +377,9 @@ end
 
 function st_play_done()
 	gui_finish()
+
+	-- free the cursor
+	tankbobs.in_grabClear()
 
 	gl.DeleteLists(tank_listBase, 1)
 	gl.DeleteLists(wall_listBase, c_tcm_current_map.walls_n)
