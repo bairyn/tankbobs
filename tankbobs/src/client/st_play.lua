@@ -21,7 +21,6 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 st_play.lua
 
 main play state
-TODO: add pause
 --]]
 
 local tankbobs = tankbobs
@@ -349,7 +348,7 @@ function st_play_init()
 		end
 	end
 
-	gui_addLabel(tankbobs.m_vec2(50, 50), "", updatePause, nil, c_config_get("config.game.pauseRed"), c_config_get("config.game.pauseGreen"), c_config_get("config.game.pauseBlue"), c_config_get("config.game.pauseAlpha"), c_config_get("config.game.pauseRed"), c_config_get("config.game.pauseGreen"), c_config_get("config.game.pauseBlue"), c_config_get("config.game.pauseAlpha"))
+	gui_addLabel(tankbobs.m_vec2(37.5, 50), "", updatePause, nil, c_config_get("config.game.pauseRed"), c_config_get("config.game.pauseGreen"), c_config_get("config.game.pauseBlue"), c_config_get("config.game.pauseAlpha"), c_config_get("config.game.pauseRed"), c_config_get("config.game.pauseGreen"), c_config_get("config.game.pauseBlue"), c_config_get("config.game.pauseAlpha"))
 
 	-- initialize the world
 	c_world_newWorld()
@@ -393,8 +392,8 @@ function st_play_done()
 
 	gl.DeleteLists(healthbar_listBase, 1)
 	gl.DeleteLists(healthbarBorder_listBase, 1)
-	gl.DeleteTextures(healthbar_texture, 1)
-	gl.DeleteTextures(healthbarBorder_texture, 1)
+	gl.DeleteTextures(healthbar_texture)
+	gl.DeleteTextures(healthbarBorder_texture)
 
 	c_tcm_unload_extra_data()
 	c_weapon_clear()
@@ -416,7 +415,7 @@ function st_play_button(button, pressed)
 	if pressed then
 		if not gui_button(button) then
 			if button == c_config_get("config.key.pause") then
-				c_world_setPaused(not c_world_getPaused)
+				c_world_setPaused(not c_world_getPaused())
 			elseif button == 0x1B or button == c_config_get("config.key.quit") then
 				c_state_advance()
 			elseif button == c_config_get("config.key.exit") then

@@ -1053,8 +1053,8 @@ function c_world_setPaused(set)
 	paused = set
 end
 
-function c_world_getPaused(set)
-	paused = get
+function c_world_getPaused()
+	return paused
 end
 
 function c_world_setTimeStep(x)

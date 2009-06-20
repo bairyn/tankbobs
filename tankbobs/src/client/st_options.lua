@@ -286,24 +286,24 @@ function st_options_special(widget)
 end
 
 function st_options_pause(widget)
-	if widget.key then
-		c_config_set("config.key.pause", widget.key)
+	if widget.button then
+		c_config_set("config.key.pause", widget.button)
 	else
 		c_config_set("config.key.pause", false)
 	end
 end
 
 function st_options_exit(widget)
-	if widget.key then
-		c_config_set("config.key.exit", widget.key)
+	if widget.button then
+		c_config_set("config.key.exit", widget.button)
 	else
 		c_config_set("config.key.exit", false)
 	end
 end
 
 function st_options_quit(widget)
-	if widget.key then
-		c_config_set("config.key.quit", widget.key)
+	if widget.button then
+		c_config_set("config.key.quit", widget.button)
 	else
 		c_config_set("config.key.quit", false)
 	end

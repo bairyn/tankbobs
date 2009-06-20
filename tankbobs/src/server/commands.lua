@@ -188,8 +188,8 @@ command =
 	description = ""
 }
 
-local help, exec, exit, set, map, listSets, listMaps, echo
-local helpT, execT, exitT, setT, mapT, listSetsT, listMapsT, echoT
+local help, exec, exit, set, map, listSets, listMaps, echo, pause
+local helpT, execT, exitT, setT, mapT, listSetsT, listMapsT, echoT, pauseT
 
 function help(line)
 	local args = commands_private_args(line)
@@ -690,6 +690,20 @@ end
 
 -- no auto completion for echo
 
+function pause(line)
+	local args = commands_private_args(line)
+
+	if c_world_getPaused() then
+		c_world_setPaused(false)
+		s_print(" pause: the game has been unpaused")
+	else
+		c_world_setPaused(true)
+		s_print(" pause: the game has been paused!")
+	end
+end
+
+-- no auto completion for pause
+
 commands =
 {
 	{
@@ -781,5 +795,15 @@ commands =
 		" echo [text]\n" ..
 		"\n" ..
 		" Prints text to the console"
+	},
+
+	{
+		{"pause", "pause"},
+		pause,
+		pauseT,
+		"Usage:\n" ..
+		" pause\n" ..
+		"\n" ..
+		" Pauses or unpauses the game"
 	},
 }

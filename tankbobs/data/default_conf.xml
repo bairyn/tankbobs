@@ -27,10 +27,10 @@
 		<fpsAlpha> 0.875 </fpsAlpha>
 		<fpsCounter>  false </fpsCounter>
 		<overview>1</overview>
-		<pauseRed>   0.900 </pauseRed>
-		<pauseGreen> 0.900 </pauseGreen>
-		<pauseBlue>  0.950 </pauseBlue>
-		<pauseAlpha> 0.900 </pauseAlpha>
+		<pauseRed>   0.400 </pauseRed>
+		<pauseGreen> 0.400 </pauseGreen>
+		<pauseBlue>  0.600 </pauseBlue>
+		<pauseAlpha> 0.600 </pauseAlpha>
 		<player1>
 			<name>Player1</name>
 			<color>  blue

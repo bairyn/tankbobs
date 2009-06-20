@@ -48,7 +48,9 @@ function st_main_step(d)
 		commands_command(input)
 	end
 
-	--c_world_setPaused(theNumberOfConnectPlayers > 0)  -- pause the world when no player is connected
+	--if(theNumberOfConnectedPlayers <= 0) then
+		--c_world_setPaused(true)
+	--end
 
 	c_world_step(d)
 end

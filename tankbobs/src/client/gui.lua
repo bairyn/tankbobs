@@ -533,6 +533,10 @@ function gui_button(button)
 		else
 			selected.button = button
 		end
+
+		if selected.keyChangeCallBack then
+			selected:keyChangeCallBack()
+		end
 	elseif button == 0x0D or button == c_config_get("config.key.select") then
 		-- ENTER
 

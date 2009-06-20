@@ -79,7 +79,7 @@ function c_weapon_init()
 	weapon.render[4](1, 1)
 
 	weapon.projectileTexture = "weak-machinegun-projectile.png"
-	weapon.projectileDensity = 0.2
+	weapon.projectileDensity = 0.125
 	weapon.projectileRestitution = 0.1
 	weapon.projectileMaxCollisions = 0
 	weapon.projectileEndOnBody = true
@@ -97,7 +97,7 @@ function c_weapon_init()
 	weapon.projectileRender[4](0.5, -0.5)
 	weapon.projectileRender[1](0.5, -0.5)
 
-	-- string machinegun
+	-- strong machinegun
 	weapon = c_weapon:new()
 	table.insert(c_weapons, weapon)
 
