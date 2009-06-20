@@ -21,6 +21,7 @@
 		<defaultTankRed>   0.875 </defaultTankRed>  Orange
 		<defaultTankGreen> 0.750 </defaultTankGreen>
 		<defaultTankBlue>  0.010 </defaultTankBlue>
+		<defaultTankAlpha> 1.000 </defaultTankAlpha>
 		<fpsRed>   0.020 </fpsRed>
 		<fpsGreen> 0.020 </fpsGreen>
 		<fpsBlue>  0.500 </fpsBlue>
@@ -37,6 +38,7 @@
 				<r>0.1</r>
 				<g>0.1</g>
 				<b>0.9</b>
+				<a>1.0</b>
 			</color>
 		</player1>
 		<player2>
@@ -45,6 +47,7 @@
 				<r>0.9</r>
 				<g>0.1</g>
 				<b>0.1</b>
+				<a>1.0</a>
 			</color>
 		</player2>
 		<players>2</players>

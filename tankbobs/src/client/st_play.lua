@@ -486,11 +486,11 @@ function st_play_step(d)
 							gl.PushMatrix()
 								gl.Translate(v.p[1].x, v.p[1].y, 0)
 								gl.Rotate(tankbobs.m_degrees(v.r), 0, 0, 1)
-								if not (c_config_get("config.game.player" .. tostring(i) .. ".color", nil, true)) then
-									-- default red
-									c_config_set("config.game.player" .. tostring(i) .. ".color.r", c_config_get("config.game.defaultTankRed"))
-									c_config_set("config.game.player" .. tostring(i) .. ".color.g", c_config_get("config.game.defaultTankBlue"))
-									c_config_set("config.game.player" .. tostring(i) .. ".color.b", c_config_get("config.game.defaultTankGreen"))
+								if not (c_config_get("config.game.player" .. tostring(k) .. ".color", nil, true)) then
+									c_config_set("config.game.player" .. tostring(k) .. ".color.r", c_config_get("config.game.defaultTankRed"))
+									c_config_set("config.game.player" .. tostring(k) .. ".color.g", c_config_get("config.game.defaultTankBlue"))
+									c_config_set("config.game.player" .. tostring(k) .. ".color.b", c_config_get("config.game.defaultTankGreen"))
+									c_config_set("config.game.player" .. tostring(k) .. ".color.a", c_config_get("config.game.defaultTankAlpha"))
 								end
 								gl.Color(c_config_get("config.game.player" .. tostring(k) .. ".color.r"), c_config_get("config.game.player" .. tostring(k) .. ".color.g"), c_config_get("config.game.player" .. tostring(k) .. ".color.b"), 1)
 								gl.TexEnv("TEXTURE_ENV_COLOR", c_config_get("config.game.player" .. tostring(k) .. ".color.r"), c_config_get("config.game.player" .. tostring(k) .. ".color.g"), c_config_get("config.game.player" .. tostring(k) .. ".color.b"), 1)
@@ -577,6 +577,13 @@ function st_play_step(d)
 			gl.PushMatrix()
 				gl.Translate(v.p[1].x, v.p[1].y, 0)
 				gl.Rotate(tankbobs.m_degrees(v.r) + c_const_get("healthbar_rotation"), 0, 0, 1)
+				if not (c_config_get("config.game.player" .. tostring(k) .. ".color", nil, true)) then
+					c_config_set("config.game.player" .. tostring(k) .. ".color.r", c_config_get("config.game.defaultTankRed"))
+					c_config_set("config.game.player" .. tostring(k) .. ".color.g", c_config_get("config.game.defaultTankBlue"))
+					c_config_set("config.game.player" .. tostring(k) .. ".color.b", c_config_get("config.game.defaultTankGreen"))
+					c_config_set("config.game.player" .. tostring(k) .. ".color.a", c_config_get("config.game.defaultTankAlpha"))
+				end
+
 				gl.Color(c_config_get("config.game.player" .. tostring(k) .. ".color.r"), c_config_get("config.game.player" .. tostring(k) .. ".color.g"), c_config_get("config.game.player" .. tostring(k) .. ".color.b"), 1)
 				gl.TexEnv("TEXTURE_ENV_COLOR", c_config_get("config.game.player" .. tostring(k) .. ".color.r"), c_config_get("config.game.player" .. tostring(k) .. ".color.g"), c_config_get("config.game.player" .. tostring(k) .. ".color.b"), 1)
 				gl.CallList(healthbarBorder_listBase)
