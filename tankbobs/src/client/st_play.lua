@@ -250,7 +250,6 @@ function st_play_init()
 	gl.TexParameter("TEXTURE_2D", "TEXTURE_MAG_FILTER", "LINEAR")
 	tankbobs.r_loadImage2D(c_const_get("healthbarBorder_texture"), c_const_get("texturesBorder_default"))
 
-	c_const_set("healthbar_texture", "", 1)
 	c_const_set("healthbar_renderx1", -0.875, 1) c_const_set("healthbar_rendery1", -2.875, 1)
 	c_const_set("healthbar_renderx2", -0.875, 1) c_const_set("healthbar_rendery2", -2.5, 1)
 	c_const_set("healthbar_renderx3",  0.875, 1) c_const_set("healthbar_rendery3", -2.5, 1)
