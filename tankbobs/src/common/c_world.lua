@@ -96,7 +96,7 @@ function c_world_init()
 	c_const_set("tank_damageK", 2, 1)  -- damage relative to speed before a collision: 2 hp / 1 ups
 	c_const_set("tank_damageMinSpeed", 20, 1)
 	c_const_set("tank_collideMinDamage", 5, 1)
-	c_const_set("tank_deceleration", 6, 1)
+	c_const_set("tank_deceleration", 32 / 1000, 1)
 	c_const_set("tank_decelerationMinSpeed", -1, 1)
 	c_const_set("tank_highHealth", 66, 1)
 	c_const_set("tank_lowHealth", 33, 1)
@@ -764,13 +764,13 @@ function c_world_tank_step(d, tank)
 		elseif tank.state.back then
 			if vel.R >= c_const_get("tank_decelerationMinSpeed") then
 				local newVel = tankbobs.m_vec2(vel)
-				newVel.R = newVel.R - c_const_get("tank_rotationChangeMinSpeed")
-				newVel.t = tank.r
-				if vel.R >= c_const_get("tank_rotationChangeMinSpeed") * c_const_get("tank_speedK") then
-					newVel.t = common_lerp(vel.t, newVel.t, c_const_get("tank_rotationChange"))
+
+				if newVel.R > 0 then
+					newVel.R = newVel.R - c_const_get("tank_deceleration")
 				end
 
 				tankbobs.w_setLinearVelocity(tank.body, newVel)
+				vel(newVel)
 			end
 		else
 			local v = tankbobs.w_getLinearVelocity(tank.body)
