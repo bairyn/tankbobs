@@ -1,6 +1,6 @@
 <config>
 	<client>
-		<fps>256</fps>
+		<fps>128</fps>
 	</client>
 
 	<font>sans</font>

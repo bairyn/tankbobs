@@ -62,7 +62,8 @@ function c_world_init()
 
 	c_const_set("world_fps", 256)
 	--c_const_set("world_timeStep", common_FTM(c_const_get("world_fps")))
-	c_const_set("world_timeStep", 1 / 1000)
+	c_const_set("world_timeStep", 1 / 500)
+	c_const_set("world_iterations", 16)
 
 	c_const_set("world_timeWrapTest", -99999)
 
@@ -208,6 +209,7 @@ function c_world_init()
 	-- TODO: health with light green
 
 	tankbobs.w_setTimeStep(c_const_get("world_timeStep"))
+	tankbobs.w_setIterations(c_const_get("world_iterations"))
 end
 
 function c_world_done()
