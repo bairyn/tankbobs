@@ -68,7 +68,7 @@
 	276: LEFT (exception: tank movement)
 	275: RIGHT (exception: tank movement)
 	<key>
-		<down>281</down> 'PGDOWN'
+		<down>9</down> 'PGDOWN'
 		<exit></exit>
 		<left></left>
 		<pause>112</pause> 'p'
