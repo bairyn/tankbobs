@@ -529,13 +529,13 @@ function gui_button(button)
 			-- BACKSPACE
 			selected.button = nil
 		elseif button == 27 then
-			-- ESPACE
+			-- ESCAPE
 		else
 			selected.button = button
 		end
 
 		if selected.keyChangeCallBack then
-			selected:keyChangeCallBack()
+			selected:keyChangeCallBack(selected.button)
 		end
 	elseif button == 0x0D or button == c_config_get("config.key.select") then
 		-- ENTER

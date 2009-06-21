@@ -174,6 +174,7 @@ local currentPlayer = 1
 local player
 
 function st_optionsPlayers_init()
+	currentPlayer = 1
 	player = {}
 
 	gui_addAction(tankbobs.m_vec2(25, 85), "Back", nil, c_state_advance)
@@ -181,7 +182,7 @@ function st_optionsPlayers_init()
 	gui_addLabel(tankbobs.m_vec2(50, 75), "Computers", nil, 1 / 3) gui_addInput(tankbobs.m_vec2(75, 75), tostring(tonumber(c_config_get("config.game.computers"))), nil, st_optionsPlayers_computers, true, 1, 0.5)
 	gui_addLabel(tankbobs.m_vec2(50, 72), "Players", nil, 1 / 3) gui_addInput(tankbobs.m_vec2(75, 72), tostring(tonumber(c_config_get("config.game.players"))), nil, st_optionsPlayers_players, true, 1, 0.5)
 
-	gui_addLabel(tankbobs.m_vec2(50, 69), "Set up player", nil, 1 / 3) gui_addInput(tankbobs.m_vec2(75, 69), "1", nil, st_optionsPlayers_configurePlayer, true, 1, 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 66), "Set up player", nil, 1 / 3) gui_addInput(tankbobs.m_vec2(75, 66), "1", nil, st_optionsPlayers_configurePlayer, true, 1, 0.5)
 	if not (c_config_get("config.game.player1.name", nil, true)) then
 		c_config_set("config.game.player1.name", "Player1")
 	end
@@ -203,13 +204,13 @@ function st_optionsPlayers_init()
 	if not (c_config_get("config.key.player1.special", nil, true)) then
 		c_config_set("config.key.player1.special", false)
 	end
-	gui_addLabel(tankbobs.m_vec2(50, 66), "Name", nil, 1 / 3) player.name = gui_addInput(tankbobs.m_vec2(75, 66), c_config_get("config.game.player1.name"), nil, st_optionsPlayers_name, false, c_const_get("max_nameLength"), 0.5)
-	gui_addLabel(tankbobs.m_vec2(50, 63), "Fire", nil, 1 / 3) player.fire = gui_addKey(tankbobs.m_vec2(75, 63), c_config_get("config.key.player1.fire"), nil, st_optionsPlayers_fire, c_config_get("config.key.player1.fire"), 0.5)
-	gui_addLabel(tankbobs.m_vec2(50, 60), "Forward", nil, 1 / 3) player.forward = gui_addKey(tankbobs.m_vec2(75, 60), c_config_get("config.key.player1.forward"), nil, st_optionsPlayers_forward, c_config_get("config.key.player1.special"), 0.5)
-	gui_addLabel(tankbobs.m_vec2(50, 57), "Back", nil, 1 / 3) player.back = gui_addKey(tankbobs.m_vec2(75, 57), c_config_get("config.key.player1.back"), nil, st_optionsPlayers_back, c_config_get("config.key.player1.back"), 0.5)
-	gui_addLabel(tankbobs.m_vec2(50, 54), "Left", nil, 1 / 3) player.left = gui_addKey(tankbobs.m_vec2(75, 54), c_config_get("config.key.player1.left"), nil, st_optionsPlayers_left, c_config_get("config.key.player1.left"), 0.5)
-	gui_addLabel(tankbobs.m_vec2(50, 51), "Right", nil, 1 / 3) player.right = gui_addKey(tankbobs.m_vec2(75, 51), c_config_get("config.key.player1.right"), nil, st_optionsPlayers_right, c_config_get("config.key.player1.right"), 0.5)
-	gui_addLabel(tankbobs.m_vec2(50, 48), "Special", nil, 1 / 3) player.special = gui_addKey(tankbobs.m_vec2(75, 48), c_config_get("config.key.player1.special"), nil, st_optionsPlayers_special, c_config_get("config.key.player1.special"), 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 63), "Name", nil, 1 / 3) player.name = gui_addInput(tankbobs.m_vec2(75, 63), c_config_get("config.game.player1.name"), nil, st_optionsPlayers_name, false, c_const_get("max_nameLength"), 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 60), "Fire", nil, 1 / 3) player.fire = gui_addKey(tankbobs.m_vec2(75, 60), c_config_get("config.key.player1.fire"), nil, st_optionsPlayers_fire, c_config_get("config.key.player1.fire"), 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 57), "Forward", nil, 1 / 3) player.forward = gui_addKey(tankbobs.m_vec2(75, 57), c_config_get("config.key.player1.forward"), nil, st_optionsPlayers_forward, c_config_get("config.key.player1.special"), 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 54), "Back", nil, 1 / 3) player.back = gui_addKey(tankbobs.m_vec2(75, 54), c_config_get("config.key.player1.back"), nil, st_optionsPlayers_back, c_config_get("config.key.player1.back"), 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 51), "Left", nil, 1 / 3) player.left = gui_addKey(tankbobs.m_vec2(75, 51), c_config_get("config.key.player1.left"), nil, st_optionsPlayers_left, c_config_get("config.key.player1.left"), 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 48), "Right", nil, 1 / 3) player.right = gui_addKey(tankbobs.m_vec2(75, 48), c_config_get("config.key.player1.right"), nil, st_optionsPlayers_right, c_config_get("config.key.player1.right"), 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 45), "Special", nil, 1 / 3) player.special = gui_addKey(tankbobs.m_vec2(75, 45), c_config_get("config.key.player1.special"), nil, st_optionsPlayers_special, c_config_get("config.key.player1.special"), 0.5)
 end
 
 function st_optionsPlayers_done()
@@ -284,76 +285,75 @@ function st_optionsPlayers_name(widget)
 	c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".name", tostring(widget.inputText))
 end
 
-function st_optionsPlayers_fire(widget)
+function st_optionsPlayers_fire(widget, button)
 	if not (c_config_get("config.game.player" .. tonumber(currentPlayer) .. ".fire", nil, true)) then
-		c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".fire", false)
+		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".fire", false)
 	end
 
-	if widget.button then
-		c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".fire", widget.button)
+	if button then
+		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".fire", button)
 	else
-		c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".fire", false)
+		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".fire", false)
 	end
 end
 
-function st_optionsPlayers_forward(widget)
+function st_optionsPlayers_forward(widget, button)
 	if not (c_config_get("config.game.player" .. tonumber(currentPlayer) .. ".forward", nil, true)) then
-		c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".forward", false)
+		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".forward", false)
 	end
 
-	if widget.button then
-		c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".forward", widget.button)
+	if button then
+		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".forward", button)
 	else
-		c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".forward", false)
+		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".forward", false)
 	end
 end
 
-function st_optionsPlayers_right(widget)
+function st_optionsPlayers_right(widget, button)
 	if not (c_config_get("config.game.player" .. tonumber(currentPlayer) .. ".right", nil, true)) then
 		c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".right", false)
 	end
 
-	if widget.button then
-		c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".right", widget.button)
+	if button then
+		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".right", button)
 	else
-		c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".right", false)
+		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".right", false)
 	end
 end
 
-function st_optionsPlayers_back(widget)
+function st_optionsPlayers_back(widget, button)
 	if not (c_config_get("config.game.player" .. tonumber(currentPlayer) .. ".back", nil, true)) then
-		c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".back", false)
+		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".back", false)
 	end
 
-	if widget.button then
-		c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".back", widget.button)
+	if button then
+		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".back", button)
 	else
-		c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".back", false)
+		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".back", false)
 	end
 end
 
-function st_optionsPlayers_left(widget)
+function st_optionsPlayers_left(widget, button)
 	if not (c_config_get("config.game.player" .. tonumber(currentPlayer) .. ".left", nil, true)) then
-		c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".left", false)
+		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".left", false)
 	end
 
-	if widget.button then
-		c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".left", widget.button)
+	if button then
+		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".left", button)
 	else
-		c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".left", false)
+		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".left", false)
 	end
 end
 
-function st_optionsPlayers_special(widget)
-print(widget, widget.table)
+function st_optionsPlayers_special(widget, button)
 	if not (c_config_get("config.game.player" .. tonumber(currentPlayer) .. ".special", nil, true)) then
 		c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".special", false)
 	end
 
-	if widget.button then
-		c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".special", widget.button)
+	if button then
+		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".special", button)
 	else
-		c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".special", false)
+		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".special", false)
 	end
 end
 
@@ -390,25 +390,25 @@ function st_optionsControls_done()
 	gui_finish()
 end
 
-function st_optionsControls_pause(widget)
-	if widget.button then
-		c_config_set("config.key.pause", widget.button)
+function st_optionsControls_pause(widget, button)
+	if button then
+		c_config_set("config.key.pause", button)
 	else
 		c_config_set("config.key.pause", false)
 	end
 end
 
-function st_optionsControls_exit(widget)
-	if widget.button then
-		c_config_set("config.key.exit", widget.button)
+function st_optionsControls_exit(widget, button)
+	if button then
+		c_config_set("config.key.exit", button)
 	else
 		c_config_set("config.key.exit", false)
 	end
 end
 
-function st_optionsControls_quit(widget)
-	if widget.button then
-		c_config_set("config.key.quit", widget.button)
+function st_optionsControls_quit(widget, button)
+	if button then
+		c_config_set("config.key.quit", button)
 	else
 		c_config_set("config.key.quit", false)
 	end
