@@ -34,8 +34,6 @@ function st_manual_init()
 	gui_addAction(tankbobs.m_vec2(25, 75), "Back", nil, c_state_advance)
 
 	gui_addLabel(tankbobs.m_vec2(50, 65), "Tankbobs", nil, 1/3)
-
-	gui_addLabel(tankbobs.m_vec2(50, 55), "No manual yet!", nil, 1/3)  -- TODO
 end
 
 function st_manual_done()
@@ -43,14 +41,12 @@ function st_manual_done()
 end
 
 function st_manual_click(button, pressed, x, y)
-	if pressed then
-		gui_click(x, y)
-	end
+	gui_click(button, pressed, x, y)
 end
 
 function st_manual_button(button, pressed)
-	if pressed then
-		if not gui_button(button) then
+	if not gui_button(button, pressed) then
+		if pressed then
 			if button == 0x1B or button == c_config_get("config.key.quit") then
 				c_state_advance()
 			elseif button == c_config_get("config.key.exit") then

@@ -416,18 +416,16 @@ function st_play_done()
 end
 
 function st_play_click(button, pressed, x, y)
-	if pressed then
-		gui_click(x, y)
+	gui_click(button, pressed, x, y)
 
-		if endOfGame then
-			c_state_new(play_state)
-		end
+	if pressed and endOfGame then
+		c_state_new(play_state)
 	end
 end
 
 function st_play_button(button, pressed)
-	if pressed then
-		if not gui_button(button) then
+	if not gui_button(button, pressed) then
+		if pressed then
 			if button == 0x0D and endOfGame then
 				c_state_new(play_state)
 			elseif button == c_config_get("config.key.pause") then

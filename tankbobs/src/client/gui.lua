@@ -25,10 +25,20 @@ Graphical User Interface
 
 local c_const_get = c_const_get
 local tankbobs = tankbobs
+local gl = gl
+
+local scaleCenter_listBase
+local scaleCenter_texture
+local scale_listBase
+local scale_texture
+local widgets = {}
+local selected = nil
+local scroll = 0
 
 function gui_init()
 	c_const_get = _G.c_const_get
 	tankbobs = _G.tankbobs
+	gl = _G.gl
 
 	c_const_set("widget_length", 1.5, 1)
 	c_const_set("gui_vspacing", 0.5, 1)
@@ -82,7 +92,7 @@ function gui_init()
 	c_const_set("inputSelected_a", 1.0, 1)
 	c_const_set("input_posCharacter", "|", 1)
 
-	c_const_set("key_prefix", ": ", 1)
+	c_const_set("key_prefix", "", 1)
 	c_const_set("key_suffix", "", 1)
 	c_const_set("key_r", 0.62, 1)
 	c_const_set("key_g", 0.64, 1)
@@ -96,22 +106,96 @@ function gui_init()
 	c_const_set("keySelected_b", 0.65333333333333333, 1)
 	c_const_set("keySelected_a", 1.0, 1)
 
+	c_const_set("scale_prefix", "[", 1)
+	c_const_set("scale_suffix", "]", 1)
+	c_const_set("scale_r", 0.92, 1)
+	c_const_set("scale_g", 0.94, 1)
+	c_const_set("scale_b", 0.98, 1)
+	c_const_set("scale_a", 1.0, 1)
+	c_const_set("scale_scalex", 1 / 12, 1)
+	c_const_set("scale_scaley", 1 / 12, 1)
+	c_const_set("scaleSelected_r", 0.1, 1)
+	c_const_set("scaleSelected_g", 0.8, 1)
+	c_const_set("scaleSelected_b", 0.215, 1)
+	c_const_set("scaleSelected_a", 1.0, 1)
+
+	c_const_set("scaleCenter_texture", c_const_get("game_dir") .. "scaleCenter.png", 1)
+	c_const_set("scaleCenter_width", 2, 1)
+	c_const_set("scaleCenter_height", 2, 1)
+	c_const_set("scaleCenter_renderx1", 0, 1) c_const_set("scaleCenter_rendery1", c_const_get("scaleCenter_height"), 1)
+	c_const_set("scaleCenter_renderx2", 0, 1) c_const_set("scaleCenter_rendery2", 0, 1)
+	c_const_set("scaleCenter_renderx3", c_const_get("scaleCenter_width"), 1) c_const_set("scaleCenter_rendery3", 0, 1)
+	c_const_set("scaleCenter_renderx4", c_const_get("scaleCenter_width"), 1) c_const_set("scaleCenter_rendery4", c_const_get("scaleCenter_height"), 1)
+	c_const_set("scaleCenter_texturex1", 0, 1) c_const_set("scaleCenter_texturey1", 1, 1)
+	c_const_set("scaleCenter_texturex2", 0, 1) c_const_set("scaleCenter_texturey2", 0, 1)
+	c_const_set("scaleCenter_texturex3", 1, 1) c_const_set("scaleCenter_texturey3", 0, 1)
+	c_const_set("scaleCenter_texturex4", 1, 1) c_const_set("scaleCenter_texturey4", 1, 1)
+	scaleCenter_listBase = gl.GenLists(1)
+	scaleCenter_texture  = gl.GenTextures(1)
+	gl.BindTexture("TEXTURE_2D", scaleCenter_texture[1])
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_S", "REPEAT")
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_T", "REPEAT")
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_MIN_FILTER", "LINEAR")
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_MAG_FILTER", "LINEAR")
+	tankbobs.r_loadImage2D(c_const_get("scaleCenter_texture"), c_const_get("textures_default"))
+	gl.NewList(scaleCenter_listBase, "COMPILE_AND_EXECUTE")
+		gl.BindTexture("TEXTURE_2D", scaleCenter_texture[1])
+		gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
+
+		gl.Begin("QUADS")
+			for i = 1, 4 do
+				gl.TexCoord(c_const_get("scaleCenter_texturex" .. i), c_const_get("scaleCenter_texturey" .. i))
+				gl.Vertex(c_const_get("scaleCenter_renderx" .. i), c_const_get("scaleCenter_rendery" .. i))
+			end
+		gl.End()
+	gl.EndList()
+
+	c_const_set("scale_texture", c_const_get("game_dir") .. "scale.png", 1)
+	c_const_set("scale_width", 20, 1)
+	c_const_set("scale_height", 2, 1)
+	c_const_set("scale_renderx1", 0, 1) c_const_set("scale_rendery1", c_const_get("scale_height"), 1)
+	c_const_set("scale_renderx2", 0, 1) c_const_set("scale_rendery2", 0, 1)
+	c_const_set("scale_renderx3", c_const_get("scale_width"), 1) c_const_set("scale_rendery3", 0, 1)
+	c_const_set("scale_renderx4", c_const_get("scale_width"), 1) c_const_set("scale_rendery4", c_const_get("scale_height"), 1)
+	c_const_set("scale_texturex1", 0, 1) c_const_set("scale_texturey1", 1, 1)
+	c_const_set("scale_texturex2", 0, 1) c_const_set("scale_texturey2", 0, 1)
+	c_const_set("scale_texturex3", 1, 1) c_const_set("scale_texturey3", 0, 1)
+	c_const_set("scale_texturex4", 1, 1) c_const_set("scale_texturey4", 1, 1)
+	scale_listBase       = gl.GenLists(1)
+	scale_texture        = gl.GenTextures(1)
+	gl.BindTexture("TEXTURE_2D", scale_texture[1])
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_S", "REPEAT")
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_T", "REPEAT")
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_MIN_FILTER", "LINEAR")
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_MAG_FILTER", "LINEAR")
+	tankbobs.r_loadImage2D(c_const_get("scale_texture"), c_const_get("textures_default"))
+	gl.NewList(scale_listBase, "COMPILE_AND_EXECUTE")
+		gl.BindTexture("TEXTURE_2D", scale_texture[1])
+		gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
+
+		gl.Begin("QUADS")
+			for i = 1, 4 do
+				gl.TexCoord(c_const_get("scale_texturex" .. i), c_const_get("scale_texturey" .. i))
+				gl.Vertex(c_const_get("scale_renderx" .. i), c_const_get("scale_rendery" .. i))
+			end
+		gl.End()
+	gl.EndList()
+	c_const_set("scale_scrollSpeed", 0.5, 1)
+
 	c_const_set("select_init", 0.25, 1)
 	c_const_set("select_drop", 1.0, 1)
 end
 
 function gui_done()
-	gui_widgets = nil
+	widgets = nil
 end
-
-local widgets = {}
-local selected = nil
 
 local LABEL  = {}
 local ACTION = {}
 local CYCLE  = {}
 local INPUT  = {}
 local KEY    = {}
+local SCALE  = {}
 
 local widget =
 {
@@ -177,8 +261,23 @@ local widget =
 		end
 	end,
 	keyActive = false,  -- whether or not a key press will set the key
-	keyChangeCallBack = nil,
+	keyChangedCallBack = nil,
 	button = nil,
+
+	-- scales (0-1)
+	setScalePos = function (self, pos)
+		if pos < 0 then
+			pos = 0
+		elseif pos > 1 then
+			pos = 1
+		end
+
+		self.scalePos = pos
+	end,
+	scalePos = 0,
+	scaleChangedCallBack = nil,
+	scaleMouseOffset = 0,
+	scaleActive = false,
 
 	selectable = false
 }
@@ -284,7 +383,7 @@ function gui_addInput(position, text, updateTextCallBack, textChangedCallBack, i
 	return input
 end
 
-function gui_addKey(position, text, updateTextCallBack, keyChangeCallBack, initialButton, scale, color_r, color_g, color_b, color_a, altColor_r, altColor_g, altColor_b, altColor_a)
+function gui_addKey(position, text, updateTextCallBack, keyChangedCallBack, initialButton, scale, color_r, color_g, color_b, color_a, altColor_r, altColor_g, altColor_b, altColor_a)
 	local key = widget:new()
 
 	key.type = KEY
@@ -294,9 +393,7 @@ function gui_addKey(position, text, updateTextCallBack, keyChangeCallBack, initi
 	key.upperRightPos(position)  -- pre-initialize upperRightPos to avoid issues
 	key.text = text
 	key.updateTextCallBack = updateTextCallBack
-	key.keyChangeCallBack = keyChangeCallBack
-	key.integerOnly = integerOnly
-	key.maxLength = maxLength
+	key.keyChangedCallBack = keyChangedCallBack
 	key.button = initialButton
 	key.color.r = color_r or c_const_get("key_r") key.altColor.r = altColor_r or c_const_get("keySelected_r")
 	key.color.g = color_g or c_const_get("key_g") key.altColor.g = altColor_g or c_const_get("keySelected_g")
@@ -309,96 +406,169 @@ function gui_addKey(position, text, updateTextCallBack, keyChangeCallBack, initi
 	return key
 end
 
+function gui_addScale(position, text, updateTextCallBack, scaleChangedCallBack, initialPos, scale, color_r, color_g, color_b, color_a, altColor_r, altColor_g, altColor_b, altColor_a)
+	local scale = widget:new()
+
+	scale.type = SCALE
+	scale.selectable = true
+
+	scale.p(position)
+	scale.upperRightPos(position)  -- pre-initialize upperRightPos to avoid issues
+	scale.text = text
+	scale.updateTextCallBack = updateTextCallBack
+	scale.scaleChangedCallBack = scaleChangedCallBack
+	scale.scalePos = initialPos
+	scale.color.r = color_r or c_const_get("key_r") key.altColor.r = altColor_r or c_const_get("keySelected_r")
+	scale.color.g = color_g or c_const_get("key_g") key.altColor.g = altColor_g or c_const_get("keySelected_g")
+	scale.color.b = color_b or c_const_get("key_b") key.altColor.b = altColor_b or c_const_get("keySelected_b")
+	scale.color.a = color_a or c_const_get("key_a") key.altColor.a = altColor_a or c_const_get("keySelected_a")
+	scale.scale = scale or key.scale
+
+	table.insert(widgets, scale)
+
+	return scale
+end
+
 local function gui_private_scale(scalar)
 	return scalar / c_const_get("widget_length")
 end
 
 function gui_paint(d)
 	for _, v in pairs(widgets) do
-		local scalex, scaley = 1, 1
-		local prefix, suffix = "", ""
+		local breaking = false repeat  -- ugly method of continue in lua
+			local scalex, scaley = 1, 1
+			local prefix, suffix = "", ""
 
-		-- type specific stuff
-		local switch = v.type
-		if switch == nil then
-		elseif switch == LABEL then
-			scalex = c_const_get("label_scalex") scaley = c_const_get("label_scaley")
-			prefix = c_const_get("label_prefix") suffix = c_const_get("label_suffix")
-		elseif switch == ACTION then
-			scalex = c_const_get("action_scalex") scaley = c_const_get("action_scaley")
-			prefix = c_const_get("action_prefix") suffix = c_const_get("action_suffix")
-		elseif switch == CYCLE then
-			scalex = c_const_get("cycle_scalex") scaley = c_const_get("cycle_scaley")
-			prefix = c_const_get("cycle_prefix") suffix = c_const_get("cycle_suffix")
-			v.text = v.cycleList[v.cyclePos]
-		elseif switch == INPUT then
-			scalex = c_const_get("input_scalex") scaley = c_const_get("input_scaley")
-			prefix = c_const_get("input_prefix") suffix = c_const_get("input_suffix")
-			v.text = v.inputText:sub(1, v.textPos) .. c_const_get("input_posCharacter") .. v.inputText:sub(v.textPos + 1)
-		elseif switch == KEY then
-			scalex = c_const_get("key_scalex") scaley = c_const_get("key_scaley")
-			prefix = c_const_get("key_prefix") suffix = c_const_get("key_suffix")
-			if v.keyActive then
-				v.text = gui_char(v.button) .. c_const_get("key_activeSuffix")
-			else
-				v.text = gui_char(v.button)
-			end
-		end
+			-- type specific stuff
+			local switch = v.type
+			if switch == nil then
+			elseif switch == LABEL then
+				scalex = c_const_get("label_scalex") scaley = c_const_get("label_scaley")
+				prefix = c_const_get("label_prefix") suffix = c_const_get("label_suffix")
+			elseif switch == ACTION then
+				scalex = c_const_get("action_scalex") scaley = c_const_get("action_scaley")
+				prefix = c_const_get("action_prefix") suffix = c_const_get("action_suffix")
+			elseif switch == CYCLE then
+				scalex = c_const_get("cycle_scalex") scaley = c_const_get("cycle_scaley")
+				prefix = c_const_get("cycle_prefix") suffix = c_const_get("cycle_suffix")
+				v.text = v.cycleList[v.cyclePos]
+			elseif switch == INPUT then
+				scalex = c_const_get("input_scalex") scaley = c_const_get("input_scaley")
+				prefix = c_const_get("input_prefix") suffix = c_const_get("input_suffix")
+				v.text = v.inputText:sub(1, v.textPos) .. c_const_get("input_posCharacter") .. v.inputText:sub(v.textPos + 1)
+			elseif switch == KEY then
+				scalex = c_const_get("key_scalex") scaley = c_const_get("key_scaley")
+				prefix = c_const_get("key_prefix") suffix = c_const_get("key_suffix")
+				if v.keyActive then
+					v.text = gui_char(v.button) .. c_const_get("key_activeSuffix")
+				else
+					v.text = gui_char(v.button)
+				end
+			elseif switch == SCALE then
+				-- handle scales quite differently since they aren't textual widgets
+				if v.updateTextCallBack then
+					local text = v:updateTextCallBack(d)
 
-		if v.updateTextCallBack then
-			local text = v:updateTextCallBack(d)
-
-			if text and type(text) == "string" then
-				v.text = text
-			end
-		end
-
-		scalex = scalex * v.scale
-		scaley = scaley * v.scale
-
-		if v.bump then
-			v.bump = v.bump - d * c_const_get("select_drop")
-
-			if v.bump <= 0 then
-				v.bump = nil
-			else
-				scalex = scalex * (1 + v.bump)
-				scaley = scaley * (1 + v.bump)
-			end
-		end
-
-		local text = prefix .. v.text .. suffix
-
-		if v ~= selected then
-			local p = tankbobs.m_vec2(v.p)
-			local decrement = v.upperRightPos.y - v.p.y + c_const_get("gui_vspacing")
-
-			for _, vSub in pairs(tankbobs.t_explode(text, '\n')) do
-				local oldR = tankbobs.m_vec2(v.upperRightPos)
-
-				v.upperRightPos = tankbobs.r_drawString(vSub, p, v.color.r, v.color.g, v.color.b, v.color.a, gui_private_scale(scalex), gui_private_scale(scaley), false)
-				if oldR.y > v.upperRightPos.y then
-					v.upperRightPos(oldR)
+					if text and type(text) == "string" then
+						v.text = text
+					end
 				end
 
-				p.y = p.y - decrement
-			end
-		else
-			-- draw with altColor
-			local p = tankbobs.m_vec2(v.p)
-			local decrement = v.upperRightPos.y - v.p.y + c_const_get("gui_vspacing")
+				scalex = c_const_get("scale_scalex") scaley = c_const_get("scale_scaley")
+				scalex = scalex * v.scale
+				scaley = scaley * v.scale
+				if v.bump then
+					v.bump = v.bump - d * c_const_get("select_drop")
 
-			for _, vSub in pairs(tankbobs.t_explode(text, '\n')) do
-				local oldR = tankbobs.m_vec2(v.upperRightPos)
-
-				v.upperRightPos = tankbobs.r_drawString(vSub, v.p, v.altColor.r, v.altColor.g, v.altColor.b, v.altColor.a, gui_private_scale(scalex), gui_private_scale(scaley), false)
-				if oldR.y > v.upperRightPos.y then
-					v.upperRightPos(oldR)
+					if v.bump <= 0 then
+						v.bump = nil
+					else
+						scalex = scalex * (1 + v.bump)
+						scaley = scaley * (1 + v.bump)
+					end
 				end
 
-				p.y = p.y - decrement
+				if selected == v then
+					v.scalePos = v.scalePos + d * scroll * c_const_get("scale_scrollSpeed")
+				end
+
+				gl.PushMatrix()
+					-- color is the color of the scale; altColor is the color of the scale's cursor
+					gl.Translate(v.p.x, v.p.y, 0)
+					if selected == v then
+						gl.Color(v.color.r, v.color.g, v.color.b, v.color.a)
+						gl.TexEnv("TEXTURE_ENV_COLOR", v.color.r, v.color.g, v.color.b, v.color.a)
+					else
+						gl.Color(v.altColor.r, v.altColor.g, v.altColor.b, v.altColor.a)
+						gl.TexEnv("TEXTURE_ENV_COLOR", v.altColor.r, v.altColor.g, v.altColor.b, v.altColor.a)
+					end
+					gl.PushMatrix()
+						gl.Scale(scalex, scaley, 1)
+						gl.CallList(scale_listBase)
+					gl.PopMatrix()
+					gl.Scale(scalex, scaley, 1)
+					gl.Translate(v.scrollPos * c_const_get("scale_width"), 0, 0)
+					gl.CallList(scaleCenter_listBase)
+				gl.PopMatrix()
+
+				break  -- continue
 			end
-		end
+
+			if v.updateTextCallBack then
+				local text = v:updateTextCallBack(d)
+
+				if text and type(text) == "string" then
+					v.text = text
+				end
+			end
+
+			scalex = scalex * v.scale
+			scaley = scaley * v.scale
+
+			if v.bump then
+				v.bump = v.bump - d * c_const_get("select_drop")
+
+				if v.bump <= 0 then
+					v.bump = nil
+				else
+					scalex = scalex * (1 + v.bump)
+					scaley = scaley * (1 + v.bump)
+				end
+			end
+
+			local text = prefix .. v.text .. suffix
+
+			if v ~= selected then
+				local p = tankbobs.m_vec2(v.p)
+				local decrement = v.upperRightPos.y - v.p.y + c_const_get("gui_vspacing")
+
+				for _, vSub in pairs(tankbobs.t_explode(text, '\n')) do
+					local oldR = tankbobs.m_vec2(v.upperRightPos)
+
+					v.upperRightPos = tankbobs.r_drawString(vSub, p, v.color.r, v.color.g, v.color.b, v.color.a, gui_private_scale(scalex), gui_private_scale(scaley), false)
+					if oldR.y > v.upperRightPos.y then
+						v.upperRightPos(oldR)
+					end
+
+					p.y = p.y - decrement
+				end
+			else
+				-- draw with altColor
+				local p = tankbobs.m_vec2(v.p)
+				local decrement = v.upperRightPos.y - v.p.y + c_const_get("gui_vspacing")
+
+				for _, vSub in pairs(tankbobs.t_explode(text, '\n')) do
+					local oldR = tankbobs.m_vec2(v.upperRightPos)
+
+					v.upperRightPos = tankbobs.r_drawString(vSub, v.p, v.altColor.r, v.altColor.g, v.altColor.b, v.altColor.a, gui_private_scale(scalex), gui_private_scale(scaley), false)
+					if oldR.y > v.upperRightPos.y then
+						v.upperRightPos(oldR)
+					end
+
+					p.y = p.y - decrement
+				end
+			end
+		until true if breaking then break end
 	end
 end
 
@@ -474,38 +644,58 @@ local function gui_private_inputKey(button)
 	end
 end
 
-function gui_click(x, y)
-	for _, v in pairs(widgets) do
-		if x >= v.p.x and x <= v.upperRightPos.x and y >= v.p.y and y <= v.upperRightPos.y then
-			local switch = v.type
-			if switch == nil then
-			elseif switch == LABEL then
-			elseif switch == ACTION then
-				if v.actionCallBack then
-					v:actionCallBack(x, y)
-				end
-			elseif switch == CYCLE then
-				if v.cycleList[v.cyclePos + 1] then
-					-- cycle through
-					v.cyclePos = v.cyclePos + 1
+function gui_click(button, pressed, x, y)
+	if button == 1 then  -- left mouse button
+		if pressed then
+			for _, v in pairs(widgets) do
+				if x >= v.p.x and x <= v.upperRightPos.x and y >= v.p.y and y <= v.upperRightPos.y then
+					local switch = v.type
+					if switch == nil then
+					elseif switch == LABEL then
+					elseif switch == ACTION then
+						if v.actionCallBack then
+							v:actionCallBack(x, y)
+						end
+					elseif switch == CYCLE then
+						if v.cycleList[v.cyclePos + 1] then
+							-- cycle through
+							v.cyclePos = v.cyclePos + 1
 
-					if v.cycleCallBack then
-						v:cycleCallBack(v.cycleList[v.cyclePos], v.cyclePos)
-					end
-				else
-					-- back to beginning
-					v.cyclePos = 1
+							if v.cycleCallBack then
+								v:cycleCallBack(v.cycleList[v.cyclePos], v.cyclePos)
+							end
+						else
+							-- back to beginning
+							v.cyclePos = 1
 
-					if v.cycleCallBack then
-						v:cycleCallBack(v.cycleList[v.cyclePos], v.cyclePos)
+							if v.cycleCallBack then
+								v:cycleCallBack(v.cycleList[v.cyclePos], v.cyclePos)
+							end
+						end
+					elseif switch == INPUT then
+					elseif switch == KEY then
+						v.keyActive = true
+					elseif switch == SCALE then
+						local centerStart, centerEnd
+
+						centerStart = v.p.x + v.scalePos * c_const_get("scale_width")
+						centerEnd = centerStart + c_const_get("scaleCenter_width")
+
+						if x >= centerStart and x <= centerEnd then
+							v.scaleMouseOffset = x - centerStart
+							v.scaleActive = true
+						end
 					end
+
+					return  -- save more work by returning
 				end
-			elseif switch == INPUT then
-			elseif switch == KEY then
-				v.keyActive = true
 			end
-
-			return  -- save work by returning
+		else
+			for _, v in pairs(widgets) do
+				if v.type == SCALE then
+					v.scaleActive = false
+				end
+			end
 		end
 	end
 end
@@ -519,70 +709,116 @@ function gui_mouse(x, y, xrel, yrel)
 				return
 			end
 		end
+
+		if v.type == SCALE and v == selected and v.scaleActive then
+			v.scalePos = (x - v.p.x - v.scaleMouseOffset) / c_const_get("scale_width")
+
+			if v.scalePos < 0 then
+				v.scalePos = 0
+			end
+			if v.scalePos > 1 then
+				v.scalePos = 1
+			end
+		end
 	end
 end
 
-function gui_button(button)
+function gui_button(button, pressed)
 	if selected and selected.type == KEY and selected.keyActive then
-		selected.keyActive = false
-		if button == 8 then
-			-- BACKSPACE
-			selected.button = nil
-		elseif button == 27 then
-			-- ESCAPE
-		else
-			selected.button = button
+		if pressed then
+			selected.keyActive = false
+			if button == 8 then
+				-- BACKSPACE
+				selected.button = nil
+			elseif button == 27 then
+				-- ESCAPE
+			else
+				selected.button = button
+			end
+
+			if selected.keyChangedCallBack then
+				selected:keyChangedCallBack(selected.button)
+			end
 		end
 
-		if selected.keyChangeCallBack then
-			selected:keyChangeCallBack(selected.button)
-		end
+		return true
 	elseif button == 0x0D or button == c_config_get("config.key.select") then
 		-- ENTER
 
-		if selected then
-			local switch = selected.type
-			if switch == nil then
-			elseif switch == LABEL then
-			elseif switch == ACTION then
-				if selected.actionCallBack then
-					selected:actionCallBack(button)
-				end
-			elseif switch == CYCLE then
-				-- same as clicking
-				if selected.cycleList[selected.cyclePos + 1] then
-					-- cycle through
-					selected.cyclePos = selected.cyclePos + 1
-
-					if selected.cycleCallBack then
-						selected:cycleCallBack(selected.cycleList[selected.cyclePos], selected.cyclePos)
+		if pressed then
+			if selected then
+				local switch = selected.type
+				if switch == nil then
+				elseif switch == LABEL then
+				elseif switch == ACTION then
+					if selected.actionCallBack then
+						selected:actionCallBack(button)
 					end
-				else
-					-- back to beginning
-					selected.cyclePos = 1
+				elseif switch == CYCLE then
+					-- same as clicking
+					if selected.cycleList[selected.cyclePos + 1] then
+						-- cycle through
+						selected.cyclePos = selected.cyclePos + 1
 
-					if selected.cycleCallBack then
-						selected:cycleCallBack(selected.cycleList[selected.cyclePos], selected.cyclePos)
+						if selected.cycleCallBack then
+							selected:cycleCallBack(selected.cycleList[selected.cyclePos], selected.cyclePos)
+						end
+					else
+						-- back to beginning
+						selected.cyclePos = 1
+
+						if selected.cycleCallBack then
+							selected:cycleCallBack(selected.cycleList[selected.cyclePos], selected.cyclePos)
+						end
 					end
+				elseif switch == INPUT then
+				elseif switch == KEY then
+					selected.keyActive = true
+				elseif switch == SCALE then
 				end
-			elseif switch == INPUT then
-			elseif switch == KEY then
-				selected.keyActive = true
 			end
 		end
 
 	elseif button == 273 or button == c_config_get("config.key.up") then
 		-- UP
 
-		local y, x
-		local selection
+		if pressed then
+			local y, x
+			local selection
 
-		if not selected then
-			-- select the bottom-most widget
+			if not selected then
+				-- select the bottom-most widget
+
+				for _, v in pairs(widgets) do
+					if v.selectable then
+						if not y or v.p.y <= y then
+							selection = v
+							y, x = v.p.y, v.p.x
+						end
+					end
+				end
+
+				for _, v in pairs(widgets) do
+					if v.selectable then
+						if v.p.y == y and v.p.x > x then
+							selection = v
+							x = v.p.x
+						end
+					end
+				end
+
+				if selection then
+					gui_private_selected(selection)
+				end
+
+				return
+			end
+
+			-- a widget is selected, so select the previous if it exists
 
 			for _, v in pairs(widgets) do
-				if v.selectable then
-					if not y or v.p.y <= y then
+				if v.selectable and v ~= selected then
+					if v.p.y == selected.p.y and (not x or v.p.x >= x) and v.p.x <= selected.p.x then
 						selection = v
 						y, x = v.p.y, v.p.x
 					end
@@ -590,7 +826,16 @@ function gui_button(button)
 			end
 
 			for _, v in pairs(widgets) do
-				if v.selectable then
+				if v.selectable and v ~= selected then
+					if (not y or v.p.y <= y) and v.p.y > selected.p.y then
+						selection = v
+						y, x = v.p.y, v.p.x
+					end
+				end
+			end
+
+			for _, v in pairs(widgets) do
+				if v.selectable and v ~= selected then
 					if v.p.y == y and v.p.x > x then
 						selection = v
 						x = v.p.x
@@ -601,55 +846,48 @@ function gui_button(button)
 			if selection then
 				gui_private_selected(selection)
 			end
-
-			return
-		end
-
-		-- a widget is selected, so select the previous if it exists
-
-		for _, v in pairs(widgets) do
-			if v.selectable and v ~= selected then
-				if v.p.y == selected.p.y and (not x or v.p.x >= x) and v.p.x <= selected.p.x then
-					selection = v
-					y, x = v.p.y, v.p.x
-				end
-			end
-		end
-
-		for _, v in pairs(widgets) do
-			if v.selectable and v ~= selected then
-				if (not y or v.p.y <= y) and v.p.y > selected.p.y then
-					selection = v
-					y, x = v.p.y, v.p.x
-				end
-			end
-		end
-
-		for _, v in pairs(widgets) do
-			if v.selectable and v ~= selected then
-				if v.p.y == y and v.p.x > x then
-					selection = v
-					x = v.p.x
-				end
-			end
-		end
-
-		if selection then
-			gui_private_selected(selection)
 		end
 
 	elseif button == 274 or button == c_config_get("config.key.down") then
 		-- DOWN
 
-		local y, x
-		local selection
+		if pressed then
+			local y, x
+			local selection
 
-		if not selected then
-			-- select upper-most widget
+			if not selected then
+				-- select upper-most widget
+
+				for _, v in pairs(widgets) do
+					if v.selectable then
+						if not y or v.p.y >= y then
+							selection = v
+							y, x = v.p.y, v.p.x
+						end
+					end
+				end
+
+				for _, v in pairs(widgets) do
+					if v.selectable then
+						if v.p.y == y and v.p.x < x then
+							selection = v
+							x = v.p.x
+						end
+					end
+				end
+
+				if selection then
+					gui_private_selected(selection)
+				end
+
+				return
+			end
+
+			-- a widget is selected, so select the next one if it exists
 
 			for _, v in pairs(widgets) do
-				if v.selectable then
-					if not y or v.p.y >= y then
+				if v.selectable and v ~= selected then
+					if v.p.y == selected.p.y and (not x or v.p.x <= x) and v.p.x >= selected.p.x then
 						selection = v
 						y, x = v.p.y, v.p.x
 					end
@@ -657,7 +895,16 @@ function gui_button(button)
 			end
 
 			for _, v in pairs(widgets) do
-				if v.selectable then
+				if v.selectable and v ~= selected then
+					if (not y or v.p.y >= y) and v.p.y < selected.p.y then
+						selection = v
+						y, x = v.p.y, v.p.x
+					end
+				end
+			end
+
+			for _, v in pairs(widgets) do
+				if v.selectable and v ~= selected then
 					if v.p.y == y and v.p.x < x then
 						selection = v
 						x = v.p.x
@@ -668,85 +915,70 @@ function gui_button(button)
 			if selection then
 				gui_private_selected(selection)
 			end
-
-			return
-		end
-
-		-- a widget is selected, so select the next one if it exists
-
-		for _, v in pairs(widgets) do
-			if v.selectable and v ~= selected then
-				if v.p.y == selected.p.y and (not x or v.p.x <= x) and v.p.x >= selected.p.x then
-					selection = v
-					y, x = v.p.y, v.p.x
-				end
-			end
-		end
-
-		for _, v in pairs(widgets) do
-			if v.selectable and v ~= selected then
-				if (not y or v.p.y >= y) and v.p.y < selected.p.y then
-					selection = v
-					y, x = v.p.y, v.p.x
-				end
-			end
-		end
-
-		for _, v in pairs(widgets) do
-			if v.selectable and v ~= selected then
-				if v.p.y == y and v.p.x < x then
-					selection = v
-					x = v.p.x
-				end
-			end
-		end
-
-		if selection then
-			gui_private_selected(selection)
 		end
 
 	elseif selected and selected.type == INPUT then
-		return gui_private_inputKey(button)
+		if pressed then
+			return gui_private_inputKey(button)
+		end
+
+		return true
 
 	elseif button == 276 or button == c_config_get("config.key.left") then
 		-- LEFT
 
-		if selected then
-			local switch = selected.type
-			if switch == nil then
-			elseif switch == LABEL then
-			elseif switch == ACTION then
-			elseif switch == CYCLE then
-				if selected.cycleList[selected.cyclePos - 1] then
-					selected.cyclePos = selected.cyclePos - 1
+		if pressed then
+			if selected then
+				local switch = selected.type
+				if switch == nil then
+				elseif switch == LABEL then
+				elseif switch == ACTION then
+				elseif switch == CYCLE then
+					if selected.cycleList[selected.cyclePos - 1] then
+						selected.cyclePos = selected.cyclePos - 1
 
-					if selected.cycleCallBack then
-						selected:cycleCallBack(selected.cycleList[selected.cyclePos], selected.cyclePos)
+						if selected.cycleCallBack then
+							selected:cycleCallBack(selected.cycleList[selected.cyclePos], selected.cyclePos)
+						end
+					end
+				elseif switch == INPUT then
+				elseif switch == KEY then
+				elseif switch == SCALE then
+					if pressed then
+						scroll = -1
+					else
+						scroll = 0
 					end
 				end
-			elseif switch == INPUT then
-			elseif switch == KEY then
 			end
 		end
 
 	elseif button == 275 or button == c_config_get("config.key.right") then
 		-- RIGHT
 
-		if selected then
-			local switch = selected.type
-			if switch == nil then
-			elseif switch == LABEL then
-			elseif switch == ACTION then
-			elseif switch == CYCLE then
-				if selected.cycleList[selected.cyclePos + 1] then
-					selected.cyclePos = selected.cyclePos + 1
+		if pressed then
+			if selected then
+				local switch = selected.type
+				if switch == nil then
+				elseif switch == LABEL then
+				elseif switch == ACTION then
+				elseif switch == CYCLE then
+					if selected.cycleList[selected.cyclePos + 1] then
+						selected.cyclePos = selected.cyclePos + 1
 
-					if selected.cycleCallBack then
-						selected:cycleCallBack(selected.cycleList[selected.cyclePos], selected.cyclePos)
+						if selected.cycleCallBack then
+							selected:cycleCallBack(selected.cycleList[selected.cyclePos], selected.cyclePos)
+						end
+					end
+				elseif switch == INPUT then
+				elseif switch == KEY then
+				elseif switch == SCALE then
+					if pressed then
+						scroll = 1
+					else
+						scroll = 0
 					end
 				end
-			elseif switch == INPUT then
-			elseif switch == KEY then
 			end
 		end
 

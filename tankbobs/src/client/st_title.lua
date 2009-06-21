@@ -44,14 +44,12 @@ function st_title_done()
 end
 
 function st_title_click(button, pressed, x, y)
-	if pressed then
-		gui_click(x, y)
-	end
+	gui_click(button, pressed, x, y)
 end
 
 function st_title_button(button, pressed)
-	if pressed then
-		if not gui_button(button) then
+	if not gui_button(button, pressed) then
+		if pressed then
 			if button == 0x1B or button == c_config_get("config.key.exit") or button == c_config_get("config.key.quit") then
 				c_state_advance()
 			end

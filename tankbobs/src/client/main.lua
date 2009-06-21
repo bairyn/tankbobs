@@ -54,6 +54,7 @@ function main_init()
 	args = nil  -- protect against bad code
 
 	renderer_init()
+	gui_init()
 
 	tankbobs.r_newWindow(c_config_get("config.renderer.width"), c_config_get("config.renderer.height"), c_config_get("config.renderer.fullscreen"), c_const_get("title"), c_const_get("icon"))
 	renderer_setupNewWindow()
@@ -63,11 +64,11 @@ function main_init()
 	while not done do
 		main_loop()
 	end
-
-	renderer_done()
 end
 
 function main_done()
+	gui_done()
+	renderer_done()
 end
 
 function main_stt(x, y)

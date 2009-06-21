@@ -20,8 +20,7 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 --[[
 init.lua
 
-TODO: in every file, describe a description of every global function
-inits all scripts
+Initialization (and cleanup)
 --]]
 
 function init()

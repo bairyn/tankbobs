@@ -29,30 +29,18 @@ local st_options_mouse
 local st_options_step
 
 function st_options_click(button, pressed, x, y)
-	if pressed then
-		gui_click(x, y)
-	end
+	gui_click(button, pressed, x, y)
 end
 
 function st_options_button(button, pressed)
-	if not pressed and options_key then
-		if button == 0x0D then
-		elseif button == 0x1B then
-			options_key = nil
-		elseif button == 0x08 then
-			c_config_set(options_key, "")
-			options_key = nil
-		else
-			c_config_set(options_key, button)
-			options_key = nil
+	if not gui_button(button, pressed) then
+		if pressed then
+			if button == c_config_get("config.key.exit") then
+				c_state_new(exit_state)
+			elseif button == 0x1B or button == c_config_get("config.key.quit") then
+				c_state_advance()
+			end
 		end
-	elseif pressed and not options_key then
-		if button == c_config_get("config.key.exit") then
-			c_state_new(exit_state)
-		elseif button == 0x1B or button == c_config_get("config.key.quit") then
-			c_state_advance()
-		end
-		gui_button(button)
 	end
 end
 
