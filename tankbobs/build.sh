@@ -72,7 +72,7 @@ if [ "$1" == "make" ]; then
 				exit 1
 			fi
 		else
-			if ! cmake -D CMAKE_BUILD_TYPE=Debug ${CMAKEFLAGS} ./../; then
+			if ! cmake -D CMAKE_BUILD_TYPE=Debug ${CMAKEFLAGS} -D TDEBUG=TRUE ./../; then
 				exit 1
 			fi
 		fi

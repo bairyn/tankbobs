@@ -1,6 +1,8 @@
 <config>
 	<client>
 		<fps>128</fps>
+		<volume>0.8</volume>
+		<musicVolume>0.6</musicVolume>
 	</client>
 
 	<font>sans</font>

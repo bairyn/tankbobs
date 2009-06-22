@@ -237,8 +237,6 @@ int m_vec2_newindex(lua_State *L)
 
 	switch(index)
 	{
-		double inc;
-
 		case 'x':
 			v->x = val;
 

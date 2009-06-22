@@ -53,11 +53,15 @@ function main_init()
 
 	args = nil  -- protect against bad code
 
-	renderer_init()
-	gui_init()
+	tankbobs.a_init()
+	tankbobs.a_setVolume(c_config_get("config.client.volume"))
+	tankbobs.a_setMusicVolume(c_config_get("config.client.musicVolume"))
 
 	tankbobs.r_newWindow(c_config_get("config.renderer.width"), c_config_get("config.renderer.height"), c_config_get("config.renderer.fullscreen"), c_const_get("title"), c_const_get("icon"))
 	renderer_setupNewWindow()
+
+	renderer_init()
+	gui_init()
 
 	c_state_new(title_state)
 
@@ -67,6 +71,7 @@ function main_init()
 end
 
 function main_done()
+	tankbobs.a_quit()
 	gui_done()
 	renderer_done()
 end
@@ -93,6 +98,7 @@ local lastTime = 0
 
 function main_loop()
 	local t = tankbobs.t_getTicks()
+	local main_stt = main_stt
 
 	if lastTime == 0 then
 		lastTime = tankbobs.t_getTicks()

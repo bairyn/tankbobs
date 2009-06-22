@@ -398,7 +398,7 @@ c_weapon =
 	projectileTexturer = {},
 	projectileRender = {},
 
-	m = {}
+	m = {p = {}}
 }
 
 c_weapon_projectile =
@@ -416,7 +416,7 @@ c_weapon_projectile =
 	collisions = 0,
 	owner = nil,  -- tank which fired it
 
-	m = {}
+	m = {p = {}}
 }
 
 function c_weapon_getByName(name)
@@ -513,11 +513,15 @@ function c_weapon_fire(tank)
 	end
 end
 
-function c_weapon_clear()
+function c_weapon_clear(clearPersistant)
 	c_world_projectiles = {}
 
 	for _, v in pairs(c_weapons) do
-		v.m = {}
+		local pers = v.m.p
+		v.m = {p = {}}
+		if not clearPersistant then
+			v.m.p = pers
+		end
 	end
 end
 

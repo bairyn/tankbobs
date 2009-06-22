@@ -205,7 +205,7 @@ c_tcm_wall =
 	pid = 0,
 	path = false,
 
-	m = {}  -- extra data (data not in tcm; eg position if on a path)
+	m = {p = {}}  -- extra data (data not in tcm; eg position if on a path)
 }
 
 c_tcm_teleporter =
@@ -220,7 +220,7 @@ c_tcm_teleporter =
 	t = 0,
 	p = {},
 
-	m = {}  -- extra data
+	m = {p = {}}  -- extra data
 }
 
 c_tcm_playerSpawnPoint =
@@ -234,7 +234,7 @@ c_tcm_playerSpawnPoint =
 	id = 0,
 	p = {},
 
-	m = {}  -- extra data
+	m = {p = {}}  -- extra data
 }
 
 c_tcm_powerupSpawnPoint =
@@ -249,7 +249,7 @@ c_tcm_powerupSpawnPoint =
 	p = {},
 	enabledPowerups = {},
 
-	m = {}  -- extra data
+	m = {p = {}}  -- extra data
 }
 
 c_tcm_path =
@@ -266,7 +266,7 @@ c_tcm_path =
 	time = 0,
 	enabled = false,
 
-	m = {}  -- extra data
+	m = {p = {}}  -- extra data
 }
 
 function c_tcm_read_sets(dir, t)
@@ -602,24 +602,46 @@ function c_tcm_select_map(name)
 	error("c_tcm_select_map: map '" .. name .. "' not found")
 end
 
-function c_tcm_unload_extra_data()
-	for _, v in pairs(c_tcm_current_map.walls) do
-		v.m = {}
-	end
+function c_tcm_unload_extra_data(clearPersitant)
+	if c_tcm_current_map then
+		for _, v in pairs(c_tcm_current_map.walls) do
+			local pers = v.m.p
+			v.m = {p = {}}
+			if not clearPersistant then
+				v.m.p = pers
+			end
+		end
 
-	for _, v in pairs(c_tcm_current_map.teleporters) do
-		v.m = {}
-	end
+		for _, v in pairs(c_tcm_current_map.teleporters) do
+			local pers = v.m.p
+			v.m = {p = {}}
+			if not clearPersistant then
+				v.m.p = pers
+			end
+		end
 
-	for _, v in pairs(c_tcm_current_map.playerSpawnPoints) do
-		v.m = {}
-	end
+		for _, v in pairs(c_tcm_current_map.playerSpawnPoints) do
+			local pers = v.m.p
+			v.m = {p = {}}
+			if not clearPersistant then
+				v.m.p = pers
+			end
+		end
 
-	for _, v in pairs(c_tcm_current_map.powerupSpawnPoints) do
-		v.m = {}
-	end
+		for _, v in pairs(c_tcm_current_map.powerupSpawnPoints) do
+			local pers = v.m.p
+			v.m = {p = {}}
+			if not clearPersistant then
+				v.m.p = pers
+			end
+		end
 
-	for _, v in pairs(c_tcm_current_map.paths) do
-		v.m = {}
+		for _, v in pairs(c_tcm_current_map.paths) do
+			local pers = v.m.p
+			v.m = {p = {}}
+			if not clearPersistant then
+				v.m.p = pers
+			end
+		end
 	end
 end

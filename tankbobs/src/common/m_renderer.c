@@ -390,6 +390,7 @@ int r_selectFont(lua_State *L)
 {
 	r_font_t *i;
 	const char *name;
+	tstr *message;
 
 	CHECKINIT(init, L);
 
@@ -405,7 +406,7 @@ int r_selectFont(lua_State *L)
 		}
 	}
 
-	tstr *message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
+	message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
 		();
 	CDLL_FUNCTION("libtstr", "tstr_base_set", void(*)(tstr *, const char *))
 		(message, "r_selectFont: couldn't find font with name '");
@@ -481,7 +482,6 @@ int r_drawString(lua_State *L)
 	SDL_Surface *s, *screen;
 	SDL_Rect p;
 	int i;
-	int found = 0;
 	r_fontCache_t *fc;
 	int oldestTime = 0;
 	double scalex, scaley;
@@ -796,10 +796,10 @@ int r_drawString(lua_State *L)
 
 int r_freeFont(lua_State *L)
 {
-	r_font_t *i;
-	r_font_t *f;
+	r_font_t *i, *last = NULL;
 	const char *name;
 	int j;
+	tstr *message;
 
 	CHECKINIT(init, L);
 
@@ -807,11 +807,12 @@ int r_freeFont(lua_State *L)
 
 	for(i = r_fonts; i; i = i->next)
 	{
-		if(strcmp(i->next->name, name) == 0)
+		if(strcmp(i->name, name) == 0)
 		{
-			f = i->next;
-
-			i->next = f->next;
+			if(last)
+				last->next = i->next;
+			else
+				r_fonts = i->next;
 
 			TTF_CloseFont(i->font);
 #ifndef FONT_USEBLIT
@@ -834,9 +835,11 @@ int r_freeFont(lua_State *L)
 
 			return 0;
 		}
+
+		last = i;
 	}
 
-	tstr *message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
+	message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
 		();
 	CDLL_FUNCTION("libtstr", "tstr_base_set", void(*)(tstr *, const char *))
 		(message, "r_freeFont: couldn't find font with name '");

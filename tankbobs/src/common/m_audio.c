@@ -56,15 +56,20 @@ struct sound_s
 
 static char musicFilename[FILENAME_MAX] = {""};
 static Mix_Music *music = NULL;
+static int audioInitialized = FALSE;
 
 int a_init(lua_State *L)
 {
 	CHECKINIT(init, L);
 
+	if(audioInitialized)
+		return 0;
+
 	memset(&sounds, 0, sizeof(sounds));
 
-	if(!Mix_OpenAudio(FREQUENCY, FORMAT, CHANNELS, CHUNKSIZE))
+	if(Mix_OpenAudio(FREQUENCY, FORMAT, CHANNELS, CHUNKSIZE) < 0)
 	{
+		/*
 		tstr *message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
 			();
 		CDLL_FUNCTION("libtstr", "tstr_base_set", void(*)(tstr *, const char *))
@@ -78,7 +83,16 @@ int a_init(lua_State *L)
 		CDLL_FUNCTION("libtstr", "tstr_free", void(*)(tstr *))
 			(message);
 		lua_error(L);
+		*/
+
+		/* continue without audio */
+
+		audioInitialized = FALSE;
+
+		return 0;
 	}
+
+	audioInitialized = TRUE;
 
 	return 0;
 }
@@ -88,6 +102,9 @@ int a_quit(lua_State *L)
 	sound_t *i;
 
 	CHECKINIT(init, L);
+
+	if(!audioInitialized)
+		return 0;
 
 	if(music)
 		Mix_FreeMusic(music);
@@ -115,6 +132,9 @@ int a_initSound(lua_State *L)
 	const char *filename = NULL;
 
 	CHECKINIT(init, L);
+
+	if(!audioInitialized)
+		return 0;
 
 	if(lua_isstring(L, 1))
 	{
@@ -199,6 +219,9 @@ int a_freeSound(lua_State *L)
 
 	CHECKINIT(init, L);
 
+	if(!audioInitialized)
+		return 0;
+
 	if(lua_isstring(L, 1))
 	{
 		sound_t *i;
@@ -231,6 +254,9 @@ int a_startMusic(lua_State *L)
 	const char *filename = NULL;
 
 	CHECKINIT(init, L);
+
+	if(!audioInitialized)
+		return 0;
 
 	/* If filename isn't given, always continue the music.  If the music has already started playing, continue the music. */
 	if(lua_isstring(L, 1))
@@ -268,11 +294,16 @@ int a_startMusic(lua_State *L)
 	strncpy(musicFilename, filename, sizeof(musicFilename));
 	music = Mix_LoadMUS(filename);
 	Mix_FadeInMusic(music, -1, FADE_MS);
+
+	return 0;
 }
 
 int a_pauseMusic(lua_State *L)
 {
 	CHECKINIT(init, L);
+
+	if(!audioInitialized)
+		return 0;
 
 	if(Mix_PlayingMusic() && Mix_PausedMusic())
 		Mix_PauseMusic();
@@ -283,6 +314,9 @@ int a_pauseMusic(lua_State *L)
 int a_stopMusic(lua_State *L)
 {
 	CHECKINIT(init, L);
+
+	if(!audioInitialized)
+		return 0;
 
 	Mix_FadeOutMusic(FADE_MS);
 
@@ -295,6 +329,9 @@ int a_playSound(lua_State *L)
 	const char *filename = NULL;
 
 	CHECKINIT(init, L);
+
+	if(!audioInitialized)
+		return 0;
 
 	if(lua_isstring(L, 1))
 	{
@@ -383,18 +420,36 @@ int a_playSound(lua_State *L)
 
 int a_setMusicVolume(lua_State *L)
 {
+	int volume; 
+
 	CHECKINIT(init, L);
 
-	Mix_VolumeMusic(luaL_checknumber(L, 1) * MIX_MAX_VOLUME);
+	if(!audioInitialized)
+		return 0;
+
+	volume = luaL_checknumber(L, 1) * MIX_MAX_VOLUME;
+	if(volume < 0)
+		volume = 0;
+
+	Mix_VolumeMusic(volume);
 
 	return 0;
 }
 
 int a_setVolume(lua_State *L)
 {
+	int volume; 
+
 	CHECKINIT(init, L);
 
-	Mix_Volume(-1, luaL_checknumber(L, 1) * MIX_MAX_VOLUME);
+	if(!audioInitialized)
+		return 0;
+
+	volume = luaL_checknumber(L, 1) * MIX_MAX_VOLUME;
+	if(volume < 0)
+		volume = 0;
+
+	Mix_Volume(-1, volume);
 
 	return 0;
 }

@@ -42,10 +42,6 @@ static int cdll_initialized = 0;
 
 static void cdll_private_init()
 {
-#if defined(__WINDOWS__) || defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__TOS_WIN__)
-#else
-    setenv("LD_LIBRARY_PATH", getenv("PWD"), 1);
-#endif
     cdll_initialized = 1;
 }
 

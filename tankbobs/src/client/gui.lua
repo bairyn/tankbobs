@@ -112,8 +112,8 @@ function gui_init()
 	c_const_set("scale_g", 0.94, 1)
 	c_const_set("scale_b", 0.98, 1)
 	c_const_set("scale_a", 1.0, 1)
-	c_const_set("scale_scalex", 1 / 12, 1)
-	c_const_set("scale_scaley", 1 / 12, 1)
+	c_const_set("scale_scalex", 1 / 1, 1)
+	c_const_set("scale_scaley", 1 / 1, 1)
 	c_const_set("scaleSelected_r", 0.1, 1)
 	c_const_set("scaleSelected_g", 0.8, 1)
 	c_const_set("scaleSelected_b", 0.215, 1)
@@ -121,7 +121,7 @@ function gui_init()
 
 	c_const_set("scaleCenter_texture", c_const_get("game_dir") .. "scaleCenter.png", 1)
 	c_const_set("scaleCenter_width", 2, 1)
-	c_const_set("scaleCenter_height", 2, 1)
+	c_const_set("scaleCenter_height", 4, 1)
 	c_const_set("scaleCenter_renderx1", 0, 1) c_const_set("scaleCenter_rendery1", c_const_get("scaleCenter_height"), 1)
 	c_const_set("scaleCenter_renderx2", 0, 1) c_const_set("scaleCenter_rendery2", 0, 1)
 	c_const_set("scaleCenter_renderx3", c_const_get("scaleCenter_width"), 1) c_const_set("scaleCenter_rendery3", 0, 1)
@@ -240,10 +240,15 @@ local widget =
 		text = tostring(text)
 		if #text >= 1 then
 			text = text:sub(1, self.maxLength)
-			self.text = text
-			self.inputText = text
-			self.textPos = #text
 		end
+
+		self.text = text
+		self.inputText = text
+		self.textPos = #text
+
+		--if self.textChangedCallBack then
+			--self:textChangedCallBack(self, self.inputText)
+		--end
 	end,
 	inputText = "",
 	textChangedCallBack = nil,
@@ -259,6 +264,10 @@ local widget =
 		else
 			self.text = ""
 		end
+
+		--if self.keyChangedCallBack then
+			--self:keyChangedCallBack(self, self.button)
+		--end
 	end,
 	keyActive = false,  -- whether or not a key press will set the key
 	keyChangedCallBack = nil,
@@ -273,11 +282,16 @@ local widget =
 		end
 
 		self.scalePos = pos
+
+		--if self.scaleChangedCallBack then
+			--self:scaleChangedCallBack(self, self.scalePos)
+		--end
 	end,
 	scalePos = 0,
 	scaleChangedCallBack = nil,
 	scaleMouseOffset = 0,
 	scaleActive = false,
+	scaleLength = nil,
 
 	selectable = false
 }
@@ -406,7 +420,7 @@ function gui_addKey(position, text, updateTextCallBack, keyChangedCallBack, init
 	return key
 end
 
-function gui_addScale(position, text, updateTextCallBack, scaleChangedCallBack, initialPos, scale, color_r, color_g, color_b, color_a, altColor_r, altColor_g, altColor_b, altColor_a)
+function gui_addScale(position, text, updateTextCallBack, scaleChangedCallBack, initialPos, length, scale_, color_r, color_g, color_b, color_a, altColor_r, altColor_g, altColor_b, altColor_a)
 	local scale = widget:new()
 
 	scale.type = SCALE
@@ -418,11 +432,12 @@ function gui_addScale(position, text, updateTextCallBack, scaleChangedCallBack, 
 	scale.updateTextCallBack = updateTextCallBack
 	scale.scaleChangedCallBack = scaleChangedCallBack
 	scale.scalePos = initialPos
-	scale.color.r = color_r or c_const_get("key_r") key.altColor.r = altColor_r or c_const_get("keySelected_r")
-	scale.color.g = color_g or c_const_get("key_g") key.altColor.g = altColor_g or c_const_get("keySelected_g")
-	scale.color.b = color_b or c_const_get("key_b") key.altColor.b = altColor_b or c_const_get("keySelected_b")
-	scale.color.a = color_a or c_const_get("key_a") key.altColor.a = altColor_a or c_const_get("keySelected_a")
-	scale.scale = scale or key.scale
+	scale.scaleLength = length or c_const_get("scale_width")
+	scale.color.r = color_r or c_const_get("scale_r") scale.altColor.r = altColor_r or c_const_get("scaleSelected_r")
+	scale.color.g = color_g or c_const_get("scale_g") scale.altColor.g = altColor_g or c_const_get("scaleSelected_g")
+	scale.color.b = color_b or c_const_get("scale_b") scale.altColor.b = altColor_b or c_const_get("scaleSelected_b")
+	scale.color.a = color_a or c_const_get("scale_a") scale.altColor.a = altColor_a or c_const_get("scaleSelected_a")
+	scale.scale = scale_ or scale.scale
 
 	table.insert(widgets, scale)
 
@@ -490,10 +505,24 @@ function gui_paint(d)
 
 				if selected == v then
 					v.scalePos = v.scalePos + d * scroll * c_const_get("scale_scrollSpeed")
+
+					if v.scalePos < 0 then
+						v.scalePos = 0
+					end
+					if v.scalePos > 1 then
+						v.scalePos = 1
+					end
+
+					if scroll ~= 0 then
+						if v.scaleChangedCallBack then
+							v:scaleChangedCallBack(v.scalePos)
+						end
+					end
 				end
 
+				v.upperRightPos(v.p.x + v.scaleLength, v.p.y + c_const_get("scale_height"))  -- set upperRightPos manually
+
 				gl.PushMatrix()
-					-- color is the color of the scale; altColor is the color of the scale's cursor
 					gl.Translate(v.p.x, v.p.y, 0)
 					if selected == v then
 						gl.Color(v.color.r, v.color.g, v.color.b, v.color.a)
@@ -503,15 +532,15 @@ function gui_paint(d)
 						gl.TexEnv("TEXTURE_ENV_COLOR", v.altColor.r, v.altColor.g, v.altColor.b, v.altColor.a)
 					end
 					gl.PushMatrix()
-						gl.Scale(scalex, scaley, 1)
+						gl.Scale(scalex * v.scaleLength / c_const_get("scale_width"), scaley, 1)
 						gl.CallList(scale_listBase)
 					gl.PopMatrix()
 					gl.Scale(scalex, scaley, 1)
-					gl.Translate(v.scrollPos * c_const_get("scale_width"), 0, 0)
+					gl.Translate(v.scalePos * v.scaleLength, 0, 0)
 					gl.CallList(scaleCenter_listBase)
 				gl.PopMatrix()
 
-				break  -- continue
+				breaking = false break  -- continue
 			end
 
 			if v.updateTextCallBack then
@@ -648,7 +677,7 @@ function gui_click(button, pressed, x, y)
 	if button == 1 then  -- left mouse button
 		if pressed then
 			for _, v in pairs(widgets) do
-				if x >= v.p.x and x <= v.upperRightPos.x and y >= v.p.y and y <= v.upperRightPos.y then
+				if (x >= v.p.x and x <= v.upperRightPos.x and y >= v.p.y and y <= v.upperRightPos.y) or v.type == SCALE then
 					local switch = v.type
 					if switch == nil then
 					elseif switch == LABEL then
@@ -678,16 +707,15 @@ function gui_click(button, pressed, x, y)
 					elseif switch == SCALE then
 						local centerStart, centerEnd
 
-						centerStart = v.p.x + v.scalePos * c_const_get("scale_width")
+						centerStart = v.p.x + v.scalePos * v.scaleLength * v.scale
 						centerEnd = centerStart + c_const_get("scaleCenter_width")
 
-						if x >= centerStart and x <= centerEnd then
+						if x >= centerStart and x <= centerEnd and y >= v.p.y and y <= v.p.y + c_const_get("scaleCenter_height") then
 							v.scaleMouseOffset = x - centerStart
 							v.scaleActive = true
 						end
+return
 					end
-
-					return  -- save more work by returning
 				end
 			end
 		else
@@ -701,23 +729,29 @@ function gui_click(button, pressed, x, y)
 end
 
 function gui_mouse(x, y, xrel, yrel)
+	if selected and selected.type == SCALE and selected.scaleActive then
+		selected.scalePos = (x - selected.p.x) / (selected.scale * selected.scaleLength)
+
+		if selected.scalePos < 0 then
+			selected.scalePos = 0
+		end
+		if selected.scalePos > 1 then
+			selected.scalePos = 1
+		end
+
+		if selected.scaleChangedCallBack then
+			selected:scaleChangedCallBack(selected.scalePos)
+		end
+
+		return
+	end
+
 	for _, v in pairs(widgets) do
 		if v.selectable and v ~= selected then
 			if x >= v.p.x and x <= v.upperRightPos.x and y >= v.p.y and y <= v.upperRightPos.y then
 				gui_private_selected(v)
 
 				return
-			end
-		end
-
-		if v.type == SCALE and v == selected and v.scaleActive then
-			v.scalePos = (x - v.p.x - v.scaleMouseOffset) / c_const_get("scale_width")
-
-			if v.scalePos < 0 then
-				v.scalePos = 0
-			end
-			if v.scalePos > 1 then
-				v.scalePos = 1
 			end
 		end
 	end
@@ -927,13 +961,13 @@ function gui_button(button, pressed)
 	elseif button == 276 or button == c_config_get("config.key.left") then
 		-- LEFT
 
-		if pressed then
-			if selected then
-				local switch = selected.type
-				if switch == nil then
-				elseif switch == LABEL then
-				elseif switch == ACTION then
-				elseif switch == CYCLE then
+		if selected then
+			local switch = selected.type
+			if switch == nil then
+			elseif switch == LABEL then
+			elseif switch == ACTION then
+			elseif switch == CYCLE then
+				if pressed then
 					if selected.cycleList[selected.cyclePos - 1] then
 						selected.cyclePos = selected.cyclePos - 1
 
@@ -941,14 +975,14 @@ function gui_button(button, pressed)
 							selected:cycleCallBack(selected.cycleList[selected.cyclePos], selected.cyclePos)
 						end
 					end
-				elseif switch == INPUT then
-				elseif switch == KEY then
-				elseif switch == SCALE then
-					if pressed then
-						scroll = -1
-					else
-						scroll = 0
-					end
+				end
+			elseif switch == INPUT then
+			elseif switch == KEY then
+			elseif switch == SCALE then
+				if pressed then
+					scroll = -1
+				elseif scroll <= 0 then
+					scroll = 0
 				end
 			end
 		end
@@ -956,13 +990,13 @@ function gui_button(button, pressed)
 	elseif button == 275 or button == c_config_get("config.key.right") then
 		-- RIGHT
 
-		if pressed then
-			if selected then
-				local switch = selected.type
-				if switch == nil then
-				elseif switch == LABEL then
-				elseif switch == ACTION then
-				elseif switch == CYCLE then
+		if selected then
+			local switch = selected.type
+			if switch == nil then
+			elseif switch == LABEL then
+			elseif switch == ACTION then
+			elseif switch == CYCLE then
+				if pressed then
 					if selected.cycleList[selected.cyclePos + 1] then
 						selected.cyclePos = selected.cyclePos + 1
 
@@ -970,14 +1004,14 @@ function gui_button(button, pressed)
 							selected:cycleCallBack(selected.cycleList[selected.cyclePos], selected.cyclePos)
 						end
 					end
-				elseif switch == INPUT then
-				elseif switch == KEY then
-				elseif switch == SCALE then
-					if pressed then
-						scroll = 1
-					else
-						scroll = 0
-					end
+				end
+			elseif switch == INPUT then
+			elseif switch == KEY then
+			elseif switch == SCALE then
+				if pressed then
+					scroll = 1
+				elseif scroll >= 0 then
+					scroll = 0
 				end
 			end
 		end

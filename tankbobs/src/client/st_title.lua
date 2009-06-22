@@ -32,11 +32,11 @@ local st_title_step
 
 function st_title_init()
 	gui_addLabel (tankbobs.m_vec2(50, 75), "Main Menu")
-	gui_addAction(tankbobs.m_vec2(50, 65), "Play",        nil, st_title_play)
-	gui_addAction(tankbobs.m_vec2(50, 59), "Multiplayer", nil, st_title_internet)
-	gui_addAction(tankbobs.m_vec2(50, 53), "Options",     nil, st_title_options)
-	gui_addAction(tankbobs.m_vec2(50, 47), "Help",        nil, st_title_help)
-	gui_addAction(tankbobs.m_vec2(50, 41), "Exit",        nil, c_state_advance)
+	gui_addAction(tankbobs.m_vec2(50, 65), "Play",    nil, st_title_play)
+	gui_addAction(tankbobs.m_vec2(50, 59), "Online",  nil, st_title_internet)
+	gui_addAction(tankbobs.m_vec2(50, 53), "Options", nil, st_title_options)
+	gui_addAction(tankbobs.m_vec2(50, 47), "Help",    nil, st_title_help)
+	gui_addAction(tankbobs.m_vec2(50, 41), "Exit",    nil, c_state_advance)
 end
 
 function st_title_done()

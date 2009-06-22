@@ -35,7 +35,6 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 #include <GL/glu.h>
 #include <math.h>
 #include <SDL/SDL_endian.h>
-#include <zlib.h>
 #include <signal.h>
 
 #include "common.h"
@@ -52,7 +51,7 @@ void t_init(lua_State *L)
 static char siName[BUFSIZE] = {""};
 static lua_State *siState = NULL;
 
-static void t_private_interrupt(void)
+static void t_private_interrupt(int unused)
 {
 	if(siName[0] && siState)
 	{
@@ -76,7 +75,7 @@ int t_initialize(lua_State *L)
 
 		if(siName[0] && siState)
 		{
-			signal(SIGINT, (void *) t_private_interrupt);
+			signal(SIGINT, t_private_interrupt);
 		}
 	}
 
@@ -732,7 +731,7 @@ static const struct luaL_Reg tankbobs[] =
 			is a boolean of whether the cache should be prioritized.  The position
 			of the upper right corner is returned. */
 	{"r_freeFont", r_freeFont}, /* free a font */
-		/* no return, 1st and only arg is userdata of font */
+		/* no return, 1st and only arg is name of the font */
 	{"r_loadImage2D", r_loadImage2D}, /* load an image into the currently bound 2D texture */
 		/* the first argument passed is the filename of the image to be loaded.  The second
 			argument is the filename of the default image to load if the first image

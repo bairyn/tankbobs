@@ -17,8 +17,6 @@ This file is part of Tankbobs.
 along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/* This code is very similar to con_curses.c in the Tremfusion project */
-
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -32,8 +30,9 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 #include <luaconf.h>
 #include <math.h>
 
-#include <ncurses.h>
-#ifndef _WIN32
+#include <curses.h>
+#if defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__TOS_WINDOWS__) || defined(__WINDOWS__)
+#else
 #include <sys/ioctl.h>
 #endif
 #include <signal.h>
@@ -65,7 +64,7 @@ static char *insert = logbuf;
 static int scrollLine = 0;
 static int lastLine = 1;
 
-#ifdef _WIN32
+#if defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__TOS_WINDOWS__) || defined(__WINDOWS__)
 #define SCRLBAR_CURSOR ACS_BLOCK
 #define SCRLBAR_LINE ACS_VLINE
 #define SCRLBAR_UP ACS_UARROW
@@ -100,7 +99,7 @@ struct historyField_s
 
 static char historyFile[FILENAME_MAX] = {""};
 
-static historyField_t history[MAX_HISTORY_FIELDS] = {0};
+static historyField_t history[MAX_HISTORY_FIELDS] = {{{0}}};
 static int history_pos = 0; 
 static int history_nextPos = 0;
 
@@ -163,7 +162,7 @@ static const char *c_private_nextHistoryField(void)
 #define CINIT_NCERR   2
 static int c_private_initConsole(void)
 {
-	void c_private_resize(void);
+	void c_private_resize(int);
 	void c_private_updateCursor(void);
 	void c_private_drawScrollBar(void);
 
@@ -247,9 +246,10 @@ static int c_private_initConsole(void)
 	wnoutrefresh(stdscr);
 	doupdate();
 
-#ifndef _WIN32
+#if defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__TOS_WINDOWS__) || defined(__WINDOWS__)
+#else
 	/* Catch window resizes */
-	signal(SIGWINCH, (void *) c_private_resize);
+	signal(SIGWINCH, c_private_resize);
 #endif
 
 	consoleInitialized = TRUE;
@@ -257,13 +257,13 @@ static int c_private_initConsole(void)
 	return CINIT_SUCCESS;
 }
 
-void c_private_resize(void)
+void c_private_resize(int unused)
 {
 #if defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__TOS_WINDOWS__) || defined(__WINDOWS__)
 #else
 	struct winsize ws = {0, };
 
-	ioctl(fileno(stdout), TIOCGWINSZ, &ws);
+	ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws);
 	if (ws.ws_col < 12 || ws.ws_row < 5)
 		return;
 	resizeterm(ws.ws_row + 1, ws.ws_col + 1);
@@ -345,6 +345,9 @@ int c_init(lua_State *L)
 
 			break;
 	}
+
+	/* we never get here */
+	return 0;
 }
 
 int c_quit(lua_State *L)
@@ -457,7 +460,7 @@ int c_input(lua_State *L)
 				continue;
 
 			case '\f':
-				c_private_resize();
+				c_private_resize(1337);
 
 				continue;
 
@@ -560,8 +563,6 @@ int c_input(lua_State *L)
 
 int c_setTabFunction(lua_State *L)
 {
-	const char *functionName;
-
 	CHECKINIT(init, L);
 
 	strncpy(tfName, luaL_checkstring(L, 1), sizeof(tfName));

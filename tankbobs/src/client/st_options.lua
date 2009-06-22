@@ -23,6 +23,13 @@ st_options.lua
 options
 --]]
 
+local gl
+local c_const_get
+local c_const_set
+local c_config_get
+local c_config_set
+local tank_listBase
+
 local st_options_click
 local st_options_button
 local st_options_mouse
@@ -55,12 +62,30 @@ end
 local st_optionsAudio_init
 local st_optionsAudio_done
 
+local st_optionsAudio_volume
+local st_optionsAudio_musicVolume
+
 function st_optionsAudio_init()
 	gui_addAction(tankbobs.m_vec2(25, 85), "Back", nil, c_state_advance)
+
+	gui_addLabel(tankbobs.m_vec2(50, 75), "Volume", nil, 2 / 3)
+
+	gui_addLabel(tankbobs.m_vec2(50, 57), "Volume", nil, 2 / 3) gui_addScale(tankbobs.m_vec2(75, 57), "Volume", nil, st_optionsAudio_volume, c_config_get("config.client.volume"))
+	gui_addLabel(tankbobs.m_vec2(50, 51), "Music", nil, 2 / 3) gui_addScale(tankbobs.m_vec2(75, 51), "Music", nil, st_optionsAudio_musicVolume, c_config_get("config.client.musicVolume"))
 end
 
 function st_optionsAudio_done()
 	gui_finish()
+end
+
+function st_optionsAudio_volume(widget, pos)
+	c_config_set("config.client.volume", pos)
+	tankbobs.a_setVolume(pos)
+end
+
+function st_optionsAudio_musicVolume(widget, pos)
+	c_config_set("config.client.musicVolume", pos)
+	tankbobs.a_setMusicVolume(pos)
 end
 
 optionsAudio_state =
@@ -146,6 +171,7 @@ optionsVideo_state =
 
 local st_optionsPlayers_init
 local st_optionsPlayers_done
+local st_optionsPlayers_step
 
 local st_optionsPlayers_configurePlayer
 local st_optionsPlayers_computers
@@ -157,6 +183,9 @@ local st_optionsPlayers_back
 local st_optionsPlayers_left
 local st_optionsPlayers_right
 local st_optionsPlayers_special
+local st_optionsPlayers_colorR
+local st_optionsPlayers_colorG
+local st_optionsPlayers_colorB
 
 local currentPlayer = 1
 local player
@@ -164,6 +193,8 @@ local player
 function st_optionsPlayers_init()
 	currentPlayer = 1
 	player = {}
+
+	c_const_set("optionsPlayers_tankRotation", -math.pi / 2, 1)
 
 	gui_addAction(tankbobs.m_vec2(25, 85), "Back", nil, c_state_advance)
 
@@ -192,13 +223,31 @@ function st_optionsPlayers_init()
 	if not (c_config_get("config.key.player1.special", nil, true)) then
 		c_config_set("config.key.player1.special", false)
 	end
+	if not (c_config_get("config.game.player1.color.r", nil, true)) then
+		c_config_set("config.game.player1.color.r", c_config_get("config.game.defaultTankRed"))
+	end
+	if not (c_config_get("config.game.player1.color.g", nil, true)) then
+		c_config_set("config.game.player1.color.g", c_config_get("config.game.defaultTankGreen"))
+	end
+	if not (c_config_get("config.game.player1.color.b", nil, true)) then
+		c_config_set("config.game.player1.color.b", c_config_get("config.game.defaultTankBlue"))
+	end
 	gui_addLabel(tankbobs.m_vec2(50, 63), "Name", nil, 1 / 3) player.name = gui_addInput(tankbobs.m_vec2(75, 63), c_config_get("config.game.player1.name"), nil, st_optionsPlayers_name, false, c_const_get("max_nameLength"), 0.5)
-	gui_addLabel(tankbobs.m_vec2(50, 60), "Fire", nil, 1 / 3) player.fire = gui_addKey(tankbobs.m_vec2(75, 60), c_config_get("config.key.player1.fire"), nil, st_optionsPlayers_fire, c_config_get("config.key.player1.fire"), 0.5)
-	gui_addLabel(tankbobs.m_vec2(50, 57), "Forward", nil, 1 / 3) player.forward = gui_addKey(tankbobs.m_vec2(75, 57), c_config_get("config.key.player1.forward"), nil, st_optionsPlayers_forward, c_config_get("config.key.player1.special"), 0.5)
-	gui_addLabel(tankbobs.m_vec2(50, 54), "Back", nil, 1 / 3) player.back = gui_addKey(tankbobs.m_vec2(75, 54), c_config_get("config.key.player1.back"), nil, st_optionsPlayers_back, c_config_get("config.key.player1.back"), 0.5)
-	gui_addLabel(tankbobs.m_vec2(50, 51), "Left", nil, 1 / 3) player.left = gui_addKey(tankbobs.m_vec2(75, 51), c_config_get("config.key.player1.left"), nil, st_optionsPlayers_left, c_config_get("config.key.player1.left"), 0.5)
-	gui_addLabel(tankbobs.m_vec2(50, 48), "Right", nil, 1 / 3) player.right = gui_addKey(tankbobs.m_vec2(75, 48), c_config_get("config.key.player1.right"), nil, st_optionsPlayers_right, c_config_get("config.key.player1.right"), 0.5)
-	gui_addLabel(tankbobs.m_vec2(50, 45), "Special", nil, 1 / 3) player.special = gui_addKey(tankbobs.m_vec2(75, 45), c_config_get("config.key.player1.special"), nil, st_optionsPlayers_special, c_config_get("config.key.player1.special"), 0.5)
+
+	gui_addLabel(tankbobs.m_vec2(50, 57), "Fire", nil, 1 / 3) player.fire = gui_addKey(tankbobs.m_vec2(75, 57), c_config_get("config.key.player1.fire"), nil, st_optionsPlayers_fire, c_config_get("config.key.player1.fire"), 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 54), "Forward", nil, 1 / 3) player.forward = gui_addKey(tankbobs.m_vec2(75, 54), c_config_get("config.key.player1.forward"), nil, st_optionsPlayers_forward, c_config_get("config.key.player1.special"), 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 51), "Back", nil, 1 / 3) player.back = gui_addKey(tankbobs.m_vec2(75, 51), c_config_get("config.key.player1.back"), nil, st_optionsPlayers_back, c_config_get("config.key.player1.back"), 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 48), "Left", nil, 1 / 3) player.left = gui_addKey(tankbobs.m_vec2(75, 48), c_config_get("config.key.player1.left"), nil, st_optionsPlayers_left, c_config_get("config.key.player1.left"), 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 45), "Right", nil, 1 / 3) player.right = gui_addKey(tankbobs.m_vec2(75, 45), c_config_get("config.key.player1.right"), nil, st_optionsPlayers_right, c_config_get("config.key.player1.right"), 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 42), "Special", nil, 1 / 3) player.special = gui_addKey(tankbobs.m_vec2(75, 42), c_config_get("config.key.player1.special"), nil, st_optionsPlayers_special, c_config_get("config.key.player1.special"), 0.5)
+
+	gui_addLabel(tankbobs.m_vec2(50, 36), "Adjust color", nil, 1 / 3)
+
+	player.colorR = gui_addScale(tankbobs.m_vec2(75, 33), c_config_get("config.game.player1.color.r"), nil, st_optionsPlayers_colorR, c_config_get("config.game.player1.color.r"), nil, 0.5, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0)
+	player.colorG = gui_addScale(tankbobs.m_vec2(75, 30), c_config_get("config.game.player1.color.g"), nil, st_optionsPlayers_colorG, c_config_get("config.game.player1.color.g"), nil, 0.5, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0)
+	player.colorB = gui_addScale(tankbobs.m_vec2(75, 27), c_config_get("config.game.player1.color.b"), nil, st_optionsPlayers_colorB, c_config_get("config.game.player1.color.b"), nil, 0.5, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0)
+
+	-- image of tank is drawn (takes 21 and 24)
 end
 
 function st_optionsPlayers_done()
@@ -206,6 +255,24 @@ function st_optionsPlayers_done()
 
 	currentPlayer = 1
 	player = nil
+end
+
+local tankRotation = 0
+
+function st_optionsPlayers_step(d)
+	gui_paint(d)
+
+	-- draw the tank below the color scales
+	gl.PushAttrib("CURRENT_BIT")
+		gl.PushMatrix()
+			gl.Color(c_config_get("config.game.player" .. tostring(currentPlayer) .. ".color.r"), c_config_get("config.game.player" .. tostring(currentPlayer) .. ".color.g"), c_config_get("config.game.player" .. tostring(currentPlayer) .. ".color.b"), 1)
+			gl.TexEnv("TEXTURE_ENV_COLOR", c_config_get("config.game.player" .. tostring(currentPlayer) .. ".color.r"), c_config_get("config.game.player" .. tostring(currentPlayer) .. ".color.g"), c_config_get("config.game.player" .. tostring(currentPlayer) .. ".color.b"), 1)
+			gl.Translate(85, 22.5, 0)
+			gl.Rotate(tankbobs.m_degrees(tankRotation), 0, 0, 1)
+			tankRotation = tankRotation + d * c_const_get("optionsPlayers_tankRotation")
+			gl.CallList(tank_listBase)
+		gl.PopMatrix()
+	gl.PopAttrib()
 end
 
 function st_optionsPlayers_configurePlayer(widget)
@@ -255,6 +322,24 @@ function st_optionsPlayers_configurePlayer(widget)
 	end
 	local special = c_config_get("config.key.player" .. tonumber(currentPlayer) .. ".special")
 	player.special:setKey(special)
+
+	if not (c_config_get("config.game.player" .. tonumber(currentPlayer) .. ".color.r", nil, true)) then
+		c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".color.r", c_config_get("config.game.defaultTankRed"))
+	end
+	local colorR = c_config_get("config.game.player" .. tonumber(currentPlayer) .. ".color.r")
+	player.colorR:setScalePos(colorR)
+
+	if not (c_config_get("config.game.player" .. tonumber(currentPlayer) .. ".color.g", nil, true)) then
+		c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".color.g", c_config_get("config.game.defaultTankGreen"))
+	end
+	local colorG = c_config_get("config.game.player" .. tonumber(currentPlayer) .. ".color.g")
+	player.colorG:setScalePos(colorG)
+
+	if not (c_config_get("config.game.player" .. tonumber(currentPlayer) .. ".color.b", nil, true)) then
+		c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".color.b", c_config_get("config.game.defaultTankBlue"))
+	end
+	local colorB = c_config_get("config.game.player" .. tonumber(currentPlayer) .. ".color.b")
+	player.colorB:setScalePos(colorB)
 end
 
 function st_optionsPlayers_computers(widget)
@@ -274,7 +359,7 @@ function st_optionsPlayers_name(widget)
 end
 
 function st_optionsPlayers_fire(widget, button)
-	if not (c_config_get("config.game.player" .. tonumber(currentPlayer) .. ".fire", nil, true)) then
+	if not (c_config_get("config.key.player" .. tonumber(currentPlayer) .. ".fire", nil, true)) then
 		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".fire", false)
 	end
 
@@ -286,7 +371,7 @@ function st_optionsPlayers_fire(widget, button)
 end
 
 function st_optionsPlayers_forward(widget, button)
-	if not (c_config_get("config.game.player" .. tonumber(currentPlayer) .. ".forward", nil, true)) then
+	if not (c_config_get("config.key.player" .. tonumber(currentPlayer) .. ".forward", nil, true)) then
 		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".forward", false)
 	end
 
@@ -298,8 +383,8 @@ function st_optionsPlayers_forward(widget, button)
 end
 
 function st_optionsPlayers_right(widget, button)
-	if not (c_config_get("config.game.player" .. tonumber(currentPlayer) .. ".right", nil, true)) then
-		c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".right", false)
+	if not (c_config_get("config.key.player" .. tonumber(currentPlayer) .. ".right", nil, true)) then
+		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".right", false)
 	end
 
 	if button then
@@ -310,7 +395,7 @@ function st_optionsPlayers_right(widget, button)
 end
 
 function st_optionsPlayers_back(widget, button)
-	if not (c_config_get("config.game.player" .. tonumber(currentPlayer) .. ".back", nil, true)) then
+	if not (c_config_get("config.key.player" .. tonumber(currentPlayer) .. ".back", nil, true)) then
 		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".back", false)
 	end
 
@@ -322,7 +407,7 @@ function st_optionsPlayers_back(widget, button)
 end
 
 function st_optionsPlayers_left(widget, button)
-	if not (c_config_get("config.game.player" .. tonumber(currentPlayer) .. ".left", nil, true)) then
+	if not (c_config_get("config.key.player" .. tonumber(currentPlayer) .. ".left", nil, true)) then
 		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".left", false)
 	end
 
@@ -334,8 +419,8 @@ function st_optionsPlayers_left(widget, button)
 end
 
 function st_optionsPlayers_special(widget, button)
-	if not (c_config_get("config.game.player" .. tonumber(currentPlayer) .. ".special", nil, true)) then
-		c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".special", false)
+	if not (c_config_get("config.key.player" .. tonumber(currentPlayer) .. ".special", nil, true)) then
+		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".special", false)
 	end
 
 	if button then
@@ -343,6 +428,30 @@ function st_optionsPlayers_special(widget, button)
 	else
 		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".special", false)
 	end
+end
+
+function st_optionsPlayers_colorR(widget, pos)
+	if not (c_config_get("config.game.player" .. tonumber(currentPlayer) .. ".color.r", nil, true)) then
+		c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".color.r", c_config_get("config.game.defaultTankRed"))
+	end
+
+	c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".color.r", pos)
+end
+
+function st_optionsPlayers_colorG(widget, pos)
+	if not (c_config_get("config.game.player" .. tonumber(currentPlayer) .. ".color.g", nil, true)) then
+		c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".color.g", c_config_get("config.game.defaultTankGreen"))
+	end
+
+	c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".color.g", pos)
+end
+
+function st_optionsPlayers_colorB(widget, pos)
+	if not (c_config_get("config.game.player" .. tonumber(currentPlayer) .. ".color.b", nil, true)) then
+		c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".color.b", c_config_get("config.game.defaultTankBlue"))
+	end
+
+	c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".color.b", pos)
 end
 
 optionsPlayers_state =
@@ -356,7 +465,7 @@ optionsPlayers_state =
 	button = st_options_button,
 	mouse  = st_options_mouse,
 
-	main   = st_options_step
+	main   = st_optionsPlayers_step
 }
 
 local optionsControls_init
@@ -451,6 +560,13 @@ local st_options_controls
 local st_options_internet
 
 function st_options_init()
+	gl = _G.gl
+	c_const_get = _G.c_const_get
+	c_const_set = _G.c_const_set
+	c_config_get = _G.c_config_get
+	c_config_set = _G.c_config_set
+	tank_listBase = _G.tank_listBase
+
 	gui_addAction(tankbobs.m_vec2(25, 85), "Back", nil, c_state_advance)
 
 	gui_addAction(tankbobs.m_vec2(50, 75), "Audio", nil, st_options_audio)

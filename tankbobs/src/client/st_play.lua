@@ -38,17 +38,11 @@ local c_const_set = c_const_set
 local c_config_get = c_config_get
 local c_config_set = c_config_set
 local c_weapon_getWeapons = c_weapon_getWeapons
-
 local tank_listBase
-local tank_textures
 local powerup_listBase
-local powerup_textures
 local wall_listBase
-local wall_textures
 local healthbar_listBase
 local healthbarBorder_listBase
-local healthbar_texture
-local healthbarBorder_texture
 
 local st_play_init
 local st_play_done
@@ -76,79 +70,16 @@ function st_play_init()
 	c_config_get = _G.c_config_get
 	c_config_set = _G.c_config_set
 	c_weapon_getWeapons = _G.c_weapon_getWeapons
+	tank_listBase = _G.tank_listBase
+	powerup_listBase = _G.powerup_listBase
+	wall_listBase = _G.wall_listBase
+	healthbar_listBase = _G.healthbar_listBase
+	healthbarBorder_listBase = _G.healthbarBorder_listBase
 
 	endOfGame = false
 
 	-- initialize renderer stuff
-	c_const_set("tank_renderx1", -2.0, 1) c_const_set("tank_rendery1",  2.0, 1)
-	c_const_set("tank_renderx2", -2.0, 1) c_const_set("tank_rendery2", -2.0, 1)
-	c_const_set("tank_renderx3",  2.0, 1) c_const_set("tank_rendery3", -2.0, 1)
-	c_const_set("tank_renderx4",  2.0, 1) c_const_set("tank_rendery4",  2.0, 1)
-	c_const_set("tank_texturex1", 1.0, 1) c_const_set("tank_texturey1", 1.0, 1)
-	c_const_set("tank_texturex2", 0.0, 1) c_const_set("tank_texturey2", 1.0, 1)
-	c_const_set("tank_texturex3", 0.0, 1) c_const_set("tank_texturey3", 0.1, 1)  -- eliminate fuzzy top
-	c_const_set("tank_texturex4", 1.0, 1) c_const_set("tank_texturey4", 0.1, 1)  -- eliminate fuzzy top
-
-	tank_listBase = gl.GenLists(1)
-	tank_textures = gl.GenTextures(1)
-
-	if tank_listBase == 0 then
-		error "st_play_init: could not generate lists"
-	end
-
-	gl.BindTexture("TEXTURE_2D", tank_textures[1])
-	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_S", "REPEAT")
-	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_T", "REPEAT")
-	gl.TexParameter("TEXTURE_2D", "TEXTURE_MIN_FILTER", "LINEAR")
-	gl.TexParameter("TEXTURE_2D", "TEXTURE_MAG_FILTER", "LINEAR")
-	tankbobs.r_loadImage2D(c_const_get("tank"), c_const_get("textures_default"))
-
-	gl.NewList(tank_listBase, "COMPILE_AND_EXECUTE")  -- execute to remove "choppy" effect
-		-- blend tank with color
-		gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
-		gl.BindTexture("TEXTURE_2D", tank_textures[1])
-		gl.Begin("QUADS")
-			gl.TexCoord(c_const_get("tank_texturex1"), c_const_get("tank_texturey1")) gl.Vertex(c_const_get("tank_renderx1"), c_const_get("tank_rendery1"))
-			gl.TexCoord(c_const_get("tank_texturex2"), c_const_get("tank_texturey2")) gl.Vertex(c_const_get("tank_renderx2"), c_const_get("tank_rendery2"))
-			gl.TexCoord(c_const_get("tank_texturex3"), c_const_get("tank_texturey3")) gl.Vertex(c_const_get("tank_renderx3"), c_const_get("tank_rendery3"))
-			gl.TexCoord(c_const_get("tank_texturex4"), c_const_get("tank_texturey4")) gl.Vertex(c_const_get("tank_renderx4"), c_const_get("tank_rendery4"))
-		gl.End()
-	gl.EndList()
-
-	powerup_listBase = gl.GenLists(1)
-	powerup_textures = gl.GenTextures(1)
-
-	if powerup_listBase == 0 then
-		error "st_play_init: could not generate lists"
-	end
-
-	c_const_set("powerup_renderx1",  0, 1) c_const_set("powerup_rendery1",  1, 1)
-	c_const_set("powerup_renderx2",  0, 1) c_const_set("powerup_rendery2",  0, 1)
-	c_const_set("powerup_renderx3",  1, 1) c_const_set("powerup_rendery3",  0, 1)
-	c_const_set("powerup_renderx4",  1, 1) c_const_set("powerup_rendery4",  1, 1)
-	c_const_set("powerup_texturex1", 0, 1) c_const_set("powerup_texturey1", 1, 1)
-	c_const_set("powerup_texturex2", 0, 1) c_const_set("powerup_texturey2", 0, 1)
-	c_const_set("powerup_texturex3", 1, 1) c_const_set("powerup_texturey3", 0, 1)
-	c_const_set("powerup_texturex4", 1, 1) c_const_set("powerup_texturey4", 1, 1)
-
-	gl.BindTexture("TEXTURE_2D", powerup_textures[1])
-	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_S", "REPEAT")
-	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_T", "REPEAT")
-	gl.TexParameter("TEXTURE_2D", "TEXTURE_MIN_FILTER", "LINEAR")
-	gl.TexParameter("TEXTURE_2D", "TEXTURE_MAG_FILTER", "LINEAR")
-	tankbobs.r_loadImage2D(c_const_get("powerup"), c_const_get("textures_default"))
-
-	gl.NewList(powerup_listBase, "COMPILE_AND_EXECUTE")
-		gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
-		gl.BindTexture("TEXTURE_2D", powerup_textures[1])
-		gl.Begin("QUADS")
-			gl.TexCoord(c_const_get("powerup_texturex1"), c_const_get("powerup_texturey1")) gl.Vertex(c_const_get("powerup_renderx1"), c_const_get("powerup_rendery1"))
-			gl.TexCoord(c_const_get("powerup_texturex2"), c_const_get("powerup_texturey2")) gl.Vertex(c_const_get("powerup_renderx2"), c_const_get("powerup_rendery2"))
-			gl.TexCoord(c_const_get("powerup_texturex3"), c_const_get("powerup_texturey3")) gl.Vertex(c_const_get("powerup_renderx3"), c_const_get("powerup_rendery3"))
-			gl.TexCoord(c_const_get("powerup_texturex4"), c_const_get("powerup_texturey4")) gl.Vertex(c_const_get("powerup_renderx4"), c_const_get("powerup_rendery4"))
-		gl.End()
-	gl.EndList()
-
+	-- wall textures are initialized per level
 	local listOffset = 0
 
 	wall_listBase = gl.GenLists(c_tcm_current_map.walls_n)
@@ -169,7 +100,7 @@ function st_play_init()
 		gl.TexParameter("TEXTURE_2D", "TEXTURE_MAG_FILTER", "LINEAR")
 		tankbobs.r_loadImage2D(c_const_get("textures_dir") .. v.texture, c_const_get("textures_default"))
 
-		-- TODO: use vertex buffers to render dynamic walls.  Static walls will always be drawn in their initial location until then
+		-- TODO: use vertex buffers to render dynamic walls.  Dynamic walls will always be drawn as if they were in the same position
 		gl.NewList(v.m.list, "COMPILE_AND_EXECUTE")
 			gl.Color(1, 1, 1, 1)
 			gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, 1)
@@ -186,115 +117,6 @@ function st_play_init()
 
 		listOffset = listOffset + 1
 	end
-
-	for _, v in pairs(c_weapon_getWeapons()) do
-		v.m.list = gl.GenLists(1)
-		v.m.projectileList = gl.GenLists(1)
-
-		v.m.texture = gl.GenTextures(1)
-		v.m.projectileTexture = gl.GenTextures(1)
-
-		gl.BindTexture("TEXTURE_2D", v.m.texture[1])
-		gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_S", "REPEAT")
-		gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_T", "REPEAT")
-		gl.TexParameter("TEXTURE_2D", "TEXTURE_MIN_FILTER", "LINEAR")
-		gl.TexParameter("TEXTURE_2D", "TEXTURE_MAG_FILTER", "LINEAR")
-		tankbobs.r_loadImage2D(c_const_get("weaponTextures_dir") .. v.texture, c_const_get("textures_default"))
-		gl.BindTexture("TEXTURE_2D", v.m.projectileTexture[1])
-		gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_S", "REPEAT")
-		gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_T", "REPEAT")
-		gl.TexParameter("TEXTURE_2D", "TEXTURE_MIN_FILTER", "LINEAR")
-		gl.TexParameter("TEXTURE_2D", "TEXTURE_MAG_FILTER", "LINEAR")
-		tankbobs.r_loadImage2D(c_const_get("weaponTextures_dir") .. v.projectileTexture, c_const_get("textures_default"))
-
-		gl.NewList(v.m.list, "COMPILE_AND_EXECUTE")
-			gl.Color(1, 1, 1, 1)
-			gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, 1)
-			gl.BindTexture("TEXTURE_2D", v.m.texture[1])
-			gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
-
-			gl.Begin("POLYGON")
-				for i = 1, #v.render do
-					gl.TexCoord(v.texturer[i].x, v.texturer[i].y)
-					gl.Vertex(v.render[i].x, v.render[i].y)
-				end
-			gl.End()
-		gl.EndList()
-
-		gl.NewList(v.m.projectileList, "COMPILE_AND_EXECUTE")
-			gl.Color(1, 1, 1, 1)
-			gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, 1)
-			gl.BindTexture("TEXTURE_2D", v.m.projectileTexture[1])
-			gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
-
-			gl.Begin("POLYGON")
-				for i = 1, #v.projectileRender do
-					gl.TexCoord(v.projectileTexturer[i].x, v.projectileTexturer[i].y)
-					gl.Vertex(v.projectileRender[i].x, v.projectileRender[i].y)
-				end
-			gl.End()
-		gl.EndList()
-	end
-
-	healthbar_listBase = gl.GenLists(1)
-	healthbarBorder_listBase = gl.GenLists(1)
-	healthbar_texture = gl.GenTextures(1)
-	healthbarBorder_texture = gl.GenTextures(1)
-
-	gl.BindTexture("TEXTURE_2D", healthbar_texture[1])
-	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_S", "REPEAT")
-	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_T", "REPEAT")
-	gl.TexParameter("TEXTURE_2D", "TEXTURE_MIN_FILTER", "LINEAR")
-	gl.TexParameter("TEXTURE_2D", "TEXTURE_MAG_FILTER", "LINEAR")
-	tankbobs.r_loadImage2D(c_const_get("healthbar_texture"), c_const_get("textures_default"))
-	gl.BindTexture("TEXTURE_2D", healthbarBorder_texture[1])
-	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_S", "REPEAT")
-	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_T", "REPEAT")
-	gl.TexParameter("TEXTURE_2D", "TEXTURE_MIN_FILTER", "LINEAR")
-	gl.TexParameter("TEXTURE_2D", "TEXTURE_MAG_FILTER", "LINEAR")
-	tankbobs.r_loadImage2D(c_const_get("healthbarBorder_texture"), c_const_get("texturesBorder_default"))
-
-	c_const_set("healthbar_renderx1", -0.875, 1) c_const_set("healthbar_rendery1", -2.875, 1)
-	c_const_set("healthbar_renderx2", -0.875, 1) c_const_set("healthbar_rendery2", -2.5, 1)
-	c_const_set("healthbar_renderx3",  0.875, 1) c_const_set("healthbar_rendery3", -2.5, 1)
-	c_const_set("healthbar_renderx4",  0.875, 1) c_const_set("healthbar_rendery4", -2.875, 1)
-	c_const_set("healthbar_texturex1", 0, 1) c_const_set("healthbar_texturey1", 1, 1)
-	c_const_set("healthbar_texturex2", 0, 1) c_const_set("healthbar_texturey2", 0, 1)
-	c_const_set("healthbar_texturex3", 1, 1) c_const_set("healthbar_texturey3", 0, 1)
-	c_const_set("healthbar_texturex4", 1, 1) c_const_set("healthbar_texturey4", 1, 1)
-	c_const_set("healthbarBorder_renderx1", -1, 1) c_const_set("healthbarBorder_rendery1", -3, 1)
-	c_const_set("healthbarBorder_renderx2", -1, 1) c_const_set("healthbarBorder_rendery2", -2.25, 1)
-	c_const_set("healthbarBorder_renderx3",  1, 1) c_const_set("healthbarBorder_rendery3", -2.25, 1)
-	c_const_set("healthbarBorder_renderx4",  1, 1) c_const_set("healthbarBorder_rendery4", -3, 1)
-	c_const_set("healthbarBorder_texturex1", 0, 1) c_const_set("healthbarBorder_texturey1", 1, 1)
-	c_const_set("healthbarBorder_texturex2", 0, 1) c_const_set("healthbarBorder_texturey2", 0, 1)
-	c_const_set("healthbarBorder_texturex3", 1, 1) c_const_set("healthbarBorder_texturey3", 0, 1)
-	c_const_set("healthbarBorder_texturex4", 1, 1) c_const_set("healthbarBorder_texturey4", 1, 1)
-	c_const_set("healthbar_rotation", 270, 1)
-
-	gl.NewList(healthbar_listBase, "COMPILE_AND_EXECUTE")
-		gl.BindTexture("TEXTURE_2D", healthbar_texture[1])
-		gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
-
-		gl.Begin("QUADS")
-			for i = 1, 4 do
-				gl.TexCoord(c_const_get("healthbar_texturex" .. i), c_const_get("healthbar_texturey" .. i))
-				gl.Vertex(c_const_get("healthbar_renderx" .. i), c_const_get("healthbar_rendery" .. i))
-			end
-		gl.End()
-	gl.EndList()
-
-	gl.NewList(healthbarBorder_listBase, "COMPILE_AND_EXECUTE")
-		gl.BindTexture("TEXTURE_2D", healthbarBorder_texture[1])
-		gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
-
-		gl.Begin("QUADS")
-			for i = 1, 4 do
-				gl.TexCoord(c_const_get("healthbarBorder_texturex" .. i), c_const_get("healthbarBorder_texturey" .. i))
-				gl.Vertex(c_const_get("healthbarBorder_renderx" .. i), c_const_get("healthbarBorder_rendery" .. i))
-			end
-		gl.End()
-	gl.EndList()
 
 	-- scores
 	local function updateScores(widget)
@@ -385,30 +207,13 @@ function st_play_done()
 	-- free the cursor
 	tankbobs.in_grabClear()
 
-	gl.DeleteLists(tank_listBase, 1)
 	gl.DeleteLists(wall_listBase, c_tcm_current_map.walls_n)
-	gl.DeleteLists(powerup_listBase, 1)
-
-	gl.DeleteTextures(tank_textures)
 	gl.DeleteTextures(wall_textures)
-	gl.DeleteTextures(powerup_textures)
 
-	for _, v in pairs(c_weapon_getWeapons()) do
-		gl.DeleteLists(v.m.list, 1)
-		gl.DeleteLists(v.m.projectileList, 1)
-		gl.DeleteTextures(v.m.texture, 1)
-		gl.DeleteTextures(v.m.projectileTexture, 1)
-	end
+	c_tcm_unload_extra_data(false)
+	c_weapon_clear(false)
 
-	gl.DeleteLists(healthbar_listBase, 1)
-	gl.DeleteLists(healthbarBorder_listBase, 1)
-	gl.DeleteTextures(healthbar_texture)
-	gl.DeleteTextures(healthbarBorder_texture)
-
-	c_tcm_unload_extra_data()
-	c_weapon_clear()
-
-	-- reset texenv to avoid messing the GUI up
+	-- reset texenv
 	gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
 
 	-- free the world
@@ -535,7 +340,7 @@ function st_play_step(d)
 								gl.CallList(tank_listBase)
 
 								if v.weapon then
-									gl.CallList(v.weapon.m.list)
+									gl.CallList(v.weapon.m.p.list)
 								end
 							gl.PopMatrix()
 						gl.PopAttrib()
@@ -604,7 +409,7 @@ function st_play_step(d)
 		gl.PushMatrix()
 			gl.Translate(v.p[1].x, v.p[1].y, 0)
 			gl.Rotate(tankbobs.m_degrees(v.r), 0, 0, 1)
-			gl.CallList(v.weapon.m.projectileList)
+			gl.CallList(v.weapon.m.p.projectileList)
 		gl.PopMatrix()
 	end
 

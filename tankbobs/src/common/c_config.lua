@@ -101,7 +101,7 @@ function c_config_init()
 			end
 
 			if not indeces[data["tag"]] then
-				c_config_set(data["tag"], stringdata, config)
+				config_set(data["tag"], stringdata, config)
 			end
 		end
 
