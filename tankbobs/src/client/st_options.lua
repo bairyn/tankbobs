@@ -194,7 +194,7 @@ function st_optionsPlayers_init()
 	currentPlayer = 1
 	player = {}
 
-	c_const_set("optionsPlayers_tankRotation", -math.pi / 2, 1)
+	c_const_set("optionsPlayers_tankRotation", -math.pi / 2, -1)
 
 	gui_addAction(tankbobs.m_vec2(25, 85), "Back", nil, c_state_advance)
 
