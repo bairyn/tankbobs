@@ -96,6 +96,7 @@ function c_world_init()
 	c_const_set("tank_health", 100, 1)
 	c_const_set("tank_damageK", 4, 1)  -- damage relative to speed before a collision: 2 hp / 1 ups
 	c_const_set("tank_damageMinSpeed", 6, 1)
+	c_const_set("tank_intensityMaxSpeed", 24, 1)
 	c_const_set("tank_collideMinDamage", 5, 1)
 	c_const_set("tank_deceleration", 32 / 1000, 1)
 	c_const_set("tank_decelerationMinSpeed", -1, 1)
@@ -981,7 +982,7 @@ local function c_world_collide(tank, normal)
 	end
 
 	tank.m.lastCollideTime = tankbobs.t_getTicks()
-	tank.m.intensity = component / c_const_get("tank_damageMinSpeed")
+	tank.m.intensity = component / c_const_get("tank_intensityMaxSpeed")
 	if tank.m.intensity > 1 then
 		tank.m.intensity = 1
 	end

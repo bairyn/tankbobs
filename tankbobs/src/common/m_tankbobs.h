@@ -253,6 +253,7 @@ int a_stopMusic(lua_State *L);
 int a_playSound(lua_State *L);
 int a_setMusicVolume(lua_State *L);
 int a_setVolume(lua_State *L);
+int a_setVolumeChunk(lua_State *L);
 
 #ifdef __cplusplus
 }

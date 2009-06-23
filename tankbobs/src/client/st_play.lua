@@ -461,9 +461,8 @@ function st_play_step(d)
 		if v.m.lastCollideTime and v.m.lastCollideTimeB ~= v.m.lastCollideTime then
 			v.m.lastCollideTimeB = v.m.lastCollideTime
 
-			tankbobs.a_setVolume(v.m.intensity)
+			tankbobs.a_setVolumeChunk(c_const_get("collide_sound"), v.m.intensity * c_config_get("config.client.volume"))
 			tankbobs.a_playSound(c_const_get("collide_sound"))
-			tankbobs.a_setVolume(c_config_get("config.client.volume"))
 		end
 
 		if v.m.lastDamageTime and v.m.lastDamageTimeB ~= v.m.lastDamageTime then

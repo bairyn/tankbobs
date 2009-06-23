@@ -890,6 +890,8 @@ static const struct luaL_Reg tankbobs[] =
 		/* The argument passed is the volume from 0 to 1.  Nothing is returned. */
 	{"a_setVolume", a_setVolume}, /* set the volume */
 		/* The argument passed is the volume from 0 to 1.  Nothing is returned. */
+	{"a_setVolumeChunk", a_setVolumeChunk}, /* set the volume of an audio chunk */
+		/* The first argument is the filename of the sound.  The second argument passed is the volume from 0 to 1.  Nothing is returned. */
 
 	{NULL, NULL}
 };

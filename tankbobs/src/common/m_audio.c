@@ -348,14 +348,8 @@ int a_playSound(lua_State *L)
 
 		for(i = &sounds[0]; i - sounds < CACHEDSOUNDS; i++)
 		{
-			if(i->active && !strcmp(filename, i->filename))
+			if(i->active && !strcmp(filename, i->filename) && i->chunk)
 			{
-				/* re-initialize the chunk */
-				if(i->chunk)
-					Mix_FreeChunk(i->chunk);
-
-				i->chunk = Mix_LoadWAV(filename);
-
 				i->lastUsedTime = SDL_GetTicks();
 				i->active = TRUE;
 
@@ -455,6 +449,100 @@ int a_setVolume(lua_State *L)
 		volume = 0;
 
 	Mix_Volume(-1, volume);
+
+	return 0;
+}
+
+int a_setVolumeChunk(lua_State *L)
+{
+	/* similar to a_initSound */
+	int volume; 
+	const char *filename = NULL;
+
+	CHECKINIT(init, L);
+
+	if(!audioInitialized)
+		return 0;
+
+	volume = luaL_checknumber(L, -1) * MIX_MAX_VOLUME;
+	if(volume < 0)
+		volume = 0;
+
+	if(lua_isstring(L, 1))
+	{
+		int oldestTime;
+		sound_t *i;
+		sound_t *oldestSound = NULL;
+
+		filename = lua_tostring(L, 1);
+
+		for(i = &sounds[0]; i - sounds < CACHEDSOUNDS; i++)
+		{
+			if(i->active && !strcmp(filename, i->filename) && i->chunk)
+			{
+				i->lastUsedTime = SDL_GetTicks();
+				i->active = TRUE;
+
+				Mix_VolumeChunk(sounds[0].chunk, volume);
+
+				return 0;
+			}
+		}
+
+		/* find an unused chunk */
+		for(i = &sounds[0]; i - sounds < CACHEDSOUNDS; i++)
+		{
+			if(!i->active)
+			{
+				i->chunk = Mix_LoadWAV(filename);
+
+				strncpy(i->filename, filename, sizeof(i->filename));
+				i->lastUsedTime = SDL_GetTicks();
+				i->active = TRUE;
+
+				Mix_VolumeChunk(sounds[0].chunk, volume);
+
+				return 0;
+			}
+		}
+
+		/* use the oldest chunk */
+		oldestTime = SDL_GetTicks();
+
+		for(i = &sounds[0]; i - sounds < CACHEDSOUNDS; i++)
+		{
+			if(i->lastUsedTime < oldestTime)
+			{
+				oldestTime = i->lastUsedTime;
+				oldestSound = i;
+			}
+		}
+
+		if(oldestSound)
+		{
+			if(oldestSound->active && oldestSound->chunk)
+				Mix_FreeChunk(oldestSound->chunk);
+
+			strncpy(oldestSound->filename, filename, sizeof(oldestSound->filename));
+			oldestSound->lastUsedTime = SDL_GetTicks();
+			oldestSound->active = TRUE;
+
+			Mix_VolumeChunk(sounds[0].chunk, volume);
+		}
+		else
+		{
+			/* still haven't found a slot yet (time wrapped, maybe?) */
+			/* so use the first one */
+			if(sounds[0].active && sounds[0].chunk)
+				Mix_FreeChunk(sounds[0].chunk);
+
+			strncpy(sounds[0].filename, filename, sizeof(sounds[0].filename));
+			sounds[0].lastUsedTime = oldestTime;  /* oldestTime is still set to SDL_GetTicks() if there are no older sounds */
+			sounds[0].active = TRUE;
+
+			Mix_VolumeChunk(sounds[0].chunk, volume);
+		}
+	}
 
 	return 0;
 }
