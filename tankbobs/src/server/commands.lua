@@ -143,12 +143,12 @@ function commands_autoComplete(line)
 			local match = false
 
 			if type(v.name) == "string" then
-				if v.name:find("^" .. args[1]) then
+				if v.name:upper():find("^" .. args[1]:upper()) then
 					match = v.name
 				end
 			elseif type(v.name) == "table" then
 				for _, v in pairs(v.name) do
-					if v:find("^" .. args[1]) then
+					if v:upper():find("^" .. args[1]:upper()) then
 						match = v
 
 						break
@@ -306,7 +306,8 @@ function exec(line)
 	local args = commands_private_args(line)
 
 	if #args > 1 then
-		local toExec, err = loadstring(commands_private_concatArgs(line, 2))
+		local execString = commands_private_concatArgs(line, 2)
+		local toExec, err = loadstring(execString)
 
 		if not toExec then
 			s_print("exec: could not compile '", execString, "': ", err, "\n")
@@ -698,7 +699,7 @@ function pause(line)
 		s_print(" pause: the game has been unpaused")
 	else
 		c_world_setPaused(true)
-		s_print(" pause: the game has been paused!")
+		s_print(" pause: the game has been paused")
 	end
 end
 

@@ -63,6 +63,7 @@ function c_weapon_init()
 
 	weapon.knockback = 256
 	weapon.texture = "weak-machinegun.png"
+	weapon.fireSound = "weak-machinegun.wav"
 	weapon.launchDistance = 3
 	weapon.aimAid = false
 	weapon.capacity = 0
@@ -111,6 +112,7 @@ function c_weapon_init()
 
 	weapon.knockback = 384
 	weapon.texture = "machinegun.png"
+	weapon.fireSound = "machinegun.wav"
 	weapon.launchDistance = 3
 	weapon.aimAid = true
 	weapon.capacity = 64
@@ -158,7 +160,8 @@ function c_weapon_init()
 	weapon.repeatRate = 0.5  -- twice a second
 	weapon.knockback = 512  -- (per pellet)
 	weapon.texture = "shotgun.png"
-	weapon.launchDistance = 6  -- typically 3, but an extra unit to prevent the bullets from colliding before they spread
+	weapon.fireSound = "shotgun.wav"
+	weapon.launchDistance = 6  -- usually 3, but an extra unit to prevent the bullets from colliding before they spread
 	weapon.aimAid = false
 	weapon.capacity = 6
 	weapon.range = 0
@@ -206,6 +209,7 @@ function c_weapon_init()
 
 	weapon.knockback = 1024
 	weapon.texture = "railgun.png"
+	weapon.fireSound = "railgun.wav"
 	weapon.launchDistance = 3
 	weapon.aimAid = false
 	weapon.capacity = 3
@@ -254,6 +258,7 @@ function c_weapon_init()
 
 	weapon.knockback = 16384
 	weapon.texture = "coilgun.png"
+	weapon.fireSound = "coilgun.wav"
 	weapon.launchDistance = 3
 	weapon.aimAid = true
 	weapon.capacity = 3
@@ -302,6 +307,7 @@ function c_weapon_init()
 
 	weapon.knockback = 16384
 	weapon.texture = "saw.png"
+	weapon.fireSound = "saw.mav"
 	weapon.launchDistance = 3
 	weapon.aimAid = true
 	weapon.capacity = 64  -- can be used for 8 seconds
@@ -382,6 +388,7 @@ c_weapon =
 	width = 0,
 
 	texture = "",
+	fireSound = "",
 
 	texturer = {},
 	render = {},
@@ -543,11 +550,26 @@ function c_weapon_projectileRemove(projectile)
 	end
 end
 
+local function c_world_isTank(body)
+	for _, v in pairs(c_world_getTanks()) do
+		if v.body == body then
+			return true, v
+		end
+	end
+
+	return false
+end
+
 function c_weapon_projectileCollided(projectile, body)
 	if body ~= projectile.m.lastBody then
 		projectile.m.lastBody = body
 
 		projectile.collisions = projectile.collisions + 1
+
+		local tank = select(2, c_world_isTank(body))
+		if tank then
+			tank.m.lastDamageTime = tankbobs.t_getTicks()
+		end
 
 		if projectile.collisions > projectile.weapon.projectileMaxCollisions then
 			projectile.collided = true

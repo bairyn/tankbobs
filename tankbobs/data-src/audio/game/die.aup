@@ -1,0 +1,37 @@
+<?xml version="1.0" standalone="no" ?>
+<!DOCTYPE project PUBLIC "-//audacityproject-1.3.0//DTD//EN" "http://audacity.sourceforge.net/xml/audacityproject-1.3.0.dtd" >
+<project xmlns="http://audacity.sourceforge.net/xml/" projname="die_data" version="1.3.0" audacityversion="1.3.7" sel0="0.0000000000" sel1="0.0000000000" vpos="0" h="0.0000000000" zoom="444.5915136196" rate="44100">
+	<tags>
+		<tag name="id3v2" value="1"/>
+	</tags>
+	<wavetrack name="die" channel="0" linked="1" offset="0.00000000" rate="44100" gain="1" pan="0">
+		<waveclip offset="0.00000000">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="20235">
+				<waveblock start="0">
+					<simpleblockfile filename="e00000b1.au" len="20235" min="-0.273992" max="0.181649" rms="0.01193"/>
+				</waveblock>
+			</sequence>
+			<envelope numpoints="4">
+				<controlpoint t="0.000000000000" val="1.000000000000"/>
+				<controlpoint t="0.336263728434" val="0.700000000000"/>
+				<controlpoint t="0.436355607467" val="0.672413793103"/>
+				<controlpoint t="0.458843537415" val="0.672413793103"/>
+			</envelope>
+		</waveclip>
+	</wavetrack>
+	<wavetrack name="die" channel="1" linked="0" offset="0.00000000" rate="44100" gain="1" pan="0">
+		<waveclip offset="0.00000000">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="20235">
+				<waveblock start="0">
+					<simpleblockfile filename="e0000fa3.au" len="20235" min="-0.195252" max="0.187647" rms="0.009839"/>
+				</waveblock>
+			</sequence>
+			<envelope numpoints="4">
+				<controlpoint t="0.000000000000" val="1.000000000000"/>
+				<controlpoint t="0.336263728434" val="0.700000000000"/>
+				<controlpoint t="0.436355607467" val="0.672413793103"/>
+				<controlpoint t="0.458843537415" val="0.672413793103"/>
+			</envelope>
+		</waveclip>
+	</wavetrack>
+</project>

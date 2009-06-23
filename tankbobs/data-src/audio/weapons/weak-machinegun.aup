@@ -1,0 +1,29 @@
+<?xml version="1.0" standalone="no" ?>
+<!DOCTYPE project PUBLIC "-//audacityproject-1.3.0//DTD//EN" "http://audacity.sourceforge.net/xml/audacityproject-1.3.0.dtd" >
+<project xmlns="http://audacity.sourceforge.net/xml/" projname="weak-machinegun_data" version="1.3.0" audacityversion="1.3.7" sel0="0.0000000000" sel1="0.4102708333" vpos="0" h="0.0000000000" zoom="1640.7361674605" rate="48000">
+	<tags>
+		<tag name="id3v2" value="1"/>
+		<tag name="ARTIST" value="bob"/>
+		<tag name="TRACKNUMBER" value="1"/>
+		<tag name="TITLE" value="bob"/>
+		<tag name="YEAR" value="2008"/>
+		<tag name="ALBUM" value="bob"/>
+		<tag name="COMMENTS" value="bob"/>
+	</tags>
+	<wavetrack name="30749__Matt_G__m240" channel="2" linked="0" offset="0.00000000" rate="48000" gain="1" pan="0">
+		<waveclip offset="0.00000000">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="0"/>
+			<envelope numpoints="1">
+				<controlpoint t="0.000000000000" val="1.000000000000"/>
+			</envelope>
+		</waveclip>
+		<waveclip offset="0.00000000">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="19693">
+				<waveblock start="0">
+					<simpleblockfile filename="e0000c86.au" len="19693" min="-0.064964" max="0.060983" rms="0.003265"/>
+				</waveblock>
+			</sequence>
+			<envelope numpoints="0"/>
+		</waveclip>
+	</wavetrack>
+</project>

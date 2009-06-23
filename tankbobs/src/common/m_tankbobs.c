@@ -220,16 +220,18 @@ int t_explode(lua_State *L)
 	int noEmptyElements;
 	int ignoreDelimitersInQuotes;  /* this variable has a different name from ignoringDelimiterInQuotes */
 	int escapeSequences;
+	int stringLen;
 
 	CHECKINIT(init, L);
 
 	string = luaL_checkstring(L, 1);
+	stringLen = strlen(string);
 	delimiters = luaL_checkstring(L, 2);
 	noEmptyElements = lua_toboolean(L, 3);
 	ignoreDelimitersInQuotes = lua_toboolean(L, 4);
 	escapeSequences = lua_toboolean(L, 5);
 
-	if(strlen(string) >= BUFSIZE)
+	if(stringLen >= BUFSIZE)
 		line = malloc((strlen(string) + 1) * sizeof(char));
 	else
 		line = &lineBuf[0];
@@ -262,6 +264,8 @@ int t_explode(lua_State *L)
 		else if(ignoreDelimitersInQuotes && *string == '"')
 		{
 			ignoringDelimiterInQuotes =! ignoringDelimiterInQuotes;
+
+			string++;
 		}
 		else
 		{
@@ -283,11 +287,14 @@ int t_explode(lua_State *L)
 		}
 	}
 
-	lua_pushinteger(L, ++i);
-	lua_pushstring(L, line);
-	lua_settable(L, -3);
+	if(!noEmptyElements || line[0])
+	{
+		lua_pushinteger(L, ++i);
+		lua_pushstring(L, line);
+		lua_settable(L, -3);
+	}
 
-	if(strlen(string) >= BUFSIZE)
+	if(stringLen >= BUFSIZE)
 		free(line);
 
 	return 1;
@@ -489,9 +496,13 @@ int t_clone(lua_State *L)
 
 	if(!lua_istable(L, 2))
 	{
+		lua_settop(L, 1);
+
 		/* create the output table if it doesn't exist */
 		lua_newtable(L);
 	}
+
+	lua_settop(L, 2);
 
 	nextTable = &traversedTables[0];
 

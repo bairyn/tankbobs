@@ -348,7 +348,9 @@ c_world_tank =
 	score = 0,
 	ammo = 0,
 
-	cd = {}  -- data cleared on death
+	cd = {},  -- data cleared on death
+
+	m = {p = {}}
 }
 
 c_world_tank_state =
@@ -690,6 +692,7 @@ function c_world_tankDie(d, tank, t)
 	tank.killer = nil
 	tank.exists = false
 	tank.spawning = true
+	tank.m.lastDieTime = t
 
 	tank.cd = {}
 end
@@ -878,6 +881,8 @@ function c_world_powerupSpawnPoint_step(d, powerupSpawnPoint)
 			push.R = c_const_get("powerup_pushStrength")
 			push.t = c_const_get("powerup_pushAngle")
 			tankbobs.w_setLinearVelocity(powerup.m.body, push)
+
+			c_tcm_current_map.powerupSpawnPoints[1].m.lastSpawnTime = worldTime
 		end
 	end
 end
@@ -973,6 +978,12 @@ local function c_world_collide(tank, normal)
 		if damage >= c_const_get("tank_collideMinDamage") then
 			c_world_tankDamage(tank, damage)
 		end
+	end
+
+	tank.m.lastCollideTime = tankbobs.t_getTicks()
+	tank.m.intensity = component / c_const_get("tank_damageMinSpeed")
+	if tank.m.intensity > 1 then
+		tank.m.intensity = 1
 	end
 end
 

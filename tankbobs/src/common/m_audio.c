@@ -39,7 +39,8 @@ extern Uint8 init;
 
 #define FREQUENCY 96000
 #define FORMAT MIX_DEFAULT_FORMAT
-#define CHANNELS 12
+#define CHANNELS 2
+#define ALLOCATED_CHANNELS 12
 #define CHUNKSIZE 3 * 1024
 #define CACHEDSOUNDS 64
 #define FADE_MS 1000
@@ -89,8 +90,12 @@ int a_init(lua_State *L)
 
 		audioInitialized = FALSE;
 
+		fprintf(stderr, "Warning: couldn't initialize audio: %s\n", Mix_GetError());
+
 		return 0;
 	}
+
+	Mix_AllocateChannels(ALLOCATED_CHANNELS);
 
 	audioInitialized = TRUE;
 

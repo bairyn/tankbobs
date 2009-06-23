@@ -72,7 +72,17 @@ function b_mods()
 end
 
 function s_print(...)
-	local print = table.concat{...}
+	local p = {}
+	tankbobs.t_clone({...}, p)
+
+	-- table.concat doesn't like nil
+	for i = 1, #p do
+		if p[i] == nil then
+			p[i] = "nil"
+		end
+	end
+
+	local print = table.concat(p)
 
 	tankbobs.c_print(print)
 end

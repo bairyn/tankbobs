@@ -447,6 +447,45 @@ function st_play_step(d)
 
 	-- scores, FPS, rest of HUD, etc.
 	gui_paint(d)
+
+	-- play sounds
+	for _, v in pairs(c_world_getTanks()) do
+		if v.state.firing then
+			if v.m.lastFireTime ~= v.lastFireTime then
+				v.m.lastFireTime = v.lastFireTime
+
+				tankbobs.a_playSound(c_const_get("weaponAudio_dir") .. v.weapon.fireSound);
+			end
+		end
+
+		if v.m.lastCollideTime and v.m.lastCollideTimeB ~= v.m.lastCollideTime then
+			v.m.lastCollideTimeB = v.m.lastCollideTime
+
+			tankbobs.a_setVolume(v.m.intensity)
+			tankbobs.a_playSound(c_const_get("collide_sound"))
+			tankbobs.a_setVolume(c_config_get("config.client.volume"))
+		end
+
+		if v.m.lastDamageTime and v.m.lastDamageTimeB ~= v.m.lastDamageTime then
+			v.m.lastDamageTimeB = v.m.lastDamageTime
+
+			tankbobs.a_playSound(c_const_get("damage_sound"))
+		end
+
+		if v.spawning and v.m.lastDieTimeB ~= v.m.lastDieTime then
+			v.m.lastDieTimeB = v.m.lastDieTime
+
+			tankbobs.a_playSound(c_const_get("die_sound"))
+		end
+	end
+
+	if c_tcm_current_map.powerupSpawnPoints[1] then
+		if c_tcm_current_map.powerupSpawnPoints[1].m.lastSpawnTimeB ~= c_tcm_current_map.powerupSpawnPoints[1].m.lastSpawnTime then
+			c_tcm_current_map.powerupSpawnPoints[1].m.lastSpawnTimeB = c_tcm_current_map.powerupSpawnPoints[1].m.lastSpawnTime
+
+			tankbobs.a_playSound(c_const_get("powerupSpawn_sound"))
+		end
+	end
 end
 
 play_state =
