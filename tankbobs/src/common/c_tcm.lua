@@ -421,7 +421,7 @@ function c_tcm_read_map(map)
 		wall.p[1].y = c_tcm_private_get(tankbobs.io_getDouble, i)
 		wall.p[2].x = c_tcm_private_get(tankbobs.io_getDouble, i)
 		wall.p[2].y = c_tcm_private_get(tankbobs.io_getDouble, i)
-		wall.p[3].x = c_tcm_private_get(tankbobs.io_getDouble, i)  -- unexpected EOF
+		wall.p[3].x = c_tcm_private_get(tankbobs.io_getDouble, i)
 		wall.p[3].y = c_tcm_private_get(tankbobs.io_getDouble, i)
 		if q then
 			wall.p[4].x = c_tcm_private_get(tankbobs.io_getDouble, i)
@@ -436,7 +436,7 @@ function c_tcm_read_map(map)
 		wall.t[1].y = c_tcm_private_get(tankbobs.io_getDouble, i)
 		wall.t[2].x = c_tcm_private_get(tankbobs.io_getDouble, i)
 		wall.t[2].y = c_tcm_private_get(tankbobs.io_getDouble, i)
-		wall.t[3].x = c_tcm_private_get(tankbobs.io_getDouble, i)  -- unexpected EOF
+		wall.t[3].x = c_tcm_private_get(tankbobs.io_getDouble, i)
 		wall.t[3].y = c_tcm_private_get(tankbobs.io_getDouble, i)
 		if q then
 			wall.t[4].x = c_tcm_private_get(tankbobs.io_getDouble, i)

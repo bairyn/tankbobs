@@ -36,8 +36,6 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 #define JOY_MIN_AXIS   32767
 #define JOY_MAX_AXIS  -32768
 
-extern Uint8 init;
-
 typedef struct
 {
 	char  *type;

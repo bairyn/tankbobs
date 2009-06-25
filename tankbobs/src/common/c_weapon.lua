@@ -53,6 +53,7 @@ function c_weapon_init()
 	weapon = c_weapon:new()
 	table.insert(c_weapons, weapon)
 
+	weapon.index = 1
 	weapon.name = "weak-machinegun"
 	weapon.altName = "default"
 	weapon.damage = 4
@@ -102,6 +103,7 @@ function c_weapon_init()
 	weapon = c_weapon:new()
 	table.insert(c_weapons, weapon)
 
+	weapon.index = 2
 	weapon.name = "machinegun"
 	weapon.altName = "machinegun"
 	weapon.damage = 4
@@ -151,6 +153,7 @@ function c_weapon_init()
 	weapon = c_weapon:new()
 	table.insert(c_weapons, weapon)
 
+	weapon.index = 3
 	weapon.name = "shotgun"
 	weapon.altName = "shotgun"
 	weapon.damage = 25
@@ -199,6 +202,7 @@ function c_weapon_init()
 	weapon = c_weapon:new()
 	table.insert(c_weapons, weapon)
 
+	weapon.index = 4
 	weapon.name = "railgun"
 	weapon.altName = "railgun"
 	weapon.damage = 70
@@ -248,6 +252,7 @@ function c_weapon_init()
 	weapon = c_weapon:new()
 	table.insert(c_weapons, weapon)
 
+	weapon.index = 5
 	weapon.name = "coilgun"
 	weapon.altName = "coilgun"
 	weapon.damage = 69
@@ -297,6 +302,7 @@ function c_weapon_init()
 	weapon = c_weapon:new()
 	table.insert(c_weapons, weapon)
 
+	weapon.index = 6
 	weapon.name = "saw"
 	weapon.altName = "saw"
 	weapon.damage = 69
@@ -386,6 +392,7 @@ c_weapon =
 	capacity = 0,
 	range = 0,
 	width = 0,
+	index = 0,
 
 	texture = "",
 	fireSound = "",

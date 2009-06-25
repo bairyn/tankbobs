@@ -195,6 +195,16 @@ function st_play_init()
 		end
 
 		tank.name = c_config_get("config.game.player" .. tostring(i) .. ".name")
+		if not (c_config_get("config.game.player" .. tostring(i) .. ".color", nil, true)) then
+			c_config_set("config.game.player" .. tostring(i) .. ".color.r", c_config_get("config.game.defaultTankRed"))
+			c_config_set("config.game.player" .. tostring(i) .. ".color.g", c_config_get("config.game.defaultTankBlue"))
+			c_config_set("config.game.player" .. tostring(i) .. ".color.b", c_config_get("config.game.defaultTankGreen"))
+			c_config_set("config.game.player" .. tostring(i) .. ".color.a", c_config_get("config.game.defaultTankAlpha"))
+		end
+		tank.color.r = c_config_get("config.game.player" .. tostring(i) .. ".color.r")
+		tank.color.g = c_config_get("config.game.player" .. tostring(i) .. ".color.g")
+		tank.color.b = c_config_get("config.game.player" .. tostring(i) .. ".color.b")
+		tank.color.a = c_config_get("config.game.player" .. tostring(i) .. ".color.a")
 
 		-- spawn
 		c_world_tank_spawn(tank)
@@ -304,14 +314,14 @@ function st_play_step(d)
 
 	local fragLimit = c_config_get("config.game.fragLimit")
 	if fragLimit > 0 then
-		for k, v in pairs(c_world_getTanks()) do
+		for _, v in pairs(c_world_getTanks()) do
 			if v.score >= fragLimit then
 				endOfGame = true
 
 				c_world_setPaused(true)
 
 				local name = tostring(c_config_get("config.game.player" .. tostring(k) .. ".name"))
-				gui_addLabel(tankbobs.m_vec2(35, 50), name .. " wins!", nil, 1.1, c_config_get("config.game.player" .. tostring(k) .. ".color.r"), c_config_get("config.game.player" .. tostring(k) .. ".color.g"), c_config_get("config.game.player" .. tostring(k) .. ".color.b"), 0.75, c_config_get("config.game.player" .. tostring(k) .. ".color.r"), c_config_get("config.game.player" .. tostring(k) .. ".color.g"), c_config_get("config.game.player" .. tostring(k) .. ".color.b"), 0.75)
+				gui_addLabel(tankbobs.m_vec2(35, 50), name .. " wins!", nil, 1.1, v.color.r, v.color.g, v.color.b, 0.75, v.color.r, v.color.g, v.color.b, 0.75)
 			end
 		end
 	end
@@ -334,8 +344,8 @@ function st_play_step(d)
 									c_config_set("config.game.player" .. tostring(k) .. ".color.b", c_config_get("config.game.defaultTankGreen"))
 									c_config_set("config.game.player" .. tostring(k) .. ".color.a", c_config_get("config.game.defaultTankAlpha"))
 								end
-								gl.Color(c_config_get("config.game.player" .. tostring(k) .. ".color.r"), c_config_get("config.game.player" .. tostring(k) .. ".color.g"), c_config_get("config.game.player" .. tostring(k) .. ".color.b"), 1)
-								gl.TexEnv("TEXTURE_ENV_COLOR", c_config_get("config.game.player" .. tostring(k) .. ".color.r"), c_config_get("config.game.player" .. tostring(k) .. ".color.g"), c_config_get("config.game.player" .. tostring(k) .. ".color.b"), 1)
+								gl.Color(v.color.r, v.color.g, v.color.b, 1)
+								gl.TexEnv("TEXTURE_ENV_COLOR", v.color.r, v.color.g, v.color.b, 1)
 								-- blend color with tank texture
 								gl.CallList(tank_listBase)
 
@@ -426,8 +436,8 @@ function st_play_step(d)
 					c_config_set("config.game.player" .. tostring(k) .. ".color.a", c_config_get("config.game.defaultTankAlpha"))
 				end
 
-				gl.Color(c_config_get("config.game.player" .. tostring(k) .. ".color.r"), c_config_get("config.game.player" .. tostring(k) .. ".color.g"), c_config_get("config.game.player" .. tostring(k) .. ".color.b"), 1)
-				gl.TexEnv("TEXTURE_ENV_COLOR", c_config_get("config.game.player" .. tostring(k) .. ".color.r"), c_config_get("config.game.player" .. tostring(k) .. ".color.g"), c_config_get("config.game.player" .. tostring(k) .. ".color.b"), 1)
+				gl.Color(v.color.r, v.color.g, v.color.b, 1)
+				gl.TexEnv("TEXTURE_ENV_COLOR", v.color.r, v.color.g, v.color.b, 1)
 				gl.CallList(healthbarBorder_listBase)
 				if v.health >= c_const_get("tank_highHealth") then
 					gl.Color(0.1, 1, 0.1, 1)

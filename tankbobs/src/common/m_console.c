@@ -43,8 +43,6 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 #include "crossdll.h"
 #include "tstr.h"
 
-extern Uint8 init;
-
 static int consoleInitialized = FALSE;
 
 #define TITLE "---[TANKBOBS CONSOLE]---"
@@ -303,6 +301,10 @@ void c_private_updateCursor(void)
 	wmove(win_input, 0, input_field.cursor - input_field.scroll);
 	wnoutrefresh(win_input);
 #endif
+}
+
+void c_initNL(lua_State *L)
+{
 }
 
 int c_init(lua_State *L)

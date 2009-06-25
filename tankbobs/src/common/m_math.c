@@ -35,8 +35,6 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 #include "tstr.h"
 #include "crossdll.h"
 
-extern Uint8 init;
-
 static const struct luaL_Reg m_vec2_m[] =
 {
 	{"__index", m_vec2_index},

@@ -35,8 +35,6 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 #include "tstr.h"
 #include "crossdll.h"
 
-extern Uint8 init;
-
 #define FREQUENCY 96000
 #define FORMAT MIX_DEFAULT_FORMAT
 #define CHANNELS 2
@@ -58,6 +56,10 @@ struct sound_s
 static char musicFilename[FILENAME_MAX] = {""};
 static Mix_Music *music = NULL;
 static int audioInitialized = FALSE;
+
+void a_initNL(lua_State *L)
+{
+}
 
 int a_init(lua_State *L)
 {

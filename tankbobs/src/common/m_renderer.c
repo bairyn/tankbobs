@@ -53,8 +53,6 @@ do \
 	} \
 } while(0)
 
-extern Uint8 init;
-
 /* #define FONT_USEBLIT */
 
 typedef struct r_font_s r_font_t;

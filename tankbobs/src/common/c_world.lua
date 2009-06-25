@@ -156,6 +156,7 @@ function c_world_init()
 
 	table.insert(c_powerupTypes, powerupType)
 
+	powerupType.index = 1
 	powerupType.name = "machinegun"
 	powerupType.c.r, powerupType.c.g, powerupType.c.b, powerupType.c.a = 0.3, 0.6, 1, 1
 
@@ -164,6 +165,7 @@ function c_world_init()
 
 	table.insert(c_powerupTypes, powerupType)
 
+	powerupType.index = 2
 	powerupType.name = "shotgun"
 	powerupType.c.r, powerupType.c.g, powerupType.c.b, powerupType.c.a = 0.25, 0.25, 0.75, 1
 
@@ -172,6 +174,7 @@ function c_world_init()
 
 	table.insert(c_powerupTypes, powerupType)
 
+	powerupType.index = 3
 	powerupType.name = "railgun"
 	powerupType.c.r, powerupType.c.g, powerupType.c.b, powerupType.c.a = 0, 0, 1, 1
 
@@ -180,6 +183,7 @@ function c_world_init()
 
 	table.insert(c_powerupTypes, powerupType)
 
+	powerupType.index = 4
 	powerupType.name = "coilgun"
 	powerupType.c.r, powerupType.c.g, powerupType.c.b, powerupType.c.a = 0.25, 0.25, 1, 0.875
 
@@ -188,6 +192,7 @@ function c_world_init()
 
 	table.insert(c_powerupTypes, powerupType)
 
+	powerupType.index = 5
 	powerupType.name = "saw"
 	powerupType.c.r, powerupType.c.g, powerupType.c.b, powerupType.c.a = 0, 0, 0.6, 0.875
 
@@ -196,6 +201,7 @@ function c_world_init()
 
 	table.insert(c_powerupTypes, powerupType)
 
+	powerupType.index = 6
 	powerupType.name = "ammo"
 	powerupType.c.r, powerupType.c.g, powerupType.c.b, powerupType.c.a = 0.05, 0.4, 0.1, 0.5
 
@@ -204,6 +210,7 @@ function c_world_init()
 
 	table.insert(c_powerupTypes, powerupType)
 
+	powerupType.index = 7
 	powerupType.name = "aim-aid"
 	powerupType.c.r, powerupType.c.g, powerupType.c.b, powerupType.c.a = 0.5, 0.75, 0.1, 0.5
 
@@ -222,6 +229,7 @@ c_world_powerupType =
 {
 	new = common_new,
 
+	index = 0,
 	name = "",
 	c = {r = 0, g = 0, b = 0, a = 0},
 }
@@ -329,6 +337,9 @@ c_world_tank =
 		o.h[3].y = c_const_get("tank_hully3")
 		o.h[4].x = c_const_get("tank_hullx4")
 		o.h[4].y = c_const_get("tank_hully4")
+		o.color.r = c_config_get("config.game.defaultTankRed")
+		o.color.g = c_config_get("config.game.defaultTankGreen")
+		o.color.b = c_config_get("config.game.defaultTankBlue")
 		o.state = c_world_tank_state:new()
 	end,
 
@@ -348,6 +359,7 @@ c_world_tank =
 	killer = nil,
 	score = 0,
 	ammo = 0,
+	color = {},
 
 	cd = {},  -- data cleared on death
 
@@ -363,7 +375,7 @@ c_world_tank_state =
 	back = false,
 	right = false,
 	left = false,
-	special = false  -- special causes stronger turning but prevent acceleration or deceleration and the damage from a collision is increased
+	special = false
 }
 
 function c_world_tank_spawn(tank)
@@ -371,9 +383,10 @@ function c_world_tank_spawn(tank)
 end
 
 function c_world_tank_die(tank)
-	-- this function is called when a tank dies.  Don't call this function if the tank hasn't spawned yet.
-	tank.exists = false
-	tankbobs.w_removeBody(tank.body)
+	if not tank.exists then
+		tank.exists = false
+		tankbobs.w_removeBody(tank.body)
+	end
 end
 
 function c_world_tank_checkSpawn(d, tank)

@@ -74,6 +74,8 @@ do                                                                              
 
 #define BUFSIZE 1024
 
+extern int init;
+
 /* m_tankbobs.c */
 void t_init(lua_State *L);
 int t_initialize(lua_State *L);
@@ -84,6 +86,7 @@ int t_isDebug(lua_State *L);
 int t_is64Bit(lua_State *L);
 int t_isWindows(lua_State *L);
 int t_testAND(lua_State *L);
+int t_testOR(lua_State *L);
 int t_implode(lua_State *L);
 int t_explode(lua_State *L);
 int t_clone(lua_State *L);
@@ -108,6 +111,22 @@ int io_getFloat(lua_State *L);
 int io_getDouble(lua_State *L);
 int io_getStr(lua_State *L);
 int io_getStrL(lua_State *L);
+int io_toInt(lua_State *L);
+int io_toShort(lua_State *L);
+int io_toChar(lua_State *L);
+int io_toFloat(lua_State *L);
+int io_toDouble(lua_State *L);
+int io_fromInt(lua_State *L);
+int io_fromShort(lua_State *L);
+int io_fromChar(lua_State *L);
+int io_fromFloat(lua_State *L);
+int io_fromDouble(lua_State *L);
+
+int io_intNL(int integer);
+short io_shortNL(short integer);
+char io_charNL(char integer);
+float io_floatNL(float number);
+double io_doubleNL(double number);
 
 /* m_renderer.c */
 void r_init(lua_State *L);
@@ -202,6 +221,7 @@ int m_vec2_normalto(lua_State *L);
 int m_vec2_project(lua_State *L);
 
 /* m_world.cpp */
+void w_init(lua_State *L);
 int w_step(lua_State *L);
 int w_newWorld(lua_State *L);
 int w_freeWorld(lua_State *L);
@@ -231,8 +251,11 @@ int w_applyForce(lua_State *L);
 int w_applyTorque(lua_State *L);
 int w_applyImpulse(lua_State *L);
 int w_getCenterOfMass(lua_State *L);
+int w_scaleVelocity(lua_State *L);
+int w_persistWorld(lua_State *L);
 
 /* m_console.c */
+void c_initNL(lua_State *L);
 int c_init(lua_State *L);
 int c_quit(lua_State *L);
 int c_input(lua_State *L);
@@ -243,6 +266,7 @@ int c_loadHistory(lua_State *L);
 int c_saveHistory(lua_State *L);
 
 /* m_audio.c */
+void a_initNL(lua_State *L);
 int a_init(lua_State *L);
 int a_quit(lua_State *L);
 int a_initSound(lua_State *L);
@@ -254,6 +278,15 @@ int a_playSound(lua_State *L);
 int a_setMusicVolume(lua_State *L);
 int a_setVolume(lua_State *L);
 int a_setVolumeChunk(lua_State *L);
+
+/* m_net.c */
+void n_initNL(lua_State *L);
+int n_init(lua_State *L);
+int n_quit(lua_State *L);
+int n_newPacket(lua_State *L);
+int n_writeToPacket(lua_State *L);
+int n_sendPacket(lua_State *L);
+int n_readPacket(lua_State *L);
 
 #ifdef __cplusplus
 }

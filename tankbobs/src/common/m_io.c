@@ -35,8 +35,6 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 
 #define EOFERROR "EOF !#\\"
 
-extern Uint8 init;
-
 void io_init(lua_State *l)
 {
 }
@@ -500,4 +498,283 @@ int io_getStrL(lua_State *L)
 	lua_pushlstring(L, (char *)result, len);
 	free(result);
 	return 1;
+}
+
+int io_toInt(lua_State *L)
+{
+	int integer;
+
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+	char *integer_ = (char *) &integer;
+
+	CHECKINIT(init, L);
+
+	integer = *((const int *) luaL_checkstring(L, 1));
+	integer_[3] ^= integer_[0];
+	integer_[0] ^= integer_[3];
+	integer_[2] ^= integer_[1];
+	integer_[1] ^= integer_[2];
+#else
+	CHECKINIT(init, L);
+
+	integer = *((const int *) luaL_checkstring(L, 1));
+#endif
+
+	lua_pushinteger(L, integer);
+	return 1;
+}
+
+int io_toShort(lua_State *L)
+{
+	short integer;
+
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+	char *integer_ = (char *) &integer;
+
+	CHECKINIT(init, L);
+
+	integer = *((const short *) luaL_checkstring(L, 1));
+	integer_[0] ^= integer_[1];
+	integer_[1] ^= integer_[0];
+#else
+	CHECKINIT(init, L);
+
+	integer = *((const short *) luaL_checkstring(L, 1));
+#endif
+
+	lua_pushinteger(L, integer);
+	return 1;
+
+	CHECKINIT(init, L);
+}
+
+int io_toChar(lua_State *L)
+{
+	CHECKINIT(init, L);
+
+	lua_pushinteger(L, *((const char *) luaL_checkstring(L, 1)));
+	return 1;
+}
+
+int io_toFloat(lua_State *L)
+{
+	float number;
+
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+	char *number_ = (char *) &number;
+
+	CHECKINIT(init, L);
+
+	number = *((const float *) luaL_checkstring(L, 1));
+	number_[3] ^= number_[0];
+	number_[0] ^= number_[3];
+	number_[2] ^= number_[1];
+	number_[1] ^= number_[2];
+#else
+	CHECKINIT(init, L);
+
+	number = *((const float *) luaL_checkstring(L, 1));
+#endif
+
+	lua_pushnumber(L, number);
+	return 1;
+}
+
+int io_toDouble(lua_State *L)
+{
+	double number;
+
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+	char *number_ = (char *) &number;
+
+	CHECKINIT(init, L);
+
+	number = *((const double *) luaL_checkstring(L, 1));
+	number_[7] ^= number_[0];
+	number_[0] ^= number_[7];
+	number_[6] ^= number_[1];
+	number_[1] ^= number_[6];
+	number_[5] ^= number_[2];
+	number_[2] ^= number_[5];
+	number_[4] ^= number_[3];
+	number_[3] ^= number_[4];
+#else
+	CHECKINIT(init, L);
+
+	number = *((const double *) luaL_checkstring(L, 1));
+#endif
+
+	lua_pushnumber(L, number);
+	return 1;
+}
+
+int io_fromInt(lua_State *L)
+{
+	int integer;
+
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+	char *integer_ = &integer;
+
+	CHECKINIT(init, L);
+
+	integer = luaL_checkinteger(L, 1);
+	integer_[3] ^= integer_[0];
+	integer_[0] ^= integer_[3];
+	integer_[2] ^= integer_[1];
+	integer_[1] ^= integer_[2];
+#else
+	CHECKINIT(init, L);
+
+	integer = luaL_checkinteger(L, 1);
+#endif
+
+	lua_pushlstring(L, ((const char *) &integer), sizeof(integer));
+	return 1;
+}
+
+int io_fromShort(lua_State *L)
+{
+	short integer;
+
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+	char *integer_ = &integer;
+
+	CHECKINIT(init, L);
+
+	integer = luaL_checkinteger(L, 1);
+	integer_[1] ^= integer_[0];
+	integer_[0] ^= integer_[1];
+#else
+	CHECKINIT(init, L);
+
+	integer = luaL_checkinteger(L, 1);
+#endif
+
+	lua_pushlstring(L, ((const char *) &integer), sizeof(integer));
+	return 1;
+}
+
+int io_fromChar(lua_State *L)
+{
+	char integer;
+
+	CHECKINIT(init, L);
+
+	integer = luaL_checkinteger(L, 1);
+
+	lua_pushlstring(L, ((const char *) &integer), sizeof(integer));
+	return 1;
+}
+
+int io_fromFloat(lua_State *L)
+{
+	float number;
+
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+	char *number_ = &number;
+
+	CHECKINIT(init, L);
+
+	number = luaL_checknumber(L, 1);
+	number_[3] ^= number_[0];
+	number_[0] ^= number_[3];
+	number_[2] ^= number_[1];
+	number_[1] ^= number_[2];
+#else
+	CHECKINIT(init, L);
+#endif
+
+	lua_pushlstring(L, ((const char *) &number), sizeof(number));
+	return 1;
+}
+
+int io_fromDouble(lua_State *L)
+{
+	double number;
+
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+	char *number_ = &number;
+
+	CHECKINIT(init, L);
+
+	number = luaL_checknumber(L, 1);
+	number_[7] ^= number_[0];
+	number_[0] ^= number_[7];
+	number_[6] ^= number_[1];
+	number_[1] ^= number_[6];
+	number_[5] ^= number_[2];
+	number_[2] ^= number_[5];
+	number_[4] ^= number_[3];
+	number_[3] ^= number_[4];
+#else
+	CHECKINIT(init, L);
+
+	number = luaL_checknumber(L, 1);
+#endif
+
+	lua_pushlstring(L, ((const char *) &number), sizeof(number));
+	return 1;
+}
+
+int io_intNL(int integer)
+{
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+	char *integer_ = &integer;
+
+	integer_[3] ^= integer_[0];
+	integer_[0] ^= integer_[3];
+	integer_[2] ^= integer_[1];
+	integer_[1] ^= integer_[2];
+#endif
+
+	return integer;
+}
+
+short io_shortNL(short integer)
+{
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+	char *integer_ = &integer;
+
+	integer_[1] ^= integer_[0];
+	integer_[0] ^= integer_[1];
+#endif
+
+	return integer;
+}
+
+char io_charNL(char integer)
+{
+	return integer;
+}
+
+float io_floatNL(float number)
+{
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+	char *number_ = &number;
+
+	number_[3] ^= number_[0];
+	number_[0] ^= number_[3];
+	number_[2] ^= number_[1];
+	number_[1] ^= number_[2];
+#endif
+
+	return number;
+}
+
+double io_doubleNL(double number)
+{
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+	char *number_ = &number;
+
+	number_[7] ^= number_[0];
+	number_[0] ^= number_[7];
+	number_[6] ^= number_[1];
+	number_[1] ^= number_[6];
+	number_[5] ^= number_[2];
+	number_[2] ^= number_[5];
+	number_[4] ^= number_[3];
+	number_[3] ^= number_[4];
+#endif
+
+	return number;
 }

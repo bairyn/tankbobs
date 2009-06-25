@@ -41,16 +41,28 @@ end
 function st_main_done()
 end
 
+local seedCounter = 1024
 function st_main_step(d)
+	-- seed the random number generator every 1024 frames for non-gameplay purposes
+	if seedCounter < 1024 then
+		seedCounter = seedCounter + 1
+	else
+		seedCounter = 0
+
+		math.randomseed(os.time() * SDL_GetTicks() + 10 * 768 * d)
+	end
+
 	local input = tankbobs.c_input()
 
 	if input then
 		commands_command(input)
 	end
 
-	--if(theNumberOfConnectedPlayers <= 0) then
-		--c_world_setPaused(true)
-	--end
+	client_step(d)
+
+	if(client_connectedClients() <= 0) then
+		c_world_setPaused(true)
+	end
 
 	c_world_step(d)
 end
