@@ -180,6 +180,15 @@ int n_writeToPacket(lua_State *L)
 	return 0;
 }
 
+int n_setPort(lua_State *L)
+{
+	CHECKINIT(init, L);
+
+	currentPort = luaL_checkinteger(L, 1);
+
+	return 0;
+}
+
 int n_sendPacket(lua_State *L)
 {
 	const char *hostName;

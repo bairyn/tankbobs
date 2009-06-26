@@ -285,6 +285,7 @@ int n_init(lua_State *L);
 int n_quit(lua_State *L);
 int n_newPacket(lua_State *L);
 int n_writeToPacket(lua_State *L);
+int n_setPort(lua_State *L);
 int n_sendPacket(lua_State *L);
 int n_readPacket(lua_State *L);
 

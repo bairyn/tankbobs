@@ -656,6 +656,41 @@ local function gui_private_inputKey(button)
 
 			if shift then
 				add = add:upper()
+				if add == ";" then
+					add = ":"
+				elseif add == "1" then
+					add = "!"
+				elseif add == "2" then
+					add = "@"
+				elseif add == "3" then
+					add = "#"
+				elseif add == "4" then
+					add = "$"
+				elseif add == "5" then
+					add = "%"
+				elseif add == "6" then
+					add = "^"
+				elseif add == "7" then
+					add = "&"
+				elseif add == "8" then
+					add = "("
+				elseif add == "9" then
+					add = ")"
+				elseif add == "\\" then
+					add = "|"
+				elseif add == "/" then
+					add = "?"
+				elseif add == "[" then
+					add = "{"
+				elseif add == "]" then
+					add = "}"
+				elseif add == "," then
+					add = "<"
+				elseif add == "." then
+					add = ">"
+				elseif add == "'" then
+					add = "\""
+				end
 			end
 			selected.inputText = selected.inputText:sub(1, selected.textPos) .. add .. selected.inputText:sub(selected.textPos + 1, -1)
 			selected.textPos = selected.textPos + 1

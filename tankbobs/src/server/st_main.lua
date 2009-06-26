@@ -52,7 +52,7 @@ function st_main_step(d)
 	else
 		seedCounter = 0
 
-		math.randomseed(os.time() * SDL_GetTicks() + 10 * 768 * d)
+		math.randomseed(os.time() * tankbobs.t_getTicks() + 10 * 768 * d)
 	end
 
 	local input = tankbobs.c_input()

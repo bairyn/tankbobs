@@ -71,7 +71,7 @@ function st_internet_init()
 	end
 
 	gui_addLabel(tankbobs.m_vec2(50,  81), "", updateStatus, 2 / 3)
-	gui_addLabel(tankbobs.m_vec2(50, 75), "IP", nil, 2 / 3) gui_addInput(tankbobs.m_vec2(55, 75), tostring(connection.address), nil, st_internet_serverIP, true, 3)
+	gui_addLabel(tankbobs.m_vec2(50, 75), "IP", nil, 2 / 3) gui_addInput(tankbobs.m_vec2(55, 75), tostring(connection.address), nil, st_internet_serverIP, false, 64)
 	gui_addAction(tankbobs.m_vec2(55, 69), "Connect", nil, st_internet_start)
 
 	if not c_config_get("config.client.ui", nil, true) then
@@ -214,7 +214,8 @@ function st_internet_start(widget)
 		tankbobs.n_quit()
 	end
 
-	tankbobs.n_init(connection.port)
+	tankbobs.n_init(c_config_get("config.client.port", nil, true))
+	tankbobs.n_setPort(connection.port)
 	tankbobs.n_newPacket(80)
 	tankbobs.n_writeToPacket(tankbobs.io_fromChar(0x00))
 	if not c_config_get("config.game.player1", nil, true) or not c_config_get("config.game.player1.name", nil, true) or not c_config_get("config.game.player1.color", nil, true) or not c_config_get("config.game.player1.color.r", nil, true) or not c_config_get("config.game.player1.color.g", nil, true) or not c_config_get("config.game.player1.color.b", nil, true) then

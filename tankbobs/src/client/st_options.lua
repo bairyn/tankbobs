@@ -478,13 +478,29 @@ local st_optionsControls_quit
 function st_optionsControls_init()
 	gui_addAction(tankbobs.m_vec2(25, 85), "Back", nil, c_state_advance)
 
-	gui_addLabel(tankbobs.m_vec2(50, 65), "Pause", nil, 2 / 3) gui_addKey(tankbobs.m_vec2(75, 65), c_config_get("config.key.pause"), nil, st_optionsControls_pause, c_config_get("config.key.pause"))
-	gui_addLabel(tankbobs.m_vec2(50, 59), "Back", nil, 2 / 3) gui_addKey(tankbobs.m_vec2(75, 59), c_config_get("config.key.quit"), nil, st_optionsControls_quit, c_config_get("config.key.quit"))
-	gui_addLabel(tankbobs.m_vec2(50, 54), "Quit", nil, 2 / 3) gui_addKey(tankbobs.m_vec2(75, 54), c_config_get("config.key.exit"), nil, st_optionsControls_exit, c_config_get("config.key.exit"))
+	local pos = 1
+	for k, v in pairs(c_const_get("keyLayouts")) do
+		if v == c_config_get("config.keyLayout") then
+			pos = k
+
+			break
+		end
+	end
+	gui_addLabel(tankbobs.m_vec2(50, 65), "Key Layout", nil, 2 / 3) gui_addCycle(tankbobs.m_vec2(75, 65), "Key Layout", nil, st_optionsControls_keyLayout, c_const_get("keyLayouts"), pos)
+
+	gui_addLabel(tankbobs.m_vec2(50, 53), "Pause", nil, 2 / 3) gui_addKey(tankbobs.m_vec2(75, 53), c_config_get("config.key.pause"), nil, st_optionsControls_pause, c_config_get("config.key.pause"))
+	gui_addLabel(tankbobs.m_vec2(50, 37), "Back", nil, 2 / 3) gui_addKey(tankbobs.m_vec2(75, 37), c_config_get("config.key.quit"), nil, st_optionsControls_quit, c_config_get("config.key.quit"))
+	gui_addLabel(tankbobs.m_vec2(50, 31), "Quit", nil, 2 / 3) gui_addKey(tankbobs.m_vec2(75, 31), c_config_get("config.key.exit"), nil, st_optionsControls_exit, c_config_get("config.key.exit"))
 end
 
 function st_optionsControls_done()
 	gui_finish()
+end
+
+function st_optionsControls_keyLayout(widget, string, index)
+	if c_const_get("keyLayout_" .. string) then
+		c_config_set("config.keyLayout", "keyLayout_" .. string)
+	end
 end
 
 function st_optionsControls_pause(widget, button)

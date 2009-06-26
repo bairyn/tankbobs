@@ -938,6 +938,8 @@ static const struct luaL_Reg tankbobs[] =
 		/* Nothing is returned.  The size of the packet is passed */
 	{"n_writeToPacket", n_writeToPacket}, /* write to the currently allocated packet */
 		/* The bytes to write to the currently allocated packet is passed as a string; nothing is returned */
+	{"n_setPort", n_setPort}, /* set the destination port */
+		/* The port is passed; nothing is returned */
 	{"n_sendPacket", n_sendPacket}, /* send the current packet to a specified host */
 		/* The host can optionally be passed as a string; if not, the last host passed will be used.  Always pass the host at least once.  Nothing is returned */
 	{"n_readPacket", n_readPacket}, /* read a packet from anywhere */

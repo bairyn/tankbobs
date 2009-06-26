@@ -101,7 +101,7 @@ local function client_sanitizeName(name)
 end
 
 local function client_getByIP(ip)
-	for k, v in pairs(client) do
+	for k, v in pairs(clients) do
 		if v.ip == ip then
 			return v
 		end
@@ -165,7 +165,7 @@ function client_step(d)
 
 	local status, ip, port, data
 	repeat
-		status, ip, port, data = n_readPacket()
+		status, ip, port, data = tankbobs.n_readPacket()
 		local client = client_getByIP(ip)
 
 		if status then
@@ -352,7 +352,7 @@ end
 function client_connectedClients()
 	local num = 0
 
-	for _, v in pairs(client) do
+	for _, v in pairs(clients) do
 		if not v.connecting then
 			num = num + 1
 		end
