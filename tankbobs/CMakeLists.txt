@@ -14,12 +14,12 @@ set(trmc_srcs src/trmc/trmc.c)
 
 add_executable(trmc ${trmc_srcs})
 
-set(tankbobs_srcs src/common/m_input.c src/common/m_io.c src/common/m_math.c src/common/m_console.c src/common/m_renderer.c src/common/m_audio.c src/common/m_tankbobs.c src/lib/crossdll.c)
+set(tankbobs_srcs src/common/m_input.c src/common/m_io.c src/common/m_math.c src/common/m_console.c src/common/m_renderer.c src/common/m_net.c src/common/m_audio.c src/common/m_tankbobs.c src/lib/crossdll.c)
 set(tankbobs_Box2D_srcs src/common/m_world.cpp)
 if(WIN32)
-	set(tankbobs_libs lua SDL SDL_mixer SDL_image SDL_ttf GL GLU z box2d m pdcurses)
+	set(tankbobs_libs lua SDL SDL_mixer SDL_image SDL_ttf SDL_net GL GLU z box2d m pdcurses)
 else(WIN32)
-	set(tankbobs_libs lua SDL SDL_mixer SDL_image SDL_ttf GL GLU z box2d m ncurses)
+	set(tankbobs_libs lua SDL SDL_mixer SDL_image SDL_ttf SDL_net GL GLU z box2d m ncurses)
 endif(WIN32)
 set(tankbobs_libdirs ../src/lib/Box2D/Source/Gen/float)
 

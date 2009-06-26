@@ -728,7 +728,7 @@ int w_persistWorld(lua_State *L)
 		/* int key (the client will generate a new body if projectiles[key] is nil); int weaponTypeIndex; double rotation; double x; double y; double velX; double velY; double h[xy][1-4]; double r; double g; double b; double health; */
 		lua_getfield(L, -1, "exists");
 		if(lua_toboolean(L, -1) &&
-		   bufpos + 2 * sizeof(int) + 15 * sizeof(double) < buf + sizeof(buf))
+		   bufpos + 2 * sizeof(int) + 17 * sizeof(double) + 1 * sizeof(int) < buf + sizeof(buf))
 		{
 			lua_pop(L, 1);
 
@@ -805,6 +805,12 @@ int w_persistWorld(lua_State *L)
 
 			/* health */
 			lua_getfield(L, -1, "health");
+			*((double *) bufpos) = io_doubleNL(lua_tonumber(L, -1)); bufpos += sizeof(double);
+			lua_pop(L, 1);
+
+			/* score */
+			lua_getfield(L, -1, "score");
+			*((int *) bufpos) = io_intNL(luaL_checkinteger(L, -1)); bufpos += sizeof(int);
 			lua_pop(L, 1);
 
 			lua_pop(L, 1);
@@ -919,7 +925,7 @@ int w_persistWorld(lua_State *L)
 
 				*bufpos++ = io_charNL(TRUE);
 			}
-			lua_pop(1);
+			lua_pop(L, 1);
 
 			/* set p[1-4] (client should ignore these for static walls, even if they are linked to a path) */
 			/* p is still on the stack */

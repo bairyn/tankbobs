@@ -3,6 +3,7 @@
 		<fps>128</fps>
 		<volume>0.8</volume>
 		<musicVolume>0.6</musicVolume>
+		<serverIP>127.0.0.1</serverIP>
 	</client>
 
 	<font>sans</font>

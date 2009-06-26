@@ -40,7 +40,7 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 #define CHANNEL       2
 #define MAXPACKETSIZE 1024
 
-static char      lastHostName[BUFSIZE];
+static char      lastHostName[BUFSIZE] = {""};
 static UDPpacket *currentPacket   = NULL;
 static UDPsocket currentSocket    = NULL;
 static Uint16    currentPort      = DEFAULTPORT;
@@ -62,7 +62,7 @@ int n_init(lua_State *L)
 		currentPort = lua_tonumber(L, 1);
 	}
 
-	if(SDLNet_Init())
+	if(SDLNet_Init() < 0)
 	{
 		message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
 			();
@@ -110,6 +110,12 @@ int n_quit(lua_State *L)
 		currentPacket = NULL;
 	}
 
+	if(currentSocket)
+	{
+		SDLNet_UDP_Close(currentSocket);
+		currentSocket = NULL;
+	}
+
 	SDLNet_Quit();
 
 	return 0;
@@ -131,13 +137,14 @@ int n_newPacket(lua_State *L)
 	if(size > MAXPACKETSIZE)
 		size = MAXPACKETSIZE;
 	if(size < 1)
-		size = 1
+		size = 1;
 
 	currentPacket = SDLNet_AllocPacket(size);
 
 	if(currentPacket)
 	{
 		currentPacket->channel = CHANNEL;
+		currentPacket->len = 0;
 	}
 
 	return 0;
@@ -160,14 +167,13 @@ int n_writeToPacket(lua_State *L)
 	if(len > currentPacket->maxlen - currentPacket->len)
 	{
 		len = currentPacket->maxlen - currentPacket->len;
-
-		if(len <= 0)
-		{
-			return 0;
-		}
+	}
+	if(len <= 0)
+	{
+		return 0;
 	}
 
-	memcpy(currentPacket->data + currentPacket->maxlen - currentBytesLeft, data, len);
+	memcpy(currentPacket->data + currentPacket->len, data, len);
 
 	currentPacket->len += len;
 
@@ -176,12 +182,11 @@ int n_writeToPacket(lua_State *L)
 
 int n_sendPacket(lua_State *L)
 {
-	IPaddress host;
 	const char *hostName;
 
 	CHECKINIT(init, L);
 
-	if(!currentPacket)
+	if(!currentPacket || !currentSocket)
 	{
 		return 0;
 	}
@@ -196,8 +201,7 @@ int n_sendPacket(lua_State *L)
 		hostName = lastHostName;
 	}
 
-	SDLNet_ResolveHost(&host, hostName, currentPort);
-	currentPacket->address = host;
+	SDLNet_ResolveHost(&currentPacket->address, hostName, currentPort);
 
 	SDLNet_UDP_Send(currentSocket, currentPacket->channel, currentPacket);
 
@@ -215,26 +219,30 @@ int n_readPacket(lua_State *L)
 		return 0;
 	}
 
-	if((packet = SDLNet_AllocPacket(MAXPACKETSIZE))) /* && */
-	if(SDLNet_UDP_Recv(currentSocket, &packet))
+	if((packet = SDLNet_AllocPacket(MAXPACKETSIZE)))
 	{
-		const char *ip;
-
-		if((ip = SDLNet_ResolveIP(packet->address)))
+		if(SDLNet_UDP_Recv(currentSocket, packet))
 		{
-			lua_pushboolean(L, TRUE);
+			const char *ip;
 
-			lua_pushstring(L, ip);
-			lua_pushinteger(L, packet->address.port);
-			lua_pushlstring(L, packet->data, packet->len);
+			if((ip = SDLNet_ResolveIP(&packet->address)))
+			{
+				lua_pushboolean(L, TRUE);
+
+				lua_pushstring(L, ip);
+				lua_pushinteger(L, packet->address.port);
+				lua_pushlstring(L, (const char *) packet->data, packet->len);
+			}
+
+			SDLNet_FreePacket(packet);
+
+			return 5;
 		}
-
-		SDLNet_FreePacket(packet);
-
-		return 5;
+		else
+		{
+			SDLNet_FreePacket(packet);
+		}
 	}
-
-	SDLNet_FreePacket(packet);
 
 	lua_pushboolean(L, FALSE);
 
