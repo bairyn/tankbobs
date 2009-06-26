@@ -241,11 +241,13 @@ int n_readPacket(lua_State *L)
 				lua_pushstring(L, ip);
 				lua_pushinteger(L, packet->address.port);
 				lua_pushlstring(L, (const char *) packet->data, packet->len);
+
+				SDLNet_FreePacket(packet);
+
+				return 4;
 			}
 
 			SDLNet_FreePacket(packet);
-
-			return 5;
 		}
 		else
 		{
