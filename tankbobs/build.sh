@@ -105,7 +105,7 @@ if [ "$1" == "make" ]; then
 		echo -ne "Warning: level compiler not built\n"
 	fi
 elif [ "$1" == "-h" ]; then
-	echo -ne "Usage: $0 (-d to debug) (-n to skip cmake) make options\nuse make VERBOSE=1 for verbose output\n"
+	echo -ne "Usage: $0 (-d to debug) (-n to skip cmake) make (options)\nuse make VERBOSE=1 for verbose output\n"
 else
 	# just cmake
 
