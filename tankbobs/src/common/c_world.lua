@@ -1004,6 +1004,11 @@ function c_world_powerup_step(d, powerup)
 	--tankbobs.w_setAngle(powerup.m.body, 0)  -- looks better with dynamic rotation
 	powerup.r = tankbobs.w_getAngle(powerup.m.body)
 
+	-- keep powerup velocity constant
+	local vel = tankbobs.w_getLinearVelocity(powerup.m.body)
+	vel.R = c_const_get("powerup_pushStrength")
+	tankbobs.w_setLinearVelocity(powerup.m.body, vel)
+
 	for _, v in pairs(c_world_tanks) do
 		if v.exists then
 			if c_world_intersection(d, c_world_powerupHull(powerup), c_world_tankHull(v), tankbobs.m_vec2(0, 0), tankbobs.w_getLinearVelocity(v.body)) then
@@ -1035,7 +1040,7 @@ end
 
 local function c_world_isPowerup(body)
 	for _, v in pairs(c_world_powerups) do
-		if v.body == body then
+		if v.m.body == body then
 			return true, v
 		end
 	end
@@ -1076,10 +1081,12 @@ function c_world_contactListener(shape1, shape2, body1, body2, position, separat
 
 		if tank then
 			c_world_powerup_pickUp(tank, select(2, c_world_isPowerup(body2)))
-		else
+		elseif tank2 then
 			c_world_powerup_pickUp(tank2, select(2, c_world_isPowerup(body1)))
 		end
-	elseif c_world_isProjectile(body1) or c_world_isProjectile(body2) then
+	end
+
+	if c_world_isProjectile(body1) or c_world_isProjectile(body2) then
 		-- remove the projectile
 		local projectile, projectile2
 
