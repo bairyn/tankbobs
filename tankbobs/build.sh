@@ -91,10 +91,12 @@ if [ "$1" == "make" ]; then
 
 	# compile maps
 	if [ -f "./trmc" ] && [ -d "./data/tcm/" ]; then
+		echo -ne "./trmc -f" `find ./data/tcm/ -name "*.trm"`"\n"
 		if ! find ./data/tcm/ -name "*.trm" -exec ./trmc -f {} +; then
 			exit 1
 		fi
 
+		echo -ne "rm" `find ./data/tcm/ -name "*.trm"`"\n"
 		# remove source maps
 		if ! find ./data/tcm/ -name "*.trm" -exec rm {} +; then
 			exit 1
