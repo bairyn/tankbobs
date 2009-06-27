@@ -64,10 +64,12 @@ int n_init(lua_State *L)
 
 	if(SDLNet_Init() < 0)
 	{
+		lua_pushboolean(L, FALSE);
+
 		message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
 			();
 		CDLL_FUNCTION("libtstr", "tstr_base_set", void(*)(tstr *, const char *))
-			(message, "Error initializing SDL_net: ");
+			(message, "Warning: could not initialize SDL_net: ");
 		CDLL_FUNCTION("libtstr", "tstr_cat", void(*)(tstr *, const char *))
 			(message, SDLNet_GetError());
 		CDLL_FUNCTION("libtstr", "tstr_base_cat", void(*)(tstr *, const char *))
@@ -76,16 +78,19 @@ int n_init(lua_State *L)
 							(message));
 		CDLL_FUNCTION("libtstr", "tstr_free", void(*)(tstr *))
 			(message);
-		lua_error(L);
+
+		return 1;
 	}
 
 	currentSocket = SDLNet_UDP_Open(currentPort);
 	if(!currentSocket)
 	{
+		lua_pushboolean(L, FALSE);
+
 		message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
 			();
 		CDLL_FUNCTION("libtstr", "tstr_base_set", void(*)(tstr *, const char *))
-			(message, "Error opening socket: ");
+			(message, "Warning: Could not open socket: ");
 		CDLL_FUNCTION("libtstr", "tstr_cat", void(*)(tstr *, const char *))
 			(message, SDLNet_GetError());
 		CDLL_FUNCTION("libtstr", "tstr_base_cat", void(*)(tstr *, const char *))
@@ -95,9 +100,12 @@ int n_init(lua_State *L)
 		CDLL_FUNCTION("libtstr", "tstr_free", void(*)(tstr *))
 			(message);
 		lua_error(L);
+
+		return 1;
 	}
 
-	return 0;
+	lua_pushboolean(L, TRUE);
+	return 1;
 }
 
 int n_quit(lua_State *L)

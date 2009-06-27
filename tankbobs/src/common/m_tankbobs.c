@@ -931,7 +931,7 @@ static const struct luaL_Reg tankbobs[] =
 
 	/* m_net.c */
 	{"n_init", n_init}, /* initialize */
-		/* Nothing is returned.  The port can optionally be passed. */
+		/* If initialization is successful, true is returned.   If not, false and the error message is returned.  The port can optionally be passed. */
 	{"n_quit", n_quit}, /* quit */
 		/* Nothing is returned; nothing is passed. */
 	{"n_newPacket", n_newPacket}, /* allocate a new packet (if the current packet hasn't been sent yet, it will be replaced) */

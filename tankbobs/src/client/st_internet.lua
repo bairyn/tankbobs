@@ -33,10 +33,11 @@ local st_internet_step
 local st_internet_serverIP
 local st_internet_start
 
-local UNCONNECTED = 1
-local REQUESTING  = 2  -- client sent initial packet
-local RESPONDED   = 3  -- server responded to connection packet
-local CONNECTED   = 4  -- connected to server
+local UNITIIALIZED = 0
+local UNCONNECTED  = 1
+local REQUESTING   = 2  -- client sent initial packet
+local RESPONDED    = 3  -- server responded to connection packet
+local CONNECTED    = 4  -- connected to server
 
 function st_internet_init()
 	connection = {state = UNCONNECTED, proceeding = false, lastRequestTime, challenge = 0, address = c_config_get("config.client.serverIP"), ip = "", port = nil, ui = ""}
@@ -55,7 +56,9 @@ function st_internet_init()
 
 	local function updateStatus(widget)
 		local switch = connection.state
-		if switch == UNCONNECTED then
+			if switch == UNINITIALIZED then
+				widget.text = "Could not initialize"
+		elseif switch == UNCONNECTED then
 			if connection.lastRequestTime then
 				widget.text = "Connection timed out"
 			else
@@ -229,7 +232,14 @@ function st_internet_start(widget)
 		tankbobs.n_quit()
 	end
 
-	tankbobs.n_init(c_config_get("config.client.port", nil, true))
+	local status, err = tankbobs.n_init(c_config_get("config.client.port", nil, true))
+	if not status then
+		io.stderr:write(err)
+
+		connection.state = UNINITIALIZED
+
+		return
+	end
 	if connection.port then
 		tankbobs.n_setPort(connection.port)
 	end
