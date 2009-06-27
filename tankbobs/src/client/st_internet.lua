@@ -230,7 +230,9 @@ function st_internet_start(widget)
 	end
 
 	tankbobs.n_init(c_config_get("config.client.port", nil, true))
-	tankbobs.n_setPort(connection.port)
+	if connection.port then
+		tankbobs.n_setPort(connection.port)
+	end
 	tankbobs.n_newPacket(80)
 	tankbobs.n_writeToPacket(tankbobs.io_fromChar(0x00))
 	if not c_config_get("config.game.player1", nil, true) or not c_config_get("config.game.player1.name", nil, true) or not c_config_get("config.game.player1.color", nil, true) or not c_config_get("config.game.player1.color.r", nil, true) or not c_config_get("config.game.player1.color.g", nil, true) or not c_config_get("config.game.player1.color.b", nil, true) then
