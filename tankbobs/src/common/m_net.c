@@ -99,7 +99,6 @@ int n_init(lua_State *L)
 							(message));
 		CDLL_FUNCTION("libtstr", "tstr_free", void(*)(tstr *))
 			(message);
-		lua_error(L);
 
 		return 1;
 	}
