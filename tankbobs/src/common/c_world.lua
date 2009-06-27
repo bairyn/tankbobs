@@ -143,6 +143,8 @@ function c_world_init()
 	c_const_set("tank_rotationSpeed", c_math_radians(450) / 1000, 1)  -- 135 degrees per second
 	c_const_set("tank_rotationSpecialSpeed", c_math_degrees(1) / 3.5, 1)
 	c_const_set("tank_defaultRotation", c_math_radians(90), 1)  -- up
+	c_const_set("tank_boostHealth", 60, 1)
+	c_const_set("tank_healthDegeneration", 1, 1)
 
 	c_const_set("powerup_hullx1",  0, 1) c_const_set("powerup_hully1",  1, 1)
 	c_const_set("powerup_hullx2",  0, 1) c_const_set("powerup_hully2",  0, 1)
@@ -217,7 +219,14 @@ function c_world_init()
 	powerupType.name = "aim-aid"
 	powerupType.c.r, powerupType.c.g, powerupType.c.b, powerupType.c.a = 0.5, 0.75, 0.1, 0.5
 
-	-- TODO: health with light green
+	-- health
+	local powerupType = c_world_powerupType:new()
+
+	table.insert(c_powerupTypes, powerupType)
+
+	powerupType.index = 8
+	powerupType.name = "health"
+	powerupType.c.r, powerupType.c.g, powerupType.c.b, powerupType.c.a = 0.1, 0.85, 0.1, 0.8
 
 	tankbobs.w_setTimeStep(c_const_get("world_timeStep"))
 	tankbobs.w_setIterations(c_const_get("world_iterations"))
@@ -727,6 +736,10 @@ function c_world_tank_step(d, tank)
 		return c_world_tankDie(d, tank, t)
 	end
 
+	if tank.health > c_const_get("tank_health") then
+		tank.health = tank.health - d * c_const_get("tank_healthDegeneration")
+	end
+
 	tank.p[1] = tankbobs.w_getPosition(tank.body)
 
 	local vel = tankbobs.w_getLinearVelocity(tank.body)
@@ -982,6 +995,9 @@ function c_world_powerup_pickUp(tank, powerup)
 	end
 	if powerupType.name == "aim-aid" then
 		tank.cd.aimAid = not tank.cd.aimAid
+	end
+	if powerupType.name == "health" then
+		tank.health = tank.health + c_const_get("tank_boostHealth")
 	end
 
 	tank.m.lastPickupTime = t

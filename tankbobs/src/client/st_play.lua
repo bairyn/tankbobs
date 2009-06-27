@@ -438,7 +438,13 @@ function st_play_step(d)
 
 				gl.Color(v.color.r, v.color.g, v.color.b, 1)
 				gl.TexEnv("TEXTURE_ENV_COLOR", v.color.r, v.color.g, v.color.b, 1)
+				local scale = v.health / c_const_get("tank_health")
+				if scale < 1 then
+					scale = 1
+				end
+				gl.Scale(scale, 1, 1)
 				gl.CallList(healthbarBorder_listBase)
+				gl.Scale(1 / scale, 1, 1)
 				if v.health >= c_const_get("tank_highHealth") then
 					gl.Color(0.1, 1, 0.1, 1)
 					gl.TexEnv("TEXTURE_ENV_COLOR", 0.1, 1, 0.1, 1)

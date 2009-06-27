@@ -1086,6 +1086,10 @@ static int compile(const char *filename)
 		{
 			powerups[0] |= 0x00000040;
 		}
+		if(strstr(powerupSpawnPoint->powerupsToEnable, "health"))
+		{
+			powerups[0] |= 0x00000080;
+		}
 
 		put_cint(fout, i);
 		put_cdouble(fout, powerupSpawnPoint->x1);
