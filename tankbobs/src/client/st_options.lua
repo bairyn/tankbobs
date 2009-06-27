@@ -235,7 +235,7 @@ function st_optionsPlayers_init()
 	gui_addLabel(tankbobs.m_vec2(50, 63), "Name", nil, 1 / 3) player.name = gui_addInput(tankbobs.m_vec2(75, 63), c_config_get("config.game.player1.name"), nil, st_optionsPlayers_name, false, c_const_get("max_nameLength"), 0.5)
 
 	gui_addLabel(tankbobs.m_vec2(50, 57), "Fire", nil, 1 / 3) player.fire = gui_addKey(tankbobs.m_vec2(75, 57), c_config_get("config.key.player1.fire"), nil, st_optionsPlayers_fire, c_config_get("config.key.player1.fire"), 0.5)
-	gui_addLabel(tankbobs.m_vec2(50, 54), "Forward", nil, 1 / 3) player.forward = gui_addKey(tankbobs.m_vec2(75, 54), c_config_get("config.key.player1.forward"), nil, st_optionsPlayers_forward, c_config_get("config.key.player1.foward"), 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 54), "Forward", nil, 1 / 3) player.forward = gui_addKey(tankbobs.m_vec2(75, 54), c_config_get("config.key.player1.forward"), nil, st_optionsPlayers_forward, c_config_get("config.key.player1.forward"), 0.5)
 	gui_addLabel(tankbobs.m_vec2(50, 51), "Back", nil, 1 / 3) player.back = gui_addKey(tankbobs.m_vec2(75, 51), c_config_get("config.key.player1.back"), nil, st_optionsPlayers_back, c_config_get("config.key.player1.back"), 0.5)
 	gui_addLabel(tankbobs.m_vec2(50, 48), "Left", nil, 1 / 3) player.left = gui_addKey(tankbobs.m_vec2(75, 48), c_config_get("config.key.player1.left"), nil, st_optionsPlayers_left, c_config_get("config.key.player1.left"), 0.5)
 	gui_addLabel(tankbobs.m_vec2(50, 45), "Right", nil, 1 / 3) player.right = gui_addKey(tankbobs.m_vec2(75, 45), c_config_get("config.key.player1.right"), nil, st_optionsPlayers_right, c_config_get("config.key.player1.right"), 0.5)
