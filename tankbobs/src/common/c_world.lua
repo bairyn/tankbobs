@@ -846,7 +846,7 @@ function c_world_powerupSpawnPoint_step(d, powerupSpawnPoint)
 	local spawn = false
 
 	if not lastPowerupSpawnTime then
-		lastPowerupSpawnTime = t - c_const_get("world_time") * c_config_get("config.game.timescale") * c_const_get("powerupSpawnPoint_initialPowerupTime") - c_const_get("world_time") * c_config_get("config.game.timescale") * c_const_get("powerupSpawnPoint_powerupTime")
+		lastPowerupSpawnTime = t + c_const_get("world_time") * c_config_get("config.game.timescale") * c_const_get("powerupSpawnPoint_initialPowerupTime") - c_const_get("world_time") * c_config_get("config.game.timescale") * c_const_get("powerupSpawnPoint_powerupTime")
 	end
 
 	if c_const_get("powerupSpawnPoints_linked") then
