@@ -76,6 +76,7 @@ function c_world_init()
 
 	c_const_set("powerupSpawnPoint_initialPowerupTime", 30, 1)
 	c_const_set("powerupSpawnPoint_powerupTime", 30, 1)
+	c_const_set("powerupSpawnPoints_linked", true, 1)
 
 	c_const_set("powerup_density", 1E-5, 1)
 	c_const_set("powerup_friction", 0, 1)
@@ -836,10 +837,40 @@ function c_world_projectile_step(d, projectile)
 	projectile.r = tankbobs.w_getAngle(projectile.m.body)
 end
 
+local lastPowerupSpawnTime
+local nextPowerupSpawnPoint
 function c_world_powerupSpawnPoint_step(d, powerupSpawnPoint)
 	local t = tankbobs.t_getTicks()
+	local spawn = false
 
-	if t >= powerupSpawnPoint.m.nextPowerupTime then
+	if c_const_get("powerupSpawnPoints_linked") then
+		if not nextPowerupSpawnPoint or powerupSpawnPoint == nextPowerupSpawnPoint then
+			if not lastPowerupSpawnTime or t >= lastPowerupSpawnTime + c_const_get("world_time") * c_config_get("config.game.timescale") * c_const_get("powerupSpawnPoint_powerupTime") then
+				lastPowerupSpawnTime = t
+				spawn = true
+
+				local found   = false
+				local current = false
+				for k, v in pairs(c_tcm_current_map.powerupSpawnPoints) do
+					if current then
+						nextPowerupSpawnPoint = v
+						found = true
+
+						break
+					elseif v == powerupSpawnPoint then
+						current = true
+					end
+				end
+				if not found then
+					nextPowerupSpawnPoint = c_tcm_current_map.powerupSpawnPoints[1] or powerupSpawnPoint  -- should never choose the latter, but better to be safe than break the system
+				end
+			end
+		end
+	else
+		spawn = t >= powerupSpawnPoint.m.nextPowerupTime
+	end
+
+	if spawn then
 		powerupSpawnPoint.m.nextPowerupTime = t + c_const_get("world_time") * c_config_get("config.game.timescale") * c_const_get("powerupSpawnPoint_powerupTime")
 
 		if c_world_canPowerupSpawn(d, powerupSpawnPoint) then
