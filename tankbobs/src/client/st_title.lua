@@ -31,7 +31,12 @@ local st_title_mouse
 local st_title_step
 
 function st_title_init()
+	-- ungrab mouse
+	tankbobs.in_grabMouse(c_config_get("config.renderer.width") / 2, c_config_get("config.renderer.height") / 2)
+	tankbobs.in_grabClear()
+
 	gui_addLabel (tankbobs.m_vec2(50, 75), "Main Menu")
+
 	gui_addAction(tankbobs.m_vec2(50, 65), "Play",    nil, st_title_play)
 	gui_addAction(tankbobs.m_vec2(50, 59), "Online",  nil, st_title_internet)
 	gui_addAction(tankbobs.m_vec2(50, 53), "Options", nil, st_title_options)
