@@ -461,13 +461,13 @@ function st_play_step(d)
 			offset.t = -1 / (endP - start).t
 			offset.R = v[6]
 
-			tmp = start + offset
-			table.insert(a, {tmp.x, tmp.y})
 			tmp = start - offset
 			table.insert(a, {tmp.x, tmp.y})
-			tmp = endP - offset
+			tmp = start + offset
 			table.insert(a, {tmp.x, tmp.y})
 			tmp = endP + offset
+			table.insert(a, {tmp.x, tmp.y})
+			tmp = endP - offset
 			table.insert(a, {tmp.x, tmp.y})
 
 			local length = (endP - start).R

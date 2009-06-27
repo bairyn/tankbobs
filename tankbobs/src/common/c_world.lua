@@ -1090,6 +1090,7 @@ end
 
 function c_world_contactListener(shape1, shape2, body1, body2, position, separation, normal)
 	local b, p
+	local powerup = false
 
 	if c_world_isPowerup(body1) or c_world_isPowerup(body2) then
 		local tank = select(2, c_world_isTank(body1))
@@ -1100,6 +1101,8 @@ function c_world_contactListener(shape1, shape2, body1, body2, position, separat
 		elseif tank2 then
 			c_world_powerup_pickUp(tank2, select(2, c_world_isPowerup(body1)))
 		end
+
+		powerup = true
 	end
 
 	if c_world_isProjectile(body1) or c_world_isProjectile(body2) then
@@ -1144,12 +1147,14 @@ function c_world_contactListener(shape1, shape2, body1, body2, position, separat
 		tank = select(2, c_world_isTank(body1))
 		tank2 = select(2, c_world_isTank(body2))
 
-		if tank then
-			c_world_collide(tank, normal)
-		end
+		if not powerup then
+			if tank then
+				c_world_collide(tank, normal)
+			end
 
-		if tank2 then
-			c_world_collide(tank2, normal)
+			if tank2 then
+				c_world_collide(tank2, normal)
+			end
 		end
 	end
 end
