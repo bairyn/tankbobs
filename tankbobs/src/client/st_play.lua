@@ -486,6 +486,12 @@ function st_play_step(d)
 
 			tankbobs.a_playSound(c_const_get("die_sound"))
 		end
+
+		if v.m.lastPickupTime and v.m.lastPickupTimeB ~= v.m.lastPickupTime then
+			v.m.lastPickupTimeB = v.m.lastPickupTime 
+
+			tankbobs.a_playSound(c_const_get("powerupPickup_sound"))
+		end
 	end
 
 	if c_tcm_current_map.powerupSpawnPoints[1] then

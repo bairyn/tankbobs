@@ -953,6 +953,7 @@ function c_world_powerupRemove(powerup)
 end
 
 function c_world_powerup_pickUp(tank, powerup)
+	local t = tankbobs.t_getTicks()
 	local powerupType = c_world_getPowerupTypeByName(powerup.typeName)
 
 	powerup.collided = true
@@ -978,6 +979,8 @@ function c_world_powerup_pickUp(tank, powerup)
 	if powerupType.name == "aim-aid" then
 		tank.cd.aimAid = not tank.cd.aimAid
 	end
+
+	tank.m.lastPickupTime = t
 end
 
 function c_world_powerup_step(d, powerup)
