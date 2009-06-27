@@ -499,7 +499,7 @@ end
 
 function st_optionsControls_keyLayout(widget, string, index)
 	if c_const_get("keyLayout_" .. string) then
-		c_config_set("config.keyLayout", "keyLayout_" .. string)
+		c_config_set("config.keyLayout", string)
 	end
 end
 
