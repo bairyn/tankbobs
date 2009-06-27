@@ -956,6 +956,10 @@ function c_world_powerup_pickUp(tank, powerup)
 	local t = tankbobs.t_getTicks()
 	local powerupType = c_world_getPowerupTypeByName(powerup.typeName)
 
+	if powerup.collided then
+		return
+	end
+
 	powerup.collided = true
 
 	if powerupType.name == "machinegun" then
@@ -1029,6 +1033,16 @@ local function c_world_isProjectile(body)
 	return false
 end
 
+local function c_world_isPowerup(body)
+	for _, v in pairs(c_world_powerups) do
+		if v.body == body then
+			return true, v
+		end
+	end
+
+	return false
+end
+
 function c_world_tankDamage(tank, damage)
 	tank.health = tank.health - damage
 end
@@ -1056,7 +1070,16 @@ end
 function c_world_contactListener(shape1, shape2, body1, body2, position, separation, normal)
 	local b, p
 
-	if c_world_isProjectile(body1) or c_world_isProjectile(body2) then
+	if c_world_isPowerup(body1) or c_world_isPowerup(body2) then
+		local tank = select(2, c_world_isTank(body1))
+		local tank2 = select(2, c_world_isTank(body2))
+
+		if tank then
+			c_world_powerup_pickUp(tank, select(2, c_world_isPowerup(body2)))
+		else
+			c_world_powerup_pickUp(tank2, select(2, c_world_isPowerup(body1)))
+		end
+	elseif c_world_isProjectile(body1) or c_world_isProjectile(body2) then
 		-- remove the projectile
 		local projectile, projectile2
 
