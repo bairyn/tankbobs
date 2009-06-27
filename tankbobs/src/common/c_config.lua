@@ -45,7 +45,7 @@ function c_config_init()
 		local oldV = v
 		if type(v) == "string" then
 			v = v:match("^[\n\t ]*([%d%.]+)[\n\t ]*$")
-			if v == nil or v:match("^.*%..*$") then
+			if v == nil or v:match("^.*%..*%..*$") then
 				v = oldV
 				v = string.match(v:lower(), "^[\n\t ]*false[\n\t ]*$")
 				if v == nil then
