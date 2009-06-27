@@ -45,7 +45,7 @@ function c_config_init()
 		local oldV = v
 		if type(v) == "string" then
 			v = v:match("^[\n\t ]*([%d%.]+)[\n\t ]*$")
-			if v == nil then
+			if v == nil or v:match("^.*%..*$") then
 				v = oldV
 				v = string.match(v:lower(), "^[\n\t ]*false[\n\t ]*$")
 				if v == nil then
@@ -341,14 +341,7 @@ function c_config_init()
 
 		lfs.mkdir(c_const_get("user_dir"):sub(1, -2))
 
-		local f, message = os.remove(c_const_get("user_conf"))
-		if not f then
-			if c_const_get("debug") then
-				io.stderr:write("Warning: could not remove the configuration file: '", c_const_get("user_dir"), c_const_get("user_conf"), "'", message, '\n')
-			end
-		end
-
-		local f, message = io.open(c_const_get("user_conf"), "w+")
+		local f, message = io.open(c_const_get("user_conf"), "w")
 		if not f then
 			error("error opening '" .. c_const_get("user_dir") .. c_const_get("user_conf") .. " for new config file - " .. message)
 		end

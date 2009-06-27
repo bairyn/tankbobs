@@ -39,7 +39,7 @@ local RESPONDED   = 3  -- server responded to connection packet
 local CONNECTED   = 4  -- connected to server
 
 function st_internet_init()
-	connection = {state = UNCONNECTED, proceeding = false, lastRequestTime, challenge = 0, address = c_config_get("config.client.serverIP"), ip = "", port = nil}
+	connection = {state = UNCONNECTED, proceeding = false, lastRequestTime, challenge = 0, address = c_config_get("config.client.serverIP"), ip = "", port = nil, ui = ""}
 
 	if connection.address:find(":") then
 		connection.port = tonumber(connection.address:sub(connection.address:find(":") + 1))
@@ -74,17 +74,32 @@ function st_internet_init()
 	gui_addLabel(tankbobs.m_vec2(50, 75), "IP", nil, 2 / 3) gui_addInput(tankbobs.m_vec2(55, 75), tostring(connection.address), nil, st_internet_serverIP, false, 64)
 	gui_addAction(tankbobs.m_vec2(55, 69), "Connect", nil, st_internet_start)
 
-	if not c_config_get("config.client.ui", nil, true) then
+	local ui = ""
+	local fin = io.open(c_const_get("ui_file"), "rb")
+	if fin then
+		ui = fin:read("*a")
+	end
+	if #ui ~= 32 then
 		math.randomseed(os.time())
-
-		local ui = ""
-
+		ui = ""
 		for i = 1, 32 do
 			ui = ui .. string.char(math.random(0x00, 0x7F))
 		end
+		local fout = io.open(c_const_get("ui_file"), "wb")
+		if fout then
+			fout:write(ui)
 
-		c_config_set("config.client.ui", ui)
+			if c_const_get("debug") then
+				io.stdout:write("Generating GUID\n")
+			end
+		else
+			if c_const_get("debug") then
+				io.stderr:write("Warning: could not write GUID to '", c_const_get("ui_file"), "'\n")
+			end
+		end
 	end
+
+	connection.ui = ui
 end
 
 function st_internet_done()
@@ -160,7 +175,7 @@ function st_internet_step(d)
 					-- send the server the challenge response
 					tankbobs.n_newPacket(37)
 					tankbobs.n_writeToPacket(tankbobs.t_fromChar(0x01))
-					tankbobs.n_writeToPacket(c_config_get("config.client.ui"))
+					tankbobs.n_writeToPacket(connection.ui)
 					tankbobs.n_writeToPacket(tankbobs.t_fromInt(challenge))
 					tankbobs.n_sendPacket()
 
@@ -237,7 +252,7 @@ function st_internet_start(widget)
 	tankbobs.n_writeToPacket(tankbobs.io_fromDouble(r))
 	tankbobs.n_writeToPacket(tankbobs.io_fromDouble(g))
 	tankbobs.n_writeToPacket(tankbobs.io_fromDouble(b))
-	tankbobs.n_writeToPacket(c_config_get("config.client.ui"))
+	tankbobs.n_writeToPacket(connection.ui)
 	tankbobs.n_sendPacket(connection.ip)
 
 	connection.lastRequestTime = tankbobs.t_getTicks()
