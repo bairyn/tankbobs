@@ -68,8 +68,10 @@ function c_weapon_init()
 	weapon.launchDistance = 3
 	weapon.aimAid = false
 	weapon.capacity = 0
-	weapon.range = 0
+	weapon.meleeRange = 0
 	weapon.width = 0
+	weapon.trail = 0
+	weapon.trailWidth = 0
 
 	weapon.texturer[2](0, 1)
 	weapon.texturer[3](0, 0)
@@ -118,8 +120,10 @@ function c_weapon_init()
 	weapon.launchDistance = 3
 	weapon.aimAid = true
 	weapon.capacity = 64
-	weapon.range = 0
+	weapon.meleeRange = 0
 	weapon.width = 0
+	weapon.trail = 0
+	weapon.trailWidth = 0
 
 	weapon.texturer[2](0, 1)
 	weapon.texturer[3](0, 0)
@@ -167,8 +171,10 @@ function c_weapon_init()
 	weapon.launchDistance = 6  -- usually 3, but an extra unit to prevent the bullets from colliding before they spread
 	weapon.aimAid = false
 	weapon.capacity = 6
-	weapon.range = 0
+	weapon.meleeRange = 0
 	weapon.width = 0
+	weapon.trail = 0
+	weapon.trailWidth = 0
 
 	weapon.texturer[2](0, 1)
 	weapon.texturer[3](0, 0)
@@ -217,8 +223,10 @@ function c_weapon_init()
 	weapon.launchDistance = 3
 	weapon.aimAid = false
 	weapon.capacity = 3
-	weapon.range = 0
+	weapon.meleeRange = 0
 	weapon.width = 0
+	weapon.trail = 1
+	weapon.trailWidth = 0
 
 	weapon.texturer[2](0, 1)
 	weapon.texturer[3](0, 0)
@@ -267,8 +275,10 @@ function c_weapon_init()
 	weapon.launchDistance = 3
 	weapon.aimAid = true
 	weapon.capacity = 3
-	weapon.range = 0
+	weapon.meleeRange = 0
 	weapon.width = 0
+	weapon.trail = 0.25
+	weapon.trailWidth = 0
 
 	weapon.texturer[2](0, 1)
 	weapon.texturer[3](0, 0)
@@ -317,8 +327,10 @@ function c_weapon_init()
 	weapon.launchDistance = 3
 	weapon.aimAid = true
 	weapon.capacity = 64  -- can be used for 8 seconds
-	weapon.range = 2
+	weapon.meleeRange = 2
 	weapon.width = 0.75
+	weapon.trail = 0
+	weapon.trailWidth = 0
 
 	weapon.texturer[2](0, 1)
 	weapon.texturer[3](0, 0)
@@ -379,6 +391,7 @@ c_weapon =
 		o.projectileRender[4] = tankbobs.m_vec2()
 	end,
 
+	index = 0,
 	name = "",
 	altName = "",
 	damage = 0,
@@ -390,9 +403,10 @@ c_weapon =
 	launchDistance = 0,
 	aimAid = false,
 	capacity = 0,
-	range = 0,
+	meleeRange = 0,
 	width = 0,
-	index = 0,
+	trail = 0,
+	trailWidth = 0,
 
 	texture = "",
 	fireSound = "",
@@ -473,7 +487,7 @@ function c_weapon_pickUp(tank, weaponName)
 	tank.ammo = weapon.capacity
 end
 
-function c_weapon_fireRangeWeapon(tank)
+function c_weapon_fireMeleeWeapon(tank)
 	print("TODO")
 end
 
@@ -486,8 +500,8 @@ function c_weapon_fire(tank)
 		return c_weapon_outOfAmmo(tank)
 	end
 
-	if weapon.range ~= 0 then
-		return c_weapon_fireRangeWeapon(tank)
+	if weapon.meleeRange ~= 0 then
+		return c_weapon_fireMeleeWeapon(tank)
 	end
 
 	for i = 1, weapon.pellets do

@@ -263,6 +263,66 @@ c_world_powerup =
 	m = {}
 }
 
+c_world_tank =
+{
+	new = common_new,
+
+	init = function (o)
+		name = "UnnamedPlayer"
+		o.p[1] = tankbobs.m_vec2()
+		o.h[1] = tankbobs.m_vec2()
+		o.h[2] = tankbobs.m_vec2()
+		o.h[3] = tankbobs.m_vec2()
+		o.h[4] = tankbobs.m_vec2()
+		o.h[1].x = c_const_get("tank_hullx1")
+		o.h[1].y = c_const_get("tank_hully1")
+		o.h[2].x = c_const_get("tank_hullx2")
+		o.h[2].y = c_const_get("tank_hully2")
+		o.h[3].x = c_const_get("tank_hullx3")
+		o.h[3].y = c_const_get("tank_hully3")
+		o.h[4].x = c_const_get("tank_hullx4")
+		o.h[4].y = c_const_get("tank_hully4")
+		o.color.r = c_config_get("config.game.defaultTankRed")
+		o.color.g = c_config_get("config.game.defaultTankGreen")
+		o.color.b = c_config_get("config.game.defaultTankBlue")
+		o.state = c_world_tank_state:new()
+	end,
+
+	p = {},
+	h = {},  -- physical box: four vectors of offsets for tanks
+	r = 0,  -- tank's rotation
+	name = "",
+	exists = false,
+	spawning = false,
+	lastSpawnPoint = 0,
+	state = nil,
+	weapon = nil,
+	lastFireTime = 0,
+	body = nil,  -- physical body
+	health = 0,
+	nextSpawnTime = 0,
+	killer = nil,
+	score = 0,
+	ammo = 0,
+	color = {},
+
+	cd = {},  -- data cleared on death
+
+	m = {p = {}}
+}
+
+c_world_tank_state =
+{
+	new = common_new,
+
+	firing = false,
+	forward = false,
+	back = false,
+	right = false,
+	left = false,
+	special = false
+}
+
 function c_world_getPowerupTypeByName(name)
 	for k, v in pairs(c_powerupTypes) do
 		if v.name == name then
@@ -330,66 +390,6 @@ function c_world_freeWorld()
 	c_world_powerups = {}
 	c_world_tanks = {}
 end
-
-c_world_tank =
-{
-	new = common_new,
-
-	init = function (o)
-		name = "UnnamedPlayer"
-		o.p[1] = tankbobs.m_vec2()
-		o.h[1] = tankbobs.m_vec2()
-		o.h[2] = tankbobs.m_vec2()
-		o.h[3] = tankbobs.m_vec2()
-		o.h[4] = tankbobs.m_vec2()
-		o.h[1].x = c_const_get("tank_hullx1")
-		o.h[1].y = c_const_get("tank_hully1")
-		o.h[2].x = c_const_get("tank_hullx2")
-		o.h[2].y = c_const_get("tank_hully2")
-		o.h[3].x = c_const_get("tank_hullx3")
-		o.h[3].y = c_const_get("tank_hully3")
-		o.h[4].x = c_const_get("tank_hullx4")
-		o.h[4].y = c_const_get("tank_hully4")
-		o.color.r = c_config_get("config.game.defaultTankRed")
-		o.color.g = c_config_get("config.game.defaultTankGreen")
-		o.color.b = c_config_get("config.game.defaultTankBlue")
-		o.state = c_world_tank_state:new()
-	end,
-
-	p = {},
-	h = {},  -- physical box: four vectors of offsets for tanks
-	r = 0,  -- tank's rotation
-	name = "",
-	exists = false,
-	spawning = false,
-	lastSpawnPoint = 0,
-	state = nil,
-	weapon = nil,
-	lastFireTime = 0,
-	body = nil,  -- physical body
-	health = 0,
-	nextSpawnTime = 0,
-	killer = nil,
-	score = 0,
-	ammo = 0,
-	color = {},
-
-	cd = {},  -- data cleared on death
-
-	m = {p = {}}
-}
-
-c_world_tank_state =
-{
-	new = common_new,
-
-	firing = false,
-	forward = false,
-	back = false,
-	right = false,
-	left = false,
-	special = false
-}
 
 function c_world_tank_spawn(tank)
 	tank.spawning = true

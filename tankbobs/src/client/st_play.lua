@@ -52,6 +52,7 @@ local st_play_mouse
 local st_play_step
 
 local endOfGame
+local trails = {}
 
 function st_play_init()
 	-- localize frequently used globals
@@ -416,11 +417,81 @@ function st_play_step(d)
 
 	-- projectiles
 	for _, v in pairs(c_weapon_getProjectiles()) do
-		gl.PushMatrix()
-			gl.Translate(v.p[1].x, v.p[1].y, 0)
-			gl.Rotate(tankbobs.m_degrees(v.r), 0, 0, 1)
-			gl.CallList(v.weapon.m.p.projectileList)
-		gl.PopMatrix()
+		if v.trail ~= 0 then  -- only draw the trail
+			gl.PushMatrix()
+				gl.Translate(v.p[1].x, v.p[1].y, 0)
+				gl.Rotate(tankbobs.m_degrees(v.r), 0, 0, 1)
+				gl.CallList(v.weapon.m.p.projectileList)
+			gl.PopMatrix()
+		end
+	end
+
+	-- trails
+	for k, v in pairs(trails) do
+		-- {weapon, time left, maximum intensity, position at which the trail started, the rotation, trail width}
+		v[2] = v[2] - d
+		if v[2] <= 0 then
+			table.remove(trails, k)
+
+			return
+		end
+
+		gl.EnableClientState("VERTEX_ARRAY")
+			local a = {}
+			local b
+			local t = {}
+			local vec = tankbobs.m_vec2()
+			local start, endP = tankbobs.m_vec2(v[4]), tankbobs.m_vec2()
+			local offset = tankbobs.m_vec2()
+			local tmp = tankbobs.m_vec2()
+
+			vec.t = v[5]
+			vec.R = c_const_get("aimAid_startDistance")
+			start:add(vec)
+
+			endP(start)
+			vec.R = c_const_get("aimAid_maxDistance")
+			endP:add(vec)
+
+			b, vec = c_world_findClosestIntersection(start, endP)
+			if b then
+				endP = vec
+			end
+
+			offset.t = -1 / (endP - start).t
+			offset.R = v[6]
+
+			tmp = start + offset
+			table.insert(a, {tmp.x, tmp.y})
+			tmp = start - offset
+			table.insert(a, {tmp.x, tmp.y})
+			tmp = endP - offset
+			table.insert(a, {tmp.x, tmp.y})
+			tmp = endP + offset
+			table.insert(a, {tmp.x, tmp.y})
+
+			local length = (endP - start).R
+			tmp(weapon.texturer[1])
+			tmp.R = length * weapon.texturer[1].R / weapon.render[1].R
+			table.insert(t, {tmp.x, tmp.y})
+			tmp(weapon.texturer[2])
+			tmp.R = length * weapon.texturer[2].R / weapon.render[2].R
+			table.insert(t, {tmp.x, tmp.y})
+			tmp(weapon.texturer[3])
+			tmp.R = length * weapon.texturer[3].R / weapon.render[3].R
+			table.insert(t, {tmp.x, tmp.y})
+			tmp(weapon.texturer[4])
+			tmp.R = length * weapon.texturer[4].R / weapon.render[4].R
+			table.insert(t, {tmp.x, tmp.y})
+
+			gl.VertexPointer(a)
+			gl.TexCoordPointer(t)
+			gl.BindTexture("TEXTURE_2D", v[1].m.p.texture[1])
+			gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
+			gl.Color(1, 1, 1, v[2] / v[3])
+			gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, v[2] / v[3])
+			gl.DrawArrays("QUADS", 0, 4)
+		gl.DisableClientState("VERTEX_ARRAY")
 	end
 
 	-- healthbars
@@ -464,13 +535,17 @@ function st_play_step(d)
 	-- scores, FPS, rest of HUD, etc.
 	gui_paint(d)
 
-	-- play sounds
+	-- play sounds and insert trails
 	for _, v in pairs(c_world_getTanks()) do
 		if v.state.firing then
 			if v.m.lastFireTime ~= v.lastFireTime then
 				v.m.lastFireTime = v.lastFireTime
 
 				tankbobs.a_playSound(c_const_get("weaponAudio_dir") .. v.weapon.fireSound);
+
+				if v.weapon.trail ~= 0 and v.weapon.trailWidth ~= 0 then
+					table.insert(trails, {v.weapon, v.weapon.trail, v.weapon.trail, v.p, v.r, v.weapon.trailWidth})
+				end
 			end
 		end
 
@@ -500,11 +575,19 @@ function st_play_step(d)
 		end
 	end
 
-	if c_tcm_current_map.powerupSpawnPoints[1] then
-		if c_tcm_current_map.powerupSpawnPoints[1].m.lastSpawnTimeB ~= c_tcm_current_map.powerupSpawnPoints[1].m.lastSpawnTime then
-			c_tcm_current_map.powerupSpawnPoints[1].m.lastSpawnTimeB = c_tcm_current_map.powerupSpawnPoints[1].m.lastSpawnTime
+	for _, v in pairs(c_tcm_current_map.powerupSpawnPoints) do
+		if v.m.lastSpawnTimeB ~= v.m.lastSpawnTime then
+			v.m.lastSpawnTimeB = v.m.lastSpawnTime
 
 			tankbobs.a_playSound(c_const_get("powerupSpawn_sound"))
+		end
+	end
+
+	for _, v in pairs(c_weapon_getProjectiles()) do
+		if v.collisions > 0 and v.collisions ~= v.m.lastCollisions then
+			v.m.lastCollisions = v.collisions
+
+			tankbobs.a_playSound(c_const_get("collideProjectile_sound"))
 		end
 	end
 end
