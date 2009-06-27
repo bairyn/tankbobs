@@ -35,6 +35,7 @@ local common_lerp             = common_lerp
 local c_weapon_fire           = c_weapon_fire
 local tankbobs                = tankbobs
 
+local c_world_tank_checkSpawn
 local c_world_tank_step
 local c_world_projectile_step
 local c_world_powerupSpawnPoint_step
@@ -78,6 +79,7 @@ function c_world_init()
 	c_const_set("powerupSpawnPoint_powerupTime", 30, 1)
 	c_const_set("powerupSpawnPoints_linked", true, 1)
 
+	c_const_set("powerup_lifeTime", 6000, 1)
 	c_const_set("powerup_density", 1E-5, 1)
 	c_const_set("powerup_friction", 0, 1)
 	c_const_set("powerup_restitution", 1, 1)
@@ -85,8 +87,8 @@ function c_world_init()
 	c_const_set("powerup_isBullet", true, 1)
 	c_const_set("powerup_linearDamping", 0, 1)
 	c_const_set("powerup_angularDamping", 0, 1)
-	c_const_set("powerup_pushStrength", 48, 1)
-	c_const_set("powerup_pushAngle", tankbobs.m_radians(45), 1)
+	c_const_set("powerup_pushStrength", 16, 1)
+	c_const_set("powerup_pushAngle", math.pi / 4, 1)
 	c_const_set("powerup_static", false, 1)
 
 	-- hull of tank facing right
@@ -247,6 +249,7 @@ c_world_powerup =
 	r = 0,  -- rotation
 	collided = false,  -- whether it needs to be removed
 	type = nil,  -- the type of powerup (shotgun, ammo, speed enhancement, etc)
+	spawnTime = 0,  -- the time the powerup spawned
 
 	m = {}
 }
@@ -492,12 +495,11 @@ end
 
 function c_world_powerupHull(powerup)
 	local c = {}
-	local p = powerup.p[1]
 
 	for i = 1, 4 do
 		local h = tankbobs.m_vec2(c_const_get("powerup_hullx" .. tostring(i)), c_const_get("powerup_hully" .. tostring(i)))
 		h.t = h.t + powerup.r
-		table.insert(c, p + h)
+		table.insert(c, h)
 	end
 
 	return c
@@ -509,7 +511,7 @@ function c_world_powerupSpawnPointHull(powerupSpawnPoint)
 
 	for i = 1, 4 do
 		local h = tankbobs.m_vec2(c_const_get("powerup_hullx" .. tostring(i)), c_const_get("powerup_hully" .. tostring(i)))
-		h.t = 0  --
+		--h.t = h.t
 		table.insert(c, p + h)
 	end
 
@@ -843,9 +845,13 @@ function c_world_powerupSpawnPoint_step(d, powerupSpawnPoint)
 	local t = tankbobs.t_getTicks()
 	local spawn = false
 
+	if not lastPowerupSpawnTime then
+		lastPowerupSpawnTime = t - c_const_get("world_time") * c_config_get("config.game.timescale") * c_const_get("powerupSpawnPoint_initialPowerupTime") - c_const_get("world_time") * c_config_get("config.game.timescale") * c_const_get("powerupSpawnPoint_powerupTime")
+	end
+
 	if c_const_get("powerupSpawnPoints_linked") then
 		if not nextPowerupSpawnPoint or powerupSpawnPoint == nextPowerupSpawnPoint then
-			if not lastPowerupSpawnTime or t >= lastPowerupSpawnTime + c_const_get("world_time") * c_config_get("config.game.timescale") * c_const_get("powerupSpawnPoint_powerupTime") then
+			if t >= lastPowerupSpawnTime + c_const_get("world_time") * c_config_get("config.game.timescale") * c_const_get("powerupSpawnPoint_powerupTime") then
 				lastPowerupSpawnTime = t
 				spawn = true
 
@@ -881,7 +887,11 @@ function c_world_powerupSpawnPoint_step(d, powerupSpawnPoint)
 			if max and max > 0 then
 				while count > max do
 					count = count - 1
-					c_world_powerups[#c_world_powerups - count].collided = true
+
+					local powerup = c_world_powerups[#c_world_powerups - count]
+					if powerup then
+						powerup.collided = true
+					end
 				end
 			end
 
@@ -917,6 +927,8 @@ function c_world_powerupSpawnPoint_step(d, powerupSpawnPoint)
 					end
 				end
 			end
+
+			powerup.spawnTime = t
 
 			powerup.p[1](powerupSpawnPoint.p[1])
 
@@ -969,14 +981,20 @@ function c_world_powerup_pickUp(tank, powerup)
 end
 
 function c_world_powerup_step(d, powerup)
+	local t = tankbobs.t_getTicks()
+
 	if powerup.collided then
 		tankbobs.w_removeBody(powerup.m.body)
 		c_world_powerupRemove(powerup)
 		return
 	end
 
+	if t > powerup.spawnTime + c_const_get("powerup_lifeTime") then
+		powerup.collided = true
+	end
+
 	powerup.p[1] = tankbobs.w_getPosition(powerup.m.body)
-	tankbobs.w_setAngle(powerup.m.body, 0)
+	--tankbobs.w_setAngle(powerup.m.body, 0)  -- looks better with dynamic rotation
 	powerup.r = tankbobs.w_getAngle(powerup.m.body)
 
 	for _, v in pairs(c_world_tanks) do
