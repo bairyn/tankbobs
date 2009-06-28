@@ -39,9 +39,6 @@ function c_weapon_init()
 	c_const_set("projectile_linearDamping", 0, 1)
 	c_const_set("projectile_angularDamping", 0, 1)
 	c_const_set("projectile_friction", 0, 1)
-	c_const_set("aimAid_startDistance", 2.1, 1)  -- distance from where the aid begins
-	c_const_set("aimAid_maxDistance", 4096, 1)
-	c_const_set("aimAid_width", 0.75, 1)
 
 	c_world_projectiles = {}
 
@@ -225,8 +222,8 @@ function c_weapon_init()
 	weapon.capacity = 3
 	weapon.meleeRange = 0
 	weapon.width = 0
-	weapon.trail = 1
-	weapon.trailWidth = 0
+	weapon.trail = 4
+	weapon.trailWidth = 0.5
 
 	weapon.texturer[2](0, 1)
 	weapon.texturer[3](0, 0)
@@ -278,7 +275,7 @@ function c_weapon_init()
 	weapon.meleeRange = 0
 	weapon.width = 0
 	weapon.trail = 0.25
-	weapon.trailWidth = 0
+	weapon.trailWidth = 0.25
 
 	weapon.texturer[2](0, 1)
 	weapon.texturer[3](0, 0)

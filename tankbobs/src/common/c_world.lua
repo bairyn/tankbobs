@@ -975,6 +975,8 @@ function c_world_powerup_pickUp(tank, powerup)
 
 	powerup.collided = true
 
+	tank.m.lastPickupTime = t
+
 	if powerupType.name == "machinegun" then
 		c_weapon_pickUp(tank, powerupType.name)
 	end
@@ -999,8 +1001,6 @@ function c_world_powerup_pickUp(tank, powerup)
 	if powerupType.name == "health" then
 		tank.health = tank.health + c_const_get("tank_boostHealth")
 	end
-
-	tank.m.lastPickupTime = t
 end
 
 function c_world_powerup_step(d, powerup)
@@ -1012,7 +1012,7 @@ function c_world_powerup_step(d, powerup)
 		return
 	end
 
-	if t > powerup.spawnTime + c_const_get("powerup_lifeTime") then
+	if t > powerup.spawnTime + c_const_get("powerup_lifeTime") and c_const_get("powerup_lifeTime") > 0 then
 		powerup.collided = true
 	end
 

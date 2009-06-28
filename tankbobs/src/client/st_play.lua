@@ -43,6 +43,7 @@ local powerup_listBase
 local wall_listBase
 local healthbar_listBase
 local healthbarBorder_listBase
+local c_world_findClosestIntersection
 
 local st_play_init
 local st_play_done
@@ -76,6 +77,7 @@ function st_play_init()
 	wall_listBase = _G.wall_listBase
 	healthbar_listBase = _G.healthbar_listBase
 	healthbarBorder_listBase = _G.healthbarBorder_listBase
+	c_world_findClosestIntersection = _G.c_world_findClosestIntersection
 
 	endOfGame = false
 
@@ -218,8 +220,14 @@ function st_play_done()
 	-- free the cursor
 	tankbobs.in_grabClear()
 
+	-- free renderer stuff
 	gl.DeleteLists(wall_listBase, c_tcm_current_map.walls_n)
 	gl.DeleteTextures(wall_textures)
+	for k, v in pairs(trails) do
+		if gl.IsList(v[3]) then
+			gl.DeleteLists(v[3], 1)
+		end
+	end
 
 	c_tcm_unload_extra_data(false)
 	c_weapon_clear(false)
@@ -417,7 +425,7 @@ function st_play_step(d)
 
 	-- projectiles
 	for _, v in pairs(c_weapon_getProjectiles()) do
-		if v.trail ~= 0 then  -- only draw the trail
+		if v.weapon.trail == 0 then  -- only draw the trail
 			gl.PushMatrix()
 				gl.Translate(v.p[1].x, v.p[1].y, 0)
 				gl.Rotate(tankbobs.m_degrees(v.r), 0, 0, 1)
@@ -428,70 +436,19 @@ function st_play_step(d)
 
 	-- trails
 	for k, v in pairs(trails) do
-		-- {weapon, time left, maximum intensity, position at which the trail started, the rotation, trail width}
-		v[2] = v[2] - d
-		if v[2] <= 0 then
+		-- {time left, maximum intensity, list}
+		v[1] = v[1] - d
+		if v[1] <= 0 then
+			gl.DeleteLists(v[3], 1)
+
 			table.remove(trails, k)
 
 			return
 		end
 
-		gl.EnableClientState("VERTEX_ARRAY")
-			local a = {}
-			local b
-			local t = {}
-			local vec = tankbobs.m_vec2()
-			local start, endP = tankbobs.m_vec2(v[4]), tankbobs.m_vec2()
-			local offset = tankbobs.m_vec2()
-			local tmp = tankbobs.m_vec2()
-
-			vec.t = v[5]
-			vec.R = c_const_get("aimAid_startDistance")
-			start:add(vec)
-
-			endP(start)
-			vec.R = c_const_get("aimAid_maxDistance")
-			endP:add(vec)
-
-			b, vec = c_world_findClosestIntersection(start, endP)
-			if b then
-				endP = vec
-			end
-
-			offset.t = -1 / (endP - start).t
-			offset.R = v[6]
-
-			tmp = start - offset
-			table.insert(a, {tmp.x, tmp.y})
-			tmp = start + offset
-			table.insert(a, {tmp.x, tmp.y})
-			tmp = endP + offset
-			table.insert(a, {tmp.x, tmp.y})
-			tmp = endP - offset
-			table.insert(a, {tmp.x, tmp.y})
-
-			local length = (endP - start).R
-			tmp(weapon.texturer[1])
-			tmp.R = length * weapon.texturer[1].R / weapon.render[1].R
-			table.insert(t, {tmp.x, tmp.y})
-			tmp(weapon.texturer[2])
-			tmp.R = length * weapon.texturer[2].R / weapon.render[2].R
-			table.insert(t, {tmp.x, tmp.y})
-			tmp(weapon.texturer[3])
-			tmp.R = length * weapon.texturer[3].R / weapon.render[3].R
-			table.insert(t, {tmp.x, tmp.y})
-			tmp(weapon.texturer[4])
-			tmp.R = length * weapon.texturer[4].R / weapon.render[4].R
-			table.insert(t, {tmp.x, tmp.y})
-
-			gl.VertexPointer(a)
-			gl.TexCoordPointer(t)
-			gl.BindTexture("TEXTURE_2D", v[1].m.p.texture[1])
-			gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
-			gl.Color(1, 1, 1, v[2] / v[3])
-			gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, v[2] / v[3])
-			gl.DrawArrays("QUADS", 0, 4)
-		gl.DisableClientState("VERTEX_ARRAY")
+		gl.Color(1, 1, 1, v[1] / v[2])
+		gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, v[2] / v[3])
+		gl.CallList(v[3])
 	end
 
 	-- healthbars
@@ -543,8 +500,70 @@ function st_play_step(d)
 
 				tankbobs.a_playSound(c_const_get("weaponAudio_dir") .. v.weapon.fireSound);
 
-				if v.weapon.trail ~= 0 and v.weapon.trailWidth ~= 0 then
-					table.insert(trails, {v.weapon, v.weapon.trail, v.weapon.trail, v.p, v.r, v.weapon.trailWidth})
+				if v.weapon.trail ~= 0 and v.weapon.trailWidth ~= 0 and v.ammo ~= 0 then
+					-- calculate the beginning and end point before the insert
+					local start, endP = tankbobs.m_vec2(v.p[1]), tankbobs.m_vec2()
+					local vec = tankbobs.m_vec2()
+					local list = gl.GenLists(1)
+					local b
+
+					vec.t = v.r
+					vec.R = c_const_get("trail_startDistance")
+					start:add(vec)
+
+					endP(start)
+					vec.R = c_const_get("trail_maxDistance")
+					endP:add(vec)
+
+					b, vec = c_world_findClosestIntersection(start, endP)
+					if b then
+						endP = vec
+					end
+
+					gl.NewList(list, "COMPILE_AND_EXECUTE")
+						local a = {}
+						local t = {}
+						local offset = tankbobs.m_vec2()
+						local tmp = tankbobs.m_vec2()
+
+						offset.t = -1 / (endP - start).t
+						offset.R = v.r
+
+						gl.BindTexture("TEXTURE_2D", v.weapon.m.p.projectileTexture[1])
+						gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
+						gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_S", "REPEAT")
+						gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_T", "REPEAT")
+
+						gl.Begin("QUADS")
+							local length = (endP - start).R
+
+							tmp(v.weapon.projectileTexturer[1])
+							tmp.R = tmp.R * length / v.weapon.projectileRender[1].R
+							gl.TexCoord(tmp.x, tmp.y)
+							tmp = start + offset
+							gl.Vertex(tmp.x, tmp.y)
+
+							tmp(v.weapon.projectileTexturer[2])
+							tmp.R = tmp.R * length / v.weapon.projectileRender[2].R
+							gl.TexCoord(tmp.x, tmp.y)
+							tmp = start - offset
+							gl.Vertex(tmp.x, tmp.y)
+
+							tmp(v.weapon.projectileTexturer[3])
+							tmp.R = tmp.R * length / v.weapon.projectileRender[3].R
+							gl.TexCoord(tmp.x, tmp.y)
+							tmp = endP - offset
+							gl.Vertex(tmp.x, tmp.y)
+
+							tmp(v.weapon.projectileTexturer[4])
+							tmp.R = tmp.R * length / v.weapon.projectileRender[4].R
+							gl.TexCoord(tmp.x, tmp.y)
+							tmp = endP + offset
+							gl.Vertex(tmp.x, tmp.y)
+						gl.End()
+					gl.EndList()
+
+					table.insert(trails, {v.weapon.trail, v.weapon.trail, list})
 				end
 			end
 		end

@@ -43,6 +43,7 @@ local powerup_listBase
 local wall_listBase
 local healthbar_listBase
 local healthbarBorder_listBase
+local c_world_findClosestIntersection
 local connection
 
 local st_online_init
@@ -78,6 +79,7 @@ function st_online_init()
 	healthbar_listBase = _G.healthbar_listBase
 	healthbarBorder_listBase = _G.healthbarBorder_listBase
 	connection = _G.connection
+	c_world_findClosestIntersection = _G.c_world_findClosestIntersection
 
 	-- initialize renderer stuff
 	-- wall textures are initialized per level

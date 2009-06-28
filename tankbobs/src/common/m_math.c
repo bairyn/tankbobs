@@ -559,6 +559,8 @@ int m_vec2_call(lua_State *L)
 		/* set rectangular coordinates */
 		v->x = luaL_checknumber(L, 2);
 		v->y = lua_tonumber(L, 3);
+
+		MATH_POLAR(*v);
 	}
 	else
 	{

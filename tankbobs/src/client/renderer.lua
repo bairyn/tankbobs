@@ -26,7 +26,7 @@ drawing output and gl
 local gl
 local tankbobs
 
-local tank_textures
+--local tank_textures
 local powerup_textures
 local healthbar_texture 
 local healthbarBorder_texture 
@@ -54,6 +54,12 @@ function renderer_init()
 			tankbobs.r_newFont(k, c_const_get("ttf_dir") .. c_config_get("ttf", v), c_config_get("size", v))
 		end
 	end
+
+	c_const_set("aimAid_startDistance", 2.1, 1)  -- distance at which the aid begins
+	c_const_set("aimAid_maxDistance", 4096, 1)
+	c_const_set("aimAid_width", 0.75, 1)
+	c_const_set("trail_startDistance", 2.1, 1)  -- distance at which the trail begins
+	c_const_set("trail_maxDistance", 4096, 1)
 
 	tankbobs.r_selectFont(c_config_get("config.font"))
 
