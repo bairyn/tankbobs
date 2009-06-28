@@ -1,0 +1,67 @@
+These were used and modified for the sounds of Tankbobs
+
+Samples used from Freesound
+
+    June 28, 2009
+        By DJ Chronos 
+(http://www.freesound.org/usersViewSingle.php?id=103319)
+            Boom.wav 
+(http://www.freesound.org/samplesViewSingle.php?id=33380)
+        By HerbertBoland 
+(http://www.freesound.org/usersViewSingle.php?id=129090)
+            CinematicBoomNorm.wav 
+(http://www.freesound.org/samplesViewSingle.php?id=33637)
+        By Shades 
+(http://www.freesound.org/usersViewSingle.php?id=376980)
+            Gun-Pistol(one shot).wav 
+(http://www.freesound.org/samplesViewSingle.php?id=37236)
+            Gun-Shot Gun(2 pumps).wav 
+(http://www.freesound.org/samplesViewSingle.php?id=37237)
+        By NoiseCollector 
+(http://www.freesound.org/usersViewSingle.php?id=4948)
+            shell.wav 
+(http://www.freesound.org/samplesViewSingle.php?id=41607)
+        By Ghostex 
+(http://www.freesound.org/usersViewSingle.php?id=962736)
+            MX5Auto_2.wav 
+(http://www.freesound.org/samplesViewSingle.php?id=68036)
+        By mastafx 
+(http://www.freesound.org/usersViewSingle.php?id=286533)
+            shot.wav 
+(http://www.freesound.org/samplesViewSingle.php?id=33276)
+        By gezortenplotz 
+(http://www.freesound.org/usersViewSingle.php?id=11536)
+            desert_eagle2.wav 
+(http://www.freesound.org/samplesViewSingle.php?id=19515)
+        By alienbomb 
+(http://www.freesound.org/usersViewSingle.php?id=8842)
+            heavy.burst.wav 
+(http://www.freesound.org/samplesViewSingle.php?id=39071)
+        By UncleSigmund 
+(http://www.freesound.org/usersViewSingle.php?id=95609)
+            shotgun.wav 
+(http://www.freesound.org/samplesViewSingle.php?id=30990)
+   ---------------------------------------
+    June 23, 2009
+        By Erdie 
+(http://www.freesound.org/usersViewSingle.php?id=118241)
+            Pigs-01.flac 
+(http://www.freesound.org/samplesViewSingle.php?id=37870)
+        By hello_flowers 
+(http://www.freesound.org/usersViewSingle.php?id=199517)
+            Sword.wav 
+(http://www.freesound.org/samplesViewSingle.php?id=37596)
+        By HardPCM 
+(http://www.freesound.org/usersViewSingle.php?id=205819)
+            Wood019.wav 
+(http://www.freesound.org/samplesViewSingle.php?id=35978)
+   ---------------------------------------
+    June 22, 2009
+        By LS (http://www.freesound.org/usersViewSingle.php?id=12368)
+            submachinegun2.wav 
+(http://www.freesound.org/samplesViewSingle.php?id=67020)
+        By Matt_G 
+(http://www.freesound.org/usersViewSingle.php?id=240366)
+            m240.wav 
+(http://www.freesound.org/samplesViewSingle.php?id=30749)
+
