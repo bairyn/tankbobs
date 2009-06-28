@@ -38,7 +38,7 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 #define FREQUENCY 96000
 #define FORMAT MIX_DEFAULT_FORMAT
 #define CHANNELS 2
-#define ALLOCATED_CHANNELS 12
+#define MIXCHANNELS 16
 #define CHUNKSIZE 3 * 1024
 #define CACHEDSOUNDS 64
 #define FADE_MS 1000
@@ -97,7 +97,7 @@ int a_init(lua_State *L)
 		return 0;
 	}
 
-	Mix_AllocateChannels(ALLOCATED_CHANNELS);
+	Mix_AllocateChannels(MIXCHANNELS);
 
 	audioInitialized = TRUE;
 

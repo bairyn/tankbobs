@@ -589,7 +589,7 @@ function st_play_step(d)
 		if v.m.lastCollideTime and v.m.lastCollideTimeB ~= v.m.lastCollideTime then
 			v.m.lastCollideTimeB = v.m.lastCollideTime
 
-			tankbobs.a_setVolumeChunk(c_const_get("collide_sound"), v.m.intensity * c_config_get("config.client.volume"))
+			--tankbobs.a_setVolumeChunk(c_const_get("collide_sound"), v.m.intensity * c_config_get("config.client.volume"))  -- this is temporarily commented out while Mix_VolumeChunk affects the volume of other samples
 			tankbobs.a_playSound(c_const_get("collide_sound"))
 		end
 
