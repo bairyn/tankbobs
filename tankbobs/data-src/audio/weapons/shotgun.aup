@@ -1,0 +1,35 @@
+<?xml version="1.0" standalone="no" ?>
+<!DOCTYPE project PUBLIC "-//audacityproject-1.3.0//DTD//EN" "http://audacity.sourceforge.net/xml/audacityproject-1.3.0.dtd" >
+<project xmlns="http://audacity.sourceforge.net/xml/" projname="shotgun_data" version="1.3.0" audacityversion="1.3.7" sel0="0.0000000000" sel1="0.0000000000" vpos="0" h="0.0000000000" zoom="639.5396602333" rate="44100">
+	<tags>
+		<tag name="id3v2" value="1"/>
+		<tag name="YEAR" value="2009"/>
+		<tag name="ALBUM" value="Tankbobs"/>
+	</tags>
+	<wavetrack name="shotgun" channel="0" linked="1" offset="0.00000000" rate="44100" gain="1" pan="0">
+		<waveclip offset="0.00000000">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="39995">
+				<waveblock start="0">
+					<simpleblockfile filename="e0000411.au" len="39995" min="-1" max="0.967346" rms="0.140099"/>
+				</waveblock>
+			</sequence>
+			<envelope numpoints="2">
+				<controlpoint t="0.000000000000" val="1.000000000000"/>
+				<controlpoint t="0.906879641765" val="1.000000000000"/>
+			</envelope>
+		</waveclip>
+	</wavetrack>
+	<wavetrack name="shotgun" channel="1" linked="0" offset="0.00000000" rate="44100" gain="1" pan="0">
+		<waveclip offset="0.00000000">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="39995">
+				<waveblock start="0">
+					<simpleblockfile filename="e0000c93.au" len="39995" min="-0.800865" max="0.871388" rms="0.117539"/>
+				</waveblock>
+			</sequence>
+			<envelope numpoints="2">
+				<controlpoint t="0.000000000000" val="1.000000000000"/>
+				<controlpoint t="0.906879641765" val="1.000000000000"/>
+			</envelope>
+		</waveclip>
+	</wavetrack>
+</project>

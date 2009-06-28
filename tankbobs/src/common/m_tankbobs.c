@@ -167,7 +167,7 @@ int t_testAND(lua_State *L)
 {
 	CHECKINIT(init, L);
 
-	lua_pushinteger(L, (luaL_checkinteger(L, 1)) & (luaL_checkinteger(L, 2)));
+	lua_pushinteger(L, ((unsigned int) luaL_checkinteger(L, 1)) & ((unsigned int) luaL_checkinteger(L, 2)));
 	return 1;
 }
 
@@ -175,7 +175,7 @@ int t_testOR(lua_State *L)
 {
 	CHECKINIT(init, L);
 
-	lua_pushinteger(L, (luaL_checkinteger(L, 1)) | (luaL_checkinteger(L, 2)));
+	lua_pushinteger(L, ((unsigned int) luaL_checkinteger(L, 1)) | ((unsigned int) luaL_checkinteger(L, 2)));
 	return 1;
 }
 

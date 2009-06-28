@@ -512,42 +512,42 @@ function c_tcm_read_map(map)
 		end
 
 		-- powerupSpawnPoint.enabledPowerups.x = true | false will be set when more powerups exist
-		if tankbobs.t_testAND(powerups[1], 0x00000001) then
+		if tankbobs.t_testAND(powerups[1], 0x00000001) ~= 0 then
 			powerupSpawnPoint.enabledPowerups.machinegun = true
 		else
 			powerupSpawnPoint.enabledPowerups.machinegun = false
 		end
-		if tankbobs.t_testAND(powerups[1], 0x00000002) then
+		if tankbobs.t_testAND(powerups[1], 0x00000002) ~= 0 then
 			powerupSpawnPoint.enabledPowerups.shotgun = true
 		else
 			powerupSpawnPoint.enabledPowerups.shotgun = false
 		end
-		if tankbobs.t_testAND(powerups[1], 0x00000004) then
+		if tankbobs.t_testAND(powerups[1], 0x00000004) ~= 0 then
 			powerupSpawnPoint.enabledPowerups.railgun = true
 		else
 			powerupSpawnPoint.enabledPowerups.railgun = false
 		end
-		if tankbobs.t_testAND(powerups[1], 0x00000008) then
+		if tankbobs.t_testAND(powerups[1], 0x00000008) ~= 0 then
 			powerupSpawnPoint.enabledPowerups.coilgun = true
 		else
 			powerupSpawnPoint.enabledPowerups.coilgun = false
 		end
-		if tankbobs.t_testAND(powerups[1], 0x00000010) then
+		if tankbobs.t_testAND(powerups[1], 0x00000010) ~= 0 then
 			powerupSpawnPoint.enabledPowerups.saw = true
 		else
 			powerupSpawnPoint.enabledPowerups.saw = false
 		end
-		if tankbobs.t_testAND(powerups[1], 0x00000020) then
+		if tankbobs.t_testAND(powerups[1], 0x00000020) ~= 0 then
 			powerupSpawnPoint.enabledPowerups.ammo = true
 		else
 			powerupSpawnPoint.enabledPowerups.ammo = false
 		end
-		if tankbobs.t_testAND(powerups[1], 0x00000040) then
+		if tankbobs.t_testAND(powerups[1], 0x00000040) ~= 0 then
 			powerupSpawnPoint.enabledPowerups["aim-aid"] = true
 		else
 			powerupSpawnPoint.enabledPowerups["aim-aid"] = false
 		end
-		if tankbobs.t_testAND(powerups[1], 0x00000040) then
+		if tankbobs.t_testAND(powerups[1], 0x00000080) ~= 0 then
 			powerupSpawnPoint.enabledPowerups.health = true
 		else
 			powerupSpawnPoint.enabledPowerups.health = false

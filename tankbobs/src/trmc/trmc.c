@@ -1055,7 +1055,7 @@ static int compile(const char *filename)
 
 	for(i = 0; i < oc; i++)
 	{
-		int powerups[16] = {0};
+		unsigned int powerups[16] = {0};
 		powerupSpawnPoint_t *powerupSpawnPoint = &powerupSpawnPoints[i];
 
 		if(strstr(powerupSpawnPoint->powerupsToEnable, "machinegun"))

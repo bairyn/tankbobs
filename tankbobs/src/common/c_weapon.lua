@@ -113,7 +113,7 @@ function c_weapon_init()
 
 	weapon.knockback = 384
 	weapon.texture = "machinegun.png"
-	weapon.fireSound = "machinegun.wav"
+	weapon.fireSound = {"machinegun.wav", "machinegun2.wav"}
 	weapon.launchDistance = 3
 	weapon.aimAid = true
 	weapon.capacity = 64
@@ -164,7 +164,7 @@ function c_weapon_init()
 	weapon.repeatRate = 0.5  -- twice a second
 	weapon.knockback = 512  -- (per pellet)
 	weapon.texture = "shotgun.png"
-	weapon.fireSound = "shotgun.wav"
+	weapon.fireSound = "shotgun2.wav"
 	weapon.launchDistance = 6  -- usually 3, but an extra unit to prevent the bullets from colliding before they spread
 	weapon.aimAid = false
 	weapon.capacity = 6
@@ -216,7 +216,7 @@ function c_weapon_init()
 
 	weapon.knockback = 1024
 	weapon.texture = "railgun.png"
-	weapon.fireSound = "railgun.wav"
+	weapon.fireSound = {"railgun.wav", "railgun2.wav"}
 	weapon.launchDistance = 3
 	weapon.aimAid = false
 	weapon.capacity = 3
@@ -268,7 +268,7 @@ function c_weapon_init()
 
 	weapon.knockback = 16384
 	weapon.texture = "coilgun.png"
-	weapon.fireSound = "coilgun.wav"
+	weapon.fireSound = {"coilgun.wav", "coilgun2.wav", "coilgun2.wav"}
 	weapon.launchDistance = 3
 	weapon.aimAid = true
 	weapon.capacity = 3
@@ -493,9 +493,13 @@ function c_weapon_fire(tank)
 
 	local angle = weapon.spread * (weapon.pellets - 1) / 2
 
+	tank.m.empty = true
+
 	if tank.ammo <= 0 and weapon.capacity ~= 0 then
 		return c_weapon_outOfAmmo(tank)
 	end
+
+	tank.m.empty = false
 
 	if weapon.meleeRange ~= 0 then
 		return c_weapon_fireMeleeWeapon(tank)

@@ -9,5 +9,5 @@ wall, 1, 67, 35, 67, 80, 78, 80, 78, 35, 0, 1, 0, 0, 1, 0, 1, 1, global/brownish
 wall, 1, 1, 90, 1, 24, 99, 24, 99, 91, 0, 1, 0, 0, 1, 0, 1, 1, global/abstract.png, 2, , 0, 1, 1
 playerSpawnPoint, 10, 57
 playerSpawnPoint, 86, 56
-powerupSpawnPoint, 34, 57, railgun coilgun
+powerupSpawnPoint, 34, 57, railgun coilgun health
 powerupSpawnPoint, 58, 58, shotgun machinegun ammo aim-aid

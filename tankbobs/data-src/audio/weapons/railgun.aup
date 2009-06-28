@@ -1,0 +1,39 @@
+<?xml version="1.0" standalone="no" ?>
+<!DOCTYPE project PUBLIC "-//audacityproject-1.3.0//DTD//EN" "http://audacity.sourceforge.net/xml/audacityproject-1.3.0.dtd" >
+<project xmlns="http://audacity.sourceforge.net/xml/" projname="railgun_data" version="1.3.0" audacityversion="1.3.7" sel0="0.0000000000" sel1="1.0549583229" vpos="0" h="0.0000000000" zoom="169.9436985708" rate="44100">
+	<tags>
+		<tag name="id3v2" value="1"/>
+		<tag name="YEAR" value="2009"/>
+		<tag name="ALBUM" value="Tankbobs"/>
+	</tags>
+	<wavetrack name="coilgun2" channel="2" linked="0" offset="0.00000000" rate="44100" gain="1" pan="0">
+		<waveclip offset="1.01296286">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="1852">
+				<waveblock start="0">
+					<simpleblockfile filename="e00002d7.au" len="1852" min="-0" max="-0" rms="0"/>
+				</waveblock>
+			</sequence>
+			<envelope numpoints="1">
+				<controlpoint t="0.000000000000" val="1.000000000000"/>
+			</envelope>
+		</waveclip>
+		<waveclip offset="0.98031746">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="1440">
+				<waveblock start="0">
+					<simpleblockfile filename="e000028c.au" len="1440" min="-0" max="0.000037" rms="0"/>
+				</waveblock>
+			</sequence>
+			<envelope numpoints="1">
+				<controlpoint t="0.000000000000" val="1.000000000000"/>
+			</envelope>
+		</waveclip>
+		<waveclip offset="0.00000000">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="43232">
+				<waveblock start="0">
+					<simpleblockfile filename="e00009f2.au" len="43232" min="-0.874691" max="0.773152" rms="0.114451"/>
+				</waveblock>
+			</sequence>
+			<envelope numpoints="0"/>
+		</waveclip>
+	</wavetrack>
+</project>
