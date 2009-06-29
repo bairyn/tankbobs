@@ -76,15 +76,23 @@ function st_optionsAudio_init()
 
 	local pos = 0
 	local buf = c_config_get("config.client.audioChunkSize")
-	if buf == 1024 then
+		if buf == 256 then
 		pos = 1
-	elseif buf == 3072 then
+	elseif buf == 512 then
 		pos = 2
-	elseif buf == 4096 then
+	elseif buf == 1024 then
 		pos = 3
+	elseif buf == 3072 then
+		pos = 4
+	elseif buf == 4096 then
+		pos = 5
+	elseif buf == 8192 then
+		pos = 6
+	elseif buf == 16384 then
+		pos = 7
 	end
 
-	gui_addLabel(tankbobs.m_vec2(50, 39), "Chunk Size", nil, 2 / 3) gui_addCycle(tankbobs.m_vec2(75, 39), "Chunk Size", nil, st_optionsAudio_chunkSize, {"Low", "Medium", "High"}, pos, 2 / 3)
+	gui_addLabel(tankbobs.m_vec2(50, 39), "Chunk Size", nil, 2 / 3) gui_addCycle(tankbobs.m_vec2(75, 39), "Chunk Size", nil, st_optionsAudio_chunkSize, {"Lowest", "Lower", "Low", "Medium", "High", "Higher", "Highest"}, pos, 2 / 3)
 	gui_addLabel(tankbobs.m_vec2(50, 36), "(Restart to take effect to chunk size)", nil, 1 / 3)
 end
 
@@ -103,12 +111,20 @@ function st_optionsAudio_musicVolume(widget, pos)
 end
 
 function st_optionsAudio_chunkSize(widget, string, index)
-	if string == "High" then
+		if string == "Highest" then
+		c_config_set("config.client.audioChunkSize", 16384)
+	elseif string == "High.r" then
+		c_config_set("config.client.audioChunkSize", 8192)
+	elseif string == "High" then
 		c_config_set("config.client.audioChunkSize", 4096)
 	elseif string == "Medium" then
-		c_config_set("config.client.audioChunkSize", 3072)
+		c_config_set("config.client.audioChunkSize", 3072)  -- magic number (*3, not *2) seems to eliminate fuzz
 	elseif string == "Low" then
 		c_config_set("config.client.audioChunkSize", 1024)
+	elseif string == "Lower" then
+		c_config_set("config.client.audioChunkSize", 512)
+	elseif string == "Lowest" then
+		c_config_set("config.client.audioChunkSize", 256)
 	end
 end
 
