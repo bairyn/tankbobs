@@ -485,7 +485,7 @@ int a_setVolumeChunk(lua_State *L)
 				i->lastUsedTime = SDL_GetTicks();
 				i->active = TRUE;
 
-				Mix_VolumeChunk(sounds[0].chunk, volume);
+				Mix_VolumeChunk(i->chunk, volume);
 
 				return 0;
 			}

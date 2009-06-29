@@ -387,31 +387,34 @@ function st_play_step(d)
 	for _, v in pairs(c_world_getTanks()) do
 		if v.exists then
 			if (v.weapon and v.weapon.aimAid) or (v.cd.aimAid) then
-				local a = {}
-				local b
-				local vec = tankbobs.m_vec2()
-				local start, endP = tankbobs.m_vec2(v.p[1]), tankbobs.m_vec2()
-
-				vec.t = v.r
-				vec.R = c_const_get("aimAid_startDistance")
-				start:add(vec)
-
-				endP(start)
-				vec.R = c_const_get("aimAid_maxDistance")
-				endP:add(vec)
-
-				b, vec = c_world_findClosestIntersection(start, endP)
-				if b then
-					endP = vec
-				end
-
-				table.insert(a, {start.x, start.y})
-				table.insert(a, {endP.x, endP.y})
-				gl.Color(0.9, 0.1, 0.1, 1)
-				gl.TexEnv("TEXTURE_ENV_COLOR", 0.9, 0.1, 0.1, 1)
-				gl.VertexPointer(a)
-				gl.LineWidth(c_const_get("aimAid_width"))
-				gl.DrawArrays("LINES", 0, 2)
+				gl.PushAttrib("ENABLE_BIT")
+					local a = {}
+					local b
+					local vec = tankbobs.m_vec2()
+					local start, endP = tankbobs.m_vec2(v.p[1]), tankbobs.m_vec2()
+	
+					vec.t = v.r
+					vec.R = c_const_get("aimAid_startDistance")
+					start:add(vec)
+	
+					endP(start)
+					vec.R = c_const_get("aimAid_maxDistance")
+					endP:add(vec)
+	
+					b, vec = c_world_findClosestIntersection(start, endP)
+					if b then
+						endP = vec
+					end
+	
+					table.insert(a, {start.x, start.y})
+					table.insert(a, {endP.x, endP.y})
+					gl.Disable("TEXTURE_2D")
+					gl.Color(0.9, 0.1, 0.1, 1)
+					gl.TexEnv("TEXTURE_ENV_COLOR", 0.9, 0.1, 0.1, 1)
+					gl.VertexPointer(a)
+					gl.LineWidth(c_const_get("aimAid_width"))
+					gl.DrawArrays("LINES", 0, 2)
+				gl.PopAttrib()
 			end
 		end
 	end
@@ -589,7 +592,7 @@ function st_play_step(d)
 		if v.m.lastCollideTime and v.m.lastCollideTimeB ~= v.m.lastCollideTime then
 			v.m.lastCollideTimeB = v.m.lastCollideTime
 
-			--tankbobs.a_setVolumeChunk(c_const_get("collide_sound"), v.m.intensity * c_config_get("config.client.volume"))  -- this is temporarily commented out while Mix_VolumeChunk affects the volume of other samples
+			tankbobs.a_setVolumeChunk(c_const_get("collide_sound"), v.m.intensity * c_config_get("config.client.volume"))  -- this is temporarily commented out while Mix_VolumeChunk affects the volume of other samples
 			tankbobs.a_playSound(c_const_get("collide_sound"))
 		end
 

@@ -99,7 +99,7 @@ function c_world_init()
 	c_const_set("tank_health", 100, 1)
 	c_const_set("tank_damageK", 4, 1)  -- damage relative to speed before a collision: 2 hp / 1 ups
 	c_const_set("tank_damageMinSpeed", 6, 1)
-	c_const_set("tank_intensityMaxSpeed", 24, 1)
+	c_const_set("tank_intensityMaxSpeed", 6, 1)
 	c_const_set("tank_collideMinDamage", 5, 1)
 	c_const_set("tank_deceleration", 32 / 1000, 1)
 	c_const_set("tank_decelerationMinSpeed", -1, 1)
@@ -144,7 +144,6 @@ function c_world_init()
 	c_const_set("tank_rotationSpecialSpeed", c_math_degrees(1) / 3.5, 1)
 	c_const_set("tank_defaultRotation", c_math_radians(90), 1)  -- up
 	c_const_set("tank_boostHealth", 60, 1)
-	c_const_set("tank_healthDegeneration", 1, 1)
 
 	c_const_set("powerup_hullx1",  0, 1) c_const_set("powerup_hully1",  1, 1)
 	c_const_set("powerup_hullx2",  0, 1) c_const_set("powerup_hully2",  0, 1)
@@ -734,10 +733,6 @@ function c_world_tank_step(d, tank)
 
 	if tank.health <= 0 then
 		return c_world_tankDie(d, tank, t)
-	end
-
-	if tank.health > c_const_get("tank_health") then
-		tank.health = tank.health - d * c_const_get("tank_healthDegeneration")
 	end
 
 	tank.p[1] = tankbobs.w_getPosition(tank.body)
