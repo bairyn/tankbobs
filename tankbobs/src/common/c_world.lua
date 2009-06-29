@@ -1199,7 +1199,9 @@ local function c_world_private_offsetWorldTimers(d)
 		v.spawnTime = v.spawnTime + d
 	end
 
-	lastPowerupSpawnTime = lastPowerupSpawnTime + d
+	if lastPowerupSpawnTime then
+		lastPowerupSpawnTime = lastPowerupSpawnTime + d
+	end
 end
 
 function c_world_timeWrapped()
@@ -1238,7 +1240,6 @@ function c_world_step(d)
 
 	if worldInitialized then
 		if paused then
-			c_world_private_resetWorldTimers()
 			c_world_private_offsetWorldTimers(d)
 		else
 			while worldTime < t do
