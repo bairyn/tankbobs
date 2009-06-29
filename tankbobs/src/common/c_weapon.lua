@@ -161,7 +161,7 @@ function c_weapon_init()
 	weapon.pellets = 5
 	weapon.speed = 1024
 	weapon.spread = tankbobs.m_radians(12)  -- the angle between each pellet
-	weapon.repeatRate = 0.5  -- twice a second
+	weapon.repeatRate = 1
 	weapon.knockback = 512  -- (per pellet)
 	weapon.texture = "shotgun.png"
 	weapon.fireSound = "shotgun2.wav"
