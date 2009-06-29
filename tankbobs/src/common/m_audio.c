@@ -38,7 +38,7 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 #define FREQUENCY 96000
 #define FORMAT MIX_DEFAULT_FORMAT
 #define CHANNELS 2
-#define MIXCHANNELS 16
+#define MIXCHANNELS 12
 #define CHUNKSIZE 3 * 1024
 #define CACHEDSOUNDS 64
 #define FADE_MS 1000
@@ -502,7 +502,7 @@ int a_setVolumeChunk(lua_State *L)
 				i->lastUsedTime = SDL_GetTicks();
 				i->active = TRUE;
 
-				Mix_VolumeChunk(sounds[0].chunk, volume);
+				Mix_VolumeChunk(i->chunk, volume);
 
 				return 0;
 			}
@@ -529,7 +529,7 @@ int a_setVolumeChunk(lua_State *L)
 			oldestSound->lastUsedTime = SDL_GetTicks();
 			oldestSound->active = TRUE;
 
-			Mix_VolumeChunk(sounds[0].chunk, volume);
+			Mix_VolumeChunk(oldestSound->chunk, volume);
 		}
 		else
 		{

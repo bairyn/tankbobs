@@ -111,6 +111,7 @@ local st_optionsVideo_fullscreen
 local st_optionsVideo_width
 local st_optionsVideo_height
 local st_optionsVideo_apply
+local st_optionsVideo_fpsCounter
 
 function st_optionsVideo_init()
 	st_optionsVideo_renderer = {fullscreen = c_config_get("config.renderer.fullscreen"), width = c_config_get("config.renderer.width"), height = c_config_get("config.renderer.height")}
@@ -121,6 +122,8 @@ function st_optionsVideo_init()
 	gui_addLabel(tankbobs.m_vec2(50, 69), "Width", nil, 2 / 3) gui_addInput(tankbobs.m_vec2(75, 69), tostring(c_config_get("config.renderer.width")), nil, st_optionsVideo_width, true, 5)
 	gui_addLabel(tankbobs.m_vec2(50, 63), "Height", nil, 2 / 3) gui_addInput(tankbobs.m_vec2(75, 63), tostring(c_config_get("config.renderer.height")), nil, st_optionsVideo_height, true, 5)
 	gui_addAction(tankbobs.m_vec2(75, 57), "Apply", nil, st_optionsVideo_apply)
+
+	gui_addLabel(tankbobs.m_vec2(50, 51), "FPS Counter", nil, 2 / 3) gui_addCycle(tankbobs.m_vec2(75, 51), "FPS Counter", nil, st_optionsVideo_fpsCounter, {"No", "Yes"}, c_config_get("config.game.fpsCounter") and 2 or 1)
 end
 
 function st_optionsVideo_done()
@@ -152,6 +155,14 @@ function st_optionsVideo_apply(widget)
 		c_config_set("config.renderer.height", st_optionsVideo_renderer.height)
 		renderer_updateWindow()  -- in case SDL forgets to send a resize signal
 		tankbobs.r_newWindow(c_config_get("config.renderer.width"), c_config_get("config.renderer.height"), c_config_get("config.renderer.fullscreen"), c_const_get("title"), c_const_get("icon"))
+	end
+end
+
+function st_optionsVideo_fpsCounter(widget, string, index)
+	if string == "Yes" then
+		c_config_set("config.game.fpsCounter", true)
+	elseif string == "No" then
+		c_config_set("config.game.fpsCounter", false)
 	end
 end
 

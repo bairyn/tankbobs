@@ -165,7 +165,7 @@ function c_weapon_init()
 	weapon.knockback = 512  -- (per pellet)
 	weapon.texture = "shotgun.png"
 	weapon.fireSound = "shotgun2.wav"
-	weapon.launchDistance = 6  -- usually 3, but an extra unit to prevent the bullets from colliding before they spread
+	weapon.launchDistance = 6  -- normally 3, but an extra unit to prevent the bullets from colliding before they spread
 	weapon.aimAid = false
 	weapon.capacity = 6
 	weapon.meleeRange = 0
