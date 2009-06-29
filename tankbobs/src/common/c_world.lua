@@ -1175,8 +1175,31 @@ local function c_world_private_resetWorldTimers()
 		v.m.nextPowerupTime = t + c_const_get("world_time") * c_config_get("config.game.timescale") * c_const_get("powerupSpawnPoint_initialPowerupTime")
 	end
 
+	for _, v in pairs(c_world_powerups) do
+		v.spawnTime = t
+	end
+
 	lastPowerupSpawnTime = nil
 	nextPowerupSpawnPoint = nil
+end
+
+local function c_world_private_offsetWorldTimers(d)
+	worldTime = tankbobs.t_getTicks()
+
+	for _, v in pairs(c_world_tanks) do
+		v.lastFireTime = v.lastFireTime + d
+		v.nextSpawnTime = v.nextSpawnTime + d
+	end
+
+	for _, v in pairs(c_tcm_current_map.powerupSpawnPoints) do
+		v.m.nextPowerupTime = v.m.nextPowerupTime + d
+	end
+
+	for _, v in pairs(c_world_powerups) do
+		v.spawnTime = v.spawnTime + d
+	end
+
+	lastPowerupSpawnTime = lastPowerupSpawnTime + d
 end
 
 function c_world_timeWrapped()
@@ -1216,6 +1239,7 @@ function c_world_step(d)
 	if worldInitialized then
 		if paused then
 			c_world_private_resetWorldTimers()
+			c_world_private_offsetWorldTimers(d)
 		else
 			while worldTime < t do
 				for _, v in pairs(c_world_tanks) do
