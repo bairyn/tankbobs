@@ -64,6 +64,7 @@ local st_optionsAudio_done
 
 local st_optionsAudio_volume
 local st_optionsAudio_musicVolume
+local st_optionsAudio_chunkSize
 
 function st_optionsAudio_init()
 	gui_addAction(tankbobs.m_vec2(25, 85), "Back", nil, c_state_advance)
@@ -72,6 +73,19 @@ function st_optionsAudio_init()
 
 	gui_addLabel(tankbobs.m_vec2(50, 57), "Volume", nil, 2 / 3) gui_addScale(tankbobs.m_vec2(75, 57), "Volume", nil, st_optionsAudio_volume, c_config_get("config.client.volume"))
 	gui_addLabel(tankbobs.m_vec2(50, 51), "Music", nil, 2 / 3) gui_addScale(tankbobs.m_vec2(75, 51), "Music", nil, st_optionsAudio_musicVolume, c_config_get("config.client.musicVolume"))
+
+	local pos = 0
+	local buf = c_config_get("config.client.audioChunkSize")
+	if buf == 1024 then
+		pos = 1
+	elseif buf == 3072 then
+		pos = 2
+	elseif buf == 4096 then
+		pos = 3
+	end
+
+	gui_addLabel(tankbobs.m_vec2(50, 39), "Chunk Size", nil, 2 / 3) gui_addCycle(tankbobs.m_vec2(75, 39), "Chunk Size", nil, st_optionsAudio_chunkSize, {"Low", "Medium", "High"}, pos, 2 / 3)
+	gui_addLabel(tankbobs.m_vec2(50, 36), "(Restart to take effect to chunk size)", nil, 1 / 3)
 end
 
 function st_optionsAudio_done()
@@ -86,6 +100,16 @@ end
 function st_optionsAudio_musicVolume(widget, pos)
 	c_config_set("config.client.musicVolume", pos)
 	tankbobs.a_setMusicVolume(pos)
+end
+
+function st_optionsAudio_chunkSize(widget, string, index)
+	if string == "High" then
+		c_config_set("config.client.audioChunkSize", 4096)
+	elseif string == "Medium" then
+		c_config_set("config.client.audioChunkSize", 3072)
+	elseif string == "Low" then
+		c_config_set("config.client.audioChunkSize", 1024)
+	end
 end
 
 optionsAudio_state =

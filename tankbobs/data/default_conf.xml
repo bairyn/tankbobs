@@ -4,6 +4,7 @@
 		<volume>0.8</volume>
 		<musicVolume>0.6</musicVolume>
 		<serverIP>127.0.0.1</serverIP>
+		<audioChunkSize>3072</audioChunkSize>
 	</client>
 
 	<font>sans</font>

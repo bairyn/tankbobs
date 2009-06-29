@@ -38,7 +38,7 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 #define FREQUENCY 96000
 #define FORMAT MIX_DEFAULT_FORMAT
 #define CHANNELS 2
-#define MIXCHANNELS 12
+#define MIXCHANNELS 16
 #define CHUNKSIZE 3 * 1024
 #define CACHEDSOUNDS 64
 #define FADE_MS 1000
@@ -63,14 +63,21 @@ void a_initNL(lua_State *L)
 
 int a_init(lua_State *L)
 {
+	int chunksize = CHUNKSIZE;
+
 	CHECKINIT(init, L);
 
 	if(audioInitialized)
 		return 0;
 
+	if(lua_isnumber(L, 1))
+	{
+		chunksize = luaL_checkinteger(L, 1);
+	}
+
 	memset(&sounds, 0, sizeof(sounds));
 
-	if(Mix_OpenAudio(FREQUENCY, FORMAT, CHANNELS, CHUNKSIZE) < 0)
+	if(Mix_OpenAudio(FREQUENCY, FORMAT, CHANNELS, chunksize) < 0)
 	{
 		/*
 		tstr *message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))

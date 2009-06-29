@@ -53,7 +53,7 @@ function main_init()
 
 	args = nil  -- protect against bad code
 
-	tankbobs.a_init()
+	tankbobs.a_init(c_config_get("config.client.audioChunkSize", nil, true))
 	tankbobs.a_setVolume(c_config_get("config.client.volume"))
 	tankbobs.a_setMusicVolume(c_config_get("config.client.musicVolume"))
 

@@ -21,7 +21,6 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 #include <iostream>
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
-#include <SDL/SDL_mixer.h>
 #include <SDL/SDL_endian.h>
 #include <cmath>
 
