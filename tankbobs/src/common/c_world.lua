@@ -964,6 +964,10 @@ function c_world_powerupRemove(powerup)
 end
 
 function c_world_powerup_pickUp(tank, powerup)
+	if not powerup then
+		return
+	end
+
 	local t = tankbobs.t_getTicks()
 	local powerupType = c_world_getPowerupTypeByName(powerup.typeName)
 
