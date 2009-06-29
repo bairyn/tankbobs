@@ -147,7 +147,7 @@ function st_optionsVideo_init()
 	gui_addLabel(tankbobs.m_vec2(50, 63), "Height", nil, 2 / 3) gui_addInput(tankbobs.m_vec2(75, 63), tostring(c_config_get("config.renderer.height")), nil, st_optionsVideo_height, true, 5)
 	gui_addAction(tankbobs.m_vec2(75, 57), "Apply", nil, st_optionsVideo_apply)
 
-	gui_addLabel(tankbobs.m_vec2(50, 51), "FPS Counter", nil, 2 / 3) gui_addCycle(tankbobs.m_vec2(75, 51), "FPS Counter", nil, st_optionsVideo_fpsCounter, {"No", "Yes"}, c_config_get("config.game.fpsCounter") and 2 or 1)
+	gui_addLabel(tankbobs.m_vec2(50, 45), "FPS Counter", nil, 2 / 4) gui_addCycle(tankbobs.m_vec2(75, 45), "FPS Counter", nil, st_optionsVideo_fpsCounter, {"No", "Yes"}, c_config_get("config.game.fpsCounter") and 2 or 1)  -- Label needs to be a bit smaller
 end
 
 function st_optionsVideo_done()

@@ -45,6 +45,9 @@ local c_world_powerups
 
 local worldTime = 0
 local tank_acceleration
+local lastPowerupSpawnTime
+local nextPowerupSpawnPoint
+local worldInitialized = false
 
 function c_world_init()
 	c_config_set            = _G.c_config_set
@@ -234,8 +237,6 @@ end
 function c_world_done()
 end
 
-local worldInitialized = false
-
 c_world_powerupType =
 {
 	new = common_new,
@@ -340,6 +341,10 @@ function c_world_newWorld()
 	wordTime = t
 
 	tankbobs.w_newWorld(tankbobs.m_vec2(c_const_get("world_lowerBoundx"), c_const_get("world_lowerBoundy")), tankbobs.m_vec2(c_const_get("world_upperBoundx"), c_const_get("world_upperBoundy")), tankbobs.m_vec2(c_const_get("world_gravityx"), c_const_get("world_gravityy")), c_const_get("world_allowSleep"), "c_world_contactListener")
+
+	-- reset powerups
+	lastPowerupSpawnTime = nil
+	nextPowerupSpawnPoint = nil
 
 	for _, v in pairs(c_tcm_current_map.walls) do
 		if v.detail then
@@ -847,8 +852,6 @@ function c_world_projectile_step(d, projectile)
 	projectile.r = tankbobs.w_getAngle(projectile.m.body)
 end
 
-local lastPowerupSpawnTime
-local nextPowerupSpawnPoint
 function c_world_powerupSpawnPoint_step(d, powerupSpawnPoint)
 	local t = tankbobs.t_getTicks()
 	local spawn = false
@@ -1167,6 +1170,9 @@ local function c_world_private_resetWorldTimers()
 	for _, v in pairs(c_tcm_current_map.powerupSpawnPoints) do
 		v.m.nextPowerupTime = t + c_const_get("world_time") * c_config_get("config.game.timescale") * c_const_get("powerupSpawnPoint_initialPowerupTime")
 	end
+
+	lastPowerupSpawnTime = nil
+	nextPowerupSpawnPoint = nil
 end
 
 function c_world_timeWrapped()
