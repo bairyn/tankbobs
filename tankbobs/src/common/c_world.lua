@@ -847,8 +847,22 @@ function c_world_wall_step(d, wall)
 	if wall.static then
 		-- could be on a path
 	else
+		if wall.detail or not wall.m.body then
+			return
+		end
+
 		-- dynamic wall
-		--wall.p[1] = ?
+		local average = tankbobs.m_vec2(0, 0)
+		for _, v in pairs(wall.p) do
+			average:add(v)
+		end
+		average.R = average.R / #wall.p
+
+		local offset = tankbobs.w_getPosition(wall.m.body) - average
+
+		for _, v in pairs(wall.p) do
+			v:add(offset)
+		end
 	end
 end
 

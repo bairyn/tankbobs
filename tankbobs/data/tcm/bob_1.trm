@@ -8,6 +8,6 @@ wall, 1, 0, 100, 0, 97, 3, 97, 3, 100, 0, 1, 0, 0, 1, 0, 1, 1, global/brownish2.
 wall, 1, 0, 3, 0, 0, 3, 0, 3, 3, 0, 1, 0, 0, 1, 0, 1, 1, global/brownish2.png, 6, , 1, 0, 1
 wall, 1, 97, 3, 97, 0, 100, 0, 100, 3, 0, 1, 0, 0, 1, 0, 1, 1, global/brownish2.png, 6, , 1, 0, 1
 wall, 1, 97, 100, 97, 97, 100, 97, 100, 100, 0, 1, 0, 0, 1, 0, 1, 1, global/brownish2.png, 6, , 1, 0, 1
-wall, 1, 0, 100, 0, 0, 100, 0, 100, 99, 0, 1.5, 0, 0, 1.5, 0, 1.5, 1.5, global/abstract.png, 2, , 0, 1, 1
+wall, 1, 0, 100, 0, 0, 100, 0, 100, 100, 0, 1.5, 0, 0, 1.5, 0, 1.5, 1.5, global/abstract.png, 2, , 0, 1, 1
 playerSpawnPoint, 25, 50
 playerSpawnPoint, 75, 50
