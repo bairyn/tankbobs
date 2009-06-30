@@ -175,7 +175,12 @@ c_tcm_map =
 	playerSpawnPoints = {},
 	powerupSpawnPoints = {},
 	paths = {},
-	message = ""  -- the level message
+	message = "",  -- the level message
+
+	uppermost = 0,
+	lowermost = 0,
+	rightmost = 0,
+	leftmost = 0
 }
 
 c_tcm_wall =
@@ -406,6 +411,10 @@ function c_tcm_read_map(map)
 	r.powerupSpawnPoints_n = c_tcm_private_get(tankbobs.io_getInt, i)
 	r.paths_n = c_tcm_private_get(tankbobs.io_getInt, i)
 
+	local uppermost = 100
+	local lowermost = 0
+	local rightmost = 100
+	local leftmost  = 0
 	for it = 1, r.walls_n do
 		local wall = c_tcm_wall:new()
 		local q = false
@@ -426,11 +435,39 @@ function c_tcm_read_map(map)
 		if q then
 			wall.p[4].x = c_tcm_private_get(tankbobs.io_getDouble, i)
 			wall.p[4].y = c_tcm_private_get(tankbobs.io_getDouble, i)
+
+			for i = 1, 4 do
+				if wall.p[i].x < leftmost then
+					leftmost = wall.p[i].x
+				elseif wall.p[i].x > rightmost then
+					rightmost = wall.p[i].x
+				end
+
+				if wall.p[i].y < lowermost then
+					lowermost = wall.p[i].y
+				elseif wall.p[i].y > uppermost then
+					uppermost = wall.p[i].y
+				end
+			end
 		else
 			i:seek("cur", 16)
 			--for its = 1, 2 do
 				--c_tcm_private_get(tankbobs.io_getDouble, i)
 			--end
+
+			for i = 1, 3 do
+				if wall.p[i].x < leftmost then
+					leftmost = wall.p[i].x
+				elseif wall.p[i].x > rightmost then
+					rightmost = wall.p[i].x
+				end
+
+				if wall.p[i].y < lowermost then
+					lowermost = wall.p[i].y
+				elseif wall.p[i].y > uppermost then
+					uppermost = wall.p[i].y
+				end
+			end
 		end
 		wall.t[1].x = c_tcm_private_get(tankbobs.io_getDouble, i)
 		wall.t[1].y = c_tcm_private_get(tankbobs.io_getDouble, i)
@@ -472,6 +509,10 @@ function c_tcm_read_map(map)
 
 		table.insert(r.walls, wall)
 	end
+	r.uppermost = uppermost
+	r.lowermost = lowermost
+	r.rightmost = rightmost
+	r.leftmost  = leftmost
 
 	for it = 1, r.teleporters_n do
 		local teleporter = c_tcm_teleporter:new()
@@ -511,7 +552,6 @@ function c_tcm_read_map(map)
 			table.insert(powerups, c_tcm_private_get(tankbobs.io_getInt, i))
 		end
 
-		-- powerupSpawnPoint.enabledPowerups.x = true | false will be set when more powerups exist
 		if tankbobs.t_testAND(powerups[1], 0x00000001) ~= 0 then
 			powerupSpawnPoint.enabledPowerups.machinegun = true
 		else

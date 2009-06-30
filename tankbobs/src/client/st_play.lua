@@ -44,6 +44,7 @@ local wall_listBase
 local healthbar_listBase
 local healthbarBorder_listBase
 local c_world_findClosestIntersection
+local common_lerp
 
 local st_play_init
 local st_play_done
@@ -54,6 +55,7 @@ local st_play_step
 
 local endOfGame
 local trails = {}
+local camera
 
 function st_play_init()
 	-- localize frequently used globals
@@ -78,8 +80,10 @@ function st_play_init()
 	healthbar_listBase = _G.healthbar_listBase
 	healthbarBorder_listBase = _G.healthbarBorder_listBase
 	c_world_findClosestIntersection = _G.c_world_findClosestIntersection
+	common_lerp = _G.common_lerp
 
 	endOfGame = false
+	camera = tankbobs.m_vec2()
 
 	-- initialize renderer stuff
 	-- wall textures are initialized per level
@@ -346,6 +350,64 @@ function st_play_step(d)
 
 	c_world_step(d)
 
+	-- adjust the camera
+	local uppermost
+	local lowermost
+	local rightmost
+	local leftmost
+	-- Position the camera so that all tanks and powerups are shown, while zooming in as much as possible
+	for _, v in pairs(c_world_getTanks()) do
+		if not leftmost or v.p[1].x < leftmost then
+			leftmost = v.p[1].x
+		end
+		if not rightmost or v.p[1].x > rightmost then
+			rightmost = v.p[1].x
+		end
+
+		if not lowermost or v.p[1].y < lowermost then
+			lowermost = v.p[1].y
+		end
+		if not uppermost or v.p[1].y > uppermost then
+			uppermost = v.p[1].y
+		end
+	end
+	for _, v in pairs(c_world_getPowerups()) do
+		if not leftmost or v.p[1].x < leftmost then
+			leftmost = v.p[1].x
+		end
+		if not rightmost or v.p[1].x > rightmost then
+			rightmost = v.p[1].x
+		end
+
+		if not lowermost or v.p[1].y < lowermost then
+			lowermost = v.p[1].y
+		end
+		if not uppermost or v.p[1].y > uppermost then
+			uppermost = v.p[1].y
+		end
+	end
+	if not uppermost or not lowermost or not rightmost or not leftmost then
+		return
+	end
+	local m = c_tcm_current_map
+	uppermost = math.min(m.uppermost - 95, uppermost)
+	lowermost = math.max(m.lowermost + 95, lowermost)
+	rightmost = math.min(m.rightmost - 95, rightmost)
+	leftmost  = math.max(m.leftmost  + 95, leftmost)
+
+	gl.Translate(50, 50, 0)
+
+	local distance = math.abs(rightmost - leftmost) > math.abs(uppermost - lowermost) and math.abs(rightmost - leftmost) or math.abs(uppermost - lowermost)
+	local scale = 100 / (distance + 5)
+	if scale > 1 then
+		scale = 1
+	end
+	gl.Scale(scale, scale, 1)
+
+	camera = common_lerp(camera, tankbobs.m_vec2(-(rightmost + leftmost) / 2, -(uppermost + lowermost) / 2), c_config_get("config.client.cameraSpeed") / (d * c_const_get("world_time") * c_config_get("config.game.timescale")))
+	gl.Translate(camera.x, camera.y, 0)
+
+	-- draw tanks and walls
 	for i = 1, c_const_get("tcm_maxLevel") do
 		for k, v in pairs(c_tcm_current_map.walls) do
 			if i == c_const_get("tcm_tankLevel") then

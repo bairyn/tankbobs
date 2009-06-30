@@ -1,10 +1,11 @@
 <config>
 	<client>
+		<audioChunkSize>3072</audioChunkSize>
+		<cameraSpeed>0.8</cameraSpeed>
 		<fps>128</fps>
-		<volume>0.8</volume>
 		<musicVolume>0.6</musicVolume>
 		<serverIP>127.0.0.1</serverIP>
-		<audioChunkSize>3072</audioChunkSize>
+		<volume>0.8</volume>
 	</client>
 
 	<font>sans</font>
