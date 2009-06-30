@@ -37,6 +37,7 @@ local tankbobs                = tankbobs
 
 local c_world_tank_checkSpawn
 local c_world_tank_step
+local c_world_wall_step
 local c_world_projectile_step
 local c_world_powerupSpawnPoint_step
 local c_world_powerup_step
@@ -840,6 +841,17 @@ function c_world_tank_step(d, tank)
 	end
 end
 
+function c_world_wall_step(d, wall)
+	local t = tankbobs.t_getTicks()
+
+	if wall.static then
+		-- could be on a path
+	else
+		-- dynamic wall
+		--wall.p[1] = ?
+	end
+end
+
 function c_world_projectile_step(d, projectile)
 	-- TODO: projectiles can go through teleporters
 	if projectile.collided then
@@ -1237,6 +1249,7 @@ end
 
 function c_world_step(d)
 	local t = tankbobs.t_getTicks()
+	local f = 1 / (c_const_get("world_time") * c_config_get("config.game.timescale"))
 
 	if worldInitialized then
 		if paused then
@@ -1244,19 +1257,23 @@ function c_world_step(d)
 		else
 			while worldTime < t do
 				for _, v in pairs(c_world_tanks) do
-					c_world_tank_step(common_FTM(c_const_get("world_fps")), v)
+					c_world_tank_step(common_FTM(c_const_get("world_fps")) * f, v)
+				end
+
+				for _, v in pairs(c_tcm_current_map.walls) do
+					c_world_wall_step(common_FTM(c_const_get("world_fps")) * f, v)
 				end
 
 				for _, v in pairs(c_weapon_getProjectiles()) do
-					c_world_projectile_step(common_FTM(c_const_get("world_fps")), v)
+					c_world_projectile_step(common_FTM(c_const_get("world_fps")) * f, v)
 				end
 
 				for _, v in pairs(c_tcm_current_map.powerupSpawnPoints) do
-					c_world_powerupSpawnPoint_step(common_FTM(c_const_get("world_fps")), v)
+					c_world_powerupSpawnPoint_step(common_FTM(c_const_get("world_fps")) * f, v)
 				end
 
 				for _, v in pairs(c_world_powerups) do
-					c_world_powerup_step(common_FTM(c_const_get("world_fps")), v)
+					c_world_powerup_step(common_FTM(c_const_get("world_fps")) * f, v)
 				end
 
 				tankbobs.w_step()

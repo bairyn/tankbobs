@@ -40,7 +40,6 @@ local c_config_set = c_config_set
 local c_weapon_getWeapons = c_weapon_getWeapons
 local tank_listBase
 local powerup_listBase
-local wall_listBase
 local healthbar_listBase
 local healthbarBorder_listBase
 local c_world_findClosestIntersection
@@ -76,28 +75,21 @@ function st_play_init()
 	c_weapon_getWeapons = _G.c_weapon_getWeapons
 	tank_listBase = _G.tank_listBase
 	powerup_listBase = _G.powerup_listBase
-	wall_listBase = _G.wall_listBase
 	healthbar_listBase = _G.healthbar_listBase
 	healthbarBorder_listBase = _G.healthbarBorder_listBase
 	c_world_findClosestIntersection = _G.c_world_findClosestIntersection
 	common_lerp = _G.common_lerp
 
 	endOfGame = false
-	camera = tankbobs.m_vec2()
+	camera = tankbobs.m_vec2(-50, -50)
 
 	-- initialize renderer stuff
 	-- wall textures are initialized per level
 	local listOffset = 0
 
-	wall_listBase = gl.GenLists(c_tcm_current_map.walls_n)
 	wall_textures = gl.GenTextures(c_tcm_current_map.walls_n)
 
-	if wall_listBase == 0 then
-		error "st_play_init: could not generate lists"
-	end
-
 	for k, v in pairs(c_tcm_current_map.walls) do
-		v.m.list = wall_listBase + listOffset
 		v.m.texture = wall_textures[k]
 
 		gl.BindTexture("TEXTURE_2D", v.m.texture)
@@ -106,23 +98,6 @@ function st_play_init()
 		gl.TexParameter("TEXTURE_2D", "TEXTURE_MIN_FILTER", "LINEAR")
 		gl.TexParameter("TEXTURE_2D", "TEXTURE_MAG_FILTER", "LINEAR")
 		tankbobs.r_loadImage2D(c_const_get("textures_dir") .. v.texture, c_const_get("textures_default"))
-
-		-- TODO: use vertex buffers to render dynamic walls.  Dynamic walls will always be drawn as if they were in the same position
-		gl.NewList(v.m.list, "COMPILE_AND_EXECUTE")
-			gl.Color(1, 1, 1, 1)
-			gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, 1)
-			gl.BindTexture("TEXTURE_2D", v.m.texture)
-			gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
-
-			gl.Begin("POLYGON")
-				for i = 1, #v.p do
-					gl.TexCoord(v.t[i].x, v.t[i].y)
-					gl.Vertex(v.p[i].x, v.p[i].y)
-				end
-			gl.End()
-		gl.EndList()
-
-		listOffset = listOffset + 1
 	end
 
 	-- scores
@@ -225,7 +200,6 @@ function st_play_done()
 	tankbobs.in_grabClear()
 
 	-- free renderer stuff
-	gl.DeleteLists(wall_listBase, c_tcm_current_map.walls_n)
 	gl.DeleteTextures(wall_textures)
 	for k, v in pairs(trails) do
 		if gl.IsList(v[3]) then
@@ -439,7 +413,31 @@ function st_play_step(d)
 			end
 
 			if v.l == i then
-				gl.CallList(v.m.list)
+				gl.Color(1, 1, 1, 1)
+				gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1)
+				gl.BindTexture("TEXTURE_2D", v.m.texture)
+
+				gl.EnableClientState("VERTEX_ARRAY,TEXTURE_COORD_ARRAY")
+				local a, t = {}, {}
+				for _, v in pairs(v.p) do
+					table.insert(a, {v.x, v.y})
+				end
+				for _, v in pairs(v.t) do
+					table.insert(t, {v.x, v.y})
+				end
+				gl.VertexPointer(a)
+				gl.TexCoordPointer(t)
+				gl.DrawArrays("POLYGON", 0, #v.p)  -- TODO: FIXME: figure out why texture coordinates are being ignored and remove immediate mode below
+				gl.DisableClientState("VERTEX_ARRAY,TEXTURE_COORD_ARRAY")
+
+				gl.Begin("QUADS")
+					gl.TexCoord(v.t[1].x, v.t[1].y) gl.Vertex(v.p[1].x, v.p[1].y)
+					gl.TexCoord(v.t[2].x, v.t[2].y) gl.Vertex(v.p[2].x, v.p[2].y)
+					gl.TexCoord(v.t[3].x, v.t[3].y) gl.Vertex(v.p[3].x, v.p[3].y)
+					if v.p[4] then
+						gl.TexCoord(v.t[4].x, v.t[4].y) gl.Vertex(v.p[4].x, v.p[4].y)
+					end
+				gl.End()
 			end
 		end
 	end
