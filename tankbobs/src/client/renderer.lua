@@ -26,7 +26,8 @@ drawing output and gl
 local gl
 local tankbobs
 
---local tank_textures
+local tank_textures
+local tankBorder_textures
 local powerup_textures
 local healthbar_texture 
 local healthbarBorder_texture 
@@ -72,10 +73,21 @@ function renderer_init()
 	c_const_set("tank_texturex3", 0.0, 1) c_const_set("tank_texturey3", 0.1, 1)  -- eliminate fuzzy top
 	c_const_set("tank_texturex4", 1.0, 1) c_const_set("tank_texturey4", 0.1, 1)  -- eliminate fuzzy top
 
+	c_const_set("tankBorder_renderx1", -2.1, 1) c_const_set("tankBorder_rendery1",  2.1, 1)
+	c_const_set("tankBorder_renderx2", -2.1, 1) c_const_set("tankBorder_rendery2", -2.1, 1)
+	c_const_set("tankBorder_renderx3",  2.1, 1) c_const_set("tankBorder_rendery3", -2.1, 1)
+	c_const_set("tankBorder_renderx4",  2.1, 1) c_const_set("tankBorder_rendery4",  2.1, 1)
+	c_const_set("tankBorder_texturex1", 0.9875, 1) c_const_set("tankBorder_texturey1", 0.9875, 1)
+	c_const_set("tankBorder_texturex2", 0.0125, 1) c_const_set("tankBorder_texturey2", 0.9875, 1)
+	c_const_set("tankBorder_texturex3", 0.0125, 1) c_const_set("tankBorder_texturey3", 0.1, 1)  -- no outline on top
+	c_const_set("tankBorder_texturex4", 0.9875, 1) c_const_set("tankBorder_texturey4", 0.1, 1)  -- no outline on top
+
 	tank_listBase = gl.GenLists(1)
 	tank_textures = gl.GenTextures(1)
+	tankBorder_listBase = gl.GenLists(1)
+	tankBorder_textures = gl.GenTextures(1)
 
-	if tank_listBase == 0 then
+	if tank_listBase == 0 or tankBorder_listBase == 0 then
 		error("st_play_init: could not generate lists: " .. gl.GetError())
 	end
 
@@ -86,7 +98,7 @@ function renderer_init()
 	gl.TexParameter("TEXTURE_2D", "TEXTURE_MAG_FILTER", "LINEAR")
 	tankbobs.r_loadImage2D(c_const_get("tank"), c_const_get("textures_default"))
 
-	gl.NewList(tank_listBase, "COMPILE_AND_EXECUTE")  -- execute to remove "choppy" effect
+	gl.NewList(tank_listBase, "COMPILE_AND_EXECUTE")
 		-- blend tank with color
 		gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
 		gl.BindTexture("TEXTURE_2D", tank_textures[1])
@@ -95,6 +107,25 @@ function renderer_init()
 			gl.TexCoord(c_const_get("tank_texturex2"), c_const_get("tank_texturey2")) gl.Vertex(c_const_get("tank_renderx2"), c_const_get("tank_rendery2"))
 			gl.TexCoord(c_const_get("tank_texturex3"), c_const_get("tank_texturey3")) gl.Vertex(c_const_get("tank_renderx3"), c_const_get("tank_rendery3"))
 			gl.TexCoord(c_const_get("tank_texturex4"), c_const_get("tank_texturey4")) gl.Vertex(c_const_get("tank_renderx4"), c_const_get("tank_rendery4"))
+		gl.End()
+	gl.EndList()
+
+	gl.BindTexture("TEXTURE_2D", tankBorder_textures[1])
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_S", "REPEAT")
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_T", "REPEAT")
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_MIN_FILTER", "LINEAR")
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_MAG_FILTER", "LINEAR")
+	tankbobs.r_loadImage2D(c_const_get("tankBorder"), c_const_get("textures_default"))
+
+	gl.NewList(tankBorder_listBase, "COMPILE_AND_EXECUTE")
+		-- blend tank with color
+		gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
+		gl.BindTexture("TEXTURE_2D", tankBorder_textures[1])
+		gl.Begin("QUADS")
+			gl.TexCoord(c_const_get("tankBorder_texturex1"), c_const_get("tankBorder_texturey1")) gl.Vertex(c_const_get("tankBorder_renderx1"), c_const_get("tankBorder_rendery1"))
+			gl.TexCoord(c_const_get("tankBorder_texturex2"), c_const_get("tankBorder_texturey2")) gl.Vertex(c_const_get("tankBorder_renderx2"), c_const_get("tankBorder_rendery2"))
+			gl.TexCoord(c_const_get("tankBorder_texturex3"), c_const_get("tankBorder_texturey3")) gl.Vertex(c_const_get("tankBorder_renderx3"), c_const_get("tankBorder_rendery3"))
+			gl.TexCoord(c_const_get("tankBorder_texturex4"), c_const_get("tankBorder_texturey4")) gl.Vertex(c_const_get("tankBorder_renderx4"), c_const_get("tankBorder_rendery4"))
 		gl.End()
 	gl.EndList()
 
@@ -250,9 +281,11 @@ function renderer_done()
 	end
 
 	gl.DeleteLists(tank_listBase, 1)
+	gl.DeleteLists(tankBorder_listBase, 1)
 	gl.DeleteLists(powerup_listBase, 1)
 
 	gl.DeleteTextures(tank_textures)
+	gl.DeleteTextures(tankBorder_textures)
 	gl.DeleteTextures(powerup_textures)
 
 	for _, v in pairs(c_weapon_getWeapons()) do

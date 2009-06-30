@@ -39,6 +39,7 @@ local c_config_get = c_config_get
 local c_config_set = c_config_set
 local c_weapon_getWeapons = c_weapon_getWeapons
 local tank_listBase
+local tankBorder_listBase
 local powerup_listBase
 local healthbar_listBase
 local healthbarBorder_listBase
@@ -74,6 +75,7 @@ function st_play_init()
 	c_config_set = _G.c_config_set
 	c_weapon_getWeapons = _G.c_weapon_getWeapons
 	tank_listBase = _G.tank_listBase
+	tankBorder_listBase = _G.tankBorder_listBase
 	powerup_listBase = _G.powerup_listBase
 	healthbar_listBase = _G.healthbar_listBase
 	healthbarBorder_listBase = _G.healthbarBorder_listBase
@@ -186,7 +188,6 @@ function st_play_init()
 		tank.color.r = c_config_get("config.game.player" .. tostring(i) .. ".color.r")
 		tank.color.g = c_config_get("config.game.player" .. tostring(i) .. ".color.g")
 		tank.color.b = c_config_get("config.game.player" .. tostring(i) .. ".color.b")
-		tank.color.a = c_config_get("config.game.player" .. tostring(i) .. ".color.a")
 
 		-- spawn
 		c_world_tank_spawn(tank)
@@ -402,6 +403,10 @@ function st_play_step(d)
 								gl.TexEnv("TEXTURE_ENV_COLOR", v.color.r, v.color.g, v.color.b, 1)
 								-- blend color with tank texture
 								gl.CallList(tank_listBase)
+								-- white outline
+								gl.Color(1, 1, 1, 0.875)
+								gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, 0.875)
+								gl.CallList(tankBorder_listBase)
 
 								if v.weapon then
 									gl.CallList(v.weapon.m.p.list)
