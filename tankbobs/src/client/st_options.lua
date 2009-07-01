@@ -182,7 +182,7 @@ end
 function st_optionsAudio_chunkSize(widget, string, index)
 		if string == "Highest" then
 		c_config_set("config.client.audioChunkSize", 16384)
-	elseif string == "High.r" then
+	elseif string == "Higher" then
 		c_config_set("config.client.audioChunkSize", 8192)
 	elseif string == "High" then
 		c_config_set("config.client.audioChunkSize", 4096)
