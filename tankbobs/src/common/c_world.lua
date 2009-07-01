@@ -349,16 +349,18 @@ function c_world_newWorld()
 	nextPowerupSpawnPoint = nil
 
 	for _, v in pairs(c_tcm_current_map.walls) do
-		if v.detail then
-			break  -- the wall isn't part of the physical world
-		end
+		local breaking = false repeat
+			if v.detail then
+				breaking = false break  -- the wall isn't part of the physical world
+			end
 
-		-- add wall to world
-		local b = c_world_wallShape(v)
-		v.m.body = tankbobs.w_addBody(b[1], 0, c_const_get("wall_canSleep"), c_const_get("wall_isBullet"), c_const_get("wall_linearDamping"), c_const_get("wall_angularDamping"), b[2], c_const_get("wall_density"), c_const_get("wall_friction"), c_const_get("wall_restitution"), not v.static)
-		if not v.m.body then
-			error "c_world_newWorld: could not add a wall to the physical world"
-		end
+			-- add wall to world
+			local b = c_world_wallShape(v)
+			v.m.body = tankbobs.w_addBody(b[1], 0, c_const_get("wall_canSleep"), c_const_get("wall_isBullet"), c_const_get("wall_linearDamping"), c_const_get("wall_angularDamping"), b[2], c_const_get("wall_density"), c_const_get("wall_friction"), c_const_get("wall_restitution"), not v.static)
+			if not v.m.body then
+				error "c_world_newWorld: could not add a wall to the physical world"
+			end
+		until true if breaking then break end
 	end
 
 	for k, v in pairs(c_tcm_current_map.powerupSpawnPoints) do
@@ -852,7 +854,7 @@ function c_world_wall_step(d, wall)
 
 	if wall.static then
 		-- test if the wall is linked to a path
-		if wall.pid > 0 then
+		if wall.path then
 			if not wall.m.pid then
 				wall.m.pid = wall.pid
 				wall.m.ppos = 0
