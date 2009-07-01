@@ -56,6 +56,7 @@ local st_play_step
 local endOfGame
 local trails = {}
 local camera
+local zoom
 
 function st_play_init()
 	-- localize frequently used globals
@@ -84,6 +85,7 @@ function st_play_init()
 
 	endOfGame = false
 	camera = tankbobs.m_vec2(-50, -50)
+	zoom = 1
 
 	-- initialize renderer stuff
 	-- wall textures are initialized per level
@@ -365,10 +367,10 @@ function st_play_step(d)
 		return
 	end
 	local m = c_tcm_current_map
-	--------------------------------uppermost = math.min(m.uppermost - 95, uppermost)
-	--------------------------------lowermost = math.max(m.lowermost + 95, lowermost)
-	--------------------------------rightmost = math.min(m.rightmost - 95, rightmost)
-	--------------------------------leftmost  = math.max(m.leftmost  + 95, leftmost)
+	uppermost = math.min(m.uppermost, uppermost)
+	lowermost = math.max(m.lowermost, lowermost)
+	rightmost = math.min(m.rightmost, rightmost)
+	leftmost  = math.max(m.leftmost,  leftmost)
 
 	gl.Translate(50, 50, 0)
 
@@ -377,6 +379,7 @@ function st_play_step(d)
 	if scale > 1 then
 		scale = 1
 	end
+	zoom = common_lerp(zoom, scale, c_config_get("config.client.cameraSpeed") / (d * c_const_get("world_time") * c_config_get("config.game.timescale")))
 	gl.Scale(scale, scale, 1)
 
 	camera = common_lerp(camera, tankbobs.m_vec2(-(rightmost + leftmost) / 2, -(uppermost + lowermost) / 2), c_config_get("config.client.cameraSpeed") / (d * c_const_get("world_time") * c_config_get("config.game.timescale")))
