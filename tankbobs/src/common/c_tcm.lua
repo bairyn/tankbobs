@@ -501,6 +501,7 @@ function c_tcm_read_map(map)
 		else
 			wall.detail = false
 		end
+
 		if c_tcm_private_get(tankbobs.io_getChar, i) ~= 0 then
 			wall.static = true
 		else

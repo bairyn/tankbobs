@@ -365,10 +365,10 @@ function st_play_step(d)
 		return
 	end
 	local m = c_tcm_current_map
-	uppermost = math.min(m.uppermost - 95, uppermost)
-	lowermost = math.max(m.lowermost + 95, lowermost)
-	rightmost = math.min(m.rightmost - 95, rightmost)
-	leftmost  = math.max(m.leftmost  + 95, leftmost)
+	--------------------------------uppermost = math.min(m.uppermost - 95, uppermost)
+	--------------------------------lowermost = math.max(m.lowermost + 95, lowermost)
+	--------------------------------rightmost = math.min(m.rightmost - 95, rightmost)
+	--------------------------------leftmost  = math.max(m.leftmost  + 95, leftmost)
 
 	gl.Translate(50, 50, 0)
 

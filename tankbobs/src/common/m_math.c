@@ -935,14 +935,7 @@ int m_vec2_normalto(lua_State *L)
 
 	v->x = -v2->y / v2->R;
 	v->y = v2->x / v2->R;
-	v->R = 1.0;
-	v->t = atan(v->y / v->x);
-	if(v->x < 0.0 && v->y < 0.0)
-		v->t += m_radiansNL(180);
-	else if(v->x < 0.0)
-		v->t += m_radiansNL(90);
-	else if(v->y < 0.0)
-		v->t += m_radiansNL(270);
+	MATH_POLAR(*v);
 
 	return 1;
 }
@@ -963,54 +956,29 @@ int m_vec2_project(lua_State *L)
 	luaL_getmetatable(L, MATH_METATABLE);
 	lua_setmetatable(L, -2);
 
-	/* r = (-(L1) * L2) * L2 */
-	dot = (-v2->x * v3->x) + (-v2->y * v3->y);
+	/* r = (L1 * L2) * L1 / L1^2 */
+	dot = ((v2->x * v3->x) + (v2->y * v3->y));
 
-	v->x = v3->x * dot;
-	v->y = v3->y * dot;
-	v->R = v3->R * dot;
-	v->t = atan(v->y / v->x);
-	if(v->x < 0.0 && v->y < 0.0)
-		v->t += m_radiansNL(180);
-	else if(v->x < 0.0)
-		v->t += m_radiansNL(90);
-	else if(v->y < 0.0)
-		v->t += m_radiansNL(270);
+	v->x = dot * v2->x / (v2->x * v2->x);
+	v->y = dot * v2->y / (v2->y * v2->y);
+	MATH_POLAR(*v);
 
 	return 1;
 }
 
-/* this function assumes that the vertices are already ordered either in a clockwise order or a counterclockwise order.  This function alsa assumes that the polygon is convex */
+/* The polygon must be convex */
 void m_orderVertices(const vec2_t *vertices[], int numVertices, int dir)
 {
-	vec2_t v0, v1;
 	int currentDir;
+	int a;
 	int i;
 
 	if(numVertices < 3)
 		return;
 
-	v0.x = vertices[0]->x - vertices[1]->x; v0.y = vertices[0]->y - vertices[1]->y;
-	v0.R = sqrt(v0.x * v0.x + v0.y * v0.y);
-	v0.t = atan(v0.y / v0.x);
-	if(v0.x < 0.0 && v0.y < 0.0)
-		v0.t += m_radiansNL(180);
-	else if(v0.x < 0.0)
-		v0.t += m_radiansNL(90);
-	else if(v0.y < 0.0)
-		v0.t += m_radiansNL(270);
+	a = vertices[0]->x * vertices[1]->y - vertices[1]->x * vertices[0]->y + vertices[1]->x * vertices[2]->y - vertices[1]->x * vertices[2]->y;
 
-	v1.x = vertices[1]->x - vertices[2]->x; v1.y = vertices[1]->y - vertices[2]->y;
-	v1.R = sqrt(v1.x * v1.x + v1.y * v1.y);
-	v1.t = atan(v1.y / v1.x);
-	if(v1.x < 0.0 && v1.y < 0.0)
-		v1.t += m_radiansNL(180);
-	else if(v1.x < 0.0)
-		v1.t += m_radiansNL(90);
-	else if(v1.y < 0.0)
-		v1.t += m_radiansNL(270);
-
-	if(v1.t < v0.t)
+	if(a < 0)
 		currentDir = CLOCKWISE;
 	else
 		currentDir = COUNTERCLOCKWISE;
