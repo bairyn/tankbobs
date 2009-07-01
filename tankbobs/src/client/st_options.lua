@@ -59,6 +59,76 @@ function st_options_step(d)
 	gui_paint(d)
 end
 
+local st_optionsGame_init
+local st_optionsGame_done
+
+local st_optionsGame_worldFPS
+
+function st_optionsGame_init()
+	gui_addAction(tankbobs.m_vec2(25, 85), "Back", nil, c_state_advance)
+
+	local pos = 0
+	local buf = c_config_get("config.game.worldFPS")
+		if buf == 8 then
+		pos = 1
+	elseif buf == 16 then
+		pos = 2
+	elseif buf == 32 then
+		pos = 3
+	elseif buf == 64 then
+		pos = 4
+	elseif buf == 128 then
+		pos = 5
+	elseif buf == 256 then
+		pos = 6
+	elseif buf == 512 then
+		pos = 7
+	elseif buf == 1024 then
+		pos = 8
+	end
+	-- World FPS needs to be constant
+	--gui_addLabel(tankbobs.m_vec2(50, 75), "World Simulation", nil, 1 / 3) gui_addCycle(tankbobs.m_vec2(75, 75), "World Simulation", nil, st_optionsGame_worldFPS, {"Slide Show", "Roughest", "Rougher", "Rough", "Medium", "Smooth", "Smoother", "Smoothest"}, pos, 1 / 3)
+	--gui_addLabel(tankbobs.m_vec2(50, 72), "(Restart to take effect to world simulation smoothness)", nil, 1 / 3)
+end
+
+function st_optionsGame_done()
+	gui_finish()
+end
+
+function st_optionsGame_worldFPS(widget, string, index)
+		if string == "Smoothest" then
+		c_config_set("config.game.worldFPS", 1024)
+	elseif string == "Smoother" then
+		c_config_set("config.game.worldFPS", 512)
+	elseif string == "Smooth" then
+		c_config_set("config.game.worldFPS", 256)
+	elseif string == "Medium" then
+		c_config_set("config.game.worldFPS", 128)
+	elseif string == "Rough" then
+		c_config_set("config.game.worldFPS", 64)
+	elseif string == "Rougher" then
+		c_config_set("config.game.worldFPS", 32)
+	elseif string == "Roughest" then
+		c_config_set("config.game.worldFPS", 16)
+	elseif string == "Slide Show" then
+		c_config_set("config.game.worldFPS", 8)
+	end
+end
+
+optionsGame_state =
+{
+	name   = "optionsGame_state",
+	init   = st_optionsGame_init,
+	done   = st_optionsGame_done,
+	next   = function () return options_state end,
+
+	click  = st_options_click,
+	button = st_options_button,
+	mouse  = st_options_mouse,
+
+	main   = st_options_step
+}
+
 local st_optionsAudio_init
 local st_optionsAudio_done
 
@@ -91,7 +161,6 @@ function st_optionsAudio_init()
 	elseif buf == 16384 then
 		pos = 7
 	end
-
 	gui_addLabel(tankbobs.m_vec2(50, 39), "Chunk Size", nil, 2 / 3) gui_addCycle(tankbobs.m_vec2(75, 39), "Chunk Size", nil, st_optionsAudio_chunkSize, {"Lowest", "Lower", "Low", "Medium", "High", "Higher", "Highest"}, pos, 2 / 3)
 	gui_addLabel(tankbobs.m_vec2(50, 36), "(Restart to take effect to chunk size)", nil, 1 / 3)
 end
@@ -639,15 +708,20 @@ function st_options_init()
 
 	gui_addAction(tankbobs.m_vec2(25, 85), "Back", nil, c_state_advance)
 
-	gui_addAction(tankbobs.m_vec2(50, 75), "Audio", nil, st_options_audio)
-	gui_addAction(tankbobs.m_vec2(50, 69), "Video", nil, st_options_video)
-	gui_addAction(tankbobs.m_vec2(50, 63), "Players", nil, st_options_players)
-	gui_addAction(tankbobs.m_vec2(50, 57), "Controls", nil, st_options_controls)
-	gui_addAction(tankbobs.m_vec2(50, 51), "Internet", nil, st_options_internet)
+	gui_addAction(tankbobs.m_vec2(50, 75), "Game", nil, st_options_game)
+	gui_addAction(tankbobs.m_vec2(50, 69), "Audio", nil, st_options_audio)
+	gui_addAction(tankbobs.m_vec2(50, 63), "Video", nil, st_options_video)
+	gui_addAction(tankbobs.m_vec2(50, 57), "Players", nil, st_options_players)
+	gui_addAction(tankbobs.m_vec2(50, 51), "Controls", nil, st_options_controls)
+	gui_addAction(tankbobs.m_vec2(50, 45), "Internet", nil, st_options_internet)
 end
 
 function st_options_done()
 	gui_finish()
+end
+
+function st_options_game()
+	c_state_new(optionsGame_state)
 end
 
 function st_options_video()

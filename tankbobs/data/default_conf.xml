@@ -62,6 +62,7 @@
 		<scoresBlue>  0.500 </scoresBlue>
 		<scoresAlpha> 0.875 </scoresAlpha>
 		<timescale>1</timescale>
+		<worldFPS>256</worldFPS>
 	</game>
 
 	These keys might conflict with the default menu keys:

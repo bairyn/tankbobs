@@ -66,6 +66,7 @@ function c_world_init()
 	c_const_set("world_time", 1000)  -- relative to change in seconds
 
 	c_const_set("world_fps", 256)
+	--c_const_set("world_fps", c_config_get("config.game.worldFPS"))  -- physics FPS needs to be constant
 	--c_const_set("world_timeStep", common_FTM(c_const_get("world_fps")))
 	c_const_set("world_timeStep", 1 / 500)
 	c_const_set("world_iterations", 16)
@@ -533,13 +534,13 @@ function c_world_powerupSpawnPointHull(powerupSpawnPoint)
 end
 
 function c_world_wallShape(wall)
-	local average = tankbobs.m_vec2()
+	local average = tankbobs.m_vec2(0, 0)
 	local offsets = {}
 
 	for _, v in pairs(wall.p) do
-		average = average + v
+		average:add(v)
 	end
-	average = average / #wall.p
+	average.R = average.R / #wall.p
 
 	for _, v in ipairs(wall.p) do
 		table.insert(offsets, v - average)
@@ -791,7 +792,7 @@ function c_world_tank_step(d, tank)
 				newVel.t = math.fmod(newVel.t, 2 * math.pi)
 				if        vel.t - newVel.t > math.pi then
 					vel.t    =    vel.t - 2 * math.pi
-				elseif newVel.t - vel.t    > math.pi then
+				elseif newVel.t -    vel.t > math.pi then
 					newVel.t = newVel.t - 2 * math.pi
 				end
 				newVel.t = common_lerp(vel.t, newVel.t, c_const_get("tank_rotationChange"))
@@ -843,26 +844,54 @@ end
 
 function c_world_wall_step(d, wall)
 	local t = tankbobs.t_getTicks()
+	local paths = c_tcm_current_map.paths
+
+	if wall.detail or not wall.m.body then
+		return
+	end
 
 	if wall.static then
-		-- could be on a path
-	else
-		if wall.detail or not wall.m.body then
-			return
-		end
+		-- test if the wall is linked to a path
+		if wall.pid > 0 then
+			if not wall.m.pid then
+				wall.m.pid = wall.pid
+				wall.m.ppos = 0
+				wall.m.startpos = c_world_wallShape(wall)[1]
+			else
+				local path = paths[wall.m.pid]
 
-		-- dynamic wall
-		local average = tankbobs.m_vec2(0, 0)
-		for _, v in pairs(wall.p) do
-			average:add(v)
-		end
-		average.R = average.R / #wall.p
+				if path and path.enabled then
+					if path.time == 0 then
+						wall.m.ppos = 1
+					else
+						wall.m.ppos = math.min(1, wall.m.ppos + (d / time))
+					end
 
-		local offset = tankbobs.w_getPosition(wall.m.body) - average
+					local prevPath = paths[wall.m.ppid]
 
-		for _, v in pairs(wall.p) do
-			v:add(offset)
+					if wall.m.ppos < 1 and prevPath then
+						tankbobs.w_setPosition(wall.m.body, common_lerp(wall.m.startpos, wall.m.startpos + path.p[1] - prevPath.p[1], wall.m.ppos))
+					else
+						wall.m.ppid = wall.m.pid
+						wall.m.startpos = c_world_wallShape(wall)[1]
+						wall.m.pid = path.t
+					end
+				end
+			end
 		end
+	end
+
+	-- for efficiency, copy all that we need from c_world_wallShape
+	local average = tankbobs.m_vec2(0, 0)
+	for _, v in pairs(wall.p) do
+		average:add(v)
+	end
+	average.R = average.R / #wall.p
+
+	local offset = tankbobs.w_getPosition(wall.m.body) - average
+
+	for _, v in pairs(wall.p) do
+		v:add(offset)
 	end
 end
 
