@@ -988,3 +988,38 @@ int w_persistWorld(lua_State *L)
 
 	return 1;
 }
+
+int w_getVertices(lua_State *L)
+{
+	CHECKINIT(init, L);
+
+	CHECKWORLD(world, L);
+
+	b2Body *body = reinterpret_cast<b2Body *>(lua_touserdata(L, 1));
+	lua_pop(L, 1);
+
+	lua_newtable(L);
+
+	for(b2Shape *bshape = body->GetShapeList(); bshape; bshape = bshape->GetNext())
+	{
+		b2PolygonShape *shape = static_cast<b2PolygonShape *>(bshape);
+
+		const b2Vec2 *vertices = shape->GetVertices();
+		for(int i = 0; i < shape->GetVertexCount(); i++)
+		{
+			lua_pushinteger(L, i + 1);
+			vec2_t *v = reinterpret_cast<vec2_t *>(lua_newuserdata(L, sizeof(vec2_t)));
+
+			luaL_getmetatable(L, MATH_METATABLE);
+			lua_setmetatable(L, -2);
+
+			v->x = vertices[i].x;
+			v->y = vertices[i].y;
+			MATH_POLAR(*v);
+
+			lua_settable(L, -3);
+		}
+	}
+
+	return 1;
+}

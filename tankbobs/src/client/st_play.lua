@@ -438,7 +438,7 @@ function st_play_step(d)
 				gl.DrawArrays("POLYGON", 0, #v.p)  -- TODO: FIXME: figure out why texture coordinates are being ignored and remove immediate mode below
 				gl.DisableClientState("VERTEX_ARRAY,TEXTURE_COORD_ARRAY")
 
-				gl.Begin("QUADS")
+				gl.Begin(v.p[4] and "QUADS" or "TRIANGLES")
 					gl.TexCoord(v.t[1].x, v.t[1].y) gl.Vertex(v.p[1].x, v.p[1].y)
 					gl.TexCoord(v.t[2].x, v.t[2].y) gl.Vertex(v.p[2].x, v.p[2].y)
 					gl.TexCoord(v.t[3].x, v.t[3].y) gl.Vertex(v.p[3].x, v.p[3].y)

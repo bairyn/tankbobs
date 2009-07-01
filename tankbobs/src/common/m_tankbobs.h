@@ -253,6 +253,7 @@ int w_applyImpulse(lua_State *L);
 int w_getCenterOfMass(lua_State *L);
 int w_scaleVelocity(lua_State *L);
 int w_persistWorld(lua_State *L);
+int w_getVertices(lua_State *L);
 
 /* m_console.c */
 void c_initNL(lua_State *L);

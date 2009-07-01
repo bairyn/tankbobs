@@ -883,16 +883,10 @@ function c_world_wall_step(d, wall)
 		end
 	end
 
-	-- for efficiency, copy all that we need from c_world_wallShape
-	local average = tankbobs.m_vec2(0, 0)
+	wall.p = tankbobs.w_getVertices(wall.m.body)
+	local offset = tankbobs.w_getPosition(wall.m.body)
 	for _, v in pairs(wall.p) do
-		average:add(v)
-	end
-	average.R = average.R / #wall.p
-
-	local offset = tankbobs.w_getPosition(wall.m.body) - average
-
-	for _, v in pairs(wall.p) do
+		v.t = v.t + tankbobs.w_getAngle(wall.m.body)
 		v:add(offset)
 	end
 end

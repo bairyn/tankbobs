@@ -878,6 +878,8 @@ static const struct luaL_Reg tankbobs[] =
 		/* A string containing the data of the world is returned.  The first argument passed
 			is the projectiles of the world.  The second argument passed are the tanks of the world.
 			The third argument is a table of the powerups.  The fourth argument passed is the walls */
+	{"w_getVertices", w_getVertices}, /* Get the vertices of a table */
+		/* The body is the only argument passed.  A table of vertices is returned. */
 
 	/* m_console.c */
 	{"c_init", c_init}, /* initialize an ncurses console */
