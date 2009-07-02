@@ -31,7 +31,7 @@ map, string name, string title, string description, string authors, string versi
 wall, integer quad, double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double tx1, double ty1, double tx2, double ty2, double tx3, double ty3, double tx4, double ty4, string texture, integer level / layer of wall, string target, integer path, integer detail, integer static - target is the path
 teleporter, string name, string targetName, double x1, double y1, int enabled
 playerSpawnPoint, double x1, double y1
-powerupSpawnPoint, double x1, double y1, string stringPowerupsToEnable - stringPowerupsToEnable will be searched for and will be tested if it has the name of any powerups
+powerupSpawnPoint, double x1, double y1, string stringPowerupsToEnable, int linked, double repeat, double initial, int focus - stringPowerupsToEnable will be searched for and will be tested if it has the name of any powerups
 path, string name, string targetName, double x1, double y1, int enabled, time
 
 TankCompiledMap (compiled TankRawMap)
@@ -103,6 +103,10 @@ powerupSpawnPoints
  -4 bytes more powerups to enable
  -4 bytes more powerups to enable
  -another 4 groups of powerups - altogether 64 bytes
+ -1 byte linked
+ -8 bytes repeat double float
+ -8 bytes initial double float
+ -1 byte focus
  - 52 total bytes
 paths
  -4 bytes id
@@ -253,6 +257,10 @@ c_tcm_powerupSpawnPoint =
 	id = 0,
 	p = {},
 	enabledPowerups = {},
+	linked = false,  -- powerups will spawn in order
+	["repeat"] = 0,  -- time between each powerup
+	initial = 0,  -- initial time before first powerup
+	focus = false,  -- focus the camera on spawned powerup
 
 	m = {p = {}}  -- extra data
 }
@@ -592,6 +600,19 @@ function c_tcm_read_map(map)
 			powerupSpawnPoint.enabledPowerups.health = true
 		else
 			powerupSpawnPoint.enabledPowerups.health = false
+		end
+
+		if c_tcm_private_get(tankbobs.io_getChar, i) ~= 0 then
+			powerupSpawnPoint.linked = true
+		else
+			powerupSpawnPoint.linked = false
+		end
+		powerupSpawnPoint["repeat"] = c_tcm_private_get(tankbobs.io_getDouble, i)
+		powerupSpawnPoint.initial = c_tcm_private_get(tankbobs.io_getDouble, i)
+		if c_tcm_private_get(tankbobs.io_getChar, i) ~= 0 then
+			powerupSpawnPoint.focus = true
+		else
+			powerupSpawnPoint.focus = false
 		end
 
 		table.insert(r.powerupSpawnPoints, powerupSpawnPoint)

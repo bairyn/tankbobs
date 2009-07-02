@@ -80,6 +80,8 @@ function c_world_init()
 
 	c_const_set("world_maxPowerups", 64, 1)
 
+	c_const_set("world_initTime", 5, 1)
+
 	c_const_set("powerupSpawnPoint_initialPowerupTime", 30, 1)
 	c_const_set("powerupSpawnPoint_powerupTime", 30, 1)
 	c_const_set("powerupSpawnPoints_linked", true, 1)
@@ -106,7 +108,7 @@ function c_world_init()
 	c_const_set("tank_damageMinSpeed", 6, 1)
 	c_const_set("tank_intensityMaxSpeed", 6, 1)
 	c_const_set("tank_collideMinDamage", 5, 1)
-	c_const_set("tank_deceleration", 32 / 1000, 1)
+	c_const_set("tank_deceleration", 64 / 1000, 1)
 	c_const_set("tank_decelerationMinSpeed", -1, 1)
 	c_const_set("tank_highHealth", 66, 1)
 	c_const_set("tank_lowHealth", 33, 1)
@@ -126,14 +128,12 @@ function c_world_init()
 	c_const_set("tank_speedK", 5, 1)
 	c_const_set("tank_density", 2, 1)
 	c_const_set("tank_friction", 0.25, 1)
-	c_const_set("tank_worldFriction", 0.75 / 1000, 1)  -- damping
+	c_const_set("tank_worldFriction", 2 / 1000, 1)  -- damping
 	c_const_set("tank_restitution", 0.4, 1)
 	c_const_set("tank_canSleep", false, 1)
 	c_const_set("tank_isBullet", true, 1)
 	c_const_set("tank_linearDamping", 0, 1)
 	c_const_set("tank_angularDamping", 0, 1)
-	c_const_set("tank_accelerationVectorPointTest", -90, 1)  -- the origin of acceleration force
-	c_const_set("tank_decelerationVectorPointTest", 90, 1)
 	c_const_set("tank_spawnTime", 0.75, 1)
 	c_const_set("tank_static", false, 1)
 	c_const_set("wall_density", 1, 1)
@@ -145,7 +145,7 @@ function c_world_init()
 	c_const_set("wall_angularDamping", 0, 1)
 	c_const_set("tank_rotationChange", 0.005, 1)
 	c_const_set("tank_rotationChangeMinSpeed", 0.5, 1)  -- if at least 24 ups
-	c_const_set("tank_rotationSpeed", c_math_radians(450) / 1000, 1)  -- 135 degrees per second
+	c_const_set("tank_rotationSpeed", c_math_radians(510) / 1000, 1)
 	c_const_set("tank_rotationSpecialSpeed", c_math_degrees(1) / 3.5, 1)
 	c_const_set("tank_defaultRotation", c_math_radians(90), 1)  -- up
 	c_const_set("tank_boostHealth", 60, 1)
@@ -258,6 +258,7 @@ c_world_powerup =
 
 	p = {},
 	r = 0,  -- rotation
+	spawner = nil,
 	collided = false,  -- whether it needs to be removed
 	type = nil,  -- the type of powerup (shotgun, ammo, speed enhancement, etc)
 	spawnTime = 0,  -- the time the powerup spawned
@@ -340,8 +341,6 @@ function c_world_newWorld()
 
 	local t = tankbobs.t_getTicks()
 
-	wordTime = t
-
 	tankbobs.w_newWorld(tankbobs.m_vec2(c_const_get("world_lowerBoundx"), c_const_get("world_lowerBoundy")), tankbobs.m_vec2(c_const_get("world_upperBoundx"), c_const_get("world_upperBoundy")), tankbobs.m_vec2(c_const_get("world_gravityx"), c_const_get("world_gravityy")), c_const_get("world_allowSleep"), "c_world_contactListener")
 
 	-- reset powerups
@@ -382,6 +381,8 @@ function c_world_newWorld()
 
 	c_world_powerups = {}
 	c_world_tanks = {}
+
+	worldTime = t
 
 	worldInitialized = true
 end
@@ -860,13 +861,13 @@ function c_world_wall_step(d, wall)
 				wall.m.ppos = 0
 				wall.m.startpos = c_world_wallShape(wall)[1]
 			else
-				local path = paths[wall.m.pid]
+				local path = paths[wall.m.pid + 1]
 
 				if path and path.enabled then
 					if path.time == 0 then
 						wall.m.ppos = 1
 					else
-						wall.m.ppos = math.min(1, wall.m.ppos + (d / time))
+						wall.m.ppos = math.min(1, wall.m.ppos + (d / path.time))
 					end
 
 					local prevPath = paths[wall.m.ppid]
@@ -874,9 +875,10 @@ function c_world_wall_step(d, wall)
 					if wall.m.ppos < 1 and prevPath then
 						tankbobs.w_setPosition(wall.m.body, common_lerp(wall.m.startpos, wall.m.startpos + path.p[1] - prevPath.p[1], wall.m.ppos))
 					else
-						wall.m.ppid = wall.m.pid
+						wall.m.ppid = wall.m.pid + 1
 						wall.m.startpos = c_world_wallShape(wall)[1]
 						wall.m.pid = path.t
+						wall.m.ppos = 0
 					end
 				end
 			end
@@ -908,12 +910,12 @@ function c_world_powerupSpawnPoint_step(d, powerupSpawnPoint)
 	local spawn = false
 
 	if not lastPowerupSpawnTime then
-		lastPowerupSpawnTime = t + c_const_get("world_time") * c_config_get("config.game.timescale") * c_const_get("powerupSpawnPoint_initialPowerupTime") - c_const_get("world_time") * c_config_get("config.game.timescale") * c_const_get("powerupSpawnPoint_powerupTime")
+		lastPowerupSpawnTime = t + c_const_get("world_time") * c_config_get("config.game.timescale") * powerupSpawnPoint.initial - c_const_get("world_time") * c_config_get("config.game.timescale") * powerupSpawnPoint["repeat"]
 	end
 
-	if c_const_get("powerupSpawnPoints_linked") then
+	if powerupSpawnPoint.linked then
 		if not nextPowerupSpawnPoint or powerupSpawnPoint == nextPowerupSpawnPoint then
-			if t >= lastPowerupSpawnTime + c_const_get("world_time") * c_config_get("config.game.timescale") * c_const_get("powerupSpawnPoint_powerupTime") then
+			if t >= lastPowerupSpawnTime + c_const_get("world_time") * c_config_get("config.game.timescale") * powerupSpawnPoint["repeat"] then
 				lastPowerupSpawnTime = t
 				spawn = true
 
@@ -939,7 +941,7 @@ function c_world_powerupSpawnPoint_step(d, powerupSpawnPoint)
 	end
 
 	if spawn then
-		powerupSpawnPoint.m.nextPowerupTime = t + c_const_get("world_time") * c_config_get("config.game.timescale") * c_const_get("powerupSpawnPoint_powerupTime")
+		powerupSpawnPoint.m.nextPowerupTime = t + c_const_get("world_time") * c_config_get("config.game.timescale") * powerupSpawnPoint["repeat"]
 
 		if c_world_canPowerupSpawn(d, powerupSpawnPoint) then
 			-- make sure there's not too many powerups
@@ -961,6 +963,8 @@ function c_world_powerupSpawnPoint_step(d, powerupSpawnPoint)
 			local powerup = c_world_powerup:new()
 
 			table.insert(c_world_powerups, powerup)
+
+			powerup.spawner = powerupSpawnPoint
 
 			powerup.typeName = nil
 

@@ -569,6 +569,10 @@ static struct powerupSpawnPoint_s
 {
 	double x1; double y1;
 	char powerupsToEnable[MAX_STRING_STRUCT_CHARS];
+	int linked;
+	double repeat;
+	double initial;
+	int focus;
 } powerupSpawnPoints[MAX_POWERUPSPAWNPOINTS];
 
 typedef struct path_s path_t;
@@ -635,7 +639,7 @@ static void add_wall(int quad, double x1, double y1, double x2, double y2, doubl
 	wall->ty4 = ty4;
 	strncpy(wall->texture, texture, sizeof(wall->texture));
 	wall->level = level;
-	strncpy(wall->target, texture, sizeof(wall->target));
+	strncpy(wall->target, target, sizeof(wall->target));
 	wall->path = path;
 	wall->detail = detail;
 	wall->staticW = staticW;
@@ -671,7 +675,7 @@ static void add_playerSpawnPoint(double x1, double y1)
 	playerSpawnPoint->y1 = y1;
 }
 
-static void add_powerupSpawnPoint(double x1, double y1, const char *powerupsToEnable)
+static void add_powerupSpawnPoint(double x1, double y1, const char *powerupsToEnable, int linked, double repeat, double initial, int focus)
 {
 	powerupSpawnPoint_t *powerupSpawnPoint = &powerupSpawnPoints[oc++];
 
@@ -684,6 +688,10 @@ static void add_powerupSpawnPoint(double x1, double y1, const char *powerupsToEn
 	powerupSpawnPoint->x1 = x1;
 	powerupSpawnPoint->y1 = y1;
 	strncpy(powerupSpawnPoint->powerupsToEnable, powerupsToEnable, sizeof(powerupSpawnPoint->powerupsToEnable));
+	powerupSpawnPoint->linked = linked;
+	powerupSpawnPoint->repeat = repeat;
+	powerupSpawnPoint->initial = initial;
+	powerupSpawnPoint->focus = focus;
 }
 
 static void add_path(const char *targetName, const char *target, double x1, double y1, int enabled, double time)
@@ -895,12 +903,16 @@ static int compile(const char *filename)
 				{
 					double x1, y1;
 					char powerupsToEnable[MAX_STRING_SIZE];
+					int linked;
+					double repeat;
+					double initial;
+					int focus;
 
 					x1 = read_double();
 					y1 = read_double();
 					read_string(powerupsToEnable);
 
-					add_powerupSpawnPoint(x1, y1, powerupsToEnable);
+					add_powerupSpawnPoint(x1, y1, powerupsToEnable, linked, repeat, initial, focus);
 				}
 				else if(strncmp(entity, "path", sizeof(entity)) == 0)
 				{
@@ -983,11 +995,11 @@ static int compile(const char *filename)
 		wall_t *wall = &walls[i];
 
 		/* find the target (it might not exist) */
-		for(j = 0; j < tc; j++)
+		for(j = 0; j < pc; j++)
 		{
-			teleporter_t *teleporter = &teleporters[j];
+			path_t *path = &paths[j];
 
-			if(strcmp(wall->target, teleporter->targetName) == 0)
+			if(strcmp(wall->target, path->targetName) == 0)
 			{
 				id = j;
 				break;
@@ -1098,6 +1110,10 @@ static int compile(const char *filename)
 		{
 			put_cint(fout, powerups[j]);
 		}
+		put_cchar(fout, powerupSpawnPoint->linked);
+		put_cdouble(fout, powerupSpawnPoint->repeat);
+		put_cdouble(fout, powerupSpawnPoint->initial);
+		put_cchar(fout, powerupSpawnPoint->focus);
 	}
 
 	for(i = 0; i < pc; i++)

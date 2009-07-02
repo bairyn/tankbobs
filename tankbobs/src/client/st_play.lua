@@ -349,28 +349,30 @@ function st_play_step(d)
 		end
 	end
 	for _, v in pairs(c_world_getPowerups()) do
-		if not leftmost or v.p[1].x < leftmost then
-			leftmost = v.p[1].x
-		end
-		if not rightmost or v.p[1].x > rightmost then
-			rightmost = v.p[1].x
-		end
+		if v.spawner.focus then
+			if not leftmost or v.p[1].x < leftmost then
+				leftmost = v.p[1].x
+			end
+			if not rightmost or v.p[1].x > rightmost then
+				rightmost = v.p[1].x
+			end
 
-		if not lowermost or v.p[1].y < lowermost then
-			lowermost = v.p[1].y
-		end
-		if not uppermost or v.p[1].y > uppermost then
-			uppermost = v.p[1].y
+			if not lowermost or v.p[1].y < lowermost then
+				lowermost = v.p[1].y
+			end
+			if not uppermost or v.p[1].y > uppermost then
+				uppermost = v.p[1].y
+			end
 		end
 	end
 	if not uppermost or not lowermost or not rightmost or not leftmost then
 		return
 	end
 	local m = c_tcm_current_map
-	uppermost = math.min(m.uppermost, uppermost)
-	lowermost = math.max(m.lowermost, lowermost)
-	rightmost = math.min(m.rightmost, rightmost)
-	leftmost  = math.max(m.leftmost,  leftmost)
+	uppermost = math.min(m.uppermost - 95, uppermost)
+	lowermost = math.max(m.lowermost + 95, lowermost)
+	rightmost = math.min(m.rightmost - 95, rightmost)
+	leftmost  = math.max(m.leftmost  + 95,  leftmost)
 
 	gl.Translate(50, 50, 0)
 

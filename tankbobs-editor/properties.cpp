@@ -56,10 +56,20 @@ Properties::Properties(QWidget *parent)
 		if(selection == reinterpret_cast<void *>(static_cast<entities::PowerupSpawnPoint *>(*i)))
 		{
 			powerups->setText(QString(reinterpret_cast<entities::PowerupSpawnPoint *>(selection)->powerups.c_str()));
+			linked->setChecked(reinterpret_cast<entities::PowerupSpawnPoint *>(selection)->linked);
+			repeat->setText(QString::number(reinterpret_cast<entities::PowerupSpawnPoint *>(selection)->repeat));
+			initial->setText(QString::number(reinterpret_cast<entities::PowerupSpawnPoint *>(selection)->initial));
+			focus->setChecked(reinterpret_cast<entities::PowerupSpawnPoint *>(selection)->focus);
 
 			selected = true;
 			powerups->setEnabled(true);
 			powerupsLabel->setEnabled(true);
+			linked->setEnabled(true);
+			repeat->setEnabled(true);
+			repeatLabel->setEnabled(true);
+			initial->setEnabled(true);
+			initialLabel->setEnabled(true);
+			focus->setEnabled(true);
 		}
 	}
 	for(vector<entities::Teleporter *>::iterator i = teleporter.begin(); i != teleporter.end(); ++i)
@@ -192,6 +202,8 @@ Properties::Properties(QWidget *parent)
 	connect(enabled, SIGNAL(stateChanged(int)), this, SLOT(enabledChanged(int)));
 	connect(level, SIGNAL(textChanged(const QString &)), this, SLOT(levelChanged(const QString &)));
 	connect(time, SIGNAL(textChanged(const QString &)), this, SLOT(timeChanged(const QString &)));
+	connect(repeat, SIGNAL(textChanged(const QString &)), this, SLOT(repeatChanged(const QString &)));
+	connect(initial, SIGNAL(textChanged(const QString &)), this, SLOT(initialChanged(const QString &)));
 	connect(autoselect, SIGNAL(stateChanged(int)), this, SLOT(autoselectChanged(int)));
 	connect(nomodify, SIGNAL(stateChanged(int)), this, SLOT(nomodifyChanged(int)));
 	connect(autonotexture, SIGNAL(stateChanged(int)), this, SLOT(autonotextureChanged(int)));
@@ -199,6 +211,8 @@ Properties::Properties(QWidget *parent)
 	connect(path, SIGNAL(stateChanged(int)), this, SLOT(pathChanged(int)));
 	connect(detail, SIGNAL(stateChanged(int)), this, SLOT(detailChanged(int)));
 	connect(staticW, SIGNAL(stateChanged(int)), this, SLOT(staticWChanged(int)));
+	connect(linked, SIGNAL(stateChanged(int)), this, SLOT(linkedChanged(int)));
+	connect(focus, SIGNAL(stateChanged(int)), this, SLOT(focusChanged(int)));
 }
 
 void Properties::textureChanged(const QString &text)
@@ -293,6 +307,48 @@ void Properties::targetChanged(const QString &text)
 void Properties::powerupsChanged(const QString &text)
 {
 	reinterpret_cast<entities::PowerupSpawnPoint *>(selection)->powerups = util_qtcp(text);
+}
+
+void Properties::linkedChanged(int state)
+{
+	entities::PowerupSpawnPoint *o = reinterpret_cast<entities::PowerupSpawnPoint *>(selection);
+
+	if(state)
+	{
+		o->linked = true;
+	}
+	else
+	{
+		o->linked = false;
+	}
+}
+
+void Properties::focusChanged(int state)
+{
+	entities::PowerupSpawnPoint *o = reinterpret_cast<entities::PowerupSpawnPoint *>(selection);
+
+	if(state)
+	{
+		o->focus = true;
+	}
+	else
+	{
+		o->focus = false;
+	}
+}
+
+void Properties::repeatChanged(const QString &text)
+{
+	entities::PowerupSpawnPoint *o = reinterpret_cast<entities::PowerupSpawnPoint *>(selection);
+
+	o->repeat = atof(util_qtcp(text).c_str());
+}
+
+void Properties::initialChanged(const QString &text)
+{
+	entities::PowerupSpawnPoint *o = reinterpret_cast<entities::PowerupSpawnPoint *>(selection);
+
+	o->repeat = atof(util_qtcp(text).c_str());
 }
 
 void Properties::fourVerticesChanged(int state)

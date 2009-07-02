@@ -64,7 +64,11 @@ namespace entities
 		public:
 			double x, y;
 			string powerups;
-			PowerupSpawnPoint(double PowerupSpawnPoint_x = 0.0, double PowerupSpawnPoint_y = 0.0, string PowerupSpawnPoint_powerups = "") : x(PowerupSpawnPoint_x), y(PowerupSpawnPoint_y), powerups(PowerupSpawnPoint_powerups) {}
+			int linked;
+			double repeat;
+			double initial;
+			int focus;
+			PowerupSpawnPoint(double PowerupSpawnPoint_x = 0.0, double PowerupSpawnPoint_y = 0.0, string PowerupSpawnPoint_powerups = "", int PowerupSpawnPoint_linked = false, double PowerupSpawnPoint_repeat = 0.0, double PowerupSpawnPoint_initial = 0.0, int PowerupSpawnPoint_focus = false) : x(PowerupSpawnPoint_x), y(PowerupSpawnPoint_y), powerups(PowerupSpawnPoint_powerups), linked(PowerupSpawnPoint_linked), repeat(PowerupSpawnPoint_repeat), initial(PowerupSpawnPoint_initial), focus(PowerupSpawnPoint_focus) {}
 	};
 
 	class Teleporter : private Entity

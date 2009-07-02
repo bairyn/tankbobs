@@ -98,7 +98,7 @@ void trm_modifyAttempted()
 }
 
 /*
-used from trmc.c
+These function were copied from trmc.c
 */
 
 static const char *read_line = NULL;
@@ -405,7 +405,7 @@ static int read_reset(const char *line)
 
 /* */
 
-bool trm_open(const char *filename, bool import)  // Will not confirm lost progress!
+bool trm_open(const char *filename, bool import)  // Will not confirm unsaved progress!
 {
 	char c;
 	FILE *fin;
@@ -541,12 +541,20 @@ bool trm_open(const char *filename, bool import)  // Will not confirm lost progr
 				{
 					double x1, y1;
 					char powerupsToEnable[1024];
+					int linked;
+					double repeat;
+					double initial;
+					int focus;
 
 					x1 = read_double();
 					y1 = read_double();
 					read_string(powerupsToEnable);
+					linked = read_int();
+					repeat = read_double();
+					initial = read_double();
+					focus = read_int();
 
-					powerupSpawnPoint.push_back(new entities::PowerupSpawnPoint(x1, y1, powerupsToEnable));
+					powerupSpawnPoint.push_back(new entities::PowerupSpawnPoint(x1, y1, powerupsToEnable, linked, repeat, initial, focus));
 				}
 				else if(strncmp(entity, "path", sizeof(entity)) == 0)
 				{
@@ -715,6 +723,14 @@ bool trm_save(const char *filename)
 		<< e->y
 		<< ", "
 		<< e->powerups
+		<< ", "
+		<< e->linked
+		<< ", "
+		<< e->repeat
+		<< ", "
+		<< e->initial
+		<< ", "
+		<< e->focus
 		<< endl;
 	}
 

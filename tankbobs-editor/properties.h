@@ -56,6 +56,8 @@ class Properties : public QDialog, private Ui::PropertiesDialog
 		void ty4Changed(const QString &text);
 		void targetChanged(const QString &text);
 		void targetNameChanged(const QString &text);
+		void repeatChanged(const QString &text);
+		void initialChanged(const QString &text);
 		void fourVerticesChanged(int state);
 		void autoselectChanged(int state);
 		void nomodifyChanged(int state);
@@ -65,6 +67,8 @@ class Properties : public QDialog, private Ui::PropertiesDialog
 		void detailChanged(int state);
 		void staticWChanged(int state);
 		void enabledChanged(int state);
+		void linkedChanged(int state);
+		void focusChanged(int state);
 };
 
 #endif
