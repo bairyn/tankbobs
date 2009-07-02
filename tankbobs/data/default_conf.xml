@@ -1,7 +1,7 @@
 <config>
 	<client>
 		<audioChunkSize>3072</audioChunkSize>
-		<cameraSpeed>0.8</cameraSpeed>
+		<cameraSpeed>5</cameraSpeed>
 		<fps>128</fps>
 		<musicVolume>0.6</musicVolume>
 		<serverIP>127.0.0.1</serverIP>

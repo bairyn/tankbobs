@@ -381,10 +381,10 @@ function st_play_step(d)
 	if scale > 1 then
 		scale = 1
 	end
-	zoom = common_lerp(zoom, scale, c_config_get("config.client.cameraSpeed") / (d * c_const_get("world_time") * c_config_get("config.game.timescale")))
+	zoom = common_lerp(zoom, scale, math.min(1, d * c_config_get("config.client.cameraSpeed")))
 	gl.Scale(scale, scale, 1)
 
-	camera = common_lerp(camera, tankbobs.m_vec2(-(rightmost + leftmost) / 2, -(uppermost + lowermost) / 2), c_config_get("config.client.cameraSpeed") / (d * c_const_get("world_time") * c_config_get("config.game.timescale")))
+	camera = common_lerp(camera, tankbobs.m_vec2(-(rightmost + leftmost) / 2, -(uppermost + lowermost) / 2), math.min(1, d * c_config_get("config.client.cameraSpeed")))
 	gl.Translate(camera.x, camera.y, 0)
 
 	-- draw tanks and walls
