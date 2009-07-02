@@ -12,6 +12,8 @@ include_directories(${include_dirs})
 
 set(trmc_srcs src/trmc/trmc.c)
 
+set_source_files_properties(${trmc_srcs} PROPERTIES COMPILE_FLAGS "-Wall -Werror -pedantic-errors -ansi")
+
 add_executable(trmc ${trmc_srcs})
 
 set(tankbobs_srcs src/common/m_input.c src/common/m_io.c src/common/m_math.c src/common/m_console.c src/common/m_renderer.c src/common/m_net.c src/common/m_audio.c src/common/m_tankbobs.c src/lib/crossdll.c)

@@ -911,6 +911,10 @@ static int compile(const char *filename)
 					x1 = read_double();
 					y1 = read_double();
 					read_string(powerupsToEnable);
+					linked = read_int();
+					repeat = read_double();
+					initial = read_double();
+					focus = read_int();
 
 					add_powerupSpawnPoint(x1, y1, powerupsToEnable, linked, repeat, initial, focus);
 				}

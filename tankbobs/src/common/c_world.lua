@@ -909,11 +909,11 @@ function c_world_powerupSpawnPoint_step(d, powerupSpawnPoint)
 	local t = tankbobs.t_getTicks()
 	local spawn = false
 
-	if not lastPowerupSpawnTime then
-		lastPowerupSpawnTime = t + c_const_get("world_time") * c_config_get("config.game.timescale") * powerupSpawnPoint.initial - c_const_get("world_time") * c_config_get("config.game.timescale") * powerupSpawnPoint["repeat"]
-	end
-
 	if powerupSpawnPoint.linked then
+		if not lastPowerupSpawnTime then
+			lastPowerupSpawnTime = t + c_const_get("world_time") * c_config_get("config.game.timescale") * powerupSpawnPoint.initial - c_const_get("world_time") * c_config_get("config.game.timescale") * powerupSpawnPoint["repeat"]
+		end
+
 		if not nextPowerupSpawnPoint or powerupSpawnPoint == nextPowerupSpawnPoint then
 			if t >= lastPowerupSpawnTime + c_const_get("world_time") * c_config_get("config.game.timescale") * powerupSpawnPoint["repeat"] then
 				lastPowerupSpawnTime = t
