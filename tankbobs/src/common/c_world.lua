@@ -82,10 +82,6 @@ function c_world_init()
 
 	c_const_set("world_initTime", 5, 1)
 
-	c_const_set("powerupSpawnPoint_initialPowerupTime", 30, 1)
-	c_const_set("powerupSpawnPoint_powerupTime", 30, 1)
-	c_const_set("powerupSpawnPoints_linked", true, 1)
-
 	c_const_set("powerup_lifeTime", 12000, 1)
 	c_const_set("powerup_density", 1E-5, 1)
 	c_const_set("powerup_friction", 0, 1)
