@@ -31,17 +31,19 @@ function c_const_init()
 	local const = {}
 
 	function c_const_get(k)
-		if not const[k] then
+		local cst = const
+
+		if not cst[k] then
 			return nil
 		end
 
 		-- return a proxy table so the real table doesn't change (the clone also handles sub-tables)
-		if type(const[k]["v"]) == "table" then
+		if type(cst[k][1]) == "table" then
 			local t = {}
-			clone(const[k]["v"], t)
+			clone(cst[k][1], t)
 			return t
 		else
-			return const[k]["v"]
+			return cst[k][1]
 		end
 	end
 
@@ -52,12 +54,12 @@ function c_const_init()
 
 		if c_const_get(k) == nil then
 			const[k] = {}
-			const[k]["v"] = v
-			const[k]["c"] = 0
+			const[k][1] = v
+			const[k][2] = 0
 			if c ~= nil and tonumber(c) then
-				const[k]["c"] = tonumber(c)
+				const[k][2] = tonumber(c)
 			end
-		elseif const[k]["c"] <= 0 and const[k]["c"] ~= -1 then
+		elseif const[k][2] <= 0 and const[k][2] ~= -1 then
 			--if c_const_get("const_setError") then
 				--error("attempt to change constant '" .. tostring(k) .. "' from '" .. tostring(c_const_get(k)) .. "' to '" .. tostring(v) .. "'")
 			--end
@@ -65,11 +67,11 @@ function c_const_init()
 				io.stderr:write("Warning: attempt to change constant '" .. tostring(k) .. "' from '" .. tostring(c_const_get(k)) .. "' to '" .. tostring(v) .. "'\n")
 			end
 		else
-			if const[k]["c"] ~= -1 then
-				const[k]["c"] = const[k]["c"] - 1
+			if const[k][2] ~= -1 then
+				const[k][2] = const[k][2] - 1
 			end
 
-			const[k]["v"] = v
+			const[k][1] = v
 		end
 	end
 

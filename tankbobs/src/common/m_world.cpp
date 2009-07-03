@@ -324,7 +324,7 @@ int w_bodies(lua_State *L)
 
 	CHECKWORLD(world, L);
 
-	lua_newtable(L);
+	lua_createtable(L, world->GetBodyCount(), 0);
 
 	int count = 1;
 	for(b2Body *body = world->GetBodyList(); body; body = body->GetNext(), count++)

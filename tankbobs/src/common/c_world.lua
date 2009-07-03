@@ -31,6 +31,15 @@ local common_FTM              = common_FTM
 local common_lerp             = common_lerp
 local c_weapon_fire           = c_weapon_fire
 local tankbobs                = tankbobs
+local t_w_setAngle            = nil
+local t_w_getAngle            = nil
+local t_w_getPosition         = nil
+local t_w_getVertices         = nil
+local t_t_getTicks            = nil
+local t_m_vec2                = nil
+local t_w_getLinearVelocity   = nil
+local t_w_setLinearVelocity   = nil
+local t_w_setAngularVelocity  = nil
 
 local c_world_tank_checkSpawn
 local c_world_tank_step
@@ -40,9 +49,14 @@ local c_world_powerupSpawnPoint_step
 local c_world_powerup_step
 local c_world_tanks
 local c_world_powerups
+local tank_acceleration
+local tank_rotationSpeed
+local tank_rotationSpecialSpeed
+local tank_speedK
+local tank_rotationChangeMinSpeed
+local tank_worldFriction
 
 local worldTime = 0
-local tank_acceleration
 local lastPowerupSpawnTime
 local nextPowerupSpawnPoint
 local worldInitialized = false
@@ -57,6 +71,15 @@ function c_world_init()
 	common_lerp             = _G.common_lerp
 	c_weapon_fire           = _G.c_weapon_fire
 	tankbobs                = _G.tankbobs
+	t_w_setAngle            = _G.tankbobs.w_setAngle
+	t_w_getAngle            = _G.tankbobs.w_getAngle
+	t_w_getPosition         = _G.tankbobs.w_getPosition
+	t_w_getVertices         = _G.tankbobs.w_getVertices
+	t_t_getTicks            = _G.tankbobs.t_getTicks
+	t_m_vec2                = _G.tankbobs.m_vec2
+	t_w_getLinearVelocity   = _G.tankbobs.w_getLinearVelocity
+	t_w_setLinearVelocity   = _G.tankbobs.w_setLinearVelocity
+	t_w_setAngularVelocity  = _G.tankbobs.w_setAngularVelocity
 
 	c_config_cheat_protect("config.game.timescale")
 
@@ -70,8 +93,8 @@ function c_world_init()
 
 	c_const_set("world_timeWrapTest", -99999)
 
-	c_const_set("world_lowerbound", tankbobs.m_vec2(-5, -5), 1)
-	c_const_set("world_upperbound", tankbobs.m_vec2(5, 5), 1)
+	c_const_set("world_lowerbound", t_m_vec2(-5, -5), 1)
+	c_const_set("world_upperbound", t_m_vec2(5, 5), 1)
 
 	c_const_set("world_gravityx", 0, 1) c_const_set("world_gravityy", 0, 1)
 	c_const_set("world_allowSleep", true, 1)
@@ -120,9 +143,11 @@ function c_world_init()
 	}, 1)
 	tank_acceleration = c_const_get("tank_acceleration")
 	c_const_set("tank_speedK", 5, 1)
+	tank_speedK = c_const_get("tank_speedK")
 	c_const_set("tank_density", 2, 1)
 	c_const_set("tank_friction", 0.25, 1)
 	c_const_set("tank_worldFriction", 2 / 1000, 1)  -- damping
+	tank_worldFriction = c_const_get("tank_worldFriction")
 	c_const_set("tank_restitution", 0.4, 1)
 	c_const_set("tank_canSleep", false, 1)
 	c_const_set("tank_isBullet", false, 1)
@@ -139,8 +164,11 @@ function c_world_init()
 	c_const_set("wall_angularDamping", 0, 1)
 	c_const_set("tank_rotationChange", 0.005, 1)
 	c_const_set("tank_rotationChangeMinSpeed", 0.5, 1)  -- if at least 24 ups
+	tank_rotationChangeMinSpeed = c_const_get("tank_rotationChangeMinSpeed")
 	c_const_set("tank_rotationSpeed", c_math_radians(510) / 1000, 1)
+	tank_rotationSpeed = c_const_get("tank_rotationSpeed")
 	c_const_set("tank_rotationSpecialSpeed", c_math_degrees(1) / 3.5, 1)
+	tank_rotationSpecialSpeed = c_const_get("tank_rotationSpecialSpeed")
 	c_const_set("tank_defaultRotation", c_math_radians(90), 1)  -- up
 	c_const_set("tank_boostHealth", 60, 1)
 
@@ -333,10 +361,10 @@ function c_world_newWorld()
 		return
 	end
 
-	local t = tankbobs.t_getTicks()
+	local t = t_t_getTicks()
 
 	local m = c_tcm_current_map
-	tankbobs.w_newWorld(c_const_get("world_lowerbound") + tankbobs.m_vec2(m.leftmost, m.lowermost), c_const_get("world_upperbound") + tankbobs.m_vec2(m.rightmost, m.uppermost), tankbobs.m_vec2(c_const_get("world_gravityx"), c_const_get("world_gravityy")), c_const_get("world_allowSleep"), "c_world_contactListener")
+	tankbobs.w_newWorld(c_const_get("world_lowerbound") + t_m_vec2(m.leftmost, m.lowermost), c_const_get("world_upperbound") + t_m_vec2(m.rightmost, m.uppermost), t_m_vec2(c_const_get("world_gravityx"), c_const_get("world_gravityy")), c_const_get("world_allowSleep"), "c_world_contactListener")
 
 	-- reset powerups
 	lastPowerupSpawnTime = nil
@@ -455,24 +483,34 @@ function c_world_tank_checkSpawn(d, tank)
 	return true
 end
 
+local p1a = {nil, nil, nil}
+local p2a = {nil, nil, nil}
 function c_world_intersection(d, p1, p2, v1, v2)
-	-- detects if two polygons ever collide
+	-- test if two polygons can collide
 
-	local p1h = {}
-	local p2h = {}
-	local p1a = {}
-	local p2a = {}
+	local p1h = {nil, nil, nil}
+	local p2h = {nil, nil, nil}
 
 	tankbobs.t_clone(p1, p1h)
 	tankbobs.t_clone(p2, p2h)
 	tankbobs.t_clone(p1h, p1a)
 	tankbobs.t_clone(p2h, p2a)
 
-	for _, v in pairs(p1a) do
-		v = v + d * v1
+	local lp1a = #p1a
+	for k, v in pairs(p1a) do
+		if k <= lp1a then
+			v = v + d * v1
+		else
+			table.remove(p1a, k)
+		end
 	end
-	for _, v in pairs(p2a) do
-		v = v + d * v2
+	local lp2a = #p2a
+	for k, v in pairs(p2a) do
+		if k <= lp2a then
+			v = v + d * v2
+		else
+			table.remove(p2a, k)
+		end
 	end
 
 	tankbobs.t_clone(p1a, p1h)
@@ -487,7 +525,7 @@ function c_world_tankHull(tank)
 	local p = tank.p[1]
 
 	for _, v in ipairs(tank.h) do  -- ipairs to make sure of proper order
-		local h = tankbobs.m_vec2(v)
+		local h = t_m_vec2(v)
 		h.t = h.t + tank.r
 		table.insert(c, p + h)
 	end
@@ -500,7 +538,7 @@ function c_world_projectileHull(projectile)
 	local p = projectile.p[1]
 
 	for _, v in ipairs(projectile.weapon.projectileHull) do  -- ipairs to make sure of proper order
-		local h = tankbobs.m_vec2(v)
+		local h = t_m_vec2(v)
 		h.t = h.t + projectile.r
 		table.insert(c, p + h)
 	end
@@ -512,7 +550,7 @@ function c_world_powerupHull(powerup)
 	local c = {}
 
 	for i = 1, 4 do
-		local h = tankbobs.m_vec2(c_const_get("powerup_hullx" .. tostring(i)), c_const_get("powerup_hully" .. tostring(i)))
+		local h = t_m_vec2(c_const_get("powerup_hullx" .. tostring(i)), c_const_get("powerup_hully" .. tostring(i)))
 		h.t = h.t + powerup.r
 		table.insert(c, h)
 	end
@@ -525,7 +563,7 @@ function c_world_powerupSpawnPointHull(powerupSpawnPoint)
 	local p = powerupSpawnPoint.p[1]
 
 	for i = 1, 4 do
-		local h = tankbobs.m_vec2(c_const_get("powerup_hullx" .. tostring(i)), c_const_get("powerup_hully" .. tostring(i)))
+		local h = t_m_vec2(c_const_get("powerup_hullx" .. tostring(i)), c_const_get("powerup_hully" .. tostring(i)))
 		--h.t = h.t
 		table.insert(c, p + h)
 	end
@@ -534,7 +572,7 @@ function c_world_powerupSpawnPointHull(powerupSpawnPoint)
 end
 
 function c_world_wallShape(wall)
-	local average = tankbobs.m_vec2(0, 0)
+	local average = t_m_vec2(0, 0)
 	local offsets = {}
 
 	for _, v in pairs(wall.p) do
@@ -553,7 +591,7 @@ function c_world_canPowerupSpawn(d, powerupSpawnPoint)
 	-- make sure it doesn't interfere with another powerup or wall
 	for _, v in pairs(c_tcm_current_map.walls) do
 		if not v.detail then
-			if c_world_intersection(d, c_world_powerupSpawnPointHull(powerupSpawnPoint), v.p, tankbobs.m_vec2(0, 0), v.static and tankbobs.m_vec2(0, 0) or tankbobs.w_getLinearVelocity(v.m.body)) then
+			if c_world_intersection(d, c_world_powerupSpawnPointHull(powerupSpawnPoint), v.p, t_m_vec2(0, 0), v.static and t_m_vec2(0, 0) or t_w_getLinearVelocity(v.m.body)) then
 				return false
 			end
 		end
@@ -561,7 +599,7 @@ function c_world_canPowerupSpawn(d, powerupSpawnPoint)
 
 	for _, v in pairs(c_world_powerups) do
 		if not v.collided then
-			if c_world_intersection(d, c_world_powerupSpawnPointHull(powerupSpawnPoint), c_world_powerupHull(v), tankbobs.m_vec2(0, 0), not v.m.body and tankbobs.m_vec2(0, 0) or tankbobs.w_getLinearVelocity(v.m.body)) then
+			if c_world_intersection(d, c_world_powerupSpawnPointHull(powerupSpawnPoint), c_world_powerupHull(v), t_m_vec2(0, 0), not v.m.body and t_m_vec2(0, 0) or t_w_getLinearVelocity(v.m.body)) then
 				return false
 			end
 		end
@@ -571,7 +609,7 @@ function c_world_canPowerupSpawn(d, powerupSpawnPoint)
 end
 
 function c_world_tank_canSpawn(d, tank)
-	local t = tankbobs.t_getTicks()
+	local t = t_t_getTicks()
 
 	-- make sure the tank hasn't already spawned
 	if tank.exists then
@@ -593,7 +631,7 @@ function c_world_tank_canSpawn(d, tank)
 	-- test if spawning interferes with another tank
 	for _, v in pairs(c_world_tanks) do
 		if v.exists then
-			if c_world_intersection(d, c_world_tankHull(tank), c_world_tankHull(v), tankbobs.m_vec2(0, 0), tankbobs.w_getLinearVelocity(v.body)) then
+			if c_world_intersection(d, c_world_tankHull(tank), c_world_tankHull(v), t_m_vec2(0, 0), t_w_getLinearVelocity(v.body)) then
 				return false
 			end
 		end
@@ -730,7 +768,7 @@ function c_world_tankDie(d, tank, t)
 end
 
 function c_world_tank_step(d, tank)
-	local t = tankbobs.t_getTicks()
+	local t = t_t_getTicks()
 
 	c_world_tank_checkSpawn(d, tank)
 
@@ -742,51 +780,52 @@ function c_world_tank_step(d, tank)
 		return c_world_tankDie(d, tank, t)
 	end
 
-	tank.p[1] = tankbobs.w_getPosition(tank.body)
+	tank.p[1] = t_w_getPosition(tank.body)
 
-	local vel = tankbobs.w_getLinearVelocity(tank.body)
+	local vel = t_w_getLinearVelocity(tank.body)
 
 	if tank.state.special then
 		if tank.state.left then
 			if vel.R < 0 then  -- inverse rotation
-				tank.r = tank.r - c_const_get("tank_rotationSpeed") * vel.R / c_const_get("tank_rotationSpecialSpeed")
+				tank.r = tank.r - tank_rotationSpeed * vel.R / tank_rotationSpecialSpeed
 			else
-				tank.r = tank.r + c_const_get("tank_rotationSpeed") * vel.R / c_const_get("tank_rotationSpecialSpeed")
+				tank.r = tank.r + tank_rotationSpeed * vel.R / tank_rotationSpecialSpeed
 			end
 		end
 
 		if tank.state.right then
 			if vel.R < 0 then  -- inverse rotation
-				tank.r = tank.r + c_const_get("tank_rotationSpeed") * vel.R / c_const_get("tank_rotationSpecialSpeed")
+				tank.r = tank.r + tank_rotationSpeed * vel.R / tank_rotationSpecialSpeed
 			else
-				tank.r = tank.r - c_const_get("tank_rotationSpeed") * vel.R / c_const_get("tank_rotationSpecialSpeed")
+				tank.r = tank.r - tank_rotationSpeed * vel.R / tank_rotationSpecialSpeed
 			end
 		end
 
-		local v = tankbobs.m_vec2()
+		local v = t_m_vec2()
 		v.R = vel.R
 		v.t = tank.r
 
-		tankbobs.w_setLinearVelocity(tank.body, v)
+		t_w_setLinearVelocity(tank.body, v)
 	else
 		if tank.state.forward then
 			-- determine the acceleration
 			local acceleration
+			local speedK = tank_speedK
 
 			for _, v in pairs(tank_acceleration) do  -- local copy of table for optimization
 				if v[2] then
-					if vel.R >= v[2] * c_const_get("tank_speedK") then
+					if vel.R >= v[2] * speedK then
 						acceleration = v[1]
 					end
 				elseif not acceleration then
-					acceleration = v[1] * c_const_get("tank_speedK")
+					acceleration = v[1] * speedK
 				end
 			end
 
-			local newVel = tankbobs.m_vec2(vel)
+			local newVel = t_m_vec2(vel)
 			newVel.R = newVel.R + acceleration
 			newVel.t = tank.r
-			if vel.R >= c_const_get("tank_rotationChangeMinSpeed") * c_const_get("tank_speedK") then
+			if vel.R >= tank_rotationChangeMinSpeed * speedK then
 				-- interpolate in the right direction
 				vel.t    = math.fmod(vel.t, 2 * math.pi)
 				newVel.t = math.fmod(newVel.t, 2 * math.pi)
@@ -798,38 +837,38 @@ function c_world_tank_step(d, tank)
 				newVel.t = common_lerp(vel.t, newVel.t, c_const_get("tank_rotationChange"))
 			end
 
-			tankbobs.w_setLinearVelocity(tank.body, newVel)
+			t_w_setLinearVelocity(tank.body, newVel)
 			vel(newVel)
 		elseif tank.state.back then
 			if vel.R >= c_const_get("tank_decelerationMinSpeed") then
-				local newVel = tankbobs.m_vec2(vel)
+				local newVel = t_m_vec2(vel)
 
 				if newVel.R > 0 then
 					newVel.R = newVel.R - c_const_get("tank_deceleration")
 				end
 
-				tankbobs.w_setLinearVelocity(tank.body, newVel)
+				t_w_setLinearVelocity(tank.body, newVel)
 				vel(newVel)
 			end
 		else
-			local v = tankbobs.w_getLinearVelocity(tank.body)
+			local v = t_w_getLinearVelocity(tank.body)
 
-			v.R = v.R / (1 + c_const_get("tank_worldFriction"))
-			tankbobs.w_setLinearVelocity(tank.body, v)
+			v.R = v.R / (1 + tank_worldFriction)
+			t_w_setLinearVelocity(tank.body, v)
 		end
 
 		if tank.state.left then
-			tank.r = tank.r + c_const_get("tank_rotationSpeed")
+			tank.r = tank.r + tank_rotationSpeed
 		end
 
 		if tank.state.right then
-			tank.r = tank.r - c_const_get("tank_rotationSpeed")
+			tank.r = tank.r - tank_rotationSpeed
 		end
 	end
 
-	tankbobs.w_setAngle(tank.body, tank.r)
+	t_w_setAngle(tank.body, tank.r)
 
-	tankbobs.w_setAngularVelocity(tank.body, 0)  -- reset the tank's angular velocity
+	t_w_setAngularVelocity(tank.body, 0)  -- reset the tank's angular velocity
 
 	-- weapons
 	if tank.state.firing then
@@ -843,7 +882,7 @@ function c_world_tank_step(d, tank)
 end
 
 function c_world_wall_step(d, wall)
-	local t = tankbobs.t_getTicks()
+	local t = t_t_getTicks()
 	local paths = c_tcm_current_map.paths
 
 	if wall.detail or not wall.m.body then
@@ -882,10 +921,11 @@ function c_world_wall_step(d, wall)
 		end
 	end
 
-	tankbobs.w_getVertices(wall.m.body, wall.p)
-	local offset = tankbobs.w_getPosition(wall.m.body)
+	t_w_getVertices(wall.m.body, wall.p)
+	local offset = t_w_getPosition(wall.m.body)
+	local angle = t_w_getAngle(wall.m.body)
 	for _, v in pairs(wall.p) do
-		v.t = v.t + tankbobs.w_getAngle(wall.m.body)
+		v.t = v.t + angle
 		v:add(offset)
 	end
 end
@@ -898,12 +938,12 @@ function c_world_projectile_step(d, projectile)
 		return
 	end
 
-	projectile.p[1] = tankbobs.w_getPosition(projectile.m.body)
-	projectile.r = tankbobs.w_getAngle(projectile.m.body)
+	projectile.p[1] = t_w_getPosition(projectile.m.body)
+	projectile.r = t_w_getAngle(projectile.m.body)
 end
 
 function c_world_powerupSpawnPoint_step(d, powerupSpawnPoint)
-	local t = tankbobs.t_getTicks()
+	local t = t_t_getTicks()
 	local spawn = false
 
 	if powerupSpawnPoint.linked then
@@ -997,10 +1037,10 @@ function c_world_powerupSpawnPoint_step(d, powerupSpawnPoint)
 
 			powerup.m.body = tankbobs.w_addBody(powerup.p[1], 0, c_const_get("powerup_canSleep"), c_const_get("powerup_isBullet"), c_const_get("powerup_linearDamping"), c_const_get("powerup_angularDamping"), c_world_powerupHull(powerup), c_const_get("powerup_density"), c_const_get("powerup_friction"), c_const_get("powerup_restitution"), not c_const_get("powerup_static"))
 			-- add some initial push to the powerup
-			local push = tankbobs.m_vec2()
+			local push = t_m_vec2()
 			push.R = c_const_get("powerup_pushStrength")
 			push.t = c_const_get("powerup_pushAngle")
-			tankbobs.w_setLinearVelocity(powerup.m.body, push)
+			t_w_setLinearVelocity(powerup.m.body, push)
 
 			c_tcm_current_map.powerupSpawnPoints[1].m.lastSpawnTime = worldTime
 		end
@@ -1020,7 +1060,7 @@ function c_world_powerup_pickUp(tank, powerup)
 		return
 	end
 
-	local t = tankbobs.t_getTicks()
+	local t = t_t_getTicks()
 	local powerupType = c_world_getPowerupTypeByName(powerup.typeName)
 
 	if powerup.collided then
@@ -1058,7 +1098,7 @@ function c_world_powerup_pickUp(tank, powerup)
 end
 
 function c_world_powerup_step(d, powerup)
-	local t = tankbobs.t_getTicks()
+	local t = t_t_getTicks()
 
 	if powerup.collided then
 		tankbobs.w_removeBody(powerup.m.body)
@@ -1070,18 +1110,18 @@ function c_world_powerup_step(d, powerup)
 		powerup.collided = true
 	end
 
-	powerup.p[1] = tankbobs.w_getPosition(powerup.m.body)
-	--tankbobs.w_setAngle(powerup.m.body, 0)  -- looks better with dynamic rotation
-	powerup.r = tankbobs.w_getAngle(powerup.m.body)
+	powerup.p[1] = t_w_getPosition(powerup.m.body)
+	--t_w_setAngle(powerup.m.body, 0)  -- looks better with dynamic rotation
+	powerup.r = t_w_getAngle(powerup.m.body)
 
 	-- keep powerup velocity constant
-	local vel = tankbobs.w_getLinearVelocity(powerup.m.body)
+	local vel = t_w_getLinearVelocity(powerup.m.body)
 	vel.R = c_const_get("powerup_pushStrength")
-	tankbobs.w_setLinearVelocity(powerup.m.body, vel)
+	t_w_setLinearVelocity(powerup.m.body, vel)
 
 	for _, v in pairs(c_world_tanks) do
 		if v.exists then
-			if c_world_intersection(d, c_world_powerupHull(powerup), c_world_tankHull(v), tankbobs.m_vec2(0, 0), tankbobs.w_getLinearVelocity(v.body)) then
+			if c_world_intersection(d, c_world_powerupHull(powerup), c_world_tankHull(v), t_m_vec2(0, 0), t_w_getLinearVelocity(v.body)) then
 				c_world_powerup_pickUp(v, powerup)
 			end
 		end
@@ -1124,7 +1164,7 @@ end
 
 local c_world_tankDamage = c_world_tankDamage
 local function c_world_collide(tank, normal)
-	local vel = tankbobs.w_getLinearVelocity(tank.body)
+	local vel = t_w_getLinearVelocity(tank.body)
 	local component = vel * -normal
 
 	if component >= c_const_get("tank_damageMinSpeed") then
@@ -1135,7 +1175,7 @@ local function c_world_collide(tank, normal)
 		end
 	end
 
-	tank.m.lastCollideTime = tankbobs.t_getTicks()
+	tank.m.lastCollideTime = t_t_getTicks()
 	tank.m.intensity = component / c_const_get("tank_intensityMaxSpeed")
 	if tank.m.intensity > 1 then
 		tank.m.intensity = 1
@@ -1214,9 +1254,9 @@ function c_world_contactListener(shape1, shape2, body1, body2, position, separat
 end
 
 local function c_world_private_resetWorldTimers()
-	local t = tankbobs.t_getTicks()
+	local t = t_t_getTicks()
 
-	worldTime = tankbobs.t_getTicks()
+	worldTime = t_t_getTicks()
 
 	for _, v in pairs(c_world_tanks) do
 		v.lastFireTime = t
@@ -1236,7 +1276,7 @@ local function c_world_private_resetWorldTimers()
 end
 
 local function c_world_private_offsetWorldTimers(d)
-	worldTime = tankbobs.t_getTicks()
+	worldTime = t_t_getTicks()
 
 	for _, v in pairs(c_world_tanks) do
 		v.lastFireTime = v.lastFireTime + d
@@ -1288,7 +1328,7 @@ function c_world_setIterations()
 end
 
 function c_world_step(d)
-	local t = tankbobs.t_getTicks()
+	local t = t_t_getTicks()
 	local f = 1 / (c_const_get("world_time") * c_config_get("config.game.timescale"))
 
 	if worldInitialized then
