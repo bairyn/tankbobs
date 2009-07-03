@@ -92,7 +92,7 @@ if [ "$1" == "make" ]; then
 	if [ $skipc == 0 ]; then
 		if [ $debug == 0 ]; then
 			if [ $nojit == 0 ]; then
-				if ! cmake -D CMAKE_BUILD_TYPE=Release ${CMAKEFLAGS} ./../; then
+				if ! cmake -D CMAKE_BUILD_TYPE=Release -D NOJIT=False ${CMAKEFLAGS} ./../; then
 					exit 1
 				fi
 			else
@@ -102,7 +102,7 @@ if [ "$1" == "make" ]; then
 			fi
 		else
 			if [ $nojit == 0 ]; then
-				if ! cmake -D CMAKE_BUILD_TYPE=Debug ${CMAKEFLAGS} -D TDEBUG=TRUE ./../; then
+				if ! cmake -D CMAKE_BUILD_TYPE=Debug -D NOJIT=False ${CMAKEFLAGS} -D TDEBUG=TRUE ./../; then
 					exit 1
 				fi
 			else
@@ -147,7 +147,7 @@ else
 	if [ $skipc == 0 ]; then
 		if [ $debug == 0 ]; then
 			if [ $nojit == 0 ]; then
-				if ! cmake -D CMAKE_BUILD_TYPE=Release ${CMAKEFLAGS} ./../; then
+				if ! cmake -D CMAKE_BUILD_TYPE=Release -D NOJIT=False ${CMAKEFLAGS} ./../; then
 					exit 1
 				fi
 			else
@@ -157,7 +157,7 @@ else
 			fi
 		else
 			if [ $nojit == 0 ]; then
-				if ! cmake -D CMAKE_BUILD_TYPE=Debug ${CMAKEFLAGS} ./../; then
+				if ! cmake -D CMAKE_BUILD_TYPE=Debug -D NOJIT=False ${CMAKEFLAGS} ./../; then
 					exit 1
 				fi
 			else
