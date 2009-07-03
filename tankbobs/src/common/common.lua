@@ -28,8 +28,10 @@ function common_nil(...)
 end
 
 function common_init()
-	require "jit.opt".start()
-	require "jit.opt_inline".start()
+	if jit then
+		require "jit.opt".start()
+		require "jit.opt_inline".start()
+	end
 
 	require "libmtankbobs"
 	tankbobs.t_initialize("common_interrupt", client and not server)
@@ -41,6 +43,14 @@ function common_init()
 	-- remove debug if debugging isn't enabled for security reasons
 	if not c_const_get("debug") then
 		debug = nil
+	end
+
+	if c_const_get("debug") then
+		if jit then
+			print("JIT enabled")
+		else
+			print("JIT disabled")
+		end
 	end
 
 	c_module_init()

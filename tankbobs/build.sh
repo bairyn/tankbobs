@@ -20,6 +20,7 @@ cd ./build
 
 debug=0
 skipc=0
+nojit=0
 
 if [ "$1" == "-d" ]; then
 	debug=1
@@ -33,6 +34,11 @@ fi
 
 if [ "$1" == "-d" ]; then
 	debug=1
+	shift
+fi
+
+if [ "$1" == "-o" ]; then
+	nojit=1
 	shift
 fi
 
@@ -85,12 +91,24 @@ if [ "$1" == "make" ]; then
 	cd ./build/
 	if [ $skipc == 0 ]; then
 		if [ $debug == 0 ]; then
-			if ! cmake -D CMAKE_BUILD_TYPE=Release ${CMAKEFLAGS} ./../; then
-				exit 1
+			if [ $nojit == 0 ]; then
+				if ! cmake -D CMAKE_BUILD_TYPE=Release ${CMAKEFLAGS} ./../; then
+					exit 1
+				fi
+			else
+				if ! cmake -D CMAKE_BUILD_TYPE=Release -D NOJIT=True ${CMAKEFLAGS} ./../; then
+					exit 1
+				fi
 			fi
 		else
-			if ! cmake -D CMAKE_BUILD_TYPE=Debug ${CMAKEFLAGS} -D TDEBUG=TRUE ./../; then
-				exit 1
+			if [ $nojit == 0 ]; then
+				if ! cmake -D CMAKE_BUILD_TYPE=Debug ${CMAKEFLAGS} -D TDEBUG=TRUE ./../; then
+					exit 1
+				fi
+			else
+				if ! cmake -D CMAKE_BUILD_TYPE=Debug -D NOJIT=True ${CMAKEFLAGS} -D TDEBUG=TRUE ./../; then
+					exit 1
+				fi
 			fi
 		fi
 	fi
@@ -122,18 +140,30 @@ if [ "$1" == "make" ]; then
 		echo -ne "Warning: level compiler not built\n"
 	fi
 elif [ "$1" == "-h" ]; then
-	echo -ne "Usage: $0 (-d to debug) (-n to skip cmake) make (options)\nuse make VERBOSE=1 for verbose output\n"
+	echo -ne "Usage: $0 (-d to debug) (-n to skip cmake) (-o to disable jit) make (options)\nUse make VERBOSE=1 for verbose output\nOptions need to be in order\n"
 else
 	# just cmake
 
 	if [ $skipc == 0 ]; then
 		if [ $debug == 0 ]; then
-			if ! cmake -D CMAKE_BUILD_TYPE=Release ${CMAKEFLAGS} ./../; then
-				exit 1
+			if [ $nojit == 0 ]; then
+				if ! cmake -D CMAKE_BUILD_TYPE=Release ${CMAKEFLAGS} ./../; then
+					exit 1
+				fi
+			else
+				if ! cmake -D CMAKE_BUILD_TYPE=Release -D NOJIT=True ${CMAKEFLAGS} ./../; then
+					exit 1
+				fi
 			fi
 		else
-			if ! cmake -D CMAKE_BUILD_TYPE=Debug ${CMAKEFLAGS} ./../; then
-				exit 1
+			if [ $nojit == 0 ]; then
+				if ! cmake -D CMAKE_BUILD_TYPE=Debug ${CMAKEFLAGS} ./../; then
+					exit 1
+				fi
+			else
+				if ! cmake -D CMAKE_BUILD_TYPE=Release -D NOJIT=True ${CMAKEFLAGS} ./../; then
+					exit 1
+				fi
 			fi
 		fi
 	fi

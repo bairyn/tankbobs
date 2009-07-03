@@ -25,6 +25,7 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdio.h>
 #include "common.h"
 
+#ifndef NOJIT
 static const luaL_Reg lualibs[] =
 {
 	{"", luaopen_base},
@@ -50,6 +51,7 @@ LUALIB_API void luaL_openlibs (lua_State *L)
 		lua_call(L, 1, 0);
 	}
 }
+#endif
 
 int main(int argc, char **argv)
 {

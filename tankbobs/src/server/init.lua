@@ -27,8 +27,10 @@ function init()
 	server = true
 	client = false
 
-	jit.on(true, true)
-	assert(jit.compilesub(true, true) == nil)
+	if jit then
+		jit.on(true, true)
+		assert(jit.compilesub(true, true) == nil)
+	end
 
 	common_init()
 
@@ -46,5 +48,7 @@ function init()
 
 	common_done()
 
-	jit.off(true, true)
+	if jit then
+		jit.off(true, true)
+	end
 end
