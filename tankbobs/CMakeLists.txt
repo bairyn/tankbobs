@@ -31,6 +31,7 @@ endif(CMAKE_BUILD_TYPE MATCHES Debug)
 
 set_source_files_properties(${tankbobs_srcs} PROPERTIES COMPILE_FLAGS "-Wall -Werror -pedantic-errors -ansi -DLUA_USE_LINUX")
 
+include_directories(${include_dirs})
 link_directories(${tankbobs_libdirs})
 add_library(mtankbobs SHARED ${tankbobs_srcs} ${tankbobs_Box2D_srcs})
 target_link_libraries(mtankbobs ${tankbobs_libs})
@@ -40,6 +41,7 @@ set_source_files_properties(${client_srcs} PROPERTIES COMPILE_FLAGS "-Wall -Werr
 set(client_srcs src/client/client.c)
 set(client_libdirs ../src/lib/LuaJIT/src)
 
+include_directories(${include_dirs})
 link_directories(${client_libdirs})
 add_executable(tankbobs ${client_srcs})
 target_link_libraries(tankbobs lua m dl)
@@ -49,6 +51,7 @@ set(server_libdirs ../src/lib/LuaJIT/src)
 
 set_source_files_properties(${server_srcs} PROPERTIES COMPILE_FLAGS "-Wall -Werror -pedantic-errors -ansi -DLUA_USE_LINUX")
 
+include_directories(${include_dirs})
 link_directories(${server_libdirs})
 add_executable(tankbobs-server ${server_srcs})
 target_link_libraries(tankbobs-server lua m dl)

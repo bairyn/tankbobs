@@ -19,11 +19,8 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 --[[
 c_world.lua
 
-world and physics
+World and physics
 --]]
-
---TODO: knockback and damage for hitting world.  A powerup will protect the front.  another will protect the back and sides.  Each will do so in exchange for a slight decrease in acceleration.
---TODO: damage is noticeably higher in special mode.
 
 local c_config_set            = c_config_set
 local c_config_get            = c_config_get
@@ -73,6 +70,9 @@ function c_world_init()
 
 	c_const_set("world_timeWrapTest", -99999)
 
+	c_const_set("world_lowerbound", tankbobs.m_vec2(-5, -5), 1)
+	c_const_set("world_upperbound", tankbobs.m_vec2(5, 5), 1)
+
 	c_const_set("world_gravityx", 0, 1) c_const_set("world_gravityy", 0, 1)
 	c_const_set("world_allowSleep", true, 1)
 
@@ -85,7 +85,7 @@ function c_world_init()
 	c_const_set("powerup_friction", 0, 1)
 	c_const_set("powerup_restitution", 1, 1)
 	c_const_set("powerup_canSleep", false, 1)
-	c_const_set("powerup_isBullet", true, 1)
+	c_const_set("powerup_isBullet", false, 1)
 	c_const_set("powerup_linearDamping", 0, 1)
 	c_const_set("powerup_angularDamping", 0, 1)
 	c_const_set("powerup_pushStrength", 16, 1)
@@ -125,7 +125,7 @@ function c_world_init()
 	c_const_set("tank_worldFriction", 2 / 1000, 1)  -- damping
 	c_const_set("tank_restitution", 0.4, 1)
 	c_const_set("tank_canSleep", false, 1)
-	c_const_set("tank_isBullet", true, 1)
+	c_const_set("tank_isBullet", false, 1)
 	c_const_set("tank_linearDamping", 0, 1)
 	c_const_set("tank_angularDamping", 0, 1)
 	c_const_set("tank_spawnTime", 0.75, 1)
@@ -134,7 +134,7 @@ function c_world_init()
 	c_const_set("wall_friction", 0.25, 1)  -- deceleration caused by friction (~speed *= 1 - friction)
 	c_const_set("wall_restitution", 0.2, 1)
 	c_const_set("wall_canSleep", true, 1)
-	c_const_set("wall_isBullet", true, 1)
+	c_const_set("wall_isBullet", false, 1)
 	c_const_set("wall_linearDamping", 0, 1)
 	c_const_set("wall_angularDamping", 0, 1)
 	c_const_set("tank_rotationChange", 0.005, 1)
@@ -336,7 +336,7 @@ function c_world_newWorld()
 	local t = tankbobs.t_getTicks()
 
 	local m = c_tcm_current_map
-	tankbobs.w_newWorld(tankbobs.m_vec2(m.leftmost, m.lowermost), tankbobs.m_vec2(m.rightmost, m.uppermost), tankbobs.m_vec2(c_const_get("world_gravityx"), c_const_get("world_gravityy")), c_const_get("world_allowSleep"), "c_world_contactListener")
+	tankbobs.w_newWorld(c_const_get("world_lowerbound") + tankbobs.m_vec2(m.leftmost, m.lowermost), c_const_get("world_upperbound") + tankbobs.m_vec2(m.rightmost, m.uppermost), tankbobs.m_vec2(c_const_get("world_gravityx"), c_const_get("world_gravityy")), c_const_get("world_allowSleep"), "c_world_contactListener")
 
 	-- reset powerups
 	lastPowerupSpawnTime = nil

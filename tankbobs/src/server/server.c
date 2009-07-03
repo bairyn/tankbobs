@@ -76,8 +76,11 @@ int main(int argc, char **argv)
 	if((err = lua_pcall(L, 0, 0, 0)))
 	{
 		const char *message = lua_tostring(L, -1);
+
 		fprintf(stderr, "Error: %s\n", message);
+
 		return err;
 	}
+
 	return 0;
 }
