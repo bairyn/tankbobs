@@ -882,7 +882,7 @@ function c_world_wall_step(d, wall)
 		end
 	end
 
-	wall.p = tankbobs.w_getVertices(wall.m.body)
+	tankbobs.w_getVertices(wall.m.body, wall.p)
 	local offset = tankbobs.w_getPosition(wall.m.body)
 	for _, v in pairs(wall.p) do
 		v.t = v.t + tankbobs.w_getAngle(wall.m.body)

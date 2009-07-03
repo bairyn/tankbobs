@@ -23,6 +23,7 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 #include <SDL/SDL_image.h>
 #include <SDL/SDL_endian.h>
 #include <cmath>
+#include <assert.h>
 
 extern "C"
 {
@@ -996,9 +997,13 @@ int w_getVertices(lua_State *L)
 	CHECKWORLD(world, L);
 
 	b2Body *body = reinterpret_cast<b2Body *>(lua_touserdata(L, 1));
-	lua_pop(L, 1);
+	lua_remove(L, 1);
 
-	lua_newtable(L);
+	if(!lua_istable(L, -1))
+	{
+		lua_pushliteral(L, "no table passed to \n");
+		lua_error(L);
+	}
 
 	for(b2Shape *bshape = body->GetShapeList(); bshape; bshape = bshape->GetNext())
 	{
@@ -1008,18 +1013,17 @@ int w_getVertices(lua_State *L)
 		for(int i = 0; i < shape->GetVertexCount(); i++)
 		{
 			lua_pushinteger(L, i + 1);
-			vec2_t *v = reinterpret_cast<vec2_t *>(lua_newuserdata(L, sizeof(vec2_t)));
-
-			luaL_getmetatable(L, MATH_METATABLE);
-			lua_setmetatable(L, -2);
+			lua_gettable(L, -2);
+			vec2_t *v = CHECKVEC(L, -1);
+			lua_pop(L, 1);
 
 			v->x = vertices[i].x;
 			v->y = vertices[i].y;
 			MATH_POLAR(*v);
-
-			lua_settable(L, -3);
 		}
 	}
 
-	return 1;
+	lua_pop(L, 1);
+
+	return 0;
 }
