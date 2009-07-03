@@ -5,6 +5,7 @@
 
 SERVER_SRCS="src/common/common.lua src/common/c_config.lua src/common/c_const.lua src/common/c_data.lua src/common/c_math.lua src/common/c_mods.lua src/common/c_module.lua src/common/c_state.lua src/common/c_tcm.lua src/common/c_weapon.lua src/common/c_world.lua src/common/lom.lua src/server/init.lua src/server/main.lua src/server/commands.lua src/server/client.lua src/server/st_main.lua"
 CLIENT_SRCS="src/common/common.lua src/common/c_config.lua src/common/c_const.lua src/common/c_data.lua src/common/c_math.lua src/common/c_mods.lua src/common/c_module.lua src/common/c_state.lua src/common/c_tcm.lua src/common/c_weapon.lua src/common/c_world.lua src/common/lom.lua src/client/gui.lua src/client/init.lua src/client/main.lua src/client/renderer.lua src/client/st_exit.lua src/client/st_help.lua src/client/st_level.lua src/client/st_internet.lua src/client/st_online.lua src/client/st_manual.lua src/client/st_options.lua src/client/st_play.lua src/client/st_selected.lua src/client/st_set.lua src/client/st_title.lua"
+OPT_SRCS="src/lib/LuaJIT/jit/opt.lua src/lib/LuaJIT/jit/opt_inline.lua"
 DATA="CHANGELOG COPYING data mod-client mod-server NOTICE"
 
 cd `dirname $0`
@@ -61,8 +62,24 @@ if [ "$1" == "make" ]; then
 		fi
 	fi
 
-	# build Box2D manually
-	make -C ./src/lib/Box2D/Source CXXFLAGS="-g -O2 -fPIC"
+	# build Box2D and luaJIT manually
+	if [ $debug == 0 ]; then
+		make -C ./src/lib/Box2D/Source CXXFLAGS="-O2 -fPIC"
+		make -C ./src/lib/LuaJIT linux
+		if ! [ -d "./build/jit" ]; then
+			mkdir ./build/jit
+		fi
+		cp ./src/lib/LuaJIT/jit/opt.lua ./build/jit/
+		cp ./src/lib/LuaJIT/jit/opt_inline.lua ./build/jit/
+	else
+		make -C ./src/lib/Box2D/Source CXXFLAGS="-g -fPIC"
+		make -C ./src/lib/LuaJIT linux
+		if ! [ -d "./build/jit" ]; then
+			mkdir ./build/jit
+		fi
+		cp ./src/lib/LuaJIT/jit/opt.lua ./build/jit/
+		cp ./src/lib/LuaJIT/jit/opt_inline.lua ./build/jit/
+	fi
 
 	# build tankbobs
 	cd ./build/

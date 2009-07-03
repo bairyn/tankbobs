@@ -26,16 +26,6 @@ interface to modules
 function c_module_init()
 	c_module_init = nil
 
-	print("Tankbobs v" .. c_const_get("version") .. " startup")
-end
-
-function c_module_done()
-	print("Tankbobs v" .. c_const_get("version") .. " shutdown")
-
-	c_module_done = nil
-end
-
-function c_module_load(mod)
 	if tankbobs.t_isWindows() then
 		if tankbobs.t_is64Bit() then
 			package.cpath = c_const_get("module64-win_dir") .. "?.dll" .. ";" .. package.cpath
@@ -49,5 +39,16 @@ function c_module_load(mod)
 			package.cpath = c_const_get("module_dir") .. "?.so" .. ";" .. package.cpath
 		end
 	end
-	require(mod)
+
+	print("Tankbobs v" .. c_const_get("version") .. " startup")
+end
+
+function c_module_done()
+	print("Tankbobs v" .. c_const_get("version") .. " shutdown")
+
+	c_module_done = nil
+end
+
+function c_module_load(mod)
+	return require(mod)
 end

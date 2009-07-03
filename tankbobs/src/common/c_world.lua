@@ -73,8 +73,6 @@ function c_world_init()
 
 	c_const_set("world_timeWrapTest", -99999)
 
-	c_const_set("world_lowerBoundx", -9999, 1) c_const_set("world_lowerBoundy", -9999, 1)
-	c_const_set("world_upperBoundx",  9999, 1) c_const_set("world_upperBoundy",  9999, 1)
 	c_const_set("world_gravityx", 0, 1) c_const_set("world_gravityy", 0, 1)
 	c_const_set("world_allowSleep", true, 1)
 
@@ -337,7 +335,8 @@ function c_world_newWorld()
 
 	local t = tankbobs.t_getTicks()
 
-	tankbobs.w_newWorld(tankbobs.m_vec2(c_const_get("world_lowerBoundx"), c_const_get("world_lowerBoundy")), tankbobs.m_vec2(c_const_get("world_upperBoundx"), c_const_get("world_upperBoundy")), tankbobs.m_vec2(c_const_get("world_gravityx"), c_const_get("world_gravityy")), c_const_get("world_allowSleep"), "c_world_contactListener")
+	local m = c_tcm_current_map
+	tankbobs.w_newWorld(tankbobs.m_vec2(m.leftmost, m.lowermost), tankbobs.m_vec2(m.rightmost, m.uppermost), tankbobs.m_vec2(c_const_get("world_gravityx"), c_const_get("world_gravityy")), c_const_get("world_allowSleep"), "c_world_contactListener")
 
 	-- reset powerups
 	lastPowerupSpawnTime = nil
@@ -359,7 +358,7 @@ function c_world_newWorld()
 	end
 
 	for k, v in pairs(c_tcm_current_map.powerupSpawnPoints) do
-		v.m.nextPowerupTime = t + c_const_get("world_time") * c_config_get("config.game.timescale") * c_const_get("powerupSpawnPoint_initialPowerupTime")
+		v.m.nextPowerupTime = t + c_const_get("world_time") * c_config_get("config.game.timescale") * v.initial
 		local enabled = false
 		for k, vs in pairs(v.enabledPowerups) do
 			if vs then
@@ -391,6 +390,8 @@ function c_world_freeWorld()
 	worldInitialized = false
 
 	tankbobs.w_freeWorld()
+
+	c_tcm_unload_extra_data(false)
 
 	c_world_powerups = {}
 	c_world_tanks = {}

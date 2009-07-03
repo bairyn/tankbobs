@@ -28,6 +28,9 @@ function common_nil(...)
 end
 
 function common_init()
+	require "jit.opt".start()
+	require "jit.opt_inline".start()
+
 	require "libmtankbobs"
 	tankbobs.t_initialize("common_interrupt", client and not server)
 
