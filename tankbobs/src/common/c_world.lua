@@ -963,21 +963,29 @@ function c_world_wall_step(d, wall)
 						tankbobs.w_setPosition(wall.m.body, common_lerp(wall.m.startpos, wall.m.startpos + path.p[1] - prevPath.p[1], wall.m.ppos))
 					else
 						wall.m.ppid = wall.m.pid + 1
-						wall.m.startpos = t_m_vec2(c_world_wallShape(wall)[1])
+						wall.m.startpos(c_world_wallShape(wall)[1])
 						wall.m.pid = path.t
 						wall.m.ppos = 0
 					end
 				end
 			end
-		end
-	end
 
-	t_w_getVertices(wall.m.body, wall.p)
-	local offset = t_w_getPosition(wall.m.body)
-	local angle = t_w_getAngle(wall.m.body)
-	for _, v in pairs(wall.p) do
-		v.t = v.t + angle
-		v:add(offset)
+			t_w_getVertices(wall.m.body, wall.p)
+			local offset = t_w_getPosition(wall.m.body)
+			local angle = t_w_getAngle(wall.m.body)
+			for _, v in pairs(wall.p) do
+				v.t = v.t + angle
+				v:add(offset)
+			end
+		end
+	else
+		t_w_getVertices(wall.m.body, wall.p)
+		local offset = t_w_getPosition(wall.m.body)
+		local angle = t_w_getAngle(wall.m.body)
+		for _, v in pairs(wall.p) do
+			v.t = v.t + angle
+			v:add(offset)
+		end
 	end
 end
 
