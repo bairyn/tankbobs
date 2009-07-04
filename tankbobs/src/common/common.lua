@@ -123,9 +123,20 @@ function common_endsIn(str, match)
 	return match == "" or str:sub(-match:len()) == match
 end
 
+-- NOTE: This function is very slow and creates much garbage.  Use the C implementation of tankbobs.t_clone instead
+
 -- traverse i into o
 -- if the output table exists, any values that are not overwritten from the input table will remain unchanged
-function common_clone(i, o)
+function common_clone(c, i, o)
+	local copyVectors = false
+
+	if not o then
+		o = i
+		i = c
+	else
+		copyVectors = c
+	end
+
 	local cloned_tables = {}
 
 	o = o or {}
@@ -152,7 +163,16 @@ function common_clone(i, o)
 					clone_level(v, o[k])
 				end
 			else
-				o[k] = v
+				if copyVectors and type(v) == "userdata" and v.vec2 then
+					local vec = c_math_vec2:new()
+
+					vec.x = v.x
+					vec.y = v.y
+					--vec.R = vec.R
+					--vec.t = vec.t
+				else
+					o[k] = v
+				end
 			end
 		end
 

@@ -682,7 +682,7 @@ function c_world_tank_canSpawn(d, tank)
 	-- test if spawning interferes with another tank
 	for _, v in pairs(c_world_tanks) do
 		if v.exists then
-			if c_world_intersection(d, t_t_clone(c_world_tankHull(tank)), t_t_clone(c_world_tankHull(v)), t_m_vec2(0, 0), t_w_getLinearVelocity(v.body)) then
+			if c_world_intersection(d, t_t_clone(true, c_world_tankHull(tank)), t_t_clone(c_world_tankHull(v)), t_m_vec2(0, 0), t_w_getLinearVelocity(v.body)) then
 				return false
 			end
 		end
@@ -1172,7 +1172,7 @@ function c_world_powerup_step(d, powerup)
 
 	for _, v in pairs(c_world_tanks) do
 		if v.exists then
-			if c_world_intersection(d, c_world_powerupHull(powerup), t_t_clone(c_world_tankHull(v)), t_m_vec2(0, 0), t_w_getLinearVelocity(v.body)) then
+			if c_world_intersection(d, c_world_powerupHull(powerup), c_world_tankHull(v), t_m_vec2(0, 0), t_w_getLinearVelocity(v.body)) then
 				c_world_powerup_pickUp(v, powerup)
 			end
 		end

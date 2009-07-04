@@ -20,7 +20,7 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 --[[
 math.lua
 
-a slower alternative to the module's math for mods.
+math
 --]]
 
 function c_math_init()
@@ -39,6 +39,8 @@ function c_math_degrees(radians)
 	return radians * 180 / math.pi
 end
 
+-- NOTE: This class is slow and creates much garbage.  Use the C implementation of tankbobs.m_vec2 instead
+
 c_math_vec2 =
 {
 	self =
@@ -53,6 +55,7 @@ c_math_vec2 =
 		o = o or {}  --  create table if user does not provide one
 		setmetatable(o, self)
 		o.i = self
+		o.vec2 = true
 		o.self = {}  -- initialize the values
 		o.self.x, o.self.y, o.self.R, o.self.t = 0, 0, 0, 0  -- initialize the values
 		return o

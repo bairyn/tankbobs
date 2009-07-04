@@ -320,7 +320,7 @@ static const void **nextTable;
 static table_t *lastDynTable;
 static int tableDynMem = FALSE;
 
-static void t_cloneTable(lua_State *L)
+static void t_cloneTable(lua_State *L, int copyVectors)
 {
 	/* see if any of the tables has already been traversed to avoid circular references */
 
@@ -476,15 +476,38 @@ static void t_cloneTable(lua_State *L)
 					continue;
 				}
 			}
-			t_cloneTable(L);
+			t_cloneTable(L, copyVectors);
 			lua_pop(L, 2);
 		}
 		else
 		{
-			lua_pushvalue(L, -2);
-			lua_pushvalue(L, -2);
-			lua_settable(L, -5);
-			lua_pop(L, 1);
+			if(copyVectors && ISVEC(L, -1))
+			{
+				vec2_t *v;
+				const vec2_t *v2;
+
+				v2 = CHECKVEC(L, -1);
+				lua_pop(L, 1);
+
+				v = lua_newuserdata(L, sizeof(vec2_t));
+
+				luaL_getmetatable(L, MATH_METATABLE);
+				lua_setmetatable(L, -2);
+
+				memcpy(v, v2, sizeof(vec2_t));
+
+				lua_pushvalue(L, -2);
+				lua_pushvalue(L, -2);
+				lua_settable(L, -5);
+				lua_pop(L, 1);
+			}
+			else
+			{
+				lua_pushvalue(L, -2);
+				lua_pushvalue(L, -2);
+				lua_settable(L, -5);
+				lua_pop(L, 1);
+			}
 		}
 	}
 
@@ -493,7 +516,16 @@ static void t_cloneTable(lua_State *L)
 
 int t_clone(lua_State *L)
 {
+	int copyVectors = FALSE;
+
 	CHECKINIT(init, L);
+
+	if(lua_isboolean(L, 1))
+	{
+		copyVectors = lua_toboolean(L, 1);
+
+		lua_remove(L, 1);
+	}
 
 	if(!lua_istable(L, 1))
 	{
@@ -513,7 +545,7 @@ int t_clone(lua_State *L)
 
 	nextTable = &traversedTables[0];
 
-	t_cloneTable(L);
+	t_cloneTable(L, copyVectors);
 
 	if(tableDynMem)
 	{
@@ -562,6 +594,7 @@ static const struct luaL_Reg tankbobs[] =
 			If the fifth argument passed is true, two escape sequences will be recognized:
 			\\ -> \; \" -> ".  This is useful if you want unrecognized "'s in the passed string */
 	{"t_clone", t_clone}, /* clone the first passed table into the second passed table */
+		/* If the first argument is a boolean, it determines whether all vectors are copied */
 
 	/* m_input.c */
 	{"in_getEvents", in_getEvents}, /* store events in a userdata */

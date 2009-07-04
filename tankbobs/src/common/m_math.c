@@ -113,20 +113,14 @@ int m_vec2(lua_State *L)  /* similar to c_math.lua's vec2:new() but can take arg
 
 		v = lua_newuserdata(L, sizeof(vec2_t));
 
-		v->x = v2->x;
-		v->y = v2->y;
-		v->R = v2->R;
-		v->t = v2->t;
+		memcpy(v, v2, sizeof(vec2_t));
 	}
 	else
 	{
 		/* new vec2 */
 		v = lua_newuserdata(L, sizeof(vec2_t));
 
-		v->x = 0.0;
-		v->y = 0.0;
-		v->R = 0.0;
-		v->t = 0.0;
+		memset(v, 0x00, sizeof(vec2_t));
 	}
 
 	luaL_getmetatable(L, MATH_METATABLE);
@@ -570,10 +564,7 @@ int m_vec2_call(lua_State *L)
 
 		v2 = CHECKVEC(L, 2);
 
-		v->x = v2->x;
-		v->y = v2->y;
-		v->R = v2->R;
-		v->t = v2->t;
+		memcpy(v, v2, sizeof(vec2_t));
 	}
 
 	return 0;
