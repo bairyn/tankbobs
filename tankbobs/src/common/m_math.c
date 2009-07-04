@@ -251,6 +251,8 @@ int m_vec2_newindex(lua_State *L)
 			break;
 
 		case 'R':
+			v->x *= v->R / val;
+			v->y *= v->R / val;
 			v->R = val;
 
 			MATH_RECTANGULAR(*v);
@@ -484,7 +486,7 @@ int m_vec2___div(lua_State *L)
 	if(lua_isnumber(L, 1))
 	{
 		v2 = CHECKVEC(L, 2);
-		scalar = lua_tonumber(L, 1);
+		scalar = 1 / lua_tonumber(L, 1);
 
 		v = lua_newuserdata(L, sizeof(vec2_t));
 
@@ -498,7 +500,7 @@ int m_vec2___div(lua_State *L)
 	else
 	{
 		v2 = CHECKVEC(L, 1);
-		scalar = lua_tonumber(L, 2);
+		scalar = 1 / lua_tonumber(L, 2);
 
 		v = lua_newuserdata(L, sizeof(vec2_t));
 
@@ -522,11 +524,11 @@ int m_vec2_div(lua_State *L)
 
 	/* scalar division only */
 	v = CHECKVEC(L, 1);
-	scalar = luaL_checknumber(L, 2);
+	scalar = 1 / luaL_checknumber(L, 2);
 
-	v->x /= scalar;
-	v->y /= scalar;
-	v->R /= scalar;
+	v->x *= scalar;
+	v->y *= scalar;
+	v->R *= scalar;
 
 	return 0;
 }

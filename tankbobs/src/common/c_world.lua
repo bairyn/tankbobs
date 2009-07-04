@@ -55,6 +55,7 @@ local tank_rotationSpecialSpeed
 local tank_speedK
 local tank_rotationChangeMinSpeed
 local tank_worldFriction
+local behind
 
 local worldTime = 0
 local lastPowerupSpawnTime
@@ -90,6 +91,9 @@ function c_world_init()
 	--c_const_set("world_timeStep", common_FTM(c_const_get("world_fps")))
 	c_const_set("world_timeStep", 1 / 500)
 	c_const_set("world_iterations", 16)
+
+	c_const_set("world_behind", 5000, 1)  -- (in direct ms)
+	behind = c_const_get("world_behind")
 
 	c_const_set("world_timeWrapTest", -99999)
 
@@ -519,72 +523,114 @@ function c_world_intersection(d, p1, p2, v1, v2)
 	return tankbobs.m_polygon(p1h, p2h)
 end
 
+local c = nil
 function c_world_tankHull(tank)
+	if not c then
+		c = {t_m_vec2(0, 0), t_m_vec2(0, 0), t_m_vec2(0, 0), t_m_vec2(0, 0)}
+	end
+
 	-- return a table of coordinates of tank's hull
-	local c = {}
 	local p = tank.p[1]
 
-	for _, v in ipairs(tank.h) do  -- ipairs to make sure of proper order
+	for k, v in pairs(tank.h) do
 		local h = t_m_vec2(v)
 		h.t = h.t + tank.r
-		table.insert(c, p + h)
+		h:add(p)
+		c[k](h)
 	end
 
 	return c
 end
 
+local c = nil
 function c_world_projectileHull(projectile)
-	local c = {}
+	if not c then
+		c = {t_m_vec2(0, 0), t_m_vec2(0, 0), t_m_vec2(0, 0), t_m_vec2(0, 0)}
+	end
+
 	local p = projectile.p[1]
 
-	for _, v in ipairs(projectile.weapon.projectileHull) do  -- ipairs to make sure of proper order
+	for k, v in pairs(projectile.weapon.projectileHull) do
 		local h = t_m_vec2(v)
 		h.t = h.t + projectile.r
-		table.insert(c, p + h)
+		h:add(p)
+		c[k](h)
 	end
 
 	return c
 end
 
+local c = nil
 function c_world_powerupHull(powerup)
-	local c = {}
+	if not c then
+		c = {t_m_vec2(0, 0), t_m_vec2(0, 0), t_m_vec2(0, 0), t_m_vec2(0, 0)}
+	end
 
 	for i = 1, 4 do
 		local h = t_m_vec2(c_const_get("powerup_hullx" .. tostring(i)), c_const_get("powerup_hully" .. tostring(i)))
 		h.t = h.t + powerup.r
-		table.insert(c, h)
+		c[i](h)
 	end
 
 	return c
 end
 
+local c = nil
 function c_world_powerupSpawnPointHull(powerupSpawnPoint)
-	local c = {}
+	if not c then
+		c = {t_m_vec2(0, 0), t_m_vec2(0, 0), t_m_vec2(0, 0), t_m_vec2(0, 0)}
+	end
+
 	local p = powerupSpawnPoint.p[1]
 
 	for i = 1, 4 do
 		local h = t_m_vec2(c_const_get("powerup_hullx" .. tostring(i)), c_const_get("powerup_hully" .. tostring(i)))
 		--h.t = h.t
-		table.insert(c, p + h)
+		h:add(p)
+		c[i](h)
 	end
 
 	return c
 end
 
+local shape = nil
 function c_world_wallShape(wall)
-	local average = t_m_vec2(0, 0)
-	local offsets = {}
-
-	for _, v in pairs(wall.p) do
-		average:add(v)
-	end
-	average.R = average.R / #wall.p
-
-	for _, v in ipairs(wall.p) do
-		table.insert(offsets, v - average)
+	if not shape then
+		shape = {t_m_vec2(0, 0), {t_m_vec2(0, 0), t_m_vec2(0, 0), t_m_vec2(0, 0)}}
 	end
 
-	return {average, offsets}
+	local average = shape[1]
+	local offsets = shape[2]
+	local p = wall.p
+
+	average(0, 0)
+
+	-- walls can only have three or four vertices
+	if wall.p[4] then
+		average:add(p[1])
+		average:add(p[2])
+		average:add(p[3])
+		average:add(p[4])
+		average:mul(0.25)
+		if not offsets[4] then
+			offsets[4] = t_m_vec2(0, 0)
+		end
+		offsets[1](p[1] - average)
+		offsets[2](p[2] - average)
+		offsets[3](p[3] - average)
+		offsets[4](p[4] - average)
+	else
+		average:add(p[1])
+		average:add(p[2])
+		average:add(p[3])
+		average:mul(0.3333333333333333)
+		table.remove(offsets, 4)
+		offsets[1](p[1] - average)
+		offsets[2](p[2] - average)
+		offsets[3](p[3] - average)
+	end
+
+	return shape
 end
 
 function c_world_canPowerupSpawn(d, powerupSpawnPoint)
@@ -1330,30 +1376,37 @@ end
 function c_world_step(d)
 	local t = t_t_getTicks()
 	local f = 1 / (c_const_get("world_time") * c_config_get("config.game.timescale"))
+	local wd = common_FTM(c_const_get("world_fps")) * f
 
 	if worldInitialized then
 		if paused then
 			c_world_private_offsetWorldTimers(d)
 		else
 			while worldTime < t do
+				if t - worldTime > behind then
+					worldTime = t_t_getTicks()
+
+					break
+				end
+
 				for _, v in pairs(c_world_tanks) do
-					c_world_tank_step(common_FTM(c_const_get("world_fps")) * f, v)
+					c_world_tank_step(wd, v)
 				end
 
 				for _, v in pairs(c_tcm_current_map.walls) do
-					c_world_wall_step(common_FTM(c_const_get("world_fps")) * f, v)
+					c_world_wall_step(wd, v)
 				end
 
 				for _, v in pairs(c_weapon_getProjectiles()) do
-					c_world_projectile_step(common_FTM(c_const_get("world_fps")) * f, v)
+					c_world_projectile_step(wd, v)
 				end
 
 				for _, v in pairs(c_tcm_current_map.powerupSpawnPoints) do
-					c_world_powerupSpawnPoint_step(common_FTM(c_const_get("world_fps")) * f, v)
+					c_world_powerupSpawnPoint_step(wd, v)
 				end
 
 				for _, v in pairs(c_world_powerups) do
-					c_world_powerup_step(common_FTM(c_const_get("world_fps")) * f, v)
+					c_world_powerup_step(wd, v)
 				end
 
 				tankbobs.w_step()
