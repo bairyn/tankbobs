@@ -36,6 +36,7 @@ local t_w_getAngle            = nil
 local t_w_getPosition         = nil
 local t_w_getVertices         = nil
 local t_t_getTicks            = nil
+local t_t_clone               = nil
 local t_m_vec2                = nil
 local t_w_getLinearVelocity   = nil
 local t_w_setLinearVelocity   = nil
@@ -77,6 +78,7 @@ function c_world_init()
 	t_w_getPosition         = _G.tankbobs.w_getPosition
 	t_w_getVertices         = _G.tankbobs.w_getVertices
 	t_t_getTicks            = _G.tankbobs.t_getTicks
+	t_t_clone               = _G.tankbobs.t_clone
 	t_m_vec2                = _G.tankbobs.m_vec2
 	t_w_getLinearVelocity   = _G.tankbobs.w_getLinearVelocity
 	t_w_setLinearVelocity   = _G.tankbobs.w_setLinearVelocity
@@ -594,13 +596,16 @@ function c_world_powerupSpawnPointHull(powerupSpawnPoint)
 end
 
 local shape = nil
+local average = nil
+local offsets = nil
 function c_world_wallShape(wall)
 	if not shape then
-		shape = {t_m_vec2(0, 0), {t_m_vec2(0, 0), t_m_vec2(0, 0), t_m_vec2(0, 0)}}
+		shape = {t_m_vec2(0, 0), {t_m_vec2(0, 0), t_m_vec2(0, 0), t_m_vec2(0, 0), t_m_vec2(0, 0)}}
+
+		average = shape[1]
+		offsets = shape[2]
 	end
 
-	local average = shape[1]
-	local offsets = shape[2]
 	local p = wall.p
 
 	average(0, 0)
@@ -677,7 +682,7 @@ function c_world_tank_canSpawn(d, tank)
 	-- test if spawning interferes with another tank
 	for _, v in pairs(c_world_tanks) do
 		if v.exists then
-			if c_world_intersection(d, c_world_tankHull(tank), c_world_tankHull(v), t_m_vec2(0, 0), t_w_getLinearVelocity(v.body)) then
+			if c_world_intersection(d, t_t_clone(c_world_tankHull(tank)), t_t_clone(c_world_tankHull(v)), t_m_vec2(0, 0), t_w_getLinearVelocity(v.body)) then
 				return false
 			end
 		end
@@ -729,7 +734,7 @@ function c_world_findClosestIntersection(start, endP)
 	-- tanks
 	for _, v in pairs(c_world_tanks) do
 		if v.exists then
-			hull = c_world_tankHull(v)
+			hull = t_t_clone(c_world_tankHull(v))
 			local t = v
 			for _, v in pairs(hull) do
 				currentPoint = v
@@ -941,7 +946,7 @@ function c_world_wall_step(d, wall)
 			if not wall.m.pid then
 				wall.m.pid = wall.pid
 				wall.m.ppos = 0
-				wall.m.startpos = c_world_wallShape(wall)[1]
+				wall.m.startpos = t_m_vec2(c_world_wallShape(wall)[1])
 			else
 				local path = paths[wall.m.pid + 1]
 
@@ -958,7 +963,7 @@ function c_world_wall_step(d, wall)
 						tankbobs.w_setPosition(wall.m.body, common_lerp(wall.m.startpos, wall.m.startpos + path.p[1] - prevPath.p[1], wall.m.ppos))
 					else
 						wall.m.ppid = wall.m.pid + 1
-						wall.m.startpos = c_world_wallShape(wall)[1]
+						wall.m.startpos = t_m_vec2(c_world_wallShape(wall)[1])
 						wall.m.pid = path.t
 						wall.m.ppos = 0
 					end
@@ -1167,7 +1172,7 @@ function c_world_powerup_step(d, powerup)
 
 	for _, v in pairs(c_world_tanks) do
 		if v.exists then
-			if c_world_intersection(d, c_world_powerupHull(powerup), c_world_tankHull(v), t_m_vec2(0, 0), t_w_getLinearVelocity(v.body)) then
+			if c_world_intersection(d, c_world_powerupHull(powerup), t_t_clone(c_world_tankHull(v)), t_m_vec2(0, 0), t_w_getLinearVelocity(v.body)) then
 				c_world_powerup_pickUp(v, powerup)
 			end
 		end

@@ -549,7 +549,6 @@ int m_vec2_len(lua_State *L)
 int m_vec2_call(lua_State *L)
 {
 	vec2_t *v;
-	const vec2_t *v2;
 
 	CHECKINIT(init, L);
 
@@ -566,6 +565,9 @@ int m_vec2_call(lua_State *L)
 	else
 	{
 		/* clone / assignment */
+
+		const vec2_t *v2;
+
 		v2 = CHECKVEC(L, 2);
 
 		v->x = v2->x;
