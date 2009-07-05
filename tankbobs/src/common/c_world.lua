@@ -54,6 +54,7 @@ local tank_acceleration
 local tank_rotationSpeed
 local tank_rotationSpecialSpeed
 local tank_speedK
+local tank_rotationChange
 local tank_rotationChangeMinSpeed
 local tank_worldFriction
 local behind
@@ -169,6 +170,7 @@ function c_world_init()
 	c_const_set("wall_linearDamping", 0, 1)
 	c_const_set("wall_angularDamping", 0, 1)
 	c_const_set("tank_rotationChange", 0.005, 1)
+	tank_rotationChange = c_const_get("tank_rotationChange")
 	c_const_set("tank_rotationChangeMinSpeed", 0.5, 1)  -- if at least 24 ups
 	tank_rotationChangeMinSpeed = c_const_get("tank_rotationChangeMinSpeed")
 	c_const_set("tank_rotationSpeed", c_math_radians(510) / 1000, 1)
@@ -369,8 +371,12 @@ function c_world_newWorld()
 
 	local t = t_t_getTicks()
 
+	c_world_powerups = {}
+	c_world_tanks = {}
+
 	local m = c_tcm_current_map
-	tankbobs.w_newWorld(c_const_get("world_lowerbound") + t_m_vec2(m.leftmost, m.lowermost), c_const_get("world_upperbound") + t_m_vec2(m.rightmost, m.uppermost), t_m_vec2(c_const_get("world_gravityx"), c_const_get("world_gravityy")), c_const_get("world_allowSleep"), "c_world_contactListener")
+	assert(c_tcm_current_map)
+	tankbobs.w_newWorld(c_const_get("world_lowerbound") + t_m_vec2(m.leftmost, m.lowermost), c_const_get("world_upperbound") + t_m_vec2(m.rightmost, m.uppermost), t_m_vec2(c_const_get("world_gravityx"), c_const_get("world_gravityy")), c_const_get("world_allowSleep"), "c_world_contactListener", c_world_tank_step, c_world_wall_step, c_world_projectile_step, c_world_powerupSpawnPoint_step, c_world_powerup_step, c_world_tanks, c_tcm_current_map.walls, c_weapon_getProjectiles(), c_tcm_current_map.powerupSpawnPoints, c_world_powerups)
 
 	-- reset powerups
 	lastPowerupSpawnTime = nil
@@ -407,9 +413,6 @@ function c_world_newWorld()
 	end
 
 	c_world_setPaused(false)  -- clear pause
-
-	c_world_powerups = {}
-	c_world_tanks = {}
 
 	worldTime = t
 
@@ -885,7 +888,7 @@ function c_world_tank_step(d, tank)
 				elseif newVel.t -    vel.t > math.pi then
 					newVel.t = newVel.t - 2 * math.pi
 				end
-				newVel.t = common_lerp(vel.t, newVel.t, c_const_get("tank_rotationChange"))
+				newVel.t = common_lerp(vel.t, newVel.t, tank_rotationChange)
 			end
 
 			t_w_setLinearVelocity(tank.body, newVel)
@@ -1402,6 +1405,9 @@ function c_world_step(d)
 					break
 				end
 
+				tankbobs.w_luaStep(wd)
+
+				--[[
 				for _, v in pairs(c_world_tanks) do
 					c_world_tank_step(wd, v)
 				end
@@ -1421,6 +1427,7 @@ function c_world_step(d)
 				for _, v in pairs(c_world_powerups) do
 					c_world_powerup_step(wd, v)
 				end
+				--]]
 
 				tankbobs.w_step()
 

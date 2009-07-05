@@ -836,7 +836,7 @@ static const struct luaL_Reg tankbobs[] =
 		/* nothing is returned; the first argument is a vector of the lower bounds.  The second
 			argument is of the upper bounds.  The third argument is the gravity vector (should always
 			be a zero-factor.  The fourth argument is a boolean of whether bodies can sleep.
-			The fifth argument is the function to call on contact (f(shape1, shape2, body1, body2, position, separation, normal)). */
+			The fifth argument is the function to call on contact (f(shape1, shape2, body1, body2, position, separation, normal)).  The sixth, seventh, eighth, ninth, and the tenth arguments are step functions of the tanks, walls, projectiles, powerupSpawnPoints, and powerups.  Arguments eleven-fifteen are the tables of them. */
 	{"w_freeWorld", w_freeWorld}, /* free the current world */
 		/* no arguments are passed and nothing is returned.  The current world is freed. */
 	{"w_getTimeStep", w_getTimeStep}, /* get time step */
@@ -852,7 +852,7 @@ static const struct luaL_Reg tankbobs[] =
 			The second argument is the body's rotation in radians
 			The third argument is whether the body can sleep.  The fourth argument is
 			whether the body is a bullet.  The fifth and sixth arguments are the body's
-			linear and angular daming.
+			linear and angular damping.
 			The seventh argument is a table of the vertices *relative to the position
 			of the body.  The eighth argument is the shape's density.  The ninth is the friction.
 			The tenth is the restitution.  The eleventh argument is whether the body to be added is static.
@@ -914,6 +914,7 @@ static const struct luaL_Reg tankbobs[] =
 	{"w_getVertices", w_getVertices}, /* Get the vertices of a table */
 		/* The body is the first argument passed.  The table of vertices to be set is also passed.  A table of
 			vertices is returned. */
+	{"w_luaStep", w_luaStep}, /* the only argument passed is the delta value */
 
 	/* m_console.c */
 	{"c_init", c_init}, /* initialize an ncurses console */

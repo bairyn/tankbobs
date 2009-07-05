@@ -23,7 +23,6 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 #include <SDL/SDL_image.h>
 #include <SDL/SDL_endian.h>
 #include <cmath>
-#include <assert.h>
 
 extern "C"
 {
@@ -48,7 +47,7 @@ do \
 		tstr *message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void)) \
 			(); \
 		CDLL_FUNCTION("libtstr", "tstr_base_set", void(*)(tstr *, const char *)) \
-			(message, "world is unintialized\n"); \
+			(message, "world is uninitialized\n"); \
 		lua_pushstring(L, CDLL_FUNCTION("libtstr", "tstr_cstr", const char *(*)(tstr *)) \
 							(message)); \
 		CDLL_FUNCTION("libtstr", "tstr_free", void(*)(tstr *)) \
@@ -67,6 +66,17 @@ static int iterations = 24;
 
 static char clName[BUFSIZE] = {""};
 static lua_State *clState = NULL;
+
+static int tankFunction;
+static int wallFunction;
+static int projectileFunction;
+static int powerupSpawnPointFunction;
+static int powerupFunction;
+static int tankTable;
+static int wallTable;
+static int projectileTable;
+static int powerupSpawnPointTable;
+static int powerupTable;
 
 class w_private_worldListener : public b2ContactListener
 {
@@ -166,6 +176,25 @@ int w_newWorld(lua_State *L)
 	strncpy(clName, luaL_checkstring(L, 5), sizeof(clName));
 	clState = L;
 
+	if(!(lua_isfunction(L, 6) && lua_isfunction(L, 7) && lua_isfunction(L, 8) && lua_isfunction(L, 9), lua_isfunction(L, 10) && lua_istable(L, 11) && lua_istable(L, 12) && lua_istable(L, 13) && lua_istable(L, 14) && lua_istable(L, 15)))
+	{
+		lua_pushliteral(L, "w_newWorld: invalid arguments passed for step\n");
+		lua_error(L);
+	}
+
+	powerupTable = luaL_ref(L, LUA_REGISTRYINDEX);
+	powerupSpawnPointTable = luaL_ref(L, LUA_REGISTRYINDEX);
+	projectileTable = luaL_ref(L, LUA_REGISTRYINDEX);
+	wallTable = luaL_ref(L, LUA_REGISTRYINDEX);
+	tankTable = luaL_ref(L, LUA_REGISTRYINDEX);
+	powerupFunction = luaL_ref(L, LUA_REGISTRYINDEX);
+	powerupSpawnPointFunction = luaL_ref(L, LUA_REGISTRYINDEX);
+	projectileFunction = luaL_ref(L, LUA_REGISTRYINDEX);
+	wallFunction = luaL_ref(L, LUA_REGISTRYINDEX);
+	tankFunction = luaL_ref(L, LUA_REGISTRYINDEX);
+
+	lua_pop(L, 5);
+
 	return 0;
 }
 
@@ -191,6 +220,17 @@ int w_freeWorld(lua_State *L)
 
 	clName[0] = 0;
 	clState = NULL;
+
+	luaL_unref(L, LUA_REGISTRYINDEX, tankFunction);
+	luaL_unref(L, LUA_REGISTRYINDEX, wallFunction);
+	luaL_unref(L, LUA_REGISTRYINDEX, projectileFunction);
+	luaL_unref(L, LUA_REGISTRYINDEX, powerupSpawnPointFunction);
+	luaL_unref(L, LUA_REGISTRYINDEX, powerupFunction);
+	luaL_unref(L, LUA_REGISTRYINDEX, tankTable);
+	luaL_unref(L, LUA_REGISTRYINDEX, wallTable);
+	luaL_unref(L, LUA_REGISTRYINDEX, projectileTable);
+	luaL_unref(L, LUA_REGISTRYINDEX, powerupSpawnPointTable);
+	luaL_unref(L, LUA_REGISTRYINDEX, powerupTable);
 
 	return 0;
 }
@@ -1024,6 +1064,43 @@ int w_getVertices(lua_State *L)
 	}
 
 	lua_pop(L, 1);
+
+	return 0;
+}
+
+#define STEP(function, table) \
+do \
+{ \
+	lua_rawgeti(L, LUA_REGISTRYINDEX, function); \
+	lua_rawgeti(L, LUA_REGISTRYINDEX, table); \
+	lua_pushnil(L); \
+	while(lua_next(L, 2)) \
+	{ \
+		lua_pushvalue(L, 1); \
+		lua_pushnumber(L, d); \
+		lua_pushvalue(L, -3); \
+		lua_call(L, 2, 0); \
+ \
+		lua_pop(L, 1); \
+	} \
+	lua_pop(L, 2); \
+} while(0)
+int w_luaStep(lua_State *L)
+{
+	double d;
+
+	CHECKINIT(init, L);
+
+	CHECKWORLD(world, L);
+	
+	d = luaL_checknumber(L, 1);
+	lua_pop(L, 1);
+
+	STEP(tankFunction, tankTable);
+	STEP(wallFunction, wallTable);
+	STEP(projectileFunction, projectileTable);
+	STEP(powerupSpawnPointFunction, powerupSpawnPointTable);
+	STEP(powerupFunction, powerupTable);
 
 	return 0;
 }
