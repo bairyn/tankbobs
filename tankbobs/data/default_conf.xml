@@ -1,6 +1,7 @@
 <config>
 	<client>
 		<audioChunkSize>3072</audioChunkSize>
+		<cameraExtraFOV>25</cameraExtraFOV>
 		<cameraSpeed>5</cameraSpeed>
 		<fps>128</fps>
 		<musicVolume>0.6</musicVolume>
