@@ -297,6 +297,8 @@ function st_play_mouse(x, y, xrel, yrel)
 end
 
 local frame = 3
+local a = {{0, 0}, {0, 0}}  -- aim-aid table
+local w, t = {{0, 0}, {0, 0}, {0, 0}, {0, 0}}, {{0, 0}, {0, 0}, {0, 0}, {0, 0}}
 function st_play_step(d)
 	frame = frame - 1
 
@@ -428,14 +430,18 @@ function st_play_step(d)
 				gl.BindTexture("TEXTURE_2D", v.m.texture)
 
 				gl.EnableClientState("VERTEX_ARRAY,TEXTURE_COORD_ARRAY")
-				local a, t = {}, {}
-				for _, v in pairs(v.m.pos) do
-					table.insert(a, {v.x, v.y})
+				w[1][1], w[1][2] = v.m.pos[1].x, v.m.pos[1].y
+				w[2][1], w[2][2] = v.m.pos[2].x, v.m.pos[2].y
+				w[3][1], w[3][2] = v.m.pos[3].x, v.m.pos[3].y
+				t[1][1], t[1][2] = v.t[1].x, v.t[1].y
+				t[2][1], t[2][2] = v.t[2].x, v.t[2].y
+				t[3][1], t[3][2] = v.t[3].x, v.t[3].y
+				if v.m.pos[4] then
+					w[4][1], w[4][2] = v.m.pos[4].x, v.m.pos[4].y
+				else
+					t[4][1], t[4][2] = v.t[4].x, v.t[4].y
 				end
-				for _, v in pairs(v.t) do
-					table.insert(t, {v.x, v.y})
-				end
-				gl.VertexPointer(a)
+				gl.VertexPointer(w)
 				gl.TexCoordPointer(t)
 				gl.DrawArrays("POLYGON", 0, #v.m.pos)  -- TODO: FIXME: figure out why texture coordinates are being ignored and remove immediate mode below
 				gl.DisableClientState("VERTEX_ARRAY,TEXTURE_COORD_ARRAY")
@@ -458,7 +464,6 @@ function st_play_step(d)
 		if v.exists then
 			if (v.weapon and v.weapon.aimAid) or (v.cd.aimAid) then
 				gl.PushAttrib("ENABLE_BIT")
-					local a = {}
 					local b
 					local vec = tankbobs.m_vec2()
 					local start, endP = tankbobs.m_vec2(v.p[1]), tankbobs.m_vec2()
@@ -476,8 +481,8 @@ function st_play_step(d)
 						endP = vec
 					end
 	
-					table.insert(a, {start.x, start.y})
-					table.insert(a, {endP.x, endP.y})
+					a[1][1] = start.x a[1][2] = start.y
+					a[2][1] = endP.x a[2][2] = endP.y
 					gl.Disable("TEXTURE_2D")
 					gl.Color(0.9, 0.1, 0.1, 1)
 					gl.TexEnv("TEXTURE_ENV_COLOR", 0.9, 0.1, 0.1, 1)
