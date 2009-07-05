@@ -42,6 +42,7 @@ local t_w_getLinearVelocity   = nil
 local t_w_setLinearVelocity   = nil
 local t_w_setAngularVelocity  = nil
 
+local c_world_contactListener
 local c_world_tank_checkSpawn
 local c_world_tank_step
 local c_world_wall_step
@@ -157,7 +158,7 @@ function c_world_init()
 	tank_worldFriction = c_const_get("tank_worldFriction")
 	c_const_set("tank_restitution", 0.4, 1)
 	c_const_set("tank_canSleep", false, 1)
-	c_const_set("tank_isBullet", false, 1)
+	c_const_set("tank_isBullet", true, 1)
 	c_const_set("tank_linearDamping", 0, 1)
 	c_const_set("tank_angularDamping", 0, 1)
 	c_const_set("tank_spawnTime", 0.75, 1)
@@ -376,7 +377,7 @@ function c_world_newWorld()
 
 	local m = c_tcm_current_map
 	assert(c_tcm_current_map)
-	tankbobs.w_newWorld(c_const_get("world_lowerbound") + t_m_vec2(m.leftmost, m.lowermost), c_const_get("world_upperbound") + t_m_vec2(m.rightmost, m.uppermost), t_m_vec2(c_const_get("world_gravityx"), c_const_get("world_gravityy")), c_const_get("world_allowSleep"), "c_world_contactListener", c_world_tank_step, c_world_wall_step, c_world_projectile_step, c_world_powerupSpawnPoint_step, c_world_powerup_step, c_world_tanks, c_tcm_current_map.walls, c_weapon_getProjectiles(), c_tcm_current_map.powerupSpawnPoints, c_world_powerups)
+	tankbobs.w_newWorld(c_const_get("world_lowerbound") + t_m_vec2(m.leftmost, m.lowermost), c_const_get("world_upperbound") + t_m_vec2(m.rightmost, m.uppermost), t_m_vec2(c_const_get("world_gravityx"), c_const_get("world_gravityy")), c_const_get("world_allowSleep"), c_world_contactListener, c_world_tank_step, c_world_wall_step, c_world_projectile_step, c_world_powerupSpawnPoint_step, c_world_powerup_step, c_world_tanks, c_tcm_current_map.walls, c_weapon_getProjectiles(), c_tcm_current_map.powerupSpawnPoints, c_world_powerups)
 
 	-- reset powerups
 	lastPowerupSpawnTime = nil
@@ -834,7 +835,7 @@ function c_world_tank_step(d, tank)
 		return c_world_tankDie(d, tank, t)
 	end
 
-	tank.p[1] = t_w_getPosition(tank.body)
+	tank.p[1](t_w_getPosition(tank.body))
 
 	local vel = t_w_getLinearVelocity(tank.body)
 
@@ -1000,7 +1001,7 @@ function c_world_projectile_step(d, projectile)
 		return
 	end
 
-	projectile.p[1] = t_w_getPosition(projectile.m.body)
+	projectile.p[1](t_w_getPosition(projectile.m.body))
 	projectile.r = t_w_getAngle(projectile.m.body)
 end
 
@@ -1172,7 +1173,7 @@ function c_world_powerup_step(d, powerup)
 		powerup.collided = true
 	end
 
-	powerup.p[1] = t_w_getPosition(powerup.m.body)
+	powerup.p[1](t_w_getPosition(powerup.m.body))
 	--t_w_setAngle(powerup.m.body, 0)  -- looks better with dynamic rotation
 	powerup.r = t_w_getAngle(powerup.m.body)
 
@@ -1181,10 +1182,12 @@ function c_world_powerup_step(d, powerup)
 	vel.R = c_const_get("powerup_pushStrength")
 	t_w_setLinearVelocity(powerup.m.body, vel)
 
-	for _, v in pairs(c_world_tanks) do
-		if v.exists then
-			if c_world_intersection(d, c_world_powerupHull(powerup), c_world_tankHull(v), t_m_vec2(0, 0), t_w_getLinearVelocity(v.body)) then
-				c_world_powerup_pickUp(v, powerup)
+	if c_config_get("config.game.ept") then
+		for _, v in pairs(c_world_tanks) do
+			if v.exists then
+				if c_world_intersection(d, c_world_powerupHull(powerup), c_world_tankHull(v), t_m_vec2(0, 0), t_w_getLinearVelocity(v.body)) then
+					c_world_powerup_pickUp(v, powerup)
+				end
 			end
 		end
 	end

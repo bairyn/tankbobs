@@ -64,7 +64,7 @@ static bool allowSleep;
 static double timeStep = 1.0 / 128.0;
 static int iterations = 24;
 
-static char clName[BUFSIZE] = {""};
+static int clFunction;
 static lua_State *clState = NULL;
 
 static int tankFunction;
@@ -83,11 +83,11 @@ class w_private_worldListener : public b2ContactListener
 	public:
 	void Add(const b2ContactPoint *point)
 	{
-		if(clName[0] && clState)
+		if(clState)
 		{
 			if(point->shape1->GetBody() && point->shape2->GetBody())
 			{
-				lua_getfield(clState, LUA_GLOBALSINDEX, clName);
+				lua_rawgeti(clState, LUA_REGISTRYINDEX, clFunction);
 				lua_pushlightuserdata(clState, point->shape1);
 				lua_pushlightuserdata(clState, point->shape2);
 				lua_pushlightuserdata(clState, point->shape1->GetBody());
@@ -116,21 +116,21 @@ class w_private_worldListener : public b2ContactListener
 
 	void Persist(const b2ContactPoint *point)
 	{
-		if(clName[0] && clState)
+		if(clState)
 		{
 		}
 	}
 
 	void Remove(const b2ContactPoint *point)
 	{
-		if(clName[0] && clState)
+		if(clState)
 		{
 		}
 	}
 
 	void Result(const b2ContactPoint *point)
 	{
-		if(clName[0] && clState)
+		if(clState)
 		{
 		}
 	}
@@ -173,7 +173,8 @@ int w_newWorld(lua_State *L)
 
 	world->SetContactListener(&w_private_contactListener);
 
-	strncpy(clName, luaL_checkstring(L, 5), sizeof(clName));
+	lua_pushvalue(L, 5);
+	clFunction = luaL_ref(L, LUA_REGISTRYINDEX);
 	clState = L;
 
 	if(!(lua_isfunction(L, 6) && lua_isfunction(L, 7) && lua_isfunction(L, 8) && lua_isfunction(L, 9), lua_isfunction(L, 10) && lua_istable(L, 11) && lua_istable(L, 12) && lua_istable(L, 13) && lua_istable(L, 14) && lua_istable(L, 15)))
@@ -218,7 +219,7 @@ int w_freeWorld(lua_State *L)
 	delete world;
 	world = NULL;
 
-	clName[0] = 0;
+	luaL_unref(clState, LUA_REGISTRYINDEX, clFunction);
 	clState = NULL;
 
 	luaL_unref(L, LUA_REGISTRYINDEX, tankFunction);
@@ -1068,7 +1069,7 @@ int w_getVertices(lua_State *L)
 	return 0;
 }
 
-#define STEP(function, table) \
+#define STEP(function, table, d) \
 do \
 { \
 	lua_rawgeti(L, LUA_REGISTRYINDEX, function); \
@@ -1096,11 +1097,11 @@ int w_luaStep(lua_State *L)
 	d = luaL_checknumber(L, 1);
 	lua_pop(L, 1);
 
-	STEP(tankFunction, tankTable);
-	STEP(wallFunction, wallTable);
-	STEP(projectileFunction, projectileTable);
-	STEP(powerupSpawnPointFunction, powerupSpawnPointTable);
-	STEP(powerupFunction, powerupTable);
+	STEP(tankFunction, tankTable, d);
+	STEP(wallFunction, wallTable, d);
+	STEP(projectileFunction, projectileTable, d);
+	STEP(powerupSpawnPointFunction, powerupSpawnPointTable, d);
+	STEP(powerupFunction, powerupTable, d);
 
 	return 0;
 }

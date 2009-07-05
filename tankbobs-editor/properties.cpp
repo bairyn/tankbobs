@@ -348,7 +348,7 @@ void Properties::initialChanged(const QString &text)
 {
 	entities::PowerupSpawnPoint *o = reinterpret_cast<entities::PowerupSpawnPoint *>(selection);
 
-	o->repeat = atof(util_qtcp(text).c_str());
+	o->initial = atof(util_qtcp(text).c_str());
 }
 
 void Properties::fourVerticesChanged(int state)

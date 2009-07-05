@@ -27,6 +27,7 @@
 		<defaultTankGreen> 0.750 </defaultTankGreen>
 		<defaultTankBlue>  0.010 </defaultTankBlue>
 		<defaultTankAlpha> 1.000 </defaultTankAlpha>
+		<ept>false</ept>  Whether to do an extra expensive but accurate test for powerup pickups
 		<fpsRed>   0.020 </fpsRed>
 		<fpsGreen> 0.020 </fpsGreen>
 		<fpsBlue>  0.500 </fpsBlue>
