@@ -422,14 +422,14 @@ function st_play_step(d)
 				end
 			end
 
-			if v.l == i then
+			if v.l == i and v.m.pos then
 				gl.Color(1, 1, 1, 1)
 				gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1)
 				gl.BindTexture("TEXTURE_2D", v.m.texture)
 
 				gl.EnableClientState("VERTEX_ARRAY,TEXTURE_COORD_ARRAY")
 				local a, t = {}, {}
-				for _, v in pairs(v.p) do
+				for _, v in pairs(v.m.pos) do
 					table.insert(a, {v.x, v.y})
 				end
 				for _, v in pairs(v.t) do
@@ -437,15 +437,15 @@ function st_play_step(d)
 				end
 				gl.VertexPointer(a)
 				gl.TexCoordPointer(t)
-				gl.DrawArrays("POLYGON", 0, #v.p)  -- TODO: FIXME: figure out why texture coordinates are being ignored and remove immediate mode below
+				gl.DrawArrays("POLYGON", 0, #v.m.pos)  -- TODO: FIXME: figure out why texture coordinates are being ignored and remove immediate mode below
 				gl.DisableClientState("VERTEX_ARRAY,TEXTURE_COORD_ARRAY")
 
-				gl.Begin(v.p[4] and "QUADS" or "TRIANGLES")
-					gl.TexCoord(v.t[1].x, v.t[1].y) gl.Vertex(v.p[1].x, v.p[1].y)
-					gl.TexCoord(v.t[2].x, v.t[2].y) gl.Vertex(v.p[2].x, v.p[2].y)
-					gl.TexCoord(v.t[3].x, v.t[3].y) gl.Vertex(v.p[3].x, v.p[3].y)
-					if v.p[4] then
-						gl.TexCoord(v.t[4].x, v.t[4].y) gl.Vertex(v.p[4].x, v.p[4].y)
+				gl.Begin(v.m.pos[4] and "QUADS" or "TRIANGLES")
+					gl.TexCoord(v.t[1].x, v.t[1].y) gl.Vertex(v.m.pos[1].x, v.m.pos[1].y)
+					gl.TexCoord(v.t[2].x, v.t[2].y) gl.Vertex(v.m.pos[2].x, v.m.pos[2].y)
+					gl.TexCoord(v.t[3].x, v.t[3].y) gl.Vertex(v.m.pos[3].x, v.m.pos[3].y)
+					if v.m.pos[4] then
+						gl.TexCoord(v.t[4].x, v.t[4].y) gl.Vertex(v.m.pos[4].x, v.m.pos[4].y)
 					end
 				gl.End()
 			end

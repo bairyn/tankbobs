@@ -50,7 +50,7 @@ wall, 1, 5, -91, 81, -33, 95, -33, 20, -91, 0, -1, 0, 0, -1, 0, -1, -1, global/t
 wall, 1, 95, -33, 95, -91, 99, -91, 99, -33, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1
 wall, 1, 182, -88, 182, 53, 195, 53, 195, -88, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 0
 wall, 1, 157, 69, 157, 77, 194, 77, 194, 69, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1
-wall, 1, -88, 131, -88, 125, -97, 125, -97, 131, 0, 1, 0, 0, 1, 0, 1, 1, , 6, , 0, 0, 1
+wall, 1, -88, 131, -88, 125, -97, 125, -97, 131, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1
 wall, 1, 116, 131, 116, 197, 111, 197, 111, 131, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1
 wall, 1, -86, 136, -86, 131, -81, 131, -81, 136, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 0
 wall, 1, -91, 136, -91, 131, -86, 131, -86, 136, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 0
@@ -65,7 +65,7 @@ playerSpawnPoint, 168, 62
 playerSpawnPoint, -8, -62
 playerSpawnPoint, -9, 77
 powerupSpawnPoint, 51, 34, health shotgun machinegun, 0, 30, 30, 1
-powerupSpawnPoint, 97, 72, health, 0, 20, 30, 0
+powerupSpawnPoint, 97, 72, health, 0, 20, 20, 0
 powerupSpawnPoint, 35, 53, railgun, 0, 30, 30, 1
 powerupSpawnPoint, 119, 45, coilgun ammo, 0, 30, 30, 1
 powerupSpawnPoint, -94, -94, railgun aim-aid, 1, 30, 30, 1

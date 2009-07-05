@@ -370,8 +370,6 @@ function c_world_newWorld()
 		return
 	end
 
-	local t = t_t_getTicks()
-
 	c_world_powerups = {}
 	c_world_tanks = {}
 
@@ -385,12 +383,14 @@ function c_world_newWorld()
 
 	for _, v in pairs(c_tcm_current_map.walls) do
 		local breaking = false repeat
+			v.m.pos = t_t_clone(true, v.p)
+
 			if v.detail then
 				breaking = false break  -- the wall isn't part of the physical world
 			end
 
 			-- add wall to world
-			local b = c_world_wallShape(v)
+			local b = c_world_wallShape(v.p)
 			v.m.body = tankbobs.w_addBody(b[1], 0, c_const_get("wall_canSleep"), c_const_get("wall_isBullet"), c_const_get("wall_linearDamping"), c_const_get("wall_angularDamping"), b[2], c_const_get("wall_density"), c_const_get("wall_friction"), c_const_get("wall_restitution"), not v.static)
 			if not v.m.body then
 				error "c_world_newWorld: could not add a wall to the physical world"
@@ -399,7 +399,7 @@ function c_world_newWorld()
 	end
 
 	for k, v in pairs(c_tcm_current_map.powerupSpawnPoints) do
-		v.m.nextPowerupTime = t + c_const_get("world_time") * c_config_get("config.game.timescale") * v.initial
+		v.m.nextPowerupTime = t_t_getTicks() + c_const_get("world_time") * c_config_get("config.game.timescale") * v.initial
 		local enabled = false
 		for k, vs in pairs(v.enabledPowerups) do
 			if vs then
@@ -415,7 +415,7 @@ function c_world_newWorld()
 
 	c_world_setPaused(false)  -- clear pause
 
-	worldTime = t
+	worldTime = t_t_getTicks()
 
 	worldInitialized = true
 end
@@ -602,7 +602,7 @@ end
 local shape = nil
 local average = nil
 local offsets = nil
-function c_world_wallShape(wall)
+function c_world_wallShape(p)
 	if not shape then
 		shape = {t_m_vec2(0, 0), {t_m_vec2(0, 0), t_m_vec2(0, 0), t_m_vec2(0, 0), t_m_vec2(0, 0)}}
 
@@ -610,12 +610,10 @@ function c_world_wallShape(wall)
 		offsets = shape[2]
 	end
 
-	local p = wall.p
-
 	average(0, 0)
 
 	-- walls can only have three or four vertices
-	if wall.p[4] then
+	if p[4] then
 		average:add(p[1])
 		average:add(p[2])
 		average:add(p[3])
@@ -950,7 +948,7 @@ function c_world_wall_step(d, wall)
 			if not wall.m.pid then
 				wall.m.pid = wall.pid
 				wall.m.ppos = 0
-				wall.m.startpos = t_m_vec2(c_world_wallShape(wall)[1])
+				wall.m.startpos = t_m_vec2(c_world_wallShape(wall.m.pos)[1])
 			else
 				local path = paths[wall.m.pid + 1]
 
@@ -967,26 +965,26 @@ function c_world_wall_step(d, wall)
 						tankbobs.w_setPosition(wall.m.body, common_lerp(wall.m.startpos, wall.m.startpos + path.p[1] - prevPath.p[1], wall.m.ppos))
 					else
 						wall.m.ppid = wall.m.pid + 1
-						wall.m.startpos(c_world_wallShape(wall)[1])
+						wall.m.startpos(c_world_wallShape(wall.m.pos)[1])
 						wall.m.pid = path.t
 						wall.m.ppos = 0
 					end
 				end
 			end
 
-			t_w_getVertices(wall.m.body, wall.p)
+			t_w_getVertices(wall.m.body, wall.m.pos)
 			local offset = t_w_getPosition(wall.m.body)
 			local angle = t_w_getAngle(wall.m.body)
-			for _, v in pairs(wall.p) do
+			for _, v in pairs(wall.m.pos) do
 				v.t = v.t + angle
 				v:add(offset)
 			end
 		end
 	else
-		t_w_getVertices(wall.m.body, wall.p)
+		t_w_getVertices(wall.m.body, wall.m.pos)
 		local offset = t_w_getPosition(wall.m.body)
 		local angle = t_w_getAngle(wall.m.body)
-		for _, v in pairs(wall.p) do
+		for _, v in pairs(wall.m.pos) do
 			v.t = v.t + angle
 			v:add(offset)
 		end
