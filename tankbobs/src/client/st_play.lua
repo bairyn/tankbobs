@@ -373,6 +373,7 @@ function st_play_step(d)
 		end
 		local m = c_tcm_current_map
 		-- FIXME: this is broken
+		if m.uppermost <= 105 and m.lowermost >= -5 and m.rightmost <= 105 and m.leftmost >= -5 then uppermost, rightmost, lowermost, leftmost = 50, 50, 50, 50 end  -- TEMPORARY CODE TO KEEP LEVELS 1 AND 2 STILL
 		--uppermost = math.min(m.uppermost - (50 + c_config_get("config.client.cameraExtraFOV")), uppermost)
 		--lowermost = math.max(m.lowermost + (50 + c_config_get("config.client.cameraExtraFOV")), lowermost)
 		--rightmost = math.min(m.rightmost - (50 + c_config_get("config.client.cameraExtraFOV")), rightmost)
