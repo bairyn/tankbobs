@@ -1073,8 +1073,6 @@ function c_world_powerupSpawnPoint_step(d, powerupSpawnPoint)
 			-- spawn a powerup
 			local powerup = c_world_powerup:new()
 
-			table.insert(c_world_powerups, powerup)
-
 			powerup.spawner = powerupSpawnPoint
 
 			powerup.typeName = nil
@@ -1083,7 +1081,7 @@ function c_world_powerupSpawnPoint_step(d, powerupSpawnPoint)
 			for k, v in pairs(powerupSpawnPoint.enabledPowerups) do
 				if v then
 					if found then
-						if not c_config_get("config.game.instagib") or c_world_getPowerupTypeByName("powerup.typeName").instagib then
+						if c_world_getPowerupTypeByName(v) and (not c_config_get("config.game.instagib") or c_world_getPowerupTypeByName(v).instagib) then
 							powerupSpawnPoint.m.lastPowerup = k
 							powerup.typeName = k
 							break
@@ -1099,7 +1097,7 @@ function c_world_powerupSpawnPoint_step(d, powerupSpawnPoint)
 				for k, v in pairs(powerupSpawnPoint.enabledPowerups) do
 					if v then
 						if found then
-							if not c_config_get("config.game.instagib") or c_world_getPowerupTypeByName("powerup.typeName").instagib then
+							if c_world_getPowerupTypeByName(v) and (not c_config_get("config.game.instagib") or c_world_getPowerupTypeByName(v).instagib) then
 								powerupSpawnPoint.m.lastPowerup = k
 								powerup.typeName = k
 								break
@@ -1110,6 +1108,8 @@ function c_world_powerupSpawnPoint_step(d, powerupSpawnPoint)
 			end
 			if not powerup.typeName then
 				return
+			else
+				table.insert(c_world_powerups, powerup)
 			end
 
 			powerup.spawnTime = t

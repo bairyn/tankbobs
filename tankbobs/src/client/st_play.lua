@@ -580,6 +580,10 @@ function st_play_step(d)
 	-- scores, FPS, rest of HUD, etc.
 	gui_paint(d)
 
+	if c_world_getPaused() then
+		return
+	end
+
 	-- play sounds and insert trails
 	for _, v in pairs(c_world_getTanks()) do
 		if v.state.firing then
