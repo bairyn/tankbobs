@@ -717,7 +717,7 @@ function c_world_findClosestIntersection(start, endP)
 	-- walls
 	for _, v in pairs(c_tcm_current_map.walls) do
 		if not v.detail then
-			hull = v.m.p
+			hull = v.m.pos
 			local t = v
 			for _, v in pairs(hull) do
 				currentPoint = v
