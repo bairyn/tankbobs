@@ -35,6 +35,7 @@
 		<fpsAlpha> 0.875 </fpsAlpha>
 		<fpsCounter>  false </fpsCounter>
 		<fragLimit>15</fragLimit>
+		<instagib>false</instagib>
 		<overview>1</overview>
 		<pauseRed>   0.400 </pauseRed>
 		<pauseGreen> 0.400 </pauseGreen>

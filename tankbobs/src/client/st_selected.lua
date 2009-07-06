@@ -20,7 +20,7 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 --[[
 st_selected.lua
 
-the screen before playing
+Screen before playing
 --]]
 
 local st_selected_init
@@ -37,7 +37,8 @@ function st_selected_init()
 	gui_addAction(tankbobs.m_vec2(25, 92.5), "Back", nil, c_state_advance)
 
 	gui_addLabel(tankbobs.m_vec2(50, 75), "Frag limit", nil, 2 / 3) gui_addInput(tankbobs.m_vec2(75, 75), tostring(c_config_get("config.game.fragLimit")), nil, st_selected_fragLimit, true, 3)
-	gui_addAction(tankbobs.m_vec2(75, 69), "Start", nil, st_selected_start)
+	gui_addLabel(tankbobs.m_vec2(50, 69), "Instagib", nil, 2 / 3) gui_addCycle(tankbobs.m_vec2(75, 69), "Instagib", nil, st_selected_instagib, {"No", "Yes"}, c_config_get("config.game.instagib") and 2 or 1)
+	gui_addAction(tankbobs.m_vec2(75, 63), "Start", nil, st_selected_start)
 end
 
 function st_selected_done()
@@ -72,6 +73,16 @@ function st_selected_fragLimit(widget)
 	c_config_set("config.game.fragLimit", tonumber(widget.inputText))
 end
 
+function st_selected_instagib(widget, string, index)
+	if string == "Yes" then
+		c_config_set("config.game.instagib", true)
+	elseif string == "No" then
+		c_config_set("config.game.instagib", false)
+	end
+end
+
+function st_optionsVideo_width(widget)
+	st_optionsVideo_renderer.width = tonumber(widget.inputText)
 function st_selected_start(widget)
 	if c_config_get("config.game.fragLimit") > 0 then
 		c_state_new(play_state)

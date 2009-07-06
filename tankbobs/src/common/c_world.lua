@@ -199,6 +199,7 @@ function c_world_init()
 	powerupType.index = 1
 	powerupType.name = "machinegun"
 	powerupType.c.r, powerupType.c.g, powerupType.c.b, powerupType.c.a = 0.3, 0.6, 1, 1
+	powerupType.instagib = false
 
 	-- shotgun
 	local powerupType = c_world_powerupType:new()
@@ -208,6 +209,7 @@ function c_world_init()
 	powerupType.index = 2
 	powerupType.name = "shotgun"
 	powerupType.c.r, powerupType.c.g, powerupType.c.b, powerupType.c.a = 0.25, 0.25, 0.75, 1
+	powerupType.instagib = false
 
 	-- railgun
 	local powerupType = c_world_powerupType:new()
@@ -217,6 +219,7 @@ function c_world_init()
 	powerupType.index = 3
 	powerupType.name = "railgun"
 	powerupType.c.r, powerupType.c.g, powerupType.c.b, powerupType.c.a = 0, 0, 1, 1
+	powerupType.instagib = false
 
 	-- coilgun
 	local powerupType = c_world_powerupType:new()
@@ -226,6 +229,7 @@ function c_world_init()
 	powerupType.index = 4
 	powerupType.name = "coilgun"
 	powerupType.c.r, powerupType.c.g, powerupType.c.b, powerupType.c.a = 0.25, 0.25, 1, 0.875
+	powerupType.instagib = false
 
 	-- saw
 	local powerupType = c_world_powerupType:new()
@@ -235,6 +239,7 @@ function c_world_init()
 	powerupType.index = 5
 	powerupType.name = "saw"
 	powerupType.c.r, powerupType.c.g, powerupType.c.b, powerupType.c.a = 0, 0, 0.6, 0.875
+	powerupType.instagib = false
 
 	-- ammo
 	local powerupType = c_world_powerupType:new()
@@ -244,6 +249,7 @@ function c_world_init()
 	powerupType.index = 6
 	powerupType.name = "ammo"
 	powerupType.c.r, powerupType.c.g, powerupType.c.b, powerupType.c.a = 0.05, 0.4, 0.1, 0.5
+	powerupType.instagib = false
 
 	-- aim aid
 	local powerupType = c_world_powerupType:new()
@@ -253,6 +259,7 @@ function c_world_init()
 	powerupType.index = 7
 	powerupType.name = "aim-aid"
 	powerupType.c.r, powerupType.c.g, powerupType.c.b, powerupType.c.a = 0.5, 0.75, 0.1, 0.5
+	powerupType.instagib = true
 
 	-- health
 	local powerupType = c_world_powerupType:new()
@@ -262,6 +269,7 @@ function c_world_init()
 	powerupType.index = 8
 	powerupType.name = "health"
 	powerupType.c.r, powerupType.c.g, powerupType.c.b, powerupType.c.a = 0.1, 0.85, 0.1, 0.8
+	powerupType.instagib = true
 
 	tankbobs.w_setTimeStep(c_const_get("world_timeStep"))
 	tankbobs.w_setIterations(c_const_get("world_iterations"))
@@ -277,6 +285,7 @@ c_world_powerupType =
 	index = 0,
 	name = "",
 	c = {r = 0, g = 0, b = 0, a = 0},
+	instagib = false
 }
 
 c_world_powerup =
@@ -484,9 +493,13 @@ function c_world_tank_checkSpawn(d, tank)
 	tank.r = c_const_get("tank_defaultRotation")
 	tank.p[1](playerSpawnPoint.p[1])
 	tank.health = c_const_get("tank_health")
-	tank.weapon = c_weapon_getByAltName("default")
-	tank.exists = true
+	if c_config_get("config.game.instagib") then
+		tank.weapon = c_weapon_getByAltName("instagun")
+	else
+		tank.weapon = c_weapon_getByAltName("default")
+	end
 	tank.cd = {}
+	tank.exists = true
 
 	-- add a physical body
 	tank.body = tankbobs.w_addBody(tank.p[1], tank.r, c_const_get("tank_canSleep"), c_const_get("tank_isBullet"), c_const_get("tank_linearDamping"), c_const_get("tank_angularDamping"), tank.h, c_const_get("tank_density"), c_const_get("tank_friction"), c_const_get("tank_restitution"), not c_const_get("tank_static"))
@@ -1070,9 +1083,11 @@ function c_world_powerupSpawnPoint_step(d, powerupSpawnPoint)
 			for k, v in pairs(powerupSpawnPoint.enabledPowerups) do
 				if v then
 					if found then
-						powerupSpawnPoint.m.lastPowerup = k
-						powerup.typeName = k
-						break
+						if not c_config_get("config.game.instagib") or c_world_getPowerupTypeByName("powerup.typeName").instagib then
+							powerupSpawnPoint.m.lastPowerup = k
+							powerup.typeName = k
+							break
+						end
 					end
 	
 					if k == powerupSpawnPoint.m.lastPowerup then
@@ -1084,12 +1099,17 @@ function c_world_powerupSpawnPoint_step(d, powerupSpawnPoint)
 				for k, v in pairs(powerupSpawnPoint.enabledPowerups) do
 					if v then
 						if found then
-							powerupSpawnPoint.m.lastPowerup = k
-							powerup.typeName = k
-							break
+							if not c_config_get("config.game.instagib") or c_world_getPowerupTypeByName("powerup.typeName").instagib then
+								powerupSpawnPoint.m.lastPowerup = k
+								powerup.typeName = k
+								break
+							end
 						end
 					end
 				end
+			end
+			if not powerup.typeName then
+				return
 			end
 
 			powerup.spawnTime = t
@@ -1227,6 +1247,11 @@ end
 
 local c_world_tankDamage = c_world_tankDamage
 local function c_world_collide(tank, normal)
+	if c_config_get("config.game.instagib") then
+		-- no collision damage in instagib mode
+		return
+	end
+
 	local vel = t_w_getLinearVelocity(tank.body)
 	local component = vel * -normal
 

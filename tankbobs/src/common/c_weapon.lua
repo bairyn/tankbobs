@@ -229,10 +229,10 @@ function c_weapon_init()
 	weapon.texturer[3](0, 0)
 	weapon.texturer[4](1, 0)
 	weapon.texturer[1](1, 1)
-	weapon.render[1](-25, 1)
-	weapon.render[2](-25, -25)
-	weapon.render[3](25, -25)
-	weapon.render[4](25, 25)
+	weapon.render[1](-1, 1)
+	weapon.render[2](-1, -1)
+	weapon.render[3](1, -1)
+	weapon.render[4](1, 1)
 
 	weapon.projectileTexture = "railgun-projectile.png"
 	weapon.projectileDensity = 12
@@ -248,16 +248,68 @@ function c_weapon_init()
 	weapon.projectileTexturer[2](0, 0)
 	weapon.projectileTexturer[3](1, 0)
 	weapon.projectileTexturer[4](1, 1)
-	weapon.projectileRender[2](-0.5, 0.5)
-	weapon.projectileRender[3](-0.5, -0.5)
-	weapon.projectileRender[4](0.5, -0.5)
-	weapon.projectileRender[1](0.5, -0.5)
+	weapon.projectileRender[2](-25, 25)
+	weapon.projectileRender[3](-25, -25)
+	weapon.projectileRender[4](25, -25)
+	weapon.projectileRender[1](25, -25)
+
+	-- instagun
+	weapon = c_weapon:new()
+	table.insert(c_weapons, weapon)
+
+	weapon.index = 5
+	weapon.name = "instagun"
+	weapon.altName = "instagun"
+	weapon.damage = 100
+	weapon.pellets = 1
+	weapon.speed = 524288
+	weapon.spread = tankbobs.m_radians(0)
+	weapon.repeatRate = 2
+
+	weapon.knockback = 1024
+	weapon.texture = "railgun.png"
+	weapon.fireSound = {"railgun.wav", "railgun2.wav"}
+	weapon.launchDistance = 3
+	weapon.aimAid = false
+	weapon.capacity = 0
+	weapon.meleeRange = 0
+	weapon.width = 0
+	weapon.trail = 4
+	weapon.trailWidth = 0.5
+
+	weapon.texturer[2](0, 1)
+	weapon.texturer[3](0, 0)
+	weapon.texturer[4](1, 0)
+	weapon.texturer[1](1, 1)
+	weapon.render[1](-1, 1)
+	weapon.render[2](-1, -1)
+	weapon.render[3](1, -1)
+	weapon.render[4](1, 1)
+
+	weapon.projectileTexture = "railgun-projectile.png"
+	weapon.projectileDensity = 12
+	weapon.projectileRestitution = 0.1
+	weapon.projectileMaxCollisions = 0
+	weapon.projectileEndOnBody = true
+
+	weapon.projectileHull[1](0, 1)
+	weapon.projectileHull[2](0, 0)
+	weapon.projectileHull[3](1, 0)
+	weapon.projectileHull[4](1, 1)
+	weapon.projectileTexturer[1](0, 1)
+	weapon.projectileTexturer[2](0, 0)
+	weapon.projectileTexturer[3](1, 0)
+	weapon.projectileTexturer[4](1, 1)
+	weapon.projectileRender[2](-25, 25)
+	weapon.projectileRender[3](-25, -25)
+	weapon.projectileRender[4](25, -25)
+	weapon.projectileRender[1](25, -25)
 
 	-- coilgun
 	weapon = c_weapon:new()
 	table.insert(c_weapons, weapon)
 
-	weapon.index = 5
+	weapon.index = 6
 	weapon.name = "coilgun"
 	weapon.altName = "coilgun"
 	weapon.damage = 69
@@ -281,10 +333,10 @@ function c_weapon_init()
 	weapon.texturer[3](0, 0)
 	weapon.texturer[4](1, 0)
 	weapon.texturer[1](1, 1)
-	weapon.render[1](-20, 20)
-	weapon.render[2](-20, -20)
-	weapon.render[3](20, -20)
-	weapon.render[4](20, 20)
+	weapon.render[1](-1, 1)
+	weapon.render[2](-1, -1)
+	weapon.render[3](1, -1)
+	weapon.render[4](1, 1)
 
 	weapon.projectileTexture = "coilgun-projectile.png"
 	weapon.projectileDensity = 4
@@ -300,16 +352,16 @@ function c_weapon_init()
 	weapon.projectileTexturer[2](0, 0)
 	weapon.projectileTexturer[3](1, 0)
 	weapon.projectileTexturer[4](1, 1)
-	weapon.projectileRender[2](-0.5, 0.5)
-	weapon.projectileRender[3](-0.5, -0.5)
-	weapon.projectileRender[4](0.5, -0.5)
-	weapon.projectileRender[1](0.5, -0.5)
+	weapon.projectileRender[2](-20, 20)
+	weapon.projectileRender[3](-20, -20)
+	weapon.projectileRender[4](20, -20)
+	weapon.projectileRender[1](20, -20)
 
 	-- saw
 	weapon = c_weapon:new()
 	table.insert(c_weapons, weapon)
 
-	weapon.index = 6
+	weapon.index = 7
 	weapon.name = "saw"
 	weapon.altName = "saw"
 	weapon.damage = 69
