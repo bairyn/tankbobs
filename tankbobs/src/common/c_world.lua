@@ -717,7 +717,7 @@ function c_world_findClosestIntersection(start, endP)
 	-- walls
 	for _, v in pairs(c_tcm_current_map.walls) do
 		if not v.detail then
-			hull = v.p
+			hull = v.m.p
 			local t = v
 			for _, v in pairs(hull) do
 				currentPoint = v
@@ -1081,6 +1081,8 @@ function c_world_powerupSpawnPoint_step(d, powerupSpawnPoint)
 			for k, v in pairs(powerupSpawnPoint.enabledPowerups) do
 				if v then
 					if found then
+						-- FIXME TODO XXX
+						FIXME: THIS IS BROKEN
 						if c_world_getPowerupTypeByName(v) and (not c_config_get("config.game.instagib") or c_world_getPowerupTypeByName(v).instagib) then
 							powerupSpawnPoint.m.lastPowerup = k
 							powerup.typeName = k
@@ -1247,19 +1249,17 @@ end
 
 local c_world_tankDamage = c_world_tankDamage
 local function c_world_collide(tank, normal)
-	if c_config_get("config.game.instagib") then
-		-- no collision damage in instagib mode
-		return
-	end
-
 	local vel = t_w_getLinearVelocity(tank.body)
 	local component = vel * -normal
 
-	if component >= c_const_get("tank_damageMinSpeed") then
-		local damage = c_const_get("tank_damageK") * (component - c_const_get("tank_damageMinSpeed"))
+	if not c_config_get("config.game.instagib") then
+		-- no collision damage in instagib mode
+		if component >= c_const_get("tank_damageMinSpeed") then
+			local damage = c_const_get("tank_damageK") * (component - c_const_get("tank_damageMinSpeed"))
 
-		if damage >= c_const_get("tank_collideMinDamage") then
-			c_world_tankDamage(tank, damage)
+			if damage >= c_const_get("tank_collideMinDamage") then
+				c_world_tankDamage(tank, damage)
+			end
 		end
 	end
 

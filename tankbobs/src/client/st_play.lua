@@ -373,14 +373,14 @@ function st_play_step(d)
 		end
 		local m = c_tcm_current_map
 		-- FIXME: this is broken
-		--uppermost = math.min(m.uppermost - 95, uppermost)
-		--lowermost = math.max(m.lowermost + 95, lowermost)
-		--rightmost = math.min(m.rightmost - 95, rightmost)
-		--leftmost  = math.max(m.leftmost  + 95,  leftmost)
+		--uppermost = math.min(m.uppermost - (50 + c_config_get("config.client.cameraExtraFOV")), uppermost)
+		--lowermost = math.max(m.lowermost + (50 + c_config_get("config.client.cameraExtraFOV")), lowermost)
+		--rightmost = math.min(m.rightmost - (50 + c_config_get("config.client.cameraExtraFOV")), rightmost)
+		--leftmost  = math.max(m.leftmost  + (50 + c_config_get("config.client.cameraExtraFOV")),  leftmost)
 
 		gl.Translate(50, 50, 0)
 
-	local distance = math.abs(rightmost - leftmost) > math.abs(uppermost - lowermost) and math.abs(rightmost - leftmost) or math.abs(uppermost - lowermost)
+		local distance = math.abs(rightmost - leftmost) > math.abs(uppermost - lowermost) and math.abs(rightmost - leftmost) or math.abs(uppermost - lowermost)
 		local scale = 100 / (distance + c_config_get("config.client.cameraExtraFOV"))
 		if scale > 1 then
 			scale = 1
