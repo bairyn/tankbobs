@@ -81,8 +81,6 @@ function st_selected_instagib(widget, string, index)
 	end
 end
 
-function st_optionsVideo_width(widget)
-	st_optionsVideo_renderer.width = tonumber(widget.inputText)
 function st_selected_start(widget)
 	if c_config_get("config.game.fragLimit") > 0 then
 		c_state_new(play_state)
