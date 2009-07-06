@@ -1081,9 +1081,7 @@ function c_world_powerupSpawnPoint_step(d, powerupSpawnPoint)
 			for k, v in pairs(powerupSpawnPoint.enabledPowerups) do
 				if v then
 					if found then
-						-- FIXME TODO XXX
-						FIXME: THIS IS BROKEN
-						if c_world_getPowerupTypeByName(v) and (not c_config_get("config.game.instagib") or c_world_getPowerupTypeByName(v).instagib) then
+						if c_world_getPowerupTypeByName(k) and (not c_config_get("config.game.instagib") or c_world_getPowerupTypeByName(k).instagib) then
 							powerupSpawnPoint.m.lastPowerup = k
 							powerup.typeName = k
 							break
@@ -1099,7 +1097,7 @@ function c_world_powerupSpawnPoint_step(d, powerupSpawnPoint)
 				for k, v in pairs(powerupSpawnPoint.enabledPowerups) do
 					if v then
 						if found then
-							if c_world_getPowerupTypeByName(v) and (not c_config_get("config.game.instagib") or c_world_getPowerupTypeByName(v).instagib) then
+							if c_world_getPowerupTypeByName(k) and (not c_config_get("config.game.instagib") or c_world_getPowerupTypeByName(k).instagib) then
 								powerupSpawnPoint.m.lastPowerup = k
 								powerup.typeName = k
 								break
