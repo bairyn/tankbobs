@@ -626,7 +626,7 @@ function st_play_step(d)
 							local tmp = tankbobs.m_vec2()
 
 							offset.t = -1 / (endP - start).t
-							offset.R = v.r
+							offset.R = v.weapon.trailWidth
 
 							gl.BindTexture("TEXTURE_2D", v.weapon.m.p.projectileTexture[1])
 							gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
