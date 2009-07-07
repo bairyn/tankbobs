@@ -5,6 +5,7 @@
 		<cameraSpeed>5</cameraSpeed>
 		<fps>128</fps>
 		<musicVolume>0.6</musicVolume>
+		<port>0</port>
 		<serverIP>127.0.0.1</serverIP>
 		<volume>0.8</volume>
 	</client>

@@ -38,6 +38,7 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 #define DEFAULTPORT   43210
 #define CHANNEL       2
 #define MAXPACKETSIZE 1024
+#define NUMBER        0xABADB011
 
 static char      lastHostName[BUFSIZE] = {""};
 static UDPpacket *currentPacket   = NULL;
@@ -150,7 +151,8 @@ int n_newPacket(lua_State *L)
 	if(currentPacket)
 	{
 		currentPacket->channel = CHANNEL;
-		currentPacket->len = 0;
+		currentPacket->len = 4;
+		SDLNet_Write32(NUMBER, currentPacket->data);
 	}
 
 	return 0;
@@ -218,11 +220,7 @@ int n_sendPacket(lua_State *L)
 
 	SDLNet_ResolveHost(&currentPacket->address, hostName, currentPort);
 
-	SDLNet_UDP_Bind(currentSocket, currentPacket->channel, &currentPacket->address);
-
 	SDLNet_UDP_Send(currentSocket, currentPacket->channel, currentPacket);
-
-	SDLNet_UDP_Unbind(currentSocket, currentPacket->channel);
 
 	return 0;
 }
@@ -246,11 +244,15 @@ int n_readPacket(lua_State *L)
 
 			if((ip = SDLNet_ResolveIP(&packet->address)))
 			{
+				int number;
+
 				lua_pushboolean(L, TRUE);
 
 				lua_pushstring(L, ip);
 				lua_pushinteger(L, packet->address.port);
-				lua_pushlstring(L, (const char *) packet->data, packet->len);
+				lua_pushlstring(L, ((const char *) packet->data) + 4, packet->len);
+
+				number = SDLNet_Read32(packet->data);
 
 				SDLNet_FreePacket(packet);
 
