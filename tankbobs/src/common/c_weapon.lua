@@ -223,7 +223,7 @@ function c_weapon_init()
 	weapon.meleeRange = 0
 	weapon.width = 0
 	weapon.trail = 4
-	weapon.trailWidth = 0.5
+	weapon.trailWidth = 1.5
 
 	weapon.texturer[2](0, 1)
 	weapon.texturer[3](0, 0)
@@ -240,10 +240,10 @@ function c_weapon_init()
 	weapon.projectileMaxCollisions = 0
 	weapon.projectileEndOnBody = true
 
-	weapon.projectileHull[1](0, 1)
+	weapon.projectileHull[1](0, 2)
 	weapon.projectileHull[2](0, 0)
-	weapon.projectileHull[3](1, 0)
-	weapon.projectileHull[4](1, 1)
+	weapon.projectileHull[3](2, 0)
+	weapon.projectileHull[4](2, 2)
 	weapon.projectileTexturer[1](0, 1)
 	weapon.projectileTexturer[2](0, 0)
 	weapon.projectileTexturer[3](1, 0)
@@ -261,7 +261,7 @@ function c_weapon_init()
 	weapon.name = "instagun"
 	weapon.altName = "instagun"
 	weapon.damage = 100
-	weapon.pellets = 1
+	weapon.pellets = 1.5
 	weapon.speed = 524288
 	weapon.spread = tankbobs.m_radians(0)
 	weapon.repeatRate = 2
@@ -292,10 +292,10 @@ function c_weapon_init()
 	weapon.projectileMaxCollisions = 0
 	weapon.projectileEndOnBody = true
 
-	weapon.projectileHull[1](0, 1)
+	weapon.projectileHull[1](0, 2)
 	weapon.projectileHull[2](0, 0)
-	weapon.projectileHull[3](1, 0)
-	weapon.projectileHull[4](1, 1)
+	weapon.projectileHull[3](2, 0)
+	weapon.projectileHull[4](2, 2)
 	weapon.projectileTexturer[1](0, 1)
 	weapon.projectileTexturer[2](0, 0)
 	weapon.projectileTexturer[3](1, 0)
@@ -327,7 +327,7 @@ function c_weapon_init()
 	weapon.meleeRange = 0
 	weapon.width = 0
 	weapon.trail = 0.25
-	weapon.trailWidth = 0.25
+	weapon.trailWidth = 0.75
 
 	weapon.texturer[2](0, 1)
 	weapon.texturer[3](0, 0)
@@ -344,10 +344,10 @@ function c_weapon_init()
 	weapon.projectileMaxCollisions = 0
 	weapon.projectileEndOnBody = true
 
-	weapon.projectileHull[1](0, 1)
+	weapon.projectileHull[1](0, 2)
 	weapon.projectileHull[2](0, 0)
-	weapon.projectileHull[3](1, 0)
-	weapon.projectileHull[4](1, 1)
+	weapon.projectileHull[3](2, 0)
+	weapon.projectileHull[4](2, 2)
 	weapon.projectileTexturer[1](0, 1)
 	weapon.projectileTexturer[2](0, 0)
 	weapon.projectileTexturer[3](1, 0)
