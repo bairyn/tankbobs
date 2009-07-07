@@ -218,7 +218,11 @@ int n_sendPacket(lua_State *L)
 
 	SDLNet_ResolveHost(&currentPacket->address, hostName, currentPort);
 
+	SDLNet_UDP_Bind(currentSocket, currentPacket->channel, &currentPacket->address);
+
 	SDLNet_UDP_Send(currentSocket, currentPacket->channel, currentPacket);
+
+	SDLNet_UDP_Unbind(currentSocket, currentPacket->channel);
 
 	return 0;
 }

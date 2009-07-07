@@ -65,7 +65,7 @@ playerSpawnPoint, 168, 62
 playerSpawnPoint, -8, -62
 playerSpawnPoint, -9, 77
 powerupSpawnPoint, 51, 34, health shotgun machinegun, 0, 30, 30, 1
-powerupSpawnPoint, 97, 72, health, 0, 20, 20, 0
+powerupSpawnPoint, 97, 71.5, health, 0, 20, 20, 0
 powerupSpawnPoint, 35, 53, railgun, 0, 30, 30, 1
 powerupSpawnPoint, 119, 45, coilgun ammo, 0, 30, 30, 1
 powerupSpawnPoint, -94, -94, railgun aim-aid, 0, 30, 30, 1
