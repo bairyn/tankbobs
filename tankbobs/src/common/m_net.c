@@ -36,7 +36,7 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 #include "crossdll.h"
 
 #define DEFAULTPORT   43210
-#define CHANNEL       2
+#define CHANNEL       -1
 #define MAXPACKETSIZE 1024
 #define NUMBER        0xABADB011
 
