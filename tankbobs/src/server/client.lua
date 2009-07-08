@@ -52,11 +52,11 @@ local tankbobs
 function client_init()
 	tankbobs = _G.tankbobs
 
-	c_const_get("client_connectFlood", 2000, 1)
-	c_const_get("client_ticksCheck", 5000, 1)
-	c_const_get("client_maxInactiveTime", 12000, 1)  -- drop after 2 minutes of no packets
-	c_const_get("client_connectingMaxInactiveTime", 3000, 1)
-	c_const_get("client_maxChallengeAttempts", 3, 1)
+	c_const_set("client_connectFlood", 2000, 1)
+	c_const_set("client_ticksCheck", 5000, 1)
+	c_const_set("client_maxInactiveTime", 12000, 1)  -- drop after 2 minutes of no packets
+	c_const_set("client_connectingMaxInactiveTime", 3000, 1)
+	c_const_set("client_maxChallengeAttempts", 3, 1)
 end
 
 function client_done()
@@ -82,6 +82,8 @@ client =
 	ui = ""  -- unique identifier
 }
 
+local client_class = client
+
 local clients = {}
 
 local lastConnectTime
@@ -91,7 +93,7 @@ local function client_sanitizeName(name)
 
 	if #name >= 1 then
 		for i = 1, math.min(#name, c_const_get("max_nameLength")) do
-			if char(name:sub(i)) >= 32 and char(name:sub(i)) < 127 then
+			if string.byte(name:sub(i)) >= 32 and string.byte(name:sub(i)) < 127 then
 				sanitizedName = sanitizedName .. name:sub(i)
 			end
 		end
@@ -118,6 +120,7 @@ local function client_askForTick(client)
 	client.lastTickSendTime = t
 	tankbobs.n_newPacket(1)
 	tankbobs.n_writeToPacket(tankbobs.io_fromChar(0xA3))
+	tankbobs.n_setPort(client.port)
 	tankbobs.n_sendPacket(client.ip)
 end
 
@@ -129,6 +132,7 @@ local function client_disconnect(client, reason)
 	tankbobs.n_newPacket(#reason + 1)
 	tankbobs.n_writeToPacket(tankbobs.io_fromChar(0xA4))
 	tankbobs.n_writeToPacket(reason)
+	tankbobs.n_setPort(client.port)
 	-- send the packet a few times
 	tankbobs.n_sendPacket(client.ip)
 	tankbobs.n_sendPacket(client.ip)
@@ -169,17 +173,17 @@ function client_step(d)
 		local client = client_getByIP(ip)
 
 		if status then
-			local switch = data:sub(1, 1) data = data:sub(2)
+			local switch = string.byte(data, 1) data = data:sub(2)
 			if switch == nil then
 			elseif switch == 0x00 then
-				if #data >= 79 then  -- connection request packet expects to be at least 79 bytes, so ignore it if it's not
+				if #data >= 77 then  -- connection request packet expects to be at least 79 bytes, so ignore it if it's not
 					if not client then
 						if not lastConnectTime or t > lastConnectTime + c_const_get("client_connectFlood") then
 							lastConnectTime = t
 
 							-- client wants to connect
 							-- initialize new client
-							local client = client:new()
+							local client = client_class:new()
 							table.insert(clients, client)
 
 							client.ip = ip
@@ -208,12 +212,13 @@ function client_step(d)
 							-- send the challenge number, set and map
 							tankbobs.n_newPacket(256)
 							tankbobs.n_writeToPacket(tankbobs.io_fromChar(0xA0))
-							client.challenge = math.random(0x00000000, 0xFFFFFFFF)
+							client.challenge = math.random(0x80000000, 0x7FFFFFFF)
 							tankbobs.n_writeToPacket(tankbobs.io_fromInt(client.challenge))
 							-- set and map as a NULL-terminated string
 							tankbobs.n_writeToPacket(c_tcm_current_set.name .. string.char(0x00))
 							tankbobs.n_writeToPacket(c_tcm_current_map.name .. string.char(0x00))
 
+							tankbobs.n_setPort(client.port)
 							tankbobs.n_sendPacket(client.ip)
 						end
 					end
@@ -233,6 +238,7 @@ function client_step(d)
 
 									tankbobs.n_newPacket(1)
 									tankbobs.n_writeToPacket(tankbobs.io_fromChar(0xA1))
+									tankbobs.n_setPort(client.port)
 									tankbobs.n_sendPacket(client.ip)
 
 									s_print("'", client.tank.name, "' entered the game from ", client.ip, ":", client.port, "\n")
@@ -337,6 +343,7 @@ function client_step(d)
 				end
 				-- send a snapshot of the world in the 1000 remaining bytes
 				tankbobs.n_writeToPacket(tankbobs.w_persistWorld(c_weapon_getProjectiles(), c_world_getTanks(), c_world_getPowerups(), c_tcm_current_map.walls))
+				tankbobs.n_setPort(client.port)
 				tankbobs.n_sendPacket(client.ip)
 			else
 				client_askForTick(v)

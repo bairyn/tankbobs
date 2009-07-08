@@ -247,6 +247,7 @@ int n_readPacket(lua_State *L)
 		{
 			const char *ip;
 
+			/* FIXME: IP isn't set right */
 			if((ip = SDLNet_ResolveIP(&packet->address)))
 			{
 				lua_pushboolean(L, TRUE);

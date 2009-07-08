@@ -87,6 +87,10 @@ function s_print(...)
 	tankbobs.c_print(print)
 end
 
+function s_printnl(...)
+	return s_print(..., '\n')
+end
+
 local lastTime = 0
 function main_loop()
 	local t = tankbobs.t_getTicks()
