@@ -296,102 +296,10 @@ function st_play_mouse(x, y, xrel, yrel)
 	gui_mouse(x, y, xrel, yrel)
 end
 
-local frame = 3
 local a = {{0, 0}, {0, 0}}  -- aim-aid table
 local w, t = {{0, 0}, {0, 0}, {0, 0}, {0, 0}}, {{0, 0}, {0, 0}, {0, 0}, {0, 0}}
-function st_play_step(d)
-	frame = frame - 1
-
-	if frame <= 0 then
-		frame = 256
-
-		math.randomseed(os.time() * tankbobs.t_getTicks() + 10 * 768 * d)
-	end
-
-	-- test for end of game
-	if endOfGame then
-		c_world_setPaused(true)
-	end
-
-	local fragLimit = c_config_get("config.game.fragLimit")
-	if fragLimit > 0 then
-		for k, v in pairs(c_world_getTanks()) do
-			if v.score >= fragLimit then
-				endOfGame = true
-
-				c_world_setPaused(true)
-
-				local name = tostring(c_config_get("config.game.player" .. tostring(k) .. ".name"))
-				gui_addLabel(tankbobs.m_vec2(35, 50), name .. " wins!", nil, 1.1, v.color.r, v.color.g, v.color.b, 0.75, v.color.r, v.color.g, v.color.b, 0.75)
-			end
-		end
-	end
-
-	c_world_step(d)
-
+local function play_drawWorld(d)
 	gl.PushMatrix()
-		-- adjust the camera
-		local uppermost
-		local lowermost
-		local rightmost
-		local leftmost
-		-- Position the camera so that all tanks and powerups are shown, while zooming in as much as possible
-		for _, v in pairs(c_world_getTanks()) do
-			if not leftmost or v.p[1].x < leftmost then
-				leftmost = v.p[1].x
-			end
-			if not rightmost or v.p[1].x > rightmost then
-				rightmost = v.p[1].x
-			end
-
-			if not lowermost or v.p[1].y < lowermost then
-				lowermost = v.p[1].y
-			end
-			if not uppermost or v.p[1].y > uppermost then
-				uppermost = v.p[1].y
-			end
-		end
-		for _, v in pairs(c_world_getPowerups()) do
-			if v.spawner.focus then
-				if not leftmost or v.p[1].x < leftmost then
-					leftmost = v.p[1].x
-				end
-				if not rightmost or v.p[1].x > rightmost then
-					rightmost = v.p[1].x
-				end
-
-				if not lowermost or v.p[1].y < lowermost then
-					lowermost = v.p[1].y
-				end
-				if not uppermost or v.p[1].y > uppermost then
-					uppermost = v.p[1].y
-				end
-			end
-		end
-		if not uppermost or not lowermost or not rightmost or not leftmost then
-			return
-		end
-		local m = c_tcm_current_map
-		-- FIXME: this is broken
-		if m.uppermost <= 105 and m.lowermost >= -5 and m.rightmost <= 105 and m.leftmost >= -5 then uppermost, rightmost, lowermost, leftmost = 50, 50, 50, 50 end  -- TEMPORARY CODE TO KEEP LEVELS 1 AND 2 STILL
-		--uppermost = math.min(m.uppermost - (50 + c_config_get("config.client.cameraExtraFOV")), uppermost)
-		--lowermost = math.max(m.lowermost + (50 + c_config_get("config.client.cameraExtraFOV")), lowermost)
-		--rightmost = math.min(m.rightmost - (50 + c_config_get("config.client.cameraExtraFOV")), rightmost)
-		--leftmost  = math.max(m.leftmost  + (50 + c_config_get("config.client.cameraExtraFOV")),  leftmost)
-
-		gl.Translate(50, 50, 0)
-
-		local distance = math.abs(rightmost - leftmost) > math.abs(uppermost - lowermost) and math.abs(rightmost - leftmost) or math.abs(uppermost - lowermost)
-		local scale = 100 / (distance + c_config_get("config.client.cameraExtraFOV"))
-		if scale > 1 then
-			scale = 1
-		end
-		zoom = common_lerp(zoom, scale, d * c_config_get("config.client.cameraSpeed"))
-		gl.Scale(zoom, zoom, 1)
-
-		camera = common_lerp(camera, tankbobs.m_vec2(-(rightmost + leftmost) / 2, -(uppermost + lowermost) / 2), d * c_config_get("config.client.cameraSpeed"))
-		gl.Translate(camera.x, camera.y, 0)
-
 		-- draw tanks and walls
 		for i = 1, c_const_get("tcm_maxLevel") do
 			for k, v in pairs(c_tcm_current_map.walls) do
@@ -579,6 +487,103 @@ function st_play_step(d)
 			end
 		end
 	gl.PopMatrix()
+end
+
+local frame = 3
+function st_play_step(d)
+	frame = frame - 1
+
+	if frame <= 0 then
+		frame = 256
+
+		math.randomseed(os.time() * tankbobs.t_getTicks() + 10 * 768 * d)
+	end
+
+	-- test for end of game
+	if endOfGame then
+		c_world_setPaused(true)
+	end
+
+	local fragLimit = c_config_get("config.game.fragLimit")
+	if fragLimit > 0 then
+		for k, v in pairs(c_world_getTanks()) do
+			if v.score >= fragLimit then
+				endOfGame = true
+
+				c_world_setPaused(true)
+
+				local name = tostring(c_config_get("config.game.player" .. tostring(k) .. ".name"))
+				gui_addLabel(tankbobs.m_vec2(35, 50), name .. " wins!", nil, 1.1, v.color.r, v.color.g, v.color.b, 0.75, v.color.r, v.color.g, v.color.b, 0.75)
+			end
+		end
+	end
+
+	c_world_step(d)
+
+	gl.PushMatrix()
+		-- adjust the camera
+		local uppermost
+		local lowermost
+		local rightmost
+		local leftmost
+		-- Position the camera so that all tanks and powerups are shown, while zooming in as much as possible
+		for _, v in pairs(c_world_getTanks()) do
+			if not leftmost or v.p[1].x < leftmost then
+				leftmost = v.p[1].x
+			end
+			if not rightmost or v.p[1].x > rightmost then
+				rightmost = v.p[1].x
+			end
+
+			if not lowermost or v.p[1].y < lowermost then
+				lowermost = v.p[1].y
+			end
+			if not uppermost or v.p[1].y > uppermost then
+				uppermost = v.p[1].y
+			end
+		end
+		for _, v in pairs(c_world_getPowerups()) do
+			if v.spawner.focus then
+				if not leftmost or v.p[1].x < leftmost then
+					leftmost = v.p[1].x
+				end
+				if not rightmost or v.p[1].x > rightmost then
+					rightmost = v.p[1].x
+				end
+
+				if not lowermost or v.p[1].y < lowermost then
+					lowermost = v.p[1].y
+				end
+				if not uppermost or v.p[1].y > uppermost then
+					uppermost = v.p[1].y
+				end
+			end
+		end
+		if not uppermost or not lowermost or not rightmost or not leftmost then
+			return
+		end
+		local m = c_tcm_current_map
+		-- FIXME: this is broken
+		if m.uppermost <= 105 and m.lowermost >= -5 and m.rightmost <= 105 and m.leftmost >= -5 then uppermost, rightmost, lowermost, leftmost = 50, 50, 50, 50 end  -- TEMPORARY CODE TO KEEP LEVELS 1 AND 2 STILL
+		--uppermost = math.min(m.uppermost - (50 + c_config_get("config.client.cameraExtraFOV")), uppermost)
+		--lowermost = math.max(m.lowermost + (50 + c_config_get("config.client.cameraExtraFOV")), lowermost)
+		--rightmost = math.min(m.rightmost - (50 + c_config_get("config.client.cameraExtraFOV")), rightmost)
+		--leftmost  = math.max(m.leftmost  + (50 + c_config_get("config.client.cameraExtraFOV")),  leftmost)
+
+		gl.Translate(50, 50, 0)
+
+		local distance = math.abs(rightmost - leftmost) > math.abs(uppermost - lowermost) and math.abs(rightmost - leftmost) or math.abs(uppermost - lowermost)
+		local scale = 100 / (distance + c_config_get("config.client.cameraExtraFOV"))
+		if scale > 1 then
+			scale = 1
+		end
+		zoom = common_lerp(zoom, scale, d * c_config_get("config.client.cameraSpeed"))
+		gl.Scale(zoom, zoom, 1)
+
+		camera = common_lerp(camera, tankbobs.m_vec2(-(rightmost + leftmost) / 2, -(uppermost + lowermost) / 2), d * c_config_get("config.client.cameraSpeed"))
+		gl.Translate(camera.x, camera.y, 0)
+		play_drawWorld(d)
+	gl.PopMatrix()
 
 	-- scores, FPS, rest of HUD, etc.
 	gui_paint(d)
@@ -622,7 +627,7 @@ function st_play_step(d)
 							endP = vec
 						end
 
-						gl.NewList(list, "COMPILE_AND_EXECUTE")
+						gl.NewList(list, "COMPILE")
 							local a = {}
 							local t = {}
 							local offset = tankbobs.m_vec2()
