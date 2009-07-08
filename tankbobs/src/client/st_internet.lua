@@ -242,6 +242,8 @@ function st_internet_start(widget)
 	end
 	if connection.port then
 		tankbobs.n_setPort(connection.port)
+	else
+		tankbobs.n_setPort(c_const_get("default_connectPort"))
 	end
 	tankbobs.n_newPacket(80)
 	tankbobs.n_writeToPacket(tankbobs.io_fromChar(0x00))

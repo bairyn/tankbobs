@@ -36,7 +36,8 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 #include "crossdll.h"
 
 #define DEFAULTPORT   43210
-#define CHANNEL       -1
+#define CHANNEL       2
+#define LISTENCHANNEL 2
 #define MAXPACKETSIZE 1024
 #define NUMBER        0xABADB011
 
@@ -44,6 +45,7 @@ static char      lastHostName[BUFSIZE] = {""};
 static UDPpacket *currentPacket   = NULL;
 static UDPsocket currentSocket    = NULL;
 static Uint16    currentPort      = DEFAULTPORT;
+static IPaddress anyHost          = {INADDR_ANY, 0};
 
 void n_initNL(lua_State *L)
 {
@@ -79,7 +81,7 @@ int n_init(lua_State *L)
 		CDLL_FUNCTION("libtstr", "tstr_free", void(*)(tstr *))
 			(message);
 
-		return 1;
+		return 2;
 	}
 
 	currentSocket = SDLNet_UDP_Open(currentPort);
@@ -100,7 +102,7 @@ int n_init(lua_State *L)
 		CDLL_FUNCTION("libtstr", "tstr_free", void(*)(tstr *))
 			(message);
 
-		return 1;
+		return 2;
 	}
 
 	lua_pushboolean(L, TRUE);
@@ -151,8 +153,7 @@ int n_newPacket(lua_State *L)
 	if(currentPacket)
 	{
 		currentPacket->channel = CHANNEL;
-		currentPacket->len = 4;
-		SDLNet_Write32(NUMBER, currentPacket->data);
+		currentPacket->len = 0;
 	}
 
 	return 0;
@@ -200,6 +201,7 @@ int n_setPort(lua_State *L)
 int n_sendPacket(lua_State *L)
 {
 	const char *hostName;
+	IPaddress host;
 
 	CHECKINIT(init, L);
 
@@ -218,7 +220,8 @@ int n_sendPacket(lua_State *L)
 		hostName = lastHostName;
 	}
 
-	SDLNet_ResolveHost(&currentPacket->address, hostName, currentPort);
+	SDLNet_ResolveHost(&host, hostName, currentPort);
+	SDLNet_UDP_Bind(currentSocket, currentPacket->channel, &host);
 
 	SDLNet_UDP_Send(currentSocket, currentPacket->channel, currentPacket);
 
@@ -236,6 +239,8 @@ int n_readPacket(lua_State *L)
 		return 0;
 	}
 
+	SDLNet_UDP_Bind(currentSocket, LISTENCHANNEL, &anyHost);
+
 	if((packet = SDLNet_AllocPacket(MAXPACKETSIZE)))
 	{
 		if(SDLNet_UDP_Recv(currentSocket, packet))
@@ -244,15 +249,11 @@ int n_readPacket(lua_State *L)
 
 			if((ip = SDLNet_ResolveIP(&packet->address)))
 			{
-				int number;
-
 				lua_pushboolean(L, TRUE);
 
 				lua_pushstring(L, ip);
 				lua_pushinteger(L, packet->address.port);
-				lua_pushlstring(L, ((const char *) packet->data) + 4, packet->len);
-
-				number = SDLNet_Read32(packet->data);
+				lua_pushlstring(L, (const char *) packet->data, packet->len);
 
 				SDLNet_FreePacket(packet);
 

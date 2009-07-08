@@ -199,6 +199,8 @@ function c_data_init()
 	c_const_set("keyLayout_dvorak", layout_dvorak, 1)
 	c_const_set("keyLayouts", {"qwerty", "dvorak"}, 1)
 
+	c_const_set("default_connectPort", 43210, 1)
+
 	c_const_set("max_nameLength", 32, 1)
 
 	tankbobs.c_setHistoryFile(c_const_get("history_file"))
