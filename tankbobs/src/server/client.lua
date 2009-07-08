@@ -97,6 +97,8 @@ local function client_sanitizeName(name)
 				sanitizedName = sanitizedName .. name:sub(i)
 			end
 		end
+	else
+		sanitizedName = c_const_get("defaultName")
 	end
 
 	return sazitizedName
@@ -310,7 +312,7 @@ function client_step(d)
 	for k, v in pairs(clients) do
 		if v.connecting then
 			if v.lastAliveTime and t > v.lastAliveTime + c_const_get("client_connectingMaxInactiveTime") then
-				client_disconnect(client, "timed out")
+				client_disconnect(v, "timed out")
 			end
 		else
 			if v.ticksOffset and v.lastOffsetCheckTime and t >= v.lastOffsetCheckTime + c_const_get("client_ticksCheck") then

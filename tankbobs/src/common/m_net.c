@@ -245,23 +245,24 @@ int n_readPacket(lua_State *L)
 	{
 		if(SDLNet_UDP_Recv(currentSocket, packet))
 		{
-			const char *ip;
+			static char ip[BUFSIZE];
 
-			/* FIXME: IP isn't set right */
-			if((ip = SDLNet_ResolveIP(&packet->address)))
-			{
-				lua_pushboolean(L, TRUE);
+			/* ip = SDLNet_PresentIP(&packet->address); */
+/*#if SDL_BYTEORDER == SDL_BIG_ENDIAN*/
+			sprintf(ip, "%d.%d.%d.%d", (packet->address.host >> 24) & 0x000000FF, (packet->address.host >> 16) & 0x000000FF, (packet->address.host >> 8) & 0x000000FF, (packet->address.host >> 0) & 0x000000FF);
+/*#else*/
+			/*sprintf(ip, "%d.%d.%d.%d", (packet->address.host >> 0) & 0x000000FF, (packet->address.host >> 8) & 0x000000FF, (packet->address.host >> 16) & 0x000000FF, (packet->address.host >> 24) & 0x000000FF);*/
+/*#endif*/
 
-				lua_pushstring(L, ip);
-				lua_pushinteger(L, packet->address.port);
-				lua_pushlstring(L, (const char *) packet->data, packet->len);
+			lua_pushboolean(L, TRUE);
 
-				SDLNet_FreePacket(packet);
-
-				return 4;
-			}
+			lua_pushstring(L, ip);
+			lua_pushinteger(L, packet->address.port);
+			lua_pushlstring(L, (const char *) packet->data, packet->len);
 
 			SDLNet_FreePacket(packet);
+
+			return 4;
 		}
 		else
 		{
