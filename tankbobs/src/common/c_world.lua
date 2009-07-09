@@ -139,15 +139,8 @@ function c_world_init()
 	c_const_set("tank_lowHealth", 33, 1)
 	c_const_set("tank_acceleration",
 	{
-		{16 / 1000},  -- acceleration of 16 by default
-		{12 / 1000, 3},  -- unless the tank's speed is at least 8 units per second, in which case the acceleration is dropped to 48
-		{6 / 1000, 4},
-		{4 / 1000, 8},
-		{2 / 1000, 12},
-		{1 / 1000, 16},
-		{0.5 / 1000, 24},
-		{0.4 / 1000, 32},
-		{(1 / 3) / 1000, 48}
+		{16 / 1000},
+		{12 / 1000, 4},
 	}, 1)
 	tank_acceleration = c_const_get("tank_acceleration")
 	c_const_set("tank_speedK", 5, 1)
