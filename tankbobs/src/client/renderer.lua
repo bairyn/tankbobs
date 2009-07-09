@@ -28,6 +28,7 @@ local tankbobs
 
 local tank_textures
 local tankBorder_textures
+local tankShield_textures
 local powerup_textures
 local healthbar_texture 
 local healthbarBorder_texture 
@@ -56,11 +57,12 @@ function renderer_init()
 		end
 	end
 
-	c_const_set("aimAid_startDistance", 2.1, 1)  -- distance at which the aid begins
+	c_const_set("aimAid_startDistance", 2.1, 1)  -- distance between the aid and the tank
 	c_const_set("aimAid_maxDistance", 4096, 1)
 	c_const_set("aimAid_width", 0.75, 1)
-	c_const_set("trail_startDistance", 2.1, 1)  -- distance at which the trail begins
+	c_const_set("trail_startDistance", 2.1, 1)  -- distance between the trail and the tank
 	c_const_set("trail_maxDistance", 4096, 1)
+	c_const_set("tank_accelerationColorModifier", 1.25, 1)
 
 	tankbobs.r_selectFont(c_config_get("config.font"))
 
@@ -82,10 +84,21 @@ function renderer_init()
 	c_const_set("tankBorder_texturex3", 0.0125, 1) c_const_set("tankBorder_texturey3", 0.1, 1)  -- no outline on top
 	c_const_set("tankBorder_texturex4", 0.9875, 1) c_const_set("tankBorder_texturey4", 0.1, 1)  -- no outline on top
 
+	c_const_set("tankShield_renderx1", -2.0, 1) c_const_set("tankShield_rendery1",  2.0, 1)
+	c_const_set("tankShield_renderx2", -2.0, 1) c_const_set("tankShield_rendery2", -2.0, 1)
+	c_const_set("tankShield_renderx3",  2.0, 1) c_const_set("tankShield_rendery3", -2.0, 1)
+	c_const_set("tankShield_renderx4",  2.0, 1) c_const_set("tankShield_rendery4",  2.0, 1)
+	c_const_set("tankShield_texturex1", 0.75, 1) c_const_set("tankShield_texturey1", 0.75, 1)
+	c_const_set("tankShield_texturex2", 0.25, 1) c_const_set("tankShield_texturey2", 0.75, 1)
+	c_const_set("tankShield_texturex3", 0.25, 1) c_const_set("tankShield_texturey3", 0.25, 1)
+	c_const_set("tankShield_texturex4", 0.75, 1) c_const_set("tankShield_texturey4", 0.25, 1)
+
 	tank_listBase = gl.GenLists(1)
 	tank_textures = gl.GenTextures(1)
 	tankBorder_listBase = gl.GenLists(1)
 	tankBorder_textures = gl.GenTextures(1)
+	tankShield_listBase = gl.GenLists(1)
+	tankShield_textures = gl.GenTextures(1)
 
 	if tank_listBase == 0 or tankBorder_listBase == 0 then
 		error("st_play_init: could not generate lists: " .. gl.GetError())
@@ -126,6 +139,25 @@ function renderer_init()
 			gl.TexCoord(c_const_get("tankBorder_texturex2"), c_const_get("tankBorder_texturey2")) gl.Vertex(c_const_get("tankBorder_renderx2"), c_const_get("tankBorder_rendery2"))
 			gl.TexCoord(c_const_get("tankBorder_texturex3"), c_const_get("tankBorder_texturey3")) gl.Vertex(c_const_get("tankBorder_renderx3"), c_const_get("tankBorder_rendery3"))
 			gl.TexCoord(c_const_get("tankBorder_texturex4"), c_const_get("tankBorder_texturey4")) gl.Vertex(c_const_get("tankBorder_renderx4"), c_const_get("tankBorder_rendery4"))
+		gl.End()
+	gl.EndList()
+
+	gl.BindTexture("TEXTURE_2D", tankShield_textures[1])
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_S", "REPEAT")
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_T", "REPEAT")
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_MIN_FILTER", "LINEAR")
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_MAG_FILTER", "LINEAR")
+	tankbobs.r_loadImage2D(c_const_get("tankShield"), c_const_get("textures_default"))
+
+	gl.NewList(tankShield_listBase, "COMPILE_AND_EXECUTE")
+		-- blend tank with color
+		gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
+		gl.BindTexture("TEXTURE_2D", tankShield_textures[1])
+		gl.Begin("QUADS")
+			gl.TexCoord(c_const_get("tankShield_texturex1"), c_const_get("tankShield_texturey1")) gl.Vertex(c_const_get("tankShield_renderx1"), c_const_get("tankShield_rendery1"))
+			gl.TexCoord(c_const_get("tankShield_texturex2"), c_const_get("tankShield_texturey2")) gl.Vertex(c_const_get("tankShield_renderx2"), c_const_get("tankShield_rendery2"))
+			gl.TexCoord(c_const_get("tankShield_texturex3"), c_const_get("tankShield_texturey3")) gl.Vertex(c_const_get("tankShield_renderx3"), c_const_get("tankShield_rendery3"))
+			gl.TexCoord(c_const_get("tankShield_texturex4"), c_const_get("tankShield_texturey4")) gl.Vertex(c_const_get("tankShield_renderx4"), c_const_get("tankShield_rendery4"))
 		gl.End()
 	gl.EndList()
 

@@ -317,13 +317,21 @@ local function play_drawWorld(d)
 										c_config_set("config.game.player" .. tostring(k) .. ".color.b", c_config_get("config.game.defaultTankGreen"))
 										c_config_set("config.game.player" .. tostring(k) .. ".color.a", c_config_get("config.game.defaultTankAlpha"))
 									end
-									gl.Color(v.color.r, v.color.g, v.color.b, 1)
+									if v.cd.acceleration then
+										gl.Color(v.color.r * c_const_get("tank_accelerationColorModifier"), v.color.g * c_const_get("tank_accelerationColorModifier"), v.color.b * c_const_get("tank_accelerationColorModifier"), 1)
+									else
+										gl.Color(v.color.r, v.color.g, v.color.b, 1)
+									end
 									gl.TexEnv("TEXTURE_ENV_COLOR", v.color.r, v.color.g, v.color.b, 1)
 									-- blend color with tank texture
 									gl.CallList(tank_listBase)
 									-- white outline
 									gl.Color(1, 1, 1, 0.875)
 									gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, 0.875)
+									gl.CallList(tankBorder_listBase)
+									-- shield
+									gl.Color(1, 1, 1, v.shield / c_const_get("tank_boostShield"))
+									gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, v.shield / c_const_get("tank_boostShield"))
 									gl.CallList(tankBorder_listBase)
 
 									if v.weapon then

@@ -1106,6 +1106,14 @@ static int compile(const char *filename)
 		{
 			powerups[0] |= 0x00000080;
 		}
+		if(strstr(powerupSpawnPoint->powerupsToEnable, "acceleration"))
+		{
+			powerups[0] |= 0x00000100;
+		}
+		if(strstr(powerupSpawnPoint->powerupsToEnable, "shield"))
+		{
+			powerups[0] |= 0x00000200;
+		}
 
 		put_cint(fout, i);
 		put_cdouble(fout, powerupSpawnPoint->x1);

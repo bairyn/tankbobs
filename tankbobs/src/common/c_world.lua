@@ -173,6 +173,10 @@ function c_world_init()
 	tank_rotationSpecialSpeed = c_const_get("tank_rotationSpecialSpeed")
 	c_const_set("tank_defaultRotation", c_math_radians(90), 1)  -- up
 	c_const_set("tank_boostHealth", 60, 1)
+	c_const_set("tank_boostShield", 25, 1)
+	c_const_set("tank_shieldedDamage", 1 / 4, 1)
+	c_const_set("tank_shieldDamage", 1 / 16, 1)
+	c_const_set("tank_accelerationModifier", 2, 1)
 
 	c_const_set("powerup_hullx1",  0, 1) c_const_set("powerup_hully1",  1, 1)
 	c_const_set("powerup_hullx2",  0, 1) c_const_set("powerup_hully2",  0, 1)
@@ -263,6 +267,26 @@ function c_world_init()
 	powerupType.name = "health"
 	powerupType.c.r, powerupType.c.g, powerupType.c.b, powerupType.c.a = 0.1, 0.85, 0.1, 0.8
 	powerupType.instagib = true
+
+	-- acceleration
+	local powerupType = c_world_powerupType:new()
+
+	table.insert(c_powerupTypes, powerupType)
+
+	powerupType.index = 9
+	powerupType.name = "acceleration"
+	powerupType.c.r, powerupType.c.g, powerupType.c.b, powerupType.c.a = 0.25, 0.375, 0.05, 0.75
+	powerupType.instagib = true
+
+	-- shield
+	local powerupType = c_world_powerupType:new()
+
+	table.insert(c_powerupTypes, powerupType)
+
+	powerupType.index = 10
+	powerupType.name = "shield"
+	powerupType.c.r, powerupType.c.g, powerupType.c.b, powerupType.c.a = 0.25, 0.5, 0.05, 0.755
+	powerupType.instagib = false
 
 	tankbobs.w_setTimeStep(c_const_get("world_timeStep"))
 	tankbobs.w_setIterations(c_const_get("world_iterations"))
@@ -454,6 +478,7 @@ function c_world_tank_die(tank, t)
 	else
 		tank.score = tank.score - 1
 	end
+	tank.shield = 0
 	tank.killer = nil
 	tank.exists = false
 	tank.spawning = true
@@ -500,6 +525,7 @@ function c_world_tank_checkSpawn(d, tank)
 	tank.r = c_const_get("tank_defaultRotation")
 	tank.p[1](playerSpawnPoint.p[1])
 	tank.health = c_const_get("tank_health")
+	tank.shield = 0
 	if c_config_get("config.game.instagib") then
 		tank.weapon = c_weapon_getByAltName("instagun")
 	else
@@ -879,6 +905,10 @@ function c_world_tank_step(d, tank)
 				end
 			end
 
+			if tank.cd.acceleration then
+				acceleration = acceleration * c_const_get("tank_accelerationModifier")
+			end
+
 			local newVel = t_m_vec2(vel)
 			newVel.R = newVel.R + acceleration
 			newVel.t = tank.r
@@ -1167,6 +1197,12 @@ function c_world_powerup_pickUp(tank, powerup)
 	if powerupType.name == "health" then
 		tank.health = tank.health + c_const_get("tank_boostHealth")
 	end
+	if powerupType.name == "acceleration" then
+		tank.cd.acceleration = not tank.cd.acceleration
+	end
+	if powerupType.name == "shield" then
+		tank.shield = tank.shield + c_const_get("tank_boostShield")
+	end
 end
 
 function c_world_powerup_step(d, powerup)
@@ -1233,7 +1269,12 @@ local function c_world_isPowerup(body)
 end
 
 function c_world_tankDamage(tank, damage)
-	tank.health = tank.health - damage
+	if tank.shield > 0 then
+		tank.health = tank.health - c_const_get("tank_shieldedDamage") * damage
+		tank.shield = tank.shield - c_const_get("tank_shieldDamage") * damage
+	else
+		tank.health = tank.health - damage
+	end
 end
 
 local c_world_tankDamage = c_world_tankDamage
@@ -1241,8 +1282,8 @@ local function c_world_collide(tank, normal)
 	local vel = t_w_getLinearVelocity(tank.body)
 	local component = vel * -normal
 
-	if not c_config_get("config.game.instagib") then
-		-- no collision damage in instagib mode
+	if not c_config_get("config.game.instagib") and tank.shield <= 0 then
+		-- no collision damage in instagib mode or if any of the shield is left
 		if component >= c_const_get("tank_damageMinSpeed") then
 			local damage = c_const_get("tank_damageK") * (component - c_const_get("tank_damageMinSpeed"))
 

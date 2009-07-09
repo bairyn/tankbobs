@@ -78,6 +78,7 @@ powerupSpawnPoint, 108, 194, health, 0, 30, 30, 0
 powerupSpawnPoint, 107, 135, health, 0, 30, 60, 0
 powerupSpawnPoint, 193, 192, s4w-when-it's-finished, 0, 30, 30, 0
 powerupSpawnPoint, 120, 192, health, 0, 30, 30, 0
+powerupSpawnPoint, 0, 168, acceleration shield, 0, 30, 30, 0
 path, path_1, path_2, 71, 95, 1, 1
 path, path_2, path_1, 71, 88, 1, 1
 path, down, down2, 44, 117, 1, 3

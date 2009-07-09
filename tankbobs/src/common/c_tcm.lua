@@ -601,6 +601,16 @@ function c_tcm_read_map(map)
 		else
 			powerupSpawnPoint.enabledPowerups.health = false
 		end
+		if tankbobs.t_testAND(powerups[1], 0x00000100) ~= 0 then
+			powerupSpawnPoint.enabledPowerups.acceleration = true
+		else
+			powerupSpawnPoint.enabledPowerups.acceleration = false
+		end
+		if tankbobs.t_testAND(powerups[1], 0x00000200) ~= 0 then
+			powerupSpawnPoint.enabledPowerups.shield = true
+		else
+			powerupSpawnPoint.enabledPowerups.shield = false
+		end
 
 		if c_tcm_private_get(tankbobs.io_getChar, i) ~= 0 then
 			powerupSpawnPoint.linked = true
