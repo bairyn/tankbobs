@@ -743,7 +743,7 @@ int r_drawString(lua_State *L)
 			glScalef(scalex, scaley, 1.0);
 			glTexEnvfv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_COLOR, fill);
 			glColor4fv(fill);
-			glNewList(fc->list, GL_COMPILE_AND_EXECUTE);  /* execute it so that text won't only be rendered after being placed in cache */
+			glNewList(fc->list, GL_COMPILE);  /* execute it so that text won't only be rendered after being placed in cache */
 				glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 				glBindTexture(GL_TEXTURE_2D, fc->texture);
 				glBegin(GL_QUADS);

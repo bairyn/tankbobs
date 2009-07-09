@@ -104,7 +104,7 @@ function st_online_init()
 		tankbobs.r_loadImage2D(c_const_get("textures_dir") .. v.texture, c_const_get("textures_default"))
 
 		-- TODO: use vertex buffers to render dynamic walls.  Dynamic walls will always be drawn as if they were in the same position
-		gl.NewList(v.m.list, "COMPILE_AND_EXECUTE")
+		gl.NewList(v.m.list, "COMPILE")
 			gl.Color(1, 1, 1, 1)
 			gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, 1)
 			gl.BindTexture("TEXTURE_2D", v.m.texture)
