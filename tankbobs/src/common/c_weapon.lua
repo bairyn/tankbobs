@@ -19,7 +19,7 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 --[[
 c_weapon.lua
 
-weapons
+Weapons
 --]]
 
 local c_world_tankDamage = c_world_tankDamage
@@ -287,7 +287,7 @@ function c_weapon_init()
 	weapon.render[4](1, 1)
 
 	weapon.projectileTexture = "railgun-projectile.png"
-	weapon.projectileDensity = 12
+	weapon.projectileDensity = 8
 	weapon.projectileRestitution = 0.1
 	weapon.projectileMaxCollisions = 0
 	weapon.projectileEndOnBody = true
@@ -318,7 +318,7 @@ function c_weapon_init()
 	weapon.spread = tankbobs.m_radians(0)
 	weapon.repeatRate = 2
 
-	weapon.knockback = 16384
+	weapon.knockback = 8192
 	weapon.texture = "coilgun.png"
 	weapon.fireSound = {"coilgun.wav", "coilgun2.wav", "coilgun2.wav"}
 	weapon.launchDistance = 3
@@ -364,7 +364,7 @@ function c_weapon_init()
 	weapon.index = 7
 	weapon.name = "saw"
 	weapon.altName = "saw"
-	weapon.damage = 69
+	weapon.damage = 60 / 8
 	weapon.pellets = 1
 	weapon.speed = 0
 	weapon.spread = tankbobs.m_radians(0)

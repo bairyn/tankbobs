@@ -245,6 +245,9 @@ function st_play_button(button, pressed)
 				end
 			elseif button == c_config_get("config.key.exit") then
 				c_state_new(exit_state)
+TODO FIX THESE POWERUPS one one one eleventy one
+elseif button == 0x31 then c_world_getTanks()[1].cd.acceleration = not c_world_getTanks()[1].cd.acceleration
+elseif button == 0x32 then c_world_getTanks()[1].shield = 25
 			end
 		end
 	end
