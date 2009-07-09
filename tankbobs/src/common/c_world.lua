@@ -448,11 +448,25 @@ function c_world_tank_spawn(tank)
 	tank.spawning = true
 end
 
-function c_world_tank_die(tank)
-	if not tank.exists then
-		tank.exists = false
+function c_world_tank_die(tank, t)
+	t = t or t_t_getTicks()
+
+	if tank.exists then
 		tankbobs.w_removeBody(tank.body)
 	end
+
+	tank.nextSpawnTime = t + c_const_get("world_time") * c_config_get("config.game.timescale") * c_const_get("tank_spawnTime")
+	if tank.killer then
+		tank.killer.score = tank.killer.score + 1
+	else
+		tank.score = tank.score - 1
+	end
+	tank.killer = nil
+	tank.exists = false
+	tank.spawning = true
+	tank.m.lastDieTime = t
+
+	tank.cd = {}
 end
 
 function c_world_tank_checkSpawn(d, tank)
@@ -817,22 +831,6 @@ function c_world_findClosestIntersection(start, endP)
 	return minDistance, minIntersection, typeOfTarget, target
 end
 
-function c_world_tankDie(d, tank, t)
-	tankbobs.w_removeBody(tank.body)
-	tank.nextSpawnTime = t + c_const_get("world_time") * c_config_get("config.game.timescale") * c_const_get("tank_spawnTime")
-	if tank.killer then
-		tank.killer.score = tank.killer.score + 1
-	else
-		tank.score = tank.score - 1
-	end
-	tank.killer = nil
-	tank.exists = false
-	tank.spawning = true
-	tank.m.lastDieTime = t
-
-	tank.cd = {}
-end
-
 function c_world_tank_step(d, tank)
 	local t = t_t_getTicks()
 
@@ -843,7 +841,7 @@ function c_world_tank_step(d, tank)
 	end
 
 	if tank.health <= 0 then
-		return c_world_tankDie(d, tank, t)
+		return c_world_tank_die(tank, t)
 	end
 
 	tank.p[1](t_w_getPosition(tank.body))

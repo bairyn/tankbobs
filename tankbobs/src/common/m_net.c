@@ -37,7 +37,6 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 
 #define DEFAULTPORT   43210
 #define CHANNEL       2
-#define LISTENCHANNEL 2
 #define MAXPACKETSIZE 1024
 #define NUMBER        0xABADB011
 
@@ -45,7 +44,6 @@ static char      lastHostName[BUFSIZE] = {""};
 static UDPpacket *currentPacket   = NULL;
 static UDPsocket currentSocket    = NULL;
 static Uint16    currentPort      = DEFAULTPORT;
-static IPaddress anyHost          = {INADDR_ANY, 0};
 
 void n_initNL(lua_State *L)
 {
@@ -239,8 +237,6 @@ int n_readPacket(lua_State *L)
 		return 0;
 	}
 
-	SDLNet_UDP_Bind(currentSocket, LISTENCHANNEL, &anyHost);
-
 	if((packet = SDLNet_AllocPacket(MAXPACKETSIZE)))
 	{
 		if(SDLNet_UDP_Recv(currentSocket, packet))
@@ -249,9 +245,9 @@ int n_readPacket(lua_State *L)
 
 			/* ip = SDLNet_PresentIP(&packet->address); */
 /*#if SDL_BYTEORDER == SDL_BIG_ENDIAN*/
-			sprintf(ip, "%d.%d.%d.%d", (packet->address.host >> 24) & 0x000000FF, (packet->address.host >> 16) & 0x000000FF, (packet->address.host >> 8) & 0x000000FF, (packet->address.host >> 0) & 0x000000FF);
+			/*sprintf(ip, "%d.%d.%d.%d", (packet->address.host >> 24) & 0x000000FF, (packet->address.host >> 16) & 0x000000FF, (packet->address.host >> 8) & 0x000000FF, (packet->address.host >> 0) & 0x000000FF);*/
 /*#else*/
-			/*sprintf(ip, "%d.%d.%d.%d", (packet->address.host >> 0) & 0x000000FF, (packet->address.host >> 8) & 0x000000FF, (packet->address.host >> 16) & 0x000000FF, (packet->address.host >> 24) & 0x000000FF);*/
+			sprintf(ip, "%d.%d.%d.%d", (packet->address.host >> 0) & 0x000000FF, (packet->address.host >> 8) & 0x000000FF, (packet->address.host >> 16) & 0x000000FF, (packet->address.host >> 24) & 0x000000FF);
 /*#endif*/
 
 			lua_pushboolean(L, TRUE);

@@ -142,12 +142,12 @@ local function client_disconnect(client, reason)
 	tankbobs.n_sendPacket(client.ip)
 	tankbobs.n_sendPacket(client.ip)
 
-	s_print("'", client.tank.name, "' disconnected from ", client.ip, ":", client.port, "; reason: ", reason, "\n")
+	s_printnl("'", client.tank.name, "' disconnected from ", client.ip, ":", client.port, "; reason: ", reason)
 
 	for k, v in pairs(clients) do
 		if v == client then
 			-- remove tank from world
-			c_world_tank_die(client.tank)
+			c_world_tank_die(v.tank)
 
 			-- remove client
 			table.remove(clients, k)
@@ -191,6 +191,7 @@ function client_step(d)
 							client.ip = ip
 							client.port = port
 							client.lastAliveTime = t
+							client.connecting = true
 
 							-- the 2nd byte specifies the length of the name in the next 20 bytes (bytes 3-23)
 							local len = tankbobs.io_toChar(data)
@@ -206,7 +207,7 @@ function client_step(d)
 							client.tank.color.g = tankbobs.io_toDouble(data) data = data:sub(9)
 							client.tank.color.b = tankbobs.io_toDouble(data) data = data:sub(9)
 
-							s_print("'", client.tank.name, "' connected from ", ip, ":", port, "\n")
+							s_printnl("'", client.tank.name, "' connected from ", ip, ":", port)
 
 							-- the last 32 bytes are the client's unique identifier
 							client.ui = data:sub(1, 32) data = data:sub(33)
@@ -243,7 +244,7 @@ function client_step(d)
 									tankbobs.n_setPort(client.port)
 									tankbobs.n_sendPacket(client.ip)
 
-									s_print("'", client.tank.name, "' entered the game from ", client.ip, ":", client.port, "\n")
+									s_printnl("'", client.tank.name, "' entered the game from ", client.ip, ":", client.port)
 								else
 									client.challengeAttempts = client.challengeAttempts + 1
 
@@ -352,7 +353,7 @@ function client_step(d)
 			end
 
 			if v.lastAliveTime and t > v.lastAliveTime + c_const_get("client_maxInactiveTime") then
-				client_disconnect(client, "timed out")
+				client_disconnect(v, "timed out")
 			end
 		end
 	end

@@ -87,8 +87,11 @@ function s_print(...)
 	tankbobs.c_print(print)
 end
 
+local s_print = s_print
 function s_printnl(...)
-	return s_print(..., '\n')
+	s_print(...)
+
+	tankbobs.c_print('\n')
 end
 
 local lastTime = 0

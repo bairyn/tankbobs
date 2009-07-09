@@ -45,11 +45,11 @@ function commands_done()
 end
 
 local function commands_private_setSelected()
-	s_print("Selected level set '", c_tcm_current_set.name, "' (", c_tcm_current_set.title, ")\n")
+	s_printnl("Selected level set '", c_tcm_current_set.name, "' (", c_tcm_current_set.title, ")")
 end
 
 local function commands_private_mapSelected()
-	s_print("Selected level '", c_tcm_current_set.name, "' (", c_tcm_current_set.title, ")\n")
+	s_printnl("Selected level '", c_tcm_current_map.name, "' (", c_tcm_current_map.title, ")")
 
 	c_world_freeWorld()
 
@@ -105,7 +105,7 @@ function commands_command(line)
 		end
 
 		-- no valid command
-		s_print("Unknown command: ", args[1], "\n")
+		s_printnl("Unknown command: ", args[1])
 	end
 end
 
@@ -683,7 +683,7 @@ function echo(line)
 	local args = commands_private_args(line)
 
 	if #args > 1 then
-		s_print(commands_private_concatArgs(line, 2), "\n")
+		s_println(commands_private_concatArgs(line, 2))
 	else
 		return help("help echo")
 	end

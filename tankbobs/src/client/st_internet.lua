@@ -165,6 +165,7 @@ function st_internet_step(d)
 			status, ip, port, data = tankbobs.n_readPacket()
 
 			if status then
+print("SANOTEUHNATSOHU")
 				local switch = data:sub(1, 1) data = data:sub(2)
 				if switch == nil then
 				elseif switch == 0xA0 then
