@@ -176,7 +176,7 @@ function c_world_init()
 	c_const_set("tank_boostShield", 25, 1)
 	c_const_set("tank_shieldedDamage", 1 / 4, 1)
 	c_const_set("tank_shieldDamage", 1 / 16, 1)
-	c_const_set("tank_accelerationModifier", 2, 1)
+	c_const_set("tank_accelerationModifier", 3, 1)
 
 	c_const_set("powerup_hullx1",  0, 1) c_const_set("powerup_hully1",  1, 1)
 	c_const_set("powerup_hullx2",  0, 1) c_const_set("powerup_hully2",  0, 1)

@@ -317,17 +317,26 @@ local function play_drawWorld(d)
 										c_config_set("config.game.player" .. tostring(k) .. ".color.b", c_config_get("config.game.defaultTankGreen"))
 										c_config_set("config.game.player" .. tostring(k) .. ".color.a", c_config_get("config.game.defaultTankAlpha"))
 									end
+									local r, g, b, a = v.color.r, v.color.g, v.color.b, 1
 									if v.cd.acceleration then
-										gl.Color(v.color.r * c_const_get("tank_accelerationColorModifier"), v.color.g * c_const_get("tank_accelerationColorModifier"), v.color.b * c_const_get("tank_accelerationColorModifier"), 1)
-									else
-										gl.Color(v.color.r, v.color.g, v.color.b, 1)
+										if r + g + b >= 2.5 then
+											r = r + c_const_get("tank_lightAccelerationColorOffset")
+											g = g + c_const_get("tank_lightAccelerationColorOffset")
+											b = b + c_const_get("tank_lightAccelerationColorOffset")
+										else
+											r = r + c_const_get("tank_accelerationColorOffset")
+											g = g + c_const_get("tank_accelerationColorOffset")
+											b = b + c_const_get("tank_accelerationColorOffset")
+										end
+										--a = c_const_get("tank_accelerationAlpha")  -- FIXME: this doesn't work.  Until it's fixed, change rgb
 									end
-									gl.TexEnv("TEXTURE_ENV_COLOR", v.color.r, v.color.g, v.color.b, 1)
+									gl.Color(r, g, b, a)
+									gl.TexEnv("TEXTURE_ENV_COLOR", r, g, b, a)
 									-- blend color with tank texture
 									gl.CallList(tank_listBase)
 									-- white outline
-									gl.Color(1, 1, 1, 0.875)
-									gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, 0.875)
+									gl.Color(1, 1, 1, 1)
+									gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, 1)
 									gl.CallList(tankBorder_listBase)
 									-- shield
 									gl.Color(1, 1, 1, v.shield / c_const_get("tank_boostShield"))

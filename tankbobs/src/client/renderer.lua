@@ -20,7 +20,7 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 --[[
 renderer.lua
 
-drawing output and gl
+Tankbobs renderer
 --]]
 
 local gl
@@ -62,7 +62,9 @@ function renderer_init()
 	c_const_set("aimAid_width", 0.75, 1)
 	c_const_set("trail_startDistance", 2.1, 1)  -- distance between the trail and the tank
 	c_const_set("trail_maxDistance", 4096, 1)
-	c_const_set("tank_accelerationColorModifier", 1.25, 1)
+	c_const_set("tank_lightAccelerationColorOffset", -0.66, 1)
+	c_const_set("tank_accelerationColorOffset", 0.33, 1)
+	--c_const_set("tank_accelerationAlpha", 0.75, 1)
 
 	tankbobs.r_selectFont(c_config_get("config.font"))
 
@@ -111,7 +113,7 @@ function renderer_init()
 	gl.TexParameter("TEXTURE_2D", "TEXTURE_MAG_FILTER", "LINEAR")
 	tankbobs.r_loadImage2D(c_const_get("tank"), c_const_get("textures_default"))
 
-	gl.NewList(tank_listBase, "COMPILE_AND_EXECUTE")
+	gl.NewList(tank_listBase, "COMPILE")
 		-- blend tank with color
 		gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
 		gl.BindTexture("TEXTURE_2D", tank_textures[1])
@@ -130,7 +132,7 @@ function renderer_init()
 	gl.TexParameter("TEXTURE_2D", "TEXTURE_MAG_FILTER", "LINEAR")
 	tankbobs.r_loadImage2D(c_const_get("tankBorder"), c_const_get("textures_default"))
 
-	gl.NewList(tankBorder_listBase, "COMPILE_AND_EXECUTE")
+	gl.NewList(tankBorder_listBase, "COMPILE")
 		-- blend tank with color
 		gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
 		gl.BindTexture("TEXTURE_2D", tankBorder_textures[1])
@@ -149,7 +151,7 @@ function renderer_init()
 	gl.TexParameter("TEXTURE_2D", "TEXTURE_MAG_FILTER", "LINEAR")
 	tankbobs.r_loadImage2D(c_const_get("tankShield"), c_const_get("textures_default"))
 
-	gl.NewList(tankShield_listBase, "COMPILE_AND_EXECUTE")
+	gl.NewList(tankShield_listBase, "COMPILE")
 		-- blend tank with color
 		gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
 		gl.BindTexture("TEXTURE_2D", tankShield_textures[1])
@@ -184,7 +186,7 @@ function renderer_init()
 	gl.TexParameter("TEXTURE_2D", "TEXTURE_MAG_FILTER", "LINEAR")
 	tankbobs.r_loadImage2D(c_const_get("powerup"), c_const_get("textures_default"))
 
-	gl.NewList(powerup_listBase, "COMPILE_AND_EXECUTE")
+	gl.NewList(powerup_listBase, "COMPILE")
 		gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
 		gl.BindTexture("TEXTURE_2D", powerup_textures[1])
 		gl.Begin("QUADS")
@@ -215,7 +217,7 @@ function renderer_init()
 		gl.TexParameter("TEXTURE_2D", "TEXTURE_MAG_FILTER", "LINEAR")
 		tankbobs.r_loadImage2D(c_const_get("weaponTextures_dir") .. v.projectileTexture, c_const_get("textures_default"))
 
-		gl.NewList(v.m.p.list, "COMPILE_AND_EXECUTE")
+		gl.NewList(v.m.p.list, "COMPILE")
 			gl.Color(1, 1, 1, 1)
 			gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, 1)
 			gl.BindTexture("TEXTURE_2D", v.m.p.texture[1])
@@ -229,7 +231,7 @@ function renderer_init()
 			gl.End()
 		gl.EndList()
 
-		gl.NewList(v.m.p.projectileList, "COMPILE_AND_EXECUTE")
+		gl.NewList(v.m.p.projectileList, "COMPILE")
 			gl.Color(1, 1, 1, 1)
 			gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, 1)
 			gl.BindTexture("TEXTURE_2D", v.m.p.projectileTexture[1])
@@ -280,7 +282,7 @@ function renderer_init()
 	c_const_set("healthbarBorder_texturex4", 1, 1) c_const_set("healthbarBorder_texturey4", 1, 1)
 	c_const_set("healthbar_rotation", 270, 1)
 
-	gl.NewList(healthbar_listBase, "COMPILE_AND_EXECUTE")
+	gl.NewList(healthbar_listBase, "COMPILE")
 		gl.BindTexture("TEXTURE_2D", healthbar_texture[1])
 		gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
 
@@ -292,7 +294,7 @@ function renderer_init()
 		gl.End()
 	gl.EndList()
 
-	gl.NewList(healthbarBorder_listBase, "COMPILE_AND_EXECUTE")
+	gl.NewList(healthbarBorder_listBase, "COMPILE")
 		gl.BindTexture("TEXTURE_2D", healthbarBorder_texture[1])
 		gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
 
