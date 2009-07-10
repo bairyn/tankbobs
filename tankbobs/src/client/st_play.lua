@@ -251,7 +251,7 @@ function st_play_button(button, pressed)
 
 	local c_world_tanks = c_world_getTanks()
 
-	for i = 1, c_config_get("config.game.players") + c_config_get("config.game.computers") do
+	for i = 1, c_config_get("config.game.players") do
 		if not (c_config_get("config.key.player" .. tostring(i) .. ".fire", nil, true)) then
 			c_config_set("config.key.player" .. tostring(i) .. ".fire", false)
 		end
@@ -341,7 +341,7 @@ local function play_drawWorld(d)
 									-- shield
 									gl.Color(1, 1, 1, v.shield / c_const_get("tank_boostShield"))
 									gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, v.shield / c_const_get("tank_boostShield"))
-									gl.CallList(tankBorder_listBase)
+									gl.CallList(tankShield_listBase)
 
 									if v.weapon then
 										gl.CallList(v.weapon.m.p.list)
@@ -440,7 +440,7 @@ local function play_drawWorld(d)
 
 		-- projectiles
 		for _, v in pairs(c_weapon_getProjectiles()) do
-			if v.weapon.trail == 0 then  -- only draw the trail
+			if v.weapon.trail == 0 and v.weapon.trailWidth == 0 then  -- only draw the trail
 				gl.PushMatrix()
 					gl.Translate(v.p[1].x, v.p[1].y, 0)
 					gl.Rotate(tankbobs.m_degrees(v.r), 0, 0, 1)
@@ -463,7 +463,9 @@ local function play_drawWorld(d)
 
 			gl.Color(1, 1, 1, v[1] / v[2])
 			gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, v[2] / v[3])
-			gl.CallList(v[3])
+			gl.PushMatrix()
+				gl.CallList(v[3])
+			gl.PopMatrix()
 		end
 
 		-- healthbars

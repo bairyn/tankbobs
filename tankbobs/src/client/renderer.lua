@@ -86,14 +86,14 @@ function renderer_init()
 	c_const_set("tankBorder_texturex3", 0.0125, 1) c_const_set("tankBorder_texturey3", 0.1, 1)  -- no outline on top
 	c_const_set("tankBorder_texturex4", 0.9875, 1) c_const_set("tankBorder_texturey4", 0.1, 1)  -- no outline on top
 
-	c_const_set("tankShield_renderx1", -2.0, 1) c_const_set("tankShield_rendery1",  2.0, 1)
-	c_const_set("tankShield_renderx2", -2.0, 1) c_const_set("tankShield_rendery2", -2.0, 1)
-	c_const_set("tankShield_renderx3",  2.0, 1) c_const_set("tankShield_rendery3", -2.0, 1)
-	c_const_set("tankShield_renderx4",  2.0, 1) c_const_set("tankShield_rendery4",  2.0, 1)
-	c_const_set("tankShield_texturex1", 0.75, 1) c_const_set("tankShield_texturey1", 0.75, 1)
-	c_const_set("tankShield_texturex2", 0.25, 1) c_const_set("tankShield_texturey2", 0.75, 1)
-	c_const_set("tankShield_texturex3", 0.25, 1) c_const_set("tankShield_texturey3", 0.25, 1)
-	c_const_set("tankShield_texturex4", 0.75, 1) c_const_set("tankShield_texturey4", 0.25, 1)
+	c_const_set("tankShield_renderx1", -2.33, 1) c_const_set("tankShield_rendery1",  2.33, 1)
+	c_const_set("tankShield_renderx2", -2.33, 1) c_const_set("tankShield_rendery2", -2.33, 1)
+	c_const_set("tankShield_renderx3",  2.33, 1) c_const_set("tankShield_rendery3", -2.33, 1)
+	c_const_set("tankShield_renderx4",  2.33, 1) c_const_set("tankShield_rendery4",  2.33, 1)
+	c_const_set("tankShield_texturex1", 1.0, 1) c_const_set("tankShield_texturey1", 1.0, 1)
+	c_const_set("tankShield_texturex2", 0.0, 1) c_const_set("tankShield_texturey2", 1.0, 1)
+	c_const_set("tankShield_texturex3", 0.0, 1) c_const_set("tankShield_texturey3", 0.1, 1)  -- eliminate fuzzy top
+	c_const_set("tankShield_texturex4", 1.0, 1) c_const_set("tankShield_texturey4", 0.1, 1)  -- eliminate fuzzy top
 
 	tank_listBase = gl.GenLists(1)
 	tank_textures = gl.GenTextures(1)
