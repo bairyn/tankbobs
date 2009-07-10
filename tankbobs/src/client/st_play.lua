@@ -106,34 +106,42 @@ function st_play_init()
 
 	-- scores
 	local function updateScores(widget)
-		local length = 0
+		if c_world_gameType == "deathmatch" then
+			-- non-team scores
 
-		widget.text = ""
+			local length = 0
 
-		for k, v in pairs(c_world_getTanks()) do
-			local name = tostring(c_config_get("config.game.player" .. tostring(k) .. ".name"))
+			widget.text = ""
 
-			if #name > length then
-				length = #name
-			end
-		end
+			for k, v in pairs(c_world_getTanks()) do
+				local name = tostring(c_config_get("config.game.player" .. tostring(k) .. ".name"))
 
-		if length < 1 then
-			length = 1
-		end
-
-		for k, v in pairs(c_world_getTanks()) do
-			local name, between, score
-
-			if widget.text:len() ~= 0 then
-				widget.text = widget.text .. "\n"
+				if #name > length then
+					length = #name
+				end
 			end
 
-			name = tostring(c_config_get("config.game.player" .. tostring(k) .. ".name"))
-			between = string.rep("  ", length - #name + 1)
-			score = tostring(v.score)
+			if length < 1 then
+				length = 1
+			end
 
-			widget.text = widget.text .. name .. between .. score
+			for k, v in pairs(c_world_getTanks()) do
+				local name, between, score
+
+				if widget.text:len() ~= 0 then
+					widget.text = widget.text .. "\n"
+				end
+
+				name = tostring(c_config_get("config.game.player" .. tostring(k) .. ".name"))
+				between = string.rep("  ", length - #name + 1)
+				score = tostring(v.score)
+
+				widget.text = widget.text .. name .. between .. score
+			end
+		else
+			-- team scores
+
+			widget.text = "Red  " .. c_world_redTeam.score .. "\nBlue " .. c_world_blueTeam.score
 		end
 	end
 
@@ -187,9 +195,13 @@ function st_play_init()
 			c_config_set("config.game.player" .. tostring(i) .. ".color.b", c_config_get("config.game.defaultTankGreen"))
 			c_config_set("config.game.player" .. tostring(i) .. ".color.a", c_config_get("config.game.defaultTankAlpha"))
 		end
+		if not (c_config_get("config.game.player" .. tostring(i) .. ".team", nil, true)) then
+			c_config_set("config.game.player" .. tostring(i) .. ".team", false)
+		end
 		tank.color.r = c_config_get("config.game.player" .. tostring(i) .. ".color.r")
 		tank.color.g = c_config_get("config.game.player" .. tostring(i) .. ".color.g")
 		tank.color.b = c_config_get("config.game.player" .. tostring(i) .. ".color.b")
+		tank.red = c_config_get("config.game.player" .. tostring(i) .. ".team") == "red"
 
 		-- spawn
 		c_world_tank_spawn(tank)
@@ -318,6 +330,11 @@ local function play_drawWorld(d)
 										c_config_set("config.game.player" .. tostring(k) .. ".color.a", c_config_get("config.game.defaultTankAlpha"))
 									end
 									local r, g, b, a = v.color.r, v.color.g, v.color.b, 1
+									if c_world_gameType ~= "deathmatch" then
+										-- team colors
+										local color = c_const_get(v.red and "color_red" or "color_blue")
+										r, g, b, a = color[1], color[2], color[3], color[4]
+									end
 									if v.cd.acceleration then
 										if r + g + b >= 2.5 then
 											r = r + c_const_get("tank_lightAccelerationColorOffset")
@@ -532,7 +549,7 @@ function st_play_step(d)
 				c_world_setPaused(true)
 
 				local name = tostring(c_config_get("config.game.player" .. tostring(k) .. ".name"))
-				gui_addLabel(tankbobs.m_vec2(35, 50), name .. " wins!", nil, 1.1, v.color.r, v.color.g, v.color.b, 0.75, v.color.r, v.color.g, v.color.b, 0.75)
+				gui_addLabel(tankbobs.m_vec2(35, 50), name .. " wins!", nil, 1.1, v.color.r, v.color.g, v.color.b, 0.75, v.color.r, v.color.g, v.color.b, 0.8)
 			end
 		end
 	end
@@ -603,6 +620,18 @@ function st_play_step(d)
 		gl.Translate(camera.x, camera.y, 0)
 		play_drawWorld(d)
 	gl.PopMatrix()
+
+	-- draw tank names
+	for _, v in pairs(c_world_getTanks()) do
+		if v.exists then
+			-- draw name
+			gl.PushMatrix()
+				gl.Translate(v.p[1].x, v.p[1].y, 0)
+				tankbobs.r_drawString(v.name, c_const_get("tank_nameOffset"), v.color.r, v.color.g, v.color.b, c_config_get("config.game.scoresAlpha"), c_const_get("tank_nameScalex"), c_const_get("tank_nameScaley"), false)
+			gl.PopMatrix()
+		end
+	end
+
 
 	-- scores, FPS, rest of HUD, etc.
 	gui_paint(d)

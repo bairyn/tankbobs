@@ -65,6 +65,9 @@ function renderer_init()
 	c_const_set("tank_lightAccelerationColorOffset", -0.66, 1)
 	c_const_set("tank_accelerationColorOffset", 0.33, 1)
 	--c_const_set("tank_accelerationAlpha", 0.75, 1)
+	c_const_set("tank_nameOffset", tankbobs.m_vec2(-3, 0), 1)
+	c_const_set("tank_nameScalex", 1 / 33, 1)
+	c_const_set("tank_nameScaley", 1 / 33, 1)
 
 	tankbobs.r_selectFont(c_config_get("config.font"))
 
@@ -94,6 +97,9 @@ function renderer_init()
 	c_const_set("tankShield_texturex2", 0.0, 1) c_const_set("tankShield_texturey2", 1.0, 1)
 	c_const_set("tankShield_texturex3", 0.0, 1) c_const_set("tankShield_texturey3", 0.1, 1)  -- eliminate fuzzy top
 	c_const_set("tankShield_texturex4", 1.0, 1) c_const_set("tankShield_texturey4", 0.1, 1)  -- eliminate fuzzy top
+
+	c_const_set("color_red", {0.875, 0.125, 0.125, 1})
+	c_const_set("color_blue", {0.125, 0.125, 0.875, 1})
 
 	tank_listBase = gl.GenLists(1)
 	tank_textures = gl.GenTextures(1)

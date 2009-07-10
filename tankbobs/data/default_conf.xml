@@ -36,6 +36,7 @@
 		<fpsAlpha> 0.875 </fpsAlpha>
 		<fpsCounter>  false </fpsCounter>
 		<fragLimit>15</fragLimit>
+		<gameType>deathmatch</gameType>
 		<instagib>false</instagib>
 		<overview>1</overview>
 		<pauseRed>   0.400 </pauseRed>
@@ -50,6 +51,7 @@
 				<b>0.9</b>
 				<a>1.0</a>
 			</color>
+			<team>red</team>
 		</player1>
 		<player2>
 			<name>Player2</name>
@@ -59,6 +61,7 @@
 				<b>0.1</b>
 				<a>1.0</a>
 			</color>
+			<team>red</team>
 		</player2>
 		<players>2</players>
 		<scoresRed>   0.020 </scoresRed>

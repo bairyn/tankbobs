@@ -16,8 +16,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 --[[
 lom.lua
 
-slightly modified source to be compatible with tankbobs.  The original work
-is _not mine_ and can be found at http://www.keplerproject.org/luaexpat/lom.html
+Slightly modified to be compatible with Tankbobs.  The original source
+can be found at http://www.keplerproject.org/luaexpat/lom.html
 --]]
 
 -- removed line

@@ -49,6 +49,8 @@ local c_world_wall_step
 local c_world_projectile_step
 local c_world_powerupSpawnPoint_step
 local c_world_powerup_step
+local c_world_controlPoint_step
+local c_world_flag_step
 local c_world_tanks
 local c_world_powerups
 local tank_acceleration
@@ -64,6 +66,12 @@ local worldTime = 0
 local lastPowerupSpawnTime
 local nextPowerupSpawnPoint
 local worldInitialized = false
+
+-- gametypes
+local DEATHMATCH     = {}
+local DOMINATION     = {}
+local CAPTURETHEFLAG = {}
+local gameType = DEATHMATCH
 
 function c_world_init()
 	c_config_set            = _G.c_config_set
@@ -109,7 +117,7 @@ function c_world_init()
 
 	c_const_set("world_maxPowerups", 64, 1)
 
-	c_const_set("world_initTime", 5, 1)
+	c_const_set("world_touchDistance", 8, 1)
 
 	c_const_set("powerup_lifeTime", 12000, 1)
 	c_const_set("powerup_density", 1E-5, 1)
@@ -364,6 +372,7 @@ c_world_tank =
 	killer = nil,
 	score = 0,
 	ammo = 0,
+	red = false,
 	color = {},
 
 	cd = {},  -- data cleared on death
@@ -383,6 +392,14 @@ c_world_tank_state =
 	special = false
 }
 
+c_world_team =
+{
+	new = common_new,
+
+	red = false,
+	score = 0
+}
+
 function c_world_getPowerupTypeByName(name)
 	for k, v in pairs(c_powerupTypes) do
 		if v.name == name then
@@ -398,10 +415,37 @@ function c_world_newWorld()
 
 	c_world_powerups = {}
 	c_world_tanks = {}
+	c_world_teams = {}
 
 	local m = c_tcm_current_map
 	assert(c_tcm_current_map)
-	tankbobs.w_newWorld(c_const_get("world_lowerbound") + t_m_vec2(m.leftmost, m.lowermost), c_const_get("world_upperbound") + t_m_vec2(m.rightmost, m.uppermost), t_m_vec2(c_const_get("world_gravityx"), c_const_get("world_gravityy")), c_const_get("world_allowSleep"), c_world_contactListener, c_world_tank_step, c_world_wall_step, c_world_projectile_step, c_world_powerupSpawnPoint_step, c_world_powerup_step, c_world_tanks, c_tcm_current_map.walls, c_weapon_getProjectiles(), c_tcm_current_map.powerupSpawnPoints, c_world_powerups)
+	tankbobs.w_newWorld(c_const_get("world_lowerbound") + t_m_vec2(m.leftmost, m.lowermost), c_const_get("world_upperbound") + t_m_vec2(m.rightmost, m.uppermost), t_m_vec2(c_const_get("world_gravityx"), c_const_get("world_gravityy")), c_const_get("world_allowSleep"), c_world_contactListener, c_world_tank_step, c_world_wall_step, c_world_projectile_step, c_world_powerupSpawnPoint_step, c_world_powerup_step, c_world_controlPoint_step, c_world_flag_step, c_world_tanks, c_tcm_current_map.walls, c_weapon_getProjectiles(), c_tcm_current_map.powerupSpawnPoints, c_world_powerups, c_tcm_current_map.controlPoints, c_tcm_current_map.flags)
+
+	-- set game type
+	gameType = DEATHMATCH
+	c_world_gameType = c_config_get("config.game.gameType")
+	local switch = c_world_gameType
+		if switch == "deathmatch" then
+		gameType = DEATHMATCH
+	elseif switch == "domination" then
+		gameType = DOMINATION
+	elseif switch == "capturetheflag" then
+		gameType = CAPTURETHEFLAG
+	end
+
+	-- teams
+	local team
+	team = c_world_team:new()
+	c_world_redTeam = team
+	table.insert(c_world_teams, team)
+	team.red = true
+	team.score = 0
+
+	team = c_world_team:new()
+	c_world_blueTeam = team
+	table.insert(c_world_teams, team)
+	team.red = false
+	team.score = 0
 
 	-- reset powerups
 	lastPowerupSpawnTime = nil
@@ -1238,6 +1282,28 @@ function c_world_powerup_step(d, powerup)
 	end
 end
 
+function c_world_controlPoint_step(d, controlPoint)
+	for _, v in pairs(c_world_tanks) do
+		if v.exists then
+			-- inexpensive distance check
+			if (v.p1[1] - controlPoint.p[1]).R <= c_const_get("world_touchDistance") then
+				-- handle here
+			end
+		end
+	end
+end
+
+function c_world_flag_step(d, flag)
+	for _, v in pairs(c_world_tanks) do
+		if v.exists then
+			-- inexpensive distance check
+			if (v.p1[1] - flag.p[1]).R <= c_const_get("world_touchDistance") then
+				-- handle here
+			end
+		end
+	end
+end
+
 local function c_world_isTank(body)
 	for _, v in pairs(c_world_tanks) do
 		if v.body == body then
@@ -1482,6 +1548,14 @@ function c_world_step(d)
 
 				for _, v in pairs(c_world_powerups) do
 					c_world_powerup_step(wd, v)
+				end
+
+				for _, v in pairs(c_tcm_current_map.controlPoints) do
+					c_world_controlPoint_step(wd, v)
+				end
+
+				for _, v in pairs(c_tcm_current_map.flags) do
+					c_world_flag_step(wd, v)
 				end
 				--]]
 

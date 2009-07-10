@@ -352,6 +352,10 @@ function st_optionsPlayers_init()
 	if not (c_config_get("config.game.player1.color.b", nil, true)) then
 		c_config_set("config.game.player1.color.b", c_config_get("config.game.defaultTankBlue"))
 	end
+	if not (c_config_get("config.game.player1.team", nil, true)) then
+		c_config_set("config.game.player1.team", false)
+	end
+
 	gui_addLabel(tankbobs.m_vec2(50, 63), "Name", nil, 1 / 3) player.name = gui_addInput(tankbobs.m_vec2(75, 63), c_config_get("config.game.player1.name"), nil, st_optionsPlayers_name, false, c_const_get("max_nameLength"), 0.5)
 
 	gui_addLabel(tankbobs.m_vec2(50, 57), "Fire", nil, 1 / 3) player.fire = gui_addKey(tankbobs.m_vec2(75, 57), c_config_get("config.key.player1.fire"), nil, st_optionsPlayers_fire, c_config_get("config.key.player1.fire"), 0.5)
@@ -368,6 +372,8 @@ function st_optionsPlayers_init()
 	player.colorB = gui_addScale(tankbobs.m_vec2(75, 27), c_config_get("config.game.player1.color.b"), nil, st_optionsPlayers_colorB, c_config_get("config.game.player1.color.b"), nil, 0.5, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0)
 
 	-- image of tank is drawn (takes 21 and 24)
+
+	gui_addLabel(tankbobs.m_vec2(50, 15), "Team", nil, 2 / 3) player.team = gui_addCycle(tankbobs.m_vec2(75, 75), "Team", nil, st_optionsPlayers_team, {"Blue", "Red"}, c_config_get("config.game.player1.team") == "red" and 2 or 1)
 end
 
 function st_optionsPlayers_done()
@@ -463,6 +469,12 @@ function st_optionsPlayers_configurePlayer(widget)
 	end
 	local colorB = c_config_get("config.game.player" .. tonumber(currentPlayer) .. ".color.b")
 	player.colorB:setScalePos(colorB)
+
+	if not (c_config_get("config.game.player" .. tonumber(currentPlayer) .. ".team", nil, true)) then
+		c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".team", false)
+	end
+	local team = c_config_get("config.game.player" .. tonumber(currentPlayer) .. ".color.b") == "red" and 2 or 1
+	player.team:setCyclePos(team)
 end
 
 function st_optionsPlayers_computers(widget)
@@ -575,6 +587,22 @@ function st_optionsPlayers_colorB(widget, pos)
 	end
 
 	c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".color.b", pos)
+end
+
+function st_optionsPlayers_team(widget, string, index)
+	if string == "Red" then
+		if not (c_config_get("config.game.player" .. tonumber(currentPlayer) .. ".team", nil, true)) then
+			c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".team", false)
+		end
+
+		c_config_set("config.game.team" .. tonumber(currentPlayer) .. ".team", "red")
+	elseif string == "Blue" then
+		if not (c_config_get("config.game.player" .. tonumber(currentPlayer) .. ".team", nil, true)) then
+			c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".team", false)
+		end
+
+		c_config_set("config.game.team" .. tonumber(currentPlayer) .. ".team", "blue")
+	end
 end
 
 optionsPlayers_state =

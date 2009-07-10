@@ -33,6 +33,8 @@ teleporter, string name, string targetName, double x1, double y1, int enabled
 playerSpawnPoint, double x1, double y1
 powerupSpawnPoint, double x1, double y1, string stringPowerupsToEnable, int linked, double repeat, double initial, int focus - stringPowerupsToEnable will be searched for and will be tested if it has the name of any powerups
 path, string name, string targetName, double x1, double y1, int enabled, time
+controlPoint, double x1, double y1, int red
+flag, double x1, double y1, int red
 
 TankCompiledMap (compiled TankRawMap)
 format:
@@ -56,7 +58,9 @@ format:
 4 bytes number of playerSpawnPoints
 4 bytes number of powerupSpawnPoints
 4 bytes number of paths
-walls, ...
+4 bytes number of controlPoints
+4 bytes number of flags
+walls
  -4 bytes id (unique only to other walls)  -- NOTE: every enitity's id must increment consecutively
  -1 byte: if non-zero, the 4th coordinates are used
  -8 bytes x1 double float
@@ -81,14 +85,14 @@ walls, ...
  -1 byte static
  -4 bytes path id
  -1 byte path (whether or not the wall follows a path)
- - 367 total bytes, this amount for each wall
-teleporters, ...
+ - 367 total bytes
+teleporters
  -4 bytes id
  -4 bytes target id
  -8 bytes x1 double float
  -8 bytes y1 double float
  -1 byte enabled
- - 24 total bytes
+ - 33 total bytes
 playerSpawnPoints
  -4 bytes id
  -8 bytes x1 double float
@@ -102,12 +106,12 @@ powerupSpawnPoints
  -4 bytes more powerups to enable
  -4 bytes more powerups to enable
  -4 bytes more powerups to enable
- -another 4 groups of powerups - altogether 64 bytes
+ -another 4 groups of powerups - these groups altogether are altogether 64 bytes
  -1 byte linked
  -8 bytes repeat double float
  -8 bytes initial double float
  -1 byte focus
- - 52 total bytes
+ - 118 total bytes
 paths
  -4 bytes id
  -8 bytes x1 double float
@@ -115,7 +119,13 @@ paths
  -1 byte enabled
  -8 bytes double float time to reach other path
  -4 bites target id
- - 20 total bytes
+ - 33 total bytes
+controlPoints
+ -4 bytes id
+ -8 bytes x1 double float
+ -8 bytes y1 double float
+ -1 byte red
+ - 21 total bytes
 --]]
 
 function c_tcm_init()
@@ -173,12 +183,16 @@ c_tcm_map =
 	playerSpawnPoints_n = 0,
 	powerupSpawnPoints_n = 0,
 	paths_n = 0,
+	controlPoints_n = 0,
+	flags_n = 0,
 
 	walls = {},  -- table of walls
 	teleporters = {},
 	playerSpawnPoints = {},
 	powerupSpawnPoints = {},
 	paths = {},
+	controlPoints = {},
+	flags = {},
 	message = "",  -- the level message
 
 	uppermost = 0,
@@ -278,6 +292,36 @@ c_tcm_path =
 	t = 0,
 	time = 0,
 	enabled = false,
+
+	m = {p = {}}  -- extra data
+}
+
+c_tcm_controlPoint =
+{
+	new = common_new,
+
+	init = function (o)
+		o.p[1] = tankbobs.m_vec2()
+	end,
+
+	id = 0,
+	p = {},
+	red = 0,
+
+	m = {p = {}}  -- extra data
+}
+
+c_tcm_flag =
+{
+	new = common_new,
+
+	init = function (o)
+		o.p[1] = tankbobs.m_vec2()
+	end,
+
+	id = 0,
+	p = {},
+	red = 0,
 
 	m = {p = {}}  -- extra data
 }
@@ -418,6 +462,8 @@ function c_tcm_read_map(map)
 	r.playerSpawnPoints_n = c_tcm_private_get(tankbobs.io_getInt, i)
 	r.powerupSpawnPoints_n = c_tcm_private_get(tankbobs.io_getInt, i)
 	r.paths_n = c_tcm_private_get(tankbobs.io_getInt, i)
+	r.controlPoints_n = c_tcm_private_get(tankbobs.io_getInt, i)
+	r.flags_n = c_tcm_private_get(tankbobs.io_getInt, i)
 
 	local uppermost = 100
 	local lowermost = 0
@@ -644,6 +690,36 @@ function c_tcm_read_map(map)
 
 		table.insert(r.paths, path)
 	end
+  
+	for it = 1, r.controlPoints_n do
+		local controlPoint = c_tcm_flag:new()
+
+		controlPoint.id = c_tcm_private_get(tankbobs.io_getInt, i)
+		controlPoint.p[1].x = c_tcm_private_get(tankbobs.io_getDouble, i)
+		controlPoint.p[1].y = c_tcm_private_get(tankbobs.io_getDouble, i)
+		if c_tcm_private_get(tankbobs.io_getChar, i) ~= 0 then
+			controlPoint.red = true
+		else
+			controlPoint.red = false
+		end
+
+		table.insert(r.controlPoints, path)
+	end
+
+	for it = 1, r.flags_n do
+		local flag = c_tcm_flag:new()
+
+		flag.id = c_tcm_private_get(tankbobs.io_getInt, i)
+		flag.p[1].x = c_tcm_private_get(tankbobs.io_getDouble, i)
+		flag.p[1].y = c_tcm_private_get(tankbobs.io_getDouble, i)
+		if c_tcm_private_get(tankbobs.io_getChar, i) ~= 0 then
+			flag.red = true
+		else
+			flag.red = false
+		end
+
+		table.insert(r.flags, path)
+	end
 
 	i:close()
 
@@ -653,8 +729,10 @@ function c_tcm_read_map(map)
 	table.sort(r.playerSpawnPoints, function (e1, e2) return e1.id < e2.id end)
 	table.sort(r.powerupSpawnPoints, function (e1, e2) return e1.id < e2.id end)
 	table.sort(r.paths, function (e1, e2) return e1.id < e2.id end)
+	table.sort(r.controlPoints, function (e1, e2) return e1.id < e2.id end)
+	table.sort(r.flags, function (e1, e2) return e1.id < e2.id end)
 
-	return r;
+	return r
 end
 
 function c_tcm_select_set(name)

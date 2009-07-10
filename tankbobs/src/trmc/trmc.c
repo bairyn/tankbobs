@@ -516,7 +516,9 @@ static int read_reset(const char *line)
 #define MAX_TELEPORTERS 528
 #define MAX_PLAYERSPAWNPOINTS 256
 #define MAX_POWERUPSPAWNPOINTS 528
-#define MAX_PATHS 528
+#define MAX_PATHS 2048
+#define MAX_CONTROLPOINTS 528
+#define MAX_FLAGS 2
 
 typedef struct map_s map_t;
 static struct map_s
@@ -585,12 +587,28 @@ static struct path_s
 	double time;
 } paths[MAX_PATHS];
 
+typedef struct controlPoint_s controlPoint_t;
+static struct controlPoint_s
+{
+	double x1; double y1;
+	int red;
+} controlPoints[MAX_CONTROLPOINTS];
+
+typedef struct flag_s flag_t;
+static struct flag_s
+{
+	double x1; double y1;
+	int red;
+} flags[MAX_FLAGS];
+
 static int mc;
 static int wc;
 static int tc;
 static int lc;
 static int oc;
 static int pc;
+static int cc;
+static int fc;
 
 static void add_map(const char *name, const char *title, const char *description, const char *authors, const char *version_s, int version)
 {
@@ -712,8 +730,38 @@ static void add_path(const char *targetName, const char *target, double x1, doub
 	path->time = time;
 }
 
+static void add_controlPoint(double x1, double y1, int red)
+{
+	controlPoint_t *controlPoint = &controlPoints[cc++];
 
-static char hidden(const char *filename)
+	if(cc > MAX_CONTROLPOINTS)
+	{
+		fprintf(stderr, "Error: controlPoint overflow (%d)\n", MAX_CONTROLPOINTS);
+		exit(1);
+	}
+
+	controlPoint->x1 = x1;
+	controlPoint->y1 = y1;
+	controlPoint->red = red;
+}
+
+static void add_flag(double x1, double y1, int red)
+{
+	flag_t *flag = &flags[fc++];
+
+	if(fc > MAX_FLAGS)
+	{
+		fprintf(stderr, "Error: flag overflow (%d)\n", MAX_FLAGS);
+		exit(1);
+	}
+
+	flag->x1 = x1;
+	flag->y1 = y1;
+	flag->red = red;
+}
+
+
+static int hidden(const char *filename)
 {
 	const char *p = filename;
 
@@ -736,7 +784,7 @@ static int compile(const char *filename)
 	char line[MAX_LINE_SIZE] = {""};
 
 	/* reset counters */
-	mc = wc = tc = lc = oc = pc = 0;
+	mc = wc = tc = lc = oc = pc = cc = fc = 0;
 
 	if(hidden(filename))
 	{
@@ -935,6 +983,28 @@ static int compile(const char *filename)
 
 					add_path(targetName, target, x1, y1, enabled, time);
 				}
+				else if(strncmp(entity, "controlPoint", sizeof(entity)) == 0)
+				{
+					double x1, y1;
+					int red;
+
+					x1 = read_double();
+					y1 = read_double();
+					red = read_int();
+
+					add_controlPoint(x1, y1, red);
+				}
+				else if(strncmp(entity, "flag", sizeof(entity)) == 0)
+				{
+					double x1, y1;
+					int red;
+
+					x1 = read_double();
+					y1 = read_double();
+					red = read_int();
+
+					add_flag(x1, y1, red);
+				}
 
 				else
 				{
@@ -992,6 +1062,8 @@ static int compile(const char *filename)
 	put_cint(fout, lc);
 	put_cint(fout, oc);
 	put_cint(fout, pc);
+	put_cint(fout, cc);
+	put_cint(fout, fc);
 
 	for(i = 0; i < wc; i++)
 	{
@@ -1151,6 +1223,26 @@ static int compile(const char *filename)
 		put_cchar(fout, ((path->enabled) ? (1) : (0)));
 		put_cdouble(fout, path->time);
 		put_cint(fout, id);
+	}
+
+	for(i = 0; i < cc; i++)
+	{
+		controlPoint_t *controlPoint = &controlPoints[i];
+
+		put_cint(fout, i);
+		put_cdouble(fout, controlPoint->x1);
+		put_cdouble(fout, controlPoint->y1);
+		put_cchar(fout, ((controlPoint->red) ? (1) : (0)));
+	}
+
+	for(i = 0; i < fc; i++)
+	{
+		flag_t *flag = &flags[i];
+
+		put_cint(fout, i);
+		put_cdouble(fout, flag->x1);
+		put_cdouble(fout, flag->y1);
+		put_cchar(fout, ((flag->red) ? (1) : (0)));
 	}
 
 	fclose(fout);

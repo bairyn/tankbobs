@@ -231,6 +231,9 @@ local widget =
 	actionCallBack = nil,  -- either actionCallBack(currentWidget, mouseX, mouseY) or actionCallBack(currentWidget, keyButton)
 
 	-- cycles
+	setScalePos = function (self, pos)
+		self.cyclePos = pos
+	end,
 	cycleCallBack = nil,  -- called with (currentWidget, elementString, elementIndex) when the user changes the current element in a cycle
 	cycleList = {},  -- a table of strings
 	cyclePos = 0,  -- which element of the table is currently selected (by key / index)

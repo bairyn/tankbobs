@@ -836,7 +836,7 @@ static const struct luaL_Reg tankbobs[] =
 		/* nothing is returned; the first argument is a vector of the lower bounds.  The second
 			argument is of the upper bounds.  The third argument is the gravity vector (should always
 			be a zero-factor.  The fourth argument is a boolean of whether bodies can sleep.
-			The fifth argument is the function to call on contact (f(shape1, shape2, body1, body2, position, separation, normal)).  The sixth, seventh, eighth, ninth, and the tenth arguments are step functions of the tanks, walls, projectiles, powerupSpawnPoints, and powerups.  Arguments eleven-fifteen are the tables of them. */
+			The fifth argument is the function to call on contact (f(shape1, shape2, body1, body2, position, separation, normal)).  The sixth, seventh, eighth, ninth, tenth, eleventh, and the twelfth arguments are step functions of the tanks, walls, projectiles, powerupSpawnPoints, powerups, controlPoints, and flags.  Arguments thirteen-seventeen are the tables of them. */
 	{"w_freeWorld", w_freeWorld}, /* free the current world */
 		/* no arguments are passed and nothing is returned.  The current world is freed. */
 	{"w_getTimeStep", w_getTimeStep}, /* get time step */

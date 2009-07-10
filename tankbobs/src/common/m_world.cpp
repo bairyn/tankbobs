@@ -72,11 +72,15 @@ static int wallFunction;
 static int projectileFunction;
 static int powerupSpawnPointFunction;
 static int powerupFunction;
+static int controlPointFunction;
+static int flagFunction;
 static int tankTable;
 static int wallTable;
 static int projectileTable;
 static int powerupSpawnPointTable;
 static int powerupTable;
+static int controlPointTable;
+static int flagTable;
 
 class w_private_worldListener : public b2ContactListener
 {
@@ -177,17 +181,21 @@ int w_newWorld(lua_State *L)
 	clFunction = luaL_ref(L, LUA_REGISTRYINDEX);
 	clState = L;
 
-	if(!(lua_isfunction(L, 6) && lua_isfunction(L, 7) && lua_isfunction(L, 8) && lua_isfunction(L, 9), lua_isfunction(L, 10) && lua_istable(L, 11) && lua_istable(L, 12) && lua_istable(L, 13) && lua_istable(L, 14) && lua_istable(L, 15)))
+	if(!(lua_isfunction(L, 6) && lua_isfunction(L, 7) && lua_isfunction(L, 8) && lua_isfunction(L, 9), lua_isfunction(L, 10) && lua_isfunction(L, 11) && lua_isfunction(L, 12) && lua_istable(L, 13) && lua_istable(L, 14) && lua_istable(L, 15) && lua_istable(L, 16) && lua_istable(L, 17) && lua_istable(L, 18) && lua_istable(L, 19)))
 	{
 		lua_pushliteral(L, "w_newWorld: invalid arguments passed for step\n");
 		lua_error(L);
 	}
 
+	flagTable = luaL_ref(L, LUA_REGISTRYINDEX);
+	controlPointTable = luaL_ref(L, LUA_REGISTRYINDEX);
 	powerupTable = luaL_ref(L, LUA_REGISTRYINDEX);
 	powerupSpawnPointTable = luaL_ref(L, LUA_REGISTRYINDEX);
 	projectileTable = luaL_ref(L, LUA_REGISTRYINDEX);
 	wallTable = luaL_ref(L, LUA_REGISTRYINDEX);
 	tankTable = luaL_ref(L, LUA_REGISTRYINDEX);
+	flagFunction = luaL_ref(L, LUA_REGISTRYINDEX);
+	controlPointFunction = luaL_ref(L, LUA_REGISTRYINDEX);
 	powerupFunction = luaL_ref(L, LUA_REGISTRYINDEX);
 	powerupSpawnPointFunction = luaL_ref(L, LUA_REGISTRYINDEX);
 	projectileFunction = luaL_ref(L, LUA_REGISTRYINDEX);
@@ -227,11 +235,15 @@ int w_freeWorld(lua_State *L)
 	luaL_unref(L, LUA_REGISTRYINDEX, projectileFunction);
 	luaL_unref(L, LUA_REGISTRYINDEX, powerupSpawnPointFunction);
 	luaL_unref(L, LUA_REGISTRYINDEX, powerupFunction);
+	luaL_unref(L, LUA_REGISTRYINDEX, controlPointFunction);
+	luaL_unref(L, LUA_REGISTRYINDEX, flagFunction);
 	luaL_unref(L, LUA_REGISTRYINDEX, tankTable);
 	luaL_unref(L, LUA_REGISTRYINDEX, wallTable);
 	luaL_unref(L, LUA_REGISTRYINDEX, projectileTable);
 	luaL_unref(L, LUA_REGISTRYINDEX, powerupSpawnPointTable);
 	luaL_unref(L, LUA_REGISTRYINDEX, powerupTable);
+	luaL_unref(L, LUA_REGISTRYINDEX, controlPointTable);
+	luaL_unref(L, LUA_REGISTRYINDEX, flagTable);
 
 	return 0;
 }
@@ -1102,6 +1114,8 @@ int w_luaStep(lua_State *L)
 	STEP(projectileFunction, projectileTable, d);
 	STEP(powerupSpawnPointFunction, powerupSpawnPointTable, d);
 	STEP(powerupFunction, powerupTable, d);
+	STEP(controlPointFunction, controlPointTable, d);
+	STEP(flagFunction, flagTable, d);
 
 	return 0;
 }
