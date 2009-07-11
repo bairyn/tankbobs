@@ -30,8 +30,11 @@ local st_selected_button
 local st_selected_mouse
 local st_selected_step
 
-local st_selected_fragLimit
+local st_selected_limit
 local st_selected_start
+local limit = nil
+local limitInput = nil
+local limitConfig = ""
 
 function st_selected_init()
 	gui_addAction(tankbobs.m_vec2(25, 92.5), "Back", nil, c_state_advance)
@@ -40,13 +43,16 @@ function st_selected_init()
 	local type = c_config_get("config.game.gameType")
 		if type == "deathmatch" then
 		pos = 1
+		limitConfig = "config.game.fragLimit"
 	elseif type == "domination" then
 		pos = 2
+		limitConfig = "config.game.pointLimit"
 	elseif type == "capturetheflag" then
 		pos = 3
+		limitConfig = "config.game.captureLimit"
 	end
 	gui_addLabel(tankbobs.m_vec2(50, 75), "Game type", nil, 2 / 3) gui_addCycle(tankbobs.m_vec2(75, 75), "Instagib", nil, st_selected_gameType, {"Deathmatch", "Domination", "Capture the Flag"}, pos)
-	gui_addLabel(tankbobs.m_vec2(50, 69), "Frag limit", nil, 2 / 3) gui_addInput(tankbobs.m_vec2(75, 69), tostring(c_config_get("config.game.fragLimit")), nil, st_selected_fragLimit, true, 3)
+	limit = gui_addLabel(tankbobs.m_vec2(50, 69), "Frag limit", nil, 2 / 3) limitInput = gui_addInput(tankbobs.m_vec2(75, 69), tostring(c_config_get(limitConfig)), nil, st_selected_limit, true, 4)
 	gui_addLabel(tankbobs.m_vec2(50, 63), "Instagib", nil, 2 / 3) gui_addCycle(tankbobs.m_vec2(75, 63), "Instagib", nil, st_selected_instagib, {"No", "Yes"}, c_config_get("config.game.instagib") and 2 or 1)
 	gui_addAction(tankbobs.m_vec2(75, 57), "Start", nil, st_selected_start)
 end
@@ -79,8 +85,8 @@ function st_selected_step(d)
 	gui_paint(d)
 end
 
-function st_selected_fragLimit(widget)
-	c_config_set("config.game.fragLimit", tonumber(widget.inputText))
+function st_selected_limit(widget)
+	c_config_set(limitConfig, tonumber(widget.inputText))
 end
 
 function st_selected_instagib(widget, string, index)
@@ -93,16 +99,28 @@ end
 
 function st_selected_gameType(widget, string, index)
 	if index == 1 then
+		limitConfig = "config.game.fragLimit"
+		limitInput:setText(c_config_get(limitConfig))
+		limit:setText "Frag Limit"
+
 		c_config_set("config.game.gameType", "deathmatch")
 	elseif index == 2 then
+		limitConfig = "config.game.pointLimit"
+		limitInput:setText(c_config_get(limitConfig))
+		limit:setText "Point Limit"
+
 		c_config_set("config.game.gameType", "domination")
 	elseif index == 3 then
+		limitConfig = "config.game.captureLimit"
+		limitInput:setText(c_config_get(limitConfig))
+		limit:setText "Capture Limit"
+
 		c_config_set("config.game.gameType", "capturetheflag")
 	end
 end
 
 function st_selected_start(widget)
-	if c_config_get("config.game.fragLimit") > 0 then
+	if c_config_get(limitConfig) > 0 then
 		c_state_new(play_state)
 	end
 end

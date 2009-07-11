@@ -231,7 +231,7 @@ local widget =
 	actionCallBack = nil,  -- either actionCallBack(currentWidget, mouseX, mouseY) or actionCallBack(currentWidget, keyButton)
 
 	-- cycles
-	setScalePos = function (self, pos)
+	setCyclePos = function (self, pos)
 		self.cyclePos = pos
 	end,
 	cycleCallBack = nil,  -- called with (currentWidget, elementString, elementIndex) when the user changes the current element in a cycle
@@ -240,7 +240,14 @@ local widget =
 
 	-- inputs
 	setText = function (self, text)
+		-- this function works for non-input widgets as well
+
 		text = tostring(text)
+
+		if self.type ~= INPUT then
+			return
+		end
+
 		if #text >= 1 then
 			text = text:sub(1, self.maxLength)
 		end

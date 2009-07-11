@@ -440,6 +440,35 @@ local function play_drawWorld(d)
 		end
 		gl.DisableClientState("VERTEX_ARRAY")
 
+		if c_config_get("config.game.gameType") == "domination" then
+			-- draw control points
+			for _, v in pairs(c_tcm_current_map.controlPoints) do
+				local color
+
+				if v.m.team == "red" then
+					color = c_const_get("color_red")
+				elseif v.m.team == "blue" then
+					color = c_const_get("color_blue")
+				else
+					color = c_const_get("color_neutral")
+				end
+
+				if not v.m.r then
+					v.m.r = 0
+				else
+					v.m.r = v.m.r + d * c_const_get("controlPoint_rotation")
+				end
+
+				gl.Color(color[1], color[2], color[3], color[4])
+				gl.TexEnv("TEXTURE_ENV_COLOR", color[1], color[2], color[3], color[4])
+				gl.PushMatrix()
+					gl.Translate(v.p[1].x, v.p[1].y, 0)
+					gl.Rotate(tankbobs.m_degrees(v.m.r), 0, 0, 1)
+					gl.CallList(controlPoint_listBase)
+				gl.PopMatrix()
+			end
+		end
+
 		-- powerups are drawn next
 		for _, v in pairs(c_world_getPowerups()) do
 			gl.PushMatrix()
@@ -537,16 +566,64 @@ function st_play_step(d)
 		c_world_setPaused(true)
 	end
 
-	local fragLimit = c_config_get("config.game.fragLimit")
-	if fragLimit > 0 then
-		for k, v in pairs(c_world_getTanks()) do
-			if v.score >= fragLimit then
+	local switch = c_config_get("config.game.gameType")
+	if switch == "deathmatch" then
+		local fragLimit = c_config_get("config.game.fragLimit")
+
+		if fragLimit > 0 then
+			for k, v in pairs(c_world_getTanks()) do
+				if v.score >= fragLimit then
+					endOfGame = true
+
+					c_world_setPaused(true)
+
+					local name = tostring(c_config_get("config.game.player" .. tostring(k) .. ".name"))
+					gui_addLabel(tankbobs.m_vec2(35, 50), name .. " wins!", nil, 1.1, v.color.r, v.color.g, v.color.b, 0.75, v.color.r, v.color.g, v.color.b, 0.8)
+				end
+			end
+		end
+	elseif switch == "domination" then
+		local pointLimit = c_config_get("config.game.pointLimit")
+
+		if pointLimit > 0 then
+			if c_world_redTeam.score >= pointLimit then
 				endOfGame = true
 
 				c_world_setPaused(true)
 
-				local name = tostring(c_config_get("config.game.player" .. tostring(k) .. ".name"))
-				gui_addLabel(tankbobs.m_vec2(35, 50), name .. " wins!", nil, 1.1, v.color.r, v.color.g, v.color.b, 0.75, v.color.r, v.color.g, v.color.b, 0.8)
+				local name = "Red"
+				local color = c_const_get("color_red")
+				gui_addLabel(tankbobs.m_vec2(35, 50), name .. " wins!", nil, 1.1, color[1], color[2], color[3], 0.75, color[1], color[2], color[3], 0.8)
+			elseif c_world_blueTeam.score >= pointLimit then
+				endOfGame = true
+
+				c_world_setPaused(true)
+
+				local name = "Blue"
+				local color = c_const_get("color_blue")
+				gui_addLabel(tankbobs.m_vec2(35, 50), name .. " wins!", nil, 1.1, color[1], color[2], color[3], 0.75, color[1], color[2], color[3], 0.8)
+			end
+		end
+	elseif switch == "capturetheflag" then
+		local captureLimit = c_config_get("config.game.captureLimit")
+
+		if captureLimit > 0 then
+			if c_world_redTeam.score >= captureLimit then
+				endOfGame = true
+
+				c_world_setPaused(true)
+
+				local name = "Red"
+				local color = c_const_get("color_red")
+				gui_addLabel(tankbobs.m_vec2(35, 50), name .. " wins!", nil, 1.1, color[1], color[2], color[3], 0.75, color[1], color[2], color[3], 0.8)
+			elseif c_world_blueTeam.score >= captureLimit then
+				endOfGame = true
+
+				c_world_setPaused(true)
+
+				local name = "Blue"
+				local color = c_const_get("color_blue")
+				gui_addLabel(tankbobs.m_vec2(35, 50), name .. " wins!", nil, 1.1, color[1], color[2], color[3], 0.75, color[1], color[2], color[3], 0.8)
 			end
 		end
 	end
@@ -632,6 +709,7 @@ function st_play_step(d)
 
 	-- scores, FPS, rest of HUD, etc.
 	gui_paint(d)
+
 
 	if c_world_getPaused() then
 		return
@@ -767,6 +845,16 @@ function st_play_step(d)
 			v.m.lastCollisions = v.collisions
 
 			tankbobs.a_playSound(c_const_get("collideProjectile_sounds")[math.random(1, #c_const_get("collideProjectile_sounds"))])
+		end
+	end
+
+	if c_config_get("config.game.gameType") == "domination" then
+		for _, v in pairs(c_tcm_current_map.controlPoints) do
+			if v.team and  v.team ~= v.m.team then
+				v.m.team = v.team
+
+				tankbobs.a_playSound(c_const_get("control_sound"))
+			end
 		end
 	end
 end

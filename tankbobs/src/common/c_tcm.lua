@@ -703,7 +703,7 @@ function c_tcm_read_map(map)
 			controlPoint.red = false
 		end
 
-		table.insert(r.controlPoints, path)
+		table.insert(r.controlPoints, controlPoint)
 	end
 
 	for it = 1, r.flags_n do
@@ -718,7 +718,7 @@ function c_tcm_read_map(map)
 			flag.red = false
 		end
 
-		table.insert(r.flags, path)
+		table.insert(r.flags, flag)
 	end
 
 	i:close()

@@ -187,6 +187,8 @@ function c_world_init()
 	c_const_set("tank_shieldDamage", 1 / 16, 1)
 	c_const_set("tank_accelerationModifier", 3, 1)
 
+	c_const_set("controlPoint_rate", 2, 1)
+
 	c_const_set("powerup_hullx1",  0, 1) c_const_set("powerup_hully1",  1, 1)
 	c_const_set("powerup_hullx2",  0, 1) c_const_set("powerup_hully2",  0, 1)
 	c_const_set("powerup_hullx3",  1, 1) c_const_set("powerup_hully3",  0, 1)
@@ -1288,12 +1290,34 @@ function c_world_controlPoint_step(d, controlPoint)
 		return
 	end
 
+	local t = t_t_getTicks()
+
 	for _, v in pairs(c_world_tanks) do
 		if v.exists then
 			-- inexpensive distance check
 			if math.abs((v.p[1] - controlPoint.p[1]).R) <= c_const_get("world_touchDistance") then
-				-- handle here
+				controlPoint.m.nextPointTime = nil
+
+				controlPoint.m.team = v.red and "red" or "blue"
+
+				break
 			end
+		end
+	end
+
+	if controlPoint.m.team then
+		if controlPoint.m.nextPointTime then
+			while controlPoint.m.nextPointTime <= t do
+				if controlPoint.m.team == "red" then
+					c_world_redTeam.score = c_world_redTeam.score + 1
+				else
+					c_world_blueTeam.score = c_world_blueTeam.score + 1
+				end
+
+				controlPoint.m.nextPoint = t + c_const_get("world_time") * c_config_get("config.game.timescale") * c_const_get("controlPoint_rate")
+			end
+		else
+			controlPoint.m.nextPoint = t + c_const_get("world_time") * c_config_get("config.game.timescale") * c_const_get("controlPoint_rate")
 		end
 	end
 end
@@ -1308,6 +1332,8 @@ function c_world_flag_step(d, flag)
 			-- inexpensive distance check
 			if math.abs((v.p[1] - flag.p[1]).R) <= c_const_get("world_touchDistance") then
 				-- handle here
+
+				return
 			end
 		end
 	end
@@ -1335,6 +1361,8 @@ function c_world_teleporter_step(d, teleporter)
 					tankbobs.w_setPosition(v.body, target.p[1])
 					v.p[1](tankbobs.w_getPosition(v.body))
 				end
+
+				return
 			elseif v.m.target == teleporter then
 				v.m.target = nil
 			end

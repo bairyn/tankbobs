@@ -32,6 +32,8 @@ local tankShield_textures
 local powerup_textures
 local healthbar_texture 
 local healthbarBorder_texture 
+local controlPoint_texture
+local flag_texture
 
 function renderer_init()
 	--tankbobs = _G.tankbobs
@@ -100,6 +102,7 @@ function renderer_init()
 
 	c_const_set("color_red", {0.875, 0.125, 0.125, 1})
 	c_const_set("color_blue", {0.125, 0.125, 0.875, 1})
+	c_const_set("color_neutral", {0.55, 0.55, 0.6, 1})
 
 	tank_listBase = gl.GenLists(1)
 	tank_textures = gl.GenTextures(1)
@@ -200,6 +203,76 @@ function renderer_init()
 			gl.TexCoord(c_const_get("powerup_texturex2"), c_const_get("powerup_texturey2")) gl.Vertex(c_const_get("powerup_renderx2"), c_const_get("powerup_rendery2"))
 			gl.TexCoord(c_const_get("powerup_texturex3"), c_const_get("powerup_texturey3")) gl.Vertex(c_const_get("powerup_renderx3"), c_const_get("powerup_rendery3"))
 			gl.TexCoord(c_const_get("powerup_texturex4"), c_const_get("powerup_texturey4")) gl.Vertex(c_const_get("powerup_renderx4"), c_const_get("powerup_rendery4"))
+		gl.End()
+	gl.EndList()
+
+	controlPoint_listBase = gl.GenLists(1)
+	controlPoint_textures = gl.GenTextures(1)
+
+	if controlPoint_listBase == 0 then
+		error "st_play_init: could not generate lists"
+	end
+
+	c_const_set("controlPoint_renderx1",  -2, 1) c_const_set("controlPoint_rendery1",  2, 1)
+	c_const_set("controlPoint_renderx2",  -2, 1) c_const_set("controlPoint_rendery2",  -2, 1)
+	c_const_set("controlPoint_renderx3",  2, 1) c_const_set("controlPoint_rendery3",  -2, 1)
+	c_const_set("controlPoint_renderx4",  2, 1) c_const_set("controlPoint_rendery4",  2, 1)
+	c_const_set("controlPoint_texturex1", 0, 1) c_const_set("controlPoint_texturey1", 1, 1)
+	c_const_set("controlPoint_texturex2", 0, 1) c_const_set("controlPoint_texturey2", 0, 1)
+	c_const_set("controlPoint_texturex3", 1, 1) c_const_set("controlPoint_texturey3", 0, 1)
+	c_const_set("controlPoint_texturex4", 1, 1) c_const_set("controlPoint_texturey4", 1, 1)
+
+	c_const_set("controlPoint_rotation", -math.pi / 2, 1)
+
+	gl.BindTexture("TEXTURE_2D", controlPoint_textures[1])
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_S", "REPEAT")
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_T", "REPEAT")
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_MIN_FILTER", "LINEAR")
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_MAG_FILTER", "LINEAR")
+	tankbobs.r_loadImage2D(c_const_get("controlPoint"), c_const_get("textures_default"))
+
+	gl.NewList(controlPoint_listBase, "COMPILE")
+		gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
+		gl.BindTexture("TEXTURE_2D", controlPoint_textures[1])
+		gl.Begin("QUADS")
+			gl.TexCoord(c_const_get("controlPoint_texturex1"), c_const_get("controlPoint_texturey1")) gl.Vertex(c_const_get("controlPoint_renderx1"), c_const_get("controlPoint_rendery1"))
+			gl.TexCoord(c_const_get("controlPoint_texturex2"), c_const_get("controlPoint_texturey2")) gl.Vertex(c_const_get("controlPoint_renderx2"), c_const_get("controlPoint_rendery2"))
+			gl.TexCoord(c_const_get("controlPoint_texturex3"), c_const_get("controlPoint_texturey3")) gl.Vertex(c_const_get("controlPoint_renderx3"), c_const_get("controlPoint_rendery3"))
+			gl.TexCoord(c_const_get("controlPoint_texturex4"), c_const_get("controlPoint_texturey4")) gl.Vertex(c_const_get("controlPoint_renderx4"), c_const_get("controlPoint_rendery4"))
+		gl.End()
+	gl.EndList()
+
+	flag_listBase = gl.GenLists(1)
+	flag_textures = gl.GenTextures(1)
+
+	if flag_listBase == 0 then
+		error "st_play_init: could not generate lists"
+	end
+
+	c_const_set("flag_renderx1",  -1, 1) c_const_set("flag_rendery1",  2, 1)
+	c_const_set("flag_renderx2",  -1, 1) c_const_set("flag_rendery2",  -2, 1)
+	c_const_set("flag_renderx3",  1, 1) c_const_set("flag_rendery3",  -2, 1)
+	c_const_set("flag_renderx4",  1, 1) c_const_set("flag_rendery4",  2, 1)
+	c_const_set("flag_texturex1", 0, 1) c_const_set("flag_texturey1", 1, 1)
+	c_const_set("flag_texturex2", 0, 1) c_const_set("flag_texturey2", 0, 1)
+	c_const_set("flag_texturex3", 1, 1) c_const_set("flag_texturey3", 0, 1)
+	c_const_set("flag_texturex4", 1, 1) c_const_set("flag_texturey4", 1, 1)
+
+	gl.BindTexture("TEXTURE_2D", flag_textures[1])
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_S", "REPEAT")
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_T", "REPEAT")
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_MIN_FILTER", "LINEAR")
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_MAG_FILTER", "LINEAR")
+	tankbobs.r_loadImage2D(c_const_get("flag"), c_const_get("textures_default"))
+
+	gl.NewList(flag_listBase, "COMPILE")
+		gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
+		gl.BindTexture("TEXTURE_2D", flag_textures[1])
+		gl.Begin("QUADS")
+			gl.TexCoord(c_const_get("flag_texturex1"), c_const_get("flag_texturey1")) gl.Vertex(c_const_get("flag_renderx1"), c_const_get("flag_rendery1"))
+			gl.TexCoord(c_const_get("flag_texturex2"), c_const_get("flag_texturey2")) gl.Vertex(c_const_get("flag_renderx2"), c_const_get("flag_rendery2"))
+			gl.TexCoord(c_const_get("flag_texturex3"), c_const_get("flag_texturey3")) gl.Vertex(c_const_get("flag_renderx3"), c_const_get("flag_rendery3"))
+			gl.TexCoord(c_const_get("flag_texturex4"), c_const_get("flag_texturey4")) gl.Vertex(c_const_get("flag_renderx4"), c_const_get("flag_rendery4"))
 		gl.End()
 	gl.EndList()
 

@@ -373,7 +373,7 @@ function st_optionsPlayers_init()
 
 	-- image of tank is drawn (takes 21 and 24)
 
-	gui_addLabel(tankbobs.m_vec2(50, 15), "Team", nil, 2 / 3) player.team = gui_addCycle(tankbobs.m_vec2(75, 75), "Team", nil, st_optionsPlayers_team, {"Blue", "Red"}, c_config_get("config.game.player1.team") == "red" and 2 or 1)
+	gui_addLabel(tankbobs.m_vec2(50, 15), "Team", nil, 2 / 3) player.team = gui_addCycle(tankbobs.m_vec2(75, 15), "Team", nil, st_optionsPlayers_team, {"Blue", "Red"}, c_config_get("config.game.player1.team") == "red" and 2 or 1, 2 / 3)
 end
 
 function st_optionsPlayers_done()
@@ -473,7 +473,7 @@ function st_optionsPlayers_configurePlayer(widget)
 	if not (c_config_get("config.game.player" .. tonumber(currentPlayer) .. ".team", nil, true)) then
 		c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".team", false)
 	end
-	local team = c_config_get("config.game.player" .. tonumber(currentPlayer) .. ".color.b") == "red" and 2 or 1
+	local team = c_config_get("config.game.player" .. tonumber(currentPlayer) .. ".team") == "red" and 2 or 1
 	player.team:setCyclePos(team)
 end
 
@@ -595,13 +595,13 @@ function st_optionsPlayers_team(widget, string, index)
 			c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".team", false)
 		end
 
-		c_config_set("config.game.team" .. tonumber(currentPlayer) .. ".team", "red")
+		c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".team", "red")
 	elseif string == "Blue" then
 		if not (c_config_get("config.game.player" .. tonumber(currentPlayer) .. ".team", nil, true)) then
 			c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".team", false)
 		end
 
-		c_config_set("config.game.team" .. tonumber(currentPlayer) .. ".team", "blue")
+		c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".team", "blue")
 	end
 end
 

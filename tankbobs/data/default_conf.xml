@@ -24,6 +24,7 @@
 	</fonts>
 
 	<game>
+		<captureLimit>10</captureLimit>
 		<computers>0</computers>
 		<defaultTankRed>   0.875 </defaultTankRed>  Orange
 		<defaultTankGreen> 0.750 </defaultTankGreen>
@@ -64,6 +65,7 @@
 			<team>red</team>
 		</player2>
 		<players>2</players>
+		<pointLimit>200</pointLimit>
 		<scoresRed>   0.020 </scoresRed>
 		<scoresGreen> 0.020 </scoresGreen>
 		<scoresBlue>  0.500 </scoresBlue>
