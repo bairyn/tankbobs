@@ -32,6 +32,8 @@ extern vector<entities::PowerupSpawnPoint *> powerupSpawnPoint;
 extern vector<entities::Teleporter *>        teleporter;
 extern vector<entities::Wall *>              wall;
 extern vector<entities::Path *>              path;
+extern vector<entities::ControlPoint *>      controlPoint;
+extern vector<entities::Flag *>              flag;
 extern void *selection;
 
 Properties::Properties(QWidget *parent)
@@ -157,6 +159,26 @@ Properties::Properties(QWidget *parent)
 			enabled->setEnabled(true);
 		}
 	}
+	for(vector<entities::ControlPoint *>::iterator i = ::controlPoint.begin(); i != ::controlPoint.end(); ++i)
+	{
+		if(selection == reinterpret_cast<void *>(static_cast<entities::ControlPoint *>(*i)))
+		{
+			red->setChecked(reinterpret_cast<entities::ControlPoint *>(selection)->red);
+
+			selected = true;
+			red->setEnabled(true);
+		}
+	}
+	for(vector<entities::Flag *>::iterator i = ::flag.begin(); i != ::flag.end(); ++i)
+	{
+		if(selection == reinterpret_cast<void *>(static_cast<entities::Flag *>(*i)))
+		{
+			red->setChecked(reinterpret_cast<entities::Flag *>(selection)->red);
+
+			selected = true;
+			red->setEnabled(true);
+		}
+	}
 	if(!selected)
 	{
 		mapname->setText(QString(tmap.name.c_str()));
@@ -213,6 +235,7 @@ Properties::Properties(QWidget *parent)
 	connect(staticW, SIGNAL(stateChanged(int)), this, SLOT(staticWChanged(int)));
 	connect(linked, SIGNAL(stateChanged(int)), this, SLOT(linkedChanged(int)));
 	connect(focus, SIGNAL(stateChanged(int)), this, SLOT(focusChanged(int)));
+	connect(red, SIGNAL(stateChanged(int)), this, SLOT(redChanged(int)));
 }
 
 void Properties::textureChanged(const QString &text)
@@ -334,6 +357,36 @@ void Properties::focusChanged(int state)
 	else
 	{
 		o->focus = false;
+	}
+}
+
+void Properties::redChanged(int state)
+{
+	if(trm_isControlPoint(selection))
+	{
+		entities::ControlPoint *o = reinterpret_cast<entities::ControlPoint *>(selection);
+
+		if(state)
+		{
+			o->red = true;
+		}
+		else
+		{
+			o->red = false;
+		}
+	}
+	else if(trm_isFlag(selection))
+	{
+		entities::Flag *o = reinterpret_cast<entities::Flag *>(selection);
+
+		if(state)
+		{
+			o->red = true;
+		}
+		else
+		{
+			o->red = false;
+		}
 	}
 }
 

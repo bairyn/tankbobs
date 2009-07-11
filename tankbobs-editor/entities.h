@@ -33,6 +33,10 @@ using namespace std;
 #define TELEPORTER_HEIGHT        5
 #define PATH_WIDTH               5
 #define PATH_HEIGHT              5
+#define CONTROLPOINT_WIDTH       5
+#define CONTROLPOINT_HEIGHT      5
+#define FLAG_WIDTH               5
+#define FLAG_HEIGHT              5
 
 namespace entities
 {
@@ -124,6 +128,24 @@ namespace entities
 			Path(double Path_x = 0.0, double Path_y = 0.0, string Path_targetName = "", string Path_target = "", bool Path_enabled = false, double Path_time = 0) : x(Path_x), y(Path_y), targetName(Path_targetName), target(Path_target), enabled(Path_enabled), time(Path_time) {}
 
 	};
+
+	class ControlPoint : private Entity
+	{
+		public:
+			double x, y;
+			bool red;
+			ControlPoint(double ControlPoint_x = 0.0, double ControlPoint_y = 0.0, bool ControlPoint_red = false) : x(ControlPoint_x), y(ControlPoint_y), red(ControlPoint_red) {}
+
+	};
+
+	class Flag : private Entity
+	{
+		public:
+			double x, y;
+			bool red;
+			Flag(double Flag_x = 0.0, double Flag_y = 0.0, bool Flag_red = false) : x(Flag_x), y(Flag_y), red(Flag_red) {}
+
+	};
 }
 
 enum
@@ -134,6 +156,8 @@ enum
 	e_selectionPowerupSpawnPoint,
 	e_selectionTeleporter,
 	e_selectionPath,
+	e_selectionControlPoint,
+	e_selectionFlag,
 
 	e_numSelection
 };

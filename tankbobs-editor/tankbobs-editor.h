@@ -47,6 +47,8 @@ class Tankbobs_editor : public QMainWindow, private Ui::MainWindow
 		void selectionPowerupSpawnPoint();
 		void selectionTeleporter();
 		void selectionPath();
+		void selectionControlPoint();
+		void selectionFlag();
 		void open();
 		void save();
 		void saveAs();

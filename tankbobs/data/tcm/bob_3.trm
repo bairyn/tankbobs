@@ -64,14 +64,14 @@ playerSpawnPoint, 14, 25
 playerSpawnPoint, 168, 62
 playerSpawnPoint, -8, -62
 playerSpawnPoint, -9, 77
-powerupSpawnPoint, 51, 34, health shotgun machinegun, 0, 30, 30, 1
+powerupSpawnPoint, 51, 34, health shotgun machinegun, 0, 30, 30, 0
 powerupSpawnPoint, 97, 71.5, health, 0, 20, 20, 0
 powerupSpawnPoint, 35, 53, railgun, 0, 30, 30, 1
-powerupSpawnPoint, 119, 45, coilgun ammo, 0, 30, 30, 1
-powerupSpawnPoint, -94, -94, railgun aim-aid, 0, 30, 30, 1
-powerupSpawnPoint, 108, -61, ammo, 0, 30, 30, 1
-powerupSpawnPoint, 194, -93, shotgun machinegun, 0, 30, 30, 1
-powerupSpawnPoint, 194, 56, shotgun machinegun, 0, 30, 30, 1
+powerupSpawnPoint, 119, 45, coilgun ammo, 0, 30, 30, 0
+powerupSpawnPoint, -94, -94, railgun aim-aid, 0, 30, 30, 0
+powerupSpawnPoint, 108, -61, ammo, 0, 30, 30, 0
+powerupSpawnPoint, 194, -93, shotgun machinegun, 0, 30, 30, 0
+powerupSpawnPoint, 194, 56, shotgun machinegun, 0, 30, 30, 0
 powerupSpawnPoint, -94, 194, ammo, 0, 30, 60, 0
 powerupSpawnPoint, -94, 135, ammo, 0, 30, 30, 0
 powerupSpawnPoint, 108, 194, health, 0, 30, 30, 0
@@ -85,3 +85,10 @@ path, down, down2, 44, 117, 1, 3
 path, down2, down, 44, 102, 1, 3
 path, up, up2, 33, 102, 1, 3
 path, up2, up, 33, 117, 1, 3
+controlPoint, 139, 4, 0
+controlPoint, 0, 157, 0
+controlPoint, 93, 20, 0
+controlPoint, -89, -86, 0
+controlPoint, 187, 183, 0
+flag, 160, -84, 1
+flag, -89, 188, 0

@@ -36,6 +36,8 @@ extern vector<entities::PowerupSpawnPoint *> powerupSpawnPoint;
 extern vector<entities::Teleporter *>        teleporter;
 extern vector<entities::Wall *>              wall;
 extern vector<entities::Path *>              path;
+extern vector<entities::ControlPoint *>      controlPoint;
+extern vector<entities::Flag *>              flag;
 //extern vector<void *> selection;
 
 double *x_selected = NULL, *y_selected = NULL;
@@ -79,6 +81,8 @@ Tankbobs_editor::Tankbobs_editor(QWidget *parent)
 	connect(powerupSpawnPoint, SIGNAL(clicked()), this, SLOT(selectionPowerupSpawnPoint()));
 	connect(teleporter, SIGNAL(clicked()), this, SLOT(selectionTeleporter()));
 	connect(path, SIGNAL(clicked()), this, SLOT(selectionPath()));
+	connect(controlPoint, SIGNAL(clicked()), this, SLOT(selectionControlPoint()));
+	connect(flag, SIGNAL(clicked()), this, SLOT(selectionFlag()));
 	connect(actionImport, SIGNAL(triggered()), this, SLOT(import()));
 	connect(actionOpen, SIGNAL(triggered()), this, SLOT(open()));
 	connect(actionSave, SIGNAL(triggered()), this, SLOT(save()));
@@ -118,6 +122,16 @@ void Tankbobs_editor::selectionTeleporter()
 void Tankbobs_editor::selectionPath()
 {
 	selectionType = e_selectionPath;
+}
+
+void Tankbobs_editor::selectionControlPoint()
+{
+	selectionType = e_selectionControlPoint;
+}
+
+void Tankbobs_editor::selectionFlag()
+{
+	selectionType = e_selectionFlag;
 }
 
 void Tankbobs_editor::tsaveAs(void)
@@ -421,6 +435,42 @@ void Editor::mousePressEvent(QMouseEvent *e)
 					selected = true;
 				}
 			}
+			if(!selected)
+			for(vector<entities::ControlPoint *>::iterator i = controlPoint.begin(); i != controlPoint.end(); ++i)
+			{
+				entities::ControlPoint *e = *i;
+
+				if(trm_isSelected(e))
+				{
+					if(config_get_int(c_noModify))
+					{
+						trm_modifyAttempted();
+						return;
+					}
+
+					modified = true;
+
+					selected = true;
+				}
+			}
+			if(!selected)
+			for(vector<entities::Flag *>::iterator i = flag.begin(); i != flag.end(); ++i)
+			{
+				entities::Flag *e = *i;
+
+				if(trm_isSelected(e))
+				{
+					if(config_get_int(c_noModify))
+					{
+						trm_modifyAttempted();
+						return;
+					}
+
+					modified = true;
+
+					selected = true;
+				}
+			}
 
 			if(!selected)
 			for(vector<entities::Wall *>::iterator i = wall.begin(); i != wall.end(); ++i)
@@ -518,6 +568,14 @@ void Editor::mouseReleaseEvent(QMouseEvent *e)
 
 				case e_selectionPath:
 					trm_newPath(x_end - x_scroll, y_end - y_scroll);
+					break;
+
+				case e_selectionControlPoint:
+					trm_newControlPoint(x_end - x_scroll, y_end - y_scroll);
+					break;
+
+				case e_selectionFlag:
+					trm_newFlag(x_end - x_scroll, y_end - y_scroll);
 					break;
 
 				default:
@@ -709,7 +767,42 @@ void Editor::mouseMoveEvent(QMouseEvent *e)
 					e->y += y_end - y_last_scroll;
 				}
 			}
+			for(vector<entities::ControlPoint *>::iterator i = controlPoint.begin(); i != controlPoint.end(); ++i)
+			{
+				entities::ControlPoint *e = *i;
 
+				if(trm_isSelected(e))
+				{
+					if(config_get_int(c_noModify))
+					{
+						trm_modifyAttempted();
+						return;
+					}
+
+					modified = true;
+
+					e->x += x_end - x_last_scroll;
+					e->y += y_end - y_last_scroll;
+				}
+			}
+			for(vector<entities::Flag *>::iterator i = flag.begin(); i != flag.end(); ++i)
+			{
+				entities::Flag *e = *i;
+
+				if(trm_isSelected(e))
+				{
+					if(config_get_int(c_noModify))
+					{
+						trm_modifyAttempted();
+						return;
+					}
+
+					modified = true;
+
+					e->x += x_end - x_last_scroll;
+					e->y += y_end - y_last_scroll;
+				}
+			}
 		}
 	}
 }
@@ -950,6 +1043,54 @@ static void drawPaths(void)
 	}
 }
 
+static void drawControlPoints(void)
+{
+	for(vector<entities::ControlPoint *>::iterator i = controlPoint.begin(); i != controlPoint.end(); ++i)
+	{
+		entities::ControlPoint *e = *i;
+
+		glPushMatrix();
+			glPushAttrib(GL_POLYGON_BIT | GL_CURRENT_BIT);
+				glTranslated(e->x, e->y, 0.0);
+				if(glIsList(entBase + e_selectionControlPoint))
+					glCallList(entBase + e_selectionControlPoint);
+				if(e == reinterpret_cast<void *>(selection))
+				{
+					glScaled(1.1 / ZOOM, 1.1 / ZOOM, 1.0);
+					glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+					glColor4d(0.0, 1.0, 1.0, 1.0);
+					if(glIsList(entBase + e_selectionControlPoint))
+						glCallList(entBase + e_selectionControlPoint);
+				}
+			glPopAttrib();
+		glPopMatrix();
+	}
+}
+
+static void drawFlags(void)
+{
+	for(vector<entities::Flag *>::iterator i = flag.begin(); i != flag.end(); ++i)
+	{
+		entities::Flag *e = *i;
+
+		glPushMatrix();
+			glPushAttrib(GL_POLYGON_BIT | GL_CURRENT_BIT);
+				glTranslated(e->x, e->y, 0.0);
+				if(glIsList(entBase + e_selectionFlag))
+					glCallList(entBase + e_selectionFlag);
+				if(e == reinterpret_cast<void *>(selection))
+				{
+					glScaled(1.1 / ZOOM, 1.1 / ZOOM, 1.0);
+					glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+					glColor4d(28.0 / 255.0, 0.0, 28.0 / 255.0, 1.0);
+					if(glIsList(entBase + e_selectionFlag))
+						glCallList(entBase + e_selectionFlag);
+				}
+			glPopAttrib();
+		glPopMatrix();
+	}
+}
+
 static void drawEntity(int e)
 {
 	#define TANKBOBSEDITOR_DRAWENTITY_ERROR(e) \
@@ -966,11 +1107,15 @@ static void drawEntity(int e)
 		drawTeleporters();
 	else if(e == 3)
 		drawPaths();
+	else if(e == 4)
+		drawControlPoints();
+	else if(e == 5)
+		drawFlags();
 	else
 		TANKBOBSEDITOR_DRAWENTITY_ERROR(e);
 }
 
-const int entityInts[] = {0, 1, 2, 3};
+const int entityInts[] = {0, 1, 2, 3, 4, 5};
 
 typedef struct
 {
@@ -1082,6 +1227,30 @@ void Editor::initializeGL()
 				glVertex2d(-PATH_WIDTH * 0.5, -PATH_HEIGHT * 0.5);
 				glVertex2d(+PATH_WIDTH * 0.5, -PATH_HEIGHT * 0.5);
 				glVertex2d(+PATH_WIDTH * 0.5, +PATH_HEIGHT * 0.5);
+			glEnd();
+		glPopAttrib();
+	glEndList();
+
+	glNewList(entBase + e_selectionControlPoint, GL_COMPILE);
+		glPushAttrib(GL_CURRENT_BIT);
+			glColor4d(0.0, 1.0, 1.0, 1.0);
+			glBegin(GL_QUADS);
+				glVertex2d(-CONTROLPOINT_WIDTH * 0.5, +CONTROLPOINT_HEIGHT * 0.5);
+				glVertex2d(-CONTROLPOINT_WIDTH * 0.5, -CONTROLPOINT_HEIGHT * 0.5);
+				glVertex2d(+CONTROLPOINT_WIDTH * 0.5, -CONTROLPOINT_HEIGHT * 0.5);
+				glVertex2d(+CONTROLPOINT_WIDTH * 0.5, +CONTROLPOINT_HEIGHT * 0.5);
+			glEnd();
+		glPopAttrib();
+	glEndList();
+
+	glNewList(entBase + e_selectionFlag, GL_COMPILE);
+		glPushAttrib(GL_CURRENT_BIT);
+			glColor4i(28.0 / 255.0, 0.0, 28.0 / 255.0, 1.0);
+			glBegin(GL_QUADS);
+				glVertex2d(-FLAG_WIDTH * 0.5, +FLAG_HEIGHT * 0.5);
+				glVertex2d(-FLAG_WIDTH * 0.5, -FLAG_HEIGHT * 0.5);
+				glVertex2d(+FLAG_WIDTH * 0.5, -FLAG_HEIGHT * 0.5);
+				glVertex2d(+FLAG_WIDTH * 0.5, +FLAG_HEIGHT * 0.5);
 			glEnd();
 		glPopAttrib();
 	glEndList();
@@ -1200,6 +1369,38 @@ void Editor::paintGL()
 						glVertex2d(-PATH_WIDTH * 0.5, -PATH_HEIGHT * 0.5);
 						glVertex2d(+PATH_WIDTH * 0.5, -PATH_HEIGHT * 0.5);
 						glVertex2d(+PATH_WIDTH * 0.5, +PATH_HEIGHT * 0.5);
+					glEnd();
+				glPopMatrix();
+			glPopAttrib();
+		}
+		if(x_begin >= 0 && y_begin >= 0 && selectionType == e_selectionControlPoint)
+		{
+			glPushAttrib(GL_POLYGON_BIT | GL_CURRENT_BIT);
+				glColor4d(0.0 * 0.225, 1.0 * 0.2, 1.0 * 0.25, 1.0);
+				glCullFace(GL_FRONT_AND_BACK);
+				glPushMatrix();
+					glTranslated(x_end - x_scroll, y_end - y_scroll, 0.0);
+					glBegin(GL_QUADS);
+						glVertex2d(-CONTROLPOINT_WIDTH * 0.5, +CONTROLPOINT_HEIGHT * 0.5);
+						glVertex2d(-CONTROLPOINT_WIDTH * 0.5, -CONTROLPOINT_HEIGHT * 0.5);
+						glVertex2d(+CONTROLPOINT_WIDTH * 0.5, -CONTROLPOINT_HEIGHT * 0.5);
+						glVertex2d(+CONTROLPOINT_WIDTH * 0.5, +CONTROLPOINT_HEIGHT * 0.5);
+					glEnd();
+				glPopMatrix();
+			glPopAttrib();
+		}
+		if(x_begin >= 0 && y_begin >= 0 && selectionType == e_selectionFlag)
+		{
+			glPushAttrib(GL_POLYGON_BIT | GL_CURRENT_BIT);
+				glColor4d((28.0 / 255.0) * 0.225, 0.0 * 0.2, (28.0 / 255.0) * 0.25, 1.0);
+				glCullFace(GL_FRONT_AND_BACK);
+				glPushMatrix();
+					glTranslated(x_end - x_scroll, y_end - y_scroll, 0.0);
+					glBegin(GL_QUADS);
+						glVertex2d(-FLAG_WIDTH * 0.5, +FLAG_HEIGHT * 0.5);
+						glVertex2d(-FLAG_WIDTH * 0.5, -FLAG_HEIGHT * 0.5);
+						glVertex2d(+FLAG_WIDTH * 0.5, -FLAG_HEIGHT * 0.5);
+						glVertex2d(+FLAG_WIDTH * 0.5, +FLAG_HEIGHT * 0.5);
 					glEnd();
 				glPopMatrix();
 			glPopAttrib();

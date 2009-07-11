@@ -69,6 +69,7 @@ class Properties : public QDialog, private Ui::PropertiesDialog
 		void enabledChanged(int state);
 		void linkedChanged(int state);
 		void focusChanged(int state);
+		void redChanged(int state);
 };
 
 #endif

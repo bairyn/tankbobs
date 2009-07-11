@@ -1,5 +1,7 @@
 <RCC>
   <qresource>
+    <file>res/icons/c.png</file>
+    <file>res/icons/f.png</file>
     <file>res/icons/psp.png</file>
     <file>res/icons/posp.png</file>
     <file>res/icons/t.png</file>
