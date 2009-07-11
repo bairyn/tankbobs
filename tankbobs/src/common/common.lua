@@ -293,9 +293,9 @@ end
 function common_new(self, inh, o)
 	o = o or {}
 	if inh then
-		tankbobs.t_clone(inh, o)
+		tankbobs.t_clone(inh, o, true)
 	end
-	tankbobs.t_clone(self, o)
+	tankbobs.t_clone(self, o, true)
 	if self.init then
 		self.init(o)
 	end

@@ -677,6 +677,7 @@ static void add_teleporter(const char *targetName, const char *target, double x1
 	strncpy(teleporter->target, target, sizeof(teleporter->target));
 	teleporter->x1 = x1;
 	teleporter->y1 = y1;
+	teleporter->enabled = enabled;
 }
 
 static void add_playerSpawnPoint(double x1, double y1)

@@ -440,9 +440,6 @@ local function play_drawWorld(d)
 		end
 		gl.DisableClientState("VERTEX_ARRAY")
 
-		-- teleporters are drawn on top everything above
-		--gl.CallLists(play_teleporter_listsMultiple)
-
 		-- powerups are drawn next
 		for _, v in pairs(c_world_getPowerups()) do
 			gl.PushMatrix()
@@ -748,6 +745,12 @@ function st_play_step(d)
 			v.m.lastPickupTimeB = v.m.lastPickupTime 
 
 			tankbobs.a_playSound(c_const_get("powerupPickup_sound"))
+		end
+
+		if v.m.target and v.m.targetB ~= v.m.target then
+			v.m.targetB = v.m.target 
+
+			tankbobs.a_playSound(c_const_get("teleport_sound"))
 		end
 	end
 

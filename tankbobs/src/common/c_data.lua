@@ -112,6 +112,7 @@ function c_data_init()
 	c_const_set("powerupSpawn_sound", c_const_get("gameAudio_dir") .. "powerupSpawn.wav", 1)
 	c_const_set("collideProjectile_sounds", {c_const_get("gameAudio_dir") .. "collideProjectile.wav", c_const_get("gameAudio_dir") .. "collideProjectile2.wav", c_const_get("gameAudio_dir") .. "collideProjectile3.wav", c_const_get("gameAudio_dir") .. "collideProjectile4.wav", c_const_get("gameAudio_dir") .. "collideProjectile5.wav", c_const_get("gameAudio_dir") .. "collideProjectile6.wav"}, 1)
 	c_const_set("emptyTrigger_sound", c_const_get("gameAudio_dir") .. "trigger.wav", 1)
+	c_const_set("teleport_sound", c_const_get("gameAudio_dir") .. "teleport.wav", 1)
 
 	c_const_set("max_tanks", 64, 1)
 

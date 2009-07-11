@@ -51,6 +51,7 @@ local c_world_powerupSpawnPoint_step
 local c_world_powerup_step
 local c_world_controlPoint_step
 local c_world_flag_step
+local c_world_teleporter_step
 local c_world_tanks
 local c_world_powerups
 local tank_acceleration
@@ -117,7 +118,7 @@ function c_world_init()
 
 	c_const_set("world_maxPowerups", 64, 1)
 
-	c_const_set("world_touchDistance", 8, 1)
+	c_const_set("world_touchDistance", 6, 1)
 
 	c_const_set("powerup_lifeTime", 12000, 1)
 	c_const_set("powerup_density", 1E-5, 1)
@@ -419,7 +420,7 @@ function c_world_newWorld()
 
 	local m = c_tcm_current_map
 	assert(c_tcm_current_map)
-	tankbobs.w_newWorld(c_const_get("world_lowerbound") + t_m_vec2(m.leftmost, m.lowermost), c_const_get("world_upperbound") + t_m_vec2(m.rightmost, m.uppermost), t_m_vec2(c_const_get("world_gravityx"), c_const_get("world_gravityy")), c_const_get("world_allowSleep"), c_world_contactListener, c_world_tank_step, c_world_wall_step, c_world_projectile_step, c_world_powerupSpawnPoint_step, c_world_powerup_step, c_world_controlPoint_step, c_world_flag_step, c_world_tanks, c_tcm_current_map.walls, c_weapon_getProjectiles(), c_tcm_current_map.powerupSpawnPoints, c_world_powerups, c_tcm_current_map.controlPoints, c_tcm_current_map.flags)
+	tankbobs.w_newWorld(c_const_get("world_lowerbound") + t_m_vec2(m.leftmost, m.lowermost), c_const_get("world_upperbound") + t_m_vec2(m.rightmost, m.uppermost), t_m_vec2(c_const_get("world_gravityx"), c_const_get("world_gravityy")), c_const_get("world_allowSleep"), c_world_contactListener, c_world_tank_step, c_world_wall_step, c_world_projectile_step, c_world_powerupSpawnPoint_step, c_world_powerup_step, c_world_controlPoint_step, c_world_flag_step, c_world_teleporter_step, c_world_tanks, c_tcm_current_map.walls, c_weapon_getProjectiles(), c_tcm_current_map.powerupSpawnPoints, c_world_powerups, c_tcm_current_map.controlPoints, c_tcm_current_map.flags, c_tcm_current_map.teleporters)
 
 	-- set game type
 	gameType = DEATHMATCH
@@ -1283,10 +1284,14 @@ function c_world_powerup_step(d, powerup)
 end
 
 function c_world_controlPoint_step(d, controlPoint)
+	if gameType ~= DOMINATION then
+		return
+	end
+
 	for _, v in pairs(c_world_tanks) do
 		if v.exists then
 			-- inexpensive distance check
-			if (v.p1[1] - controlPoint.p[1]).R <= c_const_get("world_touchDistance") then
+			if math.abs((v.p[1] - controlPoint.p[1]).R) <= c_const_get("world_touchDistance") then
 				-- handle here
 			end
 		end
@@ -1294,14 +1299,49 @@ function c_world_controlPoint_step(d, controlPoint)
 end
 
 function c_world_flag_step(d, flag)
+	if gameType ~= CAPTURETHEFLAG then
+		return
+	end
+
 	for _, v in pairs(c_world_tanks) do
 		if v.exists then
 			-- inexpensive distance check
-			if (v.p1[1] - flag.p[1]).R <= c_const_get("world_touchDistance") then
+			if math.abs((v.p[1] - flag.p[1]).R) <= c_const_get("world_touchDistance") then
 				-- handle here
 			end
 		end
 	end
+end
+
+function c_world_teleporter_step(d, teleporter)
+	local teleporters = c_tcm_current_map.teleporters
+
+	for _, v in pairs(c_world_tanks) do
+		if v.exists then
+			-- inexpensive distance check
+			if math.abs((v.p[1] - teleporter.p[1]).R) <= c_const_get("world_touchDistance") then
+				local target = teleporters[teleporter.t + 1]
+
+				if teleporter.enabled and target and v.m.target ~= teleporter then
+					for _, v in pairs(c_world_tanks) do
+						if v.exists then
+							if math.abs((v.p[1] - target.p[1]).R) <= c_const_get("world_touchDistance") then
+								return
+							end
+						end
+					end
+
+					v.m.target = target
+					tankbobs.w_setPosition(v.body, target.p[1])
+					v.p[1](tankbobs.w_getPosition(v.body))
+				end
+			elseif v.m.target == teleporter then
+				v.m.target = nil
+			end
+		end
+	end
+
+	-- Don't handle powerups and projectiles
 end
 
 local function c_world_isTank(body)
@@ -1556,6 +1596,10 @@ function c_world_step(d)
 
 				for _, v in pairs(c_tcm_current_map.flags) do
 					c_world_flag_step(wd, v)
+				end
+
+				for _, v in pairs(c_tcm_current_map.teleporters) do
+					c_world_teleporter_step(wd, v)
 				end
 				--]]
 
