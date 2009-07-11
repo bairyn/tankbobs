@@ -1295,12 +1295,14 @@ function c_world_controlPoint_step(d, controlPoint)
 	local t = t_t_getTicks()
 
 	local balance = 0
+	local num = 0
 
 	for _, v in pairs(c_world_tanks) do
 		if v.exists then
 			-- inexpensive distance check
 			if math.abs((v.p[1] - controlPoint.p[1]).R) <= c_const_get("controlPoint_touchDistance") then
-				balance = balance + v.red and 1 or -1
+				balance = balance + (v.red and 1 or -1)
+				num = num + 1
 
 				break
 			end
@@ -1315,7 +1317,7 @@ function c_world_controlPoint_step(d, controlPoint)
 		controlPoint.m.nextPointTime = nil
 
 		controlPoint.m.team = "blue"
-	else
+	elseif num > 0 then
 		controlPoint.m.team = nil
 	end
 
