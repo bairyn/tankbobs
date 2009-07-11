@@ -849,7 +849,7 @@ function st_play_step(d)
 
 	if c_config_get("config.game.gameType") == "domination" then
 		for _, v in pairs(c_tcm_current_map.controlPoints) do
-			if v.m.team and v.m.teamB ~= v.m.team then
+			if v.m.teamB ~= v.m.team then
 				v.m.teamB = v.m.team
 
 				tankbobs.a_playSound(c_const_get("control_sound"))
