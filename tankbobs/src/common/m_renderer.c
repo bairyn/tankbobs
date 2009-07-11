@@ -736,6 +736,7 @@ int r_drawString(lua_State *L)
 
 		SDL_FreeSurface(s);
 		SDL_FreeSurface(converted);
+		SDL_FreeSurface(intermediary);
 
 		/* compile list */
 		glPushMatrix();
