@@ -1612,7 +1612,7 @@ function c_world_step(d)
 
 	if worldInitialized then
 		if paused then
-			c_world_private_offsetWorldTimers(d)
+			c_world_private_offsetWorldTimers(d * 1000)
 		else
 			while worldTime < t do
 				if t - worldTime > behind then
