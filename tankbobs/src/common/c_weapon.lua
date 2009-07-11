@@ -219,7 +219,7 @@ function c_weapon_init()
 	weapon.fireSound = {"railgun.wav", "railgun2.wav"}
 	weapon.launchDistance = 3
 	weapon.aimAid = false
-	weapon.capacity = 3
+	weapon.capacity = 6
 	weapon.meleeRange = 0
 	weapon.width = 0
 	weapon.trail = 4
@@ -323,7 +323,7 @@ function c_weapon_init()
 	weapon.fireSound = {"coilgun.wav", "coilgun2.wav", "coilgun2.wav"}
 	weapon.launchDistance = 3
 	weapon.aimAid = true
-	weapon.capacity = 3
+	weapon.capacity = 4
 	weapon.meleeRange = 0
 	weapon.width = 0
 	weapon.trail = 0.25
