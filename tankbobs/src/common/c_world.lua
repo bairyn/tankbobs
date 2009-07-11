@@ -1564,7 +1564,9 @@ local function c_world_private_offsetWorldTimers(d)
 	end
 
 	for _, v in pairs(c_tcm_current_map.controlPoints) do
-		v.m.nextPointTime = v.m.nextPointTime + d
+		if v.m.nextPointTime then
+			v.m.nextPointTime = v.m.nextPointTime + d
+		end
 	end
 
 	if lastPowerupSpawnTime then
