@@ -102,7 +102,7 @@ function renderer_init()
 
 	c_const_set("color_red", {0.875, 0.125, 0.125, 1})
 	c_const_set("color_blue", {0.125, 0.125, 0.875, 1})
-	c_const_set("color_neutral", {0.55, 0.55, 0.6, 1})
+	c_const_set("color_neutral", {0.2, 0.2, 0.33, 1})
 
 	tank_listBase = gl.GenLists(1)
 	tank_textures = gl.GenTextures(1)
