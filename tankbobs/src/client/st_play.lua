@@ -20,7 +20,7 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 --[[
 st_play.lua
 
-main play state
+Offline play state
 --]]
 
 local tankbobs = tankbobs
@@ -321,7 +321,7 @@ local function play_drawWorld(d)
 						if(v.exists) then
 							gl.PushAttrib("CURRENT_BIT")
 								gl.PushMatrix()
-									gl.Translate(v.p[1].x, v.p[1].y, 0)
+									gl.Translate(v.p.x, v.p.y, 0)
 									gl.Rotate(tankbobs.m_degrees(v.r), 0, 0, 1)
 									if not (c_config_get("config.game.player" .. tostring(k) .. ".color", nil, true)) then
 										c_config_set("config.game.player" .. tostring(k) .. ".color.r", c_config_get("config.game.defaultTankRed"))
@@ -411,7 +411,7 @@ local function play_drawWorld(d)
 					gl.PushAttrib("ENABLE_BIT")
 						local b
 						local vec = tankbobs.m_vec2()
-						local start, endP = tankbobs.m_vec2(v.p[1]), tankbobs.m_vec2()
+						local start, endP = tankbobs.m_vec2(v.p), tankbobs.m_vec2()
 		
 						vec.t = v.r
 						vec.R = c_const_get("aimAid_startDistance")
@@ -462,7 +462,7 @@ local function play_drawWorld(d)
 				gl.Color(color[1], color[2], color[3], color[4])
 				gl.TexEnv("TEXTURE_ENV_COLOR", color[1], color[2], color[3], color[4])
 				gl.PushMatrix()
-					gl.Translate(v.p[1].x, v.p[1].y, 0)
+					gl.Translate(v.p.x, v.p.y, 0)
 					gl.Rotate(tankbobs.m_degrees(v.m.r), 0, 0, 1)
 					gl.CallList(controlPoint_listBase)
 				gl.PopMatrix()
@@ -475,7 +475,7 @@ local function play_drawWorld(d)
 				local c = c_world_getPowerupTypeByName(v.typeName).c
 				gl.Color(c.r, c.g, c.b, c.a)
 				gl.TexEnv("TEXTURE_ENV_COLOR", c.r, c.g, c.b, c.a)
-				gl.Translate(v.p[1].x, v.p[1].y, 0)
+				gl.Translate(v.p.x, v.p.y, 0)
 				gl.Rotate(tankbobs.m_degrees(v.r), 0, 0, 1)
 				gl.CallList(powerup_listBase)
 			gl.PopMatrix()
@@ -485,7 +485,7 @@ local function play_drawWorld(d)
 		for _, v in pairs(c_weapon_getProjectiles()) do
 			if v.weapon.trail == 0 and v.weapon.trailWidth == 0 then  -- only draw the trail
 				gl.PushMatrix()
-					gl.Translate(v.p[1].x, v.p[1].y, 0)
+					gl.Translate(v.p.x, v.p.y, 0)
 					gl.Rotate(tankbobs.m_degrees(v.r), 0, 0, 1)
 					gl.CallList(v.weapon.m.p.projectileList)
 				gl.PopMatrix()
@@ -516,7 +516,7 @@ local function play_drawWorld(d)
 			if v.exists then
 				-- draw name
 				gl.PushMatrix()
-					gl.Translate(v.p[1].x, v.p[1].y, 0)
+					gl.Translate(v.p.x, v.p.y, 0)
 					tankbobs.r_drawString(v.name, c_const_get("tank_nameOffset"), v.color.r, v.color.g, v.color.b, c_config_get("config.game.scoresAlpha"), c_const_get("tank_nameScalex"), c_const_get("tank_nameScaley"), false)
 				gl.PopMatrix()
 			end
@@ -526,7 +526,7 @@ local function play_drawWorld(d)
 		for k, v in pairs(c_world_getTanks()) do
 			if v.exists then
 				gl.PushMatrix()
-					gl.Translate(v.p[1].x, v.p[1].y, 0)
+					gl.Translate(v.p.x, v.p.y, 0)
 					gl.Rotate(tankbobs.m_degrees(v.r) + c_const_get("healthbar_rotation"), 0, 0, 1)
 					if not (c_config_get("config.game.player" .. tostring(k) .. ".color", nil, true)) then
 						c_config_set("config.game.player" .. tostring(k) .. ".color.r", c_config_get("config.game.defaultTankRed"))
@@ -649,34 +649,34 @@ function st_play_step(d)
 		local leftmost
 		-- Position the camera so that all tanks and powerups are shown, while zooming in as much as possible
 		for _, v in pairs(c_world_getTanks()) do
-			if not leftmost or v.p[1].x < leftmost then
-				leftmost = v.p[1].x
+			if not leftmost or v.p.x < leftmost then
+				leftmost = v.p.x
 			end
-			if not rightmost or v.p[1].x > rightmost then
-				rightmost = v.p[1].x
+			if not rightmost or v.p.x > rightmost then
+				rightmost = v.p.x
 			end
 
-			if not lowermost or v.p[1].y < lowermost then
-				lowermost = v.p[1].y
+			if not lowermost or v.p.y < lowermost then
+				lowermost = v.p.y
 			end
-			if not uppermost or v.p[1].y > uppermost then
-				uppermost = v.p[1].y
+			if not uppermost or v.p.y > uppermost then
+				uppermost = v.p.y
 			end
 		end
 		for _, v in pairs(c_world_getPowerups()) do
 			if v.spawner.focus then
-				if not leftmost or v.p[1].x < leftmost then
-					leftmost = v.p[1].x
+				if not leftmost or v.p.x < leftmost then
+					leftmost = v.p.x
 				end
-				if not rightmost or v.p[1].x > rightmost then
-					rightmost = v.p[1].x
+				if not rightmost or v.p.x > rightmost then
+					rightmost = v.p.x
 				end
 
-				if not lowermost or v.p[1].y < lowermost then
-					lowermost = v.p[1].y
+				if not lowermost or v.p.y < lowermost then
+					lowermost = v.p.y
 				end
-				if not uppermost or v.p[1].y > uppermost then
-					uppermost = v.p[1].y
+				if not uppermost or v.p.y > uppermost then
+					uppermost = v.p.y
 				end
 			end
 		end
@@ -731,7 +731,7 @@ function st_play_step(d)
 
 					if v.weapon.trail ~= 0 and v.weapon.trailWidth ~= 0 then
 						-- calculate the beginning and end point before the insert
-						local start, endP = tankbobs.m_vec2(v.p[1]), tankbobs.m_vec2()
+						local start, endP = tankbobs.m_vec2(v.p), tankbobs.m_vec2()
 						local vec = tankbobs.m_vec2()
 						local list = gl.GenLists(1)
 						local b

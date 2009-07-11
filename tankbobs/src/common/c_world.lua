@@ -310,8 +310,7 @@ end
 
 c_world_powerupType =
 {
-	new = common_new,
-
+	new = c_class_new,
 	index = 0,
 	name = "",
 	c = {r = 0, g = 0, b = 0, a = 0},
@@ -320,13 +319,9 @@ c_world_powerupType =
 
 c_world_powerup =
 {
-	new = common_new,
+	new = c_class_new,
 
-	init = function (o)
-		o.p[1] = tankbobs.m_vec2()
-	end,
-
-	p = {},
+	p = tankbobs.m_vec2(),
 	r = 0,  -- rotation
 	spawner = nil,
 	collided = false,  -- whether it needs to be removed
@@ -338,15 +333,9 @@ c_world_powerup =
 
 c_world_tank =
 {
-	new = common_new,
-
+	new = c_class_new,
 	init = function (o)
-		name = "UnnamedPlayer"
-		o.p[1] = tankbobs.m_vec2()
-		o.h[1] = tankbobs.m_vec2()
-		o.h[2] = tankbobs.m_vec2()
-		o.h[3] = tankbobs.m_vec2()
-		o.h[4] = tankbobs.m_vec2()
+		o.name = c_const_get("defaultName")
 		o.h[1].x = c_const_get("tank_hullx1")
 		o.h[1].y = c_const_get("tank_hully1")
 		o.h[2].x = c_const_get("tank_hullx2")
@@ -361,8 +350,8 @@ c_world_tank =
 		o.state = c_world_tank_state:new()
 	end,
 
-	p = {},
-	h = {},  -- physical box: four vectors of offsets for tanks
+	p = tankbobs.m_vec2(),
+	h = {tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2()},  -- physical box: four vectors of offsets for tanks
 	r = 0,  -- tank's rotation
 	name = "",
 	exists = false,
@@ -387,7 +376,7 @@ c_world_tank =
 
 c_world_tank_state =
 {
-	new = common_new,
+	new = c_class_new,
 
 	firing = false,
 	forward = false,
@@ -399,7 +388,7 @@ c_world_tank_state =
 
 c_world_team =
 {
-	new = common_new,
+	new = c_class_new,
 
 	red = false,
 	score = 0
@@ -572,7 +561,7 @@ function c_world_tank_checkSpawn(d, tank)
 	-- spawn
 	tank.spawning = false
 	tank.r = c_const_get("tank_defaultRotation")
-	tank.p[1](playerSpawnPoint.p[1])
+	tank.p(playerSpawnPoint.p)
 	tank.health = c_const_get("tank_health")
 	tank.shield = 0
 	if c_config_get("config.game.instagib") then
@@ -581,10 +570,12 @@ function c_world_tank_checkSpawn(d, tank)
 		tank.weapon = c_weapon_getByAltName("default")
 	end
 	tank.cd = {}
-	tank.exists = true
 
 	-- add a physical body
-	tank.body = tankbobs.w_addBody(tank.p[1], tank.r, c_const_get("tank_canSleep"), c_const_get("tank_isBullet"), c_const_get("tank_linearDamping"), c_const_get("tank_angularDamping"), tank.h, c_const_get("tank_density"), c_const_get("tank_friction"), c_const_get("tank_restitution"), not c_const_get("tank_static"))
+	tank.body = tankbobs.w_addBody(tank.p, tank.r, c_const_get("tank_canSleep"), c_const_get("tank_isBullet"), c_const_get("tank_linearDamping"), c_const_get("tank_angularDamping"), tank.h, c_const_get("tank_density"), c_const_get("tank_friction"), c_const_get("tank_restitution"), not c_const_get("tank_static"))
+
+	tank.exists = true
+
 	return true
 end
 
@@ -631,7 +622,7 @@ function c_world_tankHull(tank)
 	end
 
 	-- return a table of coordinates of tank's hull
-	local p = tank.p[1]
+	local p = tank.p
 
 	for k, v in pairs(tank.h) do
 		local h = t_m_vec2(v)
@@ -649,7 +640,7 @@ function c_world_projectileHull(projectile)
 		c = {t_m_vec2(0, 0), t_m_vec2(0, 0), t_m_vec2(0, 0), t_m_vec2(0, 0)}
 	end
 
-	local p = projectile.p[1]
+	local p = projectile.p
 
 	for k, v in pairs(projectile.weapon.projectileHull) do
 		local h = t_m_vec2(v)
@@ -682,7 +673,7 @@ function c_world_powerupSpawnPointHull(powerupSpawnPoint)
 		c = {t_m_vec2(0, 0), t_m_vec2(0, 0), t_m_vec2(0, 0), t_m_vec2(0, 0)}
 	end
 
-	local p = powerupSpawnPoint.p[1]
+	local p = powerupSpawnPoint.p
 
 	for i = 1, 4 do
 		local h = t_m_vec2(c_const_get("powerup_hullx" .. tostring(i)), c_const_get("powerup_hully" .. tostring(i)))
@@ -774,7 +765,7 @@ function c_world_tank_canSpawn(d, tank)
 	end
 
 	-- set the tank's position for proper testing (this won't interfere with anything else since the exists flag isn't set)
-	tank.p[1](c_tcm_current_map.playerSpawnPoints[tank.lastSpawnPoint].p[1])
+	tank.p(c_tcm_current_map.playerSpawnPoints[tank.lastSpawnPoint].p)
 
 	-- test if spawning interferes with another tank
 	for _, v in pairs(c_world_tanks) do
@@ -912,7 +903,7 @@ function c_world_tank_step(d, tank)
 		return c_world_tank_die(tank, t)
 	end
 
-	tank.p[1](t_w_getPosition(tank.body))
+	tank.p(t_w_getPosition(tank.body))
 
 	local vel = t_w_getLinearVelocity(tank.body)
 
@@ -1045,7 +1036,7 @@ function c_world_wall_step(d, wall)
 					local prevPath = paths[wall.m.ppid]
 
 					if wall.m.ppos < 1 and prevPath then
-						tankbobs.w_setPosition(wall.m.body, common_lerp(wall.m.startpos, wall.m.startpos + path.p[1] - prevPath.p[1], wall.m.ppos))
+						tankbobs.w_setPosition(wall.m.body, common_lerp(wall.m.startpos, wall.m.startpos + path.p - prevPath.p, wall.m.ppos))
 					else
 						wall.m.ppid = wall.m.pid + 1
 						wall.m.startpos(c_world_wallShape(wall.m.pos)[1])
@@ -1082,7 +1073,7 @@ function c_world_projectile_step(d, projectile)
 		return
 	end
 
-	projectile.p[1](t_w_getPosition(projectile.m.body))
+	projectile.p(t_w_getPosition(projectile.m.body))
 	projectile.r = t_w_getAngle(projectile.m.body)
 end
 
@@ -1184,9 +1175,9 @@ function c_world_powerupSpawnPoint_step(d, powerupSpawnPoint)
 
 			powerup.spawnTime = t
 
-			powerup.p[1](powerupSpawnPoint.p[1])
+			powerup.p(powerupSpawnPoint.p)
 
-			powerup.m.body = tankbobs.w_addBody(powerup.p[1], 0, c_const_get("powerup_canSleep"), c_const_get("powerup_isBullet"), c_const_get("powerup_linearDamping"), c_const_get("powerup_angularDamping"), c_world_powerupHull(powerup), c_const_get("powerup_density"), c_const_get("powerup_friction"), c_const_get("powerup_restitution"), not c_const_get("powerup_static"))
+			powerup.m.body = tankbobs.w_addBody(powerup.p, 0, c_const_get("powerup_canSleep"), c_const_get("powerup_isBullet"), c_const_get("powerup_linearDamping"), c_const_get("powerup_angularDamping"), c_world_powerupHull(powerup), c_const_get("powerup_density"), c_const_get("powerup_friction"), c_const_get("powerup_restitution"), not c_const_get("powerup_static"))
 			-- add some initial push to the powerup
 			local push = t_m_vec2()
 			push.R = c_const_get("powerup_pushStrength")
@@ -1267,7 +1258,7 @@ function c_world_powerup_step(d, powerup)
 		powerup.collided = true
 	end
 
-	powerup.p[1](t_w_getPosition(powerup.m.body))
+	powerup.p(t_w_getPosition(powerup.m.body))
 	--t_w_setAngle(powerup.m.body, 0)  -- looks better with dynamic rotation
 	powerup.r = t_w_getAngle(powerup.m.body)
 
@@ -1300,7 +1291,7 @@ function c_world_controlPoint_step(d, controlPoint)
 	for _, v in pairs(c_world_tanks) do
 		if v.exists then
 			-- inexpensive distance check
-			if math.abs((v.p[1] - controlPoint.p[1]).R) <= c_const_get("controlPoint_touchDistance") then
+			if math.abs((v.p - controlPoint.p).R) <= c_const_get("controlPoint_touchDistance") then
 				balance = balance + (v.red and (1) or (-1))
 				num = num + 1
 			end
@@ -1344,7 +1335,7 @@ function c_world_flag_step(d, flag)
 	for _, v in pairs(c_world_tanks) do
 		if v.exists then
 			-- inexpensive distance check
-			if math.abs((v.p[1] - flag.p[1]).R) <= c_const_get("flag_touchDistance") then
+			if math.abs((v.p - flag.p).R) <= c_const_get("flag_touchDistance") then
 				-- handle here
 
 				return
@@ -1359,21 +1350,21 @@ function c_world_teleporter_step(d, teleporter)
 	for _, v in pairs(c_world_tanks) do
 		if v.exists then
 			-- inexpensive distance check
-			if math.abs((v.p[1] - teleporter.p[1]).R) <= c_const_get("teleporter_touchDistance") then
+			if math.abs((v.p - teleporter.p).R) <= c_const_get("teleporter_touchDistance") then
 				local target = teleporters[teleporter.t + 1]
 
 				if teleporter.enabled and target and v.m.target ~= teleporter then
 					for _, v in pairs(c_world_tanks) do
 						if v.exists then
-							if math.abs((v.p[1] - target.p[1]).R) <= c_const_get("world_touchDistance") then
+							if math.abs((v.p - target.p).R) <= c_const_get("world_touchDistance") then
 								return
 							end
 						end
 					end
 
 					v.m.target = target
-					tankbobs.w_setPosition(v.body, target.p[1])
-					v.p[1](tankbobs.w_getPosition(v.body))
+					tankbobs.w_setPosition(v.body, target.p)
+					v.p(tankbobs.w_getPosition(v.body))
 				end
 
 				return

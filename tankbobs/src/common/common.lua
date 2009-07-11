@@ -20,12 +20,11 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 --[[
 common.lua
 
-common lua functions
+Common functions
 --]]
 
-function common_nil(...)
-	return ...
-end
+require "libmtankbobs"
+tankbobs.t_initialize("common_interrupt", false)
 
 function common_init()
 	if jit then
@@ -33,8 +32,11 @@ function common_init()
 		require "jit.opt_inline".start()
 	end
 
-	require "libmtankbobs"
-	tankbobs.t_initialize("common_interrupt", client and not server)
+	if client and not server then
+		-- reinitialize SDL
+
+		tankbobs.t_initialize("common_interrupt", true)
+	end
 
 	c_const_init()
 
@@ -59,6 +61,8 @@ function common_init()
 
 	c_mods_init()
 	b_mods()  -- anything below this is moddable
+
+	c_class_init()
 
 	c_math_init()
 
@@ -86,6 +90,8 @@ function common_done()
 
 	c_math_init()
 
+	c_class_done()
+
 	c_mods_done()
 
 	c_config_done()
@@ -100,6 +106,10 @@ function common_done()
 end
 
 SPECIAL = {}
+
+function common_nil(...)
+	return ...
+end
 
 function common_interrupt()
 	--common_done()
@@ -287,21 +297,6 @@ function common_setField(f, v, e)
 		else
 		end
 	end
-end
-
--- for classes and inheritance
-function common_new(self, inh, o)
-	o = o or {}
-	if inh then
-		tankbobs.t_clone(inh, o, true)
-	end
-	tankbobs.t_clone(self, o, true)
-	if self.init then
-		self.init(o)
-	end
-	setmetatable(o, {__index = self})
-	self.__index = self
-	return o
 end
 
 function common_fileExists(filename)

@@ -38,7 +38,7 @@ function st_set_init()
 	local x, y = 50, 85
 
 	for _, v in pairs(c_tcm_current_sets) do
-		gui_addAction(tankbobs.m_vec2(x, y), v.title, nil, st_set_select).misc.name = v.name
+		gui_addAction(tankbobs.m_vec2(x, y), v.title, nil, st_set_select).m.name = v.name
 		y = y - 2.5
 	end
 end
@@ -72,7 +72,7 @@ function st_set_step(d)
 end
 
 function st_set_select(widget)
-	c_tcm_select_set(widget.misc.name)
+	c_tcm_select_set(widget.m.name)
 	c_state_new(level_state)
 end
 

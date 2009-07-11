@@ -80,6 +80,7 @@ extern int init;
 void t_init(lua_State *L);
 int t_initialize(lua_State *L);
 int t_quit(lua_State *L);
+int t_quitSDL(lua_State *L);
 int t_getTicks(lua_State *L);
 int t_delay(lua_State *L);
 int t_isDebug(lua_State *L);

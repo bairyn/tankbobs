@@ -190,47 +190,71 @@ function gui_done()
 	widgets = nil
 end
 
-local LABEL  = {}
-local ACTION = {}
-local CYCLE  = {}
-local INPUT  = {}
-local KEY    = {}
-local SCALE  = {}
+local GENERIC = {}
+local LABEL   = {}
+local ACTION  = {}
+local CYCLE   = {}
+local INPUT   = {}
+local KEY     = {}
+local SCALE   = {}
 
 local widget =
 {
-	new = common_new,
-
+	new  = c_class_new,
 	init = function (o)
-		o.p = tankbobs.m_vec2()
-		o.upperRightPos = tankbobs.m_vec2()
 		o.scale = 1
 		o.color.r = c_const_get("label_r") o.altColor.r = c_const_get("label_r")
 		o.color.g = c_const_get("label_g") o.altColor.g = c_const_get("label_g")
 		o.color.b = c_const_get("label_b") o.altColor.b = c_const_get("label_b")
 		o.color.a = c_const_get("label_a") o.altColor.a = c_const_get("label_a")
 	end,
+	type = GENERIC,
 
-	p = nil,
-	type = nil,
+	p = tankbobs.m_vec2(),
+	upperRightPos = tankbobs.m_vec2(),
 	text = "",
-	updateTextCallBack = nil,  -- This function called every frame.  If the function exists and returns a string, the string returned is the string to which the widget will set its text
-	upperRightPos = nil,
-
-	misc = {},
+	updateTextCallBack = nil,  -- This function called every frame.  If the function exists and returns a string, the widget's text will be set to string returned.
 
 	scale = 0,
-	color = {},
-	altColor = {},
-
+	color = {0, 0, 0, 0},
+	altColor = {0, 0, 0, 0},
 	bump = nil,
 
-	-- labels
+	setText = function (self, text)
+		self.text = tostring(text)
+	end,
 
-	-- actions
-	actionCallBack = nil,  -- either actionCallBack(currentWidget, mouseX, mouseY) or actionCallBack(currentWidget, keyButton)
+	m = {p = {}},
 
-	-- cycles
+	selectable = false
+}
+
+local label =
+{
+	new  = c_class_new,
+	type = LABEL,
+	base = widget,
+
+	selectable = false
+}
+
+local action =
+{
+	new  = c_class_new,
+	type = ACTION,
+	base = widget,
+
+	actionCallBack = nil,  -- this is called with either actionCallBack(currentWidget, mouseX, mouseY) or actionCallBack(currentWidget, keyButton)
+
+	selectable = true
+}
+
+local cycle =
+{
+	new  = c_class_new,
+	type = CYCLE,
+	base = widget,
+
 	setCyclePos = function (self, pos)
 		self.cyclePos = pos
 	end,
@@ -238,15 +262,17 @@ local widget =
 	cycleList = {},  -- a table of strings
 	cyclePos = 0,  -- which element of the table is currently selected (by key / index)
 
-	-- inputs
+	selectable = true
+}
+
+local input =
+{
+	new  = c_class_new,
+	type = INPUT,
+	base = widget,
+
 	setText = function (self, text)
-		-- this function works for non-input widgets as well
-
 		text = tostring(text)
-
-		if self.type ~= INPUT then
-			return
-		end
 
 		if #text >= 1 then
 			text = text:sub(1, self.maxLength)
@@ -256,6 +282,7 @@ local widget =
 		self.inputText = text
 		self.textPos = #text
 
+		-- Don't call change callback
 		--if self.textChangedCallBack then
 			--self:textChangedCallBack(self, self.inputText)
 		--end
@@ -266,7 +293,15 @@ local widget =
 	integerOnly = false,
 	textPos = 0,
 
-	-- keys
+	selectable = true
+}
+
+local key =
+{
+	new  = c_class_new,
+	type = KEY,
+	base = widget,
+
 	setKey = function (self, button)
 		self.button = button
 		if key then
@@ -279,11 +314,19 @@ local widget =
 			--self:keyChangedCallBack(self, self.button)
 		--end
 	end,
-	keyActive = false,  -- whether or not a key press will set the key
+	keyActive = false,  -- whether or not a key press will set this key
 	keyChangedCallBack = nil,
 	button = nil,
 
-	-- scales (0-1)
+	selectable = true
+}
+
+local scale =
+{
+	new  = c_class_new,
+	type = KEY,
+	base = widget,
+
 	setScalePos = function (self, pos)
 		if pos < 0 then
 			pos = 0
@@ -297,13 +340,13 @@ local widget =
 			--self:scaleChangedCallBack(self, self.scalePos)
 		--end
 	end,
-	scalePos = 0,
+	scalePos = 0,  -- 0-1
 	scaleChangedCallBack = nil,
 	scaleMouseOffset = 0,
 	scaleActive = false,
 	scaleLength = nil,
 
-	selectable = false
+	selectable = true
 }
 
 function gui_finish()
@@ -315,7 +358,7 @@ end
 -- * gui_addWidget returns a handle to the widget (strictly speaking, the widget itself) which can be used with callbacks
 --]]--
 function gui_addLabel(position, text, updateTextCallBack, scale, color_r, color_g, color_b, color_a, altColor_r, altColor_g, altColor_b, altColor_a)
-	local label = widget:new()
+	local label = label:new()
 
 	label.type = LABEL
 	label.selectable = false  -- labels aren't selectable
@@ -336,7 +379,7 @@ function gui_addLabel(position, text, updateTextCallBack, scale, color_r, color_
 end
 
 function gui_addAction(position, text, updateTextCallBack, actionCallBack, scale, color_r, color_g, color_b, color_a, altColor_r, altColor_g, altColor_b, altColor_a)
-	local action = widget:new()
+	local action = action:new()
 
 	action.type = ACTION
 	action.selectable = true
@@ -358,7 +401,7 @@ function gui_addAction(position, text, updateTextCallBack, actionCallBack, scale
 end
 
 function gui_addCycle(position, text, updateTextCallBack, cycleCallBack, cycleList, initialCycleIndex, scale, color_r, color_g, color_b, color_a, altColor_r, altColor_g, altColor_b, altColor_a)
-	local cycle = widget:new()
+	local cycle = cycle:new()
 
 	cycle.type = CYCLE
 	cycle.selectable = true
@@ -382,7 +425,7 @@ function gui_addCycle(position, text, updateTextCallBack, cycleCallBack, cycleLi
 end
 
 function gui_addInput(position, text, updateTextCallBack, textChangedCallBack, integerOnly, maxLength, scale, color_r, color_g, color_b, color_a, altColor_r, altColor_g, altColor_b, altColor_a)
-	local input = widget:new()
+	local input = input:new()
 
 	input.type = INPUT
 	input.selectable = true
@@ -408,7 +451,7 @@ function gui_addInput(position, text, updateTextCallBack, textChangedCallBack, i
 end
 
 function gui_addKey(position, text, updateTextCallBack, keyChangedCallBack, initialButton, scale, color_r, color_g, color_b, color_a, altColor_r, altColor_g, altColor_b, altColor_a)
-	local key = widget:new()
+	local key = key:new()
 
 	key.type = KEY
 	key.selectable = true
@@ -431,7 +474,7 @@ function gui_addKey(position, text, updateTextCallBack, keyChangedCallBack, init
 end
 
 function gui_addScale(position, text, updateTextCallBack, scaleChangedCallBack, initialPos, length, scale_, color_r, color_g, color_b, color_a, altColor_r, altColor_g, altColor_b, altColor_a)
-	local scale = widget:new()
+	local scale = scale:new()
 
 	scale.type = SCALE
 	scale.selectable = true

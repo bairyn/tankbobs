@@ -37,7 +37,7 @@ function st_level_init()
 
 	local x, y = 50, 75
 	for _, v in pairs(c_tcm_current_set.maps) do
-		gui_addAction(tankbobs.m_vec2(x, y), v.title, nil, st_level_select).misc.name = v.name
+		gui_addAction(tankbobs.m_vec2(x, y), v.title, nil, st_level_select).m.name = v.name
 		y = y - 5
 	end
 end
@@ -71,7 +71,7 @@ function st_level_step(d)
 end
 
 function st_level_select(widget)
-	c_tcm_select_map(widget.misc.name)
+	c_tcm_select_map(widget.m.name)
 	c_state_new(selected_state)
 end
 

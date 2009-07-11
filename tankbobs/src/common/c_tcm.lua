@@ -157,7 +157,7 @@ end
 
 c_tcm_set =
 {
-	new = common_new,
+	new = c_class_new,
 
 	maps = {},  -- table of maps.  All maps are loaded once
 	name = "",  -- internal name.
@@ -167,7 +167,7 @@ c_tcm_set =
 
 c_tcm_map =
 {
-	new = common_new,
+	new = c_class_new,
 
 	map = "",  -- the filename
 
@@ -201,25 +201,26 @@ c_tcm_map =
 	leftmost = 0
 }
 
+c_tcm_entity =
+{
+	new = c_class_new,
+
+	p = tankbobs.m_vec2(),
+
+	m = {p = {}}  -- extra data (data not in tcm; eg position if on a path)
+}
+
 c_tcm_wall =
 {
-	new = common_new,
-
+	new  = c_class_new,
+	base = c_tcm_entity,
 	init = function (o)
-		o.p[1] = tankbobs.m_vec2()
-		o.p[2] = tankbobs.m_vec2()
-		o.p[3] = tankbobs.m_vec2()
-		o.p[4] = tankbobs.m_vec2()
-		o.t[1] = tankbobs.m_vec2()
-		o.t[2] = tankbobs.m_vec2()
-		o.t[3] = tankbobs.m_vec2()
-		o.t[4] = tankbobs.m_vec2()
 		o.l = c_const_get("tcm_tankLevel")
 	end,
 
 	id = 0,
-	p = {},
-	t = {},
+	p = {tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2()},  -- walls have 4 (or 3) positions
+	t = {tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2()},
 	texture = "",
 	detail = false,
 	static = false,
@@ -227,103 +228,65 @@ c_tcm_wall =
 
 	pid = 0,
 	path = false,
-
-	m = {p = {}}  -- extra data (data not in tcm; eg position if on a path)
 }
 
 c_tcm_teleporter =
 {
-	new = common_new,
-
-	init = function (o)
-		o.p[1] = tankbobs.m_vec2()
-	end,
+	new  = c_class_new,
+	base = c_tcm_entity,
 
 	id = 0,
 	t = 0,
-	p = {},
-
-	m = {p = {}}  -- extra data
 }
 
 c_tcm_playerSpawnPoint =
 {
-	new = common_new,
-
-	init = function (o)
-		o.p[1] = tankbobs.m_vec2()
-	end,
+	new  = c_class_new,
+	base = c_tcm_entity,
 
 	id = 0,
-	p = {},
-
-	m = {p = {}}  -- extra data
 }
 
 c_tcm_powerupSpawnPoint =
 {
-	new = common_new,
-
-	init = function (o)
-		o.p[1] = tankbobs.m_vec2()
-	end,
+	new  = c_class_new,
+	base = c_tcm_entity,
 
 	id = 0,
-	p = {},
 	enabledPowerups = {},
 	linked = false,  -- powerups will spawn in order
 	["repeat"] = 0,  -- time between each powerup
 	initial = 0,  -- initial time before first powerup
 	focus = false,  -- focus the camera on spawned powerup
-
-	m = {p = {}}  -- extra data
 }
 
 c_tcm_path =
 {
-	new = common_new,
-
-	init = function (o)
-		o.p[1] = tankbobs.m_vec2()
-	end,
+	new  = c_class_new,
+	base = c_tcm_entity,
 
 	id = 0,
-	p = {},
 	t = 0,
 	time = 0,
 	enabled = false,
-
-	m = {p = {}}  -- extra data
 }
 
 c_tcm_controlPoint =
 {
-	new = common_new,
-
-	init = function (o)
-		o.p[1] = tankbobs.m_vec2()
-	end,
+	new  = c_class_new,
+	base = c_tcm_entity,
 
 	id = 0,
-	p = {},
-	red = 0,
-
-	m = {p = {}}  -- extra data
+	red = false,
 }
 
 c_tcm_flag =
 {
-	new = common_new,
-
-	init = function (o)
-		o.p[1] = tankbobs.m_vec2()
-	end,
+	new  = c_class_new,
+	base = c_tcm_entity,
 
 	id = 0,
-	p = {},
-	red = 0,
-
-	m = {p = {}}  -- extra data
+	red = false,
 }
 
 function c_tcm_read_sets(dir, t)
@@ -574,8 +537,8 @@ function c_tcm_read_map(map)
 
 		teleporter.id = c_tcm_private_get(tankbobs.io_getInt, i)
 		teleporter.t = c_tcm_private_get(tankbobs.io_getInt, i)
-		teleporter.p[1].x = c_tcm_private_get(tankbobs.io_getDouble, i)
-		teleporter.p[1].y = c_tcm_private_get(tankbobs.io_getDouble, i)
+		teleporter.p.x = c_tcm_private_get(tankbobs.io_getDouble, i)
+		teleporter.p.y = c_tcm_private_get(tankbobs.io_getDouble, i)
 		if c_tcm_private_get(tankbobs.io_getChar, i) ~= 0 then
 			teleporter.enabled = true
 		else
@@ -589,8 +552,8 @@ function c_tcm_read_map(map)
 		local playerSpawnPoint = c_tcm_playerSpawnPoint:new()
 
 		playerSpawnPoint.id = c_tcm_private_get(tankbobs.io_getInt, i)
-		playerSpawnPoint.p[1].x = c_tcm_private_get(tankbobs.io_getDouble, i)
-		playerSpawnPoint.p[1].y = c_tcm_private_get(tankbobs.io_getDouble, i)
+		playerSpawnPoint.p.x = c_tcm_private_get(tankbobs.io_getDouble, i)
+		playerSpawnPoint.p.y = c_tcm_private_get(tankbobs.io_getDouble, i)
 
 		table.insert(r.playerSpawnPoints, playerSpawnPoint)
 	end
@@ -599,8 +562,8 @@ function c_tcm_read_map(map)
 		local powerupSpawnPoint = c_tcm_powerupSpawnPoint:new()
 
 		powerupSpawnPoint.id = c_tcm_private_get(tankbobs.io_getInt, i)
-		powerupSpawnPoint.p[1].x = c_tcm_private_get(tankbobs.io_getDouble, i)
-		powerupSpawnPoint.p[1].y = c_tcm_private_get(tankbobs.io_getDouble, i)
+		powerupSpawnPoint.p.x = c_tcm_private_get(tankbobs.io_getDouble, i)
+		powerupSpawnPoint.p.y = c_tcm_private_get(tankbobs.io_getDouble, i)
 
 		local powerups = {}
 		for it = 1, 16 do  -- the format includes 16 ints for different powerup possibilities
@@ -678,8 +641,8 @@ function c_tcm_read_map(map)
 		local path = c_tcm_path:new()
 
 		path.id = c_tcm_private_get(tankbobs.io_getInt, i)
-		path.p[1].x = c_tcm_private_get(tankbobs.io_getDouble, i)
-		path.p[1].y = c_tcm_private_get(tankbobs.io_getDouble, i)
+		path.p.x = c_tcm_private_get(tankbobs.io_getDouble, i)
+		path.p.y = c_tcm_private_get(tankbobs.io_getDouble, i)
 		if c_tcm_private_get(tankbobs.io_getChar, i) ~= 0 then
 			path.enabled = true
 		else
@@ -695,8 +658,8 @@ function c_tcm_read_map(map)
 		local controlPoint = c_tcm_flag:new()
 
 		controlPoint.id = c_tcm_private_get(tankbobs.io_getInt, i)
-		controlPoint.p[1].x = c_tcm_private_get(tankbobs.io_getDouble, i)
-		controlPoint.p[1].y = c_tcm_private_get(tankbobs.io_getDouble, i)
+		controlPoint.p.x = c_tcm_private_get(tankbobs.io_getDouble, i)
+		controlPoint.p.y = c_tcm_private_get(tankbobs.io_getDouble, i)
 		if c_tcm_private_get(tankbobs.io_getChar, i) ~= 0 then
 			controlPoint.red = true
 		else
@@ -710,8 +673,8 @@ function c_tcm_read_map(map)
 		local flag = c_tcm_flag:new()
 
 		flag.id = c_tcm_private_get(tankbobs.io_getInt, i)
-		flag.p[1].x = c_tcm_private_get(tankbobs.io_getDouble, i)
-		flag.p[1].y = c_tcm_private_get(tankbobs.io_getDouble, i)
+		flag.p.x = c_tcm_private_get(tankbobs.io_getDouble, i)
+		flag.p.y = c_tcm_private_get(tankbobs.io_getDouble, i)
 		if c_tcm_private_get(tankbobs.io_getChar, i) ~= 0 then
 			flag.red = true
 		else

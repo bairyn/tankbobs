@@ -110,6 +110,15 @@ int t_quit(lua_State *L)
 	return 0;
 }
 
+int t_quitSDL(lua_State *L)
+{
+	CHECKINIT(init, L);
+
+	SDL_Quit();
+
+	return 0;
+}
+
 int t_getTicks(lua_State *L)
 {
 	CHECKINIT(init, L);
@@ -573,7 +582,8 @@ static const struct luaL_Reg tankbobs[] =
 			SIGINT is emitted.  If the second argument is true, the extra
 			sub-systems of SDL are initialized (AUDIO and VIDEO). */
 	{"t_quit", t_quit}, /* clean up */
-		/* no args, no returns, quits general module */
+		/* no args, no returns, quits Tankbobs module */
+	{"t_quitSDL", t_quitSDL}, /* quit SDL */
 	{"t_getTicks", t_getTicks}, /* SDL_GetTicks() */
 		/* no args, 1st and only return value is number of milliseconds since
 			app start */

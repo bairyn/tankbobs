@@ -415,30 +415,7 @@ end
 
 c_weapon =
 {
-	new = common_new,
-
-	init = function (o)
-		o.texturer[1] = tankbobs.m_vec2()
-		o.texturer[2] = tankbobs.m_vec2()
-		o.texturer[3] = tankbobs.m_vec2()
-		o.texturer[4] = tankbobs.m_vec2()
-		o.render[1] = tankbobs.m_vec2()
-		o.render[2] = tankbobs.m_vec2()
-		o.render[3] = tankbobs.m_vec2()
-		o.render[4] = tankbobs.m_vec2()
-		o.projectileHull[1] = tankbobs.m_vec2()
-		o.projectileHull[2] = tankbobs.m_vec2()
-		o.projectileHull[3] = tankbobs.m_vec2()
-		o.projectileHull[4] = tankbobs.m_vec2()
-		o.projectileTexturer[1] = tankbobs.m_vec2()
-		o.projectileTexturer[2] = tankbobs.m_vec2()
-		o.projectileTexturer[3] = tankbobs.m_vec2()
-		o.projectileTexturer[4] = tankbobs.m_vec2()
-		o.projectileRender[1] = tankbobs.m_vec2()
-		o.projectileRender[2] = tankbobs.m_vec2()
-		o.projectileRender[3] = tankbobs.m_vec2()
-		o.projectileRender[4] = tankbobs.m_vec2()
-	end,
+	new = c_class_new,
 
 	index = 0,
 	name = "",
@@ -460,8 +437,8 @@ c_weapon =
 	texture = "",
 	fireSound = "",
 
-	texturer = {},
-	render = {},
+	texturer = {tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2()},
+	render = {tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2()},
 
 	-- projectiles
 	projectileDensity = 0,
@@ -471,22 +448,18 @@ c_weapon =
 
 	projectileTexture = "",
 
-	projectileHull = {},
-	projectileTexturer = {},
-	projectileRender = {},
+	projectileHull = {tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2()},
+	projectileTexturer = {tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2()},
+	projectileRender = {tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2()},
 
 	m = {p = {}}
 }
 
 c_weapon_projectile =
 {
-	new = common_new,
+	new = c_class_new,
 
-	init = function (o)
-		o.p[1] = tankbobs.m_vec2()
-	end,
-
-	p = {},
+	p = tankbobs.m_vec2(),
 	weapon = nil,  -- type of the weapon which created the bolt
 	r = 0,  -- rotation
 	collided = false,  -- whether it needs to be removed
@@ -565,13 +538,13 @@ function c_weapon_fire(tank)
 
 		vec.t = tank.r + angle
 		vec.R = weapon.launchDistance
-		projectile.p[1](tank.p[1] + vec)
+		projectile.p(tank.p + vec)
 
 		projectile.owner = tank
 
 		projectile.r = vec.t
 
-		projectile.m.body = tankbobs.w_addBody(projectile.p[1], projectile.r, c_const_get("projectile_canSleep"), c_const_get("projectile_isBullet"), c_const_get("projectile_linearDamping"), c_const_get("projectile_angularDamping"), weapon.projectileHull, weapon.projectileDensity, c_const_get("projectile_friction"), weapon.projectileRestitution, true)
+		projectile.m.body = tankbobs.w_addBody(projectile.p, projectile.r, c_const_get("projectile_canSleep"), c_const_get("projectile_isBullet"), c_const_get("projectile_linearDamping"), c_const_get("projectile_angularDamping"), weapon.projectileHull, weapon.projectileDensity, c_const_get("projectile_friction"), weapon.projectileRestitution, true)
 		vec.R = weapon.speed
 		tankbobs.w_setLinearVelocity(projectile.m.body, vec)
 
