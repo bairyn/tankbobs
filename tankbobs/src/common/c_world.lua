@@ -1538,7 +1538,9 @@ local function c_world_private_resetWorldTimers()
 	end
 
 	for _, v in pairs(c_tcm_current_map.controlPoints) do
-		v.m.nextPointTime = t
+		if v.m.nextPointTime then
+			v.m.nextPointTime = t
+		end
 	end
 
 	lastPowerupSpawnTime = nil
