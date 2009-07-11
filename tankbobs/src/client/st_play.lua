@@ -511,6 +511,17 @@ local function play_drawWorld(d)
 			gl.PopMatrix()
 		end
 
+		-- draw tank names
+		for _, v in pairs(c_world_getTanks()) do
+			if v.exists then
+				-- draw name
+				gl.PushMatrix()
+					gl.Translate(v.p[1].x, v.p[1].y, 0)
+					tankbobs.r_drawString(v.name, c_const_get("tank_nameOffset"), v.color.r, v.color.g, v.color.b, c_config_get("config.game.scoresAlpha"), c_const_get("tank_nameScalex"), c_const_get("tank_nameScaley"), false)
+				gl.PopMatrix()
+			end
+		end
+
 		-- healthbars
 		for k, v in pairs(c_world_getTanks()) do
 			if v.exists then
@@ -694,18 +705,6 @@ function st_play_step(d)
 		gl.Translate(camera.x, camera.y, 0)
 		play_drawWorld(d)
 	gl.PopMatrix()
-
-	-- draw tank names
-	for _, v in pairs(c_world_getTanks()) do
-		if v.exists then
-			-- draw name
-			gl.PushMatrix()
-				gl.Translate(v.p[1].x, v.p[1].y, 0)
-				tankbobs.r_drawString(v.name, c_const_get("tank_nameOffset"), v.color.r, v.color.g, v.color.b, c_config_get("config.game.scoresAlpha"), c_const_get("tank_nameScalex"), c_const_get("tank_nameScaley"), false)
-			gl.PopMatrix()
-		end
-	end
-
 
 	-- scores, FPS, rest of HUD, etc.
 	gui_paint(d)
