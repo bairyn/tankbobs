@@ -589,7 +589,7 @@ int r_drawString(lua_State *L)
 
 				memset(fc, 0, sizeof(r_fontCache_t));
 
-				break;
+				/* break; */
 			}
 		}
 	}
@@ -611,7 +611,7 @@ int r_drawString(lua_State *L)
 
 				memset(fc, 0, sizeof(r_fontCache_t));
 
-				break;
+				/* break; */
 			}
 		}
 	}

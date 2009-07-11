@@ -798,5 +798,21 @@ function c_tcm_unload_extra_data(clearPersitant)
 				v.m.p = pers
 			end
 		end
+
+		for _, v in pairs(c_tcm_current_map.controlPoints) do
+			local pers = v.m.p
+			v.m = {p = {}}
+			if not clearPersistant then
+				v.m.p = pers
+			end
+		end
+
+		for _, v in pairs(c_tcm_current_map.flags) do
+			local pers = v.m.p
+			v.m = {p = {}}
+			if not clearPersistant then
+				v.m.p = pers
+			end
+		end
 	end
 end
