@@ -802,7 +802,6 @@ function gui_click(button, pressed, x, y)
 							v.scaleMouseOffset = x - centerStart
 							v.scaleActive = true
 						end
-return
 					end
 				end
 			end
