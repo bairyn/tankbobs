@@ -309,6 +309,7 @@ function st_play_mouse(x, y, xrel, yrel)
 end
 
 local a = {{0, 0}, {0, 0}}  -- aim-aid table
+local m = {{0, 0}, {0, 0}}  -- ammobar table
 local w, t = {{0, 0}, {0, 0}, {0, 0}, {0, 0}}, {{0, 0}, {0, 0}, {0, 0}, {0, 0}}
 local function play_drawWorld(d)
 	gl.PushMatrix()
@@ -570,9 +571,48 @@ local function play_drawWorld(d)
 						gl.Color(1, 1, 1, 1)
 						gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, 1)
 						gl.CallList(ammobarBorder_listBase)
-						gl.Color(c_const_get("ammobar_r"), c_const_get("ammobar_g"), c_const_get("ammobar_b"), c_const_get("ammobarar"))
+						gl.Color(c_const_get("ammobar_r"), c_const_get("ammobar_g"), c_const_get("ammobar_b"), c_const_get("ammobar_a"))
 						gl.TexEnv("TEXTURE_ENV_COLOR", c_const_get("ammobar_r"), c_const_get("ammobar_g"), c_const_get("ammobar_b"), c_const_get("ammobar_a"))
-						-- TODO
+						gl.PushMatrix()
+							gl.PushAttrib("ENABLE_BIT")
+								gl.Disable("TEXTURE_2D")
+								gl.Translate((c_const_get("ammobarBorder_renderx1") + c_const_get("ammobarBorder_renderx2")) / 2, c_const_get("ammobarBorder_rendery1"), 0)
+								gl.Scale(c_const_get("ammobarBorder_renderx4") - c_const_get("ammobarBorder_renderx1"), 1, 1)
+
+								local height = c_const_get("ammobarBorder_rendery2") - c_const_get("ammobarBorder_rendery1")
+
+								gl.EnableClientState("VERTEX_ARRAY")
+									local ammo = v.ammo
+									local capacity = v.weapon.capacity
+									local spacing = 0.1 * (3 / capacity)
+
+									local x = 0
+									local xp = x
+									for i = 1, capacity do
+										for j = 0, 3 do
+											if not m[i * 4 - j] then
+												m[i * 4 - j] = {0, 0}
+											end
+										end
+
+										xp = x
+										x = x - spacing + 1 / capacity
+
+										if i <= ammo then
+											m[i * 4 - 3][1], m[i * 4 - 3][2] = xp, height
+											m[i * 4 - 2][1], m[i * 4 - 2][2] = xp, 0
+											m[i * 4 - 1][1], m[i * 4 - 1][2] = x, 0
+											m[i * 4 - 0][1], m[i * 4 - 0][2] = x, height
+										end
+
+										x = x + spacing
+									end
+
+									gl.VertexPointer(m)
+									gl.DrawArrays("QUADS", 0, 4 * ammo)
+								gl.DisableClientState("VERTEX_ARRAY")
+							gl.PopAttrib()
+						gl.PopMatrix()
 					end
 
 					gl.Color(v.color.r, v.color.g, v.color.b, 1)
