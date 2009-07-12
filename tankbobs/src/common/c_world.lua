@@ -514,6 +514,7 @@ function c_world_tank_die(tank, t)
 		-- drop flag
 		tank.m.flag.m.pos = tankbobs.m_vec2(tank.p)
 		tank.m.flag.m.dropped = true
+		tank.m.flag = nil
 	end
 
 	tank.nextSpawnTime = t + c_const_get("world_time") * c_config_get("config.game.timescale") * c_const_get("tank_spawnTime")
