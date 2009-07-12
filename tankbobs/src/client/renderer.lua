@@ -32,8 +32,10 @@ local tankShield_textures
 local powerup_textures
 local healthbar_texture 
 local healthbarBorder_texture 
+local ammobarBorder_texture 
 local controlPoint_texture
 local flag_texture
+local flagBase_texture
 
 function renderer_init()
 	--tankbobs = _G.tankbobs
@@ -72,6 +74,11 @@ function renderer_init()
 	c_const_set("tank_nameScaley", 1 / 33, 1)
 
 	tankbobs.r_selectFont(c_config_get("config.font"))
+
+	c_const_set("ammobar_r", 0.1, 1)
+	c_const_set("ammobar_g", 0.1, 1)
+	c_const_set("ammobar_b", 0.1, 1)
+	c_const_set("ammobar_a", 1.0, 1)
 
 	c_const_set("tank_renderx1", -2.0, 1) c_const_set("tank_rendery1",  2.0, 1)
 	c_const_set("tank_renderx2", -2.0, 1) c_const_set("tank_rendery2", -2.0, 1)
@@ -207,7 +214,7 @@ function renderer_init()
 	gl.EndList()
 
 	controlPoint_listBase = gl.GenLists(1)
-	controlPoint_textures = gl.GenTextures(1)
+	controlPoint_texture = gl.GenTextures(1)
 
 	if controlPoint_listBase == 0 then
 		error "st_play_init: could not generate lists"
@@ -224,7 +231,7 @@ function renderer_init()
 
 	c_const_set("controlPoint_rotation", -math.pi / 2, 1)
 
-	gl.BindTexture("TEXTURE_2D", controlPoint_textures[1])
+	gl.BindTexture("TEXTURE_2D", controlPoint_texture[1])
 	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_S", "REPEAT")
 	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_T", "REPEAT")
 	gl.TexParameter("TEXTURE_2D", "TEXTURE_MIN_FILTER", "LINEAR")
@@ -233,7 +240,7 @@ function renderer_init()
 
 	gl.NewList(controlPoint_listBase, "COMPILE")
 		gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
-		gl.BindTexture("TEXTURE_2D", controlPoint_textures[1])
+		gl.BindTexture("TEXTURE_2D", controlPoint_texture[1])
 		gl.Begin("QUADS")
 			gl.TexCoord(c_const_get("controlPoint_texturex1"), c_const_get("controlPoint_texturey1")) gl.Vertex(c_const_get("controlPoint_renderx1"), c_const_get("controlPoint_rendery1"))
 			gl.TexCoord(c_const_get("controlPoint_texturex2"), c_const_get("controlPoint_texturey2")) gl.Vertex(c_const_get("controlPoint_renderx2"), c_const_get("controlPoint_rendery2"))
@@ -243,22 +250,22 @@ function renderer_init()
 	gl.EndList()
 
 	flag_listBase = gl.GenLists(1)
-	flag_textures = gl.GenTextures(1)
+	flag_texture = gl.GenTextures(1)
 
 	if flag_listBase == 0 then
 		error "st_play_init: could not generate lists"
 	end
 
-	c_const_set("flag_renderx1",  -1, 1) c_const_set("flag_rendery1",  2, 1)
-	c_const_set("flag_renderx2",  -1, 1) c_const_set("flag_rendery2",  -2, 1)
-	c_const_set("flag_renderx3",  1, 1) c_const_set("flag_rendery3",  -2, 1)
-	c_const_set("flag_renderx4",  1, 1) c_const_set("flag_rendery4",  2, 1)
+	c_const_set("flag_renderx1",  -1, 1) c_const_set("flag_rendery1",  -2, 1)
+	c_const_set("flag_renderx2",  -1, 1) c_const_set("flag_rendery2",  2, 1)
+	c_const_set("flag_renderx3",  1, 1) c_const_set("flag_rendery3",  2, 1)
+	c_const_set("flag_renderx4",  1, 1) c_const_set("flag_rendery4",  -2, 1)
 	c_const_set("flag_texturex1", 0, 1) c_const_set("flag_texturey1", 1, 1)
 	c_const_set("flag_texturex2", 0, 1) c_const_set("flag_texturey2", 0, 1)
 	c_const_set("flag_texturex3", 1, 1) c_const_set("flag_texturey3", 0, 1)
 	c_const_set("flag_texturex4", 1, 1) c_const_set("flag_texturey4", 1, 1)
 
-	gl.BindTexture("TEXTURE_2D", flag_textures[1])
+	gl.BindTexture("TEXTURE_2D", flag_texture[1])
 	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_S", "REPEAT")
 	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_T", "REPEAT")
 	gl.TexParameter("TEXTURE_2D", "TEXTURE_MIN_FILTER", "LINEAR")
@@ -267,12 +274,46 @@ function renderer_init()
 
 	gl.NewList(flag_listBase, "COMPILE")
 		gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
-		gl.BindTexture("TEXTURE_2D", flag_textures[1])
+		gl.BindTexture("TEXTURE_2D", flag_texture[1])
 		gl.Begin("QUADS")
 			gl.TexCoord(c_const_get("flag_texturex1"), c_const_get("flag_texturey1")) gl.Vertex(c_const_get("flag_renderx1"), c_const_get("flag_rendery1"))
 			gl.TexCoord(c_const_get("flag_texturex2"), c_const_get("flag_texturey2")) gl.Vertex(c_const_get("flag_renderx2"), c_const_get("flag_rendery2"))
 			gl.TexCoord(c_const_get("flag_texturex3"), c_const_get("flag_texturey3")) gl.Vertex(c_const_get("flag_renderx3"), c_const_get("flag_rendery3"))
 			gl.TexCoord(c_const_get("flag_texturex4"), c_const_get("flag_texturey4")) gl.Vertex(c_const_get("flag_renderx4"), c_const_get("flag_rendery4"))
+		gl.End()
+	gl.EndList()
+
+	flagBase_listBase = gl.GenLists(1)
+	flagBase_texture = gl.GenTextures(1)
+
+	if flagBase_listBase == 0 then
+		error "st_play_init: could not generate lists"
+	end
+
+	c_const_set("flagBase_renderx1",  -2, 1) c_const_set("flagBase_rendery1",  2, 1)
+	c_const_set("flagBase_renderx2",  -2, 1) c_const_set("flagBase_rendery2",  -2, 1)
+	c_const_set("flagBase_renderx3",  2, 1) c_const_set("flagBase_rendery3",  -2, 1)
+	c_const_set("flagBase_renderx4",  2, 1) c_const_set("flagBase_rendery4",  2, 1)
+	c_const_set("flagBase_texturex1", 0, 1) c_const_set("flagBase_texturey1", 1, 1)
+	c_const_set("flagBase_texturex2", 0, 1) c_const_set("flagBase_texturey2", 0, 1)
+	c_const_set("flagBase_texturex3", 1, 1) c_const_set("flagBase_texturey3", 0, 1)
+	c_const_set("flagBase_texturex4", 1, 1) c_const_set("flagBase_texturey4", 1, 1)
+
+	gl.BindTexture("TEXTURE_2D", flagBase_texture[1])
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_S", "REPEAT")
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_T", "REPEAT")
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_MIN_FILTER", "LINEAR")
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_MAG_FILTER", "LINEAR")
+	tankbobs.r_loadImage2D(c_const_get("flagBase"), c_const_get("textures_default"))
+
+	gl.NewList(flagBase_listBase, "COMPILE")
+		gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
+		gl.BindTexture("TEXTURE_2D", flagBase_texture[1])
+		gl.Begin("QUADS")
+			gl.TexCoord(c_const_get("flagBase_texturex1"), c_const_get("flagBase_texturey1")) gl.Vertex(c_const_get("flagBase_renderx1"), c_const_get("flagBase_rendery1"))
+			gl.TexCoord(c_const_get("flagBase_texturex2"), c_const_get("flagBase_texturey2")) gl.Vertex(c_const_get("flagBase_renderx2"), c_const_get("flagBase_rendery2"))
+			gl.TexCoord(c_const_get("flagBase_texturex3"), c_const_get("flagBase_texturey3")) gl.Vertex(c_const_get("flagBase_renderx3"), c_const_get("flagBase_rendery3"))
+			gl.TexCoord(c_const_get("flagBase_texturex4"), c_const_get("flagBase_texturey4")) gl.Vertex(c_const_get("flagBase_renderx4"), c_const_get("flagBase_rendery4"))
 		gl.End()
 	gl.EndList()
 
@@ -327,8 +368,10 @@ function renderer_init()
 
 	healthbar_listBase = gl.GenLists(1)
 	healthbarBorder_listBase = gl.GenLists(1)
+	ammobarBorder_listBase = gl.GenLists(1)
 	healthbar_texture = gl.GenTextures(1)
 	healthbarBorder_texture = gl.GenTextures(1)
+	ammobarBorder_texture = gl.GenTextures(1)
 
 	gl.BindTexture("TEXTURE_2D", healthbar_texture[1])
 	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_S", "REPEAT")
@@ -341,7 +384,13 @@ function renderer_init()
 	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_T", "REPEAT")
 	gl.TexParameter("TEXTURE_2D", "TEXTURE_MIN_FILTER", "LINEAR")
 	gl.TexParameter("TEXTURE_2D", "TEXTURE_MAG_FILTER", "LINEAR")
-	tankbobs.r_loadImage2D(c_const_get("healthbarBorder_texture"), c_const_get("texturesBorder_default"))
+	tankbobs.r_loadImage2D(c_const_get("healthbarBorder_texture"), c_const_get("textures_default"))
+	gl.BindTexture("TEXTURE_2D", ammobarBorder_texture[1])
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_S", "REPEAT")
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_T", "REPEAT")
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_MIN_FILTER", "LINEAR")
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_MAG_FILTER", "LINEAR")
+	tankbobs.r_loadImage2D(c_const_get("ammobarBorder_texture"), c_const_get("textures_default"))
 
 	c_const_set("healthbar_renderx1", -0.875, 1) c_const_set("healthbar_rendery1", -2.875, 1)
 	c_const_set("healthbar_renderx2", -0.875, 1) c_const_set("healthbar_rendery2", -2.5, 1)
@@ -359,6 +408,14 @@ function renderer_init()
 	c_const_set("healthbarBorder_texturex2", 0, 1) c_const_set("healthbarBorder_texturey2", 0, 1)
 	c_const_set("healthbarBorder_texturex3", 1, 1) c_const_set("healthbarBorder_texturey3", 0, 1)
 	c_const_set("healthbarBorder_texturex4", 1, 1) c_const_set("healthbarBorder_texturey4", 1, 1)
+	c_const_set("ammobarBorder_renderx1", -1, 1) c_const_set("ammobarBorder_rendery1", -4, 1)
+	c_const_set("ammobarBorder_renderx2", -1, 1) c_const_set("ammobarBorder_rendery2", -3.25, 1)
+	c_const_set("ammobarBorder_renderx3",  1, 1) c_const_set("ammobarBorder_rendery3", -3.25, 1)
+	c_const_set("ammobarBorder_renderx4",  1, 1) c_const_set("ammobarBorder_rendery4", -4, 1)
+	c_const_set("ammobarBorder_texturex1", 0, 1) c_const_set("ammobarBorder_texturey1", 1, 1)
+	c_const_set("ammobarBorder_texturex2", 0, 1) c_const_set("ammobarBorder_texturey2", 0, 1)
+	c_const_set("ammobarBorder_texturex3", 1, 1) c_const_set("ammobarBorder_texturey3", 0, 1)
+	c_const_set("ammobarBorder_texturex4", 1, 1) c_const_set("ammobarBorder_texturey4", 1, 1)
 	c_const_set("healthbar_rotation", 270, 1)
 
 	gl.NewList(healthbar_listBase, "COMPILE")
@@ -384,6 +441,18 @@ function renderer_init()
 			end
 		gl.End()
 	gl.EndList()
+
+	gl.NewList(ammobarBorder_listBase, "COMPILE")
+		gl.BindTexture("TEXTURE_2D", ammobarBorder_texture[1])
+		gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
+
+		gl.Begin("QUADS")
+			for i = 1, 4 do
+				gl.TexCoord(c_const_get("ammobarBorder_texturex" .. i), c_const_get("ammobarBorder_texturey" .. i))
+				gl.Vertex(c_const_get("ammobarBorder_renderx" .. i), c_const_get("ammobarBorder_rendery" .. i))
+			end
+		gl.End()
+	gl.EndList()
 end
 
 function renderer_done()
@@ -396,10 +465,16 @@ function renderer_done()
 	gl.DeleteLists(tank_listBase, 1)
 	gl.DeleteLists(tankBorder_listBase, 1)
 	gl.DeleteLists(powerup_listBase, 1)
+	gl.DeleteLists(controlPoint_listBase, 1)
+	gl.DeleteLists(flag_listBase, 1)
+	gl.DeleteLists(flagBase_listBase, 1)
 
 	gl.DeleteTextures(tank_textures)
 	gl.DeleteTextures(tankBorder_textures)
 	gl.DeleteTextures(powerup_textures)
+	gl.DeleteTextures(controlPoint_texture)
+	gl.DeleteTextures(flag_texture)
+	gl.DeleteTextures(flagBase_texture)
 
 	for _, v in pairs(c_weapon_getWeapons()) do
 		gl.DeleteLists(v.m.p.list, 1)
@@ -410,8 +485,10 @@ function renderer_done()
 
 	gl.DeleteLists(healthbar_listBase, 1)
 	gl.DeleteLists(healthbarBorder_listBase, 1)
+	gl.DeleteLists(ammobarBorder_listBase, 1)
 	gl.DeleteTextures(healthbar_texture)
 	gl.DeleteTextures(healthbarBorder_texture)
+	gl.DeleteTextures(ammobarBorder_texture)
 
 	c_weapon_clear(true)
 end

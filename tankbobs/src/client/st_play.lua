@@ -467,6 +467,37 @@ local function play_drawWorld(d)
 					gl.CallList(controlPoint_listBase)
 				gl.PopMatrix()
 			end
+		elseif c_config_get("config.game.gameType") == "capturetheflag" then
+			for _, v in pairs(c_tcm_current_map.flags) do
+				local color
+
+				if v.red then
+					color = c_const_get("color_red")
+				else
+					color = c_const_get("color_blue")
+				end
+
+				gl.Color(color[1], color[2], color[3], color[4])
+				gl.TexEnv("TEXTURE_ENV_COLOR", color[1], color[2], color[3], color[4])
+
+				-- draw base
+				gl.PushMatrix()
+					gl.Translate(v.p.x, v.p.y, 0)
+					gl.CallList(flagBase_listBase)
+				gl.PopMatrix()
+
+				-- draw flag
+				gl.PushMatrix()
+					if v.m.dropped then
+						gl.Translate(v.m.pos.x, v.m.pos.y, 0)
+					elseif v.m.stolen then
+						gl.Translate(v.m.stolen.p.x, v.m.stolen.p.y, 0)
+					else
+						gl.Translate(v.p.x, v.p.y, 0)
+					end
+					gl.CallList(flag_listBase)
+				gl.PopMatrix()
+			end
 		end
 
 		-- powerups are drawn next
@@ -522,7 +553,7 @@ local function play_drawWorld(d)
 			end
 		end
 
-		-- healthbars
+		-- healthbars and ammo bars
 		for k, v in pairs(c_world_getTanks()) do
 			if v.exists then
 				gl.PushMatrix()
@@ -533,6 +564,15 @@ local function play_drawWorld(d)
 						c_config_set("config.game.player" .. tostring(k) .. ".color.g", c_config_get("config.game.defaultTankBlue"))
 						c_config_set("config.game.player" .. tostring(k) .. ".color.b", c_config_get("config.game.defaultTankGreen"))
 						c_config_set("config.game.player" .. tostring(k) .. ".color.a", c_config_get("config.game.defaultTankAlpha"))
+					end
+
+					if v.weapon and v.weapon.capacity > 0 then
+						gl.Color(1, 1, 1, 1)
+						gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, 1)
+						gl.CallList(ammobarBorder_listBase)
+						gl.Color(c_const_get("ammobar_r"), c_const_get("ammobar_g"), c_const_get("ammobar_b"), c_const_get("ammobarar"))
+						gl.TexEnv("TEXTURE_ENV_COLOR", c_const_get("ammobar_r"), c_const_get("ammobar_g"), c_const_get("ammobar_b"), c_const_get("ammobar_a"))
+						-- TODO
 					end
 
 					gl.Color(v.color.r, v.color.g, v.color.b, 1)
@@ -584,12 +624,16 @@ function st_play_step(d)
 		if fragLimit > 0 then
 			for k, v in pairs(c_world_getTanks()) do
 				if v.score >= fragLimit then
-					endOfGame = true
-
 					c_world_setPaused(true)
 
 					local name = tostring(c_config_get("config.game.player" .. tostring(k) .. ".name"))
 					gui_addLabel(tankbobs.m_vec2(35, 50), name .. " wins!", nil, 1.1, v.color.r, v.color.g, v.color.b, 0.75, v.color.r, v.color.g, v.color.b, 0.8)
+
+					if not endOfGame then
+						tankbobs.a_playSound(c_const_get("win_sound"))
+					end
+
+					endOfGame = true
 				end
 			end
 		end
@@ -598,21 +642,29 @@ function st_play_step(d)
 
 		if pointLimit > 0 then
 			if c_world_redTeam.score >= pointLimit then
-				endOfGame = true
-
 				c_world_setPaused(true)
 
 				local name = "Red"
 				local color = c_const_get("color_red")
 				gui_addLabel(tankbobs.m_vec2(35, 50), name .. " wins!", nil, 1.1, color[1], color[2], color[3], 0.75, color[1], color[2], color[3], 0.8)
-			elseif c_world_blueTeam.score >= pointLimit then
-				endOfGame = true
 
+				if not endOfGame then
+					tankbobs.a_playSound(c_const_get("win_sound"))
+				end
+
+				endOfGame = true
+			elseif c_world_blueTeam.score >= pointLimit then
 				c_world_setPaused(true)
 
 				local name = "Blue"
 				local color = c_const_get("color_blue")
 				gui_addLabel(tankbobs.m_vec2(35, 50), name .. " wins!", nil, 1.1, color[1], color[2], color[3], 0.75, color[1], color[2], color[3], 0.8)
+
+				if not endOfGame then
+					tankbobs.a_playSound(c_const_get("win_sound"))
+				end
+
+				endOfGame = true
 			end
 		end
 	elseif switch == "capturetheflag" then
@@ -620,21 +672,29 @@ function st_play_step(d)
 
 		if captureLimit > 0 then
 			if c_world_redTeam.score >= captureLimit then
-				endOfGame = true
-
 				c_world_setPaused(true)
 
 				local name = "Red"
 				local color = c_const_get("color_red")
 				gui_addLabel(tankbobs.m_vec2(35, 50), name .. " wins!", nil, 1.1, color[1], color[2], color[3], 0.75, color[1], color[2], color[3], 0.8)
-			elseif c_world_blueTeam.score >= captureLimit then
-				endOfGame = true
 
+				if not endOfGame then
+					tankbobs.a_playSound(c_const_get("win_sound"))
+				end
+
+				endOfGame = true
+			elseif c_world_blueTeam.score >= captureLimit then
 				c_world_setPaused(true)
 
 				local name = "Blue"
 				local color = c_const_get("color_blue")
 				gui_addLabel(tankbobs.m_vec2(35, 50), name .. " wins!", nil, 1.1, color[1], color[2], color[3], 0.75, color[1], color[2], color[3], 0.8)
+
+				if not endOfGame then
+					tankbobs.a_playSound(c_const_get("win_sound"))
+				end
+
+				endOfGame = true
 			end
 		end
 	end
@@ -853,6 +913,26 @@ function st_play_step(d)
 				v.m.teamB = v.m.team
 
 				tankbobs.a_playSound(c_const_get("control_sound"))
+			end
+		end
+	elseif c_config_get("config.game.gameType") == "capturetheflag" then
+		for _, v in pairs(c_tcm_current_map.flags) do
+			if v.m.lastCaptureTime and v.m.lastCaptureTimeB ~= v.m.lastCaptureTime then
+				v.m.lastCaptureTimeB = v.m.lastCaptureTime
+
+				tankbobs.a_playSound(c_const_get("flagCapture_sound"))
+			end
+
+			if v.m.lastPickupTime and v.m.lastPickupTimeB ~= v.m.lastPickupTime then
+				v.m.lastPickupTimeB = v.m.lastPickupTime
+
+				tankbobs.a_playSound(c_const_get("flagPickUp_sound"))
+			end
+
+			if v.m.lastReturnTime and v.m.lastReturnTimeB ~= v.m.lastReturnTime then
+				v.m.lastReturnTimeB = v.m.lastReturnTime
+
+				tankbobs.a_playSound(c_const_get("flagReturn_sound"))
 			end
 		end
 	end

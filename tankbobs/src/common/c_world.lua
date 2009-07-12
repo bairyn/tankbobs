@@ -510,6 +510,12 @@ function c_world_tank_die(tank, t)
 		tankbobs.w_removeBody(tank.body)
 	end
 
+	if tank.m.flag then
+		-- drop flag
+		tank.m.flag.m.pos = tankbobs.m_vec2(tank.p)
+		tank.m.flag.m.dropped = true
+	end
+
 	tank.nextSpawnTime = t + c_const_get("world_time") * c_config_get("config.game.timescale") * c_const_get("tank_spawnTime")
 	if tank.killer then
 		tank.killer.score = tank.killer.score + 1
@@ -1332,11 +1338,60 @@ function c_world_flag_step(d, flag)
 		return
 	end
 
+	local t = t_t_getTicks()
+
+	local p = flag.m.dropped and flag.m.pos or flag.p
 	for _, v in pairs(c_world_tanks) do
 		if v.exists then
 			-- inexpensive distance check
-			if math.abs((v.p - flag.p).R) <= c_const_get("flag_touchDistance") then
-				-- handle here
+			if math.abs((v.p - p).R) <= c_const_get("flag_touchDistance") then
+				if not flag.m.dropped then
+					if not flag.m.stolen then
+						if v.red ~= flag.red then
+							-- flag was stolen
+
+							v.m.flag = flag
+
+							flag.m.stolen = v
+							flag.m.dropped = false  -- redundant, but just in case
+
+							flag.m.lastPickupTime = t
+						elseif v.m.flag and v.red == flag.red then
+							-- flag was captured
+
+							if flag.red then
+								c_world_redTeam.score = c_world_redTeam.score + 1
+							else
+								c_world_blueTeam.score = c_world_blueTeam.score + 1
+							end
+
+							flag.m.lastCaptureTime = t
+
+							-- silently return flag
+							v.m.flag.m.stolen = false
+							v.m.flag = nil
+						end
+					end
+				else
+					if v.red == flag.red then
+						-- return flag
+
+						flag.m.dropped = false
+						flag.m.stolen = false  -- redundant, but just in case
+						v.m.flag = nil
+
+						flag.m.lastReturnTime = t
+					else
+						-- other player picked up flag
+
+						v.m.flag = flag
+
+						flag.m.dropped = false
+						flag.m.stolen = v
+
+						flag.m.lastPickupTime = t
+					end
+				end
 
 				return
 			end
