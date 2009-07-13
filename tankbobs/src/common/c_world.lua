@@ -1376,7 +1376,6 @@ function c_world_flag_step(d, flag)
 
 						flag.m.dropped = false
 						flag.m.stolen = false  -- redundant, but just in case
-						v.m.flag = nil
 
 						flag.m.lastReturnTime = t
 					else
