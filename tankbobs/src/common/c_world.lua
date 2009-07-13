@@ -518,6 +518,7 @@ function c_world_tank_die(tank, t)
 		-- drop flag
 		tank.m.flag.m.pos = tankbobs.m_vec2(tank.p)
 		tank.m.flag.m.dropped = true
+		tank.m.flag.m.stolen = false
 		tank.m.flag = nil
 	end
 
