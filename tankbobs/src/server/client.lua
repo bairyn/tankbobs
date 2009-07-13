@@ -270,6 +270,7 @@ function client_step(d)
 							client.tank.state.right   = tankbobs.t_testAND(input, 0x08)
 							client.tank.state.left    = tankbobs.t_testAND(input, 0x10)
 							client.tank.state.special = tankbobs.t_testAND(input, 0x20)
+							client.tank.state.reload  = tankbobs.t_testAND(input, 0x40)
 
 							data = data:sub(2)
 						end

@@ -62,9 +62,13 @@ function c_weapon_init()
 	weapon.knockback = 256
 	weapon.texture = "weak-machinegun.png"
 	weapon.fireSound = "weak-machinegun.wav"
+	weapon.reloadSound = "reload.wav"
 	weapon.launchDistance = 3
 	weapon.aimAid = false
 	weapon.capacity = 0
+	weapon.clips = 0
+	weapon.reloadTime = 0
+	weapon.shotgunClips = false
 	weapon.meleeRange = 0
 	weapon.width = 0
 	weapon.trail = 0
@@ -98,7 +102,7 @@ function c_weapon_init()
 	weapon.projectileRender[4](0.75, -0.75)
 	weapon.projectileRender[1](0.75, -0.75)
 
-	-- strong machinegun
+	-- machinegun
 	weapon = c_weapon:new()
 	table.insert(c_weapons, weapon)
 
@@ -114,9 +118,13 @@ function c_weapon_init()
 	weapon.knockback = 384
 	weapon.texture = "machinegun.png"
 	weapon.fireSound = {"machinegun.wav", "machinegun2.wav"}
+	weapon.reloadSound = "reload.wav"
 	weapon.launchDistance = 3
 	weapon.aimAid = true
-	weapon.capacity = 64
+	weapon.capacity = 15
+	weapon.clips = 4
+	weapon.reloadTime = 2
+	weapon.shotgunClips = false
 	weapon.meleeRange = 0
 	weapon.width = 0
 	weapon.trail = 0
@@ -165,9 +173,13 @@ function c_weapon_init()
 	weapon.knockback = 512  -- (per pellet)
 	weapon.texture = "shotgun.png"
 	weapon.fireSound = "shotgun2.wav"
+	weapon.reloadSound = {clip = "shotgun-reload.wav", initial = "shotgun-open.wav", final = "shotgun-close.wav"}
 	weapon.launchDistance = 6  -- normally 3, but an extra unit to prevent the bullets from colliding before they spread
 	weapon.aimAid = false
-	weapon.capacity = 6
+	weapon.capacity = 4
+	weapon.clips = 4
+	weapon.reloadTime = {clip = 0.5, initial = 1, final = 1}
+	weapon.shotgunClips = true
 	weapon.meleeRange = 0
 	weapon.width = 0
 	weapon.trail = 0
@@ -217,9 +229,13 @@ function c_weapon_init()
 	weapon.knockback = 1024
 	weapon.texture = "railgun.png"
 	weapon.fireSound = {"railgun.wav", "railgun2.wav"}
+	weapon.reloadSound = "railgun-reload.wav"
 	weapon.launchDistance = 3
 	weapon.aimAid = false
-	weapon.capacity = 6
+	weapon.capacity = 2
+	weapon.clips = 4
+	weapon.reloadTime = 2
+	weapon.shotgunClips = false
 	weapon.meleeRange = 0
 	weapon.width = 0
 	weapon.trail = 4
@@ -269,9 +285,13 @@ function c_weapon_init()
 	weapon.knockback = 1024
 	weapon.texture = "railgun.png"
 	weapon.fireSound = {"railgun.wav", "railgun2.wav"}
+	weapon.reloadSound = "railgun-reload.wav"
 	weapon.launchDistance = 3
 	weapon.aimAid = false
 	weapon.capacity = 0
+	weapon.clips = 0
+	weapon.reloadTime = 0
+	weapon.shotgunClips = false
 	weapon.meleeRange = 0
 	weapon.width = 0
 	weapon.trail = 4
@@ -321,9 +341,13 @@ function c_weapon_init()
 	weapon.knockback = 8192
 	weapon.texture = "coilgun.png"
 	weapon.fireSound = {"coilgun.wav", "coilgun2.wav", "coilgun2.wav"}
+	weapon.reloadSound = "reload.wav"
 	weapon.launchDistance = 3
 	weapon.aimAid = true
-	weapon.capacity = 6
+	weapon.capacity = 2
+	weapon.clips = 3
+	weapon.reloadTime = 2
+	weapon.shotgunClips = false
 	weapon.meleeRange = 0
 	weapon.width = 0
 	weapon.trail = 0.25
@@ -373,9 +397,13 @@ function c_weapon_init()
 	weapon.knockback = 16384
 	weapon.texture = "saw.png"
 	weapon.fireSound = "saw.mav"
+	weapon.reloadSound = "reload.wav"
 	weapon.launchDistance = 3
 	weapon.aimAid = true
 	weapon.capacity = 64  -- can be used for 8 seconds
+	weapon.clips = 0
+	weapon.reloadTime = 0
+	weapon.shotgunClips = false
 	weapon.meleeRange = 2
 	weapon.width = 0.75
 	weapon.trail = 0
@@ -429,6 +457,9 @@ c_weapon =
 	launchDistance = 0,
 	aimAid = false,
 	capacity = 0,
+	clips = 0,  -- clips remaining
+	reloadTime = 0,
+	shotgunClips = false,
 	meleeRange = 0,
 	width = 0,
 	trail = 0,
@@ -436,6 +467,7 @@ c_weapon =
 
 	texture = "",
 	fireSound = "",
+	reloadSound = "",
 
 	texturer = {tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2()},
 	render = {tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2()},
@@ -507,6 +539,9 @@ function c_weapon_pickUp(tank, weaponName)
 
 	tank.weapon = weapon
 	tank.ammo = weapon.capacity
+	tank.clips = weapon.clips
+	tank.reloading = false
+	tank.shotgunReloadState = nil
 end
 
 function c_weapon_fireMeleeWeapon(tank)
@@ -514,56 +549,145 @@ function c_weapon_fireMeleeWeapon(tank)
 end
 
 function c_weapon_fire(tank)
+	local t = tankbobs.t_getTicks()
+
+	if not tank.weapon then
+		return
+	end
+
 	local weapon = tank.weapon
 
-	local angle = weapon.spread * (weapon.pellets - 1) / 2
+	if tank.reloading then
+		if weapon.shotgunClips then
+			if not tank.shotgunReloadState then
+				tank.reloading = t
 
-	tank.m.empty = true
+				tank.shotgunReloadState = 0
+			else
+				if tank.shotgunReloadState == 0 then
+					-- initial
 
-	if tank.ammo <= 0 and weapon.capacity ~= 0 then
-		return c_weapon_outOfAmmo(tank)
+					if t >= tank.reloading + (c_const_get("world_time") * c_config_get("config.game.timescale") * weapon.reloadTime.initial) then
+						tank.reloading = t
+
+						tank.shotgunReloadState = 1
+					end
+				elseif tank.shotgunReloadState == 1 then
+					-- clip
+
+					if t >= tank.reloading + (c_const_get("world_time") * c_config_get("config.game.timescale") * weapon.reloadTime.clip) then
+						if tank.ammo < weapon.capacity and tank.clips > 0 and (tank.state.reload or tank.ammo == 0) then
+							tank.reloading = t
+
+							tank.clips = tank.clips - 1
+							tank.ammo = tank.ammo + 1
+						else
+							tank.reloading = t
+
+							tank.shotgunReloadState = 2
+						end
+					end
+				elseif tank.shotgunReloadState == 2 then
+					-- final
+
+					if t >= tank.reloading + (c_const_get("world_time") * c_config_get("config.game.timescale") * weapon.reloadTime.initial) then
+						tank.reloading = false
+
+						tank.shotgunReloadState = nil
+					end
+				end
+			end
+		else
+			if t >= tank.reloading + (c_const_get("world_time") * c_config_get("config.game.timescale") * weapon.reloadTime) then
+				tank.reloading = false
+
+				tank.clips = tank.clips - 1
+				tank.ammo = weapon.capacity
+			end
+		end
+
+		tank.m.fired = false
+
+		return
 	end
 
-	tank.m.empty = false
+	if not tank.lastFireTime or (tank.lastFireTime < t - (c_const_get("world_time") * c_config_get("config.game.timescale") * weapon.repeatRate)) then
+		tank.lastFireTime = t - (c_const_get("world_time") * c_config_get("config.game.timescale") * weapon.repeatRate)
 
-	if weapon.meleeRange ~= 0 then
-		return c_weapon_fireMeleeWeapon(tank)
+		if tank.state.reload and not tank.reloading and tank.clips > 0 and tank.ammo < weapon.capacity then
+			tank.reloading = t
+
+			return
+		end
 	end
 
-	for i = 1, weapon.pellets do
-		local projectile = c_weapon_projectile:new()
-		local vec = tankbobs.m_vec2()
-
-		projectile.weapon = weapon
-
-		vec.t = tank.r + angle
-		vec.R = weapon.launchDistance
-		projectile.p(tank.p + vec)
-
-		projectile.owner = tank
-
-		projectile.r = vec.t
-
-		projectile.m.body = tankbobs.w_addBody(projectile.p, projectile.r, c_const_get("projectile_canSleep"), c_const_get("projectile_isBullet"), c_const_get("projectile_linearDamping"), c_const_get("projectile_angularDamping"), weapon.projectileHull, weapon.projectileDensity, c_const_get("projectile_friction"), weapon.projectileRestitution, true)
-		vec.R = weapon.speed
-		tankbobs.w_setLinearVelocity(projectile.m.body, vec)
-
-		table.insert(c_world_projectiles, projectile)
-
-		angle = angle - weapon.spread
-
-		-- apply knockback to the tank
-		local point = tankbobs.w_getCenterOfMass(tank.body)
-		local force = tankbobs.m_vec2()
-		force.R = -weapon.knockback * c_const_get("tank_speedK")
-		force.t = tankbobs.w_getAngle(tank.body)
-		tankbobs.w_applyForce(tank.body, force, point)
+	if not tank.state.firing then
+		return
 	end
 
-	tank.ammo = tank.ammo - 1
+	while t >= tank.lastFireTime + (c_const_get("world_time") * c_config_get("config.game.timescale") * weapon.repeatRate) do
+		tank.lastFireTime = tank.lastFireTime + (c_const_get("world_time") * c_config_get("config.game.timescale") * weapon.repeatRate)
 
-	if tank.ammo < 0 then
-		tank.ammo = 0
+		local angle = weapon.spread * (weapon.pellets - 1) / 2
+
+		tank.m.empty = false
+		tank.m.fired = false
+
+		if tank.ammo <= 0 and weapon.capacity ~= 0 then
+			--if not tank.reloading then  -- redundant
+				if tank.clips <= 0 then
+					tank.m.empty = true
+
+					return c_weapon_outOfAmmo(tank)
+				else
+					tank.reloading = t
+
+					return
+				end
+			--end
+		end
+
+		tank.m.fired = true
+
+		if weapon.meleeRange ~= 0 then
+			return c_weapon_fireMeleeWeapon(tank)
+		end
+
+		for i = 1, weapon.pellets do
+			local projectile = c_weapon_projectile:new()
+			local vec = tankbobs.m_vec2()
+
+			projectile.weapon = weapon
+
+			vec.t = tank.r + angle
+			vec.R = weapon.launchDistance
+			projectile.p(tank.p + vec)
+
+			projectile.owner = tank
+
+			projectile.r = vec.t
+
+			projectile.m.body = tankbobs.w_addBody(projectile.p, projectile.r, c_const_get("projectile_canSleep"), c_const_get("projectile_isBullet"), c_const_get("projectile_linearDamping"), c_const_get("projectile_angularDamping"), weapon.projectileHull, weapon.projectileDensity, c_const_get("projectile_friction"), weapon.projectileRestitution, true)
+			vec.R = weapon.speed
+			tankbobs.w_setLinearVelocity(projectile.m.body, vec)
+
+			table.insert(c_world_projectiles, projectile)
+
+			angle = angle - weapon.spread
+
+			-- apply knockback to the tank
+			local point = tankbobs.w_getCenterOfMass(tank.body)
+			local force = tankbobs.m_vec2()
+			force.R = -weapon.knockback * c_const_get("tank_speedK")
+			force.t = tankbobs.w_getAngle(tank.body)
+			tankbobs.w_applyForce(tank.body, force, point)
+		end
+
+		tank.ammo = tank.ammo - 1
+
+		if tank.ammo < 0 then
+			tank.ammo = 0
+		end
 	end
 end
 

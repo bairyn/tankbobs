@@ -359,13 +359,16 @@ c_world_tank =
 	lastSpawnPoint = 0,
 	state = nil,
 	weapon = nil,
-	lastFireTime = 0,
+	lastFireTime = nil,
 	body = nil,  -- physical body
 	health = 0,
 	nextSpawnTime = 0,
 	killer = nil,
 	score = 0,
 	ammo = 0,
+	clips = 0,
+	reloading = false,
+	shotgunReloadState = nil,
 	red = false,
 	color = {},
 
@@ -383,7 +386,8 @@ c_world_tank_state =
 	back = false,
 	right = false,
 	left = false,
-	special = false
+	special = false,
+	reload = false
 }
 
 c_world_team =
@@ -1005,14 +1009,7 @@ function c_world_tank_step(d, tank)
 	t_w_setAngularVelocity(tank.body, 0)  -- reset the tank's angular velocity
 
 	-- weapons
-	if tank.state.firing then
-		if t >= tank.lastFireTime + (c_const_get("world_time") * c_config_get("config.game.timescale") * tank.weapon.repeatRate) then
-			tank.lastFireTime = t
-
-			-- fire weapon
-			c_weapon_fire(tank)
-		end
-	end
+	c_weapon_fire(tank)
 end
 
 function c_world_wall_step(d, wall)
@@ -1073,7 +1070,6 @@ function c_world_wall_step(d, wall)
 end
 
 function c_world_projectile_step(d, projectile)
-	-- TODO: projectiles can go through teleporters
 	if projectile.collided then
 		tankbobs.w_removeBody(projectile.m.body)
 		c_weapon_projectileRemove(projectile)
@@ -1236,7 +1232,7 @@ function c_world_powerup_pickUp(tank, powerup)
 		c_weapon_pickUp(tank, powerupType.name)
 	end
 	if powerupType.name == "ammo" then
-		tank.ammo = tank.ammo + tank.weapon.capacity
+		tank.clips = tank.clips + tank.weapon.clips
 	end
 	if powerupType.name == "aim-aid" then
 		tank.cd.aimAid = not tank.cd.aimAid

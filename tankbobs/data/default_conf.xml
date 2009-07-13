@@ -94,6 +94,7 @@
 			<left>97</left> 'a'
 			<right>100</right> 'd'
 			<special>304</special> 'LSHIFT'
+			<reload>111</reload> 'r'
 		</player1>
 		<player2>
 			<fire>305</fire> 'RCTRL'
@@ -102,6 +103,7 @@
 			<left>276</left> 'LEFT
 			<right>275</right> 'RIGHT'
 			<special>303</special> 'RSHIFT'
+			<reload>256</reload> 'KP_0'
 		</player2>
 		<quit>98</quit> 'b'
 		<select></select>

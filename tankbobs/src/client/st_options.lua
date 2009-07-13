@@ -20,7 +20,7 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 --[[
 st_options.lua
 
-options
+Options
 --]]
 
 local gl
@@ -303,6 +303,7 @@ local st_optionsPlayers_back
 local st_optionsPlayers_left
 local st_optionsPlayers_right
 local st_optionsPlayers_special
+local st_optionsPlayers_reload
 local st_optionsPlayers_colorR
 local st_optionsPlayers_colorG
 local st_optionsPlayers_colorB
@@ -343,6 +344,9 @@ function st_optionsPlayers_init()
 	if not (c_config_get("config.key.player1.special", nil, true)) then
 		c_config_set("config.key.player1.special", false)
 	end
+	if not (c_config_get("config.key.player1.reload", nil, true)) then
+		c_config_set("config.key.player1.reload", false)
+	end
 	if not (c_config_get("config.game.player1.color.r", nil, true)) then
 		c_config_set("config.game.player1.color.r", c_config_get("config.game.defaultTankRed"))
 	end
@@ -364,16 +368,17 @@ function st_optionsPlayers_init()
 	gui_addLabel(tankbobs.m_vec2(50, 48), "Left", nil, 1 / 3) player.left = gui_addKey(tankbobs.m_vec2(75, 48), c_config_get("config.key.player1.left"), nil, st_optionsPlayers_left, c_config_get("config.key.player1.left"), 0.5)
 	gui_addLabel(tankbobs.m_vec2(50, 45), "Right", nil, 1 / 3) player.right = gui_addKey(tankbobs.m_vec2(75, 45), c_config_get("config.key.player1.right"), nil, st_optionsPlayers_right, c_config_get("config.key.player1.right"), 0.5)
 	gui_addLabel(tankbobs.m_vec2(50, 42), "Special", nil, 1 / 3) player.special = gui_addKey(tankbobs.m_vec2(75, 42), c_config_get("config.key.player1.special"), nil, st_optionsPlayers_special, c_config_get("config.key.player1.special"), 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 39), "Reload", nil, 1 / 3) player.reload = gui_addKey(tankbobs.m_vec2(75, 39), c_config_get("config.key.player1.reload"), nil, st_optionsPlayers_reload, c_config_get("config.key.player1.reload"), 0.5)
 
-	gui_addLabel(tankbobs.m_vec2(50, 36), "Adjust color", nil, 1 / 3)
+	gui_addLabel(tankbobs.m_vec2(50, 33), "Adjust color", nil, 1 / 3)
 
-	player.colorR = gui_addScale(tankbobs.m_vec2(75, 33), c_config_get("config.game.player1.color.r"), nil, st_optionsPlayers_colorR, c_config_get("config.game.player1.color.r"), nil, 0.5, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0)
-	player.colorG = gui_addScale(tankbobs.m_vec2(75, 30), c_config_get("config.game.player1.color.g"), nil, st_optionsPlayers_colorG, c_config_get("config.game.player1.color.g"), nil, 0.5, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0)
-	player.colorB = gui_addScale(tankbobs.m_vec2(75, 27), c_config_get("config.game.player1.color.b"), nil, st_optionsPlayers_colorB, c_config_get("config.game.player1.color.b"), nil, 0.5, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0)
+	player.colorR = gui_addScale(tankbobs.m_vec2(75, 30), c_config_get("config.game.player1.color.r"), nil, st_optionsPlayers_colorR, c_config_get("config.game.player1.color.r"), nil, 0.5, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0)
+	player.colorG = gui_addScale(tankbobs.m_vec2(75, 27), c_config_get("config.game.player1.color.g"), nil, st_optionsPlayers_colorG, c_config_get("config.game.player1.color.g"), nil, 0.5, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0)
+	player.colorB = gui_addScale(tankbobs.m_vec2(75, 24), c_config_get("config.game.player1.color.b"), nil, st_optionsPlayers_colorB, c_config_get("config.game.player1.color.b"), nil, 0.5, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0)
 
-	-- image of tank is drawn (takes 21 and 24)
+	-- image of tank is drawn (takes 18 and 21)
 
-	gui_addLabel(tankbobs.m_vec2(50, 15), "Team", nil, 2 / 3) player.team = gui_addCycle(tankbobs.m_vec2(75, 15), "Team", nil, st_optionsPlayers_team, {"Blue", "Red"}, c_config_get("config.game.player1.team") == "red" and 2 or 1, 2 / 3)
+	gui_addLabel(tankbobs.m_vec2(50, 12), "Team", nil, 2 / 3) player.team = gui_addCycle(tankbobs.m_vec2(75, 12), "Team", nil, st_optionsPlayers_team, {"Blue", "Red"}, c_config_get("config.game.player1.team") == "red" and 2 or 1, 2 / 3)
 end
 
 function st_optionsPlayers_done()
@@ -393,7 +398,7 @@ function st_optionsPlayers_step(d)
 		gl.PushMatrix()
 			gl.Color(c_config_get("config.game.player" .. tostring(currentPlayer) .. ".color.r"), c_config_get("config.game.player" .. tostring(currentPlayer) .. ".color.g"), c_config_get("config.game.player" .. tostring(currentPlayer) .. ".color.b"), 1)
 			gl.TexEnv("TEXTURE_ENV_COLOR", c_config_get("config.game.player" .. tostring(currentPlayer) .. ".color.r"), c_config_get("config.game.player" .. tostring(currentPlayer) .. ".color.g"), c_config_get("config.game.player" .. tostring(currentPlayer) .. ".color.b"), 1)
-			gl.Translate(85, 22.5, 0)
+			gl.Translate(85, 19.5, 0)
 			gl.Rotate(tankbobs.m_degrees(tankRotation), 0, 0, 1)
 			tankRotation = tankRotation + d * c_const_get("optionsPlayers_tankRotation")
 			gl.CallList(tank_listBase)
@@ -451,6 +456,12 @@ function st_optionsPlayers_configurePlayer(widget)
 	end
 	local special = c_config_get("config.key.player" .. tonumber(currentPlayer) .. ".special")
 	player.special:setKey(special)
+
+	if not (c_config_get("config.key.player" .. tonumber(currentPlayer) .. ".reload", nil, true)) then
+		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".reload", false)
+	end
+	local reload = c_config_get("config.key.player" .. tonumber(currentPlayer) .. ".reload")
+	player.reload:setKey(reload)
 
 	if not (c_config_get("config.game.player" .. tonumber(currentPlayer) .. ".color.r", nil, true)) then
 		c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".color.r", c_config_get("config.game.defaultTankRed"))
@@ -562,6 +573,18 @@ function st_optionsPlayers_special(widget, button)
 		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".special", button)
 	else
 		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".special", false)
+	end
+end
+
+function st_optionsPlayers_reload(widget, button)
+	if not (c_config_get("config.key.player" .. tonumber(currentPlayer) .. ".reload", nil, true)) then
+		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".reload", false)
+	end
+
+	if button then
+		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".reload", button)
+	else
+		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".reload", false)
 	end
 end
 

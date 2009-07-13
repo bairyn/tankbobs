@@ -282,6 +282,9 @@ function st_play_button(button, pressed)
 		if not (c_config_get("config.key.player" .. tostring(i) .. ".special", nil, true)) then
 			c_config_set("config.key.player" .. tostring(i) .. ".special", false)
 		end
+		if not (c_config_get("config.key.player" .. tostring(i) .. ".reload", nil, true)) then
+			c_config_set("config.key.player" .. tostring(i) .. ".reload", false)
+		end
 
 		if button == c_config_get("config.key.player" .. tostring(i) .. ".fire") then
 			c_world_tanks[i].state.firing = pressed
@@ -300,6 +303,9 @@ function st_play_button(button, pressed)
 		end
 		if button == c_config_get("config.key.player" .. tostring(i) .. ".special") then
 			c_world_tanks[i].state.special = pressed
+		end
+		if button == c_config_get("config.key.player" .. tostring(i) .. ".reload") then
+			c_world_tanks[i].state.reload = pressed
 		end
 	end
 end
@@ -361,7 +367,7 @@ local function play_drawWorld(d)
 									gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, v.shield / c_const_get("tank_boostShield"))
 									gl.CallList(tankShield_listBase)
 
-									if v.weapon then
+									if v.weapon and not v.reloading then
 										gl.CallList(v.weapon.m.p.list)
 									end
 								gl.PopMatrix()
@@ -408,7 +414,7 @@ local function play_drawWorld(d)
 		gl.EnableClientState("VERTEX_ARRAY")
 		for _, v in pairs(c_world_getTanks()) do
 			if v.exists then
-			if (v.weapon and v.weapon.aimAid) or (v.cd.aimAid) then
+			if (v.weapon and v.weapon.aimAid and not v.reloading) or (v.cd.aimAid) then
 					gl.PushAttrib("ENABLE_BIT")
 						local b
 						local vec = tankbobs.m_vec2()
@@ -610,6 +616,45 @@ local function play_drawWorld(d)
 
 									gl.VertexPointer(m)
 									gl.DrawArrays("QUADS", 0, 4 * ammo)
+								gl.DisableClientState("VERTEX_ARRAY")
+							gl.PopAttrib()
+						gl.PopMatrix()
+
+						-- clips
+						gl.PushMatrix()
+							gl.PushAttrib("ENABLE_BIT")
+								gl.Disable("TEXTURE_2D")
+								gl.Translate((c_const_get("ammobarBorder_renderx1") + c_const_get("ammobarBorder_renderx2")) / 2, c_const_get("ammobarBorder_rendery1") - 0.5, 0)
+								gl.Scale(c_const_get("ammobarBorder_renderx4") - c_const_get("ammobarBorder_renderx1"), 1, 1)
+
+								local height = 2 * c_const_get("ammobarBorder_rendery2") - c_const_get("ammobarBorder_rendery1")
+
+								gl.EnableClientState("VERTEX_ARRAY")
+									local clips = v.clips
+									local spacing = 1 / 3
+
+									local x = 0
+									local xp = x
+									for i = 1, clips do
+										for j = 0, 3 do
+											if not m[i * 4 - j] then
+												m[i * 4 - j] = {0, 0}
+											end
+										end
+
+										xp = x
+										x = x + spacing
+
+										m[i * 4 - 3][1], m[i * 4 - 3][2] = xp, height
+										m[i * 4 - 2][1], m[i * 4 - 2][2] = xp, 0
+										m[i * 4 - 1][1], m[i * 4 - 1][2] = x, 0
+										m[i * 4 - 0][1], m[i * 4 - 0][2] = x, height
+
+										x = x + spacing
+									end
+
+									gl.VertexPointer(m)
+									gl.DrawArrays("QUADS", 0, 4 * clips)
 								gl.DisableClientState("VERTEX_ARRAY")
 							gl.PopAttrib()
 						gl.PopMatrix()
@@ -822,7 +867,7 @@ function st_play_step(d)
 
 				if v.m.empty then
 					tankbobs.a_playSound(c_const_get("emptyTrigger_sound"))
-				elseif v.weapon then
+				elseif v.weapon and v.m.fired then
 					if type(v.weapon.fireSound) == "table" then
 						tankbobs.a_playSound(c_const_get("weaponAudio_dir") .. v.weapon.fireSound[math.random(1, #v.weapon.fireSound)])
 					elseif type(v.weapon.fireSound) == "string" then
@@ -894,7 +939,26 @@ function st_play_step(d)
 
 						table.insert(trails, {v.weapon.trail, v.weapon.trail, list})
 					end
+				end
+			end
+		end
 
+		if v.reloading and v.m.lastReloadTime ~= v.reloading then
+			v.m.lastReloadTime = v.reloading
+
+			if v.weapon.shotgunClips then
+				if v.shotgunReloadState == 0 then
+					tankbobs.a_playSound(c_const_get("weaponAudio_dir") .. v.weapon.reloadSound.initial)
+				elseif v.shotgunReloadState == 1 then
+					tankbobs.a_playSound(c_const_get("weaponAudio_dir") .. v.weapon.reloadSound.clip)
+				elseif v.shotgunReloadState == 2 then
+					tankbobs.a_playSound(c_const_get("weaponAudio_dir") .. v.weapon.reloadSound.final)
+				end
+			else
+				if type(v.weapon.reloadSound) == "table" then
+					tankbobs.a_playSound(c_const_get("weaponAudio_dir") .. v.weapon.fireSound[math.random(1, #v.weapon.reloadSound)])
+				else
+					tankbobs.a_playSound(c_const_get("weaponAudio_dir") .. v.weapon.reloadSound)
 				end
 			end
 		end
