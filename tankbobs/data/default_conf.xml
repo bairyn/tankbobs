@@ -94,7 +94,7 @@
 			<left>97</left> 'a'
 			<right>100</right> 'd'
 			<special>304</special> 'LSHIFT'
-			<reload>111</reload> 'r'
+			<reload>114</reload> 'r'
 		</player1>
 		<player2>
 			<fire>305</fire> 'RCTRL'
