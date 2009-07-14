@@ -177,7 +177,7 @@ function c_weapon_init()
 	weapon.launchDistance = 6  -- normally 3, but an extra unit to prevent the bullets from colliding before they spread
 	weapon.aimAid = false
 	weapon.capacity = 4
-	weapon.clips = 4
+	weapon.clips = 8
 	weapon.reloadTime = {clip = 0.5, initial = 1, final = 1}
 	weapon.shotgunClips = true
 	weapon.meleeRange = 0

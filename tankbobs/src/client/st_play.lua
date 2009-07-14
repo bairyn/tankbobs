@@ -627,11 +627,11 @@ local function play_drawWorld(d)
 								gl.Translate((c_const_get("ammobarBorder_renderx1") + c_const_get("ammobarBorder_renderx2")) / 2, c_const_get("ammobarBorder_rendery1") - 0.5, 0)
 								gl.Scale(c_const_get("ammobarBorder_renderx4") - c_const_get("ammobarBorder_renderx1"), 1, 1)
 
-								local height = 2 * c_const_get("ammobarBorder_rendery2") - c_const_get("ammobarBorder_rendery1")
+								local height = c_const_get("ammobarBorder_rendery2") - c_const_get("ammobarBorder_rendery1")
 
 								gl.EnableClientState("VERTEX_ARRAY")
 									local clips = v.clips
-									local spacing = 1 / 3
+									local spacing = 1 / 8
 
 									local x = 0
 									local xp = x
