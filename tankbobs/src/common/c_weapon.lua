@@ -525,8 +525,6 @@ end
 function c_weapon_pickUp(tank, weaponName)
 	local weapon
 
-	tank.weapon = nil
-
 	weapon = c_weapon_getByName(weaponName)
 	if not weapon then
 		weapon = c_weapon_getByAltName(weaponName)
@@ -536,6 +534,15 @@ function c_weapon_pickUp(tank, weaponName)
 		io.stderr:write("c_weapon_pickUp: weapon '", tostring(weaponName), "' doesn't exist\n")
 		return
 	end
+
+	if weapon == tank.weapon then
+		-- add to clips
+		tank.clips = tank.clips + weapon.clips
+
+		return
+	end
+
+	tank.weapon = nil
 
 	tank.weapon = weapon
 	tank.ammo = weapon.capacity
