@@ -20,7 +20,7 @@ teleporter, ul, br, 6, 94, 1
 teleporter, br, ul, 194, 6, 1
 playerSpawnPoint, 95, 54
 playerSpawnPoint, 105, 54
-powerupSpawnPoint, 6, 6, shield health, 0, 30, 30, 0
+powerupSpawnPoint, 6, 6, shield health, 0, 90, 30, 0
 powerupSpawnPoint, 194, 93, railgun coilgun, 0, 30, 30, 0
 powerupSpawnPoint, 194, 6, health, 0, 30, 15, 0
 powerupSpawnPoint, 194, 6, ammo, 0, 30, 30, 0
@@ -34,7 +34,6 @@ powerupSpawnPoint, 105, 54, health, 0, 1800, 0, 0
 powerupSpawnPoint, 105, 54, health, 0, 1800, 0, 0
 powerupSpawnPoint, 83, 42, health, 0, 1800, 0, 0
 powerupSpawnPoint, 97, 42, health, 0, 1800, 0, 0
-powerupSpawnPoint, 188, 87, shield ammo, 0, 30, 30, 0
 path, down, up, 96, 83, 1, 8
 path, up, down, 97, 6, 1, 8
 controlPoint, 6, 7, 0
