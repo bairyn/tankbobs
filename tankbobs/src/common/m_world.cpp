@@ -355,6 +355,9 @@ int w_addBody(lua_State *L)
 	shapeDefinition.friction = luaL_checknumber(L, 9);
 	shapeDefinition.restitution = luaL_checknumber(L, 10);
 
+	shapeDefinition.filter.categoryBits = luaL_checkinteger(L, 12);
+	shapeDefinition.filter.maskBits = luaL_checkinteger(L, 13);
+
 	body->CreateShape(&shapeDefinition);
 	if(lua_toboolean(L, 11))
 		body->SetMassFromShapes();

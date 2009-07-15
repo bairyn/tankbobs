@@ -74,6 +74,13 @@ local DOMINATION     = {}
 local CAPTURETHEFLAG = {}
 local gameType = DEATHMATCH
 
+-- contents
+local NULL = 0x0001
+local WALL = 0x0002
+local POWERUP = 0x0004
+local TANK = 0x0008
+local PROJECTILE = 0x0010
+
 function c_world_init()
 	c_config_set            = _G.c_config_set
 	c_config_get            = _G.c_config_get
@@ -104,6 +111,15 @@ function c_world_init()
 	--c_const_set("world_timeStep", common_FTM(c_const_get("world_fps")))
 	c_const_set("world_timeStep", 1 / 500)
 	c_const_set("world_iterations", 16)
+
+	c_const_set("wall_contentsMask", WALL, 1)
+	c_const_set("wall_clipmask", WALL + POWERUP + TANK + PROJECTILE, 1)
+	c_const_set("powerup_contentsMask", POWERUP, 1)
+	c_const_set("powerup_clipmask", WALL + POWERUP + TANK, 1)
+	c_const_set("tank_contentsMask", TANK, 1)
+	c_const_set("tank_clipmask", WALL + POWERUP + TANK + PROJECTILE, 1)
+	c_const_set("projectile_contentsMask", POWERUP, 1)
+	c_const_set("projectile_clipmask", WALL + TANK + PROJECTILE, 1)
 
 	c_const_set("world_behind", 5000, 1)  -- (in direct ms)
 	behind = c_const_get("world_behind")
@@ -459,7 +475,7 @@ function c_world_newWorld()
 
 			-- add wall to world
 			local b = c_world_wallShape(v.p)
-			v.m.body = tankbobs.w_addBody(b[1], 0, c_const_get("wall_canSleep"), c_const_get("wall_isBullet"), c_const_get("wall_linearDamping"), c_const_get("wall_angularDamping"), b[2], c_const_get("wall_density"), c_const_get("wall_friction"), c_const_get("wall_restitution"), not v.static)
+			v.m.body = tankbobs.w_addBody(b[1], 0, c_const_get("wall_canSleep"), c_const_get("wall_isBullet"), c_const_get("wall_linearDamping"), c_const_get("wall_angularDamping"), b[2], c_const_get("wall_density"), c_const_get("wall_friction"), c_const_get("wall_restitution"), not v.static, c_const_get("wall_contentsMask"), c_const_get("wall_clipmask"))
 			if not v.m.body then
 				error "c_world_newWorld: could not add a wall to the physical world"
 			end
@@ -584,7 +600,7 @@ function c_world_tank_checkSpawn(d, tank)
 	tank.cd = {}
 
 	-- add a physical body
-	tank.body = tankbobs.w_addBody(tank.p, tank.r, c_const_get("tank_canSleep"), c_const_get("tank_isBullet"), c_const_get("tank_linearDamping"), c_const_get("tank_angularDamping"), tank.h, c_const_get("tank_density"), c_const_get("tank_friction"), c_const_get("tank_restitution"), not c_const_get("tank_static"))
+	tank.body = tankbobs.w_addBody(tank.p, tank.r, c_const_get("tank_canSleep"), c_const_get("tank_isBullet"), c_const_get("tank_linearDamping"), c_const_get("tank_angularDamping"), tank.h, c_const_get("tank_density"), c_const_get("tank_friction"), c_const_get("tank_restitution"), not c_const_get("tank_static"), c_const_get("tank_contentsMask"), c_const_get("tank_clipmask"))
 
 	tank.exists = true
 
@@ -1181,7 +1197,7 @@ function c_world_powerupSpawnPoint_step(d, powerupSpawnPoint)
 
 			powerup.p(powerupSpawnPoint.p)
 
-			powerup.m.body = tankbobs.w_addBody(powerup.p, 0, c_const_get("powerup_canSleep"), c_const_get("powerup_isBullet"), c_const_get("powerup_linearDamping"), c_const_get("powerup_angularDamping"), c_world_powerupHull(powerup), c_const_get("powerup_density"), c_const_get("powerup_friction"), c_const_get("powerup_restitution"), not c_const_get("powerup_static"))
+			powerup.m.body = tankbobs.w_addBody(powerup.p, 0, c_const_get("powerup_canSleep"), c_const_get("powerup_isBullet"), c_const_get("powerup_linearDamping"), c_const_get("powerup_angularDamping"), c_world_powerupHull(powerup), c_const_get("powerup_density"), c_const_get("powerup_friction"), c_const_get("powerup_restitution"), not c_const_get("powerup_static"), c_const_get("powerup_contentsMask"), c_const_get("powerup_clipmask"))
 			-- add some initial push to the powerup
 			local push = t_m_vec2()
 			push.R = c_const_get("powerup_pushStrength")

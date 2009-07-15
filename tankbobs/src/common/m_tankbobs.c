@@ -867,7 +867,8 @@ static const struct luaL_Reg tankbobs[] =
 			of the body.  The eighth argument is the shape's density.  The ninth is the friction.
 			The tenth is the restitution.  The eleventh argument is whether the body to be added is static.
 			A pointer to the body to use for other functions is the only value returned.
-			The returned value can be safely ignored. */
+			The returned value can be safely ignored.  The thirteenth and fourteenth arguments
+			are the contents and clipmask of the body. */
 	{"w_removeBody", w_removeBody}, /* remove a body from the world */
 		/* Nothing is returned.  The first argument is the pointer to the body returned from w_addBody. */
 	{"w_bodies", w_bodies}, /* generate a table of pointers to bodies */
