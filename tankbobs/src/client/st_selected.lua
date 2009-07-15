@@ -37,7 +37,7 @@ local limitInput = nil
 local limitConfig = ""
 
 function st_selected_init()
-	gui_addAction(tankbobs.m_vec2(25, 92.5), "Back", nil, c_state_advance, 0.5)
+	gui_addAction(tankbobs.m_vec2(25, 92.5), "Back", nil, c_state_advance)
 
 	local pos = 0
 	local type = c_config_get("config.game.gameType")
@@ -54,7 +54,7 @@ function st_selected_init()
 	gui_addLabel(tankbobs.m_vec2(50, 75), "Game type", nil, 1 / 3) gui_addCycle(tankbobs.m_vec2(75, 75), "Instagib", nil, st_selected_gameType, {"Deathmatch", "Domination", "Capture the Flag"}, pos, 0.5)
 	limit = gui_addLabel(tankbobs.m_vec2(50, 69), "Frag limit", nil, 1 / 3) limitInput = gui_addInput(tankbobs.m_vec2(75, 69), tostring(c_config_get(limitConfig)), nil, st_selected_limit, true, 4, 0.5)
 	gui_addLabel(tankbobs.m_vec2(50, 63), "Instagib", nil, 1 / 3) gui_addCycle(tankbobs.m_vec2(75, 63), "Instagib", nil, st_selected_instagib, {"No", "Yes"}, c_config_get("config.game.instagib") and 2 or 1, 0.5)
-	gui_addAction(tankbobs.m_vec2(75, 57), "Start", nil, st_selected_start)
+	gui_addAction(tankbobs.m_vec2(75, 54), "Start", nil, st_selected_start)
 end
 
 function st_selected_done()
