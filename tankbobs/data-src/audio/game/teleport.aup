@@ -1,6 +1,6 @@
 <?xml version="1.0" standalone="no" ?>
 <!DOCTYPE project PUBLIC "-//audacityproject-1.3.0//DTD//EN" "http://audacity.sourceforge.net/xml/audacityproject-1.3.0.dtd" >
-<project xmlns="http://audacity.sourceforge.net/xml/" projname="teleport_data" version="1.3.0" audacityversion="1.3.7" sel0="0.0000000000" sel1="0.0000000000" vpos="0" h="0.0915227329" zoom="6140.5508982036" rate="44100">
+<project xmlns="http://audacity.sourceforge.net/xml/" projname="teleport_data" version="1.3.0" audacityversion="1.3.7" sel0="0.0000000000" sel1="0.0000000000" vpos="0" h="0.0915932371" zoom="6140.5508982036" rate="44100">
 	<tags>
 		<tag name="id3v2" value="1"/>
 		<tag name="YEAR" value="2009"/>
@@ -10,7 +10,7 @@
 		<waveclip offset="0.00000000">
 			<sequence maxsamples="262144" sampleformat="262159" numsamples="8790">
 				<waveblock start="0">
-					<simpleblockfile filename="e000007d.au" len="8790" min="-0.747223" max="0.787872" rms="0.042706"/>
+					<simpleblockfile filename="e0000e21.au" len="8790" min="-0.223075" max="0.23521" rms="0.012749"/>
 				</waveblock>
 			</sequence>
 			<envelope numpoints="10">

@@ -20,7 +20,7 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 --[[
 st_set.lua
 
-set selection
+Set selection
 --]]
 
 local st_set_init

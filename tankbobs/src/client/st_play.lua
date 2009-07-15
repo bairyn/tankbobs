@@ -988,8 +988,8 @@ function st_play_step(d)
 			tankbobs.a_playSound(c_const_get("powerupPickup_sound"))
 		end
 
-		if v.m.target and v.m.targetB ~= v.m.target then
-			v.m.targetB = v.m.target 
+		if v.m.lastTeleportTime and v.m.lastTeleportTimeB ~= v.m.lastTeleportTime then
+			v.m.lastTeleportTimeB = v.m.lastTeleportTime 
 
 			tankbobs.a_playSound(c_const_get("teleport_sound"))
 		end

@@ -20,7 +20,7 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 --[[
 st_level.lua
 
-level selection
+Level selection
 --]]
 
 local st_level_init
