@@ -578,12 +578,15 @@ function c_weapon_fire(tank)
 						tank.reloading = t
 
 						tank.shotgunReloadState = 1
+
+						tank.clips = tank.clips - 1
+						tank.ammo = tank.ammo + 1
 					end
 				elseif tank.shotgunReloadState == 1 then
 					-- clip
 
 					if t >= tank.reloading + (c_const_get("world_time") * c_config_get("config.game.timescale") * weapon.reloadTime.clip) then
-						if tank.ammo < weapon.capacity and tank.clips > 0 and (tank.state.reload or tank.ammo == 0) then
+						if tank.ammo < weapon.capacity and tank.clips > 0 and tank.state.reload then
 							tank.reloading = t
 
 							tank.clips = tank.clips - 1
