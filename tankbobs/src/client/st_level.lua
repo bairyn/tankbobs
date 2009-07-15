@@ -78,7 +78,7 @@ function st_level_step(d)
 end
 
 function st_level_select(widget)
-	c_tcm_select_map(widget.m.name)
+	c_tcm_select_map(widget.m.info.name)
 	c_state_new(selected_state)
 end
 
