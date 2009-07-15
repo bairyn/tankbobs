@@ -222,6 +222,16 @@ local widget =
 
 	setText = function (self, text)
 		self.text = tostring(text)
+
+		return self
+	end,
+
+	selectedCallback = nil,
+
+	setSelectedCallback = function (self, f)
+		self.selectedCallback = f
+
+		return self
 	end,
 
 	m = {p = {}},
@@ -257,6 +267,8 @@ local cycle =
 
 	setCyclePos = function (self, pos)
 		self.cyclePos = pos
+
+		return self
 	end,
 	cycleCallBack = nil,  -- called with (currentWidget, elementString, elementIndex) when the user changes the current element in a cycle
 	cycleList = {},  -- a table of strings
@@ -286,6 +298,8 @@ local input =
 		--if self.textChangedCallBack then
 			--self:textChangedCallBack(self, self.inputText)
 		--end
+
+		return self
 	end,
 	inputText = "",
 	textChangedCallBack = nil,
@@ -313,6 +327,8 @@ local key =
 		--if self.keyChangedCallBack then
 			--self:keyChangedCallBack(self, self.button)
 		--end
+
+		return self
 	end,
 	keyActive = false,  -- whether or not a key press will set this key
 	keyChangedCallBack = nil,
@@ -339,6 +355,8 @@ local scale =
 		--if self.scaleChangedCallBack then
 			--self:scaleChangedCallBack(self, self.scalePos)
 		--end
+
+		return self
 	end,
 	scalePos = 0,  -- 0-1
 	scaleChangedCallBack = nil,
@@ -658,6 +676,10 @@ local function gui_private_selected(selection)
 	selected = selection
 
 	selected.bump = c_const_get("select_init")
+
+	if selected.selectedCallback then
+		selected:selectedCallback()
+	end
 end
 
 -- returns true when the pressed key should not be handled further than the input widget

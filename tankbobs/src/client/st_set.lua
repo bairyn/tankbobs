@@ -30,16 +30,23 @@ local st_set_button
 local st_set_mouse
 local st_set_step
 
+local st_set_setSelected
+local st_set_select
+local set_description
+
 function st_set_init()
 	gui_addAction(tankbobs.m_vec2(25, 92.5), "Back", nil, c_state_advance)
 
 	gui_addLabel(tankbobs.m_vec2(50, 92.5), "Select Level Set", nil, 0.75)
 
+	set_description = gui_addLabel(tankbobs.m_vec2(25, 15), "", nil, 0.3)
+
 	local x, y = 50, 85
 
 	for _, v in pairs(c_tcm_current_sets) do
-		gui_addAction(tankbobs.m_vec2(x, y), v.title, nil, st_set_select).m.name = v.name
-		y = y - 2.5
+		gui_addAction(tankbobs.m_vec2(x, y), v.title, nil, st_set_select):setSelectedCallback(st_set_setSelected).m.info = {name = v.name, description = v.description}
+
+		y = y - 5
 	end
 end
 
@@ -72,8 +79,14 @@ function st_set_step(d)
 end
 
 function st_set_select(widget)
-	c_tcm_select_set(widget.m.name)
+	c_tcm_select_set(widget.m.info.name)
 	c_state_new(level_state)
+end
+
+function st_set_setSelected(widget)
+	if widget.m.info then
+		set_description:setText(widget.m.info.description)
+	end
 end
 
 set_state =

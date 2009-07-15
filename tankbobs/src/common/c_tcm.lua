@@ -161,6 +161,7 @@ c_tcm_set =
 
 	maps = {},  -- table of maps.  All maps are loaded once
 	name = "",  -- internal name.
+	order = 0,  -- bigger values of order are more back
 	title = "",  -- the name the player will see.
 	description = ""  -- the description
 }
@@ -304,6 +305,8 @@ function c_tcm_read_sets(dir, t)
 		end
 	end
 
+	table.sort(t, function (a, b) return a.order < b.order end)
+
 	c_mods_data_load()
 	c_mods_body()
 end
@@ -332,7 +335,18 @@ function c_tcm_read_set(filename, t)
 	end
 	s.title = line
 
-	-- The 3rd line is the set's description
+	-- The 3rd line is the set's order
+	line, err = set_f:read()
+	if not line then
+		error("Unexepected EOF when reading '" .. filename .. "': " .. err)
+	end
+	s.order = line
+	if(s.order:match("^[\n\t ]*([%d%.]+)[\n\t ]*$")) then
+		s.order = s.order:match("^[\n\t ]*([%d%.]+)[\n\t ]*$")
+	end
+	s.order = tonumber(s.order)
+
+	-- The 4th line is the set's description
 	line, err = set_f:read()
 	if not line then
 		error("Unexepected EOF when reading '" .. filename .. "': " .. err)

@@ -1,4 +1,4 @@
-map, bob_2, Level 2, Level 2, Byron Johnson, 1.0, 1
+map, small_2, Level 2, Level 2, Byron Johnson, 1.0, 1
 wall, 1, 0, 24, 0, 0, 100, 0, 100, 24, 0, 1, 0, 0, 1, 0, 1, 1, global/brownish.png, 6, , 0, 0, 1
 wall, 1, 0, 100, 0, 90, 100, 90, 100, 100, 0, 1, 0, 0, 1, 0, 1, 1, global/brownish.png, 6, , 0, 0, 1
 wall, 1, 0, 90, 0, 24, 1, 24, 1, 90, 0, 1, 0, 0, 1, 0, 1, 1, global/brownish.png, 6, , 0, 0, 1

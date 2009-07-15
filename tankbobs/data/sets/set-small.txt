@@ -1,0 +1,6 @@
+small
+Small Games
+-9.9
+Smaller-sized levels better for 2 - 3 players
+small_1.tcm
+small_2.tcm

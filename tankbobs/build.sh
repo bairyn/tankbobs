@@ -113,8 +113,12 @@ if [ "$1" == "make" ]; then
 		fi
 	fi
 
-	# copy data
 	cd ./../
+
+	# remove old data
+	rm ./build/data/*
+
+	# copy data
 	cp -R --preserve=all -t ./build/ ${DATA}
 
 	cd ./build/
