@@ -34,6 +34,7 @@ powerupSpawnPoint, 105, 54, health, 0, 1800, 0, 0
 powerupSpawnPoint, 105, 54, health, 0, 1800, 0, 0
 powerupSpawnPoint, 83, 42, health, 0, 1800, 0, 0
 powerupSpawnPoint, 97, 42, health, 0, 1800, 0, 0
+powerupSpawnPoint, 195, 93, shield ammo, 0, 30, 30, 0
 path, down, up, 96, 83, 1, 8
 path, up, down, 97, 6, 1, 8
 controlPoint, 6, 7, 0
