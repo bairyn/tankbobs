@@ -345,8 +345,8 @@ function st_play_mouse(x, y, xrel, yrel)
 	gui_mouse(x, y, xrel, yrel)
 end
 
-local a = {{0, 0}, {0, 0}}  -- aim-aid table
-local m = {{0, 0}, {0, 0}}  -- ammobar table
+local aa = {{0, 0}, {0, 0}}  -- aim-aid table
+local m = {0, 0, 0, 0, 0, 0, 0, 0}  -- ammobar table
 local w, t = {{0, 0}, {0, 0}, {0, 0}, {0, 0}}, {{0, 0}, {0, 0}, {0, 0}, {0, 0}}
 local function play_drawWorld(d)
 	gl.PushMatrix()
@@ -383,7 +383,6 @@ local function play_drawWorld(d)
 											g = g + c_const_get("tank_accelerationColorOffset")
 											b = b + c_const_get("tank_accelerationColorOffset")
 										end
-										--a = c_const_get("tank_accelerationAlpha")  -- FIXME: this doesn't work.  Until it's fixed, change rgb
 									end
 									gl.Color(r, g, b, a)
 									gl.TexEnv("TEXTURE_ENV_COLOR", r, g, b, a)
@@ -425,12 +424,12 @@ local function play_drawWorld(d)
 										endP = vec
 									end
 					
-									a[1][1] = start.x a[1][2] = start.y
-									a[2][1] = endP.x a[2][2] = endP.y
+									aa[1][1] = start.x aa[1][2] = start.y
+									aa[2][1] = endP.x aa[2][2] = endP.y
 									gl.Disable("TEXTURE_2D")
 									gl.Color(0.9, 0.1, 0.1, 1)
 									gl.TexEnv("TEXTURE_ENV_COLOR", 0.9, 0.1, 0.1, 1)
-									gl.VertexPointer(a)
+									gl.VertexPointer(aa)
 									gl.LineWidth(c_const_get("aimAid_width"))
 									gl.DrawArrays("LINES", 0, 2)
 								gl.PopAttrib()
@@ -454,8 +453,6 @@ local function play_drawWorld(d)
 									c_config_set("config.game.player" .. tostring(k) .. ".color.a", c_config_get("config.game.defaultTankAlpha"))
 								end
 
--- TODO: FIXME: XXX: THIS CAUSES MEMORY CORRUPTION
---[[
 								if v.weapon and v.weapon.capacity > 0 then
 									gl.Color(1, 1, 1, 1)
 									gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, 1)
@@ -477,28 +474,22 @@ local function play_drawWorld(d)
 
 												local x = 0
 												local xp = x
-												for i = 1, capacity do
-													for j = 0, 3 do
-														if not m[i * 4 - j] then
-															m[i * 4 - j] = {0, 0}
-														end
-													end
-
+												for i = 1, ammo do
 													xp = x
 													x = x - spacing + 1 / capacity
 
-													if i <= ammo then
-														m[i * 4 - 3][1], m[i * 4 - 3][2] = xp, height
-														m[i * 4 - 2][1], m[i * 4 - 2][2] = xp, 0
-														m[i * 4 - 1][1], m[i * 4 - 1][2] = x, 0
-														m[i * 4 - 0][1], m[i * 4 - 0][2] = x, height
-													end
+													m[i * 8 - 7], m[i * 8 - 6] = xp, height
+													m[i * 8 - 5], m[i * 8 - 4] = xp, 0
+													m[i * 8 - 3], m[i * 8 - 2] = x, 0
+													m[i * 8 - 1], m[i * 8 - 0] = x, height
 
 													x = x + spacing
 												end
 
-												gl.VertexPointer(m)
-												gl.DrawArrays("QUADS", 0, 4 * ammo)
+												if ammo > 0 then
+													gl.VertexPointer(m, 2)  -- this call (possibly the second call *also*) causes memory corruption on older versions of LuaGL  -- TODO: update windows and 64-bit LuaGL libraries
+													gl.DrawArrays("QUADS", 0, 4 * ammo)
+												end
 											gl.DisableClientState("VERTEX_ARRAY")
 										gl.PopAttrib()
 									gl.PopMatrix()
@@ -519,30 +510,25 @@ local function play_drawWorld(d)
 												local x = 0
 												local xp = x
 												for i = 1, clips do
-													for j = 0, 3 do
-														if not m[i * 4 - j] then
-															m[i * 4 - j] = {0, 0}
-														end
-													end
-
 													xp = x
 													x = x + spacing
 
-													m[i * 4 - 3][1], m[i * 4 - 3][2] = xp, height
-													m[i * 4 - 2][1], m[i * 4 - 2][2] = xp, 0
-													m[i * 4 - 1][1], m[i * 4 - 1][2] = x, 0
-													m[i * 4 - 0][1], m[i * 4 - 0][2] = x, height
+													m[i * 8 - 7], m[i * 8 - 6] = xp, height
+													m[i * 8 - 5], m[i * 8 - 4] = xp, 0
+													m[i * 8 - 3], m[i * 8 - 2] = x, 0
+													m[i * 8 - 1], m[i * 8 - 0] = x, height
 
 													x = x + spacing
 												end
 
-												gl.VertexPointer(m)
-												gl.DrawArrays("QUADS", 0, 4 * clips)
+												if clips > 0 then
+													gl.VertexPointer(m, 2)
+													gl.DrawArrays("QUADS", 0, 4 * clips)  -- this call (possibly the second call *also*) causes memory corruption on older versions of LuaGL  -- TODO: update windows and 64-bit LuaGL libraries
+												end
 											gl.DisableClientState("VERTEX_ARRAY")
 										gl.PopAttrib()
 									gl.PopMatrix()
 								end
---]]
 
 								gl.Color(v.color.r, v.color.g, v.color.b, 1)
 								gl.TexEnv("TEXTURE_ENV_COLOR", v.color.r, v.color.g, v.color.b, 1)
@@ -945,8 +931,6 @@ function st_play_step(d)
 						end
 
 						gl.NewList(list, "COMPILE")
-							local a = {}
-							local t = {}
 							local offset = tankbobs.m_vec2()
 							local tmp = tankbobs.m_vec2()
 
