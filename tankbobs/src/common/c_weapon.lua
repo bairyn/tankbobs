@@ -399,7 +399,7 @@ function c_weapon_init()
 	weapon.fireSound = "saw.wav"
 	weapon.reloadSound = "railgun-reload.wav"
 	weapon.launchDistance = 2
-	weapon.aimAid = true
+	weapon.aimAid = false
 	weapon.capacity = 64  -- can be used for 8 seconds
 	weapon.clips = 1
 	weapon.reloadTime = 0
