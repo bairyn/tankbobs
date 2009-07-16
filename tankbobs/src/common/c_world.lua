@@ -1065,6 +1065,8 @@ function c_world_tank_step(d, tank)
 
 			v.R = v.R / (1 + tank_worldFriction)
 			t_w_setLinearVelocity(tank.body, v)
+
+			tank.state.reverse = false
 		end
 
 		if tank.state.left then
