@@ -406,7 +406,7 @@ local function play_drawWorld(d)
 									vec.R = c_const_get("aimAid_maxDistance")
 									endP:add(vec)
 					
-									b, vec = c_world_findClosestIntersection(start, endP)
+									b, vec = c_world_findClosestIntersection(start, endP)  -- THIS FUNCTION MIGHT BE CAUSE
 									if b then
 										endP = vec
 									end

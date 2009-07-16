@@ -104,6 +104,13 @@ local function client_sanitizeName(name)
 	return sazitizedName
 end
 
+local function sendToClient(client)
+	if client.port and client.ip then
+		tankbobs.n_setPort(client.port)
+		tankbobs.n_sendPacket(client.ip)
+	end
+end
+
 local function client_getByIP(ip)
 	for k, v in pairs(clients) do
 		if v.ip == ip then
@@ -122,8 +129,7 @@ local function client_askForTick(client)
 	client.lastTickSendTime = t
 	tankbobs.n_newPacket(1)
 	tankbobs.n_writeToPacket(tankbobs.io_fromChar(0xA3))
-	tankbobs.n_setPort(client.port)
-	tankbobs.n_sendPacket(client.ip)
+	sendToClient(client)
 end
 
 local function client_validate(client, ui)
@@ -134,8 +140,7 @@ local function client_disconnect(client, reason)
 	tankbobs.n_newPacket(#reason + 1)
 	tankbobs.n_writeToPacket(tankbobs.io_fromChar(0xA4))
 	tankbobs.n_writeToPacket(reason)
-	tankbobs.n_setPort(client.port)
-	-- send the packet a few times
+	sendToClient(client)
 	tankbobs.n_sendPacket(client.ip)
 	tankbobs.n_sendPacket(client.ip)
 	tankbobs.n_sendPacket(client.ip)
@@ -221,8 +226,7 @@ function client_step(d)
 							tankbobs.n_writeToPacket(c_tcm_current_set.name .. string.char(0x00))
 							tankbobs.n_writeToPacket(c_tcm_current_map.name .. string.char(0x00))
 
-							tankbobs.n_setPort(client.port)
-							tankbobs.n_sendPacket(client.ip)
+							sendToClient(client)
 						end
 					end
 				end
@@ -241,8 +245,7 @@ function client_step(d)
 
 									tankbobs.n_newPacket(1)
 									tankbobs.n_writeToPacket(tankbobs.io_fromChar(0xA1))
-									tankbobs.n_setPort(client.port)
-									tankbobs.n_sendPacket(client.ip)
+									sendToClient(client)
 
 									s_printnl("'", client.tank.name, "' entered the game from ", client.ip, ":", client.port)
 								else
@@ -347,8 +350,7 @@ function client_step(d)
 				end
 				-- send a snapshot of the world in the 1000 remaining bytes
 				tankbobs.n_writeToPacket(tankbobs.w_persistWorld(c_weapon_getProjectiles(), c_world_getTanks(), c_world_getPowerups(), c_tcm_current_map.walls))
-				tankbobs.n_setPort(client.port)
-				tankbobs.n_sendPacket(client.ip)
+				sendToClient(client)
 			else
 				client_askForTick(v)
 			end

@@ -107,7 +107,7 @@ static void in_private_freeEvents(in_sdlevent *e)
 int in_getEvents(lua_State *L)
 {
 	SDL_Event event;
-	in_sdlevent *e;
+	in_sdlevent *e = NULL;
 	in_sdlevent *l;
 	register unsigned int results = 0;
 
