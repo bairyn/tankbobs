@@ -396,15 +396,15 @@ function c_weapon_init()
 
 	weapon.knockback = 16384
 	weapon.texture = "saw.png"
-	weapon.fireSound = "saw.mav"
-	weapon.reloadSound = "reload.wav"
-	weapon.launchDistance = 3
+	weapon.fireSound = "saw.wav"
+	weapon.reloadSound = "railgun-reload.wav"
+	weapon.launchDistance = 2
 	weapon.aimAid = true
 	weapon.capacity = 64  -- can be used for 8 seconds
-	weapon.clips = 0
+	weapon.clips = 1
 	weapon.reloadTime = 0
 	weapon.shotgunClips = false
-	weapon.meleeRange = 2
+	weapon.meleeRange = 3
 	weapon.width = 0.75
 	weapon.trail = 0
 	weapon.trailWidth = 0
@@ -413,10 +413,10 @@ function c_weapon_init()
 	weapon.texturer[3](0, 0)
 	weapon.texturer[4](1, 0)
 	weapon.texturer[1](1, 1)
-	weapon.render[1](-1, 1)
-	weapon.render[2](-1, -1)
-	weapon.render[3](1, -1)
-	weapon.render[4](1, 1)
+	weapon.render[1](-0.1, 5)
+	weapon.render[2](-0.1, 2)
+	weapon.render[3](0.1, 2)
+	weapon.render[4](0.1, 5)
 
 	weapon.projectileTexture = "saw-projectile.png"
 	weapon.projectileDensity = 0
@@ -551,8 +551,21 @@ function c_weapon_pickUp(tank, weaponName)
 	tank.shotgunReloadState = nil
 end
 
-function c_weapon_fireMeleeWeapon(tank)
-	print("TODO")
+function c_weapon_fireMeleeWeapon(tank, weapon)
+	local start, endP = tankbobs.m_vec2(tank.p), tankbobs.m_vec2()
+
+	endP.t = tank.r
+	endP.R = weapon.launchDistance
+	start:add(endP)
+
+	endP.R = endP.R + weapon.meleeRange
+
+	local status, _, typeOfTarget, target = c_world_findClosestIntersection(start, endP)
+	if status then
+		if typeOfTarget == "tank" then
+			c_weapon_meleeHit(target, tank)
+		end
+	end
 end
 
 function c_weapon_fire(tank)
@@ -660,7 +673,7 @@ function c_weapon_fire(tank)
 		tank.m.fired = true
 
 		if weapon.meleeRange ~= 0 then
-			return c_weapon_fireMeleeWeapon(tank)
+			return c_weapon_fireMeleeWeapon(tank, weapon)
 		end
 
 		for i = 1, weapon.pellets do
@@ -677,7 +690,7 @@ function c_weapon_fire(tank)
 
 			projectile.r = vec.t
 
-			projectile.m.body = tankbobs.w_addBody(projectile.p, projectile.r, c_const_get("projectile_canSleep"), c_const_get("projectile_isBullet"), c_const_get("projectile_linearDamping"), c_const_get("projectile_angularDamping"), weapon.projectileHull, weapon.projectileDensity, c_const_get("projectile_friction"), weapon.projectileRestitution, true, c_const_get("projectile_contentsMask"), c_const_get("projectile_clipmask"))
+			projectile.m.body = tankbobs.w_addBody(projectile.p, projectile.r, c_const_get("projectile_canSleep"), c_const_get("projectile_isBullet"), c_const_get("projectile_linearDamping"), c_const_get("projectile_angularDamping"), weapon.projectileHull, weapon.projectileDensity, c_const_get("projectile_friction"), weapon.projectileRestitution, true, c_const_get("projectile_contentsMask"), c_const_get("projectile_clipmask"), c_const_get("projectile_isSensor"), #c_world_projectiles + 1)
 			vec.R = weapon.speed
 			tankbobs.w_setLinearVelocity(projectile.m.body, vec)
 
@@ -723,6 +736,14 @@ function c_weapon_hit(tank, projectile)
 	end
 end
 
+function c_weapon_meleeHit(tank, attacker)
+	c_world_tankDamage(tank, attacker.weapon.damage)
+
+	if tank.health <= 0 then
+		tank.killer = attacker
+	end
+end
+
 function c_weapon_projectileRemove(projectile)
 	for k, v in pairs(c_world_projectiles) do
 		if v == projectile then
@@ -747,7 +768,7 @@ function c_weapon_projectileCollided(projectile, body)
 
 		projectile.collisions = projectile.collisions + 1
 
-		local tank = select(2, c_world_isTank(body))
+		local tank = c_world_isTank(body)
 		if tank then
 			tank.m.lastDamageTime = tankbobs.t_getTicks()
 		end

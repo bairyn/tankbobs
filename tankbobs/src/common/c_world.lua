@@ -61,6 +61,7 @@ local tank_speedK
 local tank_rotationChange
 local tank_rotationChangeMinSpeed
 local tank_worldFriction
+local c_world_testBody
 local behind
 
 local worldTime = 0
@@ -114,12 +115,16 @@ function c_world_init()
 
 	c_const_set("wall_contentsMask", WALL, 1)
 	c_const_set("wall_clipmask", WALL + POWERUP + TANK + PROJECTILE, 1)
+	c_const_set("wall_isSensor", false, 1)
 	c_const_set("powerup_contentsMask", POWERUP, 1)
-	c_const_set("powerup_clipmask", WALL + POWERUP + TANK, 1)
+	c_const_set("powerup_clipmask", WALL + TANK + POWERUP, 1)
+	c_const_set("powerup_isSensor", false, 1)
 	c_const_set("tank_contentsMask", TANK, 1)
 	c_const_set("tank_clipmask", WALL + POWERUP + TANK + PROJECTILE, 1)
-	c_const_set("projectile_contentsMask", POWERUP, 1)
+	c_const_set("tank_isSensor", false, 1)
+	c_const_set("projectile_contentsMask", PROJECTILE, 1)
 	c_const_set("projectile_clipmask", WALL + TANK + PROJECTILE, 1)
+	c_const_set("projectile_isSensor", false, 1)
 
 	c_const_set("world_behind", 5000, 1)  -- (in direct ms)
 	behind = c_const_get("world_behind")
@@ -161,7 +166,7 @@ function c_world_init()
 	c_const_set("tank_intensityMaxSpeed", 6, 1)
 	c_const_set("tank_collideMinDamage", 5, 1)
 	c_const_set("tank_deceleration", 64 / 1000, 1)
-	c_const_set("tank_decelerationMinSpeed", -1, 1)
+	c_const_set("tank_decelerationMinSpeed", 8, 1)
 	c_const_set("tank_highHealth", 66, 1)
 	c_const_set("tank_lowHealth", 33, 1)
 	c_const_set("tank_acceleration",
@@ -465,7 +470,7 @@ function c_world_newWorld()
 	lastPowerupSpawnTime = nil
 	nextPowerupSpawnPoint = nil
 
-	for _, v in pairs(c_tcm_current_map.walls) do
+	for k, v in pairs(c_tcm_current_map.walls) do
 		local breaking = false repeat
 			v.m.pos = t_t_clone(true, v.p)
 
@@ -475,7 +480,7 @@ function c_world_newWorld()
 
 			-- add wall to world
 			local b = c_world_wallShape(v.p)
-			v.m.body = tankbobs.w_addBody(b[1], 0, c_const_get("wall_canSleep"), c_const_get("wall_isBullet"), c_const_get("wall_linearDamping"), c_const_get("wall_angularDamping"), b[2], c_const_get("wall_density"), c_const_get("wall_friction"), c_const_get("wall_restitution"), not v.static, c_const_get("wall_contentsMask"), c_const_get("wall_clipmask"))
+			v.m.body = tankbobs.w_addBody(b[1], 0, c_const_get("wall_canSleep"), c_const_get("wall_isBullet"), c_const_get("wall_linearDamping"), c_const_get("wall_angularDamping"), b[2], c_const_get("wall_density"), c_const_get("wall_friction"), c_const_get("wall_restitution"), not v.static, c_const_get("wall_contentsMask"), c_const_get("wall_clipmask"), c_const_get("wall_isSensor"), k)
 			if not v.m.body then
 				error "c_world_newWorld: could not add a wall to the physical world"
 			end
@@ -517,6 +522,20 @@ function c_world_freeWorld()
 
 	c_world_powerups = {}
 	c_world_tanks = {}
+end
+
+function c_world_testBody(ent)
+	local p = ent.p
+
+	if p.y > c_tcm_current_map.uppermost then
+		ent.collided = true
+	elseif p.y < c_tcm_current_map.lowermost then
+		ent.collided = true
+	elseif p.x < c_tcm_current_map.leftmost then
+		ent.collided = true
+	elseif p.x > c_tcm_current_map.rightmost then
+		ent.collided = true
+	end
 end
 
 function c_world_tank_spawn(tank)
@@ -599,8 +618,17 @@ function c_world_tank_checkSpawn(d, tank)
 	end
 	tank.cd = {}
 
+	-- find index
+	local index = 1
+
+	for k, v in pairs(c_world_tanks) do
+		if v == tank then
+			index = k
+		end
+	end
+
 	-- add a physical body
-	tank.body = tankbobs.w_addBody(tank.p, tank.r, c_const_get("tank_canSleep"), c_const_get("tank_isBullet"), c_const_get("tank_linearDamping"), c_const_get("tank_angularDamping"), tank.h, c_const_get("tank_density"), c_const_get("tank_friction"), c_const_get("tank_restitution"), not c_const_get("tank_static"), c_const_get("tank_contentsMask"), c_const_get("tank_clipmask"))
+	tank.body = tankbobs.w_addBody(tank.p, tank.r, c_const_get("tank_canSleep"), c_const_get("tank_isBullet"), c_const_get("tank_linearDamping"), c_const_get("tank_angularDamping"), tank.h, c_const_get("tank_density"), c_const_get("tank_friction"), c_const_get("tank_restitution"), not c_const_get("tank_static"), c_const_get("tank_contentsMask"), c_const_get("tank_clipmask"), c_const_get("tank_isSensor"), index)
 
 	tank.exists = true
 
@@ -927,6 +955,16 @@ function c_world_tank_step(d, tank)
 		return
 	end
 
+	if tank.m.collided then
+		-- tank somehow escaped world bounds
+
+		tank.m.collided = false
+
+		return c_world_tank_die(tank)
+	else
+		c_world_testBody(tank)
+	end
+
 	if tank.health <= 0 then
 		return c_world_tank_die(tank, t)
 	end
@@ -958,52 +996,65 @@ function c_world_tank_step(d, tank)
 
 		t_w_setLinearVelocity(tank.body, v)
 	else
-		if tank.state.forward then
-			-- determine the acceleration
-			local acceleration
-			local speedK = tank_speedK
+		if tank.state.forward or tank.state.back then
+			if tank.state.forward then
+				-- determine the acceleration
+				local acceleration
+				local speedK = tank_speedK
 
-			for _, v in pairs(tank_acceleration) do  -- local copy of table for optimization
-				if v[2] then
-					if vel.R >= v[2] * speedK then
-						acceleration = v[1]
+				for _, v in pairs(tank_acceleration) do  -- local copy of table for optimization
+					if v[2] then
+						if vel.R >= v[2] * speedK then
+							acceleration = v[1]
+						end
+					elseif not acceleration then
+						acceleration = v[1] * speedK
 					end
-				elseif not acceleration then
-					acceleration = v[1] * speedK
 				end
-			end
 
-			if tank.cd.acceleration then
-				acceleration = acceleration * c_const_get("tank_accelerationModifier")
-			end
-
-			local newVel = t_m_vec2(vel)
-			newVel.R = newVel.R + acceleration
-			newVel.t = tank.r
-			if vel.R >= tank_rotationChangeMinSpeed * speedK then
-				-- interpolate in the right direction
-				vel.t    = math.fmod(vel.t, 2 * math.pi)
-				newVel.t = math.fmod(newVel.t, 2 * math.pi)
-				if        vel.t - newVel.t > math.pi then
-					vel.t    =    vel.t - 2 * math.pi
-				elseif newVel.t -    vel.t > math.pi then
-					newVel.t = newVel.t - 2 * math.pi
+				if tank.cd.acceleration then
+					acceleration = acceleration * c_const_get("tank_accelerationModifier")
 				end
-				newVel.t = common_lerp(vel.t, newVel.t, tank_rotationChange)
-			end
 
-			t_w_setLinearVelocity(tank.body, newVel)
-			vel(newVel)
-		elseif tank.state.back then
-			if vel.R >= c_const_get("tank_decelerationMinSpeed") then
 				local newVel = t_m_vec2(vel)
-
-				if newVel.R > 0 then
-					newVel.R = newVel.R - c_const_get("tank_deceleration")
+				newVel.R = newVel.R + acceleration
+				newVel.t = tank.r
+				if vel.R >= tank_rotationChangeMinSpeed * speedK then
+					-- interpolate in the right direction
+					vel.t    = math.fmod(vel.t, 2 * math.pi)
+					newVel.t = math.fmod(newVel.t, 2 * math.pi)
+					if        vel.t - newVel.t > math.pi then
+						vel.t    =    vel.t - 2 * math.pi
+					elseif newVel.t -    vel.t > math.pi then
+						newVel.t = newVel.t - 2 * math.pi
+					end
+					newVel.t = common_lerp(vel.t, newVel.t, tank_rotationChange)
 				end
 
 				t_w_setLinearVelocity(tank.body, newVel)
 				vel(newVel)
+			end
+			if tank.state.back then
+				if vel.R <= c_const_get("tank_decelerationMinSpeed") then
+					-- reverse
+
+					local addVel = t_m_vec2()
+					addVel.R = c_const_get("tank_deceleration")
+					addVel.t = tank.r + math.pi
+					vel:add(addVel)
+					t_w_setLinearVelocity(tank.body, vel)
+				else
+					-- break
+
+					local newVel = t_m_vec2(vel)
+
+					if newVel.R > 0 then
+						newVel.R = newVel.R - c_const_get("tank_deceleration")
+					end
+
+					t_w_setLinearVelocity(tank.body, newVel)
+					vel(newVel)
+				end
 			end
 		else
 			local v = t_w_getLinearVelocity(tank.body)
@@ -1092,6 +1143,8 @@ function c_world_projectile_step(d, projectile)
 		c_weapon_projectileRemove(projectile)
 		return
 	end
+
+	c_world_testBody(projectile)
 
 	projectile.p(t_w_getPosition(projectile.m.body))
 	projectile.r = t_w_getAngle(projectile.m.body)
@@ -1197,7 +1250,16 @@ function c_world_powerupSpawnPoint_step(d, powerupSpawnPoint)
 
 			powerup.p(powerupSpawnPoint.p)
 
-			powerup.m.body = tankbobs.w_addBody(powerup.p, 0, c_const_get("powerup_canSleep"), c_const_get("powerup_isBullet"), c_const_get("powerup_linearDamping"), c_const_get("powerup_angularDamping"), c_world_powerupHull(powerup), c_const_get("powerup_density"), c_const_get("powerup_friction"), c_const_get("powerup_restitution"), not c_const_get("powerup_static"), c_const_get("powerup_contentsMask"), c_const_get("powerup_clipmask"))
+			-- find index
+			local index = 1
+
+			for k, v in pairs(c_world_powerups) do
+				if v == powerup then
+					index = k
+				end
+			end
+
+			powerup.m.body = tankbobs.w_addBody(powerup.p, 0, c_const_get("powerup_canSleep"), c_const_get("powerup_isBullet"), c_const_get("powerup_linearDamping"), c_const_get("powerup_angularDamping"), c_world_powerupHull(powerup), c_const_get("powerup_density"), c_const_get("powerup_friction"), c_const_get("powerup_restitution"), not c_const_get("powerup_static"), c_const_get("powerup_contentsMask"), c_const_get("powerup_clipmask"), c_const_get("powerup_isSensor"), index)
 			-- add some initial push to the powerup
 			local push = t_m_vec2()
 			push.R = c_const_get("powerup_pushStrength")
@@ -1273,6 +1335,8 @@ function c_world_powerup_step(d, powerup)
 		c_world_powerupRemove(powerup)
 		return
 	end
+
+	c_world_testBody(powerup)
 
 	if t > powerup.spawnTime + c_const_get("powerup_lifeTime") and c_const_get("powerup_lifeTime") > 0 then
 		powerup.collided = true
@@ -1447,33 +1511,27 @@ function c_world_teleporter_step(d, teleporter)
 end
 
 local function c_world_isTank(body)
-	for _, v in pairs(c_world_tanks) do
-		if v.body == body then
-			return true, v
-		end
+	if tankbobs.w_getContents(body) == TANK then
+		return c_world_tanks[tankbobs.w_getIndex(body)]
 	end
 
-	return false
+	return nil
 end
 
 local function c_world_isProjectile(body)
-	for _, v in pairs(c_weapon_getProjectiles()) do
-		if v.m.body == body then
-			return true, v
-		end
+	if tankbobs.w_getContents(body) == PROJECTILE then
+		return c_weapon_getProjectiles()[tankbobs.w_getIndex(body)]
 	end
 
-	return false
+	return nil
 end
 
 local function c_world_isPowerup(body)
-	for _, v in pairs(c_world_powerups) do
-		if v.m.body == body then
-			return true, v
-		end
+	if tankbobs.w_getContents(body) == POWERUP then
+		return c_world_powerups[tankbobs.w_getIndex(body)]
 	end
 
-	return false
+	return nil
 end
 
 function c_world_tankDamage(tank, damage)
@@ -1513,13 +1571,13 @@ function c_world_contactListener(shape1, shape2, body1, body2, position, separat
 	local powerup = false
 
 	if c_world_isPowerup(body1) or c_world_isPowerup(body2) then
-		local tank = select(2, c_world_isTank(body1))
-		local tank2 = select(2, c_world_isTank(body2))
+		local tank = c_world_isTank(body1)
+		local tank2 = c_world_isTank(body2)
 
 		if tank then
-			c_world_powerup_pickUp(tank, select(2, c_world_isPowerup(body2)))
+			c_world_powerup_pickUp(tank, c_world_isPowerup(body2))
 		elseif tank2 then
-			c_world_powerup_pickUp(tank2, select(2, c_world_isPowerup(body1)))
+			c_world_powerup_pickUp(tank2, c_world_isPowerup(body1))
 		end
 
 		powerup = true
@@ -1529,14 +1587,14 @@ function c_world_contactListener(shape1, shape2, body1, body2, position, separat
 		-- remove the projectile
 		local projectile, projectile2
 
-		projectile = select(2, c_world_isProjectile(body1))
-		projectile2 = select(2, c_world_isProjectile(body2))
+		projectile = c_world_isProjectile(body1)
+		projectile2 = c_world_isProjectile(body2)
 
 		-- test if the projectile hit a tank
 		local tank, tank2
 
-		tank = select(2, c_world_isTank(body1))
-		tank2 = select(2, c_world_isTank(body2))
+		tank = c_world_isTank(body1)
+		tank2 = c_world_isTank(body2)
 
 		-- only one of them can be a tank (and if one of them is, only one them can be a projectile)
 		if tank then
@@ -1564,8 +1622,8 @@ function c_world_contactListener(shape1, shape2, body1, body2, position, separat
 	elseif c_world_isTank(body1) or c_world_isTank(body2) then
 		local tank, tank2
 
-		tank = select(2, c_world_isTank(body1))
-		tank2 = select(2, c_world_isTank(body2))
+		tank = c_world_isTank(body1)
+		tank2 = c_world_isTank(body2)
 
 		if not powerup then
 			if tank then

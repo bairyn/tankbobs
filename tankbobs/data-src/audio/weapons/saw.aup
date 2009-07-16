@@ -1,0 +1,23 @@
+<?xml version="1.0" standalone="no" ?>
+<!DOCTYPE project PUBLIC "-//audacityproject-1.3.0//DTD//EN" "http://audacity.sourceforge.net/xml/audacityproject-1.3.0.dtd" >
+<project xmlns="http://audacity.sourceforge.net/xml/" projname="saw_data" version="1.3.0" audacityversion="1.3.7" sel0="0.0000000000" sel1="2.3219954649" vpos="0" h="0.0000000000" zoom="183.1054687500" rate="11025">
+	<tags>
+		<tag name="id3v2" value="1"/>
+		<tag name="YEAR" value="2009"/>
+		<tag name="Software" value="File created by GoldWave.  GoldWave copyright (C) Chris Craig"/>
+		<tag name="ALBUM" value="Tankbobs"/>
+	</tags>
+	<wavetrack name="chainsaw" channel="2" linked="0" offset="0.00000000" rate="11025" gain="1" pan="0">
+		<waveclip offset="0.00000000">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="25600">
+				<waveblock start="0">
+					<simpleblockfile filename="e0000054.au" len="25600" min="-0.726562" max="0.640625" rms="0.095495"/>
+				</waveblock>
+			</sequence>
+			<envelope numpoints="2">
+				<controlpoint t="0.000000000000" val="1.000000000000"/>
+				<controlpoint t="2.321935297052" val="1.000000000000"/>
+			</envelope>
+		</waveclip>
+	</wavetrack>
+</project>

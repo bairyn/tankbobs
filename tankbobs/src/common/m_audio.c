@@ -340,6 +340,7 @@ int a_stopMusic(lua_State *L)
 int a_playSound(lua_State *L)
 {
 	/* similar to a_initSound */
+	int loops = 0;
 	const char *filename = NULL;
 
 	CHECKINIT(init, L);
@@ -354,6 +355,11 @@ int a_playSound(lua_State *L)
 		sound_t *oldestSound = NULL;
 
 		filename = lua_tostring(L, 1);
+		if(lua_isnumber(L, 2))
+		{
+			loops = lua_tonumber(L, 2);
+		}
+		lua_settop(L, 0);
 
 		for(i = &sounds[0]; i - sounds < CACHEDSOUNDS; i++)
 		{
@@ -362,7 +368,7 @@ int a_playSound(lua_State *L)
 				i->lastUsedTime = SDL_GetTicks();
 				i->active = TRUE;
 
-				Mix_PlayChannel(-1, i->chunk, 0);
+				Mix_PlayChannel(-1, i->chunk, loops);
 
 				return 0;
 			}
@@ -375,11 +381,14 @@ int a_playSound(lua_State *L)
 			{
 				i->chunk = Mix_LoadWAV(filename);
 
+				if(!i->chunk)
+					continue;
+
 				strncpy(i->filename, filename, sizeof(i->filename));
 				i->lastUsedTime = SDL_GetTicks();
 				i->active = TRUE;
 
-				Mix_PlayChannel(-1, i->chunk, 0);
+				Mix_PlayChannel(-1, i->chunk, loops);
 
 				return 0;
 			}
@@ -406,7 +415,7 @@ int a_playSound(lua_State *L)
 			oldestSound->lastUsedTime = SDL_GetTicks();
 			oldestSound->active = TRUE;
 
-			Mix_PlayChannel(-1, oldestSound->chunk, 0);
+			Mix_PlayChannel(-1, oldestSound->chunk, loops);
 		}
 		else
 		{
@@ -419,7 +428,7 @@ int a_playSound(lua_State *L)
 			sounds[0].lastUsedTime = oldestTime;  /* oldestTime is still set to SDL_GetTicks() if there are no older sounds */
 			sounds[0].active = TRUE;
 
-			Mix_PlayChannel(-1, sounds[0].chunk, 0);
+			Mix_PlayChannel(-1, sounds[0].chunk, loops);
 		}
 	}
 
@@ -504,6 +513,9 @@ int a_setVolumeChunk(lua_State *L)
 			if(!i->active)
 			{
 				i->chunk = Mix_LoadWAV(filename);
+
+				if(!i->chunk)
+					continue;
 
 				strncpy(i->filename, filename, sizeof(i->filename));
 				i->lastUsedTime = SDL_GetTicks();

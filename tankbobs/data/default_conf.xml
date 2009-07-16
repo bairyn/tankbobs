@@ -122,8 +122,4 @@
 	<server>
 		<fps>64</fps>
 	</server>
-
-	<mods>
-		<unsafe>false</unsafe>
-	</mods>
 </config>

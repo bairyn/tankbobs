@@ -173,6 +173,15 @@ function st_play_init()
 
 	gui_addLabel(tankbobs.m_vec2(37.5, 50), "", updatePause, nil, c_config_get("config.game.pauseRed"), c_config_get("config.game.pauseGreen"), c_config_get("config.game.pauseBlue"), c_config_get("config.game.pauseAlpha"), c_config_get("config.game.pauseRed"), c_config_get("config.game.pauseGreen"), c_config_get("config.game.pauseBlue"), c_config_get("config.game.pauseAlpha"))
 
+	-- initialize melee sounds
+	for _, v in pairs(c_weapon_getWeapons()) do
+		if v.meleeRange ~= 0 then
+			tankbobs.a_setVolumeChunk(c_const_get("weaponAudio_dir") .. v.fireSound, 0)
+			tankbobs.a_playSound(v.fireSound, -1)
+			tankbobs.a_setVolumeChunk(c_const_get("weaponAudio_dir") .. v.fireSound, 0)
+		end
+	end
+
 	-- initialize the world
 	c_world_newWorld()
 
@@ -224,6 +233,14 @@ function st_play_done()
 
 	c_tcm_unload_extra_data(false)
 	c_weapon_clear(false)
+
+	-- free melee sounds
+	for _, v in pairs(c_weapon_getWeapons()) do
+		if v.meleeRange ~= 0 then
+			tankbobs.a_setVolumeChunk(c_const_get("weaponAudio_dir") .. v.fireSound, 0)
+			tankbobs.a_freeSound(c_const_get("weaponAudio_dir") .. v.fireSound)
+		end
+	end
 
 	-- reset texenv
 	gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
@@ -325,7 +342,7 @@ local function play_drawWorld(d)
 				if i == c_const_get("tcm_tankLevel") then
 					-- render tanks
 					for k, v in pairs(c_world_getTanks()) do
-						if(v.exists) then
+						if v.exists then
 							gl.PushAttrib("CURRENT_BIT")
 								gl.PushMatrix()
 									gl.Translate(v.p.x, v.p.y, 0)
@@ -372,6 +389,166 @@ local function play_drawWorld(d)
 									end
 								gl.PopMatrix()
 							gl.PopAttrib()
+
+							-- aiming aids
+							gl.EnableClientState("VERTEX_ARRAY")
+							if (v.weapon and v.weapon.aimAid and not v.reloading) or (v.cd.aimAid) then
+								gl.PushAttrib("ENABLE_BIT")
+									local b
+									local vec = tankbobs.m_vec2()
+									local start, endP = tankbobs.m_vec2(v.p), tankbobs.m_vec2()
+					
+									vec.t = v.r
+									vec.R = c_const_get("aimAid_startDistance")
+									start:add(vec)
+					
+									endP(start)
+									vec.R = c_const_get("aimAid_maxDistance")
+									endP:add(vec)
+					
+									b, vec = c_world_findClosestIntersection(start, endP)
+									if b then
+										endP = vec
+									end
+					
+									a[1][1] = start.x a[1][2] = start.y
+									a[2][1] = endP.x a[2][2] = endP.y
+									gl.Disable("TEXTURE_2D")
+									gl.Color(0.9, 0.1, 0.1, 1)
+									gl.TexEnv("TEXTURE_ENV_COLOR", 0.9, 0.1, 0.1, 1)
+									gl.VertexPointer(a)
+									gl.LineWidth(c_const_get("aimAid_width"))
+									gl.DrawArrays("LINES", 0, 2)
+								gl.PopAttrib()
+							end
+							gl.DisableClientState("VERTEX_ARRAY")
+
+							-- draw name
+							gl.PushMatrix()
+								gl.Translate(v.p.x, v.p.y, 0)
+								tankbobs.r_drawString(v.name, c_const_get("tank_nameOffset"), v.color.r, v.color.g, v.color.b, c_config_get("config.game.scoresAlpha"), c_const_get("tank_nameScalex"), c_const_get("tank_nameScaley"), false)
+							gl.PopMatrix()
+
+							-- healthbars and ammo bars
+							gl.PushMatrix()
+								gl.Translate(v.p.x, v.p.y, 0)
+								gl.Rotate(tankbobs.m_degrees(v.r) + c_const_get("healthbar_rotation"), 0, 0, 1)
+								if not (c_config_get("config.game.player" .. tostring(k) .. ".color", nil, true)) then
+									c_config_set("config.game.player" .. tostring(k) .. ".color.r", c_config_get("config.game.defaultTankRed"))
+									c_config_set("config.game.player" .. tostring(k) .. ".color.g", c_config_get("config.game.defaultTankBlue"))
+									c_config_set("config.game.player" .. tostring(k) .. ".color.b", c_config_get("config.game.defaultTankGreen"))
+									c_config_set("config.game.player" .. tostring(k) .. ".color.a", c_config_get("config.game.defaultTankAlpha"))
+								end
+
+								if v.weapon and v.weapon.capacity > 0 then
+									gl.Color(1, 1, 1, 1)
+									gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, 1)
+									gl.CallList(ammobarBorder_listBase)
+									gl.Color(c_const_get("ammobar_r"), c_const_get("ammobar_g"), c_const_get("ammobar_b"), c_const_get("ammobar_a"))
+									gl.TexEnv("TEXTURE_ENV_COLOR", c_const_get("ammobar_r"), c_const_get("ammobar_g"), c_const_get("ammobar_b"), c_const_get("ammobar_a"))
+									gl.PushMatrix()
+										gl.PushAttrib("ENABLE_BIT")
+											gl.Disable("TEXTURE_2D")
+											gl.Translate((c_const_get("ammobarBorder_renderx1") + c_const_get("ammobarBorder_renderx2")) / 2, c_const_get("ammobarBorder_rendery1"), 0)
+											gl.Scale(c_const_get("ammobarBorder_renderx4") - c_const_get("ammobarBorder_renderx1"), 1, 1)
+
+											local height = c_const_get("ammobarBorder_rendery2") - c_const_get("ammobarBorder_rendery1")
+
+											gl.EnableClientState("VERTEX_ARRAY")
+												local ammo = v.ammo
+												local capacity = v.weapon.capacity
+												local spacing = 0.1 * (3 / capacity)
+
+												local x = 0
+												local xp = x
+												for i = 1, capacity do
+													for j = 0, 3 do
+														if not m[i * 4 - j] then
+															m[i * 4 - j] = {0, 0}
+														end
+													end
+
+													xp = x
+													x = x - spacing + 1 / capacity
+
+													if i <= ammo then
+														m[i * 4 - 3][1], m[i * 4 - 3][2] = xp, height
+														m[i * 4 - 2][1], m[i * 4 - 2][2] = xp, 0
+														m[i * 4 - 1][1], m[i * 4 - 1][2] = x, 0
+														m[i * 4 - 0][1], m[i * 4 - 0][2] = x, height
+													end
+
+													x = x + spacing
+												end
+
+												gl.VertexPointer(m)
+												gl.DrawArrays("QUADS", 0, 4 * ammo)
+											gl.DisableClientState("VERTEX_ARRAY")
+										gl.PopAttrib()
+									gl.PopMatrix()
+
+									-- clips
+									gl.PushMatrix()
+										gl.PushAttrib("ENABLE_BIT")
+											gl.Disable("TEXTURE_2D")
+											gl.Translate((c_const_get("ammobarBorder_renderx1") + c_const_get("ammobarBorder_renderx2")) / 2, c_const_get("ammobarBorder_rendery1") - 0.5, 0)
+											gl.Scale(c_const_get("ammobarBorder_renderx4") - c_const_get("ammobarBorder_renderx1"), 1, 1)
+
+											local height = 2 * c_const_get("ammobarBorder_rendery2") - c_const_get("ammobarBorder_rendery1")
+
+											gl.EnableClientState("VERTEX_ARRAY")
+												local clips = v.clips
+												local spacing = 1 / 8
+
+												local x = 0
+												local xp = x
+												for i = 1, clips do
+													for j = 0, 3 do
+														if not m[i * 4 - j] then
+															m[i * 4 - j] = {0, 0}
+														end
+													end
+
+													xp = x
+													x = x + spacing
+
+													m[i * 4 - 3][1], m[i * 4 - 3][2] = xp, height
+													m[i * 4 - 2][1], m[i * 4 - 2][2] = xp, 0
+													m[i * 4 - 1][1], m[i * 4 - 1][2] = x, 0
+													m[i * 4 - 0][1], m[i * 4 - 0][2] = x, height
+
+													x = x + spacing
+												end
+
+												gl.VertexPointer(m)
+												gl.DrawArrays("QUADS", 0, 4 * clips)
+											gl.DisableClientState("VERTEX_ARRAY")
+										gl.PopAttrib()
+									gl.PopMatrix()
+								end
+
+								gl.Color(v.color.r, v.color.g, v.color.b, 1)
+								gl.TexEnv("TEXTURE_ENV_COLOR", v.color.r, v.color.g, v.color.b, 1)
+								local scale = v.health / c_const_get("tank_health")
+								if scale < 1 then
+									scale = 1
+								end
+								gl.Scale(scale, 1, 1)
+								gl.CallList(healthbarBorder_listBase)
+								gl.Scale(1 / scale, 1, 1)
+								if v.health >= c_const_get("tank_highHealth") then
+									gl.Color(0.1, 1, 0.1, 1)
+									gl.TexEnv("TEXTURE_ENV_COLOR", 0.1, 1, 0.1, 1)
+								elseif v.health > c_const_get("tank_lowHealth") then
+									gl.Color(1, 1, 0.1, 1)
+									gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 0.1, 1)
+								else
+									gl.Color(1, 0.1, 0.1, 1)
+									gl.TexEnv("TEXTURE_ENV_COLOR", 1, 0.1, 0.1, 1)
+								end
+								gl.Scale(v.health / c_const_get("tank_health"), 1, 1)
+								gl.CallList(healthbar_listBase)
+							gl.PopMatrix()
 						end
 					end
 				end
@@ -409,43 +586,6 @@ local function play_drawWorld(d)
 				end
 			end
 		end
-
-		-- aiming aids
-		gl.EnableClientState("VERTEX_ARRAY")
-		for _, v in pairs(c_world_getTanks()) do
-			if v.exists then
-			if (v.weapon and v.weapon.aimAid and not v.reloading) or (v.cd.aimAid) then
-					gl.PushAttrib("ENABLE_BIT")
-						local b
-						local vec = tankbobs.m_vec2()
-						local start, endP = tankbobs.m_vec2(v.p), tankbobs.m_vec2()
-		
-						vec.t = v.r
-						vec.R = c_const_get("aimAid_startDistance")
-						start:add(vec)
-		
-						endP(start)
-						vec.R = c_const_get("aimAid_maxDistance")
-						endP:add(vec)
-		
-						b, vec = c_world_findClosestIntersection(start, endP)
-						if b then
-							endP = vec
-						end
-		
-						a[1][1] = start.x a[1][2] = start.y
-						a[2][1] = endP.x a[2][2] = endP.y
-						gl.Disable("TEXTURE_2D")
-						gl.Color(0.9, 0.1, 0.1, 1)
-						gl.TexEnv("TEXTURE_ENV_COLOR", 0.9, 0.1, 0.1, 1)
-						gl.VertexPointer(a)
-						gl.LineWidth(c_const_get("aimAid_width"))
-						gl.DrawArrays("LINES", 0, 2)
-					gl.PopAttrib()
-				end
-			end
-		end
-		gl.DisableClientState("VERTEX_ARRAY")
 
 		if c_config_get("config.game.gameType") == "domination" then
 			-- draw control points
@@ -519,6 +659,17 @@ local function play_drawWorld(d)
 			gl.PopMatrix()
 		end
 
+		-- melee weapons
+		for _, v in pairs(c_world_getTanks()) do
+			if v.state.firing and v.weapon and v.weapon.meleeRange ~= 0 then
+				gl.PushMatrix()
+					gl.Translate(v.p.x, v.p.y, 0)
+					gl.Rotate(tankbobs.m_degrees(v.r), 0, 0, 1)
+					gl.CallList(v.weapon.m.p.projectileList)
+				gl.PopMatrix()
+			end
+		end
+
 		-- projectiles
 		for _, v in pairs(c_weapon_getProjectiles()) do
 			if v.weapon.trail == 0 and v.weapon.trailWidth == 0 then  -- only draw the trail
@@ -547,142 +698,6 @@ local function play_drawWorld(d)
 			gl.PushMatrix()
 				gl.CallList(v[3])
 			gl.PopMatrix()
-		end
-
-		-- draw tank names
-		for _, v in pairs(c_world_getTanks()) do
-			if v.exists then
-				-- draw name
-				gl.PushMatrix()
-					gl.Translate(v.p.x, v.p.y, 0)
-					tankbobs.r_drawString(v.name, c_const_get("tank_nameOffset"), v.color.r, v.color.g, v.color.b, c_config_get("config.game.scoresAlpha"), c_const_get("tank_nameScalex"), c_const_get("tank_nameScaley"), false)
-				gl.PopMatrix()
-			end
-		end
-
-		-- healthbars and ammo bars
-		for k, v in pairs(c_world_getTanks()) do
-			if v.exists then
-				gl.PushMatrix()
-					gl.Translate(v.p.x, v.p.y, 0)
-					gl.Rotate(tankbobs.m_degrees(v.r) + c_const_get("healthbar_rotation"), 0, 0, 1)
-					if not (c_config_get("config.game.player" .. tostring(k) .. ".color", nil, true)) then
-						c_config_set("config.game.player" .. tostring(k) .. ".color.r", c_config_get("config.game.defaultTankRed"))
-						c_config_set("config.game.player" .. tostring(k) .. ".color.g", c_config_get("config.game.defaultTankBlue"))
-						c_config_set("config.game.player" .. tostring(k) .. ".color.b", c_config_get("config.game.defaultTankGreen"))
-						c_config_set("config.game.player" .. tostring(k) .. ".color.a", c_config_get("config.game.defaultTankAlpha"))
-					end
-
-					if v.weapon and v.weapon.capacity > 0 then
-						gl.Color(1, 1, 1, 1)
-						gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, 1)
-						gl.CallList(ammobarBorder_listBase)
-						gl.Color(c_const_get("ammobar_r"), c_const_get("ammobar_g"), c_const_get("ammobar_b"), c_const_get("ammobar_a"))
-						gl.TexEnv("TEXTURE_ENV_COLOR", c_const_get("ammobar_r"), c_const_get("ammobar_g"), c_const_get("ammobar_b"), c_const_get("ammobar_a"))
-						gl.PushMatrix()
-							gl.PushAttrib("ENABLE_BIT")
-								gl.Disable("TEXTURE_2D")
-								gl.Translate((c_const_get("ammobarBorder_renderx1") + c_const_get("ammobarBorder_renderx2")) / 2, c_const_get("ammobarBorder_rendery1"), 0)
-								gl.Scale(c_const_get("ammobarBorder_renderx4") - c_const_get("ammobarBorder_renderx1"), 1, 1)
-
-								local height = c_const_get("ammobarBorder_rendery2") - c_const_get("ammobarBorder_rendery1")
-
-								gl.EnableClientState("VERTEX_ARRAY")
-									local ammo = v.ammo
-									local capacity = v.weapon.capacity
-									local spacing = 0.1 * (3 / capacity)
-
-									local x = 0
-									local xp = x
-									for i = 1, capacity do
-										for j = 0, 3 do
-											if not m[i * 4 - j] then
-												m[i * 4 - j] = {0, 0}
-											end
-										end
-
-										xp = x
-										x = x - spacing + 1 / capacity
-
-										if i <= ammo then
-											m[i * 4 - 3][1], m[i * 4 - 3][2] = xp, height
-											m[i * 4 - 2][1], m[i * 4 - 2][2] = xp, 0
-											m[i * 4 - 1][1], m[i * 4 - 1][2] = x, 0
-											m[i * 4 - 0][1], m[i * 4 - 0][2] = x, height
-										end
-
-										x = x + spacing
-									end
-
-									gl.VertexPointer(m)
-									gl.DrawArrays("QUADS", 0, 4 * ammo)
-								gl.DisableClientState("VERTEX_ARRAY")
-							gl.PopAttrib()
-						gl.PopMatrix()
-
-						-- clips
-						gl.PushMatrix()
-							gl.PushAttrib("ENABLE_BIT")
-								gl.Disable("TEXTURE_2D")
-								gl.Translate((c_const_get("ammobarBorder_renderx1") + c_const_get("ammobarBorder_renderx2")) / 2, c_const_get("ammobarBorder_rendery1") - 0.5, 0)
-								gl.Scale(c_const_get("ammobarBorder_renderx4") - c_const_get("ammobarBorder_renderx1"), 1, 1)
-
-								local height = 2 * c_const_get("ammobarBorder_rendery2") - c_const_get("ammobarBorder_rendery1")
-
-								gl.EnableClientState("VERTEX_ARRAY")
-									local clips = v.clips
-									local spacing = 1 / 8
-
-									local x = 0
-									local xp = x
-									for i = 1, clips do
-										for j = 0, 3 do
-											if not m[i * 4 - j] then
-												m[i * 4 - j] = {0, 0}
-											end
-										end
-
-										xp = x
-										x = x + spacing
-
-										m[i * 4 - 3][1], m[i * 4 - 3][2] = xp, height
-										m[i * 4 - 2][1], m[i * 4 - 2][2] = xp, 0
-										m[i * 4 - 1][1], m[i * 4 - 1][2] = x, 0
-										m[i * 4 - 0][1], m[i * 4 - 0][2] = x, height
-
-										x = x + spacing
-									end
-
-									gl.VertexPointer(m)
-									gl.DrawArrays("QUADS", 0, 4 * clips)
-								gl.DisableClientState("VERTEX_ARRAY")
-							gl.PopAttrib()
-						gl.PopMatrix()
-					end
-
-					gl.Color(v.color.r, v.color.g, v.color.b, 1)
-					gl.TexEnv("TEXTURE_ENV_COLOR", v.color.r, v.color.g, v.color.b, 1)
-					local scale = v.health / c_const_get("tank_health")
-					if scale < 1 then
-						scale = 1
-					end
-					gl.Scale(scale, 1, 1)
-					gl.CallList(healthbarBorder_listBase)
-					gl.Scale(1 / scale, 1, 1)
-					if v.health >= c_const_get("tank_highHealth") then
-						gl.Color(0.1, 1, 0.1, 1)
-						gl.TexEnv("TEXTURE_ENV_COLOR", 0.1, 1, 0.1, 1)
-					elseif v.health > c_const_get("tank_lowHealth") then
-						gl.Color(1, 1, 0.1, 1)
-						gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 0.1, 1)
-					else
-						gl.Color(1, 0.1, 0.1, 1)
-						gl.TexEnv("TEXTURE_ENV_COLOR", 1, 0.1, 0.1, 1)
-					end
-					gl.Scale(v.health / c_const_get("tank_health"), 1, 1)
-					gl.CallList(healthbar_listBase)
-				gl.PopMatrix()
-			end
 		end
 	gl.PopMatrix()
 end
@@ -859,13 +874,31 @@ function st_play_step(d)
 		return
 	end
 
+	for _, v in pairs(c_weapon_getWeapons()) do
+		if v.meleeRange ~= 0 then
+			v.m.used = false
+		end
+	end
+
 	-- play sounds and insert trails
 	for _, v in pairs(c_world_getTanks()) do
+		-- handle melee sounds specially
+		if v.weapon.meleeRange ~= 0 then
+			if v.state.firing then
+				tankbobs.a_setVolumeChunk(c_const_get("weaponAudio_dir") .. v.weapon.fireSound, c_config_get("config.client.volume"))
+			else
+				tankbobs.a_setVolumeChunk(c_const_get("weaponAudio_dir") .. v.weapon.fireSound, 0)
+			end
+
+			v.weapon.m.used = true
+		end
+
 		if v.state.firing then
 			if v.m.lastFireTime ~= v.lastFireTime then
 				v.m.lastFireTime = v.lastFireTime
 
-				if v.m.empty then
+				if v.weapon.meleeRange ~= 0 then
+				elseif v.m.empty then
 					tankbobs.a_playSound(c_const_get("emptyTrigger_sound"))
 				elseif v.weapon and v.m.fired then
 					if type(v.weapon.fireSound) == "table" then
@@ -966,7 +999,7 @@ function st_play_step(d)
 		if v.m.lastCollideTime and v.m.lastCollideTimeB ~= v.m.lastCollideTime then
 			v.m.lastCollideTimeB = v.m.lastCollideTime
 
-			tankbobs.a_setVolumeChunk(c_const_get("collide_sound"), v.m.intensity * c_config_get("config.client.volume"))  -- this is temporarily commented out while Mix_VolumeChunk affects the volume of other samples
+			tankbobs.a_setVolumeChunk(c_const_get("collide_sound"), v.m.intensity * c_config_get("config.client.volume"))
 			tankbobs.a_playSound(c_const_get("collide_sound"))
 		end
 
@@ -992,6 +1025,14 @@ function st_play_step(d)
 			v.m.lastTeleportTimeB = v.m.lastTeleportTime 
 
 			tankbobs.a_playSound(c_const_get("teleport_sound"))
+		end
+	end
+
+	for _, v in pairs(c_weapon_getWeapons()) do
+		if v.meleeRange ~= 0 then
+			if not v.m.used then
+				tankbobs.a_setVolumeChunk(c_const_get("weaponAudio_dir") .. v.fireSound, 0)
+			end
 		end
 	end
 

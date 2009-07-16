@@ -60,11 +60,8 @@ void in_init(lua_State *L)
 {
 }
 
-/* TODO: remove unnecessary triple and double pointers */
-static void in_private_sdleventInit(in_sdlevent ***pE)
+static void in_private_sdleventInit(in_sdlevent *e)
 {
-	in_sdlevent *e = **pE;
-
 	e->type = NULL;
 	e->intArg0 = 0;
 	e->intArg1 = 0;
@@ -84,12 +81,10 @@ static void in_private_sdleventInit(in_sdlevent ***pE)
 	e->next = NULL;
 }
 
-static void in_private_freeEvents(in_sdlevent **event)
+static void in_private_freeEvents(in_sdlevent *e)
 {
-	in_sdlevent *e = *event;
-
 	if(e->next)
-		in_private_freeEvents(((in_sdlevent **)(&e->next)));
+		in_private_freeEvents((e->next));
 
 	if(e->strArg0)
 		free(e->strArg0);
@@ -112,16 +107,19 @@ static void in_private_freeEvents(in_sdlevent **event)
 int in_getEvents(lua_State *L)
 {
 	SDL_Event event;
-	in_sdlevent *e = malloc(sizeof(in_sdlevent));
-	in_sdlevent *l = NULL;
-	in_sdlevent **pE = &e;
-	register int results = 0;
-	in_private_sdleventInit(&pE);
+	in_sdlevent *e;
+	in_sdlevent *l;
+	register unsigned int results = 0;
 
 	CHECKINIT(init, L);
 
 	while(SDL_PollEvent(&event))
 	{
+		e = malloc(sizeof(in_sdlevent));
+		l = NULL;
+
+		in_private_sdleventInit(e);
+
 		results++;
 
 		switch(event.type)
@@ -130,8 +128,7 @@ int in_getEvents(lua_State *L)
 			{
 				in_sdlevent *n = malloc(sizeof(in_sdlevent));
 				{
-					in_sdlevent **tmp = &n;
-					in_private_sdleventInit(&tmp);
+					in_private_sdleventInit(n);
 				}
 				{
 					n->type = "nothing";
@@ -143,7 +140,7 @@ int in_getEvents(lua_State *L)
 				else
 				{
 					if(!e->next)
-						e->next = (void *)n;
+						e->next = (void *) n;
 					l->next = n;
 					l = n;
 				}
@@ -154,8 +151,7 @@ int in_getEvents(lua_State *L)
 			{
 				in_sdlevent *n = malloc(sizeof(in_sdlevent));
 				{
-					in_sdlevent **tmp = &n;
-					in_private_sdleventInit(&tmp);
+					in_private_sdleventInit(n);
 				}
 				{
 					n->type = "focus";
@@ -179,8 +175,7 @@ int in_getEvents(lua_State *L)
 			{
 				in_sdlevent *n = malloc(sizeof(in_sdlevent));
 				{
-					in_sdlevent **tmp = &n;
-					in_private_sdleventInit(&tmp);
+					in_private_sdleventInit(n);
 				}
 				{
 					char *tmp = malloc(2);
@@ -208,8 +203,7 @@ int in_getEvents(lua_State *L)
 			{
 				in_sdlevent *n = malloc(sizeof(in_sdlevent));
 				{
-					in_sdlevent **tmp = &n;
-					in_private_sdleventInit(&tmp);
+					in_private_sdleventInit(n);
 				}
 				{
 					char *tmp = malloc(2);
@@ -237,8 +231,7 @@ int in_getEvents(lua_State *L)
 			{
 				in_sdlevent *n = malloc(sizeof(in_sdlevent));
 				{
-					in_sdlevent **tmp = &n;
-					in_private_sdleventInit(&tmp);
+					in_private_sdleventInit(n);
 				}
 				{
 					n->type = "mousemove";
@@ -269,8 +262,7 @@ int in_getEvents(lua_State *L)
 			{
 				in_sdlevent *n = malloc(sizeof(in_sdlevent));
 				{
-					in_sdlevent **tmp = &n;
-					in_private_sdleventInit(&tmp);
+					in_private_sdleventInit(n);
 				}
 				{
 					n->type = "mousedown";
@@ -317,8 +309,7 @@ int in_getEvents(lua_State *L)
 			{
 				in_sdlevent *n = malloc(sizeof(in_sdlevent));
 				{
-					in_sdlevent **tmp = &n;
-					in_private_sdleventInit(&tmp);
+					in_private_sdleventInit(n);
 				}
 				{
 					n->type = "mouseup";
@@ -365,8 +356,7 @@ int in_getEvents(lua_State *L)
 			{
 				in_sdlevent *n = malloc(sizeof(in_sdlevent));
 				{
-					in_sdlevent **tmp = &n;
-					in_private_sdleventInit(&tmp);
+					in_private_sdleventInit(n);
 				}
 				{
 					n->type = "joyaxis";
@@ -394,8 +384,7 @@ int in_getEvents(lua_State *L)
 			{
 				in_sdlevent *n = malloc(sizeof(in_sdlevent));
 				{
-					in_sdlevent **tmp = &n;
-					in_private_sdleventInit(&tmp);
+					in_private_sdleventInit(n);
 				}
 				{
 					n->type = "joyball";
@@ -422,8 +411,7 @@ int in_getEvents(lua_State *L)
 			{
 				in_sdlevent *n = malloc(sizeof(in_sdlevent));
 				{
-					in_sdlevent **tmp = &n;
-					in_private_sdleventInit(&tmp);
+					in_private_sdleventInit(n);
 				}
 				{
 					n->type = "joyhat";
@@ -468,8 +456,7 @@ int in_getEvents(lua_State *L)
 			{
 				in_sdlevent *n = malloc(sizeof(in_sdlevent));
 				{
-					in_sdlevent **tmp = &n;
-					in_private_sdleventInit(&tmp);
+					in_private_sdleventInit(n);
 				}
 				{
 					n->type = "joydown";
@@ -494,8 +481,7 @@ int in_getEvents(lua_State *L)
 			{
 				in_sdlevent *n = malloc(sizeof(in_sdlevent));
 				{
-					in_sdlevent **tmp = &n;
-					in_private_sdleventInit(&tmp);
+					in_private_sdleventInit(n);
 				}
 				{
 					n->type = "joyup";
@@ -520,8 +506,7 @@ int in_getEvents(lua_State *L)
 			{
 				in_sdlevent *n = malloc(sizeof(in_sdlevent));
 				{
-					in_sdlevent **tmp = &n;
-					in_private_sdleventInit(&tmp);
+					in_private_sdleventInit(n);
 				}
 				{
 					n->type = "video";
@@ -546,8 +531,7 @@ int in_getEvents(lua_State *L)
 			{
 				in_sdlevent *n = malloc(sizeof(in_sdlevent));
 				{
-					in_sdlevent **tmp = &n;
-					in_private_sdleventInit(&tmp);
+					in_private_sdleventInit(n);
 				}
 				{
 					n->type = "videofocus";
@@ -570,8 +554,7 @@ int in_getEvents(lua_State *L)
 			{
 				in_sdlevent *n = malloc(sizeof(in_sdlevent));
 				{
-					in_sdlevent **tmp = &n;
-					in_private_sdleventInit(&tmp);
+					in_private_sdleventInit(n);
 				}
 				{
 					n->type = "quit";
@@ -594,8 +577,7 @@ int in_getEvents(lua_State *L)
 			{
 				in_sdlevent *n = malloc(sizeof(in_sdlevent));
 				{
-					in_sdlevent **tmp = &n;
-					in_private_sdleventInit(&tmp);
+					in_private_sdleventInit(n);
 				}
 				{
 					n->type = "user";
@@ -619,8 +601,7 @@ int in_getEvents(lua_State *L)
 			{
 				in_sdlevent *n = malloc(sizeof(in_sdlevent));
 				{
-					in_sdlevent **tmp = &n;
-					in_private_sdleventInit(&tmp);
+					in_private_sdleventInit(n);
 				}
 				{
 					n->type = "wm";
@@ -651,11 +632,12 @@ int in_getEvents(lua_State *L)
 	{
 		lua_pushinteger(L, results);
 		lua_pushlightuserdata(L, e);
+
 		return 2;
 	}
 
-	in_private_freeEvents(&e);
 	lua_pushnil(L);
+
 	return 1;
 }
 
@@ -790,7 +772,7 @@ int in_freeEvents(lua_State *L)
 		lua_error(L);
 	}
 
-	in_private_freeEvents(&e);
+	in_private_freeEvents(e);
 
 	return 0;
 }

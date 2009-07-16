@@ -257,6 +257,10 @@ int w_getCenterOfMass(lua_State *L);
 int w_scaleVelocity(lua_State *L);
 int w_persistWorld(lua_State *L);
 int w_getVertices(lua_State *L);
+int w_getContents(lua_State *L);
+int w_getClipmask(lua_State *L);
+int w_getIndex(lua_State *L);
+int w_setIndex(lua_State *L);
 int w_luaStep(lua_State *L);
 
 /* m_console.c */

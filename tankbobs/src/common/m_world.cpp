@@ -358,9 +358,13 @@ int w_addBody(lua_State *L)
 	shapeDefinition.filter.categoryBits = luaL_checkinteger(L, 12);
 	shapeDefinition.filter.maskBits = luaL_checkinteger(L, 13);
 
+	shapeDefinition.isSensor = lua_toboolean(L, 14);
+
 	body->CreateShape(&shapeDefinition);
 	if(lua_toboolean(L, 11))
 		body->SetMassFromShapes();
+
+	body->SetUserData(reinterpret_cast<void *>(luaL_checkinteger(L, 15)));
 
 	lua_pushlightuserdata(L, body);
 
@@ -1063,7 +1067,7 @@ int w_getVertices(lua_State *L)
 
 	if(!lua_istable(L, -1))
 	{
-		lua_pushliteral(L, "no table passed to \n");
+		lua_pushliteral(L, "no table passed to w_getVertices\n");
 		lua_error(L);
 	}
 
@@ -1086,6 +1090,76 @@ int w_getVertices(lua_State *L)
 	}
 
 	lua_pop(L, 1);
+
+	return 0;
+}
+
+int w_getContents(lua_State *L)
+{
+	CHECKINIT(init, L);
+
+	CHECKWORLD(world, L);
+
+	b2Body *body = reinterpret_cast<b2Body *>(lua_touserdata(L, 1));
+	lua_remove(L, 1);
+
+	for(b2Shape *bshape = body->GetShapeList(); bshape; bshape = bshape->GetNext())
+	{
+		lua_pushinteger(L, bshape->GetFilterData().categoryBits);
+
+		return 1;
+	}
+
+	lua_pushnil(L);
+
+	return 1;
+}
+
+int w_getClipmask(lua_State *L)
+{
+	CHECKINIT(init, L);
+
+	CHECKWORLD(world, L);
+
+	b2Body *body = reinterpret_cast<b2Body *>(lua_touserdata(L, 1));
+	lua_remove(L, 1);
+
+	for(b2Shape *bshape = body->GetShapeList(); bshape; bshape = bshape->GetNext())
+	{
+		lua_pushinteger(L, bshape->GetFilterData().maskBits);
+
+		return 1;
+	}
+
+	lua_pushnil(L);
+
+	return 1;
+}
+
+int w_getIndex(lua_State *L)
+{
+	CHECKINIT(init, L);
+
+	CHECKWORLD(world, L);
+
+	b2Body *body = reinterpret_cast<b2Body *>(lua_touserdata(L, 1));
+	lua_settop(L, 0);
+
+	lua_pushinteger(L, reinterpret_cast<int>(body->GetUserData()));
+
+	return 1;
+}
+
+int w_setIndex(lua_State *L)
+{
+	CHECKINIT(init, L);
+
+	CHECKWORLD(world, L);
+
+	b2Body *body = reinterpret_cast<b2Body *>(lua_touserdata(L, 1));
+	lua_settop(L, 0);
+
+	body->SetUserData(reinterpret_cast<void *>(luaL_checkinteger(L, 2)));
 
 	return 0;
 }

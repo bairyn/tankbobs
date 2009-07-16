@@ -79,7 +79,7 @@ if [ "$1" == "make" ]; then
 		cp ./src/lib/LuaJIT/jit/opt_inline.lua ./build/jit/
 	else
 		make -C ./src/lib/Box2D/Source CXXFLAGS="-g -fPIC"
-		make -C ./src/lib/LuaJIT linux
+		make -C ./src/lib/LuaJIT linux CFLAGS="-DLUAJIT_ASSERT -DLUA_USE_APICHECK -DUSE_VALGRIND -g -fomit-frame-pointer -Wall -DLUA_USE_LINUX -I../dynasm"
 		if ! [ -d "./build/jit" ]; then
 			mkdir ./build/jit
 		fi

@@ -867,8 +867,9 @@ static const struct luaL_Reg tankbobs[] =
 			of the body.  The eighth argument is the shape's density.  The ninth is the friction.
 			The tenth is the restitution.  The eleventh argument is whether the body to be added is static.
 			A pointer to the body to use for other functions is the only value returned.
-			The returned value can be safely ignored.  The thirteenth and fourteenth arguments
-			are the contents and clipmask of the body. */
+			The returned value can be safely ignored.  The twelfth and thirteenth arguments
+			are the contents and clipmask of the body.  The fourteenth argument a boolean of whether the body
+			is a sensor.  The fifteenth argument is the initial index of the body passed as an integer. */
 	{"w_removeBody", w_removeBody}, /* remove a body from the world */
 		/* Nothing is returned.  The first argument is the pointer to the body returned from w_addBody. */
 	{"w_bodies", w_bodies}, /* generate a table of pointers to bodies */
@@ -925,6 +926,14 @@ static const struct luaL_Reg tankbobs[] =
 	{"w_getVertices", w_getVertices}, /* Get the vertices of a table */
 		/* The body is the first argument passed.  The table of vertices to be set is also passed.  A table of
 			vertices is returned. */
+	{"w_getContents", w_getContents}, /* Get the contents of a body */
+		/* Return the passed body's contents, or nil if no shapes are attached */
+	{"w_getClipmask", w_getClipmask}, /* Get the clipmask of a body */
+		/* Return the passed body's clipmask, or nil if no shapes are attached */
+	{"w_getIndex", w_getIndex}, /* Get the body's index */
+		/* Return the passed body's index */
+	{"w_setIndex", w_setIndex}, /* Set the body's index */
+		/* Set the passed body's index to the second argument, which is passed as an integer */
 	{"w_luaStep", w_luaStep}, /* the only argument passed is the delta value */
 
 	/* m_console.c */
@@ -968,7 +977,9 @@ static const struct luaL_Reg tankbobs[] =
 	{"a_stopMusic", a_stopMusic}, /* stop the music (by fading out) */
 		/* Nothing is returned; nothing is passed. */
 	{"a_playSound", a_playSound}, /* play a sound */
-		/* The filename of the sound is passed; nothing is returned */
+		/* The filename of the sound is passed; nothing is returned.
+			The second argument can optionally be passed to override the
+			default number of loops: 0. */
 	{"a_setMusicVolume", a_setMusicVolume}, /* set the music volume */
 		/* The argument passed is the volume from 0 to 1.  Nothing is returned. */
 	{"a_setVolume", a_setVolume}, /* set the volume */

@@ -65,7 +65,7 @@ int io_getHomeDirectory(lua_State *L)
 
 int io_getInt(lua_State *L)
 {
-	int result, eof;
+	int result, c;
 	unsigned char *p = (unsigned char *)(&result);
 	FILE *fin = *((FILE **)lua_touserdata(L, -1));
 
@@ -78,63 +78,63 @@ int io_getInt(lua_State *L)
 	}
 
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-	eof = fgetc(fin);
-	if(eof == EOF)
+	c = fgetc(fin);
+	if(c == EOF)
 	{
 		lua_pushstring(L, EOFERROR);
 		return 1;
 	}
-	p[3] = (unsigned char)eof;
-	eof = fgetc(fin);
-	if(eof == EOF)
+	p[3] = (unsigned char)c;
+	c = fgetc(fin);
+	if(c == EOF)
 	{
 		lua_pushstring(L, EOFERROR);
 		return 1;
 	}
-	p[2] = (unsigned char)eof;
-	eof = fgetc(fin);
-	if(eof == EOF)
+	p[2] = (unsigned char)c;
+	c = fgetc(fin);
+	if(c == EOF)
 	{
 		lua_pushstring(L, EOFERROR);
 		return 1;
 	}
-	p[1] = (unsigned char)eof;
-	eof = fgetc(fin);
-	if(eof == EOF)
+	p[1] = (unsigned char)c;
+	c = fgetc(fin);
+	if(c == EOF)
 	{
 		lua_pushstring(L, EOFERROR);
 		return 1;
 	}
-	p[0] = (unsigned char)eof;
+	p[0] = (unsigned char)c;
 #else
-	eof = fgetc(fin);
-	if(eof == EOF)
+	c = fgetc(fin);
+	if(c == EOF)
 	{
 		lua_pushstring(L, EOFERROR);
 		return 1;
 	}
-	p[0] = (unsigned char)eof;
-	eof = fgetc(fin);
-	if(eof == EOF)
+	p[0] = (unsigned char)c;
+	c = fgetc(fin);
+	if(c == EOF)
 	{
 		lua_pushstring(L, EOFERROR);
 		return 1;
 	}
-	p[1] = (unsigned char)eof;
-	eof = fgetc(fin);
-	if(eof == EOF)
+	p[1] = (unsigned char)c;
+	c = fgetc(fin);
+	if(c == EOF)
 	{
 		lua_pushstring(L, EOFERROR);
 		return 1;
 	}
-	p[2] = (unsigned char)eof;
-	eof = fgetc(fin);
-	if(eof == EOF)
+	p[2] = (unsigned char)c;
+	c = fgetc(fin);
+	if(c == EOF)
 	{
 		lua_pushstring(L, EOFERROR);
 		return 1;
 	}
-	p[3] = (unsigned char)eof;
+	p[3] = (unsigned char)c;
 #endif
 	lua_pushinteger(L, (int)result);
 	return 1;
@@ -142,7 +142,7 @@ int io_getInt(lua_State *L)
 
 int io_getShort(lua_State *L)
 {
-	int eof;
+	int c;
 	short result;
 	unsigned char *p = (unsigned char *)(&result);
 	FILE *fin = *((FILE **)lua_touserdata(L, -1));
@@ -156,35 +156,35 @@ int io_getShort(lua_State *L)
 	}
 
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-	eof = fgetc(fin);
-	if(eof == EOF)
+	c = fgetc(fin);
+	if(c == EOF)
 	{
 		lua_pushstring(L, EOFERROR);
 		return 1;
 	}
-	p[1] = (unsigned char)eof;
-	eof = fgetc(fin);
-	if(eof == EOF)
+	p[1] = (unsigned char)c;
+	c = fgetc(fin);
+	if(c == EOF)
 	{
 		lua_pushstring(L, EOFERROR);
 		return 1;
 	}
-	p[0] = (unsigned char)eof;
+	p[0] = (unsigned char)c;
 #else
-	eof = fgetc(fin);
-	if(eof == EOF)
+	c = fgetc(fin);
+	if(c == EOF)
 	{
 		lua_pushstring(L, EOFERROR);
 		return 1;
 	}
-	p[0] = (unsigned char)eof;
-	eof = fgetc(fin);
-	if(eof == EOF)
+	p[0] = (unsigned char)c;
+	c = fgetc(fin);
+	if(c == EOF)
 	{
 		lua_pushstring(L, EOFERROR);
 		return 1;
 	}
-	p[1] = (unsigned char)eof;
+	p[1] = (unsigned char)c;
 #endif
 	lua_pushinteger(L, (int)result);
 	return 1;
@@ -192,7 +192,7 @@ int io_getShort(lua_State *L)
 
 int io_getChar(lua_State *L)
 {
-	int eof;
+	int c;
 	char result;
 	unsigned char *p = (unsigned char *)(&result);
 	FILE *fin = *((FILE **)lua_touserdata(L, -1));
@@ -206,29 +206,32 @@ int io_getChar(lua_State *L)
 	}
 
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-	eof = fgetc(fin);
-	if(eof == EOF)
+	c = fgetc(fin);
+	if(c == EOF)
 	{
 		lua_pushstring(L, EOFERROR);
+
 		return 1;
 	}
-	p[0] = (unsigned char)eof;
+	p[0] = (unsigned char) c;
 #else
-	eof = fgetc(fin);
-	if(eof == EOF)
+	c = fgetc(fin);
+	if(c == EOF)
 	{
 		lua_pushstring(L, EOFERROR);
+
 		return 1;
 	}
-	p[0] = (unsigned char)eof;
+	p[0] = (unsigned char) c;
 #endif
-	lua_pushinteger(L, (int)result);
+	lua_pushinteger(L, (int) result);
+
 	return 1;
 }
 
 int io_getFloat(lua_State *L)
 {
-	int eof;
+	int c;
 	float result;
 	unsigned char *p = (unsigned char *)(&result);
 	FILE *fin = *((FILE **)lua_touserdata(L, -1));
@@ -242,71 +245,72 @@ int io_getFloat(lua_State *L)
 	}
 
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-	eof = fgetc(fin);
-	if(eof == EOF)
+	c = fgetc(fin);
+	if(c == EOF)
 	{
 		lua_pushstring(L, EOFERROR);
 		return 1;
 	}
-	p[3] = (unsigned char)eof;
-	eof = fgetc(fin);
-	if(eof == EOF)
+	p[3] = (unsigned char) c;
+	c = fgetc(fin);
+	if(c == EOF)
 	{
 		lua_pushstring(L, EOFERROR);
 		return 1;
 	}
-	p[2] = (unsigned char)eof;
-	eof = fgetc(fin);
-	if(eof == EOF)
+	p[2] = (unsigned char) c;
+	c = fgetc(fin);
+	if(c == EOF)
 	{
 		lua_pushstring(L, EOFERROR);
 		return 1;
 	}
-	p[1] = (unsigned char)eof;
-	eof = fgetc(fin);
-	if(eof == EOF)
+	p[1] = (unsigned char) c;
+	c = fgetc(fin);
+	if(c == EOF)
 	{
 		lua_pushstring(L, EOFERROR);
 		return 1;
 	}
-	p[0] = (unsigned char)eof;
+	p[0] = (unsigned char) c;
 #else
-	eof = fgetc(fin);
-	if(eof == EOF)
+	c = fgetc(fin);
+	if(c == EOF)
 	{
 		lua_pushstring(L, EOFERROR);
 		return 1;
 	}
-	p[0] = (unsigned char)eof;
-	eof = fgetc(fin);
-	if(eof == EOF)
+	p[0] = (unsigned char) c;
+	c = fgetc(fin);
+	if(c == EOF)
 	{
 		lua_pushstring(L, EOFERROR);
 		return 1;
 	}
-	p[1] = (unsigned char)eof;
-	eof = fgetc(fin);
-	if(eof == EOF)
+	p[1] = (unsigned char) c;
+	c = fgetc(fin);
+	if(c == EOF)
 	{
 		lua_pushstring(L, EOFERROR);
 		return 1;
 	}
-	p[2] = (unsigned char)eof;
-	eof = fgetc(fin);
-	if(eof == EOF)
+	p[2] = (unsigned char) c;
+	c = fgetc(fin);
+	if(c == EOF)
 	{
 		lua_pushstring(L, EOFERROR);
 		return 1;
 	}
-	p[3] = (unsigned char)eof;
+	p[3] = (unsigned char) c;
 #endif
-	lua_pushnumber(L, (double)result);
+	lua_pushnumber(L, (double) result);
+
 	return 1;
 }
 
 int io_getDouble(lua_State *L)
 {
-	int eof;
+	int c;
 	double result;
 	unsigned char *p = (unsigned char *)(&result);
 	FILE *fin = *((FILE **)lua_touserdata(L, -1));
@@ -320,119 +324,119 @@ int io_getDouble(lua_State *L)
 	}
 
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-	eof = fgetc(fin);
-	if(eof == EOF)
+	c = fgetc(fin);
+	if(c == EOF)
 	{
 		lua_pushstring(L, EOFERROR);
 		return 1;
 	}
-	p[7] = (unsigned char)eof;
-	eof = fgetc(fin);
-	if(eof == EOF)
+	p[7] = (unsigned char)c;
+	c = fgetc(fin);
+	if(c == EOF)
 	{
 		lua_pushstring(L, EOFERROR);
 		return 1;
 	}
-	p[6] = (unsigned char)eof;
-	eof = fgetc(fin);
-	if(eof == EOF)
+	p[6] = (unsigned char)c;
+	c = fgetc(fin);
+	if(c == EOF)
 	{
 		lua_pushstring(L, EOFERROR);
 		return 1;
 	}
-	p[5] = (unsigned char)eof;
-	eof = fgetc(fin);
-	if(eof == EOF)
+	p[5] = (unsigned char)c;
+	c = fgetc(fin);
+	if(c == EOF)
 	{
 		lua_pushstring(L, EOFERROR);
 		return 1;
 	}
-	p[4] = (unsigned char)eof;
-	eof = fgetc(fin);
-	if(eof == EOF)
+	p[4] = (unsigned char)c;
+	c = fgetc(fin);
+	if(c == EOF)
 	{
 		lua_pushstring(L, EOFERROR);
 		return 1;
 	}
-	p[3] = (unsigned char)eof;
-	eof = fgetc(fin);
-	if(eof == EOF)
+	p[3] = (unsigned char)c;
+	c = fgetc(fin);
+	if(c == EOF)
 	{
 		lua_pushstring(L, EOFERROR);
 		return 1;
 	}
-	p[2] = (unsigned char)eof;
-	eof = fgetc(fin);
-	if(eof == EOF)
+	p[2] = (unsigned char)c;
+	c = fgetc(fin);
+	if(c == EOF)
 	{
 		lua_pushstring(L, EOFERROR);
 		return 1;
 	}
-	p[1] = (unsigned char)eof;
-	eof = fgetc(fin);
-	if(eof == EOF)
+	p[1] = (unsigned char)c;
+	c = fgetc(fin);
+	if(c == EOF)
 	{
 		lua_pushstring(L, EOFERROR);
 		return 1;
 	}
-	p[0] = (unsigned char)eof;
+	p[0] = (unsigned char)c;
 #else
-	eof = fgetc(fin);
-	if(eof == EOF)
+	c = fgetc(fin);
+	if(c == EOF)
 	{
 		lua_pushstring(L, EOFERROR);
 		return 1;
 	}
-	p[0] = (unsigned char)eof;
-	eof = fgetc(fin);
-	if(eof == EOF)
+	p[0] = (unsigned char)c;
+	c = fgetc(fin);
+	if(c == EOF)
 	{
 		lua_pushstring(L, EOFERROR);
 		return 1;
 	}
-	p[1] = (unsigned char)eof;
-	eof = fgetc(fin);
-	if(eof == EOF)
+	p[1] = (unsigned char)c;
+	c = fgetc(fin);
+	if(c == EOF)
 	{
 		lua_pushstring(L, EOFERROR);
 		return 1;
 	}
-	p[2] = (unsigned char)eof;
-	eof = fgetc(fin);
-	if(eof == EOF)
+	p[2] = (unsigned char)c;
+	c = fgetc(fin);
+	if(c == EOF)
 	{
 		lua_pushstring(L, EOFERROR);
 		return 1;
 	}
-	p[3] = (unsigned char)eof;
-	eof = fgetc(fin);
-	if(eof == EOF)
+	p[3] = (unsigned char)c;
+	c = fgetc(fin);
+	if(c == EOF)
 	{
 		lua_pushstring(L, EOFERROR);
 		return 1;
 	}
-	p[4] = (unsigned char)eof;
-	eof = fgetc(fin);
-	if(eof == EOF)
+	p[4] = (unsigned char)c;
+	c = fgetc(fin);
+	if(c == EOF)
 	{
 		lua_pushstring(L, EOFERROR);
 		return 1;
 	}
-	p[5] = (unsigned char)eof;
-	eof = fgetc(fin);
-	if(eof == EOF)
+	p[5] = (unsigned char)c;
+	c = fgetc(fin);
+	if(c == EOF)
 	{
 		lua_pushstring(L, EOFERROR);
 		return 1;
 	}
-	p[6] = (unsigned char)eof;
-	eof = fgetc(fin);
-	if(eof == EOF)
+	p[6] = (unsigned char)c;
+	c = fgetc(fin);
+	if(c == EOF)
 	{
 		lua_pushstring(L, EOFERROR);
 		return 1;
 	}
-	p[7] = (unsigned char)eof;
+	p[7] = (unsigned char)c;
 #endif
 	lua_pushnumber(L, (double)result);
 	return 1;
@@ -468,7 +472,7 @@ int io_getStr(lua_State *L)
 
 int io_getStrL(lua_State *L)
 {
-	int eof;
+	int c;
 	unsigned char *result;
 	int i, len = luaL_checkinteger(L, -1);
 	FILE *fin = *((FILE **)lua_touserdata(L, -2));
@@ -485,9 +489,9 @@ int io_getStrL(lua_State *L)
 
 	for(i = 0; i < len; i++)
 	{
-		eof = fgetc(fin);
-		result[i] = (unsigned char)eof;
-		if(eof == EOF)
+		c = fgetc(fin);
+		result[i] = (unsigned char)c;
+		if(c == EOF)
 		{
 			free(result);
 			lua_pushstring(L, EOFERROR);

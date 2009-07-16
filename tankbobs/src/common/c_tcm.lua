@@ -354,7 +354,10 @@ function c_tcm_read_set(filename, t)
 	s.description = line
 
 	-- read the set's filenames and read their headers
-	line = set_f:read()
+	line, err = set_f:read()
+	if not line then
+		error("Unexepected EOF when reading '" .. filename .. "': " .. err)
+	end
 	while line and type(line) == "string" and line ~= "" do
 		table.insert(s.maps, c_tcm_read_map(c_const_get("tcm_dir") .. line))
 
