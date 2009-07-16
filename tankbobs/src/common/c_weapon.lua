@@ -749,7 +749,7 @@ end
 function c_weapon_projectileRemove(projectile)
 	for k, v in pairs(c_world_projectiles) do
 		if v == projectile then
-			table.remove(c_world_projectiles, k)
+			c_world_projectiles[k] = nil
 		end
 	end
 end
