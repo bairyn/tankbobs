@@ -265,17 +265,19 @@ function client_step(d)
 						if client_validate(client, data:sub(1, 32)) then
 							data = data:sub(33)
 
-							local input = tankbobs.io_toChar(data)
+							local input = tankbobs.io_toShort(data)
 
-							client.tank.state.firing  = tankbobs.t_testAND(input, 0x01)
-							client.tank.state.forward = tankbobs.t_testAND(input, 0x02)
-							client.tank.state.back    = tankbobs.t_testAND(input, 0x04)
-							client.tank.state.right   = tankbobs.t_testAND(input, 0x08)
-							client.tank.state.left    = tankbobs.t_testAND(input, 0x10)
-							client.tank.state.special = tankbobs.t_testAND(input, 0x20)
-							client.tank.state.reload  = tankbobs.t_testAND(input, 0x40)
+							client.tank.state.firing  = tankbobs.t_testAND(input, 0x0001)
+							client.tank.state.forward = tankbobs.t_testAND(input, 0x0002)
+							client.tank.state.back    = tankbobs.t_testAND(input, 0x0004)
+							client.tank.state.right   = tankbobs.t_testAND(input, 0x0008)
+							client.tank.state.left    = tankbobs.t_testAND(input, 0x0010)
+							client.tank.state.special = tankbobs.t_testAND(input, 0x0020)
+							client.tank.state.reload  = tankbobs.t_testAND(input, 0x0040)
+							client.tank.state.reverse = tankbobs.t_testAND(input, 0x0080)
+							client.tank.state.mod     = tankbobs.t_testAND(input, 0x0100)
 
-							data = data:sub(2)
+							data = data:sub(3)
 						end
 					end
 				end

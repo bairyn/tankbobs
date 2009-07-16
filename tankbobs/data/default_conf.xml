@@ -92,6 +92,8 @@
 			<forward>119</forward> 'w'
 			<back>115</back> 's'
 			<left>97</left> 'a'
+			<mod></mod>
+			<reverse></reverse>
 			<right>100</right> 'd'
 			<special>304</special> 'LSHIFT'
 			<reload>114</reload> 'r'
@@ -101,6 +103,8 @@
 			<forward>273</forward> 'UP'
 			<back>274</back> 'DOWN'
 			<left>276</left> 'LEFT
+			<mod></mod>
+			<reverse></reverse>
 			<right>275</right> 'RIGHT'
 			<special>303</special> 'RSHIFT'
 			<reload>256</reload> 'KP_0'

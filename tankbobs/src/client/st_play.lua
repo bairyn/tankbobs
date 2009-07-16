@@ -304,6 +304,12 @@ function st_play_button(button, pressed)
 		if not (c_config_get("config.key.player" .. tostring(i) .. ".reload", nil, true)) then
 			c_config_set("config.key.player" .. tostring(i) .. ".reload", false)
 		end
+		if not (c_config_get("config.key.player" .. tostring(i) .. ".reverse", nil, true)) then
+			c_config_set("config.key.player" .. tostring(i) .. ".reverse", false)
+		end
+		if not (c_config_get("config.key.player" .. tostring(i) .. ".mod", nil, true)) then
+			c_config_set("config.key.player" .. tostring(i) .. ".mod", false)
+		end
 
 		if button == c_config_get("config.key.player" .. tostring(i) .. ".fire") then
 			c_world_tanks[i].state.firing = pressed
@@ -325,6 +331,12 @@ function st_play_button(button, pressed)
 		end
 		if button == c_config_get("config.key.player" .. tostring(i) .. ".reload") then
 			c_world_tanks[i].state.reload = pressed
+		end
+		--if button == c_config_get("config.key.player" .. tostring(i) .. ".reverse") then
+			--c_world_tanks[i].state.reverse = reverse
+		--end
+		if button == c_config_get("config.key.player" .. tostring(i) .. ".reload") then
+			c_world_tanks[i].state.mod = mod
 		end
 	end
 end
