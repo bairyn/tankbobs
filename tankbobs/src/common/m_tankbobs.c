@@ -741,6 +741,10 @@ static const struct luaL_Reg tankbobs[] =
 	{"in_isGrabbed", in_isGrabbed}, /* is cursor grabbed */
 		/* no args, 1 and only return is boolean of whether or not cursor is
 			grabbed */
+	{"in_getKeys", in_getKeys}, /* grab array of SDL keys */
+		/* Nothing is passed or returned. */
+	{"in_keyPressed", in_keyPressed}, /* see if a key is pressed */
+		/* The key is the only value passed.  in_getKeys must be called before any call to this function. */
 
 	/* m_io.c */
 	{"io_getHomeDirectory", io_getHomeDirectory},  /* function to retrieve the user directory, eg /home/user */

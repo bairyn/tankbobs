@@ -101,6 +101,8 @@ int in_freeEvents(lua_State *L);
 int in_grabClear(lua_State *L);
 int in_grabMouse(lua_State *L);
 int in_isGrabbed(lua_State *L);
+int in_getKeys(lua_State *L);
+int in_keyPressed(lua_State *L);
 
 /* m_io.c */
 void io_init(lua_State *L);

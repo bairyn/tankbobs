@@ -293,7 +293,8 @@ function c_config_init()
 
 				-- special case for config.key
 				if kt:find("^config%.key%.") then
-					return c_config_keyLayoutGet(v)
+					local res = c_config_keyLayoutGet(v)
+					return tonumber(res) or 0
 				else
 					return v
 				end

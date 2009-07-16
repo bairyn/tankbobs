@@ -812,3 +812,35 @@ int in_isGrabbed(lua_State *L)
 
 	return 1;
 }
+
+static Uint8 *keyState = NULL;
+static int numKeys;
+
+int in_getKeys(lua_State *L)
+{
+	CHECKINIT(init, L);
+
+	keyState = SDL_GetKeyState(&numKeys);
+
+	return 0;
+}
+
+int in_keyPressed(lua_State *L)
+{
+	int key;
+
+	CHECKINIT(init, L);
+
+	key = luaL_checkinteger(L, 1);
+
+	if(!keyState || key > numKeys)
+	{
+		lua_pushboolean(L, false);
+
+		return 1;
+	}
+
+	lua_pushboolean(L, keyState[key]);
+
+	return 1;
+}
