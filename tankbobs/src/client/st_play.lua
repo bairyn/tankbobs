@@ -177,7 +177,7 @@ function st_play_init()
 	for _, v in pairs(c_weapon_getWeapons()) do
 		if v.meleeRange ~= 0 then
 			tankbobs.a_setVolumeChunk(c_const_get("weaponAudio_dir") .. v.fireSound, 0)
-			tankbobs.a_playSound(v.fireSound, -1)
+			tankbobs.a_playSound(c_const_get("weaponAudio_dir") .. v.fireSound, -1)
 			tankbobs.a_setVolumeChunk(c_const_get("weaponAudio_dir") .. v.fireSound, 0)
 		end
 	end
@@ -277,6 +277,8 @@ function st_play_button(button, pressed)
 			end
 		end
 	end
+
+	-- TODO: query the state of all keys on key press
 
 	local c_world_tanks = c_world_getTanks()
 
@@ -406,7 +408,7 @@ local function play_drawWorld(d)
 									vec.R = c_const_get("aimAid_maxDistance")
 									endP:add(vec)
 					
-									b, vec = c_world_findClosestIntersection(start, endP)  -- THIS FUNCTION MIGHT BE CAUSE
+									b, vec = c_world_findClosestIntersection(start, endP)
 									if b then
 										endP = vec
 									end
@@ -440,6 +442,8 @@ local function play_drawWorld(d)
 									c_config_set("config.game.player" .. tostring(k) .. ".color.a", c_config_get("config.game.defaultTankAlpha"))
 								end
 
+-- TODO: FIXME: XXX: THIS CAUSES MEMORY CORRUPTION
+--[[
 								if v.weapon and v.weapon.capacity > 0 then
 									gl.Color(1, 1, 1, 1)
 									gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, 1)
@@ -526,6 +530,7 @@ local function play_drawWorld(d)
 										gl.PopAttrib()
 									gl.PopMatrix()
 								end
+--]]
 
 								gl.Color(v.color.r, v.color.g, v.color.b, 1)
 								gl.TexEnv("TEXTURE_ENV_COLOR", v.color.r, v.color.g, v.color.b, 1)
@@ -661,10 +666,10 @@ local function play_drawWorld(d)
 
 		-- melee weapons
 		for _, v in pairs(c_world_getTanks()) do
-			if v.state.firing and v.weapon and v.weapon.meleeRange ~= 0 then
+			if v.state.firing and v.weapon and v.weapon.meleeRange ~= 0 and not v.reloading then
 				gl.PushMatrix()
 					gl.Translate(v.p.x, v.p.y, 0)
-					gl.Rotate(tankbobs.m_degrees(v.r), 0, 0, 1)
+					gl.Rotate(tankbobs.m_degrees(v.r - c_const_get("tank_defaultRotation")), 0, 0, 1)
 					gl.CallList(v.weapon.m.p.projectileList)
 				gl.PopMatrix()
 			end
@@ -883,7 +888,7 @@ function st_play_step(d)
 	-- play sounds and insert trails
 	for _, v in pairs(c_world_getTanks()) do
 		-- handle melee sounds specially
-		if v.weapon.meleeRange ~= 0 then
+		if v.weapon.meleeRange ~= 0 and not v.reloading then
 			if v.state.firing then
 				tankbobs.a_setVolumeChunk(c_const_get("weaponAudio_dir") .. v.weapon.fireSound, c_config_get("config.client.volume"))
 			else

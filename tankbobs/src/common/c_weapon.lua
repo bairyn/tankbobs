@@ -398,13 +398,13 @@ function c_weapon_init()
 	weapon.texture = "saw.png"
 	weapon.fireSound = "saw.wav"
 	weapon.reloadSound = "railgun-reload.wav"
-	weapon.launchDistance = 2
+	weapon.launchDistance = 2.1
 	weapon.aimAid = false
 	weapon.capacity = 64  -- can be used for 8 seconds
 	weapon.clips = 1
-	weapon.reloadTime = 0
+	weapon.reloadTime = 2
 	weapon.shotgunClips = false
-	weapon.meleeRange = 3
+	weapon.meleeRange = 4.9
 	weapon.width = 0.75
 	weapon.trail = 0
 	weapon.trailWidth = 0
@@ -413,10 +413,10 @@ function c_weapon_init()
 	weapon.texturer[3](0, 0)
 	weapon.texturer[4](1, 0)
 	weapon.texturer[1](1, 1)
-	weapon.render[1](-0.1, 5)
-	weapon.render[2](-0.1, 2)
-	weapon.render[3](0.1, 2)
-	weapon.render[4](0.1, 5)
+	weapon.render[1](-1, 1)
+	weapon.render[2](-1, -1)
+	weapon.render[3](1, -1)
+	weapon.render[4](1, 1)
 
 	weapon.projectileTexture = "saw-projectile.png"
 	weapon.projectileDensity = 0
@@ -432,10 +432,10 @@ function c_weapon_init()
 	weapon.projectileTexturer[2](0, 0)
 	weapon.projectileTexturer[3](1, 0)
 	weapon.projectileTexturer[4](1, 1)
-	weapon.projectileRender[2](0, 1)
-	weapon.projectileRender[3](0, 0)
-	weapon.projectileRender[4](1, 0)
-	weapon.projectileRender[1](1, 1)
+	weapon.projectileRender[2](-0.2, 6)
+	weapon.projectileRender[3](-0.2, 2)
+	weapon.projectileRender[4](0.2, 2)
+	weapon.projectileRender[1](0.2, 6)
 end
 
 function c_weapon_done()
@@ -552,13 +552,15 @@ function c_weapon_pickUp(tank, weaponName)
 end
 
 function c_weapon_fireMeleeWeapon(tank, weapon)
-	local start, endP = tankbobs.m_vec2(tank.p), tankbobs.m_vec2()
+	local start, endP, tmp = tankbobs.m_vec2(tank.p), tankbobs.m_vec2(), tankbobs.m_vec2()
 
-	endP.t = tank.r
-	endP.R = weapon.launchDistance
-	start:add(endP)
+	tmp.t = tank.r
+	tmp.R = weapon.launchDistance
+	start:add(tmp)
 
-	endP.R = endP.R + weapon.meleeRange
+	endP(start)
+	tmp.R = weapon.meleeRange
+	endP:add(tmp)
 
 	local status, _, typeOfTarget, target = c_world_findClosestIntersection(start, endP)
 	if status then
@@ -673,37 +675,37 @@ function c_weapon_fire(tank)
 		tank.m.fired = true
 
 		if weapon.meleeRange ~= 0 then
-			return c_weapon_fireMeleeWeapon(tank, weapon)
-		end
+			c_weapon_fireMeleeWeapon(tank, weapon)
+		else
+			for i = 1, weapon.pellets do
+				local projectile = c_weapon_projectile:new()
+				local vec = tankbobs.m_vec2()
 
-		for i = 1, weapon.pellets do
-			local projectile = c_weapon_projectile:new()
-			local vec = tankbobs.m_vec2()
+				projectile.weapon = weapon
 
-			projectile.weapon = weapon
+				vec.t = tank.r + angle
+				vec.R = weapon.launchDistance
+				projectile.p(tank.p + vec)
 
-			vec.t = tank.r + angle
-			vec.R = weapon.launchDistance
-			projectile.p(tank.p + vec)
+				projectile.owner = tank
 
-			projectile.owner = tank
+				projectile.r = vec.t
 
-			projectile.r = vec.t
+				projectile.m.body = tankbobs.w_addBody(projectile.p, projectile.r, c_const_get("projectile_canSleep"), c_const_get("projectile_isBullet"), c_const_get("projectile_linearDamping"), c_const_get("projectile_angularDamping"), weapon.projectileHull, weapon.projectileDensity, c_const_get("projectile_friction"), weapon.projectileRestitution, true, c_const_get("projectile_contentsMask"), c_const_get("projectile_clipmask"), c_const_get("projectile_isSensor"), #c_world_projectiles + 1)
+				vec.R = weapon.speed
+				tankbobs.w_setLinearVelocity(projectile.m.body, vec)
 
-			projectile.m.body = tankbobs.w_addBody(projectile.p, projectile.r, c_const_get("projectile_canSleep"), c_const_get("projectile_isBullet"), c_const_get("projectile_linearDamping"), c_const_get("projectile_angularDamping"), weapon.projectileHull, weapon.projectileDensity, c_const_get("projectile_friction"), weapon.projectileRestitution, true, c_const_get("projectile_contentsMask"), c_const_get("projectile_clipmask"), c_const_get("projectile_isSensor"), #c_world_projectiles + 1)
-			vec.R = weapon.speed
-			tankbobs.w_setLinearVelocity(projectile.m.body, vec)
+				table.insert(c_world_projectiles, projectile)
 
-			table.insert(c_world_projectiles, projectile)
+				angle = angle - weapon.spread
 
-			angle = angle - weapon.spread
-
-			-- apply knockback to the tank
-			local point = tankbobs.w_getCenterOfMass(tank.body)
-			local force = tankbobs.m_vec2()
-			force.R = -weapon.knockback * c_const_get("tank_speedK")
-			force.t = tankbobs.w_getAngle(tank.body)
-			tankbobs.w_applyForce(tank.body, force, point)
+				-- apply knockback to the tank
+				local point = tankbobs.w_getCenterOfMass(tank.body)
+				local force = tankbobs.m_vec2()
+				force.R = -weapon.knockback * c_const_get("tank_speedK")
+				force.t = tankbobs.w_getAngle(tank.body)
+				tankbobs.w_applyForce(tank.body, force, point)
+			end
 		end
 
 		tank.ammo = tank.ammo - 1
@@ -753,13 +755,11 @@ function c_weapon_projectileRemove(projectile)
 end
 
 local function c_world_isTank(body)
-	for _, v in pairs(c_world_getTanks()) do
-		if v.body == body then
-			return true, v
-		end
+	if tankbobs.w_getContents(body) == TANK then
+		return c_world_tanks[tankbobs.w_getIndex(body)]
 	end
 
-	return false
+	return nil
 end
 
 function c_weapon_projectileCollided(projectile, body)

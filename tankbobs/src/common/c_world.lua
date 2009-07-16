@@ -165,9 +165,9 @@ function c_world_init()
 	c_const_set("tank_damageMinSpeed", 6, 1)
 	c_const_set("tank_intensityMaxSpeed", 6, 1)
 	c_const_set("tank_collideMinDamage", 5, 1)
-	c_const_set("tank_backwardMovement", true, 1)
 	c_const_set("tank_deceleration", 64 / 1000, 1)
 	c_const_set("tank_decelerationMinSpeed", 8, 1)
+	c_const_set("tank_breakSlow", true, 1)
 	c_const_set("tank_highHealth", 66, 1)
 	c_const_set("tank_lowHealth", 33, 1)
 	c_const_set("tank_acceleration",
@@ -991,11 +991,22 @@ function c_world_tank_step(d, tank)
 			end
 		end
 
-		local v = t_m_vec2()
-		v.R = vel.R
-		v.t = tank.r
+		vel.t = tank.r
 
-		t_w_setLinearVelocity(tank.body, v)
+		t_w_setLinearVelocity(tank.body, vel)
+
+		if tank.state.back then
+			-- break
+
+			local newVel = t_m_vec2(vel)
+
+			if newVel.R > 0 then
+				newVel.R = newVel.R - c_const_get("tank_deceleration")
+			end
+
+			t_w_setLinearVelocity(tank.body, newVel)
+			vel(newVel)
+		end
 	else
 		if tank.state.forward or tank.state.back then
 			if tank.state.forward then
@@ -1036,7 +1047,7 @@ function c_world_tank_step(d, tank)
 				vel(newVel)
 			end
 			if tank.state.back then
-				if c_const_get("tank_backwardMovement") and vel.R <= c_const_get("tank_decelerationMinSpeed") then
+				if c_const_get("tank_breakSlow") or vel.R <= c_const_get("tank_decelerationMinSpeed") then
 					-- reverse
 
 					local addVel = t_m_vec2()

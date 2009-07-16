@@ -76,7 +76,7 @@ powerupSpawnPoint, -94, 194, ammo, 0, 30, 60, 0
 powerupSpawnPoint, -94, 135, ammo, 0, 30, 30, 0
 powerupSpawnPoint, 108, 194, health, 0, 30, 30, 0
 powerupSpawnPoint, 107, 135, health, 0, 30, 60, 0
-powerupSpawnPoint, 193, 192, s4w-when-it's-finished, 0, 30, 30, 0
+powerupSpawnPoint, 193, 192, saw, 0, 30, 30, 0
 powerupSpawnPoint, 120, 192, health, 0, 30, 30, 0
 powerupSpawnPoint, 0, 168, acceleration shield, 0, 30, 30, 0
 path, path_1, path_2, 71, 95, 1, 1
