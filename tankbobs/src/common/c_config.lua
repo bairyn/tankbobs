@@ -178,6 +178,39 @@ function c_config_init()
 		table.insert(cheats, key)
 	end
 
+	local function c_config_save(key, value, config)
+		value = trim(value)
+		key = tostring(key)
+
+		local pos = key:find('%.')
+		if not pos then
+			config[key] = value
+		else
+			if type(config[key:sub(1, pos - 1)]) ~= "table" then
+				config[key:sub(1, pos - 1)] = {}
+			end
+
+			c_config_save(key:sub(pos + 1), value, config[key:sub(1, pos - 1)])
+		end
+	end
+
+	local function c_config_write(fout, config, tabs)
+		tabs = tabs or 0
+
+		for k, v in pairs(config) do
+			if type(v) == "table" then
+				fout:write(string.rep('\t', tabs))
+				fout:write(string.format("<%s>\n", k, tostring(v), k))
+				c_config_write(fout, v, tabs + 1)
+				fout:write(string.rep('\t', tabs))
+				fout:write(string.format("</%s>\n", k, tostring(v), k))
+			else
+				fout:write(string.rep('\t', tabs))
+				fout:write(string.format("<%s>%s</%s>\n", k, tostring(v), k))
+			end
+		end
+	end
+
 	local function done()
 		c_module_load "lfs"
 
@@ -189,9 +222,17 @@ function c_config_init()
 			error("c_config_done: error saving user configuration file '" .. c_const_get("user_conf") .. "': " .. err)
 		end
 
-		fout:close()
+		-- put configuration into a table
+		local save = {config = {}}
 
-		error"TODO: save config"
+		for k, v in pairs(config) do
+			c_config_save(k, v, save.config)
+		end
+
+		-- write configuration
+		c_config_write(fout, save)
+
+		fout:close()
 	end
 
 	function c_config_done()
