@@ -714,62 +714,64 @@ function st_play_step(d)
 	end
 
 	-- get input keys
-	tankbobs.in_getKeys()
-	for i = 1, c_config_get("config.game.players") do
-		if not (c_config_get("config.key.player" .. tostring(i) .. ".fire", nil, true)) then
-			c_config_set("config.key.player" .. tostring(i) .. ".fire", false)
-		end
-		if not (c_config_get("config.key.player" .. tostring(i) .. ".forward", nil, true)) then
-			c_config_set("config.key.player" .. tostring(i) .. ".forward", false)
-		end
-		if not (c_config_get("config.key.player" .. tostring(i) .. ".back", nil, true)) then
-			c_config_set("config.key.player" .. tostring(i) .. ".back", false)
-		end
-		if not (c_config_get("config.key.player" .. tostring(i) .. ".right", nil, true)) then
-			c_config_set("config.key.player" .. tostring(i) .. ".right", false)
-		end
-		if not (c_config_get("config.key.player" .. tostring(i) .. ".left", nil, true)) then
-			c_config_set("config.key.player" .. tostring(i) .. ".left", false)
-		end
-		if not (c_config_get("config.key.player" .. tostring(i) .. ".special", nil, true)) then
-			c_config_set("config.key.player" .. tostring(i) .. ".special", false)
-		end
-		if not (c_config_get("config.key.player" .. tostring(i) .. ".reload", nil, true)) then
-			c_config_set("config.key.player" .. tostring(i) .. ".reload", false)
-		end
-		if not (c_config_get("config.key.player" .. tostring(i) .. ".reverse", nil, true)) then
-			c_config_set("config.key.player" .. tostring(i) .. ".reverse", false)
-		end
-		if not (c_config_get("config.key.player" .. tostring(i) .. ".mod", nil, true)) then
-			c_config_set("config.key.player" .. tostring(i) .. ".mod", false)
-		end
+	if frame == 100 then
+		tankbobs.in_getKeys()
+		for i = 1, c_config_get("config.game.players") do
+			if not (c_config_get("config.key.player" .. tostring(i) .. ".fire", nil, true)) then
+				c_config_set("config.key.player" .. tostring(i) .. ".fire", false)
+			end
+			if not (c_config_get("config.key.player" .. tostring(i) .. ".forward", nil, true)) then
+				c_config_set("config.key.player" .. tostring(i) .. ".forward", false)
+			end
+			if not (c_config_get("config.key.player" .. tostring(i) .. ".back", nil, true)) then
+				c_config_set("config.key.player" .. tostring(i) .. ".back", false)
+			end
+			if not (c_config_get("config.key.player" .. tostring(i) .. ".right", nil, true)) then
+				c_config_set("config.key.player" .. tostring(i) .. ".right", false)
+			end
+			if not (c_config_get("config.key.player" .. tostring(i) .. ".left", nil, true)) then
+				c_config_set("config.key.player" .. tostring(i) .. ".left", false)
+			end
+			if not (c_config_get("config.key.player" .. tostring(i) .. ".special", nil, true)) then
+				c_config_set("config.key.player" .. tostring(i) .. ".special", false)
+			end
+			if not (c_config_get("config.key.player" .. tostring(i) .. ".reload", nil, true)) then
+				c_config_set("config.key.player" .. tostring(i) .. ".reload", false)
+			end
+			if not (c_config_get("config.key.player" .. tostring(i) .. ".reverse", nil, true)) then
+				c_config_set("config.key.player" .. tostring(i) .. ".reverse", false)
+			end
+			if not (c_config_get("config.key.player" .. tostring(i) .. ".mod", nil, true)) then
+				c_config_set("config.key.player" .. tostring(i) .. ".mod", false)
+			end
 
-		if c_config_get("config.key.player" .. tostring(i) .. ".fire") ~= 303 and c_config_get("config.key.player" .. tostring(i) .. ".fire") ~= 304 then
-			c_world_getTanks()[i].state.firing = tankbobs.in_keyPressed(c_config_get("config.key.player" .. tostring(i) .. ".fire"))
-		end
-		if c_config_get("config.key.player" .. tostring(i) .. ".forward") ~= 303 and c_config_get("config.key.player" .. tostring(i) .. ".forward") ~= 304 then
-			c_world_getTanks()[i].state.forward = tankbobs.in_keyPressed(c_config_get("config.key.player" .. tostring(i) .. ".forward"))
-		end
-		if c_config_get("config.key.player" .. tostring(i) .. ".back") ~= 303 and c_config_get("config.key.player" .. tostring(i) .. ".back") ~= 304 then
-			c_world_getTanks()[i].state.back = tankbobs.in_keyPressed(c_config_get("config.key.player" .. tostring(i) .. ".back"))
-		end
-		if c_config_get("config.key.player" .. tostring(i) .. ".left") ~= 303 and c_config_get("config.key.player" .. tostring(i) .. ".left") ~= 304 then
-			c_world_getTanks()[i].state.left = tankbobs.in_keyPressed(c_config_get("config.key.player" .. tostring(i) .. ".left"))
-		end
-		if c_config_get("config.key.player" .. tostring(i) .. ".right") ~= 303 and c_config_get("config.key.player" .. tostring(i) .. ".right") ~= 304 then
-			c_world_getTanks()[i].state.right = tankbobs.in_keyPressed(c_config_get("config.key.player" .. tostring(i) .. ".right"))
-		end
-		if c_config_get("config.key.player" .. tostring(i) .. ".special") ~= 303 and c_config_get("config.key.player" .. tostring(i) .. ".special") ~= 304 then
-			c_world_getTanks()[i].state.special = tankbobs.in_keyPressed(c_config_get("config.key.player" .. tostring(i) .. ".special"))
-		end
-		if c_config_get("config.key.player" .. tostring(i) .. ".reload") ~= 303 and c_config_get("config.key.player" .. tostring(i) .. ".reload") ~= 304 then
-			c_world_getTanks()[i].state.reload = tankbobs.in_keyPressed(c_config_get("config.key.player" .. tostring(i) .. ".reload"))
-		end
-		--if b_config_get("config.key.player" .. tostring(i) .. ".reverse") ~= 303 and _config_get("config.key.player" .. tostring(i) .. ".reverse") ~= 304 then
-			--c_world_getTanks()[i].state.reverse = tankbobs.in_keyPressed(c_config_get("config.key.player" .. tostring(i) .. ".reverse"))
-		--end
-		if c_config_get("config.key.player" .. tostring(i) .. ".reload") ~= 303 and c_config_get("config.key.player" .. tostring(i) .. ".reload") ~= 304 then
-			c_world_getTanks()[i].state.mod = tankbobs.in_keyPressed(c_config_get("config.key.player" .. tostring(i) .. ".mod"))
+			if c_config_get("config.key.player" .. tostring(i) .. ".fire") ~= 303 and c_config_get("config.key.player" .. tostring(i) .. ".fire") ~= 304 then
+				c_world_getTanks()[i].state.firing = tankbobs.in_keyPressed(c_config_get("config.key.player" .. tostring(i) .. ".fire"))
+			end
+			if c_config_get("config.key.player" .. tostring(i) .. ".forward") ~= 303 and c_config_get("config.key.player" .. tostring(i) .. ".forward") ~= 304 then
+				c_world_getTanks()[i].state.forward = tankbobs.in_keyPressed(c_config_get("config.key.player" .. tostring(i) .. ".forward"))
+			end
+			if c_config_get("config.key.player" .. tostring(i) .. ".back") ~= 303 and c_config_get("config.key.player" .. tostring(i) .. ".back") ~= 304 then
+				c_world_getTanks()[i].state.back = tankbobs.in_keyPressed(c_config_get("config.key.player" .. tostring(i) .. ".back"))
+			end
+			if c_config_get("config.key.player" .. tostring(i) .. ".left") ~= 303 and c_config_get("config.key.player" .. tostring(i) .. ".left") ~= 304 then
+				c_world_getTanks()[i].state.left = tankbobs.in_keyPressed(c_config_get("config.key.player" .. tostring(i) .. ".left"))
+			end
+			if c_config_get("config.key.player" .. tostring(i) .. ".right") ~= 303 and c_config_get("config.key.player" .. tostring(i) .. ".right") ~= 304 then
+				c_world_getTanks()[i].state.right = tankbobs.in_keyPressed(c_config_get("config.key.player" .. tostring(i) .. ".right"))
+			end
+			if c_config_get("config.key.player" .. tostring(i) .. ".special") ~= 303 and c_config_get("config.key.player" .. tostring(i) .. ".special") ~= 304 then
+				c_world_getTanks()[i].state.special = tankbobs.in_keyPressed(c_config_get("config.key.player" .. tostring(i) .. ".special"))
+			end
+			if c_config_get("config.key.player" .. tostring(i) .. ".reload") ~= 303 and c_config_get("config.key.player" .. tostring(i) .. ".reload") ~= 304 then
+				c_world_getTanks()[i].state.reload = tankbobs.in_keyPressed(c_config_get("config.key.player" .. tostring(i) .. ".reload"))
+			end
+			--if b_config_get("config.key.player" .. tostring(i) .. ".reverse") ~= 303 and _config_get("config.key.player" .. tostring(i) .. ".reverse") ~= 304 then
+				--c_world_getTanks()[i].state.reverse = tankbobs.in_keyPressed(c_config_get("config.key.player" .. tostring(i) .. ".reverse"))
+			--end
+			if c_config_get("config.key.player" .. tostring(i) .. ".reload") ~= 303 and c_config_get("config.key.player" .. tostring(i) .. ".reload") ~= 304 then
+				c_world_getTanks()[i].state.mod = tankbobs.in_keyPressed(c_config_get("config.key.player" .. tostring(i) .. ".mod"))
+			end
 		end
 	end
 
