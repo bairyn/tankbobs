@@ -166,13 +166,13 @@ function st_play_init()
 			widget.text = "Paused"
 			tankbobs.in_grabClear()
 		else
-			if quitScreen then
-				tankbobs.in_grabClear()
-			end
-
 			widget.text = ""
 			if not tankbobs.in_isGrabbed() then
 				tankbobs.in_grabMouse(c_config_get("client.renderer.width") / 2, c_config_get("client.renderer.height") / 2)
+			end
+
+			if quitScreen then
+				tankbobs.in_grabClear()
 			end
 		end
 	end
