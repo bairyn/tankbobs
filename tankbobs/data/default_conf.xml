@@ -4,6 +4,7 @@
 		<cameraExtraFOV>25</cameraExtraFOV>
 		<cameraSpeed>5</cameraSpeed>
 		<fps>128</fps>
+		<krr>20</krr>  Key Refresh Rate
 		<musicVolume>0.6</musicVolume>
 		<port>0</port>
 		<serverIP>127.0.0.1</serverIP>
