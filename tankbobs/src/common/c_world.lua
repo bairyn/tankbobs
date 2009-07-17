@@ -953,10 +953,6 @@ function c_world_tank_step(d, tank)
 
 	c_world_tank_checkSpawn(d, tank)
 
-	if not tank.exists then
-		return
-	end
-
 	if tank.m.collided then
 		-- tank somehow escaped world bounds
 
@@ -964,7 +960,11 @@ function c_world_tank_step(d, tank)
 
 		return c_world_tank_die(tank)
 	else
-		c_world_testBody(tank)
+		--c_world_testBody(tank)
+	end
+
+	if not tank.exists then
+		return
 	end
 
 	if tank.health <= 0 then
