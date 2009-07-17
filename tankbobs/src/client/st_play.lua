@@ -955,7 +955,7 @@ function st_play_step(d)
 
 	-- play sounds and insert trails
 	for _, v in pairs(c_world_getTanks()) do
-		if v.exists
+		if v.exists then
 			-- handle melee sounds specially
 			if v.weapon and v.weapon.meleeRange ~= 0 and not v.reloading then
 				if v.state.firing then
