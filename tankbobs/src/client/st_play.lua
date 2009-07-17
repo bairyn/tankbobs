@@ -1081,23 +1081,24 @@ function st_play_step(d)
 				tankbobs.a_playSound(c_const_get("damage_sound"))
 			end
 
-			if v.spawning and v.m.lastDieTimeB ~= v.m.lastDieTime then
-				v.m.lastDieTimeB = v.m.lastDieTime
+		end
 
-				tankbobs.a_playSound(c_const_get("die_sound"))
-			end
+		if v.spawning and v.m.lastDieTimeB ~= v.m.lastDieTime then
+			v.m.lastDieTimeB = v.m.lastDieTime
 
-			if v.m.lastPickupTime and v.m.lastPickupTimeB ~= v.m.lastPickupTime then
-				v.m.lastPickupTimeB = v.m.lastPickupTime 
+			tankbobs.a_playSound(c_const_get("die_sound"))
+		end
 
-				tankbobs.a_playSound(c_const_get("powerupPickup_sound"))
-			end
+		if v.m.lastPickupTime and v.m.lastPickupTimeB ~= v.m.lastPickupTime then
+			v.m.lastPickupTimeB = v.m.lastPickupTime 
 
-			if v.m.lastTeleportTime and v.m.lastTeleportTimeB ~= v.m.lastTeleportTime then
-				v.m.lastTeleportTimeB = v.m.lastTeleportTime 
+			tankbobs.a_playSound(c_const_get("powerupPickup_sound"))
+		end
 
-				tankbobs.a_playSound(c_const_get("teleport_sound"))
-			end
+		if v.m.lastTeleportTime and v.m.lastTeleportTimeB ~= v.m.lastTeleportTime then
+			v.m.lastTeleportTimeB = v.m.lastTeleportTime 
+
+			tankbobs.a_playSound(c_const_get("teleport_sound"))
 		end
 	end
 
