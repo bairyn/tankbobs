@@ -261,6 +261,10 @@ local function refreshKeys()
 	tankbobs.in_getKeys()
 
 	for i = 1, c_config_get("config.game.players") do
+		if not c_world_getTanks()[i] then
+			break
+		end
+
 		if not (c_config_get("config.key.player" .. tostring(i) .. ".fire", nil, true)) then
 			c_config_set("config.key.player" .. tostring(i) .. ".fire", false)
 		end
