@@ -1080,7 +1080,6 @@ function st_play_step(d)
 
 				tankbobs.a_playSound(c_const_get("damage_sound"))
 			end
-
 		end
 
 		if v.spawning and v.m.lastDieTimeB ~= v.m.lastDieTime then
