@@ -316,6 +316,7 @@ local function refreshKeys()
 		if c_config_get("config.key.player" .. tostring(i) .. ".reload") ~= 303 and c_config_get("config.key.player" .. tostring(i) .. ".reload") ~= 304 then
 			c_world_getTanks()[i].state.mod = tankbobs.in_keyPressed(c_config_get("config.key.player" .. tostring(i) .. ".mod"))
 		end
+	end
 end
 
 function st_play_button(button, pressed)
