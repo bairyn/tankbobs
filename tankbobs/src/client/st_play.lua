@@ -114,7 +114,7 @@ function st_play_init()
 			widget.text = ""
 
 			for k, v in pairs(c_world_getTanks()) do
-				local name = tostring(c_config_get("config.game.player" .. tostring(k) .. ".name"))
+				local name = tostring(c_config_get("game.player" .. tostring(k) .. ".name"))
 
 				if #name > length then
 					length = #name
@@ -132,7 +132,7 @@ function st_play_init()
 					widget.text = widget.text .. "\n"
 				end
 
-				name = tostring(c_config_get("config.game.player" .. tostring(k) .. ".name"))
+				name = tostring(c_config_get("game.player" .. tostring(k) .. ".name"))
 				between = string.rep("  ", length - #name + 1)
 				score = tostring(v.score)
 
@@ -145,7 +145,7 @@ function st_play_init()
 		end
 	end
 
-	gui_addLabel(tankbobs.m_vec2(7.5, 92.5), "", updateScores, 0.5, c_config_get("config.game.scoresRed"), c_config_get("config.game.scoresGreen"), c_config_get("config.game.scoresBlue"), c_config_get("config.game.scoresAlpha"), c_config_get("config.game.scoresRed"), c_config_get("config.game.scoresGreen"), c_config_get("config.game.scoresGreen"), c_config_get("config.game.scoresAlpha"))
+	gui_addLabel(tankbobs.m_vec2(7.5, 92.5), "", updateScores, 0.5, c_config_get("client.renderer.scoresRed"), c_config_get("client.renderer.scoresGreen"), c_config_get("client.renderer.scoresBlue"), c_config_get("client.renderer.scoresAlpha"), c_config_get("client.renderer.scoresRed"), c_config_get("client.renderer.scoresGreen"), c_config_get("client.renderer.scoresGreen"), c_config_get("client.renderer.scoresAlpha"))
 
 	-- fps counter
 	local function updateFPS(widget)
@@ -154,8 +154,8 @@ function st_play_init()
 		widget.text = tostring(fps - (fps % 1))
 	end
 
-	if c_config_get("config.game.fpsCounter") then
-		gui_addLabel(tankbobs.m_vec2(92.5, 92.5), "", updateFPS, 0.5, c_config_get("config.game.fpsRed"), c_config_get("config.game.fpsGreen"), c_config_get("config.game.fpsBlue"), c_config_get("config.game.fpsAlpha"), c_config_get("config.game.fpsRed"), c_config_get("config.game.fpsGreen"), c_config_get("config.game.fpsGreen"), c_config_get("config.game.fpsAlpha"))
+	if c_config_get("client.renderer.fpsCounter") then
+		gui_addLabel(tankbobs.m_vec2(92.5, 92.5), "", updateFPS, 0.5, c_config_get("client.renderer.fpsRed"), c_config_get("client.renderer.fpsGreen"), c_config_get("client.renderer.fpsBlue"), c_config_get("client.renderer.fpsAlpha"), c_config_get("client.renderer.fpsRed"), c_config_get("client.renderer.fpsGreen"), c_config_get("client.renderer.fpsGreen"), c_config_get("client.renderer.fpsAlpha"))
 	end
 
 	-- pause
@@ -166,12 +166,12 @@ function st_play_init()
 		else
 			widget.text = ""
 			if not tankbobs.in_isGrabbed() then
-				tankbobs.in_grabMouse(c_config_get("config.renderer.width") / 2, c_config_get("config.renderer.height") / 2)
+				tankbobs.in_grabMouse(c_config_get("client.renderer.width") / 2, c_config_get("client.renderer.height") / 2)
 			end
 		end
 	end
 
-	gui_addLabel(tankbobs.m_vec2(37.5, 50), "", updatePause, nil, c_config_get("config.game.pauseRed"), c_config_get("config.game.pauseGreen"), c_config_get("config.game.pauseBlue"), c_config_get("config.game.pauseAlpha"), c_config_get("config.game.pauseRed"), c_config_get("config.game.pauseGreen"), c_config_get("config.game.pauseBlue"), c_config_get("config.game.pauseAlpha"))
+	gui_addLabel(tankbobs.m_vec2(37.5, 50), "", updatePause, nil, c_config_get("client.renderer.pauseRed"), c_config_get("client.renderer.pauseGreen"), c_config_get("client.renderer.pauseBlue"), c_config_get("client.renderer.pauseAlpha"), c_config_get("client.renderer.pauseRed"), c_config_get("client.renderer.pauseGreen"), c_config_get("client.renderer.pauseBlue"), c_config_get("client.renderer.pauseAlpha"))
 
 	-- initialize melee sounds
 	for _, v in pairs(c_weapon_getWeapons()) do
@@ -185,7 +185,7 @@ function st_play_init()
 	-- initialize the world
 	c_world_newWorld()
 
-	for i = 1, c_config_get("config.game.players") + c_config_get("config.game.computers") do
+	for i = 1, c_config_get("game.players") + c_config_get("game.computers") do
 		if i > c_const_get("max_tanks") then
 			break
 		end
@@ -193,24 +193,24 @@ function st_play_init()
 		local tank = c_world_tank:new()
 		table.insert(c_world_getTanks(), tank)
 
-		if not (c_config_get("config.game.player" .. tostring(i) .. ".name", nil, true)) then
-			c_config_set("config.game.player" .. tostring(i) .. ".name", "Player" .. tostring(i))
+		if not (c_config_get("game.player" .. tostring(i) .. ".name", true)) then
+			c_config_set("game.player" .. tostring(i) .. ".name", "Player" .. tostring(i))
 		end
 
-		tank.name = c_config_get("config.game.player" .. tostring(i) .. ".name")
-		if not (c_config_get("config.game.player" .. tostring(i) .. ".color", nil, true)) then
-			c_config_set("config.game.player" .. tostring(i) .. ".color.r", c_config_get("config.game.defaultTankRed"))
-			c_config_set("config.game.player" .. tostring(i) .. ".color.g", c_config_get("config.game.defaultTankBlue"))
-			c_config_set("config.game.player" .. tostring(i) .. ".color.b", c_config_get("config.game.defaultTankGreen"))
-			c_config_set("config.game.player" .. tostring(i) .. ".color.a", c_config_get("config.game.defaultTankAlpha"))
+		tank.name = c_config_get("game.player" .. tostring(i) .. ".name")
+		if not (c_config_get("game.player" .. tostring(i) .. ".color", true)) then
+			c_config_set("game.player" .. tostring(i) .. ".color.r", c_config_get("game.defaultTankRed"))
+			c_config_set("game.player" .. tostring(i) .. ".color.g", c_config_get("game.defaultTankBlue"))
+			c_config_set("game.player" .. tostring(i) .. ".color.b", c_config_get("game.defaultTankGreen"))
+			c_config_set("game.player" .. tostring(i) .. ".color.a", c_config_get("game.defaultTankAlpha"))
 		end
-		if not (c_config_get("config.game.player" .. tostring(i) .. ".team", nil, true)) then
-			c_config_set("config.game.player" .. tostring(i) .. ".team", false)
+		if not (c_config_get("game.player" .. tostring(i) .. ".team", true)) then
+			c_config_set("game.player" .. tostring(i) .. ".team", false)
 		end
-		tank.color.r = c_config_get("config.game.player" .. tostring(i) .. ".color.r")
-		tank.color.g = c_config_get("config.game.player" .. tostring(i) .. ".color.g")
-		tank.color.b = c_config_get("config.game.player" .. tostring(i) .. ".color.b")
-		tank.red = c_config_get("config.game.player" .. tostring(i) .. ".team") == "red"
+		tank.color.r = c_config_get("game.player" .. tostring(i) .. ".color.r")
+		tank.color.g = c_config_get("game.player" .. tostring(i) .. ".color.g")
+		tank.color.b = c_config_get("game.player" .. tostring(i) .. ".color.b")
+		tank.red = c_config_get("game.player" .. tostring(i) .. ".team") == "red"
 
 		-- spawn
 		c_world_tank_spawn(tank)
@@ -260,65 +260,65 @@ end
 local function refreshKeys()
 	tankbobs.in_getKeys()
 
-	for i = 1, c_config_get("config.game.players") do
+	for i = 1, c_config_get("game.players") do
 		if not c_world_getTanks()[i] then
 			break
 		end
 
-		if not (c_config_get("config.key.player" .. tostring(i) .. ".fire", nil, true)) then
-			c_config_set("config.key.player" .. tostring(i) .. ".fire", false)
+		if not (c_config_get("client.key.player" .. tostring(i) .. ".fire", true)) then
+			c_config_set("client.key.player" .. tostring(i) .. ".fire", false)
 		end
-		if not (c_config_get("config.key.player" .. tostring(i) .. ".forward", nil, true)) then
-			c_config_set("config.key.player" .. tostring(i) .. ".forward", false)
+		if not (c_config_get("client.key.player" .. tostring(i) .. ".forward", true)) then
+			c_config_set("client.key.player" .. tostring(i) .. ".forward", false)
 		end
-		if not (c_config_get("config.key.player" .. tostring(i) .. ".back", nil, true)) then
-			c_config_set("config.key.player" .. tostring(i) .. ".back", false)
+		if not (c_config_get("client.key.player" .. tostring(i) .. ".back", true)) then
+			c_config_set("client.key.player" .. tostring(i) .. ".back", false)
 		end
-		if not (c_config_get("config.key.player" .. tostring(i) .. ".right", nil, true)) then
-			c_config_set("config.key.player" .. tostring(i) .. ".right", false)
+		if not (c_config_get("client.key.player" .. tostring(i) .. ".right", true)) then
+			c_config_set("client.key.player" .. tostring(i) .. ".right", false)
 		end
-		if not (c_config_get("config.key.player" .. tostring(i) .. ".left", nil, true)) then
-			c_config_set("config.key.player" .. tostring(i) .. ".left", false)
+		if not (c_config_get("client.key.player" .. tostring(i) .. ".left", true)) then
+			c_config_set("client.key.player" .. tostring(i) .. ".left", false)
 		end
-		if not (c_config_get("config.key.player" .. tostring(i) .. ".special", nil, true)) then
-			c_config_set("config.key.player" .. tostring(i) .. ".special", false)
+		if not (c_config_get("client.key.player" .. tostring(i) .. ".special", true)) then
+			c_config_set("client.key.player" .. tostring(i) .. ".special", false)
 		end
-		if not (c_config_get("config.key.player" .. tostring(i) .. ".reload", nil, true)) then
-			c_config_set("config.key.player" .. tostring(i) .. ".reload", false)
+		if not (c_config_get("client.key.player" .. tostring(i) .. ".reload", true)) then
+			c_config_set("client.key.player" .. tostring(i) .. ".reload", false)
 		end
-		if not (c_config_get("config.key.player" .. tostring(i) .. ".reverse", nil, true)) then
-			c_config_set("config.key.player" .. tostring(i) .. ".reverse", false)
+		if not (c_config_get("client.key.player" .. tostring(i) .. ".reverse", true)) then
+			c_config_set("client.key.player" .. tostring(i) .. ".reverse", false)
 		end
-		if not (c_config_get("config.key.player" .. tostring(i) .. ".mod", nil, true)) then
-			c_config_set("config.key.player" .. tostring(i) .. ".mod", false)
+		if not (c_config_get("client.key.player" .. tostring(i) .. ".mod", true)) then
+			c_config_set("client.key.player" .. tostring(i) .. ".mod", false)
 		end
 
-		if c_config_get("config.key.player" .. tostring(i) .. ".fire") ~= 303 and c_config_get("config.key.player" .. tostring(i) .. ".fire") ~= 304 then
-			c_world_getTanks()[i].state.firing = tankbobs.in_keyPressed(c_config_get("config.key.player" .. tostring(i) .. ".fire"))
+		if c_config_get("client.key.player" .. tostring(i) .. ".fire") ~= 303 and c_config_get("client.key.player" .. tostring(i) .. ".fire") ~= 304 then
+			c_world_getTanks()[i].state.firing = tankbobs.in_keyPressed(c_config_keyLayoutGet(c_config_get("client.key.player" .. tostring(i) .. ".fire")))
 		end
-		if c_config_get("config.key.player" .. tostring(i) .. ".forward") ~= 303 and c_config_get("config.key.player" .. tostring(i) .. ".forward") ~= 304 then
-			c_world_getTanks()[i].state.forward = tankbobs.in_keyPressed(c_config_get("config.key.player" .. tostring(i) .. ".forward"))
+		if c_config_get("client.key.player" .. tostring(i) .. ".forward") ~= 303 and c_config_get("client.key.player" .. tostring(i) .. ".forward") ~= 304 then
+			c_world_getTanks()[i].state.forward = tankbobs.in_keyPressed(c_config_keyLayoutGet(c_config_get("client.key.player" .. tostring(i) .. ".forward")))
 		end
-		if c_config_get("config.key.player" .. tostring(i) .. ".back") ~= 303 and c_config_get("config.key.player" .. tostring(i) .. ".back") ~= 304 then
-			c_world_getTanks()[i].state.back = tankbobs.in_keyPressed(c_config_get("config.key.player" .. tostring(i) .. ".back"))
+		if c_config_get("client.key.player" .. tostring(i) .. ".back") ~= 303 and c_config_get("client.key.player" .. tostring(i) .. ".back") ~= 304 then
+			c_world_getTanks()[i].state.back = tankbobs.in_keyPressed(c_config_keyLayoutGet(c_config_get("client.key.player" .. tostring(i) .. ".back")))
 		end
-		if c_config_get("config.key.player" .. tostring(i) .. ".left") ~= 303 and c_config_get("config.key.player" .. tostring(i) .. ".left") ~= 304 then
-			c_world_getTanks()[i].state.left = tankbobs.in_keyPressed(c_config_get("config.key.player" .. tostring(i) .. ".left"))
+		if c_config_get("client.key.player" .. tostring(i) .. ".left") ~= 303 and c_config_get("client.key.player" .. tostring(i) .. ".left") ~= 304 then
+			c_world_getTanks()[i].state.left = tankbobs.in_keyPressed(c_config_keyLayoutGet(c_config_get("client.key.player" .. tostring(i) .. ".left")))
 		end
-		if c_config_get("config.key.player" .. tostring(i) .. ".right") ~= 303 and c_config_get("config.key.player" .. tostring(i) .. ".right") ~= 304 then
-			c_world_getTanks()[i].state.right = tankbobs.in_keyPressed(c_config_get("config.key.player" .. tostring(i) .. ".right"))
+		if c_config_get("client.key.player" .. tostring(i) .. ".right") ~= 303 and c_config_get("client.key.player" .. tostring(i) .. ".right") ~= 304 then
+			c_world_getTanks()[i].state.right = tankbobs.in_keyPressed(c_config_keyLayoutGet(c_config_get("client.key.player" .. tostring(i) .. ".right")))
 		end
-		if c_config_get("config.key.player" .. tostring(i) .. ".special") ~= 303 and c_config_get("config.key.player" .. tostring(i) .. ".special") ~= 304 then
-			c_world_getTanks()[i].state.special = tankbobs.in_keyPressed(c_config_get("config.key.player" .. tostring(i) .. ".special"))
+		if c_config_get("client.key.player" .. tostring(i) .. ".special") ~= 303 and c_config_get("client.key.player" .. tostring(i) .. ".special") ~= 304 then
+			c_world_getTanks()[i].state.special = tankbobs.in_keyPressed(c_config_keyLayoutGet(c_config_get("client.key.player" .. tostring(i) .. ".special")))
 		end
-		if c_config_get("config.key.player" .. tostring(i) .. ".reload") ~= 303 and c_config_get("config.key.player" .. tostring(i) .. ".reload") ~= 304 then
-			c_world_getTanks()[i].state.reload = tankbobs.in_keyPressed(c_config_get("config.key.player" .. tostring(i) .. ".reload"))
+		if c_config_get("client.key.player" .. tostring(i) .. ".reload") ~= 303 and c_config_get("client.key.player" .. tostring(i) .. ".reload") ~= 304 then
+			c_world_getTanks()[i].state.reload = tankbobs.in_keyPressed(c_config_keyLayoutGet(c_config_get("client.key.player" .. tostring(i) .. ".reload")))
 		end
-		--if b_config_get("config.key.player" .. tostring(i) .. ".reverse") ~= 303 and _config_get("config.key.player" .. tostring(i) .. ".reverse") ~= 304 then
-			--c_world_getTanks()[i].state.reverse = tankbobs.in_keyPressed(c_config_get("config.key.player" .. tostring(i) .. ".reverse"))
+		--if b_config_get("client.key.player" .. tostring(i) .. ".reverse") ~= 303 and _config_get("client.key.player" .. tostring(i) .. ".reverse") ~= 304 then
+			--c_world_getTanks()[i].state.reverse = tankbobs.in_keyPressed(c_config_keyLayoutGet(c_config_get("client.key.player" .. tostring(i) .. ".reverse")))
 		--end
-		if c_config_get("config.key.player" .. tostring(i) .. ".reload") ~= 303 and c_config_get("config.key.player" .. tostring(i) .. ".reload") ~= 304 then
-			c_world_getTanks()[i].state.mod = tankbobs.in_keyPressed(c_config_get("config.key.player" .. tostring(i) .. ".mod"))
+		if c_config_get("client.key.player" .. tostring(i) .. ".reload") ~= 303 and c_config_get("client.key.player" .. tostring(i) .. ".reload") ~= 304 then
+			c_world_getTanks()[i].state.mod = tankbobs.in_keyPressed(c_config_keyLayoutGet(c_config_get("client.key.player" .. tostring(i) .. ".mod")))
 		end
 	end
 end
@@ -328,17 +328,17 @@ function st_play_button(button, pressed)
 		if pressed then
 			if button == 0x0D and endOfGame then
 				c_state_new(play_state)
-			elseif button == c_config_get("config.key.pause") then
+			elseif button == c_config_get("client.key.pause") then
 				if not endOfGame then
 					c_world_setPaused(not c_world_getPaused())
 				end
-			elseif button == 0x1B or button == c_config_get("config.key.quit") then
+			elseif button == 0x1B or button == c_config_get("client.key.quit") then
 				if endOfGame then
 					c_state_new(play_state)
 				else
 					c_state_advance()
 				end
-			elseif button == c_config_get("config.key.exit") then
+			elseif button == c_config_get("client.key.exit") then
 				c_state_new(exit_state)
 			end
 		end
@@ -346,60 +346,60 @@ function st_play_button(button, pressed)
 
 	local c_world_tanks = c_world_getTanks()
 
-	for i = 1, c_config_get("config.game.players") do
-		if not (c_config_get("config.key.player" .. tostring(i) .. ".fire", nil, true)) then
-			c_config_set("config.key.player" .. tostring(i) .. ".fire", false)
+	for i = 1, c_config_get("game.players") do
+		if not (c_config_get("client.key.player" .. tostring(i) .. ".fire", true)) then
+			c_config_set("client.key.player" .. tostring(i) .. ".fire", false)
 		end
-		if not (c_config_get("config.key.player" .. tostring(i) .. ".forward", nil, true)) then
-			c_config_set("config.key.player" .. tostring(i) .. ".forward", false)
+		if not (c_config_get("client.key.player" .. tostring(i) .. ".forward", true)) then
+			c_config_set("client.key.player" .. tostring(i) .. ".forward", false)
 		end
-		if not (c_config_get("config.key.player" .. tostring(i) .. ".back", nil, true)) then
-			c_config_set("config.key.player" .. tostring(i) .. ".back", false)
+		if not (c_config_get("client.key.player" .. tostring(i) .. ".back", true)) then
+			c_config_set("client.key.player" .. tostring(i) .. ".back", false)
 		end
-		if not (c_config_get("config.key.player" .. tostring(i) .. ".right", nil, true)) then
-			c_config_set("config.key.player" .. tostring(i) .. ".right", false)
+		if not (c_config_get("client.key.player" .. tostring(i) .. ".right", true)) then
+			c_config_set("client.key.player" .. tostring(i) .. ".right", false)
 		end
-		if not (c_config_get("config.key.player" .. tostring(i) .. ".left", nil, true)) then
-			c_config_set("config.key.player" .. tostring(i) .. ".left", false)
+		if not (c_config_get("client.key.player" .. tostring(i) .. ".left", true)) then
+			c_config_set("client.key.player" .. tostring(i) .. ".left", false)
 		end
-		if not (c_config_get("config.key.player" .. tostring(i) .. ".special", nil, true)) then
-			c_config_set("config.key.player" .. tostring(i) .. ".special", false)
+		if not (c_config_get("client.key.player" .. tostring(i) .. ".special", true)) then
+			c_config_set("client.key.player" .. tostring(i) .. ".special", false)
 		end
-		if not (c_config_get("config.key.player" .. tostring(i) .. ".reload", nil, true)) then
-			c_config_set("config.key.player" .. tostring(i) .. ".reload", false)
+		if not (c_config_get("client.key.player" .. tostring(i) .. ".reload", true)) then
+			c_config_set("client.key.player" .. tostring(i) .. ".reload", false)
 		end
-		if not (c_config_get("config.key.player" .. tostring(i) .. ".reverse", nil, true)) then
-			c_config_set("config.key.player" .. tostring(i) .. ".reverse", false)
+		if not (c_config_get("client.key.player" .. tostring(i) .. ".reverse", true)) then
+			c_config_set("client.key.player" .. tostring(i) .. ".reverse", false)
 		end
-		if not (c_config_get("config.key.player" .. tostring(i) .. ".mod", nil, true)) then
-			c_config_set("config.key.player" .. tostring(i) .. ".mod", false)
+		if not (c_config_get("client.key.player" .. tostring(i) .. ".mod", true)) then
+			c_config_set("client.key.player" .. tostring(i) .. ".mod", false)
 		end
 
-		if button == c_config_get("config.key.player" .. tostring(i) .. ".fire") then
+		if button == c_config_get("client.key.player" .. tostring(i) .. ".fire") then
 			c_world_tanks[i].state.firing = pressed
 		end
-		if button == c_config_get("config.key.player" .. tostring(i) .. ".forward") then
+		if button == c_config_get("client.key.player" .. tostring(i) .. ".forward") then
 			c_world_tanks[i].state.forward = pressed
 		end
-		if button == c_config_get("config.key.player" .. tostring(i) .. ".back") then
+		if button == c_config_get("client.key.player" .. tostring(i) .. ".back") then
 			c_world_tanks[i].state.back = pressed
 		end
-		if button == c_config_get("config.key.player" .. tostring(i) .. ".left") then
+		if button == c_config_get("client.key.player" .. tostring(i) .. ".left") then
 			c_world_tanks[i].state.left = pressed
 		end
-		if button == c_config_get("config.key.player" .. tostring(i) .. ".right") then
+		if button == c_config_get("client.key.player" .. tostring(i) .. ".right") then
 			c_world_tanks[i].state.right = pressed
 		end
-		if button == c_config_get("config.key.player" .. tostring(i) .. ".special") then
+		if button == c_config_get("client.key.player" .. tostring(i) .. ".special") then
 			c_world_tanks[i].state.special = pressed
 		end
-		if button == c_config_get("config.key.player" .. tostring(i) .. ".reload") then
+		if button == c_config_get("client.key.player" .. tostring(i) .. ".reload") then
 			c_world_tanks[i].state.reload = pressed
 		end
-		--if button == c_config_get("config.key.player" .. tostring(i) .. ".reverse") then
+		--if button == c_config_get("client.key.player" .. tostring(i) .. ".reverse") then
 			--c_world_tanks[i].state.reverse = reverse
 		--end
-		if button == c_config_get("config.key.player" .. tostring(i) .. ".reload") then
+		if button == c_config_get("client.key.player" .. tostring(i) .. ".reload") then
 			c_world_tanks[i].state.mod = mod
 		end
 	end
@@ -427,11 +427,11 @@ local function play_drawWorld(d)
 								gl.PushMatrix()
 									gl.Translate(v.p.x, v.p.y, 0)
 									gl.Rotate(tankbobs.m_degrees(v.r), 0, 0, 1)
-									if not (c_config_get("config.game.player" .. tostring(k) .. ".color", nil, true)) then
-										c_config_set("config.game.player" .. tostring(k) .. ".color.r", c_config_get("config.game.defaultTankRed"))
-										c_config_set("config.game.player" .. tostring(k) .. ".color.g", c_config_get("config.game.defaultTankBlue"))
-										c_config_set("config.game.player" .. tostring(k) .. ".color.b", c_config_get("config.game.defaultTankGreen"))
-										c_config_set("config.game.player" .. tostring(k) .. ".color.a", c_config_get("config.game.defaultTankAlpha"))
+									if not (c_config_get("game.player" .. tostring(k) .. ".color", true)) then
+										c_config_set("game.player" .. tostring(k) .. ".color.r", c_config_get("game.defaultTankRed"))
+										c_config_set("game.player" .. tostring(k) .. ".color.g", c_config_get("game.defaultTankBlue"))
+										c_config_set("game.player" .. tostring(k) .. ".color.b", c_config_get("game.defaultTankGreen"))
+										c_config_set("game.player" .. tostring(k) .. ".color.a", c_config_get("game.defaultTankAlpha"))
 									end
 									local r, g, b, a = v.color.r, v.color.g, v.color.b, 1
 									if c_world_gameType ~= "deathmatch" then
@@ -505,18 +505,18 @@ local function play_drawWorld(d)
 							-- draw name
 							gl.PushMatrix()
 								gl.Translate(v.p.x, v.p.y, 0)
-								tankbobs.r_drawString(v.name, c_const_get("tank_nameOffset"), v.color.r, v.color.g, v.color.b, c_config_get("config.game.scoresAlpha"), c_const_get("tank_nameScalex"), c_const_get("tank_nameScaley"), false)
+								tankbobs.r_drawString(v.name, c_const_get("tank_nameOffset"), v.color.r, v.color.g, v.color.b, c_config_get("client.renderer.scoresAlpha"), c_const_get("tank_nameScalex"), c_const_get("tank_nameScaley"), false)
 							gl.PopMatrix()
 
 							-- healthbars and ammo bars
 							gl.PushMatrix()
 								gl.Translate(v.p.x, v.p.y, 0)
 								gl.Rotate(tankbobs.m_degrees(v.r) + c_const_get("healthbar_rotation"), 0, 0, 1)
-								if not (c_config_get("config.game.player" .. tostring(k) .. ".color", nil, true)) then
-									c_config_set("config.game.player" .. tostring(k) .. ".color.r", c_config_get("config.game.defaultTankRed"))
-									c_config_set("config.game.player" .. tostring(k) .. ".color.g", c_config_get("config.game.defaultTankBlue"))
-									c_config_set("config.game.player" .. tostring(k) .. ".color.b", c_config_get("config.game.defaultTankGreen"))
-									c_config_set("config.game.player" .. tostring(k) .. ".color.a", c_config_get("config.game.defaultTankAlpha"))
+								if not (c_config_get("game.player" .. tostring(k) .. ".color", true)) then
+									c_config_set("game.player" .. tostring(k) .. ".color.r", c_config_get("game.defaultTankRed"))
+									c_config_set("game.player" .. tostring(k) .. ".color.g", c_config_get("game.defaultTankBlue"))
+									c_config_set("game.player" .. tostring(k) .. ".color.b", c_config_get("game.defaultTankGreen"))
+									c_config_set("game.player" .. tostring(k) .. ".color.a", c_config_get("game.defaultTankAlpha"))
 								end
 
 								if v.weapon and v.weapon.capacity > 0 then
@@ -656,7 +656,7 @@ local function play_drawWorld(d)
 			end
 		end
 
-		if c_config_get("config.game.gameType") == "domination" then
+		if c_config_get("game.gameType") == "domination" then
 			-- draw control points
 			for _, v in pairs(c_tcm_current_map.controlPoints) do
 				local color
@@ -683,7 +683,7 @@ local function play_drawWorld(d)
 					gl.CallList(controlPoint_listBase)
 				gl.PopMatrix()
 			end
-		elseif c_config_get("config.game.gameType") == "capturetheflag" then
+		elseif c_config_get("game.gameType") == "capturetheflag" then
 			for _, v in pairs(c_tcm_current_map.flags) do
 				local color
 
@@ -780,7 +780,7 @@ function st_play_step(d)
 	end
 
 	-- get input keys
-	local krr = c_config_get("config.client.krr")
+	local krr = c_config_get("client.krr")
 	if krr > 0 and frame % krr == 0 then
 		refreshKeys()
 	end
@@ -790,16 +790,16 @@ function st_play_step(d)
 		c_world_setPaused(true)
 	end
 
-	local switch = c_config_get("config.game.gameType")
+	local switch = c_config_get("game.gameType")
 	if switch == "deathmatch" then
-		local fragLimit = c_config_get("config.game.fragLimit")
+		local fragLimit = c_config_get("game.fragLimit")
 
 		if fragLimit > 0 then
 			for k, v in pairs(c_world_getTanks()) do
 				if v.score >= fragLimit then
 					c_world_setPaused(true)
 
-					local name = tostring(c_config_get("config.game.player" .. tostring(k) .. ".name"))
+					local name = tostring(c_config_get("game.player" .. tostring(k) .. ".name"))
 					gui_addLabel(tankbobs.m_vec2(35, 50), name .. " wins!", nil, 1.1, v.color.r, v.color.g, v.color.b, 0.75, v.color.r, v.color.g, v.color.b, 0.8)
 
 					if not endOfGame then
@@ -811,7 +811,7 @@ function st_play_step(d)
 			end
 		end
 	elseif switch == "domination" then
-		local pointLimit = c_config_get("config.game.pointLimit")
+		local pointLimit = c_config_get("game.pointLimit")
 
 		if pointLimit > 0 then
 			if c_world_redTeam.score >= pointLimit then
@@ -841,7 +841,7 @@ function st_play_step(d)
 			end
 		end
 	elseif switch == "capturetheflag" then
-		local captureLimit = c_config_get("config.game.captureLimit")
+		local captureLimit = c_config_get("game.captureLimit")
 
 		if captureLimit > 0 then
 			if c_world_redTeam.score >= captureLimit then
@@ -919,22 +919,22 @@ function st_play_step(d)
 		local m = c_tcm_current_map
 		-- FIXME: this is broken
 		if m.uppermost <= 105 and m.lowermost >= -5 and m.rightmost <= 105 and m.leftmost >= -5 then uppermost, rightmost, lowermost, leftmost = 50, 50, 50, 50 end  -- TEMPORARY CODE TO KEEP LEVELS 1 AND 2 STILL
-		--uppermost = math.min(m.uppermost - (50 + c_config_get("config.client.cameraExtraFOV")), uppermost)
-		--lowermost = math.max(m.lowermost + (50 + c_config_get("config.client.cameraExtraFOV")), lowermost)
-		--rightmost = math.min(m.rightmost - (50 + c_config_get("config.client.cameraExtraFOV")), rightmost)
-		--leftmost  = math.max(m.leftmost  + (50 + c_config_get("config.client.cameraExtraFOV")),  leftmost)
+		--uppermost = math.min(m.uppermost - (50 + c_config_get("client.cameraExtraFOV")), uppermost)
+		--lowermost = math.max(m.lowermost + (50 + c_config_get("client.cameraExtraFOV")), lowermost)
+		--rightmost = math.min(m.rightmost - (50 + c_config_get("client.cameraExtraFOV")), rightmost)
+		--leftmost  = math.max(m.leftmost  + (50 + c_config_get("client.cameraExtraFOV")),  leftmost)
 
 		gl.Translate(50, 50, 0)
 
 		local distance = math.abs(rightmost - leftmost) > math.abs(uppermost - lowermost) and math.abs(rightmost - leftmost) or math.abs(uppermost - lowermost)
-		local scale = 100 / (distance + c_config_get("config.client.cameraExtraFOV"))
+		local scale = 100 / (distance + c_config_get("client.cameraExtraFOV"))
 		if scale > 1 then
 			scale = 1
 		end
-		zoom = common_lerp(zoom, scale, d * c_config_get("config.client.cameraSpeed"))
+		zoom = common_lerp(zoom, scale, d * c_config_get("client.cameraSpeed"))
 		gl.Scale(zoom, zoom, 1)
 
-		camera = common_lerp(camera, tankbobs.m_vec2(-(rightmost + leftmost) / 2, -(uppermost + lowermost) / 2), d * c_config_get("config.client.cameraSpeed"))
+		camera = common_lerp(camera, tankbobs.m_vec2(-(rightmost + leftmost) / 2, -(uppermost + lowermost) / 2), d * c_config_get("client.cameraSpeed"))
 		gl.Translate(camera.x, camera.y, 0)
 		play_drawWorld(d)
 	gl.PopMatrix()
@@ -959,7 +959,7 @@ function st_play_step(d)
 			-- handle melee sounds specially
 			if v.weapon and v.weapon.meleeRange ~= 0 and not v.reloading then
 				if v.state.firing then
-					tankbobs.a_setVolumeChunk(c_const_get("weaponAudio_dir") .. v.weapon.fireSound, c_config_get("config.client.volume"))
+					tankbobs.a_setVolumeChunk(c_const_get("weaponAudio_dir") .. v.weapon.fireSound, c_config_get("client.volume"))
 				else
 					tankbobs.a_setVolumeChunk(c_const_get("weaponAudio_dir") .. v.weapon.fireSound, 0)
 				end
@@ -1071,7 +1071,7 @@ function st_play_step(d)
 			if v.m.lastCollideTime and v.m.lastCollideTimeB ~= v.m.lastCollideTime then
 				v.m.lastCollideTimeB = v.m.lastCollideTime
 
-				tankbobs.a_setVolumeChunk(c_const_get("collide_sound"), v.m.intensity * c_config_get("config.client.volume"))
+				tankbobs.a_setVolumeChunk(c_const_get("collide_sound"), v.m.intensity * c_config_get("client.volume"))
 				tankbobs.a_playSound(c_const_get("collide_sound"))
 			end
 
@@ -1125,7 +1125,7 @@ function st_play_step(d)
 		end
 	end
 
-	if c_config_get("config.game.gameType") == "domination" then
+	if c_config_get("game.gameType") == "domination" then
 		for _, v in pairs(c_tcm_current_map.controlPoints) do
 			if v.m.teamB ~= v.m.team then
 				v.m.teamB = v.m.team
@@ -1133,7 +1133,7 @@ function st_play_step(d)
 				tankbobs.a_playSound(c_const_get("control_sound"))
 			end
 		end
-	elseif c_config_get("config.game.gameType") == "capturetheflag" then
+	elseif c_config_get("game.gameType") == "capturetheflag" then
 		for _, v in pairs(c_tcm_current_map.flags) do
 			if v.m.lastCaptureTime and v.m.lastCaptureTimeB ~= v.m.lastCaptureTime then
 				v.m.lastCaptureTimeB = v.m.lastCaptureTime

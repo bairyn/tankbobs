@@ -40,7 +40,7 @@ local RESPONDED    = 3  -- server responded to connection packet
 local CONNECTED    = 4  -- connected to server
 
 function st_internet_init()
-	connection = {state = UNCONNECTED, proceeding = false, lastRequestTime, challenge = 0, address = c_config_get("config.client.serverIP"), ip = "", port = nil, ui = ""}
+	connection = {state = UNCONNECTED, proceeding = false, lastRequestTime, challenge = 0, address = c_config_get("client.serverIP"), ip = "", port = nil, ui = ""}
 
 	if connection.address:find(":") then
 		connection.port = tonumber(connection.address:sub(connection.address:find(":") + 1))
@@ -127,7 +127,7 @@ end
 function st_internet_button(button, pressed)
 	if not gui_button(button, pressed) then
 		if pressed then
-			if button == 0x1B or button == c_config_get("config.key.exit") or button == c_config_get("config.key.quit") then
+			if button == 0x1B or button == c_config_get("client.key.exit") or button == c_config_get("client.key.quit") then
 				c_state_advance()
 			end
 		end
@@ -207,7 +207,7 @@ function st_internet_step(d)
 end
 
 function st_internet_serverIP(widget, text)
-	c_config_set("config.client.serverIP", text)
+	c_config_set("client.serverIP", text)
 	connection.address = text
 
 	if connection.address:find(":") then
@@ -232,7 +232,7 @@ function st_internet_start(widget)
 		tankbobs.n_quit()
 	end
 
-	local status, err = tankbobs.n_init(c_config_get("config.client.port", nil, true))
+	local status, err = tankbobs.n_init(c_config_get("client.port", true))
 	if not status then
 		io.stderr:write(err)
 
@@ -247,13 +247,13 @@ function st_internet_start(widget)
 	end
 	tankbobs.n_newPacket(80)
 	tankbobs.n_writeToPacket(tankbobs.io_fromChar(0x00))
-	if not c_config_get("config.game.player1", nil, true) or not c_config_get("config.game.player1.name", nil, true) or not c_config_get("config.game.player1.color", nil, true) or not c_config_get("config.game.player1.color.r", nil, true) or not c_config_get("config.game.player1.color.g", nil, true) or not c_config_get("config.game.player1.color.b", nil, true) then
+	if not c_config_get("game.player1", true) or not c_config_get("game.player1.name", true) or not c_config_get("game.player1.color", true) or not c_config_get("game.player1.color.r", true) or not c_config_get("game.player1.color.g", true) or not c_config_get("game.player1.color.b", true) then
 		-- forward player to configuration if player 1 isn't set up
 		c_state_new(options_state)
 
 		return
 	end
-	local name = c_config_get("config.game.player1.name")
+	local name = c_config_get("game.player1.name")
 	if #name > 20 then
 		tankbobs.n_writeToPacket(tankbobs.io_fromChar(20))
 		tankbobs.n_writeToPacket(name, tankbobs.io_fromChar(20))
@@ -262,7 +262,7 @@ function st_internet_start(widget)
 		tankbobs.n_writeToPacket(name)
 		tankbobs.n_writeToPacket(string.rep(tankbobs.io_fromChar(0x00), 20 - #name))
 	end
-	local r, g, b = c_config_get("config.game.player1.color.r"), c_config_get("config.game.player1.color.g"), c_config_get("config.game.player1.color.b")
+	local r, g, b = c_config_get("game.player1.color.r"), c_config_get("game.player1.color.g"), c_config_get("game.player1.color.b")
 	tankbobs.n_writeToPacket(tankbobs.io_fromDouble(r))
 	tankbobs.n_writeToPacket(tankbobs.io_fromDouble(g))
 	tankbobs.n_writeToPacket(tankbobs.io_fromDouble(b))

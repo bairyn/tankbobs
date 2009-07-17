@@ -317,9 +317,9 @@ local key =
 	base = widget,
 
 	setKey = function (self, button)
-		self.button = button
+		self.button = c_config_keyLayoutGet(button)
 		if key then
-			self.text = gui_char(key)
+			self.text = gui_char(button)
 		else
 			self.text = ""
 		end
@@ -479,7 +479,7 @@ function gui_addKey(position, text, updateTextCallBack, keyChangedCallBack, init
 	key.text = text
 	key.updateTextCallBack = updateTextCallBack
 	key.keyChangedCallBack = keyChangedCallBack
-	key.button = initialButton
+	key.button = c_config_keyLayoutGet(initialButton)
 	key.color.r = color_r or c_const_get("key_r") key.altColor.r = altColor_r or c_const_get("keySelected_r")
 	key.color.g = color_g or c_const_get("key_g") key.altColor.g = altColor_g or c_const_get("keySelected_g")
 	key.color.b = color_b or c_const_get("key_b") key.altColor.b = altColor_b or c_const_get("keySelected_b")
@@ -684,13 +684,13 @@ end
 
 -- returns true when the pressed key should not be handled further than the input widget
 local function gui_private_inputKey(button)
-	if button == 276 or button == c_config_get("config.key.left") then  -- left
+	if button == 276 or button == c_config_get("client.key.left") then  -- left
 		if selected.textPos > 0 then
 			selected.textPos = selected.textPos - 1
 		end
 
 		return true
-	elseif button == 275 or button == c_config_get("config.key.right") then  -- right
+	elseif button == 275 or button == c_config_get("client.key.right") then  -- right
 		if selected.textPos < #selected.inputText then
 			selected.textPos = selected.textPos + 1
 		end
@@ -885,7 +885,7 @@ function gui_button(button, pressed)
 		end
 
 		return true
-	elseif button == 0x0D or button == c_config_get("config.key.select") then
+	elseif button == 0x0D or button == c_config_get("client.key.select") then
 		-- ENTER
 
 		if pressed then
@@ -922,7 +922,7 @@ function gui_button(button, pressed)
 			end
 		end
 
-	elseif button == 273 or button == c_config_get("config.key.up") then
+	elseif button == 273 or button == c_config_get("client.key.up") then
 		-- UP
 
 		if pressed then
@@ -991,7 +991,7 @@ function gui_button(button, pressed)
 			end
 		end
 
-	elseif button == 274 or button == c_config_get("config.key.down") then
+	elseif button == 274 or button == c_config_get("client.key.down") then
 		-- DOWN
 
 		if pressed then
@@ -1067,7 +1067,7 @@ function gui_button(button, pressed)
 
 		return true
 
-	elseif button == 276 or button == c_config_get("config.key.left") then
+	elseif button == 276 or button == c_config_get("client.key.left") then
 		-- LEFT
 
 		if selected then
@@ -1096,7 +1096,7 @@ function gui_button(button, pressed)
 			end
 		end
 
-	elseif button == 275 or button == c_config_get("config.key.right") then
+	elseif button == 275 or button == c_config_get("client.key.right") then
 		-- RIGHT
 
 		if selected then

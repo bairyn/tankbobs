@@ -128,7 +128,7 @@ function st_online_init()
 		widget.text = ""
 
 		for k, v in pairs(c_world_getTanks()) do
-			local name = tostring(c_config_get("config.game.player" .. tostring(k) .. ".name"))
+			local name = tostring(c_config_get("game.player" .. tostring(k) .. ".name"))
 
 			if #name > length then
 				length = #name
@@ -146,7 +146,7 @@ function st_online_init()
 				widget.text = widget.text .. "\n"
 			end
 
-			name = tostring(c_config_get("config.game.player" .. tostring(k) .. ".name"))
+			name = tostring(c_config_get("game.player" .. tostring(k) .. ".name"))
 			between = string.rep("  ", length - #name + 1)
 			score = tostring(v.score)
 
@@ -154,7 +154,7 @@ function st_online_init()
 		end
 	end
 
-	gui_addLabel(tankbobs.m_vec2(7.5, 92.5), "", updateScores, 0.5, c_config_get("config.game.scoresRed"), c_config_get("config.game.scoresGreen"), c_config_get("config.game.scoresBlue"), c_config_get("config.game.scoresAlpha"), c_config_get("config.game.scoresRed"), c_config_get("config.game.scoresGreen"), c_config_get("config.game.scoresGreen"), c_config_get("config.game.scoresAlpha"))
+	gui_addLabel(tankbobs.m_vec2(7.5, 92.5), "", updateScores, 0.5, c_config_get("client.renderer.scoresRed"), c_config_get("client.renderer.scoresGreen"), c_config_get("client.renderer.scoresBlue"), c_config_get("client.renderer.scoresAlpha"), c_config_get("client.renderer.scoresRed"), c_config_get("client.renderer.scoresGreen"), c_config_get("client.renderer.scoresGreen"), c_config_get("client.renderer.scoresAlpha"))
 
 	-- fps counter
 	local function updateFPS(widget)
@@ -163,8 +163,8 @@ function st_online_init()
 		widget.text = tostring(fps - (fps % 1))
 	end
 
-	if c_config_get("config.game.fpsCounter") then
-		gui_addLabel(tankbobs.m_vec2(92.5, 92.5), "", updateFPS, 0.5, c_config_get("config.game.fpsRed"), c_config_get("config.game.fpsGreen"), c_config_get("config.game.fpsBlue"), c_config_get("config.game.fpsAlpha"), c_config_get("config.game.fpsRed"), c_config_get("config.game.fpsGreen"), c_config_get("config.game.fpsGreen"), c_config_get("config.game.fpsAlpha"))
+	if c_config_get("client.renderer.fpsCounter") then
+		gui_addLabel(tankbobs.m_vec2(92.5, 92.5), "", updateFPS, 0.5, c_config_get("client.renderer.fpsRed"), c_config_get("client.renderer.fpsGreen"), c_config_get("client.renderer.fpsBlue"), c_config_get("client.renderer.fpsAlpha"), c_config_get("client.renderer.fpsRed"), c_config_get("client.renderer.fpsGreen"), c_config_get("client.renderer.fpsGreen"), c_config_get("client.renderer.fpsAlpha"))
 	end
 
 	-- pause
@@ -175,12 +175,12 @@ function st_online_init()
 		else
 			widget.text = ""
 			if not tankbobs.in_isGrabbed() then
-				tankbobs.in_grabMouse(c_config_get("config.renderer.width") / 2, c_config_get("config.renderer.height") / 2)
+				tankbobs.in_grabMouse(c_config_get("client.renderererer.width") / 2, c_config_get("client.renderererer.height") / 2)
 			end
 		end
 	end
 
-	gui_addLabel(tankbobs.m_vec2(37.5, 50), "", updatePause, nil, c_config_get("config.game.pauseRed"), c_config_get("config.game.pauseGreen"), c_config_get("config.game.pauseBlue"), c_config_get("config.game.pauseAlpha"), c_config_get("config.game.pauseRed"), c_config_get("config.game.pauseGreen"), c_config_get("config.game.pauseBlue"), c_config_get("config.game.pauseAlpha"))
+	gui_addLabel(tankbobs.m_vec2(37.5, 50), "", updatePause, nil, c_config_get("client.renderer.pauseRed"), c_config_get("client.renderer.pauseGreen"), c_config_get("client.renderer.pauseBlue"), c_config_get("client.renderer.pauseAlpha"), c_config_get("client.renderer.pauseRed"), c_config_get("client.renderer.pauseGreen"), c_config_get("client.renderer.pauseBlue"), c_config_get("client.renderer.pauseAlpha"))
 
 	-- create local world
 TODO(assert(false))  -- TODO
@@ -211,7 +211,7 @@ end
 function st_online_button(button, pressed)
 	if not gui_button(button, pressed) then
 		if pressed then
-			if button == 0x1B or button == c_config_get("config.key.exit") or button == c_config_get("config.key.quit") then
+			if button == 0x1B or button == c_config_get("client.key.exit") or button == c_config_get("client.key.quit") then
 				c_state_advance()
 			end
 		end

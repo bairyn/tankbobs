@@ -40,7 +40,7 @@ function c_const_init()
 		-- return a proxy table so the real table doesn't change (the clone also handles sub-tables)
 		if type(cst[k][1]) == "table" then
 			local t = {}
-			clone(cst[k][1], t)
+			clone(true, cst[k][1], t)
 			return t
 		else
 			return cst[k][1]

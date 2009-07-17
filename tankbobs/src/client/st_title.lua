@@ -30,10 +30,14 @@ local st_title_button
 local st_title_mouse
 local st_title_step
 
+local init = false
 function st_title_init()
-	-- ungrab mouse
-	tankbobs.in_grabMouse(c_config_get("config.renderer.width") / 2, c_config_get("config.renderer.height") / 2)
-	tankbobs.in_grabClear()
+	if not init then
+		-- ungrab mouse on init
+		tankbobs.in_grabMouse(c_config_get("client.renderer.width") / 2, c_config_get("client.renderer.height") / 2)
+		tankbobs.in_grabClear()
+	end
+	init = true
 
 	gui_addLabel (tankbobs.m_vec2(50, 75), "Main Menu")
 
@@ -55,7 +59,7 @@ end
 function st_title_button(button, pressed)
 	if not gui_button(button, pressed) then
 		if pressed then
-			if button == 0x1B or button == c_config_get("config.key.exit") or button == c_config_get("config.key.quit") then
+			if button == 0x1B or button == c_config_get("client.key.exit") or button == c_config_get("client.key.quit") then
 				c_state_advance()
 			end
 		end

@@ -40,20 +40,20 @@ function st_selected_init()
 	gui_addAction(tankbobs.m_vec2(25, 92.5), "Back", nil, c_state_advance)
 
 	local pos = 0
-	local type = c_config_get("config.game.gameType")
+	local type = c_config_get("game.gameType")
 		if type == "deathmatch" then
 		pos = 1
-		limitConfig = "config.game.fragLimit"
+		limitConfig = "game.fragLimit"
 	elseif type == "domination" then
 		pos = 2
-		limitConfig = "config.game.pointLimit"
+		limitConfig = "game.pointLimit"
 	elseif type == "capturetheflag" then
 		pos = 3
-		limitConfig = "config.game.captureLimit"
+		limitConfig = "game.captureLimit"
 	end
 	gui_addLabel(tankbobs.m_vec2(50, 75), "Game type", nil, 1 / 3) gui_addCycle(tankbobs.m_vec2(75, 75), "Instagib", nil, st_selected_gameType, {"Deathmatch", "Domination", "Capture the Flag"}, pos, 0.5)
 	limit = gui_addLabel(tankbobs.m_vec2(50, 69), "Frag limit", nil, 1 / 3) limitInput = gui_addInput(tankbobs.m_vec2(75, 69), tostring(c_config_get(limitConfig)), nil, st_selected_limit, true, 4, 0.5)
-	gui_addLabel(tankbobs.m_vec2(50, 63), "Instagib", nil, 1 / 3) gui_addCycle(tankbobs.m_vec2(75, 63), "Instagib", nil, st_selected_instagib, {"No", "Yes"}, c_config_get("config.game.instagib") and 2 or 1, 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 63), "Instagib", nil, 1 / 3) gui_addCycle(tankbobs.m_vec2(75, 63), "Instagib", nil, st_selected_instagib, {"No", "Yes"}, c_config_get("game.instagib") and 2 or 1, 0.5)
 	gui_addAction(tankbobs.m_vec2(75, 54), "Start", nil, st_selected_start)
 end
 
@@ -68,9 +68,9 @@ end
 function st_selected_button(button, pressed)
 	if not gui_button(button, pressed) then
 		if pressed then
-			if button == 0x1B or button == c_config_get("config.key.quit") then
+			if button == 0x1B or button == c_config_get("client.key.quit") then
 				c_state_advance()
-			elseif button == c_config_get("config.key.exit") then
+			elseif button == c_config_get("client.key.exit") then
 				c_state_new(exit_state)
 			end
 		end
@@ -91,31 +91,31 @@ end
 
 function st_selected_instagib(widget, string, index)
 	if string == "Yes" then
-		c_config_set("config.game.instagib", true)
+		c_config_set("game.instagib", true)
 	elseif string == "No" then
-		c_config_set("config.game.instagib", false)
+		c_config_set("game.instagib", false)
 	end
 end
 
 function st_selected_gameType(widget, string, index)
 	if index == 1 then
-		limitConfig = "config.game.fragLimit"
+		limitConfig = "game.fragLimit"
 		limitInput:setText(c_config_get(limitConfig))
 		limit:setText "Frag Limit"
 
-		c_config_set("config.game.gameType", "deathmatch")
+		c_config_set("game.gameType", "deathmatch")
 	elseif index == 2 then
-		limitConfig = "config.game.pointLimit"
+		limitConfig = "game.pointLimit"
 		limitInput:setText(c_config_get(limitConfig))
 		limit:setText "Point Limit"
 
-		c_config_set("config.game.gameType", "domination")
+		c_config_set("game.gameType", "domination")
 	elseif index == 3 then
-		limitConfig = "config.game.captureLimit"
+		limitConfig = "game.captureLimit"
 		limitInput:setText(c_config_get(limitConfig))
 		limit:setText "Capture Limit"
 
-		c_config_set("config.game.gameType", "capturetheflag")
+		c_config_set("game.gameType", "capturetheflag")
 	end
 end
 

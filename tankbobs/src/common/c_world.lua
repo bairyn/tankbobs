@@ -103,12 +103,12 @@ function c_world_init()
 	t_w_setLinearVelocity   = _G.tankbobs.w_setLinearVelocity
 	t_w_setAngularVelocity  = _G.tankbobs.w_setAngularVelocity
 
-	c_config_cheat_protect("config.game.timescale")
+	c_config_cheat_protect("game.timescale")
 
 	c_const_set("world_time", 1000)  -- relative to change in seconds
 
 	c_const_set("world_fps", 256)
-	--c_const_set("world_fps", c_config_get("config.game.worldFPS"))  -- physics FPS needs to be constant
+	--c_const_set("world_fps", c_config_get("game.worldFPS"))  -- physics FPS needs to be constant
 	--c_const_set("world_timeStep", common_FTM(c_const_get("world_fps")))
 	c_const_set("world_timeStep", 1 / 500)
 	c_const_set("world_iterations", 16)
@@ -365,9 +365,9 @@ c_world_tank =
 		o.h[3].y = c_const_get("tank_hully3")
 		o.h[4].x = c_const_get("tank_hullx4")
 		o.h[4].y = c_const_get("tank_hully4")
-		o.color.r = c_config_get("config.game.defaultTankRed")
-		o.color.g = c_config_get("config.game.defaultTankGreen")
-		o.color.b = c_config_get("config.game.defaultTankBlue")
+		o.color.r = c_config_get("game.defaultTankRed")
+		o.color.g = c_config_get("game.defaultTankGreen")
+		o.color.b = c_config_get("game.defaultTankBlue")
 		o.state = c_world_tank_state:new()
 	end,
 
@@ -444,7 +444,7 @@ function c_world_newWorld()
 
 	-- set game type
 	gameType = DEATHMATCH
-	c_world_gameType = c_config_get("config.game.gameType")
+	c_world_gameType = c_config_get("game.gameType")
 	local switch = c_world_gameType
 		if switch == "deathmatch" then
 		gameType = DEATHMATCH
@@ -490,7 +490,7 @@ function c_world_newWorld()
 	end
 
 	for k, v in pairs(c_tcm_current_map.powerupSpawnPoints) do
-		v.m.nextPowerupTime = t_t_getTicks() + c_const_get("world_time") * c_config_get("config.game.timescale") * v.initial
+		v.m.nextPowerupTime = t_t_getTicks() + c_const_get("world_time") * c_config_get("game.timescale") * v.initial
 		local enabled = false
 		for k, vs in pairs(v.enabledPowerups) do
 			if vs then
@@ -559,7 +559,7 @@ function c_world_tank_die(tank, t)
 		tank.m.flag = nil
 	end
 
-	tank.nextSpawnTime = t + c_const_get("world_time") * c_config_get("config.game.timescale") * c_const_get("tank_spawnTime")
+	tank.nextSpawnTime = t + c_const_get("world_time") * c_config_get("game.timescale") * c_const_get("tank_spawnTime")
 	if tank.killer then
 		tank.killer.score = tank.killer.score + 1
 	else
@@ -613,7 +613,7 @@ function c_world_tank_checkSpawn(d, tank)
 	tank.p(playerSpawnPoint.p)
 	tank.health = c_const_get("tank_health")
 	tank.shield = 0
-	if c_config_get("config.game.instagib") then
+	if c_config_get("game.instagib") then
 		tank.weapon = c_weapon_getByAltName("instagun")
 	else
 		tank.weapon = c_weapon_getByAltName("default")
@@ -1162,11 +1162,11 @@ function c_world_powerupSpawnPoint_step(d, powerupSpawnPoint)
 
 	if powerupSpawnPoint.linked then
 		if not lastPowerupSpawnTime then
-			lastPowerupSpawnTime = t + c_const_get("world_time") * c_config_get("config.game.timescale") * powerupSpawnPoint.initial - c_const_get("world_time") * c_config_get("config.game.timescale") * powerupSpawnPoint["repeat"]
+			lastPowerupSpawnTime = t + c_const_get("world_time") * c_config_get("game.timescale") * powerupSpawnPoint.initial - c_const_get("world_time") * c_config_get("game.timescale") * powerupSpawnPoint["repeat"]
 		end
 
 		if not nextPowerupSpawnPoint or powerupSpawnPoint == nextPowerupSpawnPoint then
-			if t >= lastPowerupSpawnTime + c_const_get("world_time") * c_config_get("config.game.timescale") * powerupSpawnPoint["repeat"] then
+			if t >= lastPowerupSpawnTime + c_const_get("world_time") * c_config_get("game.timescale") * powerupSpawnPoint["repeat"] then
 				lastPowerupSpawnTime = t
 				spawn = true
 
@@ -1192,7 +1192,7 @@ function c_world_powerupSpawnPoint_step(d, powerupSpawnPoint)
 	end
 
 	if spawn then
-		powerupSpawnPoint.m.nextPowerupTime = t + c_const_get("world_time") * c_config_get("config.game.timescale") * powerupSpawnPoint["repeat"]
+		powerupSpawnPoint.m.nextPowerupTime = t + c_const_get("world_time") * c_config_get("game.timescale") * powerupSpawnPoint["repeat"]
 
 		if c_world_canPowerupSpawn(d, powerupSpawnPoint) then
 			-- make sure there's not too many powerups
@@ -1221,7 +1221,7 @@ function c_world_powerupSpawnPoint_step(d, powerupSpawnPoint)
 			for k, v in pairs(powerupSpawnPoint.enabledPowerups) do
 				if v then
 					if found then
-						if c_world_getPowerupTypeByName(k) and (not c_config_get("config.game.instagib") or c_world_getPowerupTypeByName(k).instagib) then
+						if c_world_getPowerupTypeByName(k) and (not c_config_get("game.instagib") or c_world_getPowerupTypeByName(k).instagib) then
 							powerupSpawnPoint.m.lastPowerup = k
 							powerup.typeName = k
 							break
@@ -1237,7 +1237,7 @@ function c_world_powerupSpawnPoint_step(d, powerupSpawnPoint)
 				for k, v in pairs(powerupSpawnPoint.enabledPowerups) do
 					if v then
 						if found then
-							if c_world_getPowerupTypeByName(k) and (not c_config_get("config.game.instagib") or c_world_getPowerupTypeByName(k).instagib) then
+							if c_world_getPowerupTypeByName(k) and (not c_config_get("game.instagib") or c_world_getPowerupTypeByName(k).instagib) then
 								powerupSpawnPoint.m.lastPowerup = k
 								powerup.typeName = k
 								break
@@ -1357,7 +1357,7 @@ function c_world_powerup_step(d, powerup)
 	vel.R = c_const_get("powerup_pushStrength")
 	t_w_setLinearVelocity(powerup.m.body, vel)
 
-	if c_config_get("config.game.ept") then
+	if c_config_get("game.ept") then
 		for _, v in pairs(c_world_tanks) do
 			if v.exists then
 				if c_world_intersection(d, c_world_powerupHull(powerup), c_world_tankHull(v), t_m_vec2(0, 0), t_w_getLinearVelocity(v.body)) then
@@ -1409,10 +1409,10 @@ function c_world_controlPoint_step(d, controlPoint)
 					c_world_blueTeam.score = c_world_blueTeam.score + 1
 				end
 
-				controlPoint.m.nextPointTime = controlPoint.m.nextPointTime + c_const_get("world_time") * c_config_get("config.game.timescale") * c_const_get("controlPoint_rate")
+				controlPoint.m.nextPointTime = controlPoint.m.nextPointTime + c_const_get("world_time") * c_config_get("game.timescale") * c_const_get("controlPoint_rate")
 			end
 		else
-			controlPoint.m.nextPointTime = t + c_const_get("world_time") * c_config_get("config.game.timescale") * c_const_get("controlPoint_rate")
+			controlPoint.m.nextPointTime = t + c_const_get("world_time") * c_config_get("game.timescale") * c_const_get("controlPoint_rate")
 		end
 	end
 end
@@ -1554,7 +1554,7 @@ local function c_world_collide(tank, normal)
 	local vel = t_w_getLinearVelocity(tank.body)
 	local component = vel * -normal
 
-	if not c_config_get("config.game.instagib") and tank.shield <= 0 then
+	if not c_config_get("game.instagib") and tank.shield <= 0 then
 		-- no collision damage in instagib mode or if any of the shield is left
 		if component >= c_const_get("tank_damageMinSpeed") then
 			local damage = c_const_get("tank_damageK") * (component - c_const_get("tank_damageMinSpeed"))
@@ -1650,11 +1650,11 @@ local function c_world_private_resetWorldTimers()
 
 	for _, v in pairs(c_world_tanks) do
 		v.lastFireTime = t
-		v.nextSpawnTime = t + c_const_get("world_time") * c_config_get("config.game.timescale") * c_const_get("tank_spawnTime")
+		v.nextSpawnTime = t + c_const_get("world_time") * c_config_get("game.timescale") * c_const_get("tank_spawnTime")
 	end
 
 	for _, v in pairs(c_tcm_current_map.powerupSpawnPoints) do
-		v.m.nextPowerupTime = t + c_const_get("world_time") * c_config_get("config.game.timescale") * c_const_get("powerupSpawnPoint_initialPowerupTime")
+		v.m.nextPowerupTime = t + c_const_get("world_time") * c_config_get("game.timescale") * c_const_get("powerupSpawnPoint_initialPowerupTime")
 	end
 
 	for _, v in pairs(c_world_powerups) do
@@ -1731,7 +1731,7 @@ end
 
 function c_world_step(d)
 	local t = t_t_getTicks()
-	local f = 1 / (c_const_get("world_time") * c_config_get("config.game.timescale"))
+	local f = 1 / (c_const_get("world_time") * c_config_get("game.timescale"))
 	local wd = common_FTM(c_const_get("world_fps")) * f
 
 	if worldInitialized then

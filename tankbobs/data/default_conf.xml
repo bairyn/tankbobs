@@ -4,25 +4,91 @@
 		<cameraExtraFOV>25</cameraExtraFOV>
 		<cameraSpeed>5</cameraSpeed>
 		<fps>128</fps>
+
+		These keys might conflict with the default menu keys:
+		0x08: BACKSPACE
+		0x0D: ENTER
+		0x1B: ESCAPE
+		273: UP (exception: tank movement)
+		274: DOWN (exception: tank movement)
+		276: LEFT (exception: tank movement)
+		275: RIGHT (exception: tank movement)
+		<key>
+			<down>9</down> 'PGDOWN'
+			<exit></exit>
+			<left></left>
+			<pause>112</pause> 'p'
+			<player1>
+				<fire>306</fire> 'LCTRL'
+				<forward>119</forward> 'w'
+				<back>115</back> 's'
+				<left>97</left> 'a'
+				<mod></mod>
+				<reverse></reverse>
+				<right>100</right> 'd'
+				<special>304</special> 'LSHIFT'
+				<reload>114</reload> 'r'
+			</player1>
+			<player2>
+				<fire>305</fire> 'RCTRL'
+				<forward>273</forward> 'UP'
+				<back>274</back> 'DOWN'
+				<left>276</left> 'LEFT
+				<mod></mod>
+				<reverse></reverse>
+				<right>275</right> 'RIGHT'
+				<special>303</special> 'RSHIFT'
+				<reload>256</reload> 'KP_0'
+			</player2>
+			<quit>98</quit> 'b'
+			<select></select>
+			<right></right>
+			<up>280</up> 'PGUP'
+		</key>
+
+		<keyLayout>default</keyLayout>
 		<krr>20</krr>  Key Refresh Rate
 		<musicVolume>0.6</musicVolume>
 		<port>0</port>
+		<renderer>
+			<font>sans</font>
+
+			<fonts>
+				<sans>
+					<size>72</size>
+					<ttf>DejaVuSans-Bold.ttf</ttf>
+				</sans>
+				<bd>
+					<size>72</size>
+					<ttf>VeraBd.ttf</ttf>
+				</bd>
+			</fonts>
+
+			<fpsRed>   0.020 </fpsRed>
+			<fpsGreen> 0.020 </fpsGreen>
+			<fpsBlue>  0.500 </fpsBlue>
+			<fpsAlpha> 0.875 </fpsAlpha>
+			<fpsCounter> false </fpsCounter>
+
+			<fullscreen>false</fullscreen>
+
+			<height>600</height>
+
+			<pauseRed>   0.400 </pauseRed>
+			<pauseGreen> 0.400 </pauseGreen>
+			<pauseBlue>  0.600 </pauseBlue>
+			<pauseAlpha> 0.600 </pauseAlpha>
+
+			<scoresRed>   0.020 </scoresRed>
+			<scoresGreen> 0.020 </scoresGreen>
+			<scoresBlue>  0.500 </scoresBlue>
+			<scoresAlpha> 0.875 </scoresAlpha>
+
+			<width>800</width>
+		</renderer>
 		<serverIP>127.0.0.1</serverIP>
 		<volume>0.8</volume>
 	</client>
-
-	<font>sans</font>
-
-	<fonts>
-		<sans>
-			<size>72</size>
-			<ttf>DejaVuSans-Bold.ttf</ttf>
-		</sans>
-		<bd>
-			<size>72</size>
-			<ttf>VeraBd.ttf</ttf>
-		</bd>
-	</fonts>
 
 	<game>
 		<captureLimit>10</captureLimit>
@@ -32,19 +98,10 @@
 		<defaultTankBlue>  0.010 </defaultTankBlue>
 		<defaultTankAlpha> 1.000 </defaultTankAlpha>
 		<ept>false</ept>  Whether to do an extra expensive but accurate test for powerup pickups
-		<fpsRed>   0.020 </fpsRed>
-		<fpsGreen> 0.020 </fpsGreen>
-		<fpsBlue>  0.500 </fpsBlue>
-		<fpsAlpha> 0.875 </fpsAlpha>
-		<fpsCounter>  false </fpsCounter>
 		<fragLimit>15</fragLimit>
 		<gameType>deathmatch</gameType>
 		<instagib>false</instagib>
 		<overview>1</overview>
-		<pauseRed>   0.400 </pauseRed>
-		<pauseGreen> 0.400 </pauseGreen>
-		<pauseBlue>  0.600 </pauseBlue>
-		<pauseAlpha> 0.600 </pauseAlpha>
 		<player1>
 			<name>Player1</name>
 			<color>  blue
@@ -67,62 +124,9 @@
 		</player2>
 		<players>2</players>
 		<pointLimit>200</pointLimit>
-		<scoresRed>   0.020 </scoresRed>
-		<scoresGreen> 0.020 </scoresGreen>
-		<scoresBlue>  0.500 </scoresBlue>
-		<scoresAlpha> 0.875 </scoresAlpha>
 		<timescale>1</timescale>
 		<worldFPS>256</worldFPS>
 	</game>
-
-	These keys might conflict with the default menu keys:
-	0x08: BACKSPACE
-	0x0D: ENTER
-	0x1B: ESCAPE
-	273: UP (exception: tank movement)
-	274: DOWN (exception: tank movement)
-	276: LEFT (exception: tank movement)
-	275: RIGHT (exception: tank movement)
-	<key>
-		<down>9</down> 'PGDOWN'
-		<exit></exit>
-		<left></left>
-		<pause>112</pause> 'p'
-		<player1>
-			<fire>306</fire> 'LCTRL'
-			<forward>119</forward> 'w'
-			<back>115</back> 's'
-			<left>97</left> 'a'
-			<mod></mod>
-			<reverse></reverse>
-			<right>100</right> 'd'
-			<special>304</special> 'LSHIFT'
-			<reload>114</reload> 'r'
-		</player1>
-		<player2>
-			<fire>305</fire> 'RCTRL'
-			<forward>273</forward> 'UP'
-			<back>274</back> 'DOWN'
-			<left>276</left> 'LEFT
-			<mod></mod>
-			<reverse></reverse>
-			<right>275</right> 'RIGHT'
-			<special>303</special> 'RSHIFT'
-			<reload>256</reload> 'KP_0'
-		</player2>
-		<quit>98</quit> 'b'
-		<select></select>
-		<right></right>
-		<up>280</up> 'PGUP'
-	</key>
-
-	<keyLayout>default</keyLayout>
-
-	<renderer>
-		<fullscreen>false</fullscreen>
-		<height>600</height>
-		<width>800</width>
-	</renderer>
 
 	<server>
 		<fps>64</fps>

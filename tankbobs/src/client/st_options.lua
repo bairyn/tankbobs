@@ -42,9 +42,9 @@ end
 function st_options_button(button, pressed)
 	if not gui_button(button, pressed) then
 		if pressed then
-			if button == c_config_get("config.key.exit") then
+			if button == c_config_get("client.key.exit") then
 				c_state_new(exit_state)
-			elseif button == 0x1B or button == c_config_get("config.key.quit") then
+			elseif button == 0x1B or button == c_config_get("client.key.quit") then
 				c_state_advance()
 			end
 		end
@@ -68,7 +68,7 @@ function st_optionsGame_init()
 	gui_addAction(tankbobs.m_vec2(25, 85), "Back", nil, c_state_advance)
 
 	local pos = 0
-	local buf = c_config_get("config.game.worldFPS")
+	local buf = c_config_get("game.worldFPS")
 		if buf == 8 then
 		pos = 1
 	elseif buf == 16 then
@@ -97,21 +97,21 @@ end
 
 function st_optionsGame_worldFPS(widget, string, index)
 		if string == "Smoothest" then
-		c_config_set("config.game.worldFPS", 1024)
+		c_config_set("game.worldFPS", 1024)
 	elseif string == "Smoother" then
-		c_config_set("config.game.worldFPS", 512)
+		c_config_set("game.worldFPS", 512)
 	elseif string == "Smooth" then
-		c_config_set("config.game.worldFPS", 256)
+		c_config_set("game.worldFPS", 256)
 	elseif string == "Medium" then
-		c_config_set("config.game.worldFPS", 128)
+		c_config_set("game.worldFPS", 128)
 	elseif string == "Rough" then
-		c_config_set("config.game.worldFPS", 64)
+		c_config_set("game.worldFPS", 64)
 	elseif string == "Rougher" then
-		c_config_set("config.game.worldFPS", 32)
+		c_config_set("game.worldFPS", 32)
 	elseif string == "Roughest" then
-		c_config_set("config.game.worldFPS", 16)
+		c_config_set("game.worldFPS", 16)
 	elseif string == "Slide Show" then
-		c_config_set("config.game.worldFPS", 8)
+		c_config_set("game.worldFPS", 8)
 	end
 end
 
@@ -141,11 +141,11 @@ function st_optionsAudio_init()
 
 	gui_addLabel(tankbobs.m_vec2(50, 75), "Volume", nil, 2 / 3)
 
-	gui_addLabel(tankbobs.m_vec2(50, 57), "Volume", nil, 2 / 3) gui_addScale(tankbobs.m_vec2(75, 57), "Volume", nil, st_optionsAudio_volume, c_config_get("config.client.volume"))
-	gui_addLabel(tankbobs.m_vec2(50, 51), "Music", nil, 2 / 3) gui_addScale(tankbobs.m_vec2(75, 51), "Music", nil, st_optionsAudio_musicVolume, c_config_get("config.client.musicVolume"))
+	gui_addLabel(tankbobs.m_vec2(50, 57), "Volume", nil, 2 / 3) gui_addScale(tankbobs.m_vec2(75, 57), "Volume", nil, st_optionsAudio_volume, c_config_get("client.volume"))
+	gui_addLabel(tankbobs.m_vec2(50, 51), "Music", nil, 2 / 3) gui_addScale(tankbobs.m_vec2(75, 51), "Music", nil, st_optionsAudio_musicVolume, c_config_get("client.musicVolume"))
 
 	local pos = 0
-	local buf = c_config_get("config.client.audioChunkSize")
+	local buf = c_config_get("client.audioChunkSize")
 		if buf == 256 then
 		pos = 1
 	elseif buf == 512 then
@@ -170,30 +170,30 @@ function st_optionsAudio_done()
 end
 
 function st_optionsAudio_volume(widget, pos)
-	c_config_set("config.client.volume", pos)
+	c_config_set("client.volume", pos)
 	tankbobs.a_setVolume(pos)
 end
 
 function st_optionsAudio_musicVolume(widget, pos)
-	c_config_set("config.client.musicVolume", pos)
+	c_config_set("client.musicVolume", pos)
 	tankbobs.a_setMusicVolume(pos)
 end
 
 function st_optionsAudio_chunkSize(widget, string, index)
 		if string == "Highest" then
-		c_config_set("config.client.audioChunkSize", 16384)
+		c_config_set("client.audioChunkSize", 16384)
 	elseif string == "Higher" then
-		c_config_set("config.client.audioChunkSize", 8192)
+		c_config_set("client.audioChunkSize", 8192)
 	elseif string == "High" then
-		c_config_set("config.client.audioChunkSize", 4096)
+		c_config_set("client.audioChunkSize", 4096)
 	elseif string == "Medium" then
-		c_config_set("config.client.audioChunkSize", 3072)  -- magic number (*3, not *2) seems to eliminate fuzz
+		c_config_set("client.audioChunkSize", 3072)  -- magic number (*3, not *2) seems to eliminate fuzz
 	elseif string == "Low" then
-		c_config_set("config.client.audioChunkSize", 1024)
+		c_config_set("client.audioChunkSize", 1024)
 	elseif string == "Lower" then
-		c_config_set("config.client.audioChunkSize", 512)
+		c_config_set("client.audioChunkSize", 512)
 	elseif string == "Lowest" then
-		c_config_set("config.client.audioChunkSize", 256)
+		c_config_set("client.audioChunkSize", 256)
 	end
 end
 
@@ -223,16 +223,16 @@ local st_optionsVideo_apply
 local st_optionsVideo_fpsCounter
 
 function st_optionsVideo_init()
-	st_optionsVideo_renderer = {fullscreen = c_config_get("config.renderer.fullscreen"), width = c_config_get("config.renderer.width"), height = c_config_get("config.renderer.height")}
+	st_optionsVideo_renderer = {fullscreen = c_config_get("client.renderer.fullscreen"), width = c_config_get("client.renderer.width"), height = c_config_get("client.renderer.height")}
 
 	gui_addAction(tankbobs.m_vec2(25, 85), "Back", nil, c_state_advance)
 
-	gui_addLabel(tankbobs.m_vec2(50, 75), "Fullscreen", nil, 2 / 3) gui_addCycle(tankbobs.m_vec2(75, 75), "Fullscreen", nil, st_optionsVideo_fullscreen, {"No", "Yes"}, c_config_get("config.renderer.fullscreen") and 2 or 1)
-	gui_addLabel(tankbobs.m_vec2(50, 69), "Width", nil, 2 / 3) gui_addInput(tankbobs.m_vec2(75, 69), tostring(c_config_get("config.renderer.width")), nil, st_optionsVideo_width, true, 5)
-	gui_addLabel(tankbobs.m_vec2(50, 63), "Height", nil, 2 / 3) gui_addInput(tankbobs.m_vec2(75, 63), tostring(c_config_get("config.renderer.height")), nil, st_optionsVideo_height, true, 5)
+	gui_addLabel(tankbobs.m_vec2(50, 75), "Fullscreen", nil, 2 / 3) gui_addCycle(tankbobs.m_vec2(75, 75), "Fullscreen", nil, st_optionsVideo_fullscreen, {"No", "Yes"}, c_config_get("client.renderer.fullscreen") and 2 or 1)
+	gui_addLabel(tankbobs.m_vec2(50, 69), "Width", nil, 2 / 3) gui_addInput(tankbobs.m_vec2(75, 69), tostring(c_config_get("client.renderer.width")), nil, st_optionsVideo_width, true, 5)
+	gui_addLabel(tankbobs.m_vec2(50, 63), "Height", nil, 2 / 3) gui_addInput(tankbobs.m_vec2(75, 63), tostring(c_config_get("client.renderer.height")), nil, st_optionsVideo_height, true, 5)
 	gui_addAction(tankbobs.m_vec2(75, 57), "Apply", nil, st_optionsVideo_apply)
 
-	gui_addLabel(tankbobs.m_vec2(50, 45), "FPS Counter", nil, 2 / 4) gui_addCycle(tankbobs.m_vec2(75, 45), "FPS Counter", nil, st_optionsVideo_fpsCounter, {"No", "Yes"}, c_config_get("config.game.fpsCounter") and 2 or 1)  -- Label needs to be a bit smaller
+	gui_addLabel(tankbobs.m_vec2(50, 45), "FPS Counter", nil, 2 / 4) gui_addCycle(tankbobs.m_vec2(75, 45), "FPS Counter", nil, st_optionsVideo_fpsCounter, {"No", "Yes"}, c_config_get("client.renderer.fpsCounter") and 2 or 1)  -- Label needs to be a bit smaller
 end
 
 function st_optionsVideo_done()
@@ -258,20 +258,20 @@ function st_optionsVideo_height(widget)
 end
 
 function st_optionsVideo_apply(widget)
-	if c_config_get("config.renderer.fullscreen") ~= st_optionsVideo_renderer.fullscreen or c_config_get("config.renderer.width") ~= st_optionsVideo_renderer.width or c_config_get("config.renderer.height") ~= st_optionsVideo_renderer.height then
-		c_config_set("config.renderer.fullscreen", st_optionsVideo_renderer.fullscreen)
-		c_config_set("config.renderer.width", st_optionsVideo_renderer.width)
-		c_config_set("config.renderer.height", st_optionsVideo_renderer.height)
+	if c_config_get("client.renderer.fullscreen") ~= st_optionsVideo_renderer.fullscreen or c_config_get("client.renderer.width") ~= st_optionsVideo_renderer.width or c_config_get("client.renderer.height") ~= st_optionsVideo_renderer.height then
+		c_config_set("client.renderer.fullscreen", st_optionsVideo_renderer.fullscreen)
+		c_config_set("client.renderer.width", st_optionsVideo_renderer.width)
+		c_config_set("client.renderer.height", st_optionsVideo_renderer.height)
 		renderer_updateWindow()  -- in case SDL forgets to send a resize signal
-		tankbobs.r_newWindow(c_config_get("config.renderer.width"), c_config_get("config.renderer.height"), c_config_get("config.renderer.fullscreen"), c_const_get("title"), c_const_get("icon"))
+		tankbobs.r_newWindow(c_config_get("client.renderer.width"), c_config_get("client.renderer.height"), c_config_get("client.renderer.fullscreen"), c_const_get("title"), c_const_get("icon"))
 	end
 end
 
 function st_optionsVideo_fpsCounter(widget, string, index)
 	if string == "Yes" then
-		c_config_set("config.game.fpsCounter", true)
+		c_config_set("client.renderer.fpsCounter", true)
 	elseif string == "No" then
-		c_config_set("config.game.fpsCounter", false)
+		c_config_set("client.renderer.fpsCounter", false)
 	end
 end
 
@@ -321,74 +321,74 @@ function st_optionsPlayers_init()
 
 	gui_addAction(tankbobs.m_vec2(25, 85), "Back", nil, c_state_advance)
 
-	gui_addLabel(tankbobs.m_vec2(50, 75), "Computers", nil, 1 / 3) gui_addInput(tankbobs.m_vec2(75, 75), tostring(tonumber(c_config_get("config.game.computers"))), nil, st_optionsPlayers_computers, true, 1, 0.5)
-	gui_addLabel(tankbobs.m_vec2(50, 72), "Players", nil, 1 / 3) gui_addInput(tankbobs.m_vec2(75, 72), tostring(tonumber(c_config_get("config.game.players"))), nil, st_optionsPlayers_players, true, 1, 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 75), "Computers", nil, 1 / 3) gui_addInput(tankbobs.m_vec2(75, 75), tostring(tonumber(c_config_get("game.computers"))), nil, st_optionsPlayers_computers, true, 1, 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 72), "Players", nil, 1 / 3) gui_addInput(tankbobs.m_vec2(75, 72), tostring(tonumber(c_config_get("game.players"))), nil, st_optionsPlayers_players, true, 1, 0.5)
 
 	gui_addLabel(tankbobs.m_vec2(50, 66), "Set up player", nil, 1 / 3) gui_addInput(tankbobs.m_vec2(75, 66), "1", nil, st_optionsPlayers_configurePlayer, true, 1, 0.5)
-	if not (c_config_get("config.game.player1.name", nil, true)) then
-		c_config_set("config.game.player1.name", "Player1")
+	if not (c_config_get("game.player1.name", true)) then
+		c_config_set("game.player1.name", "Player1")
 	end
-	if not (c_config_get("config.key.player1.fire", nil, true)) then
-		c_config_set("config.key.player1.fire", false)
+	if not (c_config_get("client.key.player1.fire", true)) then
+		c_config_set("client.key.player1.fire", false)
 	end
-	if not (c_config_get("config.key.player1.forward", nil, true)) then
-		c_config_set("config.key.player1.forward", false)
+	if not (c_config_get("client.key.player1.forward", true)) then
+		c_config_set("client.key.player1.forward", false)
 	end
-	if not (c_config_get("config.key.player1.back", nil, true)) then
-		c_config_set("config.key.player1.back", false)
+	if not (c_config_get("client.key.player1.back", true)) then
+		c_config_set("client.key.player1.back", false)
 	end
-	if not (c_config_get("config.key.player1.left", nil, true)) then
-		c_config_set("config.key.player1.left", false)
+	if not (c_config_get("client.key.player1.left", true)) then
+		c_config_set("client.key.player1.left", false)
 	end
-	if not (c_config_get("config.key.player1.right", nil, true)) then
-		c_config_set("config.key.player1.right", false)
+	if not (c_config_get("client.key.player1.right", true)) then
+		c_config_set("client.key.player1.right", false)
 	end
-	if not (c_config_get("config.key.player1.special", nil, true)) then
-		c_config_set("config.key.player1.special", false)
+	if not (c_config_get("client.key.player1.special", true)) then
+		c_config_set("client.key.player1.special", false)
 	end
-	if not (c_config_get("config.key.player1.reload", nil, true)) then
-		c_config_set("config.key.player1.reload", false)
+	if not (c_config_get("client.key.player1.reload", true)) then
+		c_config_set("client.key.player1.reload", false)
 	end
-	if not (c_config_get("config.key.player1.reverse", nil, true)) then
-		c_config_set("config.key.player1.reverse", false)
+	if not (c_config_get("client.key.player1.reverse", true)) then
+		c_config_set("client.key.player1.reverse", false)
 	end
-	if not (c_config_get("config.key.player1.mod", nil, true)) then
-		c_config_set("config.key.player1.mod", false)
+	if not (c_config_get("client.key.player1.mod", true)) then
+		c_config_set("client.key.player1.mod", false)
 	end
-	if not (c_config_get("config.game.player1.color.r", nil, true)) then
-		c_config_set("config.game.player1.color.r", c_config_get("config.game.defaultTankRed"))
+	if not (c_config_get("game.player1.color.r", true)) then
+		c_config_set("game.player1.color.r", c_config_get("game.defaultTankRed"))
 	end
-	if not (c_config_get("config.game.player1.color.g", nil, true)) then
-		c_config_set("config.game.player1.color.g", c_config_get("config.game.defaultTankGreen"))
+	if not (c_config_get("game.player1.color.g", true)) then
+		c_config_set("game.player1.color.g", c_config_get("game.defaultTankGreen"))
 	end
-	if not (c_config_get("config.game.player1.color.b", nil, true)) then
-		c_config_set("config.game.player1.color.b", c_config_get("config.game.defaultTankBlue"))
+	if not (c_config_get("game.player1.color.b", true)) then
+		c_config_set("game.player1.color.b", c_config_get("game.defaultTankBlue"))
 	end
-	if not (c_config_get("config.game.player1.team", nil, true)) then
-		c_config_set("config.game.player1.team", false)
+	if not (c_config_get("game.player1.team", true)) then
+		c_config_set("game.player1.team", false)
 	end
 
-	gui_addLabel(tankbobs.m_vec2(50, 63), "Name", nil, 1 / 3) player.name = gui_addInput(tankbobs.m_vec2(75, 63), c_config_get("config.game.player1.name"), nil, st_optionsPlayers_name, false, c_const_get("max_nameLength"), 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 63), "Name", nil, 1 / 3) player.name = gui_addInput(tankbobs.m_vec2(75, 63), c_config_get("game.player1.name"), nil, st_optionsPlayers_name, false, c_const_get("max_nameLength"), 0.5)
 
-	gui_addLabel(tankbobs.m_vec2(50, 57), "Fire", nil, 1 / 3) player.fire = gui_addKey(tankbobs.m_vec2(75, 57), c_config_get("config.key.player1.fire"), nil, st_optionsPlayers_fire, c_config_get("config.key.player1.fire"), 0.5)
-	gui_addLabel(tankbobs.m_vec2(50, 54), "Forward", nil, 1 / 3) player.forward = gui_addKey(tankbobs.m_vec2(75, 54), c_config_get("config.key.player1.forward"), nil, st_optionsPlayers_forward, c_config_get("config.key.player1.forward"), 0.5)
-	gui_addLabel(tankbobs.m_vec2(50, 51), "Back", nil, 1 / 3) player.back = gui_addKey(tankbobs.m_vec2(75, 51), c_config_get("config.key.player1.back"), nil, st_optionsPlayers_back, c_config_get("config.key.player1.back"), 0.5)
-	gui_addLabel(tankbobs.m_vec2(50, 48), "Left", nil, 1 / 3) player.left = gui_addKey(tankbobs.m_vec2(75, 48), c_config_get("config.key.player1.left"), nil, st_optionsPlayers_left, c_config_get("config.key.player1.left"), 0.5)
-	gui_addLabel(tankbobs.m_vec2(50, 45), "Right", nil, 1 / 3) player.right = gui_addKey(tankbobs.m_vec2(75, 45), c_config_get("config.key.player1.right"), nil, st_optionsPlayers_right, c_config_get("config.key.player1.right"), 0.5)
-	gui_addLabel(tankbobs.m_vec2(50, 42), "Special", nil, 1 / 3) player.special = gui_addKey(tankbobs.m_vec2(75, 42), c_config_get("config.key.player1.special"), nil, st_optionsPlayers_special, c_config_get("config.key.player1.special"), 0.5)
-	gui_addLabel(tankbobs.m_vec2(50, 39), "Reload", nil, 1 / 3) player.reload = gui_addKey(tankbobs.m_vec2(75, 39), c_config_get("config.key.player1.reload"), nil, st_optionsPlayers_reload, c_config_get("config.key.player1.reload"), 0.5)
-	--gui_addLabel(tankbobs.m_vec2(50, 36), "Reverse", nil, 1 / 3) player.reverse = gui_addKey(tankbobs.m_vec2(75, 36), c_config_get("config.key.player1.reverse"), nil, st_optionsPlayers_reverse, c_config_get("config.key.player1.reverse"), 0.5)
-	gui_addLabel(tankbobs.m_vec2(50, 36), "Mod Key", nil, 1 / 3) player.mod = gui_addKey(tankbobs.m_vec2(75, 36), c_config_get("config.key.player1.mod"), nil, st_optionsPlayers_mod, c_config_get("config.key.player1.mod"), 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 57), "Fire", nil, 1 / 3) player.fire = gui_addKey(tankbobs.m_vec2(75, 57), c_config_get("client.key.player1.fire"), nil, st_optionsPlayers_fire, c_config_get("client.key.player1.fire"), 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 54), "Forward", nil, 1 / 3) player.forward = gui_addKey(tankbobs.m_vec2(75, 54), c_config_get("client.key.player1.forward"), nil, st_optionsPlayers_forward, c_config_get("client.key.player1.forward"), 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 51), "Back", nil, 1 / 3) player.back = gui_addKey(tankbobs.m_vec2(75, 51), c_config_get("client.key.player1.back"), nil, st_optionsPlayers_back, c_config_get("client.key.player1.back"), 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 48), "Left", nil, 1 / 3) player.left = gui_addKey(tankbobs.m_vec2(75, 48), c_config_get("client.key.player1.left"), nil, st_optionsPlayers_left, c_config_get("client.key.player1.left"), 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 45), "Right", nil, 1 / 3) player.right = gui_addKey(tankbobs.m_vec2(75, 45), c_config_get("client.key.player1.right"), nil, st_optionsPlayers_right, c_config_get("client.key.player1.right"), 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 42), "Special", nil, 1 / 3) player.special = gui_addKey(tankbobs.m_vec2(75, 42), c_config_get("client.key.player1.special"), nil, st_optionsPlayers_special, c_config_get("client.key.player1.special"), 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 39), "Reload", nil, 1 / 3) player.reload = gui_addKey(tankbobs.m_vec2(75, 39), c_config_get("client.key.player1.reload"), nil, st_optionsPlayers_reload, c_config_get("client.key.player1.reload"), 0.5)
+	--gui_addLabel(tankbobs.m_vec2(50, 36), "Reverse", nil, 1 / 3) player.reverse = gui_addKey(tankbobs.m_vec2(75, 36), c_config_get("client.key.player1.reverse"), nil, st_optionsPlayers_reverse, c_config_get("client.key.player1.reverse"), 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 36), "Mod Key", nil, 1 / 3) player.mod = gui_addKey(tankbobs.m_vec2(75, 36), c_config_get("client.key.player1.mod"), nil, st_optionsPlayers_mod, c_config_get("client.key.player1.mod"), 0.5)
 
 	gui_addLabel(tankbobs.m_vec2(50, 30), "Adjust color", nil, 1 / 3)
 
-	player.colorR = gui_addScale(tankbobs.m_vec2(75, 27), c_config_get("config.game.player1.color.r"), nil, st_optionsPlayers_colorR, c_config_get("config.game.player1.color.r"), nil, 0.5, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0)
-	player.colorG = gui_addScale(tankbobs.m_vec2(75, 24), c_config_get("config.game.player1.color.g"), nil, st_optionsPlayers_colorG, c_config_get("config.game.player1.color.g"), nil, 0.5, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0)
-	player.colorB = gui_addScale(tankbobs.m_vec2(75, 21), c_config_get("config.game.player1.color.b"), nil, st_optionsPlayers_colorB, c_config_get("config.game.player1.color.b"), nil, 0.5, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0)
+	player.colorR = gui_addScale(tankbobs.m_vec2(75, 27), c_config_get("game.player1.color.r"), nil, st_optionsPlayers_colorR, c_config_get("game.player1.color.r"), nil, 0.5, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0)
+	player.colorG = gui_addScale(tankbobs.m_vec2(75, 24), c_config_get("game.player1.color.g"), nil, st_optionsPlayers_colorG, c_config_get("game.player1.color.g"), nil, 0.5, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0)
+	player.colorB = gui_addScale(tankbobs.m_vec2(75, 21), c_config_get("game.player1.color.b"), nil, st_optionsPlayers_colorB, c_config_get("game.player1.color.b"), nil, 0.5, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0)
 
 	-- image of tank is drawn (takes 15 and 18)
 
-	gui_addLabel(tankbobs.m_vec2(50, 9), "Team", nil, 2 / 3) player.team = gui_addCycle(tankbobs.m_vec2(75, 9), "Team", nil, st_optionsPlayers_team, {"Blue", "Red"}, c_config_get("config.game.player1.team") == "red" and 2 or 1, 2 / 3)
+	gui_addLabel(tankbobs.m_vec2(50, 9), "Team", nil, 2 / 3) player.team = gui_addCycle(tankbobs.m_vec2(75, 9), "Team", nil, st_optionsPlayers_team, {"Blue", "Red"}, c_config_get("game.player1.team") == "red" and 2 or 1, 2 / 3)
 end
 
 function st_optionsPlayers_done()
@@ -406,8 +406,8 @@ function st_optionsPlayers_step(d)
 	-- draw the tank below the color scales
 	gl.PushAttrib("CURRENT_BIT")
 		gl.PushMatrix()
-			gl.Color(c_config_get("config.game.player" .. tostring(currentPlayer) .. ".color.r"), c_config_get("config.game.player" .. tostring(currentPlayer) .. ".color.g"), c_config_get("config.game.player" .. tostring(currentPlayer) .. ".color.b"), 1)
-			gl.TexEnv("TEXTURE_ENV_COLOR", c_config_get("config.game.player" .. tostring(currentPlayer) .. ".color.r"), c_config_get("config.game.player" .. tostring(currentPlayer) .. ".color.g"), c_config_get("config.game.player" .. tostring(currentPlayer) .. ".color.b"), 1)
+			gl.Color(c_config_get("game.player" .. tostring(currentPlayer) .. ".color.r"), c_config_get("game.player" .. tostring(currentPlayer) .. ".color.g"), c_config_get("game.player" .. tostring(currentPlayer) .. ".color.b"), 1)
+			gl.TexEnv("TEXTURE_ENV_COLOR", c_config_get("game.player" .. tostring(currentPlayer) .. ".color.r"), c_config_get("game.player" .. tostring(currentPlayer) .. ".color.g"), c_config_get("game.player" .. tostring(currentPlayer) .. ".color.b"), 1)
 			gl.Translate(85, 16.5, 0)
 			gl.Rotate(tankbobs.m_degrees(tankRotation), 0, 0, 1)
 			tankRotation = tankRotation + d * c_const_get("optionsPlayers_tankRotation")
@@ -425,252 +425,252 @@ function st_optionsPlayers_configurePlayer(widget)
 		currentPlayer = 1
 	end
 
-	if not (c_config_get("config.game.player" .. tonumber(currentPlayer) .. ".name", nil, true)) then
-		c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".name", "Player" .. tonumber(currentPlayer))
+	if not (c_config_get("game.player" .. tonumber(currentPlayer) .. ".name", true)) then
+		c_config_set("game.player" .. tonumber(currentPlayer) .. ".name", "Player" .. tonumber(currentPlayer))
 	end
-	local name = c_config_get("config.game.player" .. tonumber(currentPlayer) .. ".name")
+	local name = c_config_get("game.player" .. tonumber(currentPlayer) .. ".name")
 	player.name:setText(#name <= c_const_get("max_nameLength") and name or "Player" .. tonumber(currentPlayer))
 
-	if not (c_config_get("config.key.player" .. tonumber(currentPlayer) .. ".fire", nil, true)) then
-		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".fire", false)
+	if not (c_config_get("client.key.player" .. tonumber(currentPlayer) .. ".fire", true)) then
+		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".fire", false)
 	end
-	local fire = c_config_get("config.key.player" .. tonumber(currentPlayer) .. ".fire")
+	local fire = c_config_get("client.key.player" .. tonumber(currentPlayer) .. ".fire")
 	player.fire:setKey(fire)
 
-	if not (c_config_get("config.key.player" .. tonumber(currentPlayer) .. ".forward", nil, true)) then
-		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".forward", false)
+	if not (c_config_get("client.key.player" .. tonumber(currentPlayer) .. ".forward", true)) then
+		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".forward", false)
 	end
-	local forward = c_config_get("config.key.player" .. tonumber(currentPlayer) .. ".forward")
+	local forward = c_config_get("client.key.player" .. tonumber(currentPlayer) .. ".forward")
 	player.forward:setKey(forward)
 
-	if not (c_config_get("config.key.player" .. tonumber(currentPlayer) .. ".back", nil, true)) then
-		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".back", false)
+	if not (c_config_get("client.key.player" .. tonumber(currentPlayer) .. ".back", true)) then
+		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".back", false)
 	end
-	local back = c_config_get("config.key.player" .. tonumber(currentPlayer) .. ".back")
+	local back = c_config_get("client.key.player" .. tonumber(currentPlayer) .. ".back")
 	player.back:setKey(back)
 
-	if not (c_config_get("config.key.player" .. tonumber(currentPlayer) .. ".left", nil, true)) then
-		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".left", false)
+	if not (c_config_get("client.key.player" .. tonumber(currentPlayer) .. ".left", true)) then
+		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".left", false)
 	end
-	local left = c_config_get("config.key.player" .. tonumber(currentPlayer) .. ".left")
+	local left = c_config_get("client.key.player" .. tonumber(currentPlayer) .. ".left")
 	player.left:setKey(left)
 
-	if not (c_config_get("config.key.player" .. tonumber(currentPlayer) .. ".right", nil, true)) then
-		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".right", false)
+	if not (c_config_get("client.key.player" .. tonumber(currentPlayer) .. ".right", true)) then
+		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".right", false)
 	end
-	local right = c_config_get("config.key.player" .. tonumber(currentPlayer) .. ".right")
+	local right = c_config_get("client.key.player" .. tonumber(currentPlayer) .. ".right")
 	player.right:setKey(right)
 
-	if not (c_config_get("config.key.player" .. tonumber(currentPlayer) .. ".special", nil, true)) then
-		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".special", false)
+	if not (c_config_get("client.key.player" .. tonumber(currentPlayer) .. ".special", true)) then
+		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".special", false)
 	end
-	local special = c_config_get("config.key.player" .. tonumber(currentPlayer) .. ".special")
+	local special = c_config_get("client.key.player" .. tonumber(currentPlayer) .. ".special")
 	player.special:setKey(special)
 
-	if not (c_config_get("config.key.player" .. tonumber(currentPlayer) .. ".reload", nil, true)) then
-		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".reload", false)
+	if not (c_config_get("client.key.player" .. tonumber(currentPlayer) .. ".reload", true)) then
+		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".reload", false)
 	end
-	local reload = c_config_get("config.key.player" .. tonumber(currentPlayer) .. ".reload")
+	local reload = c_config_get("client.key.player" .. tonumber(currentPlayer) .. ".reload")
 	player.reload:setKey(reload)
 
-	--if not (c_config_get("config.key.player" .. tonumber(currentPlayer) .. ".reverse", nil, true)) then
-		--c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".reverse", false)
+	--if not (c_config_get("client.key.player" .. tonumber(currentPlayer) .. ".reverse", true)) then
+		--c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".reverse", false)
 	--end
-	--local reverse = c_config_get("config.key.player" .. tonumber(currentPlayer) .. ".reverse")
+	--local reverse = c_config_get("client.key.player" .. tonumber(currentPlayer) .. ".reverse")
 	--player.reverse:setKey(reverse)
 
-	if not (c_config_get("config.key.player" .. tonumber(currentPlayer) .. ".mod", nil, true)) then
-		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".mod", false)
+	if not (c_config_get("client.key.player" .. tonumber(currentPlayer) .. ".mod", true)) then
+		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".mod", false)
 	end
-	local mod = c_config_get("config.key.player" .. tonumber(currentPlayer) .. ".mod")
+	local mod = c_config_get("client.key.player" .. tonumber(currentPlayer) .. ".mod")
 	player.mod:setKey(mod)
 
-	if not (c_config_get("config.game.player" .. tonumber(currentPlayer) .. ".color.r", nil, true)) then
-		c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".color.r", c_config_get("config.game.defaultTankRed"))
+	if not (c_config_get("game.player" .. tonumber(currentPlayer) .. ".color.r", true)) then
+		c_config_set("game.player" .. tonumber(currentPlayer) .. ".color.r", c_config_get("game.defaultTankRed"))
 	end
-	local colorR = c_config_get("config.game.player" .. tonumber(currentPlayer) .. ".color.r")
+	local colorR = c_config_get("game.player" .. tonumber(currentPlayer) .. ".color.r")
 	player.colorR:setScalePos(colorR)
 
-	if not (c_config_get("config.game.player" .. tonumber(currentPlayer) .. ".color.g", nil, true)) then
-		c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".color.g", c_config_get("config.game.defaultTankGreen"))
+	if not (c_config_get("game.player" .. tonumber(currentPlayer) .. ".color.g", true)) then
+		c_config_set("game.player" .. tonumber(currentPlayer) .. ".color.g", c_config_get("game.defaultTankGreen"))
 	end
-	local colorG = c_config_get("config.game.player" .. tonumber(currentPlayer) .. ".color.g")
+	local colorG = c_config_get("game.player" .. tonumber(currentPlayer) .. ".color.g")
 	player.colorG:setScalePos(colorG)
 
-	if not (c_config_get("config.game.player" .. tonumber(currentPlayer) .. ".color.b", nil, true)) then
-		c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".color.b", c_config_get("config.game.defaultTankBlue"))
+	if not (c_config_get("game.player" .. tonumber(currentPlayer) .. ".color.b", true)) then
+		c_config_set("game.player" .. tonumber(currentPlayer) .. ".color.b", c_config_get("game.defaultTankBlue"))
 	end
-	local colorB = c_config_get("config.game.player" .. tonumber(currentPlayer) .. ".color.b")
+	local colorB = c_config_get("game.player" .. tonumber(currentPlayer) .. ".color.b")
 	player.colorB:setScalePos(colorB)
 
-	if not (c_config_get("config.game.player" .. tonumber(currentPlayer) .. ".team", nil, true)) then
-		c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".team", false)
+	if not (c_config_get("game.player" .. tonumber(currentPlayer) .. ".team", true)) then
+		c_config_set("game.player" .. tonumber(currentPlayer) .. ".team", false)
 	end
-	local team = c_config_get("config.game.player" .. tonumber(currentPlayer) .. ".team") == "red" and 2 or 1
+	local team = c_config_get("game.player" .. tonumber(currentPlayer) .. ".team") == "red" and 2 or 1
 	player.team:setCyclePos(team)
 end
 
 function st_optionsPlayers_computers(widget)
-	c_config_set("config.game.computers", tonumber(widget.inputText))
+	c_config_set("game.computers", tonumber(widget.inputText))
 end
 
 function st_optionsPlayers_players(widget)
-	c_config_set("config.game.players", tonumber(widget.inputText))
+	c_config_set("game.players", tonumber(widget.inputText))
 end
 
 function st_optionsPlayers_name(widget)
-	if not (c_config_get("config.game.player" .. tonumber(currentPlayer) .. ".name", nil, true)) then
-		c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".name", "Player" .. tonumber(currentPlayer))
+	if not (c_config_get("game.player" .. tonumber(currentPlayer) .. ".name", true)) then
+		c_config_set("game.player" .. tonumber(currentPlayer) .. ".name", "Player" .. tonumber(currentPlayer))
 	end
 
-	c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".name", tostring(widget.inputText))
+	c_config_set("game.player" .. tonumber(currentPlayer) .. ".name", tostring(widget.inputText))
 end
 
 function st_optionsPlayers_fire(widget, button)
-	if not (c_config_get("config.key.player" .. tonumber(currentPlayer) .. ".fire", nil, true)) then
-		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".fire", false)
+	if not (c_config_get("client.key.player" .. tonumber(currentPlayer) .. ".fire", true)) then
+		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".fire", false)
 	end
 
 	if button then
-		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".fire", button)
+		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".fire", c_config_keyLayoutGet(button))
 	else
-		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".fire", false)
+		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".fire", false)
 	end
 end
 
 function st_optionsPlayers_forward(widget, button)
-	if not (c_config_get("config.key.player" .. tonumber(currentPlayer) .. ".forward", nil, true)) then
-		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".forward", false)
+	if not (c_config_get("client.key.player" .. tonumber(currentPlayer) .. ".forward", true)) then
+		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".forward", false)
 	end
 
 	if button then
-		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".forward", button)
+		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".forward", c_config_keyLayoutGet(button))
 	else
-		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".forward", false)
+		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".forward", false)
 	end
 end
 
 function st_optionsPlayers_right(widget, button)
-	if not (c_config_get("config.key.player" .. tonumber(currentPlayer) .. ".right", nil, true)) then
-		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".right", false)
+	if not (c_config_get("client.key.player" .. tonumber(currentPlayer) .. ".right", true)) then
+		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".right", false)
 	end
 
 	if button then
-		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".right", button)
+		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".right", c_config_keyLayoutGet(button))
 	else
-		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".right", false)
+		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".right", false)
 	end
 end
 
 function st_optionsPlayers_back(widget, button)
-	if not (c_config_get("config.key.player" .. tonumber(currentPlayer) .. ".back", nil, true)) then
-		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".back", false)
+	if not (c_config_get("client.key.player" .. tonumber(currentPlayer) .. ".back", true)) then
+		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".back", false)
 	end
 
 	if button then
-		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".back", button)
+		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".back", c_config_keyLayoutGet(button))
 	else
-		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".back", false)
+		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".back", false)
 	end
 end
 
 function st_optionsPlayers_left(widget, button)
-	if not (c_config_get("config.key.player" .. tonumber(currentPlayer) .. ".left", nil, true)) then
-		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".left", false)
+	if not (c_config_get("client.key.player" .. tonumber(currentPlayer) .. ".left", true)) then
+		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".left", false)
 	end
 
 	if button then
-		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".left", button)
+		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".left", c_config_keyLayoutGet(button))
 	else
-		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".left", false)
+		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".left", false)
 	end
 end
 
 function st_optionsPlayers_special(widget, button)
-	if not (c_config_get("config.key.player" .. tonumber(currentPlayer) .. ".special", nil, true)) then
-		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".special", false)
+	if not (c_config_get("client.key.player" .. tonumber(currentPlayer) .. ".special", true)) then
+		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".special", false)
 	end
 
 	if button then
-		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".special", button)
+		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".special", c_config_keyLayoutGet(button))
 	else
-		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".special", false)
+		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".special", false)
 	end
 end
 
 function st_optionsPlayers_reload(widget, button)
-	if not (c_config_get("config.key.player" .. tonumber(currentPlayer) .. ".reload", nil, true)) then
-		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".reload", false)
+	if not (c_config_get("client.key.player" .. tonumber(currentPlayer) .. ".reload", true)) then
+		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".reload", false)
 	end
 
 	if button then
-		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".reload", button)
+		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".reload", c_config_keyLayoutGet(button))
 	else
-		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".reload", false)
+		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".reload", false)
 	end
 end
 
 function st_optionsPlayers_reverse(widget, button)
-	if not (c_config_get("config.key.player" .. tonumber(currentPlayer) .. ".reverse", nil, true)) then
-		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".reverse", false)
+	if not (c_config_get("client.key.player" .. tonumber(currentPlayer) .. ".reverse", true)) then
+		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".reverse", false)
 	end
 
 	if button then
-		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".reverse", button)
+		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".reverse", c_config_keyLayoutGet(button))
 	else
-		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".reverse", false)
+		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".reverse", false)
 	end
 end
 
 function st_optionsPlayers_mod(widget, button)
-	if not (c_config_get("config.key.player" .. tonumber(currentPlayer) .. ".mod", nil, true)) then
-		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".mod", false)
+	if not (c_config_get("client.key.player" .. tonumber(currentPlayer) .. ".mod", true)) then
+		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".mod", false)
 	end
 
 	if button then
-		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".mod", button)
+		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".mod", c_config_keyLayoutGet(button))
 	else
-		c_config_set("config.key.player" .. tonumber(currentPlayer) .. ".mod", false)
+		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".mod", false)
 	end
 end
 
 function st_optionsPlayers_colorR(widget, pos)
-	if not (c_config_get("config.game.player" .. tonumber(currentPlayer) .. ".color.r", nil, true)) then
-		c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".color.r", c_config_get("config.game.defaultTankRed"))
+	if not (c_config_get("game.player" .. tonumber(currentPlayer) .. ".color.r", true)) then
+		c_config_set("game.player" .. tonumber(currentPlayer) .. ".color.r", c_config_get("game.defaultTankRed"))
 	end
 
-	c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".color.r", pos)
+	c_config_set("game.player" .. tonumber(currentPlayer) .. ".color.r", pos)
 end
 
 function st_optionsPlayers_colorG(widget, pos)
-	if not (c_config_get("config.game.player" .. tonumber(currentPlayer) .. ".color.g", nil, true)) then
-		c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".color.g", c_config_get("config.game.defaultTankGreen"))
+	if not (c_config_get("game.player" .. tonumber(currentPlayer) .. ".color.g", true)) then
+		c_config_set("game.player" .. tonumber(currentPlayer) .. ".color.g", c_config_get("game.defaultTankGreen"))
 	end
 
-	c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".color.g", pos)
+	c_config_set("game.player" .. tonumber(currentPlayer) .. ".color.g", pos)
 end
 
 function st_optionsPlayers_colorB(widget, pos)
-	if not (c_config_get("config.game.player" .. tonumber(currentPlayer) .. ".color.b", nil, true)) then
-		c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".color.b", c_config_get("config.game.defaultTankBlue"))
+	if not (c_config_get("game.player" .. tonumber(currentPlayer) .. ".color.b", true)) then
+		c_config_set("game.player" .. tonumber(currentPlayer) .. ".color.b", c_config_get("game.defaultTankBlue"))
 	end
 
-	c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".color.b", pos)
+	c_config_set("game.player" .. tonumber(currentPlayer) .. ".color.b", pos)
 end
 
 function st_optionsPlayers_team(widget, string, index)
 	if string == "Red" then
-		if not (c_config_get("config.game.player" .. tonumber(currentPlayer) .. ".team", nil, true)) then
-			c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".team", false)
+		if not (c_config_get("game.player" .. tonumber(currentPlayer) .. ".team", true)) then
+			c_config_set("game.player" .. tonumber(currentPlayer) .. ".team", false)
 		end
 
-		c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".team", "red")
+		c_config_set("game.player" .. tonumber(currentPlayer) .. ".team", "red")
 	elseif string == "Blue" then
-		if not (c_config_get("config.game.player" .. tonumber(currentPlayer) .. ".team", nil, true)) then
-			c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".team", false)
+		if not (c_config_get("game.player" .. tonumber(currentPlayer) .. ".team", true)) then
+			c_config_set("game.player" .. tonumber(currentPlayer) .. ".team", false)
 		end
 
-		c_config_set("config.game.player" .. tonumber(currentPlayer) .. ".team", "blue")
+		c_config_set("game.player" .. tonumber(currentPlayer) .. ".team", "blue")
 	end
 end
 
@@ -701,7 +701,7 @@ function st_optionsControls_init()
 
 	local pos = 1
 	for k, v in pairs(c_const_get("keyLayouts")) do
-		if v == c_config_get("config.keyLayout") then
+		if v == c_config_get("client.keyLayout") then
 			pos = k
 
 			break
@@ -709,11 +709,11 @@ function st_optionsControls_init()
 	end
 	gui_addLabel(tankbobs.m_vec2(50, 65), "Key Layout", nil, 2 / 3) gui_addCycle(tankbobs.m_vec2(75, 65), "Key Layout", nil, st_optionsControls_keyLayout, c_const_get("keyLayouts"), pos)
 
-	gui_addLabel(tankbobs.m_vec2(50, 53), "Pause", nil, 2 / 3) gui_addKey(tankbobs.m_vec2(75, 53), c_config_get("config.key.pause"), nil, st_optionsControls_pause, c_config_get("config.key.pause"))
-	gui_addLabel(tankbobs.m_vec2(50, 37), "Back", nil, 2 / 3) gui_addKey(tankbobs.m_vec2(75, 37), c_config_get("config.key.quit"), nil, st_optionsControls_quit, c_config_get("config.key.quit"))
-	gui_addLabel(tankbobs.m_vec2(50, 31), "Quit", nil, 2 / 3) gui_addKey(tankbobs.m_vec2(75, 31), c_config_get("config.key.exit"), nil, st_optionsControls_exit, c_config_get("config.key.exit"))
+	gui_addLabel(tankbobs.m_vec2(50, 53), "Pause", nil, 2 / 3) gui_addKey(tankbobs.m_vec2(75, 53), c_config_get("client.key.pause"), nil, st_optionsControls_pause, c_config_get("client.key.pause"))
+	gui_addLabel(tankbobs.m_vec2(50, 37), "Back", nil, 2 / 3) gui_addKey(tankbobs.m_vec2(75, 37), c_config_get("client.key.quit"), nil, st_optionsControls_quit, c_config_get("client.key.quit"))
+	gui_addLabel(tankbobs.m_vec2(50, 31), "Quit", nil, 2 / 3) gui_addKey(tankbobs.m_vec2(75, 31), c_config_get("client.key.exit"), nil, st_optionsControls_exit, c_config_get("client.key.exit"))
 
-	gui_addLabel(tankbobs.m_vec2(50, 25), "Key Refresh Rate in Frames", nil, 1 / 3) gui_addInput(tankbobs.m_vec2(85, 25), tostring(c_config_get("config.client.krr")), nil, st_optionsControls_krr, true, 5, 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 25), "Key Refresh Rate in Frames", nil, 1 / 3) gui_addInput(tankbobs.m_vec2(85, 25), tostring(c_config_get("client.krr")), nil, st_optionsControls_krr, true, 5, 0.5)
 end
 
 function st_optionsControls_done()
@@ -722,36 +722,36 @@ end
 
 function st_optionsControls_keyLayout(widget, string, index)
 	if c_const_get("keyLayout_" .. string) then
-		c_config_set("config.keyLayout", string)
+		c_config_set("client.keyLayout", string)
 	end
 end
 
 function st_optionsControls_pause(widget, button)
 	if button then
-		c_config_set("config.key.pause", button)
+		c_config_set("key.pause", button)
 	else
-		c_config_set("config.key.pause", false)
+		c_config_set("key.pause", false)
 	end
 end
 
 function st_optionsControls_exit(widget, button)
 	if button then
-		c_config_set("config.key.exit", button)
+		c_config_set("key.exit", button)
 	else
-		c_config_set("config.key.exit", false)
+		c_config_set("key.exit", false)
 	end
 end
 
 function st_optionsControls_quit(widget, button)
 	if button then
-		c_config_set("config.key.quit", button)
+		c_config_set("key.quit", button)
 	else
-		c_config_set("config.key.quit", false)
+		c_config_set("key.quit", false)
 	end
 end
 
 function st_optionsControls_krr(widget)
-	c_config_set("config.client.krr", tonumber(widget.inputText))
+	c_config_set("client.krr", tonumber(widget.inputText))
 end
 
 optionsControls_state =

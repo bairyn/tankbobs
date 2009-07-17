@@ -53,11 +53,11 @@ function main_init()
 
 	args = nil  -- protect against bad code
 
-	tankbobs.a_init(c_config_get("config.client.audioChunkSize", nil, true))
-	tankbobs.a_setVolume(c_config_get("config.client.volume"))
-	tankbobs.a_setMusicVolume(c_config_get("config.client.musicVolume"))
+	tankbobs.a_init(c_config_get("client.audioChunkSize", nil, true))
+	tankbobs.a_setVolume(c_config_get("client.volume"))
+	tankbobs.a_setMusicVolume(c_config_get("client.musicVolume"))
 
-	tankbobs.r_newWindow(c_config_get("config.renderer.width"), c_config_get("config.renderer.height"), c_config_get("config.renderer.fullscreen"), c_const_get("title"), c_const_get("icon"))
+	tankbobs.r_newWindow(c_config_get("client.renderer.width"), c_config_get("client.renderer.height"), c_config_get("client.renderer.fullscreen"), c_const_get("title"), c_const_get("icon"))
 	renderer_setupNewWindow()
 
 	renderer_init()
@@ -78,18 +78,18 @@ end
 
 function main_stt(x, y)
 	-- convert SDL coordinates to tankbobs coordinates and return
-	y = c_config_get("config.renderer.height") - y
-	x = (100 * x) / c_config_get("config.renderer.width")
-	y = (100 * y) / c_config_get("config.renderer.height")
+	y = c_config_get("client.renderer.height") - y
+	x = (100 * x) / c_config_get("client.renderer.width")
+	y = (100 * y) / c_config_get("client.renderer.height")
 
 	return x, y
 end
 
 function main_tts(x, y)
 	-- convert tankbobs coordinates to SDL coordinates and return
-	y = y / (100 * c_config_get("config.renderer.height"))
-	x = x / (100 * c_config_get("config.renderer.width"))
-	y = c_config_get("config.renderer.height") - y
+	y = y / (100 * c_config_get("client.renderer.height"))
+	x = x / (100 * c_config_get("client.renderer.width"))
+	y = c_config_get("client.renderer.height") - y
 
 	return x, y
 end
@@ -113,18 +113,18 @@ function main_loop()
 		return
 	end
 
-	if c_config_get("config.client.fps") < c_const_get("client_minFPS") and c_config_get("config.client.fps") ~= 0 then
-		c_config_set("config.client.fps", c_const_get("client_minFPS"))
+	if c_config_get("client.fps") < c_const_get("client_minFPS") and c_config_get("client.fps") ~= 0 then
+		c_config_set("client.fps", c_const_get("client_minFPS"))
 	end
 
-	if c_config_get("config.client.fps") > 0 and t - lastTime < common_FTM(c_config_get("config.client.fps")) then
-		tankbobs.t_delay(common_FTM(c_config_get("config.client.fps")) - t + lastTime)
+	if c_config_get("client.fps") > 0 and t - lastTime < common_FTM(c_config_get("client.fps")) then
+		tankbobs.t_delay(common_FTM(c_config_get("client.fps")) - t + lastTime)
 		return
 	end
 
 	fps = common_MTF(t - lastTime)
 
-	local d = (t - lastTime) / (c_const_get("world_time") * c_config_get("config.game.timescale"))
+	local d = (t - lastTime) / (c_const_get("world_time") * c_config_get("game.timescale"))
 	lastTime = t
 
 	if d == 0 then
@@ -138,8 +138,8 @@ function main_loop()
 			if tankbobs.in_getEventData(lastevent, "type") == "quit" then
 				done = true
 			elseif tankbobs.in_getEventData(lastevent, "type") == "video" then
-				config_set("config.renderer.width", tankbobs.in_getEventData(lastevent, "intData0"))
-				config_set("config.renderer.height", tankbobs.in_getEventData(lastevent, "intData1"))
+				config_set("client.renderer.width", tankbobs.in_getEventData(lastevent, "intData0"))
+				config_set("client.renderer.height", tankbobs.in_getEventData(lastevent, "intData1"))
 				renderer_updateWindow()
 			elseif tankbobs.in_getEventData(lastevent, "type") == "video_focus" then
 				video_updateWindow()
@@ -193,7 +193,7 @@ function main_parseArgs(args)
 			local c_oldConfig_set = c_config_set
 			c_config_set = function(k, v)
 				if type(k) == "string" and not k:find("^config%.") then
-					return c_oldConfig_set("config." .. k, v)
+					return c_oldConfig_set("" .. k, v)
 				else
 					return c_oldConfig_set(k, v)
 				end

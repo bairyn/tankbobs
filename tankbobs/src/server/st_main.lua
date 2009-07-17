@@ -37,7 +37,7 @@ function st_main_init()
 	c_world_setPaused = _G.c_world_setPaused
 	c_world_step = _G.c_world_step
 
-	tankbobs.n_init(c_config_get("config.server.port", nil, true))
+	tankbobs.n_init(c_config_get("server.port", nil, true))
 end
 
 function st_main_done()

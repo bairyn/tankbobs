@@ -34,43 +34,6 @@ function c_data_init()
 
 	c_const_set("const_setError", true, 9)
 
-	local hidden_globals =
-	{
-		"init$",
-		"done$",
-		"^io$",
-		"^tankbobs$",
-		"^c_config_set$",
-		"^c_mods",
-		"^c_mods_env$",
-		"^mods_env$",
-		"^setfenv$",
-		"^c_config_cheat",
-		"^debug$"
-	}
-
-	local protected_globals =
-	{
-		"^common_$",
-		"init$",
-		"done$",
-		"^io$",
-		"^tankbobs$",
-		"^tankbobs.vec2Meta$",
-		"^tankbobs",
-		"^string$",
-		"^debug$",
-		"^c_conf",
-		"^c_data",
-		"^c_mods_env$",
-		"^mods_env$",
-		"^c_config_cheat",
-		"^setfenv$"
-	}
-
-	c_const_set("hidden_globals", hidden_globals)
-	c_const_set("protected_globals", protected_globals)
-
 	c_const_set("client_minFPS", 15, 0)
 	c_const_set("server_minFPS", 5, 0)
 
@@ -164,6 +127,14 @@ function c_data_init()
 		{from = 46, to = 46},    -- .
 		{from = 59, to = 59}     -- ;
 	}
+	local layout_qwertyTo = {}
+	for _, v in pairs(layout_qwerty) do
+		layout_qwertyTo[v.from] = v.to
+	end
+	local layout_qwertyFrom = {}
+	for _, v in pairs(layout_qwerty) do
+		layout_qwertyFrom[v.to] = v.from
+	end
 
 	local layout_dvorak =
 	{
@@ -204,10 +175,24 @@ function c_data_init()
 		{from = 46, to = 118},   -- . -> v
 		{from = 59, to = 115}    -- ; -> s
 	}
+	local layout_dvorakTo = {}
+	for _, v in pairs(layout_dvorak) do
+		layout_dvorakTo[v.from] = v.to
+	end
+	local layout_dvorakFrom = {}
+	for _, v in pairs(layout_dvorak) do
+		layout_dvorakFrom[v.to] = v.from
+	end
 
 	c_const_set("keyLayout_default", layout_qwerty, 1)
+	c_const_set("keyLayout_defaultTo", layout_qwertyTo, 1)
+	c_const_set("keyLayout_defaultFrom", layout_qwertyFrom, 1)
 	c_const_set("keyLayout_qwerty", layout_qwerty, 1)
+	c_const_set("keyLayout_qwertyTo", layout_qwertyTo, 1)
+	c_const_set("keyLayout_qwertyFrom", layout_qwertyFrom, 1)
 	c_const_set("keyLayout_dvorak", layout_dvorak, 1)
+	c_const_set("keyLayout_dvorakTo", layout_dvorakTo, 1)
+	c_const_set("keyLayout_dvorakFrom", layout_dvorakFrom, 1)
 	c_const_set("keyLayouts", {"qwerty", "dvorak"}, 1)
 
 	c_const_set("default_connectPort", 43210, 1)

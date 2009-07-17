@@ -111,16 +111,16 @@ function main_loop()
 		return
 	end
 
-	if c_config_get("config.server.fps") < c_const_get("server_minFPS") and c_config_get("config.server.fps") ~= 0 then
-		c_config_set("config.server.fps", c_const_get("server_minFPS"))
+	if c_config_get("server.fps") < c_const_get("server_minFPS") and c_config_get("server.fps") ~= 0 then
+		c_config_set("server.fps", c_const_get("server_minFPS"))
 	end
 
-	if c_config_get("config.server.fps") > 0 and t - lastTime < common_FTM(c_config_get("config.server.fps")) then
-		tankbobs.t_delay(common_FTM(c_config_get("config.server.fps")) - t + lastTime)
+	if c_config_get("server.fps") > 0 and t - lastTime < common_FTM(c_config_get("server.fps")) then
+		tankbobs.t_delay(common_FTM(c_config_get("server.fps")) - t + lastTime)
 		return
 	end
 
-	local d = (t - lastTime) / (c_const_get("world_time") * c_config_get("config.game.timescale"))
+	local d = (t - lastTime) / (c_const_get("world_time") * c_config_get("game.timescale"))
 	lastTime = t
 
 	if d == 0 then

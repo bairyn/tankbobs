@@ -55,12 +55,6 @@ function renderer_init()
 		gl = _G.gl
 	end
 
-	for k, v in pairs(c_config_get("config.fonts")) do
-		if type(v) == "table" then
-			tankbobs.r_newFont(k, c_const_get("ttf_dir") .. c_config_get("ttf", v), c_config_get("size", v))
-		end
-	end
-
 	c_const_set("aimAid_startDistance", 2.1, 1)  -- distance between the aid and the tank
 	c_const_set("aimAid_maxDistance", 4096, 1)
 	c_const_set("aimAid_width", 0.75, 1)
@@ -73,7 +67,8 @@ function renderer_init()
 	c_const_set("tank_nameScalex", 1 / 33, 1)
 	c_const_set("tank_nameScaley", 1 / 33, 1)
 
-	tankbobs.r_selectFont(c_config_get("config.font"))
+	tankbobs.r_newFont(c_config_get("client.renderer.font"), c_const_get("ttf_dir") .. c_config_get("client.renderer.fonts." .. c_config_get("client.renderer.font") .. ".ttf"), c_config_get("client.renderer.fonts." .. c_config_get("client.renderer.font") .. ".size"))
+	tankbobs.r_selectFont(c_config_get("client.renderer.font"))
 
 	c_const_set("ammobar_r", 0.1, 1)
 	c_const_set("ammobar_g", 0.1, 1)
@@ -456,11 +451,7 @@ function renderer_init()
 end
 
 function renderer_done()
-	for k, v in pairs(c_config_get("config.fonts")) do
-		if type(v) == "table" then
-			tankbobs.r_freeFont(k, c_const_get("ttf_dir") .. c_config_get("ttf", v), c_config_get("size", v))
-		end
-	end
+	tankbobs.r_freeFont(c_config_get("client.renderer.font"))
 
 	gl.DeleteLists(tank_listBase, 1)
 	gl.DeleteLists(tankBorder_listBase, 1)
@@ -531,7 +522,7 @@ function renderer_updateWindow() -- this should to be called after resize, focus
 		gl = _G.gl
 	end
 
-	gl.Viewport(0, 0, c_config_get("config.renderer.width"), c_config_get("config.renderer.height"))
+	gl.Viewport(0, 0, c_config_get("client.renderer.width"), c_config_get("client.renderer.height"))
 	gl.MatrixMode("PROJECTION")
 	gl.LoadIdentity()
 	gl.Ortho(0, 100, 0, 100, -1, 1)
