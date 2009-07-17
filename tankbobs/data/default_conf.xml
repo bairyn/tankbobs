@@ -84,6 +84,11 @@
 			<scoresBlue>  0.500 </scoresBlue>
 			<scoresAlpha> 0.875 </scoresAlpha>
 
+			<quitRed>   0.200 </quitRed>
+			<quitGreen> 0.300 </quitGreen>
+			<quitBlue>  0.600 </quitBlue>
+			<quitAlpha> 1.000 </quitAlpha>
+
 			<width>800</width>
 		</renderer>
 		<serverIP>127.0.0.1</serverIP>

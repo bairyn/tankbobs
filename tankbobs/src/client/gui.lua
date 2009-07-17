@@ -340,7 +340,7 @@ local key =
 local scale =
 {
 	new  = c_class_new,
-	type = KEY,
+	type = SCALE,
 	base = widget,
 
 	setScalePos = function (self, pos)
@@ -378,7 +378,6 @@ end
 function gui_addLabel(position, text, updateTextCallBack, scale, color_r, color_g, color_b, color_a, altColor_r, altColor_g, altColor_b, altColor_a)
 	local label = label:new()
 
-	label.type = LABEL
 	label.selectable = false  -- labels aren't selectable
 
 	label.p(position)
@@ -399,7 +398,6 @@ end
 function gui_addAction(position, text, updateTextCallBack, actionCallBack, scale, color_r, color_g, color_b, color_a, altColor_r, altColor_g, altColor_b, altColor_a)
 	local action = action:new()
 
-	action.type = ACTION
 	action.selectable = true
 
 	action.p(position)
@@ -421,7 +419,6 @@ end
 function gui_addCycle(position, text, updateTextCallBack, cycleCallBack, cycleList, initialCycleIndex, scale, color_r, color_g, color_b, color_a, altColor_r, altColor_g, altColor_b, altColor_a)
 	local cycle = cycle:new()
 
-	cycle.type = CYCLE
 	cycle.selectable = true
 
 	cycle.p(position)
@@ -445,7 +442,6 @@ end
 function gui_addInput(position, text, updateTextCallBack, textChangedCallBack, integerOnly, maxLength, scale, color_r, color_g, color_b, color_a, altColor_r, altColor_g, altColor_b, altColor_a)
 	local input = input:new()
 
-	input.type = INPUT
 	input.selectable = true
 
 	input.p(position)
@@ -471,7 +467,6 @@ end
 function gui_addKey(position, text, updateTextCallBack, keyChangedCallBack, initialButton, scale, color_r, color_g, color_b, color_a, altColor_r, altColor_g, altColor_b, altColor_a)
 	local key = key:new()
 
-	key.type = KEY
 	key.selectable = true
 
 	key.p(position)
@@ -494,7 +489,6 @@ end
 function gui_addScale(position, text, updateTextCallBack, scaleChangedCallBack, initialPos, length, scale_, color_r, color_g, color_b, color_a, altColor_r, altColor_g, altColor_b, altColor_a)
 	local scale = scale:new()
 
-	scale.type = SCALE
 	scale.selectable = true
 
 	scale.p(position)
@@ -513,6 +507,19 @@ function gui_addScale(position, text, updateTextCallBack, scaleChangedCallBack, 
 	table.insert(widgets, scale)
 
 	return scale
+end
+
+function gui_removeWidget(widget)
+	for k, v in pairs(widgets) do
+		if v == widget then
+			table.remove(widgets, k)
+			if widgets[k] then
+				widgets[k] = nil
+			end
+
+			break
+		end
+	end
 end
 
 local function gui_private_scale(scalar)

@@ -54,6 +54,7 @@ local st_play_mouse
 local st_play_step
 
 local endOfGame
+local quitScreen
 local trails = {}
 local camera
 local zoom
@@ -84,6 +85,7 @@ function st_play_init()
 	common_lerp = _G.common_lerp
 
 	endOfGame = false
+	quitScreen = false
 	camera = tankbobs.m_vec2(-50, -50)
 	zoom = 1
 
@@ -160,10 +162,14 @@ function st_play_init()
 
 	-- pause
 	local function updatePause(widget)
-		if c_world_getPaused() and not endOfGame then
+		if c_world_getPaused() and not endOfGame and not quitScreen then
 			widget.text = "Paused"
 			tankbobs.in_grabClear()
 		else
+			if quitScreen then
+				tankbobs.in_grabClear()
+			end
+
 			widget.text = ""
 			if not tankbobs.in_isGrabbed() then
 				tankbobs.in_grabMouse(c_config_get("client.renderer.width") / 2, c_config_get("client.renderer.height") / 2)
@@ -323,84 +329,102 @@ local function refreshKeys()
 	end
 end
 
+local quitLabel, yesAction, noAction
+local function continue()
+	if quitScreen then
+		gui_removeWidget(quitLabel)
+		gui_removeWidget(yesAction)
+		gui_removeWidget(noAction)
+		c_world_setPaused(not c_world_getPaused())
+		quitScreen = false
+	end
+end
 function st_play_button(button, pressed)
 	if not gui_button(button, pressed) then
 		if pressed then
 			if button == 0x0D and endOfGame then
 				c_state_new(play_state)
 			elseif button == c_config_get("client.key.pause") then
-				if not endOfGame then
+				if not endOfGame and not quitScreen then
 					c_world_setPaused(not c_world_getPaused())
 				end
 			elseif button == 0x1B or button == c_config_get("client.key.quit") then
 				if endOfGame then
 					c_state_new(play_state)
+				elseif quitScreen then
+					continue()
+				elseif c_world_getPaused() then
+					c_world_setPaused(not c_world_getPaused())
 				else
-					c_state_advance()
+					c_world_setPaused(true)
+					quitLabel = gui_addLabel(tankbobs.m_vec2(35.0, 60), "Really Quit?", nil, nil, c_config_get("client.renderer.quitRed"), c_config_get("client.renderer.quitGreen"), c_config_get("client.renderer.quitBlue"), c_config_get("client.renderer.quitAlpha"), c_config_get("client.renderer.quitRed"), c_config_get("client.renderer.quitGreen"), c_config_get("client.renderer.quitBlue"), c_config_get("client.renderer.quitAlpha"))
+					yesAction = gui_addAction(tankbobs.m_vec2(35.0, 40), "Yes", nil, c_state_advance, nil, c_config_get("client.renderer.quitRed"), c_config_get("client.renderer.quitGreen"), c_config_get("client.renderer.quitBlue"), c_config_get("client.renderer.quitAlpha"), c_config_get("client.renderer.quitRed"), c_config_get("client.renderer.quitGreen"), c_config_get("client.renderer.quitBlue"), c_config_get("client.renderer.quitAlpha"))
+					noAction = gui_addAction(tankbobs.m_vec2(65.0, 40), "No", nil, continue, nil, c_config_get("client.renderer.quitRed"), c_config_get("client.renderer.quitGreen"), c_config_get("client.renderer.quitBlue"), c_config_get("client.renderer.quitAlpha"), c_config_get("client.renderer.quitRed"), c_config_get("client.renderer.quitGreen"), c_config_get("client.renderer.quitBlue"), c_config_get("client.renderer.quitAlpha"))
+					quitScreen = true
 				end
 			elseif button == c_config_get("client.key.exit") then
 				c_state_new(exit_state)
 			end
 		end
-	end
 
-	local c_world_tanks = c_world_getTanks()
+		local c_world_tanks = c_world_getTanks()
 
-	for i = 1, c_config_get("game.players") do
-		if not (c_config_get("client.key.player" .. tostring(i) .. ".fire", true)) then
-			c_config_set("client.key.player" .. tostring(i) .. ".fire", false)
-		end
-		if not (c_config_get("client.key.player" .. tostring(i) .. ".forward", true)) then
-			c_config_set("client.key.player" .. tostring(i) .. ".forward", false)
-		end
-		if not (c_config_get("client.key.player" .. tostring(i) .. ".back", true)) then
-			c_config_set("client.key.player" .. tostring(i) .. ".back", false)
-		end
-		if not (c_config_get("client.key.player" .. tostring(i) .. ".right", true)) then
-			c_config_set("client.key.player" .. tostring(i) .. ".right", false)
-		end
-		if not (c_config_get("client.key.player" .. tostring(i) .. ".left", true)) then
-			c_config_set("client.key.player" .. tostring(i) .. ".left", false)
-		end
-		if not (c_config_get("client.key.player" .. tostring(i) .. ".special", true)) then
-			c_config_set("client.key.player" .. tostring(i) .. ".special", false)
-		end
-		if not (c_config_get("client.key.player" .. tostring(i) .. ".reload", true)) then
-			c_config_set("client.key.player" .. tostring(i) .. ".reload", false)
-		end
-		if not (c_config_get("client.key.player" .. tostring(i) .. ".reverse", true)) then
-			c_config_set("client.key.player" .. tostring(i) .. ".reverse", false)
-		end
-		if not (c_config_get("client.key.player" .. tostring(i) .. ".mod", true)) then
-			c_config_set("client.key.player" .. tostring(i) .. ".mod", false)
-		end
+		for i = 1, c_config_get("game.players") do
+			if not (c_config_get("client.key.player" .. tostring(i) .. ".fire", true)) then
+				c_config_set("client.key.player" .. tostring(i) .. ".fire", false)
+			end
+			if not (c_config_get("client.key.player" .. tostring(i) .. ".forward", true)) then
+				c_config_set("client.key.player" .. tostring(i) .. ".forward", false)
+			end
+			if not (c_config_get("client.key.player" .. tostring(i) .. ".back", true)) then
+				c_config_set("client.key.player" .. tostring(i) .. ".back", false)
+			end
+			if not (c_config_get("client.key.player" .. tostring(i) .. ".right", true)) then
+				c_config_set("client.key.player" .. tostring(i) .. ".right", false)
+			end
+			if not (c_config_get("client.key.player" .. tostring(i) .. ".left", true)) then
+				c_config_set("client.key.player" .. tostring(i) .. ".left", false)
+			end
+			if not (c_config_get("client.key.player" .. tostring(i) .. ".special", true)) then
+				c_config_set("client.key.player" .. tostring(i) .. ".special", false)
+			end
+			if not (c_config_get("client.key.player" .. tostring(i) .. ".reload", true)) then
+				c_config_set("client.key.player" .. tostring(i) .. ".reload", false)
+			end
+			if not (c_config_get("client.key.player" .. tostring(i) .. ".reverse", true)) then
+				c_config_set("client.key.player" .. tostring(i) .. ".reverse", false)
+			end
+			if not (c_config_get("client.key.player" .. tostring(i) .. ".mod", true)) then
+				c_config_set("client.key.player" .. tostring(i) .. ".mod", false)
+			end
 
-		if button == c_config_get("client.key.player" .. tostring(i) .. ".fire") then
-			c_world_tanks[i].state.firing = pressed
-		end
-		if button == c_config_get("client.key.player" .. tostring(i) .. ".forward") then
-			c_world_tanks[i].state.forward = pressed
-		end
-		if button == c_config_get("client.key.player" .. tostring(i) .. ".back") then
-			c_world_tanks[i].state.back = pressed
-		end
-		if button == c_config_get("client.key.player" .. tostring(i) .. ".left") then
-			c_world_tanks[i].state.left = pressed
-		end
-		if button == c_config_get("client.key.player" .. tostring(i) .. ".right") then
-			c_world_tanks[i].state.right = pressed
-		end
-		if button == c_config_get("client.key.player" .. tostring(i) .. ".special") then
-			c_world_tanks[i].state.special = pressed
-		end
-		if button == c_config_get("client.key.player" .. tostring(i) .. ".reload") then
-			c_world_tanks[i].state.reload = pressed
-		end
-		--if button == c_config_get("client.key.player" .. tostring(i) .. ".reverse") then
-			--c_world_tanks[i].state.reverse = reverse
-		--end
-		if button == c_config_get("client.key.player" .. tostring(i) .. ".reload") then
-			c_world_tanks[i].state.mod = mod
+			if button == c_config_get("client.key.player" .. tostring(i) .. ".fire") then
+				c_world_tanks[i].state.firing = pressed
+			end
+			if button == c_config_get("client.key.player" .. tostring(i) .. ".forward") then
+				c_world_tanks[i].state.forward = pressed
+			end
+			if button == c_config_get("client.key.player" .. tostring(i) .. ".back") then
+				c_world_tanks[i].state.back = pressed
+			end
+			if button == c_config_get("client.key.player" .. tostring(i) .. ".left") then
+				c_world_tanks[i].state.left = pressed
+			end
+			if button == c_config_get("client.key.player" .. tostring(i) .. ".right") then
+				c_world_tanks[i].state.right = pressed
+			end
+			if button == c_config_get("client.key.player" .. tostring(i) .. ".special") then
+				c_world_tanks[i].state.special = pressed
+			end
+			if button == c_config_get("client.key.player" .. tostring(i) .. ".reload") then
+				c_world_tanks[i].state.reload = pressed
+			end
+			--if button == c_config_get("client.key.player" .. tostring(i) .. ".reverse") then
+				--c_world_tanks[i].state.reverse = reverse
+			--end
+			if button == c_config_get("client.key.player" .. tostring(i) .. ".reload") then
+				c_world_tanks[i].state.mod = mod
+			end
 		end
 	end
 

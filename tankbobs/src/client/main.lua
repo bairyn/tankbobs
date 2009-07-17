@@ -188,18 +188,6 @@ function main_parseArgs(args)
 	end
 
 	local function parse(i)
-		local c_config_set = c_config_set
-		do
-			local c_oldConfig_set = c_config_set
-			c_config_set = function(k, v)
-				if type(k) == "string" and not k:find("^config%.") then
-					return c_oldConfig_set("" .. k, v)
-				else
-					return c_oldConfig_set(k, v)
-				end
-			end
-		end
-
 		if args[i] == nil then
 			return nil
 		end
