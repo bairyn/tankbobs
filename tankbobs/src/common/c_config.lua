@@ -34,7 +34,7 @@ function c_config_init()
 	c_module_load "lxp"
 	c_module_load "lxp.lom"
 
-	local config = {}
+	local config
 	local cheats = {}
 
 	local cheatsEnabled = false
@@ -69,8 +69,8 @@ function c_config_init()
 		return v
 	end
 
-	local function c_config_init()
-		c_config_init = nil
+	local function c_config_init(defaults)
+		config = {}
 
 		local function parse(data, key)
 			key = key or ""
@@ -118,6 +118,10 @@ function c_config_init()
 			parse(data)
 		end
 
+		if defaults then
+			return
+		end
+
 		-- user configuration
 
 		local fin = io.open(c_const_get("user_conf"), "r")
@@ -140,6 +144,10 @@ function c_config_init()
 
 	function c_config_keyLayoutSet(key)
 		return c_const_get("keyLayout_" .. c_config_get("client.keyLayout") .. "From")[key] or tonumber(key) or -1
+	end
+
+	function c_config_defaults()
+		c_config_init(true)
 	end
 
 	function c_config_set(key, value)
