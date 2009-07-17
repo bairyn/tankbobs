@@ -955,147 +955,149 @@ function st_play_step(d)
 
 	-- play sounds and insert trails
 	for _, v in pairs(c_world_getTanks()) do
-		-- handle melee sounds specially
-		if v.weapon.meleeRange ~= 0 and not v.reloading then
-			if v.state.firing then
-				tankbobs.a_setVolumeChunk(c_const_get("weaponAudio_dir") .. v.weapon.fireSound, c_config_get("config.client.volume"))
-			else
-				tankbobs.a_setVolumeChunk(c_const_get("weaponAudio_dir") .. v.weapon.fireSound, 0)
+		if v.exists
+			-- handle melee sounds specially
+			if v.weapon and v.weapon.meleeRange ~= 0 and not v.reloading then
+				if v.state.firing then
+					tankbobs.a_setVolumeChunk(c_const_get("weaponAudio_dir") .. v.weapon.fireSound, c_config_get("config.client.volume"))
+				else
+					tankbobs.a_setVolumeChunk(c_const_get("weaponAudio_dir") .. v.weapon.fireSound, 0)
+				end
+
+				v.weapon.m.used = true
 			end
 
-			v.weapon.m.used = true
-		end
+			if v.weapon and v.state.firing then
+				if v.m.lastFireTime ~= v.lastFireTime then
+					v.m.lastFireTime = v.lastFireTime
 
-		if v.state.firing then
-			if v.m.lastFireTime ~= v.lastFireTime then
-				v.m.lastFireTime = v.lastFireTime
-
-				if v.weapon.meleeRange ~= 0 then
-				elseif v.m.empty then
-					tankbobs.a_playSound(c_const_get("emptyTrigger_sound"))
-				elseif v.weapon and v.m.fired then
-					if type(v.weapon.fireSound) == "table" then
-						tankbobs.a_playSound(c_const_get("weaponAudio_dir") .. v.weapon.fireSound[math.random(1, #v.weapon.fireSound)])
-					elseif type(v.weapon.fireSound) == "string" then
-						tankbobs.a_playSound(c_const_get("weaponAudio_dir") .. v.weapon.fireSound)
-					end
-
-					if v.weapon.trail ~= 0 and v.weapon.trailWidth ~= 0 then
-						-- calculate the beginning and end point before the insert
-						local start, endP = tankbobs.m_vec2(v.p), tankbobs.m_vec2()
-						local vec = tankbobs.m_vec2()
-						local list = gl.GenLists(1)
-						local b
-
-						vec.t = v.r
-						vec.R = c_const_get("trail_startDistance")
-						start:add(vec)
-
-						endP(start)
-						vec.R = c_const_get("trail_maxDistance")
-						endP:add(vec)
-
-						b, vec = c_world_findClosestIntersection(start, endP)
-						if b then
-							endP = vec
+					if v.weapon.meleeRange ~= 0 then
+					elseif v.m.empty then
+						tankbobs.a_playSound(c_const_get("emptyTrigger_sound"))
+					elseif v.weapon and v.m.fired then
+						if type(v.weapon.fireSound) == "table" then
+							tankbobs.a_playSound(c_const_get("weaponAudio_dir") .. v.weapon.fireSound[math.random(1, #v.weapon.fireSound)])
+						elseif type(v.weapon.fireSound) == "string" then
+							tankbobs.a_playSound(c_const_get("weaponAudio_dir") .. v.weapon.fireSound)
 						end
 
-						gl.NewList(list, "COMPILE")
-							local offset = tankbobs.m_vec2()
-							local tmp = tankbobs.m_vec2()
+						if v.weapon.trail ~= 0 and v.weapon.trailWidth ~= 0 then
+							-- calculate the beginning and end point before the insert
+							local start, endP = tankbobs.m_vec2(v.p), tankbobs.m_vec2()
+							local vec = tankbobs.m_vec2()
+							local list = gl.GenLists(1)
+							local b
 
-							offset.t = -1 / (endP - start).t
-							offset.R = v.weapon.trailWidth
+							vec.t = v.r
+							vec.R = c_const_get("trail_startDistance")
+							start:add(vec)
 
-							gl.BindTexture("TEXTURE_2D", v.weapon.m.p.projectileTexture[1])
-							gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
-							gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_S", "REPEAT")
-							gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_T", "REPEAT")
+							endP(start)
+							vec.R = c_const_get("trail_maxDistance")
+							endP:add(vec)
 
-							gl.Begin("QUADS")
-								local length = (endP - start).R
+							b, vec = c_world_findClosestIntersection(start, endP)
+							if b then
+								endP = vec
+							end
 
-								tmp(v.weapon.projectileTexturer[1])
-								tmp.R = tmp.R * length / v.weapon.projectileRender[1].R
-								gl.TexCoord(tmp.x, tmp.y)
-								tmp = start + offset
-								gl.Vertex(tmp.x, tmp.y)
+							gl.NewList(list, "COMPILE")
+								local offset = tankbobs.m_vec2()
+								local tmp = tankbobs.m_vec2()
 
-								tmp(v.weapon.projectileTexturer[2])
-								tmp.R = tmp.R * length / v.weapon.projectileRender[2].R
-								gl.TexCoord(tmp.x, tmp.y)
-								tmp = start - offset
-								gl.Vertex(tmp.x, tmp.y)
+								offset.t = -1 / (endP - start).t
+								offset.R = v.weapon.trailWidth
 
-								tmp(v.weapon.projectileTexturer[3])
-								tmp.R = tmp.R * length / v.weapon.projectileRender[3].R
-								gl.TexCoord(tmp.x, tmp.y)
-								tmp = endP - offset
-								gl.Vertex(tmp.x, tmp.y)
+								gl.BindTexture("TEXTURE_2D", v.weapon.m.p.projectileTexture[1])
+								gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
+								gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_S", "REPEAT")
+								gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_T", "REPEAT")
 
-								tmp(v.weapon.projectileTexturer[4])
-								tmp.R = tmp.R * length / v.weapon.projectileRender[4].R
-								gl.TexCoord(tmp.x, tmp.y)
-								tmp = endP + offset
-								gl.Vertex(tmp.x, tmp.y)
-							gl.End()
-						gl.EndList()
+								gl.Begin("QUADS")
+									local length = (endP - start).R
 
-						table.insert(trails, {v.weapon.trail, v.weapon.trail, list})
+									tmp(v.weapon.projectileTexturer[1])
+									tmp.R = tmp.R * length / v.weapon.projectileRender[1].R
+									gl.TexCoord(tmp.x, tmp.y)
+									tmp = start + offset
+									gl.Vertex(tmp.x, tmp.y)
+
+									tmp(v.weapon.projectileTexturer[2])
+									tmp.R = tmp.R * length / v.weapon.projectileRender[2].R
+									gl.TexCoord(tmp.x, tmp.y)
+									tmp = start - offset
+									gl.Vertex(tmp.x, tmp.y)
+
+									tmp(v.weapon.projectileTexturer[3])
+									tmp.R = tmp.R * length / v.weapon.projectileRender[3].R
+									gl.TexCoord(tmp.x, tmp.y)
+									tmp = endP - offset
+									gl.Vertex(tmp.x, tmp.y)
+
+									tmp(v.weapon.projectileTexturer[4])
+									tmp.R = tmp.R * length / v.weapon.projectileRender[4].R
+									gl.TexCoord(tmp.x, tmp.y)
+									tmp = endP + offset
+									gl.Vertex(tmp.x, tmp.y)
+								gl.End()
+							gl.EndList()
+
+							table.insert(trails, {v.weapon.trail, v.weapon.trail, list})
+						end
 					end
 				end
 			end
-		end
 
-		if v.reloading and v.m.lastReloadTime ~= v.reloading then
-			v.m.lastReloadTime = v.reloading
+			if v.weapon and v.reloading and v.m.lastReloadTime ~= v.reloading then
+				v.m.lastReloadTime = v.reloading
 
-			if v.weapon.shotgunClips then
-				if v.shotgunReloadState == 0 then
-					tankbobs.a_playSound(c_const_get("weaponAudio_dir") .. v.weapon.reloadSound.initial)
-				elseif v.shotgunReloadState == 1 then
-					tankbobs.a_playSound(c_const_get("weaponAudio_dir") .. v.weapon.reloadSound.clip)
-				elseif v.shotgunReloadState == 2 then
-					tankbobs.a_playSound(c_const_get("weaponAudio_dir") .. v.weapon.reloadSound.final)
-				end
-			else
-				if type(v.weapon.reloadSound) == "table" then
-					tankbobs.a_playSound(c_const_get("weaponAudio_dir") .. v.weapon.fireSound[math.random(1, #v.weapon.reloadSound)])
+				if v.weapon.shotgunClips then
+					if v.shotgunReloadState == 0 then
+						tankbobs.a_playSound(c_const_get("weaponAudio_dir") .. v.weapon.reloadSound.initial)
+					elseif v.shotgunReloadState == 1 then
+						tankbobs.a_playSound(c_const_get("weaponAudio_dir") .. v.weapon.reloadSound.clip)
+					elseif v.shotgunReloadState == 2 then
+						tankbobs.a_playSound(c_const_get("weaponAudio_dir") .. v.weapon.reloadSound.final)
+					end
 				else
-					tankbobs.a_playSound(c_const_get("weaponAudio_dir") .. v.weapon.reloadSound)
+					if type(v.weapon.reloadSound) == "table" then
+						tankbobs.a_playSound(c_const_get("weaponAudio_dir") .. v.weapon.fireSound[math.random(1, #v.weapon.reloadSound)])
+					else
+						tankbobs.a_playSound(c_const_get("weaponAudio_dir") .. v.weapon.reloadSound)
+					end
 				end
 			end
-		end
 
-		if v.m.lastCollideTime and v.m.lastCollideTimeB ~= v.m.lastCollideTime then
-			v.m.lastCollideTimeB = v.m.lastCollideTime
+			if v.m.lastCollideTime and v.m.lastCollideTimeB ~= v.m.lastCollideTime then
+				v.m.lastCollideTimeB = v.m.lastCollideTime
 
-			tankbobs.a_setVolumeChunk(c_const_get("collide_sound"), v.m.intensity * c_config_get("config.client.volume"))
-			tankbobs.a_playSound(c_const_get("collide_sound"))
-		end
+				tankbobs.a_setVolumeChunk(c_const_get("collide_sound"), v.m.intensity * c_config_get("config.client.volume"))
+				tankbobs.a_playSound(c_const_get("collide_sound"))
+			end
 
-		if v.m.lastDamageTime and v.m.lastDamageTimeB ~= v.m.lastDamageTime then
-			v.m.lastDamageTimeB = v.m.lastDamageTime
+			if v.m.lastDamageTime and v.m.lastDamageTimeB ~= v.m.lastDamageTime then
+				v.m.lastDamageTimeB = v.m.lastDamageTime
 
-			tankbobs.a_playSound(c_const_get("damage_sound"))
-		end
+				tankbobs.a_playSound(c_const_get("damage_sound"))
+			end
 
-		if v.spawning and v.m.lastDieTimeB ~= v.m.lastDieTime then
-			v.m.lastDieTimeB = v.m.lastDieTime
+			if v.spawning and v.m.lastDieTimeB ~= v.m.lastDieTime then
+				v.m.lastDieTimeB = v.m.lastDieTime
 
-			tankbobs.a_playSound(c_const_get("die_sound"))
-		end
+				tankbobs.a_playSound(c_const_get("die_sound"))
+			end
 
-		if v.m.lastPickupTime and v.m.lastPickupTimeB ~= v.m.lastPickupTime then
-			v.m.lastPickupTimeB = v.m.lastPickupTime 
+			if v.m.lastPickupTime and v.m.lastPickupTimeB ~= v.m.lastPickupTime then
+				v.m.lastPickupTimeB = v.m.lastPickupTime 
 
-			tankbobs.a_playSound(c_const_get("powerupPickup_sound"))
-		end
+				tankbobs.a_playSound(c_const_get("powerupPickup_sound"))
+			end
 
-		if v.m.lastTeleportTime and v.m.lastTeleportTimeB ~= v.m.lastTeleportTime then
-			v.m.lastTeleportTimeB = v.m.lastTeleportTime 
+			if v.m.lastTeleportTime and v.m.lastTeleportTimeB ~= v.m.lastTeleportTime then
+				v.m.lastTeleportTimeB = v.m.lastTeleportTime 
 
-			tankbobs.a_playSound(c_const_get("teleport_sound"))
+				tankbobs.a_playSound(c_const_get("teleport_sound"))
+			end
 		end
 	end
 
