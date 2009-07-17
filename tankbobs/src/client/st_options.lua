@@ -713,7 +713,7 @@ function st_optionsControls_init()
 	gui_addLabel(tankbobs.m_vec2(50, 37), "Back", nil, 2 / 3) gui_addKey(tankbobs.m_vec2(75, 37), c_config_get("config.key.quit"), nil, st_optionsControls_quit, c_config_get("config.key.quit"))
 	gui_addLabel(tankbobs.m_vec2(50, 31), "Quit", nil, 2 / 3) gui_addKey(tankbobs.m_vec2(75, 31), c_config_get("config.key.exit"), nil, st_optionsControls_exit, c_config_get("config.key.exit"))
 
-	gui_addLabel(tankbobs.m_vec2(50, 31), "Key Refresh Rate in Frames", nil, 1 / 3) gui_addInput(tankbobs.m_vec2(75, 31), tostring(c_config_get("config.client.krr")), nil, st_optionsControls_krr, true, 5, 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 25), "Key Refresh Rate in Frames", nil, 1 / 3) gui_addInput(tankbobs.m_vec2(85, 25), tostring(c_config_get("config.client.krr")), nil, st_optionsControls_krr, true, 5, 0.5)
 end
 
 function st_optionsControls_done()
