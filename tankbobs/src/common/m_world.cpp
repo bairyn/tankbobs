@@ -566,6 +566,11 @@ int w_getLinearVelocity(lua_State *L)
 	v->y = vel.y;
 	MATH_POLAR(*v);
 
+	if(isnan(v->x) || isnan(v->y) || isnan(v->R) || isnan(v->t) || isinf(v->x) || isinf(v->y) || isinf(v->R) || isinf(v->t) || isinf(-v->x) || isinf(-v->y) || isinf(-v->R) || isinf(-v->t))
+	{
+		v->x = v->y = v->R = v->t = 0;
+	}
+
 	return 1;
 }
 

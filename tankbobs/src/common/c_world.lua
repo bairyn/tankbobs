@@ -568,8 +568,8 @@ function c_world_tank_die(tank, t)
 	tank.shield = 0
 	tank.killer = nil
 	tank.exists = false
-	tank.spawning = true
 	tank.m.lastDieTime = t
+	tank.spawning = true
 
 	tank.cd = {}
 end
@@ -953,10 +953,10 @@ function c_world_tank_step(d, tank)
 
 	c_world_tank_checkSpawn(d, tank)
 
-	if tank.m.collided then
+	if tank.collided then
 		-- tank somehow escaped world bounds
 
-		tank.m.collided = false
+		tank.collided = false
 
 		return c_world_tank_die(tank)
 	else
