@@ -5,8 +5,8 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror -pedantic-errors -ansi")
 #set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror -pedantic-errors -ansi")  # Box2D
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -DTEBUG")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -DTEBUG")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -DTDEBUG")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -DTDEBUG")
 else(CMAKE_BUILD_TYPE MATCHES Debug)
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
