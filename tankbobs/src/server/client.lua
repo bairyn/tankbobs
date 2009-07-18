@@ -182,7 +182,7 @@ function client_step(d)
 			local switch = string.byte(data, 1) data = data:sub(2)
 			if switch == nil then
 			elseif switch == 0x00 then
-				if #data >= 77 then  -- connection request packet expects to be at least 79 bytes, so ignore it if it's not
+				if #data >= 77 then  -- connection request packet needs to be at least 77 bytes, so ignore it if it's not
 					if not client then
 						if not lastConnectTime or t > lastConnectTime + c_const_get("client_connectFlood") then
 							lastConnectTime = t
@@ -219,7 +219,7 @@ function client_step(d)
 							-- send the challenge number, set and map
 							tankbobs.n_newPacket(256)
 							tankbobs.n_writeToPacket(tankbobs.io_fromChar(0xA0))
-							client.challenge = math.random(0x80000000, 0x7FFFFFFF)
+							client.challenge = math.random(0x00000000, 0x7FFFFFFF)
 							tankbobs.n_writeToPacket(tankbobs.io_fromInt(client.challenge))
 							-- set and map as a NULL-terminated string
 							tankbobs.n_writeToPacket(c_tcm_current_set.name .. string.char(0x00))
