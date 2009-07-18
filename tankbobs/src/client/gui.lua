@@ -874,6 +874,8 @@ function gui_mouse(x, y, xrel, yrel)
 end
 
 function gui_button(button, pressed)
+	button = c_config_keyLayoutGet(button) or button
+
 	if selected and selected.type == KEY and selected.keyActive then
 		if pressed then
 			selected.keyActive = false
