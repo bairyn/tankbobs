@@ -164,7 +164,6 @@ static int c_private_initConsole(void)
 	void c_private_drawScrollBar(void);
 
 	int collumn;
-	SCREEN *test;
 
 #if defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__TOS_WINDOWS__) || defined(__WINDOWS__)
 #else
@@ -180,7 +179,8 @@ static int c_private_initConsole(void)
 
 	if(!consoleInitialized)
 	{
-		test = newterm(NULL, stdout, stdin);
+		SCREEN *test = newterm(NULL, stdout, stdin);
+
 		if(!test)
 		{
 			return CINIT_NCERR;
