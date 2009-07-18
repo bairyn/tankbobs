@@ -967,6 +967,12 @@ function st_play_step(d)
 
 
 	if c_world_getPaused() then
+		for _, v in pairs(c_weapon_getWeapons()) do
+			if v.meleeRange ~= 0 then
+				tankbobs.a_setVolumeChunk(c_const_get("weaponAudio_dir") .. v.fireSound, 0)
+			end
+		end
+
 		return
 	end
 
