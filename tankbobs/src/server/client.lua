@@ -64,7 +64,7 @@ end
 
 client =
 {
-	new = common_new,
+	new = c_class_new,
 
 	init = function (o)
 		o.tank = c_world_tank:new()
@@ -141,11 +141,10 @@ local function client_disconnect(client, reason)
 	tankbobs.n_writeToPacket(tankbobs.io_fromChar(0xA4))
 	tankbobs.n_writeToPacket(reason)
 	sendToClient(client)
-	tankbobs.n_sendPacket(client.ip)
-	tankbobs.n_sendPacket(client.ip)
-	tankbobs.n_sendPacket(client.ip)
-	tankbobs.n_sendPacket(client.ip)
-	tankbobs.n_sendPacket(client.ip)
+	sendToClient(client)
+	sendToClient(client)
+	sendToClient(client)
+	sendToClient(client)
 
 	s_printnl("'", client.tank.name, "' disconnected from ", client.ip, ":", client.port, "; reason: ", reason)
 

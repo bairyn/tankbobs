@@ -173,7 +173,7 @@ function st_internet_step(d)
 					local map = data:sub(data:find(tankbobs.fromChar(0x00))) data = data:sub(data:find(tankbobs.fromChar(0x00)) + 1)
 
 					c_tcm_select_set(set)
-					c_tcm_select_set(map)
+					c_tcm_select_map(map)
 
 					-- send the server the challenge response
 					tankbobs.n_newPacket(37)
@@ -247,7 +247,7 @@ function st_internet_start(widget)
 	end
 	tankbobs.n_newPacket(80)
 	tankbobs.n_writeToPacket(tankbobs.io_fromChar(0x00))
-	if not c_config_get("game.player1", true) or not c_config_get("game.player1.name", true) or not c_config_get("game.player1.color", true) or not c_config_get("game.player1.color.r", true) or not c_config_get("game.player1.color.g", true) or not c_config_get("game.player1.color.b", true) then
+	if not c_config_get("game.player1.name", true) or not c_config_get("game.player1.color.r", true) or not c_config_get("game.player1.color.g", true) or not c_config_get("game.player1.color.b", true) then
 		-- forward player to configuration if player 1 isn't set up
 		c_state_new(options_state)
 
