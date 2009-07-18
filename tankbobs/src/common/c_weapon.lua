@@ -388,7 +388,7 @@ function c_weapon_init()
 	weapon.index = 7
 	weapon.name = "saw"
 	weapon.altName = "saw"
-	weapon.damage = 60 / 8
+	weapon.damage = 150 / 8
 	weapon.pellets = 1
 	weapon.speed = 0
 	weapon.spread = tankbobs.m_radians(0)
