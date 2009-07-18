@@ -37,10 +37,10 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 
 #define DEFAULTPORT   43210
 #define MAXPACKETSIZE 1024
-#define NUMBER        0xABADB011
 
 static char      lastHostName[BUFSIZE] = {""};
 static UDPpacket *currentPacket   = NULL;
+static UDPpacket *listenPacket    = NULL;
 static UDPsocket currentSocket    = NULL;
 static Uint16    currentPort      = DEFAULTPORT;
 
@@ -102,6 +102,8 @@ int n_init(lua_State *L)
 		return 2;
 	}
 
+	listenPacket = SDLNet_AllocPacket(MAXPACKETSIZE);
+
 	lua_pushboolean(L, TRUE);
 	return 1;
 }
@@ -114,6 +116,12 @@ int n_quit(lua_State *L)
 	{
 		SDLNet_FreePacket(currentPacket);
 		currentPacket = NULL;
+	}
+
+	if(listenPacket)
+	{
+		SDLNet_FreePacket(listenPacket);
+		listenPacket = NULL;
 	}
 
 	if(currentSocket)
@@ -224,42 +232,31 @@ int n_sendPacket(lua_State *L)
 
 int n_readPacket(lua_State *L)
 {
-	UDPpacket *packet;
-
 	CHECKINIT(init, L);
 
-	if(!currentSocket)
+	if(!currentSocket || !listenPacket)
 	{
 		return 0;
 	}
 
-	if((packet = SDLNet_AllocPacket(MAXPACKETSIZE)))
+	if(SDLNet_UDP_Recv(currentSocket, listenPacket))
 	{
-		if(SDLNet_UDP_Recv(currentSocket, packet))
-		{
-			static char ip[BUFSIZE];
+		static char ip[BUFSIZE];
 
-			/* ip = SDLNet_PresentIP(&packet->address); */
+		/* ip = SDLNet_PresentIP(&listenPacket->address); */
 /*#if SDL_BYTEORDER == SDL_BIG_ENDIAN*/
-			/*sprintf(ip, "%d.%d.%d.%d", (packet->address.host >> 24) & 0x000000FF, (packet->address.host >> 16) & 0x000000FF, (packet->address.host >> 8) & 0x000000FF, (packet->address.host >> 0) & 0x000000FF);*/
+		/*sprintf(ip, "%d.%d.%d.%d", (listenPacket->address.host >> 24) & 0x000000FF, (listenPacket->address.host >> 16) & 0x000000FF, (listenPacket->address.host >> 8) & 0x000000FF, (listenPacket->address.host >> 0) & 0x000000FF);*/
 /*#else*/
-			sprintf(ip, "%d.%d.%d.%d", (packet->address.host >> 0) & 0x000000FF, (packet->address.host >> 8) & 0x000000FF, (packet->address.host >> 16) & 0x000000FF, (packet->address.host >> 24) & 0x000000FF);
+		sprintf(ip, "%d.%d.%d.%d", (listenPacket->address.host >> 0) & 0x000000FF, (listenPacket->address.host >> 8) & 0x000000FF, (listenPacket->address.host >> 16) & 0x000000FF, (listenPacket->address.host >> 24) & 0x000000FF);
 /*#endif*/
 
-			lua_pushboolean(L, TRUE);
+		lua_pushboolean(L, TRUE);
 
-			lua_pushstring(L, ip);
-			lua_pushinteger(L, packet->address.port);
-			lua_pushlstring(L, (const char *) packet->data, packet->len);
+		lua_pushstring(L, ip);
+		lua_pushinteger(L, listenPacket->address.port);
+		lua_pushlstring(L, (const char *) listenPacket->data, listenPacket->len);
 
-			SDLNet_FreePacket(packet);
-
-			return 4;
-		}
-		else
-		{
-			SDLNet_FreePacket(packet);
-		}
+		return 4;
 	}
 
 	lua_pushboolean(L, FALSE);
