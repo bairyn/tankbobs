@@ -167,12 +167,11 @@ function st_play_init()
 			tankbobs.in_grabClear()
 		else
 			widget.text = ""
-			if not tankbobs.in_isGrabbed() then
-				tankbobs.in_grabMouse(c_config_get("client.renderer.width") / 2, c_config_get("client.renderer.height") / 2)
-			end
 
 			if quitScreen then
 				tankbobs.in_grabClear()
+			elseif not tankbobs.in_isGrabbed() then
+				tankbobs.in_grabMouse(c_config_get("client.renderer.width") / 2, c_config_get("client.renderer.height") / 2)
 			end
 		end
 	end
@@ -204,7 +203,7 @@ function st_play_init()
 		end
 
 		tank.name = c_config_get("game.player" .. tostring(i) .. ".name")
-		if not (c_config_get("game.player" .. tostring(i) .. ".color", true)) then
+		if not (c_config_get("game.player" .. tostring(i) .. ".color.r", true)) then
 			c_config_set("game.player" .. tostring(i) .. ".color.r", c_config_get("game.defaultTankRed"))
 			c_config_set("game.player" .. tostring(i) .. ".color.g", c_config_get("game.defaultTankBlue"))
 			c_config_set("game.player" .. tostring(i) .. ".color.b", c_config_get("game.defaultTankGreen"))
@@ -451,7 +450,7 @@ local function play_drawWorld(d)
 								gl.PushMatrix()
 									gl.Translate(v.p.x, v.p.y, 0)
 									gl.Rotate(tankbobs.m_degrees(v.r), 0, 0, 1)
-									if not (c_config_get("game.player" .. tostring(k) .. ".color", true)) then
+									if not (c_config_get("game.player" .. tostring(k) .. ".color.r", true)) then
 										c_config_set("game.player" .. tostring(k) .. ".color.r", c_config_get("game.defaultTankRed"))
 										c_config_set("game.player" .. tostring(k) .. ".color.g", c_config_get("game.defaultTankBlue"))
 										c_config_set("game.player" .. tostring(k) .. ".color.b", c_config_get("game.defaultTankGreen"))
@@ -536,7 +535,7 @@ local function play_drawWorld(d)
 							gl.PushMatrix()
 								gl.Translate(v.p.x, v.p.y, 0)
 								gl.Rotate(tankbobs.m_degrees(v.r) + c_const_get("healthbar_rotation"), 0, 0, 1)
-								if not (c_config_get("game.player" .. tostring(k) .. ".color", true)) then
+								if not (c_config_get("game.player" .. tostring(k) .. ".color.r", true)) then
 									c_config_set("game.player" .. tostring(k) .. ".color.r", c_config_get("game.defaultTankRed"))
 									c_config_set("game.player" .. tostring(k) .. ".color.g", c_config_get("game.defaultTankBlue"))
 									c_config_set("game.player" .. tostring(k) .. ".color.b", c_config_get("game.defaultTankGreen"))
