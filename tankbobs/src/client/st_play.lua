@@ -1123,7 +1123,7 @@ function st_play_step(d)
 	for _, v in pairs(c_weapon_getWeapons()) do
 		if v.meleeRange ~= 0 then
 			if v.m.used then
-				tankbobs.a_setVolumeChunk(c_const_get("weaponAudio_dir") .. v.weapon.fireSound, c_config_get("client.volume"))
+				tankbobs.a_setVolumeChunk(c_const_get("weaponAudio_dir") .. v.fireSound, c_config_get("client.volume"))
 			else
 				tankbobs.a_setVolumeChunk(c_const_get("weaponAudio_dir") .. v.fireSound, 0)
 			end
