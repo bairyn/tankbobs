@@ -821,11 +821,11 @@ static int compile(const char *filename)
 
 	/* we have the filename for the input and ouput files, so open the streams */
 
-	/* first check we aren't overwriting anything undesirablely */
-	fout = fopen(tcmFilename, "rb");
-	if(fout)
+	/* first check we aren't overwriting anything undesirably */
+	fin = fopen(tcmFilename, "r");
+	if(fin)
 	{
-		fclose(fout);
+		fclose(fin);
 
 		if(!m_force)
 		{
@@ -1033,7 +1033,7 @@ static int compile(const char *filename)
 
 	fclose(fin);
 
-	if(!(fout = fopen(tcmFilename, "w")))
+	if(!(fout = fopen(tcmFilename, "wb")))
 	{
 		if(tcmAllocated)
 			free(tcmFilename);
