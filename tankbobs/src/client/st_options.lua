@@ -532,7 +532,7 @@ function st_optionsPlayers_fire(widget, button)
 	end
 
 	if button then
-		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".fire", c_config_keyLayoutGet(button))
+		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".fire", c_config_keyLayoutSet(button))
 	else
 		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".fire", false)
 	end
@@ -544,7 +544,7 @@ function st_optionsPlayers_forward(widget, button)
 	end
 
 	if button then
-		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".forward", c_config_keyLayoutGet(button))
+		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".forward", c_config_keyLayoutSet(button))
 	else
 		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".forward", false)
 	end
@@ -556,7 +556,7 @@ function st_optionsPlayers_right(widget, button)
 	end
 
 	if button then
-		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".right", c_config_keyLayoutGet(button))
+		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".right", c_config_keyLayoutSet(button))
 	else
 		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".right", false)
 	end
@@ -568,7 +568,7 @@ function st_optionsPlayers_back(widget, button)
 	end
 
 	if button then
-		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".back", c_config_keyLayoutGet(button))
+		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".back", c_config_keyLayoutSet(button))
 	else
 		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".back", false)
 	end
@@ -580,7 +580,7 @@ function st_optionsPlayers_left(widget, button)
 	end
 
 	if button then
-		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".left", c_config_keyLayoutGet(button))
+		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".left", c_config_keyLayoutSet(button))
 	else
 		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".left", false)
 	end
@@ -592,7 +592,7 @@ function st_optionsPlayers_special(widget, button)
 	end
 
 	if button then
-		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".special", c_config_keyLayoutGet(button))
+		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".special", c_config_keyLayoutSet(button))
 	else
 		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".special", false)
 	end
@@ -604,7 +604,7 @@ function st_optionsPlayers_reload(widget, button)
 	end
 
 	if button then
-		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".reload", c_config_keyLayoutGet(button))
+		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".reload", c_config_keyLayoutSet(button))
 	else
 		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".reload", false)
 	end
@@ -616,7 +616,7 @@ function st_optionsPlayers_reverse(widget, button)
 	end
 
 	if button then
-		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".reverse", c_config_keyLayoutGet(button))
+		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".reverse", c_config_keyLayoutSet(button))
 	else
 		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".reverse", false)
 	end
@@ -628,7 +628,7 @@ function st_optionsPlayers_mod(widget, button)
 	end
 
 	if button then
-		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".mod", c_config_keyLayoutGet(button))
+		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".mod", c_config_keyLayoutSet(button))
 	else
 		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".mod", false)
 	end
