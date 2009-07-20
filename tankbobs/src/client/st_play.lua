@@ -421,8 +421,8 @@ function st_play_button(button, pressed)
 			--if button == c_config_get("client.key.player" .. tostring(i) .. ".reverse") then
 				--c_world_tanks[i].state.reverse = reverse
 			--end
-			if button == c_config_get("client.key.player" .. tostring(i) .. ".reload") then
-				c_world_tanks[i].state.mod = mod
+			if button == c_config_get("client.key.player" .. tostring(i) .. ".mod") then
+				c_world_tanks[i].state.mod = pressed
 			end
 		end
 	end
