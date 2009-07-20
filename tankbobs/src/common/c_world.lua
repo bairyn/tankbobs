@@ -941,8 +941,6 @@ function c_world_findClosestIntersection(start, endP)
 		end
 	end
 
-	-- teleporters
-
 	-- powerups
 
 	return minDistance, minIntersection, typeOfTarget, target

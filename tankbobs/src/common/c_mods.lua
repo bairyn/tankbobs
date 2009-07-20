@@ -45,10 +45,10 @@ function c_mods_load(dir)
 			common_print("Running mod: " .. v[1])
 		end
 
-		local status, err = pcall(assert(loadfile(v)))
+		local status, err = pcall(v[2])
 
 		if not status then
-			print("Error loading mod '" .. v .. "': " .. err)
+			print("Error loading mod '" .. v[1] .. "': " .. err)
 		end
 	end
 
