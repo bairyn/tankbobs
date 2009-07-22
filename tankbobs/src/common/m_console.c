@@ -580,6 +580,7 @@ int c_print(lua_State *L)
 	CHECKINIT(init, L);
 
 	print = luaL_checkstring(L, 1);
+	lua_pop(L, 1);
 
 	if(print)
 	{
