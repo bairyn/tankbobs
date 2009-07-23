@@ -66,7 +66,7 @@ function st_internet_init()
 			end
 		elseif switch == REQUESTING then
 			widget.text = "Attempting connection . . ."
-		elseif siwtch == RESPONDED then
+		elseif switch == RESPONDED then
 			widget.text = "Accepting challenge . . ."
 		elseif switch == CONNECTED then
 			widget.text = "Connected"
@@ -108,10 +108,11 @@ end
 function st_internet_done()
 	gui_finish()
 
-	if connection.state > UNCONNECTED and not connection.proceeding then
+	if connection.state > REQUESTING and not connection.proceeding then
 		-- abort the connection
 		tankbobs.n_newPacket(33)
 		tankbobs.n_writeToPacket(tankbobs.io_fromChar(0x04))
+		tankbobs.n_writeToPacket(connection.ui)
 		tankbobs.n_sendPacket()
 		tankbobs.n_sendPacket()
 		tankbobs.n_sendPacket()
@@ -189,10 +190,11 @@ function st_internet_step(d)
 		until not status
 
 		if tankbobs.t_getTicks() >= connection.lastRequestTime + c_const_get("server_timeout") then
-			if connection.state > UNCONNECTED then
+			if connection.state > RESPONDED then
 				-- abort the connection
 				tankbobs.n_newPacket(33)
 				tankbobs.n_writeToPacket(tankbobs.io_fromChar(0x04))
+				tankbobs.n_writeToPacket(connection.ui)
 				tankbobs.n_sendPacket()
 				tankbobs.n_sendPacket()
 				tankbobs.n_sendPacket()
