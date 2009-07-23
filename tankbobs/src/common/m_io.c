@@ -34,6 +34,14 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 
 #define EOFERROR "EOF !#\\"
 
+#define SWAP(a, b) \
+do \
+{ \
+	(a) ^= (b); \
+	(b) ^= (a); \
+	(a) ^= (b); \
+} while(0)
+
 void io_init(lua_State *l)
 {
 }
@@ -513,10 +521,8 @@ int io_toInt(lua_State *L)
 	CHECKINIT(init, L);
 
 	integer = *((const int *) luaL_checkstring(L, 1));
-	integer_[3] ^= integer_[0];
-	integer_[0] ^= integer_[3];
-	integer_[2] ^= integer_[1];
-	integer_[1] ^= integer_[2];
+	SWAP(integer_[0], integer_[3]);
+	SWAP(integer_[1], integer_[2]);
 #else
 	CHECKINIT(init, L);
 
@@ -537,8 +543,7 @@ int io_toShort(lua_State *L)
 	CHECKINIT(init, L);
 
 	integer = *((const short *) luaL_checkstring(L, 1));
-	integer_[0] ^= integer_[1];
-	integer_[1] ^= integer_[0];
+	SWAP(integer_[0], integer_[1]);
 #else
 	CHECKINIT(init, L);
 
@@ -569,10 +574,8 @@ int io_toFloat(lua_State *L)
 	CHECKINIT(init, L);
 
 	number = *((const float *) luaL_checkstring(L, 1));
-	number_[3] ^= number_[0];
-	number_[0] ^= number_[3];
-	number_[2] ^= number_[1];
-	number_[1] ^= number_[2];
+	SWAP(number_[0], number_[3]);
+	SWAP(number_[1], number_[2]);
 #else
 	CHECKINIT(init, L);
 
@@ -593,14 +596,10 @@ int io_toDouble(lua_State *L)
 	CHECKINIT(init, L);
 
 	number = *((const double *) luaL_checkstring(L, 1));
-	number_[7] ^= number_[0];
-	number_[0] ^= number_[7];
-	number_[6] ^= number_[1];
-	number_[1] ^= number_[6];
-	number_[5] ^= number_[2];
-	number_[2] ^= number_[5];
-	number_[4] ^= number_[3];
-	number_[3] ^= number_[4];
+	SWAP(number_[0], number_[7]);
+	SWAP(number_[1], number_[6]);
+	SWAP(number_[2], number_[5]);
+	SWAP(number_[3], number_[4]);
 #else
 	CHECKINIT(init, L);
 
@@ -621,10 +620,8 @@ int io_fromInt(lua_State *L)
 	CHECKINIT(init, L);
 
 	integer = luaL_checkinteger(L, 1);
-	integer_[3] ^= integer_[0];
-	integer_[0] ^= integer_[3];
-	integer_[2] ^= integer_[1];
-	integer_[1] ^= integer_[2];
+	SWAP(integer_[0], integer_[3]);
+	SWAP(integer_[1], integer_[2]);
 #else
 	CHECKINIT(init, L);
 
@@ -645,8 +642,7 @@ int io_fromShort(lua_State *L)
 	CHECKINIT(init, L);
 
 	integer = luaL_checkinteger(L, 1);
-	integer_[1] ^= integer_[0];
-	integer_[0] ^= integer_[1];
+	SWAP(integer_[0], integer_[1]);
 #else
 	CHECKINIT(init, L);
 
@@ -679,10 +675,8 @@ int io_fromFloat(lua_State *L)
 	CHECKINIT(init, L);
 
 	number = luaL_checknumber(L, 1);
-	number_[3] ^= number_[0];
-	number_[0] ^= number_[3];
-	number_[2] ^= number_[1];
-	number_[1] ^= number_[2];
+	SWAP(number_[0], number_[3]);
+	SWAP(number_[1], number_[2]);
 #else
 	CHECKINIT(init, L);
 #endif
@@ -701,14 +695,10 @@ int io_fromDouble(lua_State *L)
 	CHECKINIT(init, L);
 
 	number = luaL_checknumber(L, 1);
-	number_[7] ^= number_[0];
-	number_[0] ^= number_[7];
-	number_[6] ^= number_[1];
-	number_[1] ^= number_[6];
-	number_[5] ^= number_[2];
-	number_[2] ^= number_[5];
-	number_[4] ^= number_[3];
-	number_[3] ^= number_[4];
+	SWAP(number_[0], number_[7]);
+	SWAP(number_[1], number_[6]);
+	SWAP(number_[2], number_[5]);
+	SWAP(number_[3], number_[4]);
 #else
 	CHECKINIT(init, L);
 
@@ -724,10 +714,8 @@ int io_intNL(int integer)
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
 	char *integer_ = &integer;
 
-	integer_[3] ^= integer_[0];
-	integer_[0] ^= integer_[3];
-	integer_[2] ^= integer_[1];
-	integer_[1] ^= integer_[2];
+	SWAP(integer_[0], integer_[3]);
+	SWAP(integer_[1], integer_[2]);
 #endif
 
 	return integer;
@@ -738,8 +726,7 @@ short io_shortNL(short integer)
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
 	char *integer_ = &integer;
 
-	integer_[1] ^= integer_[0];
-	integer_[0] ^= integer_[1];
+	SWAP(integer_[0], integer_[1]);
 #endif
 
 	return integer;
@@ -755,10 +742,8 @@ float io_floatNL(float number)
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
 	char *number_ = &number;
 
-	number_[3] ^= number_[0];
-	number_[0] ^= number_[3];
-	number_[2] ^= number_[1];
-	number_[1] ^= number_[2];
+	SWAP(number_[0], number_[3]);
+	SWAP(number_[1], number_[2]);
 #endif
 
 	return number;
@@ -769,14 +754,10 @@ double io_doubleNL(double number)
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
 	char *number_ = &number;
 
-	number_[7] ^= number_[0];
-	number_[0] ^= number_[7];
-	number_[6] ^= number_[1];
-	number_[1] ^= number_[6];
-	number_[5] ^= number_[2];
-	number_[2] ^= number_[5];
-	number_[4] ^= number_[3];
-	number_[3] ^= number_[4];
+	SWAP(number_[0], number_[7]);
+	SWAP(number_[1], number_[6]);
+	SWAP(number_[2], number_[5]);
+	SWAP(number_[3], number_[4]);
 #endif
 
 	return number;
