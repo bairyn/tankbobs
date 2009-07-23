@@ -60,4 +60,4 @@ Index: build.sh
 +++ build.sh	(revision 0)
 @@ -0,0 +1,2 @@
 +#!/build/sh
-+gcc -I../include/ -I/usr/include/lua5.1/ -llua -lGL -lm -O3 -funroll-loops -shared -o opengl.so LuaGL.c LuaGLAux.c
++gcc -I../include/ -I/usr/include/lua5.1/ -llua -lGL -lm -O3 -funroll-loops -fPIC -shared -o opengl.so LuaGL.c LuaGLAux.c
