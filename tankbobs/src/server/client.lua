@@ -101,7 +101,7 @@ local function client_sanitizeName(name)
 		sanitizedName = c_const_get("defaultName")
 	end
 
-	return sazitizedName
+	return sanitizedName
 end
 
 local function sendToClient(client)
