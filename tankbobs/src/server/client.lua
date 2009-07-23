@@ -94,7 +94,7 @@ local function client_sanitizeName(name)
 	if #name >= 1 then
 		for i = 1, math.min(#name, c_const_get("max_nameLength")) do
 			if string.byte(name:sub(i)) >= 32 and string.byte(name:sub(i)) < 127 then
-				sanitizedName = sanitizedName .. name:sub(i, i + 1)
+				sanitizedName = sanitizedName .. name:sub(i, i)
 			end
 		end
 	else
