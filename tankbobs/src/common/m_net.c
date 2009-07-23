@@ -241,19 +241,31 @@ int n_readPacket(lua_State *L)
 
 	if(SDLNet_UDP_Recv(currentSocket, listenPacket))
 	{
+		Uint16 port = listenPacket->address.port;
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+#else
+		unsigned char *p = (unsigned char *) &port;
+#endif
 		static char ip[BUFSIZE];
 
 		/* ip = SDLNet_PresentIP(&listenPacket->address); */
-/*#if SDL_BYTEORDER == SDL_BIG_ENDIAN*/
-		/*sprintf(ip, "%d.%d.%d.%d", (listenPacket->address.host >> 24) & 0x000000FF, (listenPacket->address.host >> 16) & 0x000000FF, (listenPacket->address.host >> 8) & 0x000000FF, (listenPacket->address.host >> 0) & 0x000000FF);*/
-/*#else*/
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+		sprintf(ip, "%d.%d.%d.%d", (listenPacket->address.host >> 24) & 0x000000FF, (listenPacket->address.host >> 16) & 0x000000FF, (listenPacket->address.host >> 8) & 0x000000FF, (listenPacket->address.host >> 0) & 0x000000FF);
+#else
 		sprintf(ip, "%d.%d.%d.%d", (listenPacket->address.host >> 0) & 0x000000FF, (listenPacket->address.host >> 8) & 0x000000FF, (listenPacket->address.host >> 16) & 0x000000FF, (listenPacket->address.host >> 24) & 0x000000FF);
-/*#endif*/
+#endif
 
 		lua_pushboolean(L, TRUE);
 
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+#else
+		p[0] ^= p[1];
+		p[1] ^= p[0];
+		p[0] ^= p[1];
+#endif
+
 		lua_pushstring(L, ip);
-		lua_pushinteger(L, listenPacket->address.port);
+		lua_pushinteger(L, port);
 		lua_pushlstring(L, (const char *) listenPacket->data, listenPacket->len);
 
 		return 4;
