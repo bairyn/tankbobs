@@ -324,21 +324,21 @@ function c_tcm_read_set(filename, t)
 	-- The 1st line is the set's name
 	line, err = set_f:read()
 	if not line then
-		error("Unexepected EOF when reading '" .. filename .. "': " .. err)
+		error("c_tcm_read_set: unexpected EOF while reading '" .. filename .. "': " .. err)
 	end
 	s.name = line
 
 	-- The 2nd line is the set's title
 	line, err = set_f:read()
 	if not line then
-		error("Unexepected EOF when reading '" .. filename .. "': " .. err)
+		error("c_tcm_read_set: unexpected EOF while reading '" .. filename .. "': " .. err)
 	end
 	s.title = line
 
 	-- The 3rd line is the set's order
 	line, err = set_f:read()
 	if not line then
-		error("Unexepected EOF when reading '" .. filename .. "': " .. err)
+		error("c_tcm_read_set: unexpected EOF while reading '" .. filename .. "': " .. err)
 	end
 	s.order = line
 	if(s.order:match("^[\n\t ]*([%d%.]+)[\n\t ]*$")) then
@@ -349,14 +349,14 @@ function c_tcm_read_set(filename, t)
 	-- The 4th line is the set's description
 	line, err = set_f:read()
 	if not line then
-		error("Unexepected EOF when reading '" .. filename .. "': " .. err)
+		error("c_tcm_read_set: unexpected EOF while reading '" .. filename .. "': " .. err)
 	end
 	s.description = line
 
 	-- read the set's filenames and read their headers
 	line, err = set_f:read()
 	if not line then
-		error("Unexepected EOF when reading '" .. filename .. "': " .. err)
+		error("c_tcm_read_set: unexpected EOF while reading '" .. filename .. "': " .. err)
 	end
 	while line and type(line) == "string" and line ~= "" do
 		table.insert(s.maps, c_tcm_read_map(c_const_get("tcm_dir") .. line))

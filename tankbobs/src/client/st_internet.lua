@@ -152,7 +152,7 @@ function st_internet_step(d)
 			status, ip, port, data = tankbobs.n_readPacket()
 
 			if status then
-				local switch = data:sub(1, 1) data = data:sub(2)
+				local switch = string.byte(data, 1) data = data:sub(2)
 				if switch == nil then
 				elseif switch == 0xA1 then
 					connection.state = CONNECTED
@@ -166,21 +166,21 @@ function st_internet_step(d)
 			status, ip, port, data = tankbobs.n_readPacket()
 
 			if status then
-				local switch = data:sub(1, 1) data = data:sub(2)
+				local switch = string.byte(data, 1) data = data:sub(2)
 				if switch == nil then
 				elseif switch == 0xA0 then
-					local challenge = tankbobs.t_toInt(data:sub(1, 4)) data = data:sub(5)
-					local set = data:sub(data:find(tankbobs.fromChar(0x00))) data = data:sub(data:find(tankbobs.fromChar(0x00)) + 1)
-					local map = data:sub(data:find(tankbobs.fromChar(0x00))) data = data:sub(data:find(tankbobs.fromChar(0x00)) + 1)
+					local challenge = tankbobs.io_toInt(data:sub(1, 4)) data = data:sub(5)
+					local set = data:sub(1, data:find(tankbobs.io_fromChar(0x00)) - 1) data = data:sub(data:find(tankbobs.io_fromChar(0x00)) + 1)
+					local map = data:sub(1, data:find(tankbobs.io_fromChar(0x00)) - 1) data = data:sub(data:find(tankbobs.io_fromChar(0x00)) + 1)
 
 					c_tcm_select_set(set)
 					c_tcm_select_map(map)
 
 					-- send the server the challenge response
 					tankbobs.n_newPacket(37)
-					tankbobs.n_writeToPacket(tankbobs.t_fromChar(0x01))
+					tankbobs.n_writeToPacket(tankbobs.io_fromChar(0x01))
 					tankbobs.n_writeToPacket(connection.ui)
-					tankbobs.n_writeToPacket(tankbobs.t_fromInt(challenge))
+					tankbobs.n_writeToPacket(tankbobs.io_fromInt(challenge))
 					tankbobs.n_sendPacket()
 
 					connection.lastRequestTime = tankbobs.t_getTicks()

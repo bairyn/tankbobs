@@ -54,7 +54,7 @@ function client_init()
 
 	c_const_set("client_connectFlood", 2000, 1)
 	c_const_set("client_ticksCheck", 5000, 1)
-	c_const_set("client_maxinactivetime", 120000, 1)  -- drop after 2 minutes of no packets
+	c_const_set("client_maxInactiveTime", 120000, 1)  -- drop after 2 minutes of no packets
 	c_const_set("client_connectingMaxInactiveTime", 3000, 1)
 	c_const_set("client_maxChallengeAttempts", 3, 1)
 end
