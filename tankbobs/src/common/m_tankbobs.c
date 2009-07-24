@@ -63,6 +63,7 @@ int t_initialize(lua_State *L)
 {
 	int extra = lua_toboolean(L, 2);
 	const char *sif;
+	static initialized = false;
 
 	if(lua_isstring(L, 1))
 	{
@@ -71,12 +72,21 @@ int t_initialize(lua_State *L)
 		strncpy(siName, sif, sizeof(siName));
 
 		siState = L;
+	}
 
+	if(initialized)
+	{
+		SDL_Quit();
+	}
+	else
+	{
 		if(siName[0] && siState)
 		{
 			signal(SIGINT, t_private_interrupt);
 		}
 	}
+
+	initialized = true;
 
 	atexit(SDL_Quit);
 	if(SDL_Init((extra ? (SDL_INIT_VIDEO | SDL_INIT_AUDIO) : 0) | SDL_INIT_TIMER) != 0)

@@ -26,16 +26,13 @@ Common functions
 require "libmtankbobs"
 tankbobs.t_initialize("common_interrupt", false)
 
+-- initial seed
+math.randomseed(os.time())
+
 function common_init()
 	if jit then
 		require "jit.opt".start()
 		require "jit.opt_inline".start()
-	end
-
-	if client and not server then
-		-- reinitialize SDL
-
-		tankbobs.t_initialize("common_interrupt", true)
 	end
 
 	c_const_init()

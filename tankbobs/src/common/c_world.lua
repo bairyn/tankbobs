@@ -526,6 +526,23 @@ function c_world_freeWorld()
 	c_world_tanks = {}
 end
 
+function c_world_setGameType(gameTypeString)
+	c_world_gameType = gameTypeString
+
+	local switch = c_world_gameType
+		if switch == "deathmatch" then
+		gameType = DEATHMATCH
+	elseif switch == "domination" then
+		gameType = DOMINATION
+	elseif switch == "capturetheflag" then
+		gameType = CAPTURETHEFLAG
+	else
+		-- default to deathmatch
+		c_world_gameType = "deathmatch"
+		gameType = DEATHMATCH
+	end
+end
+
 function c_world_testBody(ent)
 	local p = ent.p
 

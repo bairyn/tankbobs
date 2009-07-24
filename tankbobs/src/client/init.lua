@@ -24,6 +24,8 @@ Initialization (and cleanup)
 --]]
 
 function init()
+	-- execution begins here; the arguments passed are stored in the table 'args'
+
 	server = false
 	client = true
 
@@ -35,11 +37,21 @@ function init()
 	common_init()
 
 	main_init()
-	  --renderer_init()
-	  --gui_init()
 
-	  --gui_done()
-	  --renderer_done()
+	renderer_init()
+
+	gui_init()
+
+	game_init()
+
+	main_start()
+
+	game_done()
+
+	gui_done()
+
+	renderer_done()
+
 	main_done()
 
 	common_done()

@@ -44,14 +44,19 @@ function main_init()
 	common_MTF   = _G.common_MTF
 	tankbobs     = _G.tankbobs
 
-	--execution begins here; args are stored in table 'args'; ./tankbobs will generate {"./tankbobs"}
+	if client and not server then
+		-- reinitialize SDL
+
+		tankbobs.t_initialize("common_interrupt", true)
+	end
+
 	main_data = {}
 
 	if main_parseArgs(args) then
 		return
 	end
 
-	args = nil  -- protect against bad code
+	args = nil
 
 	tankbobs.a_init(c_config_get("client.audioChunkSize", nil, true))
 	tankbobs.a_setVolume(c_config_get("client.volume"))
@@ -59,21 +64,20 @@ function main_init()
 
 	tankbobs.r_newWindow(c_config_get("client.renderer.width"), c_config_get("client.renderer.height"), c_config_get("client.renderer.fullscreen"), c_const_get("title"), c_const_get("icon"))
 	renderer_setupNewWindow()
-
-	renderer_init()
-	gui_init()
-
-	c_state_new(title_state)
-
-	while not done do
-		main_loop()
-	end
 end
 
 function main_done()
 	tankbobs.a_quit()
 	gui_done()
 	renderer_done()
+end
+
+function main_start()
+	c_state_new(title_state)
+
+	while note done do
+		main_loop()
+	end
 end
 
 function main_stt(x, y)

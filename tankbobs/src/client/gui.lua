@@ -755,8 +755,10 @@ local function gui_private_inputKey(button)
 				elseif add == "7" then
 					add = "&"
 				elseif add == "8" then
-					add = "("
+					add = "*"
 				elseif add == "9" then
+					add = "("
+				elseif add == "0" then
 					add = ")"
 				elseif add == "\\" then
 					add = "|"

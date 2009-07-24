@@ -81,118 +81,22 @@ function st_online_init()
 	connection = _G.connection
 	c_world_findClosestIntersection = _G.c_world_findClosestIntersection
 
-	-- initialize renderer stuff
-	-- wall textures are initialized per level
-	local listOffset = 0
-
-	wall_listBase = gl.GenLists(c_tcm_current_map.walls_n)
-	wall_textures = gl.GenTextures(c_tcm_current_map.walls_n)
-
-	if wall_listBase == 0 then
-		error "st_play_init: could not generate lists"
-	end
-
-	for k, v in pairs(c_tcm_current_map.walls) do
-		v.m.list = wall_listBase + listOffset
-		v.m.texture = wall_textures[k]
-
-		gl.BindTexture("TEXTURE_2D", v.m.texture)
-		gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_S", "REPEAT")
-		gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_T", "REPEAT")
-		gl.TexParameter("TEXTURE_2D", "TEXTURE_MIN_FILTER", "LINEAR")
-		gl.TexParameter("TEXTURE_2D", "TEXTURE_MAG_FILTER", "LINEAR")
-		tankbobs.r_loadImage2D(c_const_get("textures_dir") .. v.texture, c_const_get("textures_default"))
-
-		-- TODO: use vertex buffers to render dynamic walls.  Dynamic walls will always be drawn as if they were in the same position
-		gl.NewList(v.m.list, "COMPILE")
-			gl.Color(1, 1, 1, 1)
-			gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, 1)
-			gl.BindTexture("TEXTURE_2D", v.m.texture)
-			gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
-
-			gl.Begin("POLYGON")
-				for i = 1, #v.p do
-					gl.TexCoord(v.t[i].x, v.t[i].y)
-					gl.Vertex(v.p[i].x, v.p[i].y)
-				end
-			gl.End()
-		gl.EndList()
-
-		listOffset = listOffset + 1
-	end
-
-	-- scores
-	local function updateScores(widget)
-		local length = 0
-
-		widget.text = ""
-
-		for k, v in pairs(c_world_getTanks()) do
-			local name = tostring(c_config_get("game.player" .. tostring(k) .. ".name"))
-
-			if #name > length then
-				length = #name
-			end
-		end
-
-		if length < 1 then
-			length = 1
-		end
-
-		for k, v in pairs(c_world_getTanks()) do
-			local name, between, score
-
-			if widget.text:len() ~= 0 then
-				widget.text = widget.text .. "\n"
-			end
-
-			name = tostring(c_config_get("game.player" .. tostring(k) .. ".name"))
-			between = string.rep("  ", length - #name + 1)
-			score = tostring(v.score)
-
-			widget.text = widget.text .. name .. between .. score
-		end
-	end
-
-	gui_addLabel(tankbobs.m_vec2(7.5, 92.5), "", updateScores, 0.5, c_config_get("client.renderer.scoresRed"), c_config_get("client.renderer.scoresGreen"), c_config_get("client.renderer.scoresBlue"), c_config_get("client.renderer.scoresAlpha"), c_config_get("client.renderer.scoresRed"), c_config_get("client.renderer.scoresGreen"), c_config_get("client.renderer.scoresGreen"), c_config_get("client.renderer.scoresAlpha"))
-
-	-- fps counter
-	local function updateFPS(widget)
-		local fps = fps
-
-		widget.text = tostring(fps - (fps % 1))
-	end
-
-	if c_config_get("client.renderer.fpsCounter") then
-		gui_addLabel(tankbobs.m_vec2(92.5, 92.5), "", updateFPS, 0.5, c_config_get("client.renderer.fpsRed"), c_config_get("client.renderer.fpsGreen"), c_config_get("client.renderer.fpsBlue"), c_config_get("client.renderer.fpsAlpha"), c_config_get("client.renderer.fpsRed"), c_config_get("client.renderer.fpsGreen"), c_config_get("client.renderer.fpsGreen"), c_config_get("client.renderer.fpsAlpha"))
-	end
-
-	-- pause
-	local function updatePause(widget)
-		if c_world_getPaused() and not endOfGame then
-			widget.text = "Paused"
-			tankbobs.in_grabClear()
-		else
-			widget.text = ""
-			if not tankbobs.in_isGrabbed() then
-				tankbobs.in_grabMouse(c_config_get("client.renderererer.width") / 2, c_config_get("client.renderererer.height") / 2)
-			end
-		end
-	end
-
-	gui_addLabel(tankbobs.m_vec2(37.5, 50), "", updatePause, nil, c_config_get("client.renderer.pauseRed"), c_config_get("client.renderer.pauseGreen"), c_config_get("client.renderer.pauseBlue"), c_config_get("client.renderer.pauseAlpha"), c_config_get("client.renderer.pauseRed"), c_config_get("client.renderer.pauseGreen"), c_config_get("client.renderer.pauseBlue"), c_config_get("client.renderer.pauseAlpha"))
+	game_new()
 
 	-- create local world
-TODO(assert(false))  -- TODO
+TODO(assert(false) or "TODO")  -- TODO
 end
 
 function st_online_done()
 	gui_finish()
 
-	if connection.state > UNCONNECTED then
+	game_done()
+
+	if connection.state > REQUESTING then
 		-- abort the connection
 		tankbobs.n_newPacket(33)
 		tankbobs.n_writeToPacket(tankbobs.io_fromChar(0x04))
+		tankbobs.n_writeToPacket(connection.ui)
 		tankbobs.n_sendPacket()
 		tankbobs.n_sendPacket()
 		tankbobs.n_sendPacket()
@@ -224,6 +128,11 @@ end
 
 function st_online_step(d)
 	gui_paint(d)
+
+	game_step(d)
+
+	-- step world relative to half-ping
+	-- TODO: change c_world_step to allow this to happen
 end
 
 online_state =
