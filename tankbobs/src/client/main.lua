@@ -68,8 +68,6 @@ end
 
 function main_done()
 	tankbobs.a_quit()
-	gui_done()
-	renderer_done()
 end
 
 function main_start()
