@@ -63,7 +63,7 @@ int t_initialize(lua_State *L)
 {
 	int extra = lua_toboolean(L, 2);
 	const char *sif;
-	static initialized = false;
+	static int initialized = false;
 
 	if(lua_isstring(L, 1))
 	{

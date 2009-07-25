@@ -75,7 +75,7 @@ end
 function main_start()
 	c_state_new(title_state)
 
-	while note done do
+	while not done do
 		main_loop()
 	end
 end
