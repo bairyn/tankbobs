@@ -46,6 +46,7 @@ local healthbarBorder_listBase
 local c_world_findClosestIntersection
 local common_lerp
 
+local trails = {}
 local camera
 local zoom
 

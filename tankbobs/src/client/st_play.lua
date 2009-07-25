@@ -56,9 +56,6 @@ local st_play_step
 
 local endOfGame
 local quitScreen
-local trails = {}
-local camera
-local zoom
 
 function st_play_init()
 	-- localize frequently used globals
