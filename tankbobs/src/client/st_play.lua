@@ -83,6 +83,8 @@ function st_play_init()
 	common_lerp = _G.common_lerp
 	game_refreshKeys = _G.game_refreshKeys
 
+	connected = false
+
 	endOfGame = false
 	quitScreen = false
 

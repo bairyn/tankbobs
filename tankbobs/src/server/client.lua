@@ -45,6 +45,7 @@ Clients receives packets beginning with 0xA0-0xAF
 	- 0xA2 is the head of a snapshot sent from the server
 	- 0xA3 is a tick offset request packet
 	- 0xA4 is the head of a disconnect packet
+	- 0xA5 is a tick offset packet
 --]]
 
 local tankbobs
@@ -140,6 +141,7 @@ local function client_disconnect(client, reason)
 	tankbobs.n_newPacket(#reason + 1)
 	tankbobs.n_writeToPacket(tankbobs.io_fromChar(0xA4))
 	tankbobs.n_writeToPacket(reason)
+	tankbobs.n_writeToPacket(tankbobs.io_fromChar(0x00))
 	sendToClient(client)
 	sendToClient(client)
 	sendToClient(client)
@@ -293,6 +295,12 @@ function client_step(d)
 
 							client.ping = t - client.lastTickSendTime
 							client.ticksOffset = ticks - t - client.ping / 2
+
+							-- send the client his ping
+							tankbobs.n_newPacket(5)
+							tankbobs.n_writeToPacket(tankbobs.io_fromChar(0xA5))
+							tankbobs.n_writeToPacket(tankbobs.io_fromInt(client.ping))
+							sendToClient(client)
 						end
 					end
 				end
@@ -321,37 +329,39 @@ function client_step(d)
 				client_disconnect(v, "timed out")
 			end
 		else
-			if v.ticksOffset and v.lastOffsetCheckTime and t >= v.lastOffsetCheckTime + c_const_get("client_ticksCheck") then
-				-- send the client a snapshot of the world
-				tankbobs.n_newPacket(1024)
-				tankbobs.n_writeToPacket(tankbobs.io_fromChar(0xA2))
-				tankbobs.n_writeToPacket(tankbobs.io_fromInt(t + v.ticksOffset))
-				-- send the client's own ID
-				tankbobs.n_writeToPacket(tankbobs.io_fromChar(k))
-				-- send the number of tanks
-				tankbobs.n_writeToPacket(tankbobs.io_fromChar(numTanks))
-				-- send the input state of the first 17 tanks
-				for i = 1, 17 do
-					local v = tanks[k]
+			if v.ping and v.ticksOffset and v.lastOffsetCheckTime and t >= v.lastOffsetCheckTime + c_const_get("client_ticksCheck") then
+				if p then
+					-- send the client a snapshot of the world
+					tankbobs.n_newPacket(1024)
+					tankbobs.n_writeToPacket(tankbobs.io_fromChar(0xA2))
+					tankbobs.n_writeToPacket(tankbobs.io_fromInt(t + v.ticksOffset))
+					-- send the client's own ID
+					tankbobs.n_writeToPacket(tankbobs.io_fromChar(k))
+					-- send the number of tanks
+					tankbobs.n_writeToPacket(tankbobs.io_fromChar(numTanks))
+					-- send the input state and health of the first 16 tanks
+					for i = 1, 16 do
+						local v = tanks[k]
 
-					if v then
-						local input = 0
+						if v and not v.connecting then
+							local input = 0
 
-						if v.tank.state.firing  then input = tankbobs.t_testOR(input, 0x01) end
-						if v.tank.state.forward then input = tankbobs.t_testOR(input, 0x02) end
-						if v.tank.state.back    then input = tankbobs.t_testOR(input, 0x04) end
-						if v.tank.state.right   then input = tankbobs.t_testOR(input, 0x08) end
-						if v.tank.state.left    then input = tankbobs.t_testOR(input, 0x10) end
-						if v.tank.state.special then input = tankbobs.t_testOR(input, 0x20) end
+							if v.tank.state.firing  then input = tankbobs.t_testOR(input, 0x01) end
+							if v.tank.state.forward then input = tankbobs.t_testOR(input, 0x02) end
+							if v.tank.state.back    then input = tankbobs.t_testOR(input, 0x04) end
+							if v.tank.state.right   then input = tankbobs.t_testOR(input, 0x08) end
+							if v.tank.state.left    then input = tankbobs.t_testOR(input, 0x10) end
+							if v.tank.state.special then input = tankbobs.t_testOR(input, 0x20) end
 
-						tankbobs.n_writeToPacket(tankbobs.io_fromChar(input))
-					else
-						tankbobs.n_writeToPacket(tankbobs.io_fromChar(0x00))
+							tankbobs.n_writeToPacket(tankbobs.io_fromChar(input))
+						else
+							tankbobs.n_writeToPacket(tankbobs.io_fromChar(0x00))
+						end
 					end
+					-- send a snapshot of the world with the 937 remaining bytes
+					tankbobs.n_writeToPacket(p)
+					sendToClient(client)
 				end
-				-- send a snapshot of the world in the 1000 remaining bytes
-				tankbobs.n_writeToPacket(tankbobs.w_persistWorld(c_weapon_getProjectiles(), c_world_getTanks(), c_world_getPowerups(), c_tcm_current_map.walls))
-				sendToClient(client)
 			else
 				client_askForTick(v)
 			end
