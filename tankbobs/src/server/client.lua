@@ -128,7 +128,7 @@ local function client_askForTick(client)
 	local t = tankbobs.t_getTicks()
 
 	if client.lastTickSendTime then
-		--return  -- still requesting the tick
+		return  -- still requesting the tick
 	end
 
 	client.lastTickSendTime = t

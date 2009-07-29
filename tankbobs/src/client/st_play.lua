@@ -59,6 +59,90 @@ local quitScreen
 
 local bit
 
+local refreshKeys = function ()
+	tankbobs.in_getKeys()
+
+	for i = 1, c_config_get("game.players") do
+		local tank = c_world_getTanks()[i]
+
+		if not tank then
+			break
+		end
+
+		if not (c_config_get("client.key.player" .. tostring(i) .. ".fire", true)) then
+			c_config_set("client.key.player" .. tostring(i) .. ".fire", false)
+		end
+		if not (c_config_get("client.key.player" .. tostring(i) .. ".forward", true)) then
+			c_config_set("client.key.player" .. tostring(i) .. ".forward", false)
+		end
+		if not (c_config_get("client.key.player" .. tostring(i) .. ".back", true)) then
+			c_config_set("client.key.player" .. tostring(i) .. ".back", false)
+		end
+		if not (c_config_get("client.key.player" .. tostring(i) .. ".right", true)) then
+			c_config_set("client.key.player" .. tostring(i) .. ".right", false)
+		end
+		if not (c_config_get("client.key.player" .. tostring(i) .. ".left", true)) then
+			c_config_set("client.key.player" .. tostring(i) .. ".left", false)
+		end
+		if not (c_config_get("client.key.player" .. tostring(i) .. ".special", true)) then
+			c_config_set("client.key.player" .. tostring(i) .. ".special", false)
+		end
+		if not (c_config_get("client.key.player" .. tostring(i) .. ".reload", true)) then
+			c_config_set("client.key.player" .. tostring(i) .. ".reload", false)
+		end
+		if not (c_config_get("client.key.player" .. tostring(i) .. ".reverse", true)) then
+			c_config_set("client.key.player" .. tostring(i) .. ".reverse", false)
+		end
+		if not (c_config_get("client.key.player" .. tostring(i) .. ".mod", true)) then
+			c_config_set("client.key.player" .. tostring(i) .. ".mod", false)
+		end
+
+		local ks = "client.key.player" .. tostring(i) .. "."
+
+		if pressed then
+			if button == c_config_get(ks .. "fire") then
+				tank.state = bit.bor(tank.state, FIRING)
+			end if button == c_config_get(ks .. "forward") then
+				tank.state = bit.bor(tank.state, FORWARD)
+			end if button == c_config_get(ks .. "back") then
+				tank.state = bit.bor(tank.state, BACK)
+			end if button == c_config_get(ks .. "left") then
+				tank.state = bit.bor(tank.state, LEFT)
+			end if button == c_config_get(ks .. "right") then
+				tank.state = bit.bor(tank.state, RIGHT)
+			end if button == c_config_get(ks .. "special") then
+				tank.state = bit.bor(tank.state, SPECIAL)
+			end if button == c_config_get(ks .. "reload") then
+				tank.state = bit.bor(tank.state, RELOAD)
+			--end if button == c_config_get(ks .. "reverse") then
+				--tank.state = bit.bor(tank.state, REVERSE)
+			end if button == c_config_get(ks .. "mod") then
+				tank.state = bit.bor(tank.state, MOD)
+			end
+		else
+			if button == c_config_get(ks .. "fire") then
+				tank.state = bit.band(tank.state, bit.bnot(FIRING))
+			end if button == c_config_get(ks ..           "forward") then
+				tank.state = bit.band(tank.state, bit.bnot(FORWARD))
+			end if button == c_config_get(ks ..           "back") then
+				tank.state = bit.band(tank.state, bit.bnot(BACK))
+			end if button == c_config_get(ks ..           "left") then
+				tank.state = bit.band(tank.state, bit.bnot(LEFT))
+			end if button == c_config_get(ks ..           "right") then
+				tank.state = bit.band(tank.state, bit.bnot(RIGHT))
+			end if button == c_config_get(ks ..           "special") then
+				tank.state = bit.band(tank.state, bit.bnot(SPECIAL))
+			end if button == c_config_get(ks ..           "reload") then
+				tank.state = bit.band(tank.state, bit.bnot(RELOAD))
+			--end if button == c_config_get(ks ..           "reverse") then
+				--tank.state = bit.band(tank.state, bit.bnot(REVERSE)
+			end if button == c_config_get(ks ..           "mod") then
+				tank.state = bit.band(tank.state, bit.bnot(MOD))
+			end
+		end
+	end
+end
+
 function st_play_init()
 	-- localize frequently used globals
 	tankbobs = _G.tankbobs
@@ -87,7 +171,7 @@ function st_play_init()
 
 	bit = c_module_load "bit"
 
-	connected = false
+	game_refreshKeys = refreshKeys
 
 	endOfGame = false
 	quitScreen = false

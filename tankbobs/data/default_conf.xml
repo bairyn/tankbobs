@@ -90,11 +90,12 @@
 			<quitBlue>  0.600 </quitBlue>
 			<quitAlpha> 1.000 </quitAlpha>
 
-			<unlagged>true</unlagged>
-
 			<width>800</width>
 		</renderer>
 		<serverIP>127.0.0.1</serverIP>
+
+		<unlagged>true</unlagged>
+
 		<volume>0.8</volume>
 	</client>
 

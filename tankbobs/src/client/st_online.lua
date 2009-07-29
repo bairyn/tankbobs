@@ -61,6 +61,95 @@ local online_readPackets
 
 local unpersistArgs = {}
 
+local refreshKeys = function()
+	tankbobs.in_getKeys()
+
+	if not connection.t or not c_world_getTanks()[connection.t] then
+		return
+	end
+
+	for i = connection.t, connection.t do
+		local tank = c_world_getTanks()[i]
+
+		if not tank then
+			break
+		end
+
+		if not (c_config_get("client.key.player" .. tostring(i) .. ".fire", true)) then
+			c_config_set("client.key.player" .. tostring(i) .. ".fire", false)
+		end
+		if not (c_config_get("client.key.player" .. tostring(i) .. ".forward", true)) then
+			c_config_set("client.key.player" .. tostring(i) .. ".forward", false)
+		end
+		if not (c_config_get("client.key.player" .. tostring(i) .. ".back", true)) then
+			c_config_set("client.key.player" .. tostring(i) .. ".back", false)
+		end
+		if not (c_config_get("client.key.player" .. tostring(i) .. ".right", true)) then
+			c_config_set("client.key.player" .. tostring(i) .. ".right", false)
+		end
+		if not (c_config_get("client.key.player" .. tostring(i) .. ".left", true)) then
+			c_config_set("client.key.player" .. tostring(i) .. ".left", false)
+		end
+		if not (c_config_get("client.key.player" .. tostring(i) .. ".special", true)) then
+			c_config_set("client.key.player" .. tostring(i) .. ".special", false)
+		end
+		if not (c_config_get("client.key.player" .. tostring(i) .. ".reload", true)) then
+			c_config_set("client.key.player" .. tostring(i) .. ".reload", false)
+		end
+		if not (c_config_get("client.key.player" .. tostring(i) .. ".reverse", true)) then
+			c_config_set("client.key.player" .. tostring(i) .. ".reverse", false)
+		end
+		if not (c_config_get("client.key.player" .. tostring(i) .. ".mod", true)) then
+			c_config_set("client.key.player" .. tostring(i) .. ".mod", false)
+		end
+
+		local ks = "client.key.player" .. tostring(i) .. "."
+
+		if pressed then
+			if button == c_config_get(ks .. "fire") then
+				tank.state = bit.bor(tank.state, FIRING)
+			end if button == c_config_get(ks .. "forward") then
+				tank.state = bit.bor(tank.state, FORWARD)
+			end if button == c_config_get(ks .. "back") then
+				tank.state = bit.bor(tank.state, BACK)
+			end if button == c_config_get(ks .. "left") then
+				tank.state = bit.bor(tank.state, LEFT)
+			end if button == c_config_get(ks .. "right") then
+				tank.state = bit.bor(tank.state, RIGHT)
+			end if button == c_config_get(ks .. "special") then
+				tank.state = bit.bor(tank.state, SPECIAL)
+			end if button == c_config_get(ks .. "reload") then
+				tank.state = bit.bor(tank.state, RELOAD)
+			--end if button == c_config_get(ks .. "reverse") then
+				--tank.state = bit.bor(tank.state, REVERSE)
+			end if button == c_config_get(ks .. "mod") then
+				tank.state = bit.bor(tank.state, MOD)
+			end
+		else
+			if button == c_config_get(ks .. "fire") then
+				tank.state = bit.band(tank.state, bit.bnot(FIRING))
+			end if button == c_config_get(ks ..           "forward") then
+				tank.state = bit.band(tank.state, bit.bnot(FORWARD))
+			end if button == c_config_get(ks ..           "back") then
+				tank.state = bit.band(tank.state, bit.bnot(BACK))
+			end if button == c_config_get(ks ..           "left") then
+				tank.state = bit.band(tank.state, bit.bnot(LEFT))
+			end if button == c_config_get(ks ..           "right") then
+				tank.state = bit.band(tank.state, bit.bnot(RIGHT))
+			end if button == c_config_get(ks ..           "special") then
+				tank.state = bit.band(tank.state, bit.bnot(SPECIAL))
+			end if button == c_config_get(ks ..           "reload") then
+				tank.state = bit.band(tank.state, bit.bnot(RELOAD))
+			--end if button == c_config_get(ks ..           "reverse") then
+				--tank.state = bit.band(tank.state, bit.bnot(REVERSE)
+			end if button == c_config_get(ks ..           "mod") then
+				tank.state = bit.band(tank.state, bit.bnot(MOD))
+			end
+		end
+	end
+end
+
+
 function st_online_init()
 	-- localize frequently used globals
 	tankbobs = _G.tankbobs
@@ -88,7 +177,7 @@ function st_online_init()
 
 	bit = c_module_load "bit"
 
-	connected = true
+	game_refreshKeys = refreshKeys
 
 	unpersistArgs = {c_weapon_getProjectiles(), c_world_getTanks(), c_world_getPowerups(), c_tcm_current_map.walls, c_tcm_current_map.controlPoints, c_tcm_current_map.flags, c_weapon_projectile.new, c_world_tank.new, c_world_powerup.new, c_weapon_projectile, c_world_tank, c_world_powerup, {c_const_get("projectile_canSleep"), c_const_get("projectile_isBullet"), c_const_get("projectile_linearDamping"), c_const_get("projectile_angularDamping"), c_weapon_getWeapons()[1]  --[[ most common hull --]], c_weapon_getWeapons()[1].projectileDensity  --[[ most common projectile hull --]], c_const_get("projectile_friction"), c_weapon_getWeapons()[1].projectileRestitution  --[[ most common restitution --]], true, c_const_get("projectile_contentsMask"), c_const_get("projectile_clipmask"), c_const_get("projectile_isSensor"), #c_weapon_getProjectiles() + 1}, c_world_spawnTank, c_world_spawnPowerup}
 
@@ -158,6 +247,7 @@ function online_readPackets(d)  -- local
 							c_world_projectiles = {}  -- TODO: better way of emptying table?
 						end
 						tankbobs.w_unpersistWorld(data, connection.t, unpack(unpersistArgs))
+print(#c_world_getTanks())  -- TODO: REMOVE!!!
 						c_world_stepTime(timestamp)
 						if c_config_get("client.unlagged") then
 							--[[
@@ -167,12 +257,14 @@ function online_readPackets(d)  -- local
 							-- otherwise, (if unlagged is disabled), only step ahead once,
 							-- so that the client sees what the server probably sees now
 							--]]
-							local tank = t_t_clone(c_world_getTanks()[connection.t])
-							c_world_step(d)
-							c_world_stepTime(timestamp + connection.offset)
-							c_world_getTanks()[connection.t] = tank
-							tankbobs.w_setPosition(tank.m.body, tank.p)
-							tankbobs.w_setAngle(tank.m.body, tank.r)
+							local tank = tankbobs.t_clone(c_world_getTanks()[connection.t])
+							if tank then
+								c_world_step(d)
+								c_world_stepTime(timestamp + connection.offset)
+								c_world_getTanks()[connection.t] = tank
+								tankbobs.w_setPosition(tank.m.body, tank.p)
+								tankbobs.w_setAngle(tank.m.body, tank.r)
+							end
 						end
 					end
 				end
@@ -246,8 +338,12 @@ function st_online_button(button, pressed)
 			end
 		end
 
+		if not connection.t or not c_world_getTanks()[connection.t] then
+			return
+		end
+
 		--for i = 1, c_config_get("game.players") do
-		for i = 1, 1 do
+		for i = connection.t, connection.t do
 			local tank = c_world_getTanks()[i]
 
 			if not tank then
@@ -336,31 +432,37 @@ function st_online_mouse(x, y, xrel, yrel)
 end
 
 local function sendInput()
+	local tank = c_world_getTanks()[connection.t]
+
+	if not tank then
+		return
+	end
+
 	tankbobs.n_newPacket(0x02)
 	tankbobs.n_writeToPacket(connection.ui)
-	tankbobs.n_writeToPacket(tankbobs.io_fromShort(c_world_getTanks()[connection.t].state))
+	tankbobs.n_writeToPacket(tankbobs.io_fromShort(tank.state))
 	tankbobs.n_sendPacket()
 end
 
 local lastITime
 function st_online_step(d)
-	gui_paint(d)
-
 	online_readPackets(d)
 
 	if not connection.ping then
 		return
 	end
 
-	if connection.t and (not lastITime or (c_config_get("server.ifps") > 0 and t - lastITime < common_FTM(c_config_get("server.ifps")))) then
+	if connection.t and (not lastITime or (c_config_get("client.ifps") > 0 and tankbobs.t_getTicks() - lastITime < common_FTM(c_config_get("client.ifps")))) then
 		-- send server input
 		lastITime = tankbobs.t_getTicks()
 		sendInput()
 	end
 
+	c_world_step(d)
+
 	game_step(d)
 
-	c_world_step(d)
+	gui_paint(d)
 end
 
 online_state =
