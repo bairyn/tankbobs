@@ -77,7 +77,6 @@ client =
 
 	tank = nil,
 	ticksOffset = nil,  -- number
-	lastOffsetCheckTime = nil,  -- number
 	ping = 0,
 	ip = "",
 	port = 0,
@@ -129,7 +128,7 @@ local function client_askForTick(client)
 	local t = tankbobs.t_getTicks()
 
 	if client.lastTickSendTime then
-		return  -- still requesting the tick
+		--return  -- still requesting the tick
 	end
 
 	client.lastTickSendTime = t
@@ -284,7 +283,7 @@ function client_step(d)
 			elseif switch == 0x03 then
 				if #data >= 36 then
 					if client then
-						if client_validate(client, data:sub(1, 32)) then
+						if client_validate(client, data:sub(1, 32)) and client.lastTickSendTime then
 							data = data:sub(33)
 
 							-- tick response
@@ -301,6 +300,8 @@ function client_step(d)
 							tankbobs.n_writeToPacket(tankbobs.io_fromInt(client.ping))
 							tankbobs.n_writeToPacket(tankbobs.io_fromInt(client.ticksOffset))
 							sendToClient(client)
+
+							client.lastTickSendTime = nil
 						end
 					end
 				end
@@ -320,7 +321,7 @@ function client_step(d)
 		end
 	until not status
 
-	-- iterate over each client
+	-- iterate through each client
 	local tanks = c_world_getTanks()
 	local numTanks = math.min(#tanks, 255)
 	for k, v in pairs(clients) do
@@ -329,17 +330,17 @@ function client_step(d)
 				client_disconnect(v, "timed out")
 			end
 		else
-			if v.ping and v.ticksOffset and v.lastOffsetCheckTime and t >= v.lastOffsetCheckTime + c_const_get("client_ticksCheck") then
+			if v.ping and v.ticksOffset and v.lastTickSendTime and t <= v.lastTickSendTime + c_const_get("client_ticksCheck") then
 				--if p then
 				if v.lastPTime ~= lastPTime then
 					v.lastPTime = lastPTime
 					-- send the client a snapshot of the world
 					tankbobs.n_newPacket(1024)
 					tankbobs.n_writeToPacket(tankbobs.io_fromChar(0xA2))
-					tankbobs.n_writeToPacket(tankbobs.io_fromInt(tankbobs.t_getTicks()))
+					tankbobs.n_writeToPacket(tankbobs.io_fromInt(tankbobs.t_getTicks() + v.ticksOffset))
 					tankbobs.n_writeToPacket(tankbobs.io_fromChar(k))
 					tankbobs.n_writeToPacket(p)
-					sendToClient(client)
+					sendToClient(v)
 				end
 			else
 				client_askForTick(v)

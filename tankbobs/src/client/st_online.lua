@@ -154,11 +154,11 @@ function online_readPackets(d)  -- local
 					if connection.ping then
 						connection.t = tankbobs.io_toChar(data:sub(1, 1)) data = data:sub(2)
 						local timestamp = tankbobs.io_toInt(data:sub(1, 4)) data = data:sub(5)
-						if not common_empty(c_world_projectiles) then
+						if not common_empty(c_weapon_getProjectiles()) then
 							c_world_projectiles = {}  -- TODO: better way of emptying table?
 						end
 						tankbobs.w_unpersistWorld(data, connection.t, unpack(unpersistArgs))
-						c_world_stepTime(timestamp + connection.offset)
+						c_world_stepTime(timestamp)
 						if c_config_get("client.unlagged") then
 							--[[
 							-- step ahead twice for everything but current tank,
@@ -170,7 +170,7 @@ function online_readPackets(d)  -- local
 							local tank = t_t_clone(c_world_getTanks()[connection.t])
 							c_world_step(d)
 							c_world_stepTime(timestamp + connection.offset)
-							c_world_getTanks()[t] = tank
+							c_world_getTanks()[connection.t] = tank
 							tankbobs.w_setPosition(tank.m.body, tank.p)
 							tankbobs.w_setAngle(tank.m.body, tank.r)
 						end
@@ -354,11 +354,9 @@ function st_online_step(d)
 
 	if connection.t and (not lastITime or (c_config_get("server.ifps") > 0 and t - lastITime < common_FTM(c_config_get("server.ifps")))) then
 		-- send server input
-		lastITime = t
+		lastITime = tankbobs.t_getTicks()
 		sendInput()
 	end
-
-print"GOOD"
 
 	game_step(d)
 
