@@ -46,6 +46,8 @@ local healthbarBorder_listBase
 local c_world_findClosestIntersection
 local connection
 
+local bit
+
 local st_online_init
 local st_online_done
 local st_online_click
@@ -56,6 +58,8 @@ local st_online_step
 local st_online_serverIP
 local st_online_start
 local online_readPackets
+
+local unpersistArgs = {}
 
 function st_online_init()
 	-- localize frequently used globals
@@ -82,7 +86,11 @@ function st_online_init()
 	connection = _G.connection
 	c_world_findClosestIntersection = _G.c_world_findClosestIntersection
 
+	bit = c_module_load "bit"
+
 	connected = true
+
+	unpersistArgs = {c_weapon_getProjectiles(), c_world_getTanks(), c_world_getPowerups(), c_tcm_current_map.walls, c_tcm_current_map.controlPoints, c_tcm_current_map.flags, c_weapon_projectile.new, c_world_tank.new, c_world_powerup.new, c_weapon_projectile, c_world_tank, c_world_powerup, {c_const_get("projectile_canSleep"), c_const_get("projectile_isBullet"), c_const_get("projectile_linearDamping"), c_const_get("projectile_angularDamping"), c_weapon_getWeapons()[1]  --[[ most common hull --]], c_weapon_getWeapons()[1].projectileDensity  --[[ most common projectile hull --]], c_const_get("projectile_friction"), c_weapon_getWeapons()[1].projectileRestitution  --[[ most common restitution --]], true, c_const_get("projectile_contentsMask"), c_const_get("projectile_clipmask"), c_const_get("projectile_isSensor"), #c_weapon_getProjectiles() + 1}, c_world_spawnTank, c_world_spawnPowerup}
 
 	game_new()
 
@@ -133,22 +141,39 @@ function st_online_done()
 	end
 end
 
-function online_readPackets()  -- local
+function online_readPackets(d)  -- local
 	local status, ip, port, data
 	repeat
 		status, ip, port, data = tankbobs.n_readPacket()
-		local client = client_getByIP(ip)
 
 		if status then
 			local switch = string.byte(data, 1) data = data:sub(2)
 			if switch == nil then
 			elseif switch == 0xA2 then
-				if #data >= 1024 - 937 then
+				if #data >= 5 then
 					if connection.ping then
-						-- snapshot received from server
-						-- TODO
-						--
-						-- unpersist and step world relative to half-ping (XXX REMINDER: remove all local projectiles before unpersisting
+						local t = tankbobs.io_toChar(data:sub(1, 1)) data = data:sub(2)
+						local timestamp = tankbobs.io_toInt(data:sub(1, 4)) data = data:sub(5)
+						if not common_empty(c_world_projectiles) then
+							c_world_projectiles = {}  -- TODO: better way of emptying table?
+						end
+						tankbobs.w_unpersistWorld(data, t, unpack(unpersistArgs))
+						c_world_stepTime(timestamp + connection.offset)
+						if c_config_get("client.unlagged") then
+							--[[
+							-- step ahead twice for everything but current tank,
+							-- so that the client sees what the server will probably see
+							-- when the server receives information about the client;
+							-- otherwise, (if unlagged is disabled), only step ahead once,
+							-- so that the client sees what the server probably sees now
+							--]]
+							local tank = t_t_clone(c_world_getTanks()[t])
+							c_world_step(d)
+							c_world_stepTime(timestamp + connection.offset)
+							c_world_getTanks()[t] = tank
+							tankbobs.w_setPosition(tank.m.body, tank.p)
+							tankbobs.w_setAngle(tank.m.body, tank.r)
+						end
 					end
 				end
 			elseif switch == 0xA3 then
@@ -167,10 +192,12 @@ function online_readPackets()  -- local
 
 					gui_addLabel(tankbobs.m_vec2(20, 55), "You were disconnected from the server", nil, 2 / 3)
 					gui_addLabel(tankbobs.m_vec2(20, 30), "Reason: " .. reason, nil, 1 / 3)
+				end
 			elseif switch == 0xA5 then
 				if #data >= 4 then
-					-- server sent us our ping
-					connection.ping = tankbobs.io_toInt(data:sub(1, 4)) data = data:sub(5)
+					-- server sent us our ping and tick offset
+					connection.ping   = tankbobs.io_toInt(data:sub(1, 4)) data = data:sub(5)
+					connection.offset = tankbobs.io_toInt(data:sub(1, 4)) data = data:sub(5)
 				end
 			end
 		end
@@ -191,7 +218,7 @@ local function continue()
 		quitScreen = false
 	end
 end
-function st_play_button(button, pressed)
+function st_online_button(button, pressed)
 	if not gui_button(button, pressed) then
 		if pressed then
 			if button == 0x0D and endOfGame then
@@ -219,10 +246,14 @@ function st_play_button(button, pressed)
 			end
 		end
 
-		local c_world_tanks = c_world_getTanks()
-
 		--for i = 1, c_config_get("game.players") do
 		for i = 1, 1 do
+			local tank = c_world_getTanks()[i]
+
+			if not tank then
+				break
+			end
+
 			if not (c_config_get("client.key.player" .. tostring(i) .. ".fire", true)) then
 				c_config_set("client.key.player" .. tostring(i) .. ".fire", false)
 			end
@@ -251,32 +282,48 @@ function st_play_button(button, pressed)
 				c_config_set("client.key.player" .. tostring(i) .. ".mod", false)
 			end
 
-			if button == c_config_get("client.key.player" .. tostring(i) .. ".fire") then
-				c_world_tanks[i].state.firing = pressed
-			end
-			if button == c_config_get("client.key.player" .. tostring(i) .. ".forward") then
-				c_world_tanks[i].state.forward = pressed
-			end
-			if button == c_config_get("client.key.player" .. tostring(i) .. ".back") then
-				c_world_tanks[i].state.back = pressed
-			end
-			if button == c_config_get("client.key.player" .. tostring(i) .. ".left") then
-				c_world_tanks[i].state.left = pressed
-			end
-			if button == c_config_get("client.key.player" .. tostring(i) .. ".right") then
-				c_world_tanks[i].state.right = pressed
-			end
-			if button == c_config_get("client.key.player" .. tostring(i) .. ".special") then
-				c_world_tanks[i].state.special = pressed
-			end
-			if button == c_config_get("client.key.player" .. tostring(i) .. ".reload") then
-				c_world_tanks[i].state.reload = pressed
-			end
-			--if button == c_config_get("client.key.player" .. tostring(i) .. ".reverse") then
-				--c_world_tanks[i].state.reverse = reverse
-			--end
-			if button == c_config_get("client.key.player" .. tostring(i) .. ".mod") then
-				c_world_tanks[i].state.mod = pressed
+			local ks = "client.key.player" .. tostring(i) .. "."
+
+			if pressed then
+				if button == c_config_get(ks .. "fire") then
+					tank.state = bit.bor(tank.state, FIRING)
+				end if button == c_config_get(ks .. "forward") then
+					tank.state = bit.bor(tank.state, FORWARD)
+				end if button == c_config_get(ks .. "back") then
+					tank.state = bit.bor(tank.state, BACK)
+				end if button == c_config_get(ks .. "left") then
+					tank.state = bit.bor(tank.state, LEFT)
+				end if button == c_config_get(ks .. "right") then
+					tank.state = bit.bor(tank.state, RIGHT)
+				end if button == c_config_get(ks .. "special") then
+					tank.state = bit.bor(tank.state, SPECIAL)
+				end if button == c_config_get(ks .. "reload") then
+					tank.state = bit.bor(tank.state, RELOAD)
+				--end if button == c_config_get(ks .. "reverse") then
+					--tank.state = bit.bor(tank.state, REVERSE)
+				end if button == c_config_get(ks .. "mod") then
+					tank.state = bit.bor(tank.state, MOD)
+				end
+			else
+				if button == c_config_get(ks .. "fire") then
+					tank.state = bit.band(tank.state, bit.bnot(FIRING))
+				end if button == c_config_get(ks ..           "forward") then
+					tank.state = bit.band(tank.state, bit.bnot(FORWARD))
+				end if button == c_config_get(ks ..           "back") then
+					tank.state = bit.band(tank.state, bit.bnot(BACK))
+				end if button == c_config_get(ks ..           "left") then
+					tank.state = bit.band(tank.state, bit.bnot(LEFT))
+				end if button == c_config_get(ks ..           "right") then
+					tank.state = bit.band(tank.state, bit.bnot(RIGHT))
+				end if button == c_config_get(ks ..           "special") then
+					tank.state = bit.band(tank.state, bit.bnot(SPECIAL))
+				end if button == c_config_get(ks ..           "reload") then
+					tank.state = bit.band(tank.state, bit.bnot(RELOAD))
+				--end if button == c_config_get(ks ..           "reverse") then
+					--tank.state = bit.band(tank.state, bit.bnot(REVERSE)
+				end if button == c_config_get(ks ..           "mod") then
+					tank.state = bit.band(tank.state, bit.bnot(MOD))
+				end
 			end
 		end
 	end
@@ -291,7 +338,7 @@ end
 function st_online_step(d)
 	gui_paint(d)
 
-	online_readPackets()
+	online_readPackets(d)
 
 	if not connection.ping then
 		return
@@ -300,8 +347,6 @@ function st_online_step(d)
 	game_step(d)
 
 	c_world_step(d)
-	-- step world relative to half-ping
-	-- TODO: change c_world_step to allow this to happen
 end
 
 online_state =

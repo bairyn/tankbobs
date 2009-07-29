@@ -33,14 +33,14 @@ local st_internet_step
 local st_internet_serverIP
 local st_internet_start
 
-local UNITIIALIZED = 0
-local UNCONNECTED  = 1
-local REQUESTING   = 2  -- client sent initial packet
-local RESPONDED    = 3  -- server responded to connection packet
-local CONNECTED    = 4  -- connected to server
+local UNINITIALIZED = 0
+local UNCONNECTED   = 1
+local REQUESTING    = 2  -- client sent initial packet
+local RESPONDED     = 3  -- server responded to connection packet
+local CONNECTED     = 4  -- connected to server
 
 function st_internet_init()
-	connection = {state = UNCONNECTED, proceeding = false, lastRequestTime, challenge = 0, address = c_config_get("client.serverIP"), ip = "", port = nil, ui = "", ping = nil}
+	connection = {state = UNCONNECTED, proceeding = false, lastRequestTime, challenge = 0, address = c_config_get("client.serverIP"), ip = "", port = nil, ui = "", ping = nil, offset = nil, gameType = nil}
 
 	if connection.address:find(":") then
 		connection.port = tonumber(connection.address:sub(connection.address:find(":") + 1))
@@ -175,6 +175,9 @@ function st_internet_step(d)
 
 					c_tcm_select_set(set)
 					c_tcm_select_map(map)
+
+					local gameType = data:sub(1, data:find(tankbobs.io_fromChar(0x00)) - 1) data = data:sub(data:find(tankbobs.io_fromChar(0x00)) + 1)
+					c_world_setGameType(gameType)
 
 					-- send the server the challenge response
 					tankbobs.n_newPacket(37)

@@ -57,6 +57,8 @@ local st_play_step
 local endOfGame
 local quitScreen
 
+local bit
+
 function st_play_init()
 	-- localize frequently used globals
 	tankbobs = _G.tankbobs
@@ -82,6 +84,8 @@ function st_play_init()
 	c_world_findClosestIntersection = _G.c_world_findClosestIntersection
 	common_lerp = _G.common_lerp
 	game_refreshKeys = _G.game_refreshKeys
+
+	bit = c_module_load "bit"
 
 	connected = false
 
@@ -204,9 +208,13 @@ function st_play_button(button, pressed)
 			end
 		end
 
-		local c_world_tanks = c_world_getTanks()
-
 		for i = 1, c_config_get("game.players") do
+			local tank = c_world_getTanks()[i]
+
+			if not tank then
+				break
+			end
+
 			if not (c_config_get("client.key.player" .. tostring(i) .. ".fire", true)) then
 				c_config_set("client.key.player" .. tostring(i) .. ".fire", false)
 			end
@@ -235,32 +243,48 @@ function st_play_button(button, pressed)
 				c_config_set("client.key.player" .. tostring(i) .. ".mod", false)
 			end
 
-			if button == c_config_get("client.key.player" .. tostring(i) .. ".fire") then
-				c_world_tanks[i].state.firing = pressed
-			end
-			if button == c_config_get("client.key.player" .. tostring(i) .. ".forward") then
-				c_world_tanks[i].state.forward = pressed
-			end
-			if button == c_config_get("client.key.player" .. tostring(i) .. ".back") then
-				c_world_tanks[i].state.back = pressed
-			end
-			if button == c_config_get("client.key.player" .. tostring(i) .. ".left") then
-				c_world_tanks[i].state.left = pressed
-			end
-			if button == c_config_get("client.key.player" .. tostring(i) .. ".right") then
-				c_world_tanks[i].state.right = pressed
-			end
-			if button == c_config_get("client.key.player" .. tostring(i) .. ".special") then
-				c_world_tanks[i].state.special = pressed
-			end
-			if button == c_config_get("client.key.player" .. tostring(i) .. ".reload") then
-				c_world_tanks[i].state.reload = pressed
-			end
-			--if button == c_config_get("client.key.player" .. tostring(i) .. ".reverse") then
-				--c_world_tanks[i].state.reverse = reverse
-			--end
-			if button == c_config_get("client.key.player" .. tostring(i) .. ".mod") then
-				c_world_tanks[i].state.mod = pressed
+			local ks = "client.key.player" .. tostring(i) .. "."
+
+			if pressed then
+				if button == c_config_get(ks .. "fire") then
+					tank.state = bit.bor(tank.state, FIRING)
+				end if button == c_config_get(ks .. "forward") then
+					tank.state = bit.bor(tank.state, FORWARD)
+				end if button == c_config_get(ks .. "back") then
+					tank.state = bit.bor(tank.state, BACK)
+				end if button == c_config_get(ks .. "left") then
+					tank.state = bit.bor(tank.state, LEFT)
+				end if button == c_config_get(ks .. "right") then
+					tank.state = bit.bor(tank.state, RIGHT)
+				end if button == c_config_get(ks .. "special") then
+					tank.state = bit.bor(tank.state, SPECIAL)
+				end if button == c_config_get(ks .. "reload") then
+					tank.state = bit.bor(tank.state, RELOAD)
+				--end if button == c_config_get(ks .. "reverse") then
+					--tank.state = bit.bor(tank.state, REVERSE)
+				end if button == c_config_get(ks .. "mod") then
+					tank.state = bit.bor(tank.state, MOD)
+				end
+			else
+				if button == c_config_get(ks .. "fire") then
+					tank.state = bit.band(tank.state, bit.bnot(FIRING))
+				end if button == c_config_get(ks ..           "forward") then
+					tank.state = bit.band(tank.state, bit.bnot(FORWARD))
+				end if button == c_config_get(ks ..           "back") then
+					tank.state = bit.band(tank.state, bit.bnot(BACK))
+				end if button == c_config_get(ks ..           "left") then
+					tank.state = bit.band(tank.state, bit.bnot(LEFT))
+				end if button == c_config_get(ks ..           "right") then
+					tank.state = bit.band(tank.state, bit.bnot(RIGHT))
+				end if button == c_config_get(ks ..           "special") then
+					tank.state = bit.band(tank.state, bit.bnot(SPECIAL))
+				end if button == c_config_get(ks ..           "reload") then
+					tank.state = bit.band(tank.state, bit.bnot(RELOAD))
+				--end if button == c_config_get(ks ..           "reverse") then
+					--tank.state = bit.band(tank.state, bit.bnot(REVERSE)
+				end if button == c_config_get(ks ..           "mod") then
+					tank.state = bit.band(tank.state, bit.bnot(MOD))
+				end
 			end
 		end
 	end
@@ -279,7 +303,7 @@ local function play_testEnd()
 	end
 
 	local switch = c_world_gameType
-	if switch == "deathmatch" then
+	if switch == DEATHMATCH then
 		local fragLimit = c_config_get("game.fragLimit")
 
 		if fragLimit > 0 then
@@ -298,7 +322,7 @@ local function play_testEnd()
 				end
 			end
 		end
-	elseif switch == "domination" then
+	elseif switch == DOMINATION then
 		local pointLimit = c_config_get("game.pointLimit")
 
 		if pointLimit > 0 then
@@ -328,7 +352,7 @@ local function play_testEnd()
 				endOfGame = true
 			end
 		end
-	elseif switch == "capturetheflag" then
+	elseif switch == CAPTURETHEFLAG then
 		local captureLimit = c_config_get("game.captureLimit")
 
 		if captureLimit > 0 then

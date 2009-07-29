@@ -46,6 +46,8 @@ local healthbarBorder_listBase
 local c_world_findClosestIntersection
 local common_lerp
 
+local bit
+
 local trails = {}
 local camera
 local zoom
@@ -74,6 +76,8 @@ function game_init()
 	healthbarBorder_listBase = _G.healthbarBorder_listBase
 	c_world_findClosestIntersection = _G.c_world_findClosestIntersection
 	common_lerp = _G.common_lerp
+
+	bit = c_module_load "bit"
 end
 
 function game_done()
@@ -101,7 +105,7 @@ function game_new()
 
 	-- scores
 	local function updateScores(widget)
-		if c_world_gameType == "deathmatch" then
+		if c_world_gameType == DEATHMATCH then
 			-- non-team scores
 
 			local length = 0
@@ -191,7 +195,9 @@ function game_refreshKeys()
 	tankbobs.in_getKeys()
 
 	for i = 1, c_config_get("game.players") do
-		if not c_world_getTanks()[i] then
+		local tank = c_world_getTanks()[i]
+
+		if not tank then
 			break
 		end
 
@@ -223,32 +229,48 @@ function game_refreshKeys()
 			c_config_set("client.key.player" .. tostring(i) .. ".mod", false)
 		end
 
-		if c_config_get("client.key.player" .. tostring(i) .. ".fire") ~= 303 and c_config_get("client.key.player" .. tostring(i) .. ".fire") ~= 304 then
-			c_world_getTanks()[i].state.firing = tankbobs.in_keyPressed(c_config_keyLayoutGet(c_config_get("client.key.player" .. tostring(i) .. ".fire")))
-		end
-		if c_config_get("client.key.player" .. tostring(i) .. ".forward") ~= 303 and c_config_get("client.key.player" .. tostring(i) .. ".forward") ~= 304 then
-			c_world_getTanks()[i].state.forward = tankbobs.in_keyPressed(c_config_keyLayoutGet(c_config_get("client.key.player" .. tostring(i) .. ".forward")))
-		end
-		if c_config_get("client.key.player" .. tostring(i) .. ".back") ~= 303 and c_config_get("client.key.player" .. tostring(i) .. ".back") ~= 304 then
-			c_world_getTanks()[i].state.back = tankbobs.in_keyPressed(c_config_keyLayoutGet(c_config_get("client.key.player" .. tostring(i) .. ".back")))
-		end
-		if c_config_get("client.key.player" .. tostring(i) .. ".left") ~= 303 and c_config_get("client.key.player" .. tostring(i) .. ".left") ~= 304 then
-			c_world_getTanks()[i].state.left = tankbobs.in_keyPressed(c_config_keyLayoutGet(c_config_get("client.key.player" .. tostring(i) .. ".left")))
-		end
-		if c_config_get("client.key.player" .. tostring(i) .. ".right") ~= 303 and c_config_get("client.key.player" .. tostring(i) .. ".right") ~= 304 then
-			c_world_getTanks()[i].state.right = tankbobs.in_keyPressed(c_config_keyLayoutGet(c_config_get("client.key.player" .. tostring(i) .. ".right")))
-		end
-		if c_config_get("client.key.player" .. tostring(i) .. ".special") ~= 303 and c_config_get("client.key.player" .. tostring(i) .. ".special") ~= 304 then
-			c_world_getTanks()[i].state.special = tankbobs.in_keyPressed(c_config_keyLayoutGet(c_config_get("client.key.player" .. tostring(i) .. ".special")))
-		end
-		if c_config_get("client.key.player" .. tostring(i) .. ".reload") ~= 303 and c_config_get("client.key.player" .. tostring(i) .. ".reload") ~= 304 then
-			c_world_getTanks()[i].state.reload = tankbobs.in_keyPressed(c_config_keyLayoutGet(c_config_get("client.key.player" .. tostring(i) .. ".reload")))
-		end
-		--if b_config_get("client.key.player" .. tostring(i) .. ".reverse") ~= 303 and _config_get("client.key.player" .. tostring(i) .. ".reverse") ~= 304 then
-			--c_world_getTanks()[i].state.reverse = tankbobs.in_keyPressed(c_config_keyLayoutGet(c_config_get("client.key.player" .. tostring(i) .. ".reverse")))
-		--end
-		if c_config_get("client.key.player" .. tostring(i) .. ".reload") ~= 303 and c_config_get("client.key.player" .. tostring(i) .. ".reload") ~= 304 then
-			c_world_getTanks()[i].state.mod = tankbobs.in_keyPressed(c_config_keyLayoutGet(c_config_get("client.key.player" .. tostring(i) .. ".mod")))
+		local ks = "client.key.player" .. tostring(i) .. "."
+
+		if pressed then
+			if button == c_config_get(ks .. "fire") then
+				tank.state = bit.bor(tank.state, FIRING)
+			end if button == c_config_get(ks .. "forward") then
+				tank.state = bit.bor(tank.state, FORWARD)
+			end if button == c_config_get(ks .. "back") then
+				tank.state = bit.bor(tank.state, BACK)
+			end if button == c_config_get(ks .. "left") then
+				tank.state = bit.bor(tank.state, LEFT)
+			end if button == c_config_get(ks .. "right") then
+				tank.state = bit.bor(tank.state, RIGHT)
+			end if button == c_config_get(ks .. "special") then
+				tank.state = bit.bor(tank.state, SPECIAL)
+			end if button == c_config_get(ks .. "reload") then
+				tank.state = bit.bor(tank.state, RELOAD)
+			--end if button == c_config_get(ks .. "reverse") then
+				--tank.state = bit.bor(tank.state, REVERSE)
+			end if button == c_config_get(ks .. "mod") then
+				tank.state = bit.bor(tank.state, MOD)
+			end
+		else
+			if button == c_config_get(ks .. "fire") then
+				tank.state = bit.band(tank.state, bit.bnot(FIRING))
+			end if button == c_config_get(ks ..           "forward") then
+				tank.state = bit.band(tank.state, bit.bnot(FORWARD))
+			end if button == c_config_get(ks ..           "back") then
+				tank.state = bit.band(tank.state, bit.bnot(BACK))
+			end if button == c_config_get(ks ..           "left") then
+				tank.state = bit.band(tank.state, bit.bnot(LEFT))
+			end if button == c_config_get(ks ..           "right") then
+				tank.state = bit.band(tank.state, bit.bnot(RIGHT))
+			end if button == c_config_get(ks ..           "special") then
+				tank.state = bit.band(tank.state, bit.bnot(SPECIAL))
+			end if button == c_config_get(ks ..           "reload") then
+				tank.state = bit.band(tank.state, bit.bnot(RELOAD))
+			--end if button == c_config_get(ks ..           "reverse") then
+				--tank.state = bit.band(tank.state, bit.bnot(REVERSE)
+			end if button == c_config_get(ks ..           "mod") then
+				tank.state = bit.band(tank.state, bit.bnot(MOD))
+			end
 		end
 	end
 end
@@ -277,7 +299,7 @@ local function game_drawWorld(d)
 										c_config_set("game.player" .. tostring(k) .. ".color.a", c_config_get("game.defaultTankAlpha"))
 									end
 									local r, g, b, a = v.color.r, v.color.g, v.color.b, 1
-									if c_world_gameType ~= "deathmatch" then
+									if c_world_gameType ~= DEATHMATCH then
 										-- team colors
 										local color = c_const_get(v.red and "color_red" or "color_blue")
 										r, g, b, a = color[1], color[2], color[3], color[4]
@@ -307,14 +329,14 @@ local function game_drawWorld(d)
 									gl.CallList(tankShield_listBase)
 
 									if v.weapon and not v.reloading then
-										gl.CallList(v.weapon.m.p.list)
+										gl.CallList(c_weapon_getWeapons()[v.weapon].m.p.list)
 									end
 								gl.PopMatrix()
 							gl.PopAttrib()
 
 							-- aiming aids
 							gl.EnableClientState("VERTEX_ARRAY")
-							if (v.weapon and v.weapon.aimAid and not v.reloading) or (v.cd.aimAid) then
+							if (v.weapon and c_weapon_getWeapons()[v.weapon].aimAid and not v.reloading) or (v.cd.aimAid) then
 								gl.PushAttrib("ENABLE_BIT")
 									local b
 									local vec = tankbobs.m_vec2()
@@ -362,7 +384,7 @@ local function game_drawWorld(d)
 									c_config_set("game.player" .. tostring(k) .. ".color.a", c_config_get("game.defaultTankAlpha"))
 								end
 
-								if v.weapon and v.weapon.capacity > 0 then
+								if v.weapon and c_weapon_getWeapons()[v.weapon].capacity > 0 then
 									gl.Color(1, 1, 1, 1)
 									gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, 1)
 									gl.CallList(ammobarBorder_listBase)
@@ -378,7 +400,7 @@ local function game_drawWorld(d)
 
 											gl.EnableClientState("VERTEX_ARRAY")
 												local ammo = v.ammo
-												local capacity = v.weapon.capacity
+												local capacity = c_weapon_getWeapons()[v.weapon].capacity
 												local spacing = 0.1 * (3 / capacity)
 
 												local x = 0
@@ -550,7 +572,7 @@ local function game_drawWorld(d)
 					if v.m.dropped then
 						gl.Translate(v.m.pos.x, v.m.pos.y, 0)
 					elseif v.m.stolen then
-						gl.Translate(v.m.stolen.p.x, v.m.stolen.p.y, 0)
+						gl.Translate(c_world_getTanks()[v.m.stolen].p.x, c_world_getTanks()[v.m.stolen].p.y, 0)
 					else
 						gl.Translate(v.p.x, v.p.y, 0)
 					end
@@ -573,22 +595,22 @@ local function game_drawWorld(d)
 
 		-- melee weapons
 		for _, v in pairs(c_world_getTanks()) do
-			if v.state.firing and v.weapon and v.weapon.meleeRange ~= 0 and not v.reloading then
+			if bit.band(v.state, FIRING) ~= 0 and v.weapon and c_weapon_getWeapons()[v.weapon].meleeRange ~= 0 and not v.reloading then
 				gl.PushMatrix()
 					gl.Translate(v.p.x, v.p.y, 0)
 					gl.Rotate(tankbobs.m_degrees(v.r - c_const_get("tank_defaultRotation")), 0, 0, 1)
-					gl.CallList(v.weapon.m.p.projectileList)
+					gl.CallList(c_weapon_getWeapons()[v.weapon].m.p.projectileList)
 				gl.PopMatrix()
 			end
 		end
 
 		-- projectiles
 		for _, v in pairs(c_weapon_getProjectiles()) do
-			if v.weapon.trail == 0 and v.weapon.trailWidth == 0 then  -- only draw the trail
+			if c_weapon_getWeapons()[v.weapon].trail == 0 and c_weapon_getWeapons()[v.weapon].trailWidth == 0 then  -- only draw the trail
 				gl.PushMatrix()
 					gl.Translate(v.p.x, v.p.y, 0)
 					gl.Rotate(tankbobs.m_degrees(v.r), 0, 0, 1)
-					gl.CallList(v.weapon.m.p.projectileList)
+					gl.CallList(c_weapon_getWeapons()[v.weapon].m.p.projectileList)
 				gl.PopMatrix()
 			end
 		end
@@ -715,27 +737,27 @@ function game_step(d)
 	for _, v in pairs(c_world_getTanks()) do
 		if v.exists then
 			-- handle melee sounds specially
-			if v.weapon and v.weapon.meleeRange ~= 0 and not v.reloading then
-				if v.state.firing then
-					v.weapon.m.used = true
+			if v.weapon and c_weapon_getWeapons()[v.weapon].meleeRange ~= 0 and not v.reloading then
+				if bit.band(v.state, FIRING) ~= 0 then
+					c_weapon_getWeapons()[v.weapon].m.used = true
 				end
 			end
 
-			if v.weapon and v.state.firing then
+			if v.weapon and bit.band(v.state, FIRING) ~= 0 then
 				if v.m.lastFireTime ~= v.lastFireTime then
 					v.m.lastFireTime = v.lastFireTime
 
-					if v.weapon.meleeRange ~= 0 then
+					if c_weapon_getWeapons()[v.weapon].meleeRange ~= 0 then
 					elseif v.m.empty then
 						tankbobs.a_playSound(c_const_get("emptyTrigger_sound"))
 					elseif v.weapon and v.m.fired then
-						if type(v.weapon.fireSound) == "table" then
-							tankbobs.a_playSound(c_const_get("weaponAudio_dir") .. v.weapon.fireSound[math.random(1, #v.weapon.fireSound)])
-						elseif type(v.weapon.fireSound) == "string" then
-							tankbobs.a_playSound(c_const_get("weaponAudio_dir") .. v.weapon.fireSound)
+						if type(c_weapon_getWeapons()[v.weapon].fireSound) == "table" then
+							tankbobs.a_playSound(c_const_get("weaponAudio_dir") .. c_weapon_getWeapons()[v.weapon].fireSound[math.random(1, #c_weapon_getWeapons()[v.weapon].fireSound)])
+						elseif type(c_weapon_getWeapons()[v.weapon].fireSound) == "string" then
+							tankbobs.a_playSound(c_const_get("weaponAudio_dir") .. c_weapon_getWeapons()[v.weapon].fireSound)
 						end
 
-						if v.weapon.trail ~= 0 and v.weapon.trailWidth ~= 0 then
+						if c_weapon_getWeapons()[v.weapon].trail ~= 0 and c_weapon_getWeapons()[v.weapon].trailWidth ~= 0 then
 							-- calculate the beginning and end point before the insert
 							local start, endP = tankbobs.m_vec2(v.p), tankbobs.m_vec2()
 							local vec = tankbobs.m_vec2()
@@ -760,9 +782,9 @@ function game_step(d)
 								local tmp = tankbobs.m_vec2()
 
 								offset.t = -1 / (endP - start).t
-								offset.R = v.weapon.trailWidth
+								offset.R = c_weapon_getWeapons()[v.weapon].trailWidth
 
-								gl.BindTexture("TEXTURE_2D", v.weapon.m.p.projectileTexture[1])
+								gl.BindTexture("TEXTURE_2D", c_weapon_getWeapons()[v.weapon].m.p.projectileTexture[1])
 								gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
 								gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_S", "REPEAT")
 								gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_T", "REPEAT")
@@ -770,33 +792,33 @@ function game_step(d)
 								gl.Begin("QUADS")
 									local length = (endP - start).R
 
-									tmp(v.weapon.projectileTexturer[1])
-									tmp.R = tmp.R * length / v.weapon.projectileRender[1].R
+									tmp(c_weapon_getWeapons()[v.weapon].projectileTexturer[1])
+									tmp.R = tmp.R * length / c_weapon_getWeapons()[v.weapon].projectileRender[1].R
 									gl.TexCoord(tmp.x, tmp.y)
 									tmp = start + offset
 									gl.Vertex(tmp.x, tmp.y)
 
-									tmp(v.weapon.projectileTexturer[2])
-									tmp.R = tmp.R * length / v.weapon.projectileRender[2].R
+									tmp(c_weapon_getWeapons()[v.weapon].projectileTexturer[2])
+									tmp.R = tmp.R * length / c_weapon_getWeapons()[v.weapon].projectileRender[2].R
 									gl.TexCoord(tmp.x, tmp.y)
 									tmp = start - offset
 									gl.Vertex(tmp.x, tmp.y)
 
-									tmp(v.weapon.projectileTexturer[3])
-									tmp.R = tmp.R * length / v.weapon.projectileRender[3].R
+									tmp(c_weapon_getWeapons()[v.weapon].projectileTexturer[3])
+									tmp.R = tmp.R * length / c_weapon_getWeapons()[v.weapon].projectileRender[3].R
 									gl.TexCoord(tmp.x, tmp.y)
 									tmp = endP - offset
 									gl.Vertex(tmp.x, tmp.y)
 
-									tmp(v.weapon.projectileTexturer[4])
-									tmp.R = tmp.R * length / v.weapon.projectileRender[4].R
+									tmp(c_weapon_getWeapons()[v.weapon].projectileTexturer[4])
+									tmp.R = tmp.R * length / c_weapon_getWeapons()[v.weapon].projectileRender[4].R
 									gl.TexCoord(tmp.x, tmp.y)
 									tmp = endP + offset
 									gl.Vertex(tmp.x, tmp.y)
 								gl.End()
 							gl.EndList()
 
-							table.insert(trails, {v.weapon.trail, v.weapon.trail, list})
+							table.insert(trails, {c_weapon_getWeapons()[v.weapon].trail, c_weapon_getWeapons()[v.weapon].trail, list})
 						end
 					end
 				end
@@ -805,19 +827,19 @@ function game_step(d)
 			if v.weapon and v.reloading and v.m.lastReloadTime ~= v.reloading then
 				v.m.lastReloadTime = v.reloading
 
-				if v.weapon.shotgunClips then
+				if c_weapon_getWeapons()[v.weapon].shotgunClips then
 					if v.shotgunReloadState == 0 then
-						tankbobs.a_playSound(c_const_get("weaponAudio_dir") .. v.weapon.reloadSound.initial)
+						tankbobs.a_playSound(c_const_get("weaponAudio_dir") .. c_weapon_getWeapons()[v.weapon].reloadSound.initial)
 					elseif v.shotgunReloadState == 1 then
-						tankbobs.a_playSound(c_const_get("weaponAudio_dir") .. v.weapon.reloadSound.clip)
+						tankbobs.a_playSound(c_const_get("weaponAudio_dir") .. c_weapon_getWeapons()[v.weapon].reloadSound.clip)
 					elseif v.shotgunReloadState == 2 then
-						tankbobs.a_playSound(c_const_get("weaponAudio_dir") .. v.weapon.reloadSound.final)
+						tankbobs.a_playSound(c_const_get("weaponAudio_dir") .. c_weapon_getWeapons()[v.weapon].reloadSound.final)
 					end
 				else
-					if type(v.weapon.reloadSound) == "table" then
-						tankbobs.a_playSound(c_const_get("weaponAudio_dir") .. v.weapon.fireSound[math.random(1, #v.weapon.reloadSound)])
+					if type(c_weapon_getWeapons()[v.weapon].reloadSound) == "table" then
+						tankbobs.a_playSound(c_const_get("weaponAudio_dir") .. c_weapon_getWeapons()[v.weapon].fireSound[math.random(1, #c_weapon_getWeapons()[v.weapon].reloadSound)])
 					else
-						tankbobs.a_playSound(c_const_get("weaponAudio_dir") .. v.weapon.reloadSound)
+						tankbobs.a_playSound(c_const_get("weaponAudio_dir") .. c_weapon_getWeapons()[v.weapon].reloadSound)
 					end
 				end
 			end
@@ -874,7 +896,7 @@ function game_step(d)
 	end
 
 	for _, v in pairs(c_weapon_getProjectiles()) do
-		if v.collisions > 0 and v.collisions ~= v.m.lastCollisions and v.weapon.trail == 0 and v.weapon.trailWidth == 0 then
+		if v.collisions > 0 and v.collisions ~= v.m.lastCollisions and c_weapon_getWeapons()[v.weapon].trail == 0 and c_weapon_getWeapons()[v.weapon].trailWidth == 0 then
 			v.m.lastCollisions = v.collisions
 
 			tankbobs.a_playSound(c_const_get("collideProjectile_sounds")[math.random(1, #c_const_get("collideProjectile_sounds"))])

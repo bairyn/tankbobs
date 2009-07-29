@@ -366,6 +366,8 @@ int w_addBody(lua_State *L)
 
 	body->SetUserData(reinterpret_cast<void *>(luaL_checkinteger(L, 15)));
 
+	lua_pop(L, 15);  /* "balance" stack */
+
 	lua_pushlightuserdata(L, body);
 
 	return 1;
@@ -717,348 +719,768 @@ int w_scaleVelocity(lua_State *L)
 
 int w_persistWorld(lua_State *L)
 {
-	char buf[BUFSIZE] = {""};
-	char *bufpos = &buf[0];
-	int numProjectiles, numTanks, numPowerups, numWalls;
-	const vec2_t *v;
-	const b2Body *body;
+	char   buf[BUFSIZE] = {""};
+	char   *bufpos = &buf[0];
+	short  numProjectiles, numTanks, numPowerups;
+	int    numWalls, numControlPoints, numFlags;
+	int    order;
+	const  vec2_t *v;
+	const  b2Body *body;
 	b2Vec2 vel;
 
 	CHECKINIT(init, L);
 
 	CHECKWORLD(world, L);
 
-	/* 16-byte header */
-	numProjectiles = lua_objlen(L, 1); *((int *) bufpos) = io_intNL(numProjectiles); bufpos += sizeof(int);
-	numTanks       = lua_objlen(L, 2); *((int *) bufpos) = io_intNL(numTanks);       bufpos += sizeof(int);
-	numPowerups    = lua_objlen(L, 3); *((int *) bufpos) = io_intNL(numPowerups);    bufpos += sizeof(int);
-	numWalls       = lua_objlen(L, 4); *((int *) bufpos) = io_intNL(numWalls);       bufpos += sizeof(int);
+	order = 0;
 
-	/* world */
+	numProjectiles   = lua_objlen(L, ++order); *((short *) bufpos) = io_shortNL(numProjectiles); bufpos += sizeof(short);
+	numTanks         = lua_objlen(L, ++order); *((short *) bufpos) = io_shortNL(numTanks);       bufpos += sizeof(short);
+	numPowerups      = lua_objlen(L, ++order); *((short *) bufpos) = io_shortNL(numPowerups);    bufpos += sizeof(short);
+	numWalls         = lua_objlen(L, ++order);  /* number of walls is constant */
+	numControlPoints = lua_objlen(L, ++order);  /* number of control points is constant */
+	numFlags         = lua_objlen(L, ++order);  /* number of flags is constant */
+
+	order = 0;
 
 	/* projectiles */
+	/* char weaponTypeIndex; float rotation; float x; float y; float velX; float velY; float angularVelocity; */
+	++order;
 	lua_pushnil(L);
-	while(lua_next(L, 1))
+	while(lua_next(L, order))
 	{
-		/* projectiles are described as: */
-		/* int key (the client will generate a new body if projectiles[key] is nil); int weaponTypeIndex; double rotation; double x; double y; double velX; double velY; */
 		lua_getfield(L, -1, "collided");
-		if(lua_toboolean(L, -1) &&
-		   bufpos + 2 * sizeof(int) + 4 * sizeof(double) < buf + sizeof(buf))
+		if(!lua_toboolean(L, -1) &&
+				bufpos + 1 * sizeof(char) + 6 * sizeof(float) < buf + sizeof(buf))
 		{
 			lua_pop(L, 1);
 
-			/* set key */
-			*((int *) bufpos) = io_intNL(luaL_checkinteger(L, -2)); bufpos += sizeof(int);
-
 			/* set weaponIndex */
 			lua_getfield(L, -1, "weapon");
-			lua_getfield(L, -1, "index");
-			*((int *) bufpos) = io_intNL(luaL_checkinteger(L, -1)); bufpos += sizeof(int);
-			lua_pop(L, 2);
+			*((char *) bufpos) = io_charNL(lua_tonumber(L, -1)); bufpos += sizeof(char);
+			lua_pop(L, 1);
 
 			/* set rotation */
 			lua_getfield(L, -1, "r");
-			*((double *) bufpos) = io_doubleNL(luaL_checknumber(L, -1)); bufpos += sizeof(double);
+			*((float *) bufpos) = io_floatNL(lua_tonumber(L, -1)); bufpos += sizeof(float);
 			lua_pop(L, 1);
 
 			/* set x and y */
 			lua_getfield(L, -1, "p");
-			lua_pushinteger(L, 1);
-			lua_gettable(L, -1);
 			v = CHECKVEC(L, -1);
-			*((double *) bufpos) = io_doubleNL(v->x); bufpos += sizeof(double);
-			*((double *) bufpos) = io_doubleNL(v->y); bufpos += sizeof(double);
-			lua_pop(L, 2);
+			*((float *) bufpos) = io_floatNL(v->x); bufpos += sizeof(float);
+			*((float *) bufpos) = io_floatNL(v->y); bufpos += sizeof(float);
+			lua_pop(L, 1);
 
 			/* velocity */
 			lua_getfield(L, -1, "m");
 			lua_getfield(L, -1, "body");
 			body = reinterpret_cast<b2Body *>(lua_touserdata(L, -1));
-			vel = body->GetLinearVelocity();
 			lua_pop(L, 2);
-			*((double *) bufpos) = io_doubleNL(vel.x); bufpos += sizeof(double);
-			*((double *) bufpos) = io_doubleNL(vel.y); bufpos += sizeof(double);
+			vel = body->GetLinearVelocity();
+			*((float *) bufpos) = io_floatNL(vel.x); bufpos += sizeof(float);
+			*((float *) bufpos) = io_floatNL(vel.y); bufpos += sizeof(float);
 
-			lua_pop(L, 1);
+			/* angular velocity */
+			*((float *) bufpos) = io_floatNL(body->GetAngularVelocity()); bufpos += sizeof(float);
 		}
 		else
 		{
-			lua_pop(L, 2);
+			lua_pop(L, 1);
 
-			/* decrement the number of projectiles */
-			*(((int *) &buf[0]) + 0) = --numProjectiles;
+			*(((short *) &buf[0]) + order - 1) = --numProjectiles;
 		}
+
+		lua_pop(L, 1);
 	}
 
 	/* tanks */
+	/* char name[21]; float rotation; float x; float y; float velX; float velY; short input; */
+	++order;
 	lua_pushnil(L);
-	while(lua_next(L, 1))
+	while(lua_next(L, order))
 	{
-		/* tanks are described as: */
-		/* int key (the client will generate a new body if projectiles[key] is nil); int weaponTypeIndex; double rotation; double x; double y; double velX; double velY; double h[xy][1-4]; double r; double g; double b; double health; */
 		lua_getfield(L, -1, "exists");
-		if(lua_toboolean(L, -1) &&
-		   bufpos + 2 * sizeof(int) + 17 * sizeof(double) + 1 * sizeof(int) < buf + sizeof(buf))
+		if(!lua_toboolean(L, -1) &&
+				bufpos + 5 * sizeof(float) + 1 * sizeof(short) < buf + sizeof(buf))
+		{
+			static char name[21];
+
+			lua_pop(L, 1);
+
+			/* set name */
+			lua_getfield(L, -1, "name");
+			strncpy(name, lua_tostring(L, -1), sizeof(name));
+			lua_pop(L, 1);
+			memcpy(bufpos, name, sizeof(name)); bufpos += sizeof(name);
+
+			/* set rotation */
+			lua_getfield(L, -1, "r");
+			*((float *) bufpos) = io_floatNL(lua_tonumber(L, -1)); bufpos += sizeof(float);
+			lua_pop(L, 1);
+
+			/* set x and y */
+			lua_getfield(L, -1, "p");
+			v = CHECKVEC(L, -1);
+			*((float *) bufpos) = io_floatNL(v->x); bufpos += sizeof(float);
+			*((float *) bufpos) = io_floatNL(v->y); bufpos += sizeof(float);
+
+			/* velocity */
+			lua_getfield(L, -1, "m");
+			lua_getfield(L, -1, "body");
+			body = reinterpret_cast<b2Body *>(lua_touserdata(L, -1));
+			vel = body->GetLinearVelocity();
+			lua_pop(L, 2);
+			*((float *) bufpos) = io_floatNL(vel.x); bufpos += sizeof(float);
+			*((float *) bufpos) = io_floatNL(vel.y); bufpos += sizeof(float);
+
+			/* input */
+			lua_getfield(L, -1, "state");
+			*((short *) bufpos) = io_shortNL(lua_tointeger(L, -1)); bufpos += sizeof(short);
+			lua_pop(L, 1);
+		}
+		else
 		{
 			lua_pop(L, 1);
 
-			/* set key */
-			*((int *) bufpos) = io_intNL(luaL_checkinteger(L, -2)); bufpos += sizeof(int);
+			*(((short *) &buf[0]) + order - 1) = --numTanks;
+		}
+
+		lua_pop(L, 1);
+	}
+
+	/* powerups */
+	/* char powerupTypeIndex; float rotation; float x; float y; float velX; float velY; float angularVelocity; */
+	++order;
+	lua_pushnil(L);
+	while(lua_next(L, order))
+	{
+		lua_getfield(L, -1, "collided");
+		if(!lua_toboolean(L, -1) &&
+				bufpos + 1 * sizeof(char) + 6 * sizeof(float) < buf + sizeof(buf))
+		{
+			lua_pop(L, 1);
 
 			/* set weaponIndex */
 			lua_getfield(L, -1, "weapon");
 			lua_getfield(L, -1, "index");
-			*((int *) bufpos) = io_intNL(luaL_checkinteger(L, -1)); bufpos += sizeof(int);
+			*((char *) bufpos) = io_charNL(lua_tonumber(L, -1)); bufpos += sizeof(char);
 			lua_pop(L, 2);
 
 			/* set rotation */
 			lua_getfield(L, -1, "r");
-			*((double *) bufpos) = io_doubleNL(luaL_checknumber(L, -1)); bufpos += sizeof(double);
+			*((float *) bufpos) = io_floatNL(lua_tonumber(L, -1)); bufpos += sizeof(float);
 			lua_pop(L, 1);
 
 			/* set x and y */
 			lua_getfield(L, -1, "p");
-			lua_pushinteger(L, 1);
-			lua_gettable(L, -1);
 			v = CHECKVEC(L, -1);
-			*((double *) bufpos) = io_doubleNL(v->x); bufpos += sizeof(double);
-			*((double *) bufpos) = io_doubleNL(v->y); bufpos += sizeof(double);
-			lua_pop(L, 2);
+			*((float *) bufpos) = io_floatNL(v->x); bufpos += sizeof(float);
+			*((float *) bufpos) = io_floatNL(v->y); bufpos += sizeof(float);
+			lua_pop(L, 1);
 
 			/* velocity */
 			lua_getfield(L, -1, "m");
 			lua_getfield(L, -1, "body");
 			body = reinterpret_cast<b2Body *>(lua_touserdata(L, -1));
+			lua_pop(L, 2);
 			vel = body->GetLinearVelocity();
-			lua_pop(L, 2);
-			*((double *) bufpos) = io_doubleNL(vel.x); bufpos += sizeof(double);
-			*((double *) bufpos) = io_doubleNL(vel.y); bufpos += sizeof(double);
-
-			/* hull */
-			lua_getfield(L, -1, "h");
-			lua_pushinteger(L, 1);
-			lua_gettable(L, -1);
-			v = CHECKVEC(L, -1);
-			*((double *) bufpos) = io_doubleNL(v->x); bufpos += sizeof(double);
-			*((double *) bufpos) = io_doubleNL(v->y); bufpos += sizeof(double);
-			lua_pop(L, 1);
-			lua_pushinteger(L, 2);
-			lua_gettable(L, -1);
-			v = CHECKVEC(L, -1);
-			*((double *) bufpos) = io_doubleNL(v->x); bufpos += sizeof(double);
-			*((double *) bufpos) = io_doubleNL(v->y); bufpos += sizeof(double);
-			lua_pop(L, 1);
-			lua_pushinteger(L, 3);
-			lua_gettable(L, -1);
-			v = CHECKVEC(L, -1);
-			*((double *) bufpos) = io_doubleNL(v->x); bufpos += sizeof(double);
-			*((double *) bufpos) = io_doubleNL(v->y); bufpos += sizeof(double);
-			lua_pop(L, 1);
-			lua_pushinteger(L, 4);
-			lua_gettable(L, -1);
-			v = CHECKVEC(L, -1);
-			*((double *) bufpos) = io_doubleNL(v->x); bufpos += sizeof(double);
-			*((double *) bufpos) = io_doubleNL(v->y); bufpos += sizeof(double);
-			lua_pop(L, 2);
-
-			/* color */
-			lua_getfield(L, -1, "color");
-			lua_getfield(L, -1, "r");
-			*((double *) bufpos) = io_doubleNL(lua_tonumber(L, -1)); bufpos += sizeof(double);
-			lua_pop(L, 1);
-			lua_getfield(L, -1, "g");
-			*((double *) bufpos) = io_doubleNL(lua_tonumber(L, -1)); bufpos += sizeof(double);
-			lua_pop(L, 1);
-			lua_getfield(L, -1, "b");
-			*((double *) bufpos) = io_doubleNL(lua_tonumber(L, -1)); bufpos += sizeof(double);
-			lua_pop(L, 2);
-
-			/* health */
-			lua_getfield(L, -1, "health");
-			*((double *) bufpos) = io_doubleNL(lua_tonumber(L, -1)); bufpos += sizeof(double);
-			lua_pop(L, 1);
-
-			/* score */
-			lua_getfield(L, -1, "score");
-			*((int *) bufpos) = io_intNL(luaL_checkinteger(L, -1)); bufpos += sizeof(int);
-			lua_pop(L, 1);
-
-			lua_pop(L, 1);
-		}
-		else
-		{
-			lua_pop(L, 2);
-
-			/* decrement the number of tanks */
-			*(((int *) &buf[0]) + 1) = --numTanks;
-		}
-	}
-
-	/* powerups */
-	lua_pushnil(L);
-	while(lua_next(L, 1))
-	{
-		/* powerups are described as: */
-		/* int key (the client will generate a new body if projectiles[key] is nil); int poweuprTypeIndex; double rotation; double x; double y; double velX; double velY; double h[xy][1-4]; */
-		lua_getfield(L, -1, "exists");
-		if(lua_toboolean(L, -1) &&
-		   bufpos + 2 * sizeof(int) + 8 * sizeof(double) < buf + sizeof(buf))
-		{
-			lua_pop(L, 1);
-
-			/* set key */
-			*((int *) bufpos) = io_intNL(luaL_checkinteger(L, -2)); bufpos += sizeof(int);
-
-			/* set weaponIndex */
-			lua_getfield(L, -1, "type");
-			lua_getfield(L, -1, "index");
-			*((int *) bufpos) = io_intNL(luaL_checkinteger(L, -1)); bufpos += sizeof(int);
-			lua_pop(L, 2);
-
-			/* set rotation */
-			lua_getfield(L, -1, "r");
-			*((double *) bufpos) = io_doubleNL(luaL_checknumber(L, -1)); bufpos += sizeof(double);
-			lua_pop(L, 1);
-
-			/* set x and y */
-			lua_getfield(L, -1, "p");
-			lua_pushinteger(L, 1);
-			lua_gettable(L, -1);
-			v = CHECKVEC(L, -1);
-			*((double *) bufpos) = io_doubleNL(v->x); bufpos += sizeof(double);
-			*((double *) bufpos) = io_doubleNL(v->y); bufpos += sizeof(double);
-			lua_pop(L, 2);
-
-			/* velocity */
-			lua_getfield(L, -1, "m");
-			lua_getfield(L, -1, "body");
-			body = reinterpret_cast<b2Body *>(lua_touserdata(L, -1));
-			vel = body->GetLinearVelocity();
-			lua_pop(L, 2);
-			*((double *) bufpos) = io_doubleNL(vel.x); bufpos += sizeof(double);
-			*((double *) bufpos) = io_doubleNL(vel.y); bufpos += sizeof(double);
-
-			/* color */
-			lua_getfield(L, -1, "color");
-			lua_getfield(L, -1, "r");
-			*((double *) bufpos) = io_doubleNL(lua_tonumber(L, -1)); bufpos += sizeof(double);
-			lua_pop(L, 1);
-			lua_getfield(L, -1, "g");
-			*((double *) bufpos) = io_doubleNL(lua_tonumber(L, -1)); bufpos += sizeof(double);
-			lua_pop(L, 1);
-			lua_getfield(L, -1, "b");
-			*((double *) bufpos) = io_doubleNL(lua_tonumber(L, -1)); bufpos += sizeof(double);
-			lua_pop(L, 2);
-
-			lua_pop(L, 1);
-		}
-		else
-		{
-			lua_pop(L, 2);
-
-			/* decrement the number of powerups */
-			*(((int *) &buf[0]) + 2) = --numPowerups;
-		}
-	}
-
-	/* walls */
-	lua_pushnil(L);
-	while(lua_next(L, 1))
-	{
-		/* walls are described as: */
-		/* int key; char fourVertices; double p[xy][1-4]; double bodyRotation; double angularVelocity; double linearVelocity[xy]; */
-		lua_getfield(L, -1, "m");
-		lua_getfield(L, -1, "body");
-		if(lua_toboolean(L, -1) &&
-		   bufpos + 1 * sizeof(int) + 1 * sizeof(char) + 12 * sizeof(double) < buf + sizeof(buf))
-		{
-			vec2_t *tmp;
-			b2Body *body = reinterpret_cast<b2Body *>(lua_touserdata(L, -1));
-			lua_pop(L, 2);
-
-			/* set key */
-			*((int *) bufpos) = io_intNL(luaL_checkinteger(L, -2)); bufpos += sizeof(int);
-
-			/* see if p[4] exists */
-			lua_getfield(L, -1, "p");
-			lua_pushinteger(L, 4);
-			lua_gettable(L, -2);
-			if(lua_isnoneornil(L, -1))
-			{
-				tmp = NULL;
-
-				*bufpos++ = io_charNL(FALSE);
-			}
-			else
-			{
-				tmp = CHECKVEC(L, -1);
-
-				*bufpos++ = io_charNL(TRUE);
-			}
-			lua_pop(L, 1);
-
-			/* set p[1-4] (client should ignore these for static walls, even if they are linked to a path) */
-			/* p is still on the stack */
-			lua_pushinteger(L, 1);
-			lua_gettable(L, -2);
-			v = CHECKVEC(L, -1);
-			*((double *) bufpos) = io_doubleNL(v->x); bufpos += sizeof(double);
-			*((double *) bufpos) = io_doubleNL(v->y); bufpos += sizeof(double);
-			lua_pop(L, 1);
-			lua_pushinteger(L, 2);
-			lua_gettable(L, -2);
-			v = CHECKVEC(L, -1);
-			*((double *) bufpos) = io_doubleNL(v->x); bufpos += sizeof(double);
-			*((double *) bufpos) = io_doubleNL(v->y); bufpos += sizeof(double);
-			lua_pop(L, 1);
-			lua_pushinteger(L, 3);
-			lua_gettable(L, -2);
-			v = CHECKVEC(L, -1);
-			*((double *) bufpos) = io_doubleNL(v->x); bufpos += sizeof(double);
-			*((double *) bufpos) = io_doubleNL(v->y); bufpos += sizeof(double);
-			lua_pop(L, 2);
-			if(tmp)
-			{
-				*((double *) bufpos) = io_doubleNL(tmp->x); bufpos += sizeof(double);
-				*((double *) bufpos) = io_doubleNL(tmp->y); bufpos += sizeof(double);
-			}
-			else
-			{
-				/* *((double *) bufpos) = 0x00; bufpos += sizeof(double); */
-				/* *((double *) bufpos) = 0x00; bufpos += sizeof(double); */
-
-				/* These two bytes are ignored by the client, but they need to be filled */
-				bufpos += 2 * sizeof(double);
-			}
-
-			/* set body's rotation */
-			*((double *) bufpos) = io_doubleNL(body->GetAngle()); bufpos += sizeof(double);
+			*((float *) bufpos) = io_floatNL(vel.x); bufpos += sizeof(float);
+			*((float *) bufpos) = io_floatNL(vel.y); bufpos += sizeof(float);
 
 			/* angular velocity */
-			*((double *) bufpos) = io_doubleNL(body->GetAngularVelocity()); bufpos += sizeof(double);
-
-			/* linear velocity */
-			vel = body->GetLinearVelocity();
-			*((double *) bufpos) = io_doubleNL(vel.x); bufpos += sizeof(double);
-			*((double *) bufpos) = io_doubleNL(vel.y); bufpos += sizeof(double);
-
-			/* TODO: send path info */
-
-			lua_pop(L, 1);
+			*((float *) bufpos) = io_floatNL(body->GetAngularVelocity()); bufpos += sizeof(float);
 		}
 		else
 		{
-			lua_pop(L, 3);
+			lua_pop(L, 1);
 
-			/* decrement the number of walls */
-			*(((int *) &buf[0]) + 3) = --numWalls;
+			*(((short *) &buf[0]) + order - 1) = --numPowerups;
 		}
+
+		lua_pop(L, 1);
+	}
+
+	/* TODO: FIXME: stack underflow / overflow */
+	/* walls */
+	/* float (x|y); float angle; float velX; float velY; float angularVelocity; float pathID; float previousPathID; float startpos(x|y); float pathPos; */
+	++order;
+	lua_pushnil(L);
+	while(lua_next(L, order))
+	{
+		if(bufpos + 6 * sizeof(float) + 2 * sizeof(char) + 3 * sizeof(float) < buf + sizeof(buf))
+		{
+			/* set x and y */
+			/* (get body) */
+			lua_getfield(L, -1, "m");
+			lua_getfield(L, -1, "body");
+			body = reinterpret_cast<b2Body *>(lua_touserdata(L, -1));
+			if(!body)
+			{
+				/*
+				*((char *) bufpos) = io_charNL(0x00); bufpos += sizeof(char);
+				*((char *) bufpos) = io_charNL(0x00); bufpos += sizeof(char);
+				*((float *) bufpos) = io_floatNL(0x00); bufpos += sizeof(float);
+				*/
+
+				bufpos += 2 * sizeof(char) + 1 * sizeof(float);
+
+				lua_pop(L, 3);
+
+				continue;
+			}
+			lua_pop(L, 1);  /* keep m on the stack */
+			*((float *) bufpos) = io_floatNL(body->GetPosition().x); bufpos += sizeof(float);
+			*((float *) bufpos) = io_floatNL(body->GetPosition().y); bufpos += sizeof(float);
+
+			/* set angle */
+			*((float *) bufpos) = io_floatNL(body->GetAngle()); bufpos += sizeof(float);
+
+			/* velocity */
+			vel = body->GetLinearVelocity();
+			*((float *) bufpos) = io_floatNL(vel.x); bufpos += sizeof(float);
+			*((float *) bufpos) = io_floatNL(vel.y); bufpos += sizeof(float);
+
+			/* angular velocity */
+			*((float *) bufpos) = io_floatNL(body->GetAngularVelocity()); bufpos += sizeof(float);
+
+			/* path information */
+			lua_getfield(L, -1, "pid");
+			if(!lua_isnoneornil(L, -1))
+			{
+				*((char *) bufpos) = io_charNL(lua_tonumber(L, -1)); bufpos += sizeof(char);
+				lua_pop(L, 1);
+
+				lua_getfield(L, -1, "ppid");
+				*((char *) bufpos) = io_charNL(lua_tonumber(L, -1)); bufpos += sizeof(char);
+				lua_pop(L, 1);
+
+				lua_getfield(L, -1, "startpos");
+				v = CHECKVEC(L, -1);
+				*((float *) bufpos) = io_floatNL(v->x); bufpos += sizeof(float);
+				*((float *) bufpos) = io_floatNL(v->y); bufpos += sizeof(float);
+
+				lua_getfield(L, -1, "ppos");
+				*((float *) bufpos) = io_floatNL(lua_tonumber(L, -1)); bufpos += sizeof(float);
+				lua_pop(L, 1);
+			}
+			else
+			{
+				/*
+				*((char *) bufpos) = io_charNL(0x00); bufpos += sizeof(char);
+				*((char *) bufpos) = io_charNL(0x00); bufpos += sizeof(char);
+				*((float *) bufpos) = io_floatNL(0x00); bufpos += sizeof(float);
+				*/
+
+				bufpos += 2 * sizeof(char) + 1 * sizeof(float);
+			}
+
+			/* pop pid and 'm' */
+			lua_pop(L, 2);
+		}
+		else
+		{
+			*(((short *) &buf[0]) + order - 1) = --numWalls;
+		}
+
+		lua_pop(L, 1);
+	}
+
+	/* control points */
+	/* char team;  -- team will be 0 if it's not captured, 1 if red, and 2 if blue */
+	++order;
+	lua_pushnil(L);
+	while(lua_next(L, order))
+	{
+		if(bufpos + 1 * sizeof(char) < buf + sizeof(buf))
+		{
+			/* set team */
+			lua_getfield(L, -1, "m");
+			lua_getfield(L, -1, "team");
+			if(lua_isnoneornil(L, -1))
+			{
+				*((char *) bufpos) = io_charNL(0x00); bufpos += sizeof(char);
+			}
+			else if(strcmp(lua_tostring(L, -1), "red"))
+			{
+				*((char *) bufpos) = io_charNL(0x01); bufpos += sizeof(char);
+			}
+			else
+			{
+				*((char *) bufpos) = io_charNL(0x02); bufpos += sizeof(char);
+			}
+			lua_pop(L, 2);
+		}
+		else
+		{
+			*(((short *) &buf[0]) + order - 1) = --numControlPoints;
+		}
+
+		lua_pop(L, 1);
+	}
+
+	/* flags */
+	/* char state; char stolenIndex; float droppedPos[2]; */
+	lua_pushnil(L);
+	++order;
+	while(lua_next(L, order))
+	{
+		if(bufpos + 2 * sizeof(char) + 2 * sizeof(float) < buf + sizeof(buf))
+		{
+			unsigned char state = 0;
+			unsigned char stolenIndex;
+			float droppedPos[2];
+
+			/* set stolen */
+			lua_getfield(L, -1, "m");
+			lua_getfield(L, -1, "stolen");
+			if(lua_toboolean(L, -1))
+			{
+				state &= 0x01;
+				stolenIndex = lua_tonumber(L, -1);
+			}
+			lua_pop(L, 1);
+			/* set dropped */
+			lua_getfield(L, -1, "dropped");
+			if(lua_toboolean(L, -1))
+			{
+				lua_pop(L, 1);
+				state &= 0x02;
+				lua_getfield(L, -1, "pos");
+				const vec2_t *v = CHECKVEC(L, -1);
+				droppedPos[0] = v->x;
+				droppedPos[1] = v->y;
+			}
+			lua_pop(L, 2);
+			*((char *) bufpos) = io_charNL(state); bufpos += sizeof(char);
+			*((char *) bufpos) = io_charNL(stolenIndex); bufpos += sizeof(char);
+			*((float *) bufpos) = io_floatNL(droppedPos[0]); bufpos += sizeof(float);
+			*((float *) bufpos) = io_floatNL(droppedPos[1]); bufpos += sizeof(float);
+		}
+		else
+		{
+			*(((short *) &buf[0]) + order - 1) = --numFlags;
+		}
+
+		lua_pop(L, 1);
 	}
 
 	lua_pushlstring(L, buf, bufpos - buf);
 
 	return 1;
+}
+
+int w_unpersistWorld(lua_State *L)
+{
+	CHECKINIT(init, L);
+
+	CHECKWORLD(world, L);
+
+	vec2_t *v;
+
+	const char *data = lua_tostring(L, 1);
+
+	unsigned int projectileBodyLen = lua_objlen(L, 14);
+
+	unsigned int numProjectiles    = io_shortNL(*((short *) data)); data += sizeof(short);
+	unsigned int numTanks          = io_shortNL(*((short *) data)); data += sizeof(short);
+	unsigned int numPowerups       = io_shortNL(*((short *) data)); data += sizeof(short);
+	unsigned int numWalls          = lua_objlen(L, 5);
+	unsigned int numControlPoints  = lua_objlen(L, 6);
+	unsigned int numFlags          = lua_objlen(L, 7);
+
+	/* remove projectiles before unpersisting */
+	/*lua_pushvalue(L, 1);*/
+	/*t_emptyTable(L, -1);*/
+	/*lua_pop(L, 1);*/
+	/* this should already be taken care of in the game logic */
+
+	/* Projectiles (special) */
+	for(int i = 0; i < numProjectiles; i++)
+	{
+		lua_pushvalue(L, 8);
+		lua_pushvalue(L, 11);
+		lua_call(L, 1, 0);
+		lua_pushvalue(L, -1);
+		lua_pushinteger(L, i + 1);
+		lua_settable(L, 1);
+
+		/* weapon */
+		lua_pushinteger(L, io_charNL(*((char *) data))); data += sizeof(char);
+		lua_setfield(L, -2, "weapon");
+
+		/* rotation */
+		lua_pushinteger(L, io_floatNL(*((float *) data))); data += sizeof(float);
+		lua_setfield(L, -2, "r");
+
+		/* position */
+		lua_getfield(L, -1, "p");
+		v = CHECKVEC(L, -1);
+		v->x = io_floatNL(*((float *) data)); data += sizeof(float);
+		v->y = io_floatNL(*((float *) data)); data += sizeof(float);
+		MATH_POLAR(*v);
+		/* keep position on the stack for body */
+
+		/* add body before popping position vector */
+		/* position on top of stack */
+		lua_getfield(L, -2, "r");
+		lua_getglobal(L, "unpack");
+		lua_pushvalue(L, 14);
+		lua_call(L, 1, projectileBodyLen);
+		lua_call(L, projectileBodyLen + 2, 1);
+		w_addBody(L);
+		b2Body *body = reinterpret_cast<b2Body *>(lua_touserdata(L, -1));
+
+		/* velocity */
+		b2Vec2 vel;
+		vel.x = io_floatNL(*((float *) data)); data += sizeof(float);
+		vel.y = io_floatNL(*((float *) data)); data += sizeof(float);
+		body->SetLinearVelocity(vel);
+
+		/* angular velocity */
+		body->SetAngularVelocity(io_floatNL(*((float *) data))); data += sizeof(float);
+
+		/* pop body and projectile */
+		lua_pop(L, 2);
+	}
+
+	/* Tanks */
+	for(int i = 0; i < numTanks; i++)
+	{
+		lua_pushinteger(L, i + 1);
+		lua_gettable(L, 2);
+		if(lua_isnoneornil(L, -1))
+		{
+			lua_pop(L, 1);
+
+			/* add the tank */
+			lua_pushvalue(L, 9);
+			lua_pushvalue(L, 12);
+			lua_call(L, 1, 0);
+			lua_pushvalue(L, -1);
+			lua_pushinteger(L, i + 1);
+			lua_settable(L, 2);
+
+			/* spawn the tank */
+			lua_pushvalue(L, 13);
+			lua_pushinteger(L, i + 1);
+			lua_gettable(L, 2);
+			lua_call(L, 1, 0);
+
+			/* push tank on stack */
+			lua_pushinteger(L, i + 1);
+			lua_gettable(L, 2);
+		}
+
+		/* get body */
+		lua_getfield(L, -1, "body");
+		b2Body *body = reinterpret_cast<b2Body *>(lua_touserdata(L, -1));
+		lua_pop(L, 1);
+
+		/* name */
+		static char name[21];
+		strncpy(name, data, sizeof(name)); data += 21 * sizeof(char);
+		lua_pushstring(L, name);
+		lua_setfield(L, -2, "name");
+
+		double rotation = io_floatNL(*((float *) data)); data += sizeof(float);
+		/* rotation */
+		lua_pushnumber(L, rotation);
+		lua_setfield(L, -2, "r");
+
+		/* position */
+		lua_getfield(L, -1, "p");
+		v = CHECKVEC(L, -1);
+		v->x = io_floatNL(*((float *) data)); data += sizeof(float);
+		v->y = io_floatNL(*((float *) data)); data += sizeof(float);
+		MATH_POLAR(*v);
+		/* set body */
+		body->SetXForm(b2Vec2(v->x, v->y), rotation);
+		lua_pop(L, 1);
+
+		/* velocity */
+		b2Vec2 vel;
+		vel.x = io_floatNL(*((float *) data)); data += sizeof(float);
+		vel.y = io_floatNL(*((float *) data)); data += sizeof(float);
+		body->SetLinearVelocity(b2Vec2(v->x, v->y));
+
+		/* input */
+		lua_pushinteger(L, io_shortNL(*((short *) data))); data += sizeof(short);
+		lua_setfield(L, -2, "state");
+
+		lua_pop(L, 1);
+	}
+
+	/* Powerups */
+	for(int i = 0; i < numPowerups; i++)
+	{
+		lua_pushinteger(L, i + 1);
+		lua_gettable(L, 3);
+		if(lua_isnoneornil(L, -1))
+		{
+			lua_pop(L, 1);
+
+			/* add the powerup */
+			lua_pushvalue(L, 10);
+			lua_pushvalue(L, 13);
+			lua_call(L, 1, 0);
+			lua_pushvalue(L, -1);
+			lua_pushinteger(L, i + 1);
+			lua_settable(L, 3);
+
+			/* spawn the powerup */
+			lua_pushvalue(L, 13);
+			lua_pushinteger(L, i + 1);
+			lua_gettable(L, 3);
+			lua_call(L, 1, 0);
+
+			/* push powerup on stack */
+			lua_pushinteger(L, i + 1);
+			lua_gettable(L, 3);
+		}
+
+		/* get body */
+		lua_getfield(L, -1, "m");
+		lua_getfield(L, -1, "body");
+		b2Body *body = reinterpret_cast<b2Body *>(lua_touserdata(L, -1));
+		lua_pop(L, 2);
+
+		/* type */
+		lua_pushinteger(L, io_charNL(*((char *) data))); data += sizeof(char);
+		lua_setfield(L, -2, "type");
+
+		double rotation = io_floatNL(*((float *) data)); data += sizeof(float);
+		/* rotation */
+		lua_pushnumber(L, rotation);
+		lua_setfield(L, -2, "r");
+
+		/* position */
+		lua_getfield(L, -1, "p");
+		v = CHECKVEC(L, -1);
+		v->x = io_floatNL(*((float *) data)); data += sizeof(float);
+		v->y = io_floatNL(*((float *) data)); data += sizeof(float);
+		MATH_POLAR(*v);
+		/* set body */
+		body->SetXForm(b2Vec2(v->x, v->y), rotation);
+		lua_pop(L, 1);
+
+		/* velocity */
+		b2Vec2 vel;
+		vel.x = io_floatNL(*((float *) data)); data += sizeof(float);
+		vel.y = io_floatNL(*((float *) data)); data += sizeof(float);
+		body->SetLinearVelocity(b2Vec2(v->x, v->y));
+
+		/* angular velocity */
+		body->SetAngularVelocity(io_floatNL(*((float *) data))); data += sizeof(float);
+
+		lua_pop(L, 1);
+	}
+
+	/* Walls */
+	for(int i = 0; i < numWalls; i++)
+	{
+		lua_pushinteger(L, i + 1);
+		lua_gettable(L, 3);
+		if(lua_isnoneornil(L, -1))
+		{
+			/* This should never happen, but play safe anyway */
+			data += 6 * sizeof(float) + 2 * sizeof(char) + 3 * sizeof(float);
+
+			lua_pop(L, 1);
+		}
+		else
+		{
+			lua_getfield(L, -1, "static");
+			lua_getfield(L, -2, "path");
+			if(lua_toboolean(L, -1) || !lua_toboolean(L, -2))
+			{
+				lua_pop(L, 2);
+
+				/* get body */
+				lua_getfield(L, -1, "m");
+				lua_getfield(L, -1, "body");
+				b2Body *body = reinterpret_cast<b2Body *>(lua_touserdata(L, -1));
+				lua_pop(L, 2);
+
+				/* position */
+				b2Vec2 pos;
+				pos.x = io_floatNL(*((float *) data)); data += sizeof(float);
+				pos.y = io_floatNL(*((float *) data)); data += sizeof(float);
+
+				/* angle */
+				double angle = io_floatNL(*((float *) data)); data += sizeof(float);
+
+				body->SetXForm(pos, angle);
+
+				/* velocity */
+				b2Vec2 vel;
+				vel.x = io_floatNL(*((float *) data)); data += sizeof(float);
+				vel.y = io_floatNL(*((float *) data)); data += sizeof(float);
+				body->SetLinearVelocity(vel);
+
+				/* angular velocity */
+				body->SetAngularVelocity(luaL_checknumber(L, 2));
+
+				/* path ID */
+				lua_getfield(L, -1, "m");
+				lua_pushnumber(L, io_floatNL(*((float *) data)));
+				lua_setfield(L, -2, "pid");
+				/* keep 'm' on stack */
+
+				/* previous path ID */
+				lua_pushnumber(L, io_floatNL(*((float *) data)));
+				lua_setfield(L, -2, "ppid");
+
+				/* set startpos */
+				lua_getfield(L, -1, "startpos");
+				if(lua_isnoneornil(L, -1))
+				{
+					lua_pop(L, 1);
+
+					v = reinterpret_cast<vec2_t *>(lua_newuserdata(clState, sizeof(vec2_t)));
+
+					luaL_getmetatable(L, MATH_METATABLE);
+					lua_setmetatable(L, -2);
+
+					lua_pushvalue(L, -1);
+					lua_setfield(L, -3, "startpos");
+				}
+				else
+				{
+					v = CHECKVEC(L, -1);
+				}
+				v->x = io_floatNL(*((float *) data)); data += sizeof(float);
+				v->y = io_floatNL(*((float *) data)); data += sizeof(float);
+				MATH_POLAR(*v);
+				lua_pop(L, 1);
+
+				/* path position */
+				lua_pushnumber(L, io_floatNL(*((float *) data)));
+				lua_setfield(L, -2, "ppos");
+
+				/* pop both path and wall */
+				lua_pop(L, 2);
+			}
+			else
+			{
+				/* Save processing */
+				data += 6 * sizeof(float) + 2 * sizeof(char) + 3 * sizeof(float);
+
+				lua_pop(L, 3);
+			}
+		}
+	}
+
+	/* Control Points */
+	for(int i = 0; i < numControlPoints; i++)
+	{
+		lua_pushinteger(L, i + 1);
+		lua_gettable(L, 3);
+		if(lua_isnoneornil(L, -1))
+		{
+			/* This should never happen, but play safe anyway */
+			data += 1 * sizeof(char);
+
+			lua_pop(L, 1);
+		}
+		else
+		{
+			unsigned char team = io_charNL(*((char *) data)); data += sizeof(char);
+
+			lua_getfield(L, -1, "m");
+
+			switch(team)
+			{
+				default:
+				case 0x00:
+					lua_pushnil(L);
+					lua_setfield(L, -2, "team");
+
+				case 0x01:
+					lua_pushliteral(L, "red");
+					lua_setfield(L, -2, "team");
+
+				case 0x02:
+					lua_pushliteral(L, "blue");
+					lua_setfield(L, -2, "team");
+			}
+
+			/* pop m and control point */
+			lua_pop(L, 2);
+		}
+	}
+
+	/* Flags */
+	for(int i = 0; i < numFlags; i++)
+	{
+		lua_pushinteger(L, i + 1);
+		lua_gettable(L, 3);
+		if(lua_isnoneornil(L, -1))
+		{
+			/* This should never happen, but play safe anyway */
+			data += 2 * sizeof(char) + 1 * sizeof(int) + 2 * sizeof(float);
+
+			lua_pop(L, 1);
+		}
+		else
+		{
+			unsigned char state = io_charNL(*((char *) data)); data += sizeof(char);
+			unsigned char stolenIndex = io_charNL(*((char *) data)); data += sizeof(char);
+			float droppedPosx = io_floatNL(*((float *) data)); data += sizeof(float);
+			float droppedPosy = io_floatNL(*((float *) data)); data += sizeof(float);
+
+			lua_getfield(L, -1, "m");
+
+			/* stolen */
+			if(state & 0x01)
+			{
+				lua_pushinteger(L, stolenIndex);
+				lua_setfield(L, -2, "stolen");
+			}
+			else
+			{
+				lua_pushnil(L);
+				lua_setfield(L, -2, "stolen");
+			}
+
+			/* dropped */
+			if(state & 0x02)
+			{
+				lua_getfield(L, -1, "stolen");
+				if(!lua_toboolean(L, -1))
+				{
+					lua_pop(L, 1);
+
+					v = reinterpret_cast<vec2_t *>(lua_newuserdata(clState, sizeof(vec2_t)));
+
+					luaL_getmetatable(clState, MATH_METATABLE);
+					lua_setmetatable(clState, -2);
+
+					v->x = droppedPosx;
+					v->y = droppedPosy;
+					MATH_POLAR(*v);
+				}
+				else
+				{
+					v = CHECKVEC(L, -1);
+					v->x = droppedPosx;
+					v->y = droppedPosy;
+					MATH_POLAR(*v);
+				}
+				lua_setfield(L, -2, "stolen");
+			}
+			else
+			{
+				lua_pushnil(L);
+				lua_setfield(L, -2, "stolen");
+			}
+
+			/* pop m and control point */
+			lua_pop(L, 2);
+		}
+	}
+
+	return 0;
 }
 
 int w_getVertices(lua_State *L)

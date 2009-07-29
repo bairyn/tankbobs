@@ -50,8 +50,12 @@ Clients receives packets beginning with 0xA0-0xAF
 
 local tankbobs
 
+local bit
+
 function client_init()
 	tankbobs = _G.tankbobs
+
+	bit = c_module_load "bit"
 
 	c_const_set("client_connectFlood", 2000, 1)
 	c_const_set("client_ticksCheck", 5000, 1)
@@ -80,6 +84,7 @@ client =
 	connecting = false,
 	lastAliveTime = nil,  -- number
 	lastTickSendTime = nil,   -- number
+	lastPTime = nil,
 	ui = ""  -- unique identifier
 }
 
@@ -218,7 +223,7 @@ function client_step(d)
 							-- the last 32 bytes are the client's unique identifier
 							client.ui = data:sub(1, 32) data = data:sub(33)
 
-							-- send the challenge number, set and map
+							-- send the challenge number, set, map and game type
 							tankbobs.n_newPacket(256)
 							tankbobs.n_writeToPacket(tankbobs.io_fromChar(0xA0))
 							client.challenge = math.random(0x00000000, 0x7FFFFFFF)
@@ -226,6 +231,7 @@ function client_step(d)
 							-- set and map as a NULL-terminated string
 							tankbobs.n_writeToPacket(c_tcm_current_set.name .. string.char(0x00))
 							tankbobs.n_writeToPacket(c_tcm_current_map.name .. string.char(0x00))
+							tankbobs.n_writeToPacket(c_config_get("game.gameType") .. string.char(0x00))
 
 							sendToClient(client)
 						end
@@ -268,15 +274,7 @@ function client_step(d)
 
 							local input = tankbobs.io_toShort(data)
 
-							client.tank.state.firing  = tankbobs.t_testAND(input, 0x0001)
-							client.tank.state.forward = tankbobs.t_testAND(input, 0x0002)
-							client.tank.state.back    = tankbobs.t_testAND(input, 0x0004)
-							client.tank.state.right   = tankbobs.t_testAND(input, 0x0008)
-							client.tank.state.left    = tankbobs.t_testAND(input, 0x0010)
-							client.tank.state.special = tankbobs.t_testAND(input, 0x0020)
-							client.tank.state.reload  = tankbobs.t_testAND(input, 0x0040)
-							client.tank.state.reverse = tankbobs.t_testAND(input, 0x0080)
-							client.tank.state.mod     = tankbobs.t_testAND(input, 0x0100)
+							client.tank.state = bit.tobit(input)
 
 							data = data:sub(3)
 						end
@@ -300,6 +298,7 @@ function client_step(d)
 							tankbobs.n_newPacket(5)
 							tankbobs.n_writeToPacket(tankbobs.io_fromChar(0xA5))
 							tankbobs.n_writeToPacket(tankbobs.io_fromInt(client.ping))
+							tankbobs.n_writeToPacket(tankbobs.io_fromInt(client.ticksOffset))
 							sendToClient(client)
 						end
 					end
@@ -330,35 +329,14 @@ function client_step(d)
 			end
 		else
 			if v.ping and v.ticksOffset and v.lastOffsetCheckTime and t >= v.lastOffsetCheckTime + c_const_get("client_ticksCheck") then
-				if p then
+				--if p then
+				if v.lastPTime ~= lastPTime then
+					v.lastPTime = lastPTime
 					-- send the client a snapshot of the world
 					tankbobs.n_newPacket(1024)
 					tankbobs.n_writeToPacket(tankbobs.io_fromChar(0xA2))
-					tankbobs.n_writeToPacket(tankbobs.io_fromInt(t + v.ticksOffset))
-					-- send the client's own ID
+					tankbobs.n_writeToPacket(tankbobs.io_fromInt(tankbobs.t_getTicks()))
 					tankbobs.n_writeToPacket(tankbobs.io_fromChar(k))
-					-- send the number of tanks
-					tankbobs.n_writeToPacket(tankbobs.io_fromChar(numTanks))
-					-- send the input state and health of the first 16 tanks
-					for i = 1, 16 do
-						local v = tanks[k]
-
-						if v and not v.connecting then
-							local input = 0
-
-							if v.tank.state.firing  then input = tankbobs.t_testOR(input, 0x01) end
-							if v.tank.state.forward then input = tankbobs.t_testOR(input, 0x02) end
-							if v.tank.state.back    then input = tankbobs.t_testOR(input, 0x04) end
-							if v.tank.state.right   then input = tankbobs.t_testOR(input, 0x08) end
-							if v.tank.state.left    then input = tankbobs.t_testOR(input, 0x10) end
-							if v.tank.state.special then input = tankbobs.t_testOR(input, 0x20) end
-
-							tankbobs.n_writeToPacket(tankbobs.io_fromChar(input))
-						else
-							tankbobs.n_writeToPacket(tankbobs.io_fromChar(0x00))
-						end
-					end
-					-- send a snapshot of the world with the 937 remaining bytes
 					tankbobs.n_writeToPacket(p)
 					sendToClient(client)
 				end

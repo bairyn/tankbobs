@@ -128,7 +128,11 @@ controlPoints
  - 21 total bytes
 --]]
 
+local bit
+
 function c_tcm_init()
+	bit = c_module_load "bit"
+
 	c_const_set("tcm_dir", c_const_get("data_dir") .. "tcm/")
 	c_const_set("tcm_sets_dir", c_const_get("data_dir") .. "sets/")
 	local magic = 0xDEADBEEF
@@ -587,52 +591,52 @@ function c_tcm_read_map(map)
 			table.insert(powerups, c_tcm_private_get(tankbobs.io_getInt, i))
 		end
 
-		if tankbobs.t_testAND(powerups[1], 0x00000001) ~= 0 then
+		if bit.band(powerups[1], bit.tobit(0x00000001)) ~= 0 then
 			powerupSpawnPoint.enabledPowerups.machinegun = true
 		else
 			powerupSpawnPoint.enabledPowerups.machinegun = false
 		end
-		if tankbobs.t_testAND(powerups[1], 0x00000002) ~= 0 then
+		if bit.band(powerups[1], bit.tobit(0x00000002)) ~= 0 then
 			powerupSpawnPoint.enabledPowerups.shotgun = true
 		else
 			powerupSpawnPoint.enabledPowerups.shotgun = false
 		end
-		if tankbobs.t_testAND(powerups[1], 0x00000004) ~= 0 then
+		if bit.band(powerups[1], bit.tobit(0x00000004)) ~= 0 then
 			powerupSpawnPoint.enabledPowerups.railgun = true
 		else
 			powerupSpawnPoint.enabledPowerups.railgun = false
 		end
-		if tankbobs.t_testAND(powerups[1], 0x00000008) ~= 0 then
+		if bit.band(powerups[1], bit.tobit(0x00000008)) ~= 0 then
 			powerupSpawnPoint.enabledPowerups.coilgun = true
 		else
 			powerupSpawnPoint.enabledPowerups.coilgun = false
 		end
-		if tankbobs.t_testAND(powerups[1], 0x00000010) ~= 0 then
+		if bit.band(powerups[1], bit.tobit(0x00000010)) ~= 0 then
 			powerupSpawnPoint.enabledPowerups.saw = true
 		else
 			powerupSpawnPoint.enabledPowerups.saw = false
 		end
-		if tankbobs.t_testAND(powerups[1], 0x00000020) ~= 0 then
+		if bit.band(powerups[1], bit.tobit(0x00000020)) ~= 0 then
 			powerupSpawnPoint.enabledPowerups.ammo = true
 		else
 			powerupSpawnPoint.enabledPowerups.ammo = false
 		end
-		if tankbobs.t_testAND(powerups[1], 0x00000040) ~= 0 then
+		if bit.band(powerups[1], bit.tobit(0x00000040)) ~= 0 then
 			powerupSpawnPoint.enabledPowerups["aim-aid"] = true
 		else
 			powerupSpawnPoint.enabledPowerups["aim-aid"] = false
 		end
-		if tankbobs.t_testAND(powerups[1], 0x00000080) ~= 0 then
+		if bit.band(powerups[1], bit.tobit(0x00000080)) ~= 0 then
 			powerupSpawnPoint.enabledPowerups.health = true
 		else
 			powerupSpawnPoint.enabledPowerups.health = false
 		end
-		if tankbobs.t_testAND(powerups[1], 0x00000100) ~= 0 then
+		if bit.band(powerups[1], bit.tobit(0x00000100)) ~= 0 then
 			powerupSpawnPoint.enabledPowerups.acceleration = true
 		else
 			powerupSpawnPoint.enabledPowerups.acceleration = false
 		end
-		if tankbobs.t_testAND(powerups[1], 0x00000200) ~= 0 then
+		if bit.band(powerups[1], bit.tobit(0x00000200)) ~= 0 then
 			powerupSpawnPoint.enabledPowerups.shield = true
 		else
 			powerupSpawnPoint.enabledPowerups.shield = false

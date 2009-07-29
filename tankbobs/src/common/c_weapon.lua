@@ -29,10 +29,14 @@ local tankbobs = tankbobs
 local c_world_projectiles
 local c_weapons
 
+local bit
+
 function c_weapon_init()
 	c_world_tankDamage = _G.c_world_tankDamage
 	c_const_get = _G.c_const_get
 	tankbobs = _G.tankbobs
+
+	bit = c_module_load "bit"
 
 	c_const_set("projectile_canSleep", false, 1)
 	c_const_set("projectile_isBullet", true, 1)
@@ -577,7 +581,7 @@ function c_weapon_fire(tank)
 		return
 	end
 
-	local weapon = tank.weapon
+	local weapon = c_weapons[tank.weapon]
 
 	if tank.reloading then
 		if weapon.shotgunClips then
@@ -601,7 +605,7 @@ function c_weapon_fire(tank)
 					-- clip
 
 					if t >= tank.reloading + (c_const_get("world_time") * c_config_get("game.timescale") * weapon.reloadTime.clip) then
-						if tank.ammo < weapon.capacity and tank.clips > 0 and tank.state.reload then
+						if tank.ammo < weapon.capacity and tank.clips > 0 and bit.band(tank.state, RELOAD) ~= 0 then
 							tank.reloading = t
 
 							tank.clips = tank.clips - 1
@@ -639,14 +643,14 @@ function c_weapon_fire(tank)
 	if not tank.lastFireTime or (tank.lastFireTime < t - (c_const_get("world_time") * c_config_get("game.timescale") * weapon.repeatRate)) then
 		tank.lastFireTime = t - (c_const_get("world_time") * c_config_get("game.timescale") * weapon.repeatRate)
 
-		if tank.state.reload and not tank.reloading and tank.clips > 0 and tank.ammo < weapon.capacity then
+		if bit.band(tank.state, RELOAD) ~= 0 and not tank.reloading and tank.clips > 0 and tank.ammo < weapon.capacity then
 			tank.reloading = t
 
 			return
 		end
 	end
 
-	if not tank.state.firing then
+	if not bit.band(tank.state, FIRING) ~= 0 then
 		return
 	end
 
@@ -681,7 +685,7 @@ function c_weapon_fire(tank)
 				local projectile = c_weapon_projectile:new()
 				local vec = tankbobs.m_vec2()
 
-				projectile.weapon = weapon
+				projectile.weapon = weapon.index
 
 				vec.t = tank.r + angle
 				vec.R = weapon.launchDistance
@@ -730,7 +734,7 @@ end
 
 function c_weapon_hit(tank, projectile)
 	if not projectile.collided then
-		c_world_tankDamage(tank, projectile.weapon.damage)
+		c_world_tankDamage(tank, c_weapons[projectile.weapon].damage)
 
 		if tank.health <= 0 then
 			tank.killer = projectile.owner
@@ -773,12 +777,12 @@ function c_weapon_projectileCollided(projectile, body)
 			tank.m.lastDamageTime = tankbobs.t_getTicks()
 		end
 
-		if projectile.collisions > projectile.weapon.projectileMaxCollisions then
+		if projectile.collisions > c_weapons[projectile.weapon].projectileMaxCollisions then
 			projectile.collided = true
 			return
 		end
 
-		if c_world_isTank(body) and projectile.weapon.projectileEndOnBody then
+		if c_world_isTank(body) and c_weapons[projectile.weapon].projectileEndOnBody then
 			projectile.collided = true
 			return
 		end

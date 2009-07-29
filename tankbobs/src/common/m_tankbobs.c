@@ -181,22 +181,6 @@ int t_isWindows(lua_State *L)
 	return 1;
 }
 
-int t_testAND(lua_State *L)
-{
-	CHECKINIT(init, L);
-
-	lua_pushinteger(L, ((unsigned int) luaL_checkinteger(L, 1)) & ((unsigned int) luaL_checkinteger(L, 2)));
-	return 1;
-}
-
-int t_testOR(lua_State *L)
-{
-	CHECKINIT(init, L);
-
-	lua_pushinteger(L, ((unsigned int) luaL_checkinteger(L, 1)) | ((unsigned int) luaL_checkinteger(L, 2)));
-	return 1;
-}
-
 int t_implode(lua_State *L)
 {
 	int i;
@@ -583,6 +567,17 @@ int t_clone(lua_State *L)
 	return 1;
 }
 
+void t_emptyTable(lua_State *L, int tableIndex)
+{
+	/* nil-iffies table */
+	while(lua_pushnil(L), lua_next(L, tableIndex))
+	{
+		lua_pop(L, 1);
+		lua_pushnil(L);
+		lua_settable(L, tableIndex);
+	}
+}
+
 static const struct luaL_Reg tankbobs[] =
 {
 	/* m_tankbobs.c */
@@ -600,8 +595,6 @@ static const struct luaL_Reg tankbobs[] =
 	{"t_delay", t_delay}, /* SDL_Delay() */
 		/* 1st arg is the ms to delay.  Nothing is returned. */
 	{"t_isDebug", t_isDebug}, /* if debugging is enabled, return true, if not, return false */
-	{"t_testAND", t_testAND}, /* test two integers (both are arguments) and return the bool of & */
-	{"t_testOR", t_testOR}, /* test two integers (both are arguments) and return the bool of | */
 	{"t_is64Bit", t_is64Bit}, /* if the machine is running 64-bit, return true, if not, return false */
 	{"t_isWindows", t_isWindows}, /* if the machine is running Windows, return true, if not, return false */
 	{"t_implode", t_implode}, /* implode a passed table of strings and return an imploded string */
@@ -936,7 +929,10 @@ static const struct luaL_Reg tankbobs[] =
 	{"w_persistWorld", w_persistWorld}, /* generate a string of the world */
 		/* A string containing the data of the world is returned.  The first argument passed
 			is the projectiles of the world.  The second argument passed are the tanks of the world.
-			The third argument is a table of the powerups.  The fourth argument passed is the walls */
+			The third argument is a table of the powerups.  The fourth argument passed is a table of
+			the walls.  The fifth and sixth arguments are the control points and flags */
+	{"w_unpersistWorld", w_unpersistWorld}, /* unpersist the world */
+		/* Nothing is returned.  The first argument passed is the data of the persisted world.  The rest of the arguments are the same arguments that would passed to w_persistWorld.  After these arguments, the function to be called for new projectiles is passed, the function for tanks, the function for powerups, the projectile class, and then the tank class, and the powerup class.  Next, all but the first and second arguments which would be passed to w_addBody for projectiles is passed *in a table*.  Then, the function which will be called when a tank is spawned is passed, and then the same for a powerup. */
 	{"w_getVertices", w_getVertices}, /* Get the vertices of a table */
 		/* The body is the first argument passed.  The table of vertices to be set is also passed.  A table of
 			vertices is returned. */

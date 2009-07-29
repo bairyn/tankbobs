@@ -54,6 +54,26 @@ function common_init()
 
 	c_module_init()
 
+	local bit = c_module_load "bit"
+
+	-- contents
+	NULL           = bit.tobit(NULL)
+	WALL           = bit.tobit(WALL)
+	POWERUP        = bit.tobit(POWERUP)
+	TANK           = bit.tobit(TANK)
+	PROJECTILE     = bit.tobit(PROJECTILE)
+
+	-- input state bitmasks
+	FIRING         = bit.tobit(FIRING)
+	FORWARD        = bit.tobit(FORWARD)
+	BACK           = bit.tobit(BACK)
+	LEFT           = bit.tobit(LEFT)
+	RIGHT          = bit.tobit(RIGHT)
+	SPECIAL        = bit.tobit(SPECIAL)
+	RELOAD         = bit.tobit(RELOAD)
+	REVERSE        = bit.tobit(REVERSE)
+	MOD            = bit.tobit(MOD)
+
 	c_config_init()
 
 	c_mods_init()
@@ -101,8 +121,6 @@ function common_done()
 
 	tankbobs.t_quit()
 end
-
-SPECIAL = {}
 
 function common_nil(...)
 	return ...
@@ -331,3 +349,32 @@ end
 function common_lerp(from, to, value)
 	return from - (value * (from - to))
 end
+
+---[[ constants ]]---
+
+SPECIAL        = {}
+
+-- gametypes
+DEATHMATCH     = {}
+DOMINATION     = {}
+CAPTURETHEFLAG = {}
+
+-- bitmasks --
+
+-- contents
+NULL           = 0x0001
+WALL           = 0x0002
+POWERUP        = 0x0004
+TANK           = 0x0008
+PROJECTILE     = 0x0010
+
+-- input state bitmasks
+FIRING         = 0x0001
+FORWARD        = 0x0002
+BACK           = 0x0004
+LEFT           = 0x0008
+RIGHT          = 0x0010
+SPECIAL        = 0x0020
+RELOAD         = 0x0040
+REVERSE        = 0x0080
+MOD            = 0x0100

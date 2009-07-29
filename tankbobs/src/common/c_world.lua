@@ -42,6 +42,8 @@ local t_w_getLinearVelocity   = nil
 local t_w_setLinearVelocity   = nil
 local t_w_setAngularVelocity  = nil
 
+local bit
+
 local c_world_contactListener
 local c_world_tank_checkSpawn
 local c_world_tank_step
@@ -69,19 +71,6 @@ local lastPowerupSpawnTime
 local nextPowerupSpawnPoint
 local worldInitialized = false
 
--- gametypes
-local DEATHMATCH     = {}
-local DOMINATION     = {}
-local CAPTURETHEFLAG = {}
-local gameType = DEATHMATCH
-
--- contents
-local NULL = 0x0001
-local WALL = 0x0002
-local POWERUP = 0x0004
-local TANK = 0x0008
-local PROJECTILE = 0x0010
-
 function c_world_init()
 	c_config_set            = _G.c_config_set
 	c_config_get            = _G.c_config_get
@@ -103,11 +92,13 @@ function c_world_init()
 	t_w_setLinearVelocity   = _G.tankbobs.w_setLinearVelocity
 	t_w_setAngularVelocity  = _G.tankbobs.w_setAngularVelocity
 
+	bit = c_module_load "bit"
+
 	c_config_cheat_protect("game.timescale")
 
 	c_const_set("world_time", 1000)  -- relative to change in seconds
 
-	c_const_set("world_fps", 256)
+	c_const_set("world_fps", 256)  -- TODO: make single changes to world_fps not affect game speeds
 	--c_const_set("world_fps", c_config_get("game.worldFPS"))  -- physics FPS needs to be constant
 	--c_const_set("world_timeStep", common_FTM(c_const_get("world_fps")))
 	c_const_set("world_timeStep", 1 / 500)
@@ -346,7 +337,7 @@ c_world_powerup =
 	r = 0,  -- rotation
 	spawner = nil,
 	collided = false,  -- whether it needs to be removed
-	type = nil,  -- the type of powerup (shotgun, ammo, speed enhancement, etc)
+	type = nil,  -- index of type of powerup
 	spawnTime = 0,  -- the time the powerup spawned
 
 	m = {}
@@ -368,7 +359,6 @@ c_world_tank =
 		o.color.r = c_config_get("game.defaultTankRed")
 		o.color.g = c_config_get("game.defaultTankGreen")
 		o.color.b = c_config_get("game.defaultTankBlue")
-		o.state = c_world_tank_state:new()
 	end,
 
 	p = tankbobs.m_vec2(),
@@ -378,7 +368,7 @@ c_world_tank =
 	exists = false,
 	spawning = false,
 	lastSpawnPoint = 0,
-	state = nil,
+	state = 0,
 	weapon = nil,
 	lastFireTime = nil,
 	body = nil,  -- physical body
@@ -398,21 +388,6 @@ c_world_tank =
 	m = {p = {}}
 }
 
-c_world_tank_state =
-{
-	new = c_class_new,
-
-	firing = false,
-	forward = false,
-	back = false,
-	right = false,
-	left = false,
-	special = false,
-	reload = false,
-	reverse = false,
-	mod = false
-}
-
 c_world_team =
 {
 	new = c_class_new,
@@ -429,6 +404,10 @@ function c_world_getPowerupTypeByName(name)
 	end
 end
 
+function c_world_getPowerupTypeByIndex(type)
+	return c_powerupTypes[type]
+end
+
 function c_world_newWorld()
 	if worldInitialized then
 		return
@@ -443,15 +422,15 @@ function c_world_newWorld()
 	tankbobs.w_newWorld(c_const_get("world_lowerbound") + t_m_vec2(m.leftmost, m.lowermost), c_const_get("world_upperbound") + t_m_vec2(m.rightmost, m.uppermost), t_m_vec2(c_const_get("world_gravityx"), c_const_get("world_gravityy")), c_const_get("world_allowSleep"), c_world_contactListener, c_world_tank_step, c_world_wall_step, c_world_projectile_step, c_world_powerupSpawnPoint_step, c_world_powerup_step, c_world_controlPoint_step, c_world_flag_step, c_world_teleporter_step, c_world_tanks, c_tcm_current_map.walls, c_weapon_getProjectiles(), c_tcm_current_map.powerupSpawnPoints, c_world_powerups, c_tcm_current_map.controlPoints, c_tcm_current_map.flags, c_tcm_current_map.teleporters)
 
 	-- set game type
-	gameType = DEATHMATCH
-	c_world_gameType = c_config_get("game.gameType")
-	local switch = c_world_gameType
-		if switch == "deathmatch" then
-		gameType = DEATHMATCH
+	local switch = c_config_get("game.gameType")
+	if switch == "deathmatch" then
+		c_world_gameType = DEATHMATCH
 	elseif switch == "domination" then
-		gameType = DOMINATION
+		c_world_gameType = DOMINATION
 	elseif switch == "capturetheflag" then
-		gameType = CAPTURETHEFLAG
+		c_world_gameType = CAPTURETHEFLAG
+	else
+		c_world_gameType = DEATHMATCH
 	end
 
 	-- teams
@@ -526,20 +505,20 @@ function c_world_freeWorld()
 	c_world_tanks = {}
 end
 
-function c_world_setGameType(gameTypeString)
-	c_world_gameType = gameTypeString
-
-	local switch = c_world_gameType
-		if switch == "deathmatch" then
-		gameType = DEATHMATCH
-	elseif switch == "domination" then
-		gameType = DOMINATION
-	elseif switch == "capturetheflag" then
-		gameType = CAPTURETHEFLAG
+function c_world_setGameType(gameType)
+	if type(gameType) == "string" then
+		c_world_gameType = gameType
 	else
-		-- default to deathmatch
-		c_world_gameType = "deathmatch"
-		gameType = DEATHMATCH
+		local switch = c_config_get("game.gameType")
+		if switch == "deathmatch" then
+			c_world_gameType = DEATHMATCH
+		elseif switch == "domination" then
+			c_world_gameType = DOMINATION
+		elseif switch == "capturetheflag" then
+			c_world_gameType = CAPTURETHEFLAG
+		else
+			c_world_gameType = DEATHMATCH
+		end
 	end
 end
 
@@ -572,7 +551,7 @@ function c_world_tank_die(tank, t)
 		-- drop flag
 		tank.m.flag.m.pos = tankbobs.m_vec2(tank.p)
 		tank.m.flag.m.dropped = true
-		tank.m.flag.m.stolen = false
+		tank.m.flag.m.stolen = nil
 		tank.m.flag = nil
 	end
 
@@ -589,6 +568,33 @@ function c_world_tank_die(tank, t)
 	tank.spawning = true
 
 	tank.cd = {}
+end
+
+function c_world_spawnTank(tank)
+	tank.spawning = false
+	tank.r = c_const_get("tank_defaultRotation")
+	tank.health = c_const_get("tank_health")
+	tank.shield = 0
+	if c_config_get("game.instagib") then
+		tank.weapon = c_weapon_getByAltName("instagun").index
+	else
+		tank.weapon = c_weapon_getByAltName("default").index
+	end
+	tank.cd = {}
+
+	-- find index
+	local index = 1
+
+	for k, v in pairs(c_world_tanks) do
+		if v == tank then
+			index = k
+		end
+	end
+
+	-- add a physical body
+	tank.body = tankbobs.w_addBody(tank.p, tank.r, c_const_get("tank_canSleep"), c_const_get("tank_isBullet"), c_const_get("tank_linearDamping"), c_const_get("tank_angularDamping"), tank.h, c_const_get("tank_density"), c_const_get("tank_friction"), c_const_get("tank_restitution"), not c_const_get("tank_static"), c_const_get("tank_contentsMask"), c_const_get("tank_clipmask"), c_const_get("tank_isSensor"), index)
+
+	tank.exists = true
 end
 
 function c_world_tank_checkSpawn(d, tank)
@@ -625,33 +631,8 @@ function c_world_tank_checkSpawn(d, tank)
 	end
 
 	-- spawn
-	tank.spawning = false
-	tank.r = c_const_get("tank_defaultRotation")
 	tank.p(playerSpawnPoint.p)
-	tank.health = c_const_get("tank_health")
-	tank.shield = 0
-	if c_config_get("game.instagib") then
-		tank.weapon = c_weapon_getByAltName("instagun")
-	else
-		tank.weapon = c_weapon_getByAltName("default")
-	end
-	tank.cd = {}
-
-	-- find index
-	local index = 1
-
-	for k, v in pairs(c_world_tanks) do
-		if v == tank then
-			index = k
-		end
-	end
-
-	-- add a physical body
-	tank.body = tankbobs.w_addBody(tank.p, tank.r, c_const_get("tank_canSleep"), c_const_get("tank_isBullet"), c_const_get("tank_linearDamping"), c_const_get("tank_angularDamping"), tank.h, c_const_get("tank_density"), c_const_get("tank_friction"), c_const_get("tank_restitution"), not c_const_get("tank_static"), c_const_get("tank_contentsMask"), c_const_get("tank_clipmask"), c_const_get("tank_isSensor"), index)
-
-	tank.exists = true
-
-	return true
+	return c_world_spawnTank(tank)
 end
 
 local p1a = {nil, nil, nil}
@@ -990,8 +971,8 @@ function c_world_tank_step(d, tank)
 
 	local vel = t_w_getLinearVelocity(tank.body)
 
-	if tank.state.special then
-		if tank.state.left then
+	if bit.band(tank.state, SPECIAL) ~= 0 then
+		if bit.band(tank.state, LEFT) ~= 0 then
 			if vel.R < 0 then  -- inverse rotation
 				tank.r = tank.r - tank_rotationSpeed * vel.R / tank_rotationSpecialSpeed
 			else
@@ -999,7 +980,7 @@ function c_world_tank_step(d, tank)
 			end
 		end
 
-		if tank.state.right then
+		if bit.band(tank.state, RIGHT) ~= 0 then
 			if vel.R < 0 then  -- inverse rotation
 				tank.r = tank.r + tank_rotationSpeed * vel.R / tank_rotationSpecialSpeed
 			else
@@ -1011,10 +992,14 @@ function c_world_tank_step(d, tank)
 
 		t_w_setLinearVelocity(tank.body, vel)
 
-		tank.state.reverse = tank.state.back
+		if bit.band(tank.state, BACK) ~= 0 then
+			tank.state = bit.bor(tank.state, REVERSE)
+		else
+			tank.state = bit.band(tank.state, bit.bnot(REVERSE))
+		end
 	else
-		if tank.state.forward or tank.state.back then
-			if tank.state.forward then
+		if bit.band(tank.state, FORWARD) ~= 0 or bit.band(tank.state, BACK) ~= 0 then
+			if bit.band(tank.state, FORWARD) ~= 0 then
 				-- determine the acceleration
 				local acceleration
 				local speedK = tank_speedK
@@ -1051,8 +1036,8 @@ function c_world_tank_step(d, tank)
 				t_w_setLinearVelocity(tank.body, newVel)
 				vel(newVel)
 			end
-			if tank.state.back then
-				if tank.state.reverse and vel.R <= c_const_get("tank_decelerationMaxSpeed") then
+			if bit.band(tank.state, BACK) ~= 0 then
+				if bit.band(tank.state, REVERSE) ~= 0 and vel.R <= c_const_get("tank_decelerationMaxSpeed") then
 					-- reverse
 
 					local addVel = t_m_vec2()
@@ -1073,7 +1058,7 @@ function c_world_tank_step(d, tank)
 					vel(newVel)
 				end
 			else
-				tank.state.reverse = false
+				tank.state = bit.band(tank.state, bit.bnot(REVERSE))
 			end
 		else
 			local v = t_w_getLinearVelocity(tank.body)
@@ -1081,14 +1066,14 @@ function c_world_tank_step(d, tank)
 			v.R = v.R / (1 + tank_worldFriction)
 			t_w_setLinearVelocity(tank.body, v)
 
-			tank.state.reverse = false
+			tank.state = bit.band(tank.state, bit.bnot(REVERSE))
 		end
 
-		if tank.state.left then
+		if bit.band(tank.state, LEFT) ~= 0 then
 			tank.r = tank.r + tank_rotationSpeed
 		end
 
-		if tank.state.right then
+		if bit.band(tank.state, RIGHT) ~= 0 then
 			tank.r = tank.r - tank_rotationSpeed
 		end
 	end
@@ -1230,7 +1215,7 @@ function c_world_powerupSpawnPoint_step(d, powerupSpawnPoint)
 
 			powerup.spawner = powerupSpawnPoint
 
-			powerup.typeName = nil
+			powerup.type = nil
 
 			local found = false
 			for k, v in pairs(powerupSpawnPoint.enabledPowerups) do
@@ -1238,7 +1223,7 @@ function c_world_powerupSpawnPoint_step(d, powerupSpawnPoint)
 					if found then
 						if c_world_getPowerupTypeByName(k) and (not c_config_get("game.instagib") or c_world_getPowerupTypeByName(k).instagib) then
 							powerupSpawnPoint.m.lastPowerup = k
-							powerup.typeName = k
+							powerup.type = c_world_getPowerupTypeByName(k).index
 							break
 						end
 					end
@@ -1248,20 +1233,20 @@ function c_world_powerupSpawnPoint_step(d, powerupSpawnPoint)
 					end
 				end
 			end
-			if not powerup.typeName then
+			if not powerup.type then
 				for k, v in pairs(powerupSpawnPoint.enabledPowerups) do
 					if v then
 						if found then
 							if c_world_getPowerupTypeByName(k) and (not c_config_get("game.instagib") or c_world_getPowerupTypeByName(k).instagib) then
 								powerupSpawnPoint.m.lastPowerup = k
-								powerup.typeName = k
+								powerup.type = c_world_getPowerupTypeByName(k).index 
 								break
 							end
 						end
 					end
 				end
 			end
-			if not powerup.typeName then
+			if not powerup.type then
 				return
 			else
 				table.insert(c_world_powerups, powerup)
@@ -1306,7 +1291,7 @@ function c_world_powerup_pickUp(tank, powerup)
 	end
 
 	local t = t_t_getTicks()
-	local powerupType = c_world_getPowerupTypeByName(powerup.typeName)
+	local powerupType = c_world_getPowerupTypeByIndex(powerup.type)
 
 	if powerup.collided then
 		return
@@ -1440,7 +1425,7 @@ function c_world_flag_step(d, flag)
 	local t = t_t_getTicks()
 
 	local p = flag.m.dropped and flag.m.pos or flag.p
-	for _, v in pairs(c_world_tanks) do
+	for k, v in pairs(c_world_tanks) do
 		if v.exists then
 			-- inexpensive distance check
 			if math.abs((v.p - p).R) <= c_const_get("flag_touchDistance") then
@@ -1451,7 +1436,7 @@ function c_world_flag_step(d, flag)
 
 							v.m.flag = flag
 
-							flag.m.stolen = v
+							flag.m.stolen = k
 							flag.m.dropped = false  -- redundant, but just in case
 
 							flag.m.lastPickupTime = t
@@ -1467,7 +1452,7 @@ function c_world_flag_step(d, flag)
 							flag.m.lastCaptureTime = t
 
 							-- silently return flag
-							v.m.flag.m.stolen = false
+							v.m.flag.m.stolen = nil
 							v.m.flag = nil
 						end
 					end
@@ -1476,7 +1461,7 @@ function c_world_flag_step(d, flag)
 						-- return flag
 
 						flag.m.dropped = false
-						flag.m.stolen = false  -- redundant, but just in case
+						flag.m.stolen = nil  -- redundant, but just in case
 
 						flag.m.lastReturnTime = t
 					else
@@ -1485,7 +1470,7 @@ function c_world_flag_step(d, flag)
 						v.m.flag = flag
 
 						flag.m.dropped = false
-						flag.m.stolen = v
+						flag.m.stolen = k
 
 						flag.m.lastPickupTime = t
 					end
@@ -1744,10 +1729,13 @@ function c_world_setIterations()
 	return tankbobs.w_getIterations()
 end
 
+local timeStep = nil
 function c_world_step(d)
-	local t = t_t_getTicks()
+	local t = timeStep or t_t_getTicks()
 	local f = 1 / (c_const_get("world_time") * c_config_get("game.timescale"))
 	local wd = common_FTM(c_const_get("world_fps")) * f
+
+	timeStep = nil
 
 	if worldInitialized then
 		if paused then
@@ -1802,6 +1790,10 @@ function c_world_step(d)
 			end
 		end
 	end
+end
+
+function c_world_stepTime(t)
+	stepTime = t
 end
 
 function c_world_getTanks()

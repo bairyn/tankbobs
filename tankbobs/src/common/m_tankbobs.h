@@ -86,11 +86,10 @@ int t_delay(lua_State *L);
 int t_isDebug(lua_State *L);
 int t_is64Bit(lua_State *L);
 int t_isWindows(lua_State *L);
-int t_testAND(lua_State *L);
-int t_testOR(lua_State *L);
 int t_implode(lua_State *L);
 int t_explode(lua_State *L);
 int t_clone(lua_State *L);
+void t_emptyTable(lua_State *L, int tableIndex);
 
 /* m_input.c */
 void in_init(lua_State *L);
@@ -258,6 +257,7 @@ int w_applyImpulse(lua_State *L);
 int w_getCenterOfMass(lua_State *L);
 int w_scaleVelocity(lua_State *L);
 int w_persistWorld(lua_State *L);
+int w_unpersistWorld(lua_State *L);
 int w_getVertices(lua_State *L);
 int w_getContents(lua_State *L);
 int w_getClipmask(lua_State *L);
