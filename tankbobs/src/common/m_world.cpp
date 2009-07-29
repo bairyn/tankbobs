@@ -901,7 +901,6 @@ int w_persistWorld(lua_State *L)
 		lua_pop(L, 1);
 	}
 
-	/* TODO: FIXME: stack underflow / overflow */
 	/* walls */
 	/* float (x|y); float angle; float velX; float velY; float angularVelocity; float pathID; float previousPathID; float startpos(x|y); float pathPos; */
 	++order;
