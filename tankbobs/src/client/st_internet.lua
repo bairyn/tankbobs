@@ -33,14 +33,19 @@ local st_internet_step
 local st_internet_serverIP
 local st_internet_start
 
-local UNINITIALIZED = 0
-local UNCONNECTED   = 1
-local REQUESTING    = 2  -- client sent initial packet
-local RESPONDED     = 3  -- server responded to connection packet
-local CONNECTED     = 4  -- connected to server
+UNINITIALIZED       = 0
+UNCONNECTED         = 1
+REQUESTING          = 2  -- client sent initial packet
+RESPONDED           = 3  -- server responded to connection packet
+CONNECTED           = 4  -- connected to server
+local UNINITIALIZED = UNINITIALIZED
+local UNCONNECTED   = UNCONNECTED
+local REQUESTING    = REQUESTING
+local RESPONDED     = RESPONDED
+local CONNECTED     = CONNECTED
 
 function st_internet_init()
-	connection = {state = UNCONNECTED, proceeding = false, lastRequestTime, challenge = 0, address = c_config_get("client.serverIP"), ip = "", port = nil, ui = "", ping = nil, offset = nil, gameType = nil}
+	connection = {state = UNCONNECTED, proceeding = false, lastRequestTime, challenge = 0, address = c_config_get("client.serverIP"), ip = "", port = nil, ui = "", ping = nil, offset = nil, gameType = nil, t = nil}
 
 	if connection.address:find(":") then
 		connection.port = tonumber(connection.address:sub(connection.address:find(":") + 1))

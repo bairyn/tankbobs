@@ -152,12 +152,12 @@ function online_readPackets(d)  -- local
 			elseif switch == 0xA2 then
 				if #data >= 5 then
 					if connection.ping then
-						local t = tankbobs.io_toChar(data:sub(1, 1)) data = data:sub(2)
+						connection.t = tankbobs.io_toChar(data:sub(1, 1)) data = data:sub(2)
 						local timestamp = tankbobs.io_toInt(data:sub(1, 4)) data = data:sub(5)
 						if not common_empty(c_world_projectiles) then
 							c_world_projectiles = {}  -- TODO: better way of emptying table?
 						end
-						tankbobs.w_unpersistWorld(data, t, unpack(unpersistArgs))
+						tankbobs.w_unpersistWorld(data, connection.t, unpack(unpersistArgs))
 						c_world_stepTime(timestamp + connection.offset)
 						if c_config_get("client.unlagged") then
 							--[[
@@ -167,7 +167,7 @@ function online_readPackets(d)  -- local
 							-- otherwise, (if unlagged is disabled), only step ahead once,
 							-- so that the client sees what the server probably sees now
 							--]]
-							local tank = t_t_clone(c_world_getTanks()[t])
+							local tank = t_t_clone(c_world_getTanks()[connection.t])
 							c_world_step(d)
 							c_world_stepTime(timestamp + connection.offset)
 							c_world_getTanks()[t] = tank
@@ -335,6 +335,14 @@ function st_online_mouse(x, y, xrel, yrel)
 	gui_mouse(x, y, xrel, yrel)
 end
 
+local function sendInput()
+	tankbobs.n_newPacket(0x02)
+	tankbobs.n_writeToPacket(connection.ui)
+	tankbobs.n_writeToPacket(tankbobs.io_fromShort(c_world_getTanks()[connection.t].state))
+	tankbobs.n_sendPacket()
+end
+
+local lastITime
 function st_online_step(d)
 	gui_paint(d)
 
@@ -343,6 +351,14 @@ function st_online_step(d)
 	if not connection.ping then
 		return
 	end
+
+	if connection.t and (not lastITime or (c_config_get("server.ifps") > 0 and t - lastITime < common_FTM(c_config_get("server.ifps")))) then
+		-- send server input
+		lastITime = t
+		sendInput()
+	end
+
+print"GOOD"
 
 	game_step(d)
 

@@ -254,6 +254,9 @@ function client_step(d)
 									tankbobs.n_writeToPacket(tankbobs.io_fromChar(0xA1))
 									sendToClient(client)
 
+									-- request initial ping
+									client_askForTick(client)
+
 									s_printnl("'", client.tank.name, "' entered the game from ", client.ip, ":", client.port)
 								else
 									client.challengeAttempts = client.challengeAttempts + 1
@@ -267,16 +270,14 @@ function client_step(d)
 					end
 				end
 			elseif switch == 0x02 then
-				if #data >= 33 then
+				if #data >= 34 then
 					if client then
 						if client_validate(client, data:sub(1, 32)) then
 							data = data:sub(33)
 
-							local input = tankbobs.io_toShort(data)
+							local input = tankbobs.io_toShort(data) data = data:sub(3)
 
 							client.tank.state = bit.tobit(input)
-
-							data = data:sub(3)
 						end
 					end
 				end
