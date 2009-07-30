@@ -1649,12 +1649,19 @@ local function c_world_private_resetWorldTimers()
 	worldTime = t_t_getTicks()
 
 	for _, v in pairs(c_world_tanks) do
-		v.lastFireTime = t
-		v.nextSpawnTime = t + c_const_get("world_time") * c_config_get("game.timescale") * c_const_get("tank_spawnTime")
+		if v.lastFireTime then
+			v.lastFireTime = t
+		end
+
+		if v.nextSpawnTime then
+			v.nextSpawnTime = t + c_const_get("world_time") * c_config_get("game.timescale") * c_const_get("tank_spawnTime")
+		end
 	end
 
 	for _, v in pairs(c_tcm_current_map.powerupSpawnPoints) do
-		v.m.nextPowerupTime = t + c_const_get("world_time") * c_config_get("game.timescale") * c_const_get("powerupSpawnPoint_initialPowerupTime")
+		if v.m.nextPowerupTime then
+			v.m.nextPowerupTime = t + c_const_get("world_time") * c_config_get("game.timescale") * c_const_get("powerupSpawnPoint_initialPowerupTime")
+		end
 	end
 
 	for _, v in pairs(c_world_powerups) do
@@ -1675,12 +1682,19 @@ local function c_world_private_offsetWorldTimers(d)
 	worldTime = t_t_getTicks()
 
 	for _, v in pairs(c_world_tanks) do
-		v.lastFireTime = v.lastFireTime + d
-		v.nextSpawnTime = v.nextSpawnTime + d
+		if v.lastFireTime then
+			v.lastFireTime = v.lastFireTime + d
+		end
+
+		if v.nextSpawnTime then
+			v.nextSpawnTime = v.nextSpawnTime + d
+		end
 	end
 
 	for _, v in pairs(c_tcm_current_map.powerupSpawnPoints) do
-		v.m.nextPowerupTime = v.m.nextPowerupTime + d
+		if v.m.nextPowerupTime then
+			v.m.nextPowerupTime = v.m.nextPowerupTime + d
+		end
 	end
 
 	for _, v in pairs(c_world_powerups) do

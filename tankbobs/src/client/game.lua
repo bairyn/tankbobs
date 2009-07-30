@@ -691,7 +691,9 @@ function game_step(d)
 			end
 		end
 		if not uppermost or not lowermost or not rightmost or not leftmost then
-game_drawWorld(d)  -- TODO: REMOVE!!!
+			-- draw world in default position
+			game_drawWorld(d)
+
 			return
 		end
 		local m = c_tcm_current_map

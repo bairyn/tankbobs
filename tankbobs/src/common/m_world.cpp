@@ -801,7 +801,7 @@ int w_persistWorld(lua_State *L)
 	while(lua_next(L, order))
 	{
 		lua_getfield(L, -1, "exists");
-		if(!lua_toboolean(L, -1) &&
+		if(lua_toboolean(L, -1) &&
 				bufpos + 5 * sizeof(float) + 1 * sizeof(short) < buf + sizeof(buf))
 		{
 			static char name[21];
@@ -824,13 +824,13 @@ int w_persistWorld(lua_State *L)
 			v = CHECKVEC(L, -1);
 			*((float *) bufpos) = io_floatNL(v->x); bufpos += sizeof(float);
 			*((float *) bufpos) = io_floatNL(v->y); bufpos += sizeof(float);
+			lua_pop(L, 1);
 
 			/* velocity */
-			lua_getfield(L, -1, "m");
 			lua_getfield(L, -1, "body");
 			body = reinterpret_cast<b2Body *>(lua_touserdata(L, -1));
+			lua_pop(L, 1);
 			vel = body->GetLinearVelocity();
-			lua_pop(L, 2);
 			*((float *) bufpos) = io_floatNL(vel.x); bufpos += sizeof(float);
 			*((float *) bufpos) = io_floatNL(vel.y); bufpos += sizeof(float);
 
@@ -1077,6 +1077,8 @@ int w_unpersistWorld(lua_State *L)
 
 	vec2_t *v;
 
+	static const unsigned int preArgs = 2;
+
 	const char *data = lua_tostring(L, 1);
 
 	unsigned int projectileBodyLen = lua_objlen(L, 14);
@@ -1097,12 +1099,12 @@ int w_unpersistWorld(lua_State *L)
 	/* Projectiles (special) */
 	for(int i = 0; i < numProjectiles; i++)
 	{
-		lua_pushvalue(L, 8);
-		lua_pushvalue(L, 11);
-		lua_call(L, 1, 0);
+		lua_pushvalue(L, 7 + preArgs);
+		lua_pushvalue(L, 10 + preArgs);
+		lua_call(L, 1, 1);
 		lua_pushvalue(L, -1);
 		lua_pushinteger(L, i + 1);
-		lua_settable(L, 1);
+		lua_settable(L, 1 + preArgs);
 
 		/* weapon */
 		lua_pushinteger(L, io_charNL(*((char *) data))); data += sizeof(char);
@@ -1124,7 +1126,7 @@ int w_unpersistWorld(lua_State *L)
 		/* position on top of stack */
 		lua_getfield(L, -2, "r");
 		lua_getglobal(L, "unpack");
-		lua_pushvalue(L, 14);
+		lua_pushvalue(L, 13 + preArgs);
 		lua_call(L, 1, projectileBodyLen);
 		lua_call(L, projectileBodyLen + 2, 1);
 		w_addBody(L);
@@ -1147,28 +1149,23 @@ int w_unpersistWorld(lua_State *L)
 	for(int i = 0; i < numTanks; i++)
 	{
 		lua_pushinteger(L, i + 1);
-		lua_gettable(L, 2);
+		lua_gettable(L, 2 + preArgs);
 		if(lua_isnoneornil(L, -1))
 		{
 			lua_pop(L, 1);
 
 			/* add the tank */
-			lua_pushvalue(L, 9);
-			lua_pushvalue(L, 12);
-			lua_call(L, 1, 0);
-			lua_pushvalue(L, -1);
+			lua_pushvalue(L, 8 + preArgs);
+			lua_pushvalue(L, 11 + preArgs);
+			lua_call(L, 1, 1);
 			lua_pushinteger(L, i + 1);
-			lua_settable(L, 2);
+			lua_pushvalue(L, -2);
+			lua_settable(L, 2 + preArgs);
 
 			/* spawn the tank */
-			lua_pushvalue(L, 13);
-			lua_pushinteger(L, i + 1);
-			lua_gettable(L, 2);
+			lua_pushvalue(L, 14 + preArgs);
+			lua_pushvalue(L, -2);
 			lua_call(L, 1, 0);
-
-			/* push tank on stack */
-			lua_pushinteger(L, i + 1);
-			lua_gettable(L, 2);
 		}
 
 		/* get body */
@@ -1214,28 +1211,23 @@ int w_unpersistWorld(lua_State *L)
 	for(int i = 0; i < numPowerups; i++)
 	{
 		lua_pushinteger(L, i + 1);
-		lua_gettable(L, 3);
+		lua_gettable(L, 3 + preArgs);
 		if(lua_isnoneornil(L, -1))
 		{
 			lua_pop(L, 1);
 
 			/* add the powerup */
-			lua_pushvalue(L, 10);
-			lua_pushvalue(L, 13);
-			lua_call(L, 1, 0);
-			lua_pushvalue(L, -1);
+			lua_pushvalue(L, 9 + preArgs);
+			lua_pushvalue(L, 12 + preArgs);
+			lua_call(L, 1, 1);
 			lua_pushinteger(L, i + 1);
-			lua_settable(L, 3);
+			lua_pushvalue(L, -2);
+			lua_settable(L, 3 + preArgs);
 
 			/* spawn the powerup */
-			lua_pushvalue(L, 13);
-			lua_pushinteger(L, i + 1);
-			lua_gettable(L, 3);
+			lua_pushvalue(L, 15 + preArgs);
+			lua_pushvalue(L, -2);
 			lua_call(L, 1, 0);
-
-			/* push powerup on stack */
-			lua_pushinteger(L, i + 1);
-			lua_gettable(L, 3);
 		}
 
 		/* get body */
@@ -1279,7 +1271,7 @@ int w_unpersistWorld(lua_State *L)
 	for(int i = 0; i < numWalls; i++)
 	{
 		lua_pushinteger(L, i + 1);
-		lua_gettable(L, 3);
+		lua_gettable(L, 4 + preArgs);
 		if(lua_isnoneornil(L, -1))
 		{
 			/* This should never happen, but play safe anyway */
@@ -1374,7 +1366,7 @@ int w_unpersistWorld(lua_State *L)
 	for(int i = 0; i < numControlPoints; i++)
 	{
 		lua_pushinteger(L, i + 1);
-		lua_gettable(L, 3);
+		lua_gettable(L, 5  + preArgs);
 		if(lua_isnoneornil(L, -1))
 		{
 			/* This should never happen, but play safe anyway */
@@ -1413,7 +1405,7 @@ int w_unpersistWorld(lua_State *L)
 	for(int i = 0; i < numFlags; i++)
 	{
 		lua_pushinteger(L, i + 1);
-		lua_gettable(L, 3);
+		lua_gettable(L, 6  + preArgs);
 		if(lua_isnoneornil(L, -1))
 		{
 			/* This should never happen, but play safe anyway */

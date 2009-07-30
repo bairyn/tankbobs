@@ -179,8 +179,6 @@ function st_online_init()
 
 	game_refreshKeys = refreshKeys
 
-	unpersistArgs = {c_weapon_getProjectiles(), c_world_getTanks(), c_world_getPowerups(), c_tcm_current_map.walls, c_tcm_current_map.controlPoints, c_tcm_current_map.flags, c_weapon_projectile.new, c_world_tank.new, c_world_powerup.new, c_weapon_projectile, c_world_tank, c_world_powerup, {c_const_get("projectile_canSleep"), c_const_get("projectile_isBullet"), c_const_get("projectile_linearDamping"), c_const_get("projectile_angularDamping"), c_weapon_getWeapons()[1]  --[[ most common hull --]], c_weapon_getWeapons()[1].projectileDensity  --[[ most common projectile hull --]], c_const_get("projectile_friction"), c_weapon_getWeapons()[1].projectileRestitution  --[[ most common restitution --]], true, c_const_get("projectile_contentsMask"), c_const_get("projectile_clipmask"), c_const_get("projectile_isSensor"), #c_weapon_getProjectiles() + 1}, c_world_spawnTank, c_world_spawnPowerup}
-
 	game_new()
 
 	-- pause label
@@ -205,6 +203,9 @@ function st_online_init()
 
 	-- create local world
 	c_world_newWorld()
+
+	unpersistArgs = {c_weapon_getProjectiles(), c_world_getTanks(), c_world_getPowerups(), c_tcm_current_map.walls, c_tcm_current_map.controlPoints, c_tcm_current_map.flags, c_weapon_projectile.new, c_world_tank.new, c_world_powerup.new, c_weapon_projectile, c_world_tank, c_world_powerup, {c_const_get("projectile_canSleep"), c_const_get("projectile_isBullet"), c_const_get("projectile_linearDamping"), c_const_get("projectile_angularDamping"), c_weapon_getWeapons()[1]  --[[ most common hull --]], c_weapon_getWeapons()[1].projectileDensity  --[[ most common projectile hull --]], c_const_get("projectile_friction"), c_weapon_getWeapons()[1].projectileRestitution  --[[ most common restitution --]], true, c_const_get("projectile_contentsMask"), c_const_get("projectile_clipmask"), c_const_get("projectile_isSensor"), #c_weapon_getProjectiles() + 1}, c_world_spawnTank, c_world_spawnPowerup}
+
 end
 
 function st_online_done()
@@ -247,7 +248,6 @@ function online_readPackets(d)  -- local
 							c_world_projectiles = {}  -- TODO: better way of emptying table?
 						end
 						tankbobs.w_unpersistWorld(data, connection.t, unpack(unpersistArgs))
-print(#c_world_getTanks())  -- TODO: REMOVE!!!
 						c_world_stepTime(timestamp)
 						if c_config_get("client.unlagged") then
 							--[[

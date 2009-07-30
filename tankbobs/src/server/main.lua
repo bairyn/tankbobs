@@ -93,6 +93,7 @@ function s_printnl(...)
 
 	tankbobs.c_print('\n')
 end
+s_println = s_printnl
 
 local lastTime = 0
 function main_loop()
@@ -121,7 +122,7 @@ function main_loop()
 		return
 	end
 
-	if c_tcm_current_map and (not lastPTime or (c_config_get("server.pfps") > 0 and t - lastPTime < common_FTM(c_config_get("server.pfps")))) then
+	if c_tcm_current_map and (c_config_get("server.pfps") == 0 or not lastPTime or t - lastPTime > common_FTM(c_config_get("server.pfps"))) then
 		lastPTime = t
 		p = tankbobs.w_persistWorld(c_weapon_getProjectiles(), c_world_getTanks(), c_world_getPowerups(), c_tcm_current_map.walls, c_tcm_current_map.controlPoints, c_tcm_current_map.flags)
 	end

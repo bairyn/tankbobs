@@ -83,6 +83,7 @@ client =
 	connecting = false,
 	lastAliveTime = nil,  -- number
 	lastTickSendTime = nil,   -- number
+	lastTickRequestTime = nil,   -- number (this one doesn't get reset when tick is received; used to keep track of when the server needs to update ping
 	lastPTime = nil,
 	ui = ""  -- unique identifier
 }
@@ -127,11 +128,10 @@ end
 local function client_askForTick(client)
 	local t = tankbobs.t_getTicks()
 
-	if client.lastTickSendTime then
-		return  -- still requesting the tick
+	if not client.lastTickSendTime then
+		client.lastTickSendTime = t
 	end
-
-	client.lastTickSendTime = t
+	client.lastTickRequestTime = t
 	tankbobs.n_newPacket(1)
 	tankbobs.n_writeToPacket(tankbobs.io_fromChar(0xA3))
 	sendToClient(client)
@@ -247,14 +247,12 @@ function client_step(d)
 
 								if challenge == client.challenge then
 									client.connecting = false
+									table.insert(c_world_getTanks(), client.tank)
 									c_world_tank_spawn(client.tank)
 
 									tankbobs.n_newPacket(1)
 									tankbobs.n_writeToPacket(tankbobs.io_fromChar(0xA1))
 									sendToClient(client)
-
-									-- request initial ping
-									client_askForTick(client)
 
 									s_printnl("'", client.tank.name, "' entered the game from ", client.ip, ":", client.port)
 								else
@@ -330,10 +328,11 @@ function client_step(d)
 				client_disconnect(v, "timed out")
 			end
 		else
-			if v.ping and v.ticksOffset and v.lastTickSendTime and t <= v.lastTickSendTime + c_const_get("client_ticksCheck") then
+			if v.ping and v.ticksOffset and v.lastTickRequestTime then
 				--if p then
 				if v.lastPTime ~= lastPTime then
 					v.lastPTime = lastPTime
+s_printnl"oenuthoeunh"
 					-- send the client a snapshot of the world
 					tankbobs.n_newPacket(1024)
 					tankbobs.n_writeToPacket(tankbobs.io_fromChar(0xA2))
@@ -341,6 +340,10 @@ function client_step(d)
 					tankbobs.n_writeToPacket(tankbobs.io_fromChar(k))
 					tankbobs.n_writeToPacket(p)
 					sendToClient(v)
+				end
+
+				if t <= v.lastTickRequestTime + c_const_get("client_ticksCheck") then
+					client_askForTick(v)
 				end
 			else
 				client_askForTick(v)
