@@ -242,12 +242,20 @@ function online_readPackets(d)  -- local
 			elseif switch == 0xA2 then
 				if #data >= 5 then
 					if connection.ping then
-						connection.t = tankbobs.io_toChar(data:sub(1, 1)) data = data:sub(2)
 						local timestamp = tankbobs.io_toInt(data:sub(1, 4)) data = data:sub(5)
+						connection.t = tankbobs.io_toChar(data:sub(1, 1)) data = data:sub(2)
+						local tank = c_world_getTanks()[connection.t]
 						if not common_empty(c_weapon_getProjectiles()) then
 							c_world_projectiles = {}  -- TODO: better way of emptying table?
 						end
+						local state
+						if tank then
+							state = tank.state
+						end
 						tankbobs.w_unpersistWorld(data, connection.t, unpack(unpersistArgs))
+						if tank then
+							tank.state = state
+						end
 						c_world_stepTime(timestamp)
 						if c_config_get("client.unlagged") then
 							--[[
@@ -262,8 +270,8 @@ function online_readPackets(d)  -- local
 								c_world_step(d)
 								c_world_stepTime(timestamp + connection.offset)
 								c_world_getTanks()[connection.t] = tank
-								tankbobs.w_setPosition(tank.m.body, tank.p)
-								tankbobs.w_setAngle(tank.m.body, tank.r)
+								tankbobs.w_setPosition(tank.body, tank.p)
+								tankbobs.w_setAngle(tank.body, tank.r)
 							end
 						end
 					end
@@ -434,11 +442,12 @@ end
 local function sendInput()
 	local tank = c_world_getTanks()[connection.t]
 
-	if not tank then
+	if not tank or not tank.exists then
 		return
 	end
 
-	tankbobs.n_newPacket(0x02)
+	tankbobs.n_newPacket(35)
+	tankbobs.n_writeToPacket(tankbobs.io_fromChar(0x02))
 	tankbobs.n_writeToPacket(connection.ui)
 	tankbobs.n_writeToPacket(tankbobs.io_fromShort(tank.state))
 	tankbobs.n_sendPacket()
@@ -452,7 +461,7 @@ function st_online_step(d)
 		return
 	end
 
-	if connection.t and (not lastITime or (c_config_get("client.ifps") > 0 and tankbobs.t_getTicks() - lastITime < common_FTM(c_config_get("client.ifps")))) then
+	if connection.t and (c_config_get("client.ifps") == 0 or not lastITime or tankbobs.t_getTicks() - lastITime > common_FTM(c_config_get("client.ifps"))) then
 		-- send server input
 		lastITime = tankbobs.t_getTicks()
 		sendInput()

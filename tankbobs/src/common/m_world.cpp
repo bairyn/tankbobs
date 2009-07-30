@@ -1206,7 +1206,7 @@ int w_unpersistWorld(lua_State *L)
 		b2Vec2 vel;
 		vel.x = io_floatNL(*((float *) data)); data += sizeof(float);
 		vel.y = io_floatNL(*((float *) data)); data += sizeof(float);
-		body->SetLinearVelocity(b2Vec2(v->x, v->y));
+		body->SetLinearVelocity(vel);
 
 		/* input */
 		lua_pushinteger(L, io_shortNL(*((short *) data))); data += sizeof(short);
