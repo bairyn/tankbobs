@@ -158,6 +158,7 @@ local function client_disconnect(client, reason)
 		if v == client then
 			-- remove tank from world
 			c_world_tank_die(v.tank)
+			c_world_tank_remove(v.tank)
 
 			-- remove client
 			table.remove(clients, k)

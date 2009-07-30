@@ -570,6 +570,18 @@ function c_world_tank_die(tank, t)
 	tank.cd = {}
 end
 
+function c_world_tank_remove(tank)
+	for k, v in pairs(c_world_tanks) do
+		if v == tank then
+			table.remove(c_world_tanks, k)
+
+			if c_world_tanks[k] then
+				c_world_tanks[k] = nil
+			end
+		end
+	end
+end
+
 function c_world_spawnTank(tank)
 	tank.spawning = false
 	tank.r = c_const_get("tank_defaultRotation")

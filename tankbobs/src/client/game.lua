@@ -112,8 +112,8 @@ function game_new()
 
 			widget.text = ""
 
-			for k, v in pairs(c_world_getTanks()) do
-				local name = tostring(c_config_get("game.player" .. tostring(k) .. ".name"))
+			for _, v in pairs(c_world_getTanks()) do
+				local name = v.name
 
 				if #name > length then
 					length = #name
@@ -124,14 +124,14 @@ function game_new()
 				length = 1
 			end
 
-			for k, v in pairs(c_world_getTanks()) do
+			for _, v in pairs(c_world_getTanks()) do
 				local name, between, score
 
 				if widget.text:len() ~= 0 then
 					widget.text = widget.text .. "\n"
 				end
 
-				name = tostring(c_config_get("game.player" .. tostring(k) .. ".name"))
+				name = tostring(v.name)
 				between = string.rep("  ", length - #name + 1)
 				score = tostring(v.score)
 
