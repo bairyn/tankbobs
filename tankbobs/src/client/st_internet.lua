@@ -198,7 +198,7 @@ function st_internet_step(d)
 		until not status
 
 		if tankbobs.t_getTicks() >= connection.lastRequestTime + c_const_get("server_timeout") then
-			if connection.state > RESPONDED then
+			if connection.state > UNCONNECTED then
 				-- abort the connection
 				tankbobs.n_newPacket(33)
 				tankbobs.n_writeToPacket(tankbobs.io_fromChar(0x04))
