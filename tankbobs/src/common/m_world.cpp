@@ -795,18 +795,21 @@ int w_persistWorld(lua_State *L)
 	}
 
 	/* tanks */
-	/* char name[21]; float rotation; float x; float y; float velX; float velY; short input; */
+	/* char index; char name[21]; float rotation; float x; float y; float velX; float velY; short input; */
 	++order;
 	lua_pushnil(L);
 	while(lua_next(L, order))
 	{
 		lua_getfield(L, -1, "exists");
 		if(lua_toboolean(L, -1) &&
-				bufpos + 5 * sizeof(float) + 1 * sizeof(short) < buf + sizeof(buf))
+				1 * sizeof(char) + bufpos + 5 * sizeof(float) + 1 * sizeof(short) < buf + sizeof(buf))
 		{
 			static char name[21];
 
 			lua_pop(L, 1);
+
+			/* set index */
+			*((char *) bufpos) = io_charNL((unsigned int) lua_tonumber(L, -2)); bufpos += sizeof(char);
 
 			/* set name */
 			lua_getfield(L, -1, "name");
@@ -1151,7 +1154,9 @@ int w_unpersistWorld(lua_State *L)
 	/* Tanks */
 	for(int i = 0; i < numTanks; i++)
 	{
-		lua_pushinteger(L, i + 1);
+		unsigned int index = io_charNL(*((char *) data)); data += sizeof(char);
+
+		lua_pushinteger(L, index);
 		lua_gettable(L, 2 + preArgs);
 		if(lua_isnoneornil(L, -1))
 		{
@@ -1161,7 +1166,7 @@ int w_unpersistWorld(lua_State *L)
 			lua_pushvalue(L, 8 + preArgs);
 			lua_pushvalue(L, 11 + preArgs);
 			lua_call(L, 1, 1);
-			lua_pushinteger(L, i + 1);
+			lua_pushinteger(L, index);
 			lua_pushvalue(L, -2);
 			lua_settable(L, 2 + preArgs);
 
