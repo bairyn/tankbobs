@@ -945,7 +945,7 @@ int w_persistWorld(lua_State *L)
 
 			/* path information */
 			lua_getfield(L, -1, "pid");
-			if(!lua_isnoneornil(L, -1))
+			if(lua_toboolean(L, -1))
 			{
 				*((char *) bufpos) = io_charNL(lua_tonumber(L, -1)); bufpos += sizeof(char);
 				lua_pop(L, 1);
@@ -958,6 +958,7 @@ int w_persistWorld(lua_State *L)
 				v = CHECKVEC(L, -1);
 				*((float *) bufpos) = io_floatNL(v->x); bufpos += sizeof(float);
 				*((float *) bufpos) = io_floatNL(v->y); bufpos += sizeof(float);
+				lua_pop(L, 1);
 
 				lua_getfield(L, -1, "ppos");
 				*((float *) bufpos) = io_floatNL(lua_tonumber(L, -1)); bufpos += sizeof(float);
@@ -972,10 +973,12 @@ int w_persistWorld(lua_State *L)
 				*/
 
 				bufpos += 2 * sizeof(char) + 1 * sizeof(float);
+
+				lua_pop(L, 1);
 			}
 
-			/* pop pid and 'm' */
-			lua_pop(L, 2);
+			/* pop 'm' */
+			lua_pop(L, 1);
 		}
 		else
 		{

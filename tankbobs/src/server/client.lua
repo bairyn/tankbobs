@@ -254,6 +254,11 @@ function client_step(d)
 									tankbobs.n_writeToPacket(tankbobs.io_fromChar(0xA1))
 									sendToClient(client)
 
+									-- unpause the world when the first client connects
+									if(client_connectedClients() == 1) then
+										c_world_setPaused(false)
+									end
+
 									s_printnl("'", client.tank.name, "' entered the game from ", client.ip, ":", client.port)
 								else
 									client.challengeAttempts = client.challengeAttempts + 1
@@ -332,7 +337,6 @@ function client_step(d)
 				--if p then
 				if v.lastPTime ~= lastPTime then
 					v.lastPTime = lastPTime
-s_printnl"oenuthoeunh"
 					-- send the client a snapshot of the world
 					tankbobs.n_newPacket(1024)
 					tankbobs.n_writeToPacket(tankbobs.io_fromChar(0xA2))
