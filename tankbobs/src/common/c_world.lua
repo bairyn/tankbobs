@@ -404,8 +404,16 @@ function c_world_getPowerupTypeByName(name)
 	end
 end
 
-function c_world_getPowerupTypeByIndex(type)
-	return c_powerupTypes[type]
+function c_world_getPowerupTypeByIndex(index)
+	return c_powerupTypes[index]
+
+	--[[
+	for _, v in pairs(c_powerupTypes) do
+		if v.name == name then
+			return v
+		end
+	end
+	--]]
 end
 
 function c_world_newWorld()
@@ -710,7 +718,7 @@ function c_world_projectileHull(projectile)
 
 	local p = projectile.p
 
-	for k, v in pairs(projectile.weapon.projectileHull) do
+	for k, v in pairs(c_weapon_getWeapons()[projectile.weapon].projectileHull) do
 		local h = t_m_vec2(v)
 		h.t = h.t + projectile.r
 		h:add(p)
@@ -1231,7 +1239,7 @@ function c_world_powerupSpawnPoint_step(d, powerupSpawnPoint)
 
 			powerup.spawner = powerupSpawnPoint
 
-			powerup.type = nil
+			powerup.powerupType = nil
 
 			local found = false
 			for k, v in pairs(powerupSpawnPoint.enabledPowerups) do
@@ -1239,7 +1247,7 @@ function c_world_powerupSpawnPoint_step(d, powerupSpawnPoint)
 					if found then
 						if c_world_getPowerupTypeByName(k) and (not c_config_get("game.instagib") or c_world_getPowerupTypeByName(k).instagib) then
 							powerupSpawnPoint.m.lastPowerup = k
-							powerup.type = c_world_getPowerupTypeByName(k).index
+							powerup.powerupType = c_world_getPowerupTypeByName(k).index
 							break
 						end
 					end
@@ -1249,20 +1257,20 @@ function c_world_powerupSpawnPoint_step(d, powerupSpawnPoint)
 					end
 				end
 			end
-			if not powerup.type then
+			if not powerup.powerupType then
 				for k, v in pairs(powerupSpawnPoint.enabledPowerups) do
 					if v then
 						if found then
 							if c_world_getPowerupTypeByName(k) and (not c_config_get("game.instagib") or c_world_getPowerupTypeByName(k).instagib) then
 								powerupSpawnPoint.m.lastPowerup = k
-								powerup.type = c_world_getPowerupTypeByName(k).index 
+								powerup.powerupType = c_world_getPowerupTypeByName(k).index 
 								break
 							end
 						end
 					end
 				end
 			end
-			if not powerup.type then
+			if not powerup.powerupType then
 				return
 			else
 				table.insert(c_world_powerups, powerup)
@@ -1303,16 +1311,12 @@ function c_world_powerupRemove(powerup)
 end
 
 function c_world_powerup_pickUp(tank, powerup)
-	if not powerup then
+	if not powerup or powerup.collided then
 		return
 	end
 
 	local t = t_t_getTicks()
-	local powerupType = c_world_getPowerupTypeByIndex(powerup.type)
-
-	if powerup.collided then
-		return
-	end
+	local powerupType = c_world_getPowerupTypeByIndex(powerup.powerupType)
 
 	powerup.collided = true
 

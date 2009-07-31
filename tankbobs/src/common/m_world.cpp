@@ -1263,7 +1263,7 @@ int w_unpersistWorld(lua_State *L)
 
 		/* type */
 		lua_pushinteger(L, io_charNL(*((char *) data))); data += sizeof(char);
-		lua_setfield(L, -2, "type");
+		lua_setfield(L, -2, "powerupIndex");
 
 		double rotation = io_floatNL(*((float *) data)); data += sizeof(float);
 		/* rotation */

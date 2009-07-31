@@ -506,7 +506,7 @@ c_weapon_projectile =
 }
 
 function c_weapon_getByName(name)
-	for k, v in pairs(c_weapons) do
+	for _, v in pairs(c_weapons) do
 		if v.name == name then
 			return v
 		end
@@ -514,7 +514,7 @@ function c_weapon_getByName(name)
 end
 
 function c_weapon_getByAltName(name)
-	for k, v in pairs(c_weapons) do
+	for _, v in pairs(c_weapons) do
 		if v.altName == name then
 			return v
 		end
@@ -541,14 +541,16 @@ function c_weapon_pickUp(tank, weaponName)
 
 	if weapon == tank.weapon then
 		-- add to clips
-		tank.clips = tank.clips + weapon.clips
+		if weapon.clips == 0 then
+			tank.clips = tank.clips + 1
+		else
+			tank.clips = tank.clips + weapon.clips
+		end
 
 		return
 	end
 
-	tank.weapon = nil
-
-	tank.weapon = weapon
+	tank.weapon = weapon.index
 	tank.ammo = weapon.capacity
 	tank.clips = weapon.clips
 	tank.reloading = false
@@ -743,7 +745,7 @@ function c_weapon_hit(tank, projectile)
 end
 
 function c_weapon_meleeHit(tank, attacker)
-	c_world_tankDamage(tank, attacker.weapon.damage)
+	c_world_tankDamage(tank, c_weapons[attacker.weapon].damage)
 
 	if tank.health <= 0 then
 		tank.killer = attacker

@@ -584,7 +584,7 @@ local function game_drawWorld(d)
 		-- powerups are drawn next
 		for _, v in pairs(c_world_getPowerups()) do
 			gl.PushMatrix()
-				local c = c_world_getPowerupTypeByName(v.typeName).c
+				local c = c_world_getPowerupTypeByIndex(v.powerupType).c
 				gl.Color(c.r, c.g, c.b, c.a)
 				gl.TexEnv("TEXTURE_ENV_COLOR", c.r, c.g, c.b, c.a)
 				gl.Translate(v.p.x, v.p.y, 0)
