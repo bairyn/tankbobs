@@ -194,7 +194,7 @@ function st_online_init()
 			if quitScreen then
 				tankbobs.in_grabClear()
 			elseif not tankbobs.in_isGrabbed() then
-				tankbobs.in_grabMouse(c_config_get("client.renderer.width") / 2, c_config_get("client.renderer.height") / 2)
+				--tankbobs.in_grabMouse(c_config_get("client.renderer.width") / 2, c_config_get("client.renderer.height") / 2)
 			end
 		end
 	end
@@ -204,7 +204,7 @@ function st_online_init()
 	-- create local world
 	c_world_newWorld()
 
-	unpersistArgs = {c_weapon_getProjectiles(), c_world_getTanks(), c_world_getPowerups(), c_tcm_current_map.walls, c_tcm_current_map.controlPoints, c_tcm_current_map.flags, c_weapon_projectile.new, c_world_tank.new, c_world_powerup.new, c_weapon_projectile, c_world_tank, c_world_powerup, {c_const_get("projectile_canSleep"), c_const_get("projectile_isBullet"), c_const_get("projectile_linearDamping"), c_const_get("projectile_angularDamping"), c_weapon_getWeapons()[1]  --[[ most common hull --]], c_weapon_getWeapons()[1].projectileDensity  --[[ most common projectile hull --]], c_const_get("projectile_friction"), c_weapon_getWeapons()[1].projectileRestitution  --[[ most common restitution --]], true, c_const_get("projectile_contentsMask"), c_const_get("projectile_clipmask"), c_const_get("projectile_isSensor"), #c_weapon_getProjectiles() + 1}, c_world_spawnTank, c_world_spawnPowerup}
+	unpersistArgs = {c_weapon_getProjectiles(), c_world_getTanks(), c_world_getPowerups(), c_tcm_current_map.walls, c_tcm_current_map.controlPoints, c_tcm_current_map.flags, c_weapon_projectile.new, c_world_tank.new, c_world_powerup.new, c_weapon_projectile, c_world_tank, c_world_powerup, {c_const_get("projectile_canSleep"), c_const_get("projectile_isBullet"), c_const_get("projectile_linearDamping"), c_const_get("projectile_angularDamping"), c_weapon_getWeapons()[1].projectileHull  --[[ most common hull --]], c_weapon_getWeapons()[1].projectileDensity  --[[ most common density --]], c_const_get("projectile_friction"), c_weapon_getWeapons()[1].projectileRestitution  --[[ most common restitution --]], true, c_const_get("projectile_contentsMask"), c_const_get("projectile_clipmask"), c_const_get("projectile_isSensor"), #c_weapon_getProjectiles() + 1}, c_world_spawnTank, c_world_spawnPowerup}
 
 end
 

@@ -1087,7 +1087,7 @@ int w_unpersistWorld(lua_State *L)
 
 	const char *data = lua_tostring(L, 1);
 
-	unsigned int projectileBodyLen = lua_objlen(L, 14);
+	unsigned int projectileBodyLen = lua_objlen(L, 13 + preArgs);
 
 	unsigned int numProjectiles    = io_shortNL(*((short *) data)); data += sizeof(short);
 	unsigned int numTanks          = io_shortNL(*((short *) data)); data += sizeof(short);
@@ -1102,14 +1102,14 @@ int w_unpersistWorld(lua_State *L)
 	/*lua_pop(L, 1);*/
 	/* this should already be taken care of in the game logic */
 
-	/* Projectiles (special) */
+	/* Projectiles */
 	for(int i = 0; i < numProjectiles; i++)
 	{
 		lua_pushvalue(L, 7 + preArgs);
 		lua_pushvalue(L, 10 + preArgs);
 		lua_call(L, 1, 1);
-		lua_pushvalue(L, -1);
 		lua_pushinteger(L, i + 1);
+		lua_pushvalue(L, -2);
 		lua_settable(L, 1 + preArgs);
 
 		/* weapon */
@@ -1120,22 +1120,29 @@ int w_unpersistWorld(lua_State *L)
 		lua_pushinteger(L, io_floatNL(*((float *) data))); data += sizeof(float);
 		lua_setfield(L, -2, "r");
 
+		/* push addBody function */
+		lua_pushcfunction(L, w_addBody);
+
 		/* position */
-		lua_getfield(L, -1, "p");
-		v = CHECKVEC(L, -1);
+		v = reinterpret_cast<vec2_t *>(lua_newuserdata(L, sizeof(vec2_t)));
+
+		luaL_getmetatable(L, MATH_METATABLE);
+		lua_setmetatable(L, -2);
+
 		v->x = io_floatNL(*((float *) data)); data += sizeof(float);
 		v->y = io_floatNL(*((float *) data)); data += sizeof(float);
 		MATH_POLAR(*v);
-		/* keep position on the stack for body */
+
+		lua_pushvalue(L, -1);  /* keep position on stack for body */
+		lua_setfield(L, -4, "p");
 
 		/* add body before popping position vector */
 		/* position on top of stack */
-		lua_getfield(L, -2, "r");
+		lua_getfield(L, -3, "r");
 		lua_getglobal(L, "unpack");
 		lua_pushvalue(L, 13 + preArgs);
 		lua_call(L, 1, projectileBodyLen);
 		lua_call(L, projectileBodyLen + 2, 1);
-		w_addBody(L);
 		b2Body *body = reinterpret_cast<b2Body *>(lua_touserdata(L, -1));
 
 		/* velocity */
@@ -1147,7 +1154,11 @@ int w_unpersistWorld(lua_State *L)
 		/* angular velocity */
 		body->SetAngularVelocity(io_floatNL(*((float *) data))); data += sizeof(float);
 
-		/* pop body and projectile */
+		lua_getfield(L, -2, "m");
+		lua_pushvalue(L, -2);
+		lua_setfield(L, -2, "body");
+
+		/* pop 'm' and projectile */
 		lua_pop(L, 2);
 	}
 
@@ -1336,7 +1347,7 @@ int w_unpersistWorld(lua_State *L)
 				{
 					lua_pop(L, 1);
 
-					v = reinterpret_cast<vec2_t *>(lua_newuserdata(clState, sizeof(vec2_t)));
+					v = reinterpret_cast<vec2_t *>(lua_newuserdata(L, sizeof(vec2_t)));
 
 					luaL_getmetatable(L, MATH_METATABLE);
 					lua_setmetatable(L, -2);
@@ -1450,10 +1461,10 @@ int w_unpersistWorld(lua_State *L)
 				{
 					lua_pop(L, 1);
 
-					v = reinterpret_cast<vec2_t *>(lua_newuserdata(clState, sizeof(vec2_t)));
+					v = reinterpret_cast<vec2_t *>(lua_newuserdata(L, sizeof(vec2_t)));
 
-					luaL_getmetatable(clState, MATH_METATABLE);
-					lua_setmetatable(clState, -2);
+					luaL_getmetatable(L, MATH_METATABLE);
+					lua_setmetatable(L, -2);
 
 					v->x = droppedPosx;
 					v->y = droppedPosy;

@@ -650,7 +650,7 @@ function c_weapon_fire(tank)
 		end
 	end
 
-	if not bit.band(tank.state, FIRING) ~= 0 then
+	if bit.band(tank.state, FIRING) == 0 then
 		return
 	end
 
@@ -760,7 +760,7 @@ end
 
 local function c_world_isTank(body)
 	if tankbobs.w_getContents(body) == TANK then
-		return c_world_tanks[tankbobs.w_getIndex(body)]
+		return c_world_getTanks()[tankbobs.w_getIndex(body)]
 	end
 
 	return nil
