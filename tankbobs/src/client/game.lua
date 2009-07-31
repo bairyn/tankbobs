@@ -20,7 +20,7 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 --[[
 st_game.lua
 
-Game play functions shared by offline and online states
+Game play functions shared by both offline and online states
 --]]
 
 local tankbobs = tankbobs
