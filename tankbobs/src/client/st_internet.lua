@@ -78,9 +78,9 @@ function st_internet_init()
 		end
 	end
 
-	gui_addLabel(tankbobs.m_vec2(50,  81), "", updateStatus, 2 / 3)
-	gui_addLabel(tankbobs.m_vec2(50, 75), "IP", nil, 2 / 3) gui_addInput(tankbobs.m_vec2(55, 75), tostring(connection.address), nil, st_internet_serverIP, false, 64)
-	gui_addAction(tankbobs.m_vec2(55, 69), "Connect", nil, st_internet_start)
+	gui_addLabel(tankbobs.m_vec2(50,  81), "", updateStatus, 1 / 3)
+	gui_addLabel(tankbobs.m_vec2(50, 78), "IP", nil, 1 / 3) gui_addInput(tankbobs.m_vec2(55, 75), tostring(connection.address), nil, st_internet_serverIP, false, 64, 1 / 3)
+	gui_addAction(tankbobs.m_vec2(55, 75), "Connect", nil, st_internet_start, 1 / 3)
 
 	local ui = ""
 	local fin = io.open(c_const_get("ui_file"), "rb")
