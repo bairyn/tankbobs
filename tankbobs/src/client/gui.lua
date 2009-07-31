@@ -27,6 +27,10 @@ local c_const_get = c_const_get
 local tankbobs = tankbobs
 local gl = gl
 
+local gui_private_inputKey
+
+local repeatTime
+local keyPressed
 local scaleCenter_listBase
 local scaleCenter_texture
 local scale_listBase
@@ -677,6 +681,16 @@ function gui_paint(d)
 			end
 		until true if breaking then break end
 	end
+
+	if selected then
+		if keyPressed then
+			repeatTime = repeatTime - d
+
+			if repeatTime <= 0 then
+				gui_button(keyPressed, true)
+			end
+		end
+	end
 end
 
 local function gui_private_selected(selection)
@@ -690,7 +704,7 @@ local function gui_private_selected(selection)
 end
 
 -- returns true when the pressed key should not be handled further than the input widget
-local function gui_private_inputKey(button)
+function gui_private_inputKey(button)  -- local
 	if button == 276 or button == c_config_get("client.key.left") then  -- left
 		if selected.textPos > 0 then
 			selected.textPos = selected.textPos - 1
@@ -877,6 +891,21 @@ end
 
 function gui_button(button, pressed)
 	button = c_config_keyLayoutGet(button) or button
+
+	if keyPressed and keyPressed == button then
+		if pressed then
+			while repeatTime <= 0 do
+				repeatTime = repeatTime + c_config_get("client.repeatRate")
+			end
+		else
+			keyPressed = nil
+		end
+	else
+		if pressed then
+			repeatTime = c_config_get("client.repeatDelay")
+			keyPressed = button
+		end
+	end
 
 	if selected and selected.type == KEY and selected.keyActive then
 		if pressed then
@@ -1073,7 +1102,11 @@ function gui_button(button, pressed)
 
 	elseif selected and selected.type == INPUT then
 		if pressed then
-			return gui_private_inputKey(button)
+			return gui_private_inputKey(button, false)
+		else
+			if button == selected.inputKeyPressed then
+				selected.inputKeyPressed = nil
+			end
 		end
 
 		return true

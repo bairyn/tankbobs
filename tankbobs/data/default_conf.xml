@@ -92,6 +92,10 @@
 
 			<width>800</width>
 		</renderer>
+
+		<repeatDelay>0.2</repeatDelay>
+		<repeatRate>0.01785714285714285714286</repeatRate>  56 per second
+
 		<serverIP>127.0.0.1</serverIP>
 
 		<unlagged>true</unlagged>

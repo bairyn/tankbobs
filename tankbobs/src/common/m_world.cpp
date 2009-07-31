@@ -853,16 +853,19 @@ int w_persistWorld(lua_State *L)
 	}
 
 	/* powerups */
-	/* char powerupTypeIndex; float rotation; float x; float y; float velX; float velY; float angularVelocity; */
+	/* char index; char powerupTypeIndex; float rotation; float x; float y; float velX; float velY; float angularVelocity; */
 	++order;
 	lua_pushnil(L);
 	while(lua_next(L, order))
 	{
 		lua_getfield(L, -1, "collided");
 		if(!lua_toboolean(L, -1) &&
-				bufpos + 1 * sizeof(char) + 6 * sizeof(float) < buf + sizeof(buf))
+				bufpos + 2 * sizeof(char) + 6 * sizeof(float) < buf + sizeof(buf))
 		{
 			lua_pop(L, 1);
+
+			/* set index */
+			*((char *) bufpos) = io_charNL((unsigned int) lua_tonumber(L, -2)); bufpos += sizeof(char);
 
 			/* set weaponIndex */
 			lua_getfield(L, -1, "weapon");
@@ -1229,7 +1232,9 @@ int w_unpersistWorld(lua_State *L)
 	/* Powerups */
 	for(int i = 0; i < numPowerups; i++)
 	{
-		lua_pushinteger(L, i + 1);
+		unsigned int index = io_charNL(*((char *) data)); data += sizeof(char);
+
+		lua_pushinteger(L, index);
 		lua_gettable(L, 3 + preArgs);
 		if(lua_isnoneornil(L, -1))
 		{
@@ -1239,14 +1244,15 @@ int w_unpersistWorld(lua_State *L)
 			lua_pushvalue(L, 9 + preArgs);
 			lua_pushvalue(L, 12 + preArgs);
 			lua_call(L, 1, 1);
-			lua_pushinteger(L, i + 1);
+			lua_pushinteger(L, index);
 			lua_pushvalue(L, -2);
 			lua_settable(L, 3 + preArgs);
 
 			/* spawn the powerup */
 			lua_pushvalue(L, 15 + preArgs);
 			lua_pushvalue(L, -2);
-			lua_call(L, 1, 0);
+			lua_pushinteger(L, index);
+			lua_call(L, 2, 0);
 		}
 
 		/* get body */
