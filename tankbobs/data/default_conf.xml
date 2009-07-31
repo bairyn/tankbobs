@@ -99,6 +99,12 @@
 		<volume>0.8</volume>
 	</client>
 
+	<debug>
+		<client>
+			<grabMouse>true</grabMouse>
+		</client>
+	</debug>
+
 	<game>
 		<captureLimit>10</captureLimit>
 		<computers>0</computers>

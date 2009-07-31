@@ -191,7 +191,9 @@ function st_play_init()
 			if quitScreen then
 				tankbobs.in_grabClear()
 			elseif not tankbobs.in_isGrabbed() then
-				tankbobs.in_grabMouse(c_config_get("client.renderer.width") / 2, c_config_get("client.renderer.height") / 2)
+				if not c_const_get("debug") or c_config_get("debug.client.grabMouse") then
+					tankbobs.in_grabMouse(c_config_get("client.renderer.width") / 2, c_config_get("client.renderer.height") / 2)
+				end
 			end
 		end
 	end
