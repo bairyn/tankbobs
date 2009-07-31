@@ -847,7 +847,7 @@ int w_persistWorld(lua_State *L)
 			lua_getfield(L, -1, "r");
 			*((float *) bufpos) = io_floatNL(lua_tonumber(L, -1)); bufpos += sizeof(float);
 			lua_pop(L, 1);
-			lua_getfield(L, -1, "g);
+			lua_getfield(L, -1, "g");
 			*((float *) bufpos) = io_floatNL(lua_tonumber(L, -1)); bufpos += sizeof(float);
 			lua_pop(L, 1);
 			lua_getfield(L, -1, "b");
@@ -1178,11 +1178,11 @@ int w_unpersistWorld(lua_State *L)
 
 		/* color */
 		lua_getfield(L, -1, "color");
-		lua_pushnumber(io_floatNL(*((float *) data))); data += sizeof(float);
+		lua_pushnumber(L, io_floatNL(*((float *) data))); data += sizeof(float);
 		lua_setfield(L, -1, "r");
-		lua_pushnumber(io_floatNL(*((float *) data))); data += sizeof(float);
+		lua_pushnumber(L, io_floatNL(*((float *) data))); data += sizeof(float);
 		lua_setfield(L, -1, "g");
-		lua_pushnumber(io_floatNL(*((float *) data))); data += sizeof(float);
+		lua_pushnumber(L, io_floatNL(*((float *) data))); data += sizeof(float);
 		lua_setfield(L, -1, "b");
 
 		/* pop color and projectile */
