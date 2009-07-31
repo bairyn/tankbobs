@@ -795,14 +795,14 @@ int w_persistWorld(lua_State *L)
 	}
 
 	/* tanks */
-	/* char index; char name[21]; float rotation; float x; float y; float velX; float velY; short input; */
+	/* char index; char name[21]; float rotation; float x; float y; float velX; float velY; short input; float color[rgb]; */
 	++order;
 	lua_pushnil(L);
 	while(lua_next(L, order))
 	{
 		lua_getfield(L, -1, "exists");
 		if(lua_toboolean(L, -1) &&
-				1 * sizeof(char) + bufpos + 5 * sizeof(float) + 1 * sizeof(short) < buf + sizeof(buf))
+				1 * sizeof(char) + bufpos + 5 * sizeof(float) + 1 * sizeof(short) + 3 * sizeof(float) < buf + sizeof(buf))
 		{
 			static char name[21];
 
@@ -841,6 +841,18 @@ int w_persistWorld(lua_State *L)
 			lua_getfield(L, -1, "state");
 			*((short *) bufpos) = io_shortNL(lua_tointeger(L, -1)); bufpos += sizeof(short);
 			lua_pop(L, 1);
+
+			/* color */
+			lua_getfield(L, -1, "color");
+			lua_getfield(L, -1, "r");
+			*((float *) bufpos) = io_floatNL(lua_tonumber(L, -1)); bufpos += sizeof(float);
+			lua_pop(L, 1);
+			lua_getfield(L, -1, "g);
+			*((float *) bufpos) = io_floatNL(lua_tonumber(L, -1)); bufpos += sizeof(float);
+			lua_pop(L, 1);
+			lua_getfield(L, -1, "b");
+			*((float *) bufpos) = io_floatNL(lua_tonumber(L, -1)); bufpos += sizeof(float);
+			lua_pop(L, 2);
 		}
 		else
 		{
@@ -1161,7 +1173,19 @@ int w_unpersistWorld(lua_State *L)
 		lua_pushvalue(L, -2);
 		lua_setfield(L, -2, "body");
 
-		/* pop 'm' and projectile */
+		/* pop 'm' */
+		lua_pop(L, 1);
+
+		/* color */
+		lua_getfield(L, -1, "color");
+		lua_pushnumber(io_floatNL(*((float *) data))); data += sizeof(float);
+		lua_setfield(L, -1, "r");
+		lua_pushnumber(io_floatNL(*((float *) data))); data += sizeof(float);
+		lua_setfield(L, -1, "g");
+		lua_pushnumber(io_floatNL(*((float *) data))); data += sizeof(float);
+		lua_setfield(L, -1, "b");
+
+		/* pop color and projectile */
 		lua_pop(L, 2);
 	}
 
