@@ -294,7 +294,7 @@ function online_readPackets(d)  -- local
 					gui_addLabel(tankbobs.m_vec2(20, 30), "Reason: " .. reason, nil, 1 / 3)
 				end
 			elseif switch == 0xA5 then
-				if #data >= 4 then
+				if #data >= 8 then
 					-- server sent us our ping and tick offset
 					connection.ping   = tankbobs.io_toInt(data:sub(1, 4)) data = data:sub(5)
 					connection.offset = tankbobs.io_toInt(data:sub(1, 4)) data = data:sub(5)
