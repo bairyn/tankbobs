@@ -397,7 +397,7 @@ c_world_team =
 }
 
 function c_world_getPowerupTypeByName(name)
-	for k, v in pairs(c_powerupTypes) do
+	for _, v in pairs(c_powerupTypes) do
 		if v.name == name then
 			return v
 		end

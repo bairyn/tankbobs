@@ -177,11 +177,11 @@ function st_internet_step(d)
 					local challenge = tankbobs.io_toInt(data:sub(1, 4)) data = data:sub(5)
 					local set = data:sub(1, data:find(tankbobs.io_fromChar(0x00)) - 1) data = data:sub(data:find(tankbobs.io_fromChar(0x00)) + 1)
 					local map = data:sub(1, data:find(tankbobs.io_fromChar(0x00)) - 1) data = data:sub(data:find(tankbobs.io_fromChar(0x00)) + 1)
+					local gameType = data:sub(1, data:find(tankbobs.io_fromChar(0x00)) - 1) data = data:sub(data:find(tankbobs.io_fromChar(0x00)) + 1)
 
 					c_tcm_select_set(set)
 					c_tcm_select_map(map)
 
-					local gameType = data:sub(1, data:find(tankbobs.io_fromChar(0x00)) - 1) data = data:sub(data:find(tankbobs.io_fromChar(0x00)) + 1)
 					c_world_setGameType(gameType)
 
 					-- send the server the challenge response

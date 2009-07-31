@@ -299,7 +299,7 @@ function client_step(d)
 							client.ticksOffset = ticks - t - client.ping / 2
 
 							-- send the client his ping
-							tankbobs.n_newPacket(5)
+							tankbobs.n_newPacket(9)
 							tankbobs.n_writeToPacket(tankbobs.io_fromChar(0xA5))
 							tankbobs.n_writeToPacket(tankbobs.io_fromInt(client.ping))
 							tankbobs.n_writeToPacket(tankbobs.io_fromInt(client.ticksOffset))
