@@ -296,7 +296,7 @@ function client_step(d)
 							ticks = tankbobs.io_toInt(data) data = data:sub(5)
 
 							client.ping = t - client.lastTickSendTime
-							client.ticksOffset = ticks - t - client.ping / 2
+							client.ticksOffset = ticks - t - (client.ping / 2)
 
 							-- send the client his ping
 							tankbobs.n_newPacket(9)
