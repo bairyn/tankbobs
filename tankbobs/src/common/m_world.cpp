@@ -1176,17 +1176,8 @@ int w_unpersistWorld(lua_State *L)
 		/* pop 'm' */
 		lua_pop(L, 1);
 
-		/* color */
-		lua_getfield(L, -1, "color");
-		lua_pushnumber(L, io_floatNL(*((float *) data))); data += sizeof(float);
-		lua_setfield(L, -1, "r");
-		lua_pushnumber(L, io_floatNL(*((float *) data))); data += sizeof(float);
-		lua_setfield(L, -1, "g");
-		lua_pushnumber(L, io_floatNL(*((float *) data))); data += sizeof(float);
-		lua_setfield(L, -1, "b");
-
 		/* pop color and projectile */
-		lua_pop(L, 2);
+		lua_pop(L, 1);
 	}
 
 	/* Tanks */
@@ -1250,7 +1241,17 @@ int w_unpersistWorld(lua_State *L)
 		lua_pushinteger(L, io_shortNL(*((short *) data))); data += sizeof(short);
 		lua_setfield(L, -2, "state");
 
-		lua_pop(L, 1);
+		/* color */
+		lua_getfield(L, -1, "color");
+		lua_pushnumber(L, io_floatNL(*((float *) data))); data += sizeof(float);
+		lua_setfield(L, -1, "r");
+		lua_pushnumber(L, io_floatNL(*((float *) data))); data += sizeof(float);
+		lua_setfield(L, -1, "g");
+		lua_pushnumber(L, io_floatNL(*((float *) data))); data += sizeof(float);
+		lua_setfield(L, -1, "b");
+
+		/* pop both color and tank */
+		lua_pop(L, 2);
 	}
 
 	/* Powerups */
