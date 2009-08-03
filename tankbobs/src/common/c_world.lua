@@ -337,7 +337,7 @@ c_world_powerup =
 	r = 0,  -- rotation
 	spawner = nil,
 	collided = false,  -- whether it needs to be removed
-	type = nil,  -- index of type of powerup
+	powerupType = nil,  -- index of type of powerup
 	spawnTime = 0,  -- the time the powerup spawned
 
 	m = {}

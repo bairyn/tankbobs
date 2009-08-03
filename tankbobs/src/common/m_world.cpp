@@ -795,14 +795,14 @@ int w_persistWorld(lua_State *L)
 	}
 
 	/* tanks */
-	/* char index; char name[21]; float rotation; float x; float y; float velX; float velY; short input; float color[rgb]; */
+	/* char index; char name[21]; char weapon; char ammo; char clips; float rotation; float x; float y; float velX; float velY; short input; float color[rgb]; */
 	++order;
 	lua_pushnil(L);
 	while(lua_next(L, order))
 	{
 		lua_getfield(L, -1, "exists");
 		if(lua_toboolean(L, -1) &&
-				1 * sizeof(char) + bufpos + 5 * sizeof(float) + 1 * sizeof(short) + 3 * sizeof(float) < buf + sizeof(buf))
+				25 * sizeof(char) + bufpos + 5 * sizeof(float) + 1 * sizeof(short) + 3 * sizeof(float) < buf + sizeof(buf))
 		{
 			static char name[21];
 
@@ -816,6 +816,21 @@ int w_persistWorld(lua_State *L)
 			strncpy(name, lua_tostring(L, -1), sizeof(name));
 			lua_pop(L, 1);
 			memcpy(bufpos, name, sizeof(name)); bufpos += sizeof(name);
+
+			/* set weapon */
+			lua_getfield(L, -1, "weapon");
+			*((char *) bufpos) = io_charNL((unsigned int) lua_tonumber(L, -1)); bufpos += sizeof(char);
+			lua_pop(L, 1);
+
+			/* set ammo */
+			lua_getfield(L, -1, "ammo");
+			*((char *) bufpos) = io_charNL((unsigned int) lua_tonumber(L, -1)); bufpos += sizeof(char);
+			lua_pop(L, 1);
+
+			/* set clips */
+			lua_getfield(L, -1, "clips");
+			*((char *) bufpos) = io_charNL((unsigned int) lua_tonumber(L, -1)); bufpos += sizeof(char);
+			lua_pop(L, 1);
 
 			/* set rotation */
 			lua_getfield(L, -1, "r");
@@ -879,11 +894,10 @@ int w_persistWorld(lua_State *L)
 			/* set index */
 			*((char *) bufpos) = io_charNL((unsigned int) lua_tonumber(L, -2)); bufpos += sizeof(char);
 
-			/* set weaponIndex */
-			lua_getfield(L, -1, "weapon");
-			lua_getfield(L, -1, "index");
+			/* set powerupType */
+			lua_getfield(L, -1, "powerupType");
 			*((char *) bufpos) = io_charNL(lua_tonumber(L, -1)); bufpos += sizeof(char);
-			lua_pop(L, 2);
+			lua_pop(L, 1);
 
 			/* set rotation */
 			lua_getfield(L, -1, "r");
@@ -1217,6 +1231,18 @@ int w_unpersistWorld(lua_State *L)
 		strncpy(name, data, sizeof(name)); data += 21 * sizeof(char);
 		lua_pushstring(L, name);
 		lua_setfield(L, -2, "name");
+
+		/* weapon */
+		lua_pushinteger(L, io_charNL(*((char *) data))); data += sizeof(char);
+		lua_setfield(L, -2, "weapon");
+
+		/* ammo */
+		lua_pushinteger(L, io_charNL(*((char *) data))); data += sizeof(char);
+		lua_setfield(L, -2, "ammo");
+
+		/* clips */
+		lua_pushinteger(L, io_charNL(*((char *) data))); data += sizeof(char);
+		lua_setfield(L, -2, "clips");
 
 		double rotation = io_floatNL(*((float *) data)); data += sizeof(float);
 		/* rotation */
