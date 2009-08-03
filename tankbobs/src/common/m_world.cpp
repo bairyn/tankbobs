@@ -1246,11 +1246,11 @@ int w_unpersistWorld(lua_State *L)
 		/* color */
 		lua_getfield(L, -1, "color");
 		lua_pushnumber(L, io_floatNL(*((float *) data))); data += sizeof(float);
-		lua_setfield(L, -1, "r");
+		lua_setfield(L, -2, "r");
 		lua_pushnumber(L, io_floatNL(*((float *) data))); data += sizeof(float);
-		lua_setfield(L, -1, "g");
+		lua_setfield(L, -2, "g");
 		lua_pushnumber(L, io_floatNL(*((float *) data))); data += sizeof(float);
-		lua_setfield(L, -1, "b");
+		lua_setfield(L, -2, "b");
 
 		/* pop both color and tank */
 		lua_pop(L, 2);
