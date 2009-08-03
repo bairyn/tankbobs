@@ -940,7 +940,7 @@ int w_persistWorld(lua_State *L)
 				*((float *) bufpos) = io_floatNL(0x00); bufpos += sizeof(float);
 				*/
 
-				bufpos += 2 * sizeof(char) + 1 * sizeof(float);
+				bufpos += 6 * sizeof(float) + 2 * sizeof(char) + 3 * sizeof(float);
 
 				lua_pop(L, 3);
 
@@ -988,9 +988,11 @@ int w_persistWorld(lua_State *L)
 				*((char *) bufpos) = io_charNL(0x00); bufpos += sizeof(char);
 				*((char *) bufpos) = io_charNL(0x00); bufpos += sizeof(char);
 				*((float *) bufpos) = io_floatNL(0x00); bufpos += sizeof(float);
+				*((float *) bufpos) = io_floatNL(0x00); bufpos += sizeof(float);
+				*((float *) bufpos) = io_floatNL(0x00); bufpos += sizeof(float);
 				*/
 
-				bufpos += 2 * sizeof(char) + 1 * sizeof(float);
+				bufpos += 2 * sizeof(char) + 3 * sizeof(float);
 
 				lua_pop(L, 1);
 			}
