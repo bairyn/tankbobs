@@ -309,6 +309,8 @@ function help(line)
 			" -listSets\n" ..
 			" -gameType\n" ..
 			" -exec\n" ..
+			" -clientList\n" ..
+			" -kick\n" ..
 			"\n" ..
 			"See \"help help\" for usage\n"
 		)
@@ -918,14 +920,14 @@ function kick(line)
 		local clients = client_getClientsByIdentifier(identifier, idOnly)
 
 		if #clients > 1 then
-			s_printnl("kick: '", tostring(#clients) .. "' clients found matching ID, guid, IP:port, or name of ", tostring(identifier))
+			s_printnl("kick: '", tostring(#clients) .. "' clients found matching ID, guid, IP:port, or name of '", tostring(identifier), "'")
 
 			s_printnl()
 			return clientList("clientList " .. (idOnly and "--id-only " or "") .. "\"" .. identifier .. "\"")
 		elseif #clients == 1 then
 			client_kick(clients[1], reason)
 		else--if #clients < 1 then
-			s_printnl("kick: no clients found matching ID, guid, IP:port, or name of ", tostring(identifier))
+			s_printnl("kick: no clients found matching ID, guid, IP:port, or name of '", tostring(identifier), "'")
 		end
 	else
 		return help("help kick")
