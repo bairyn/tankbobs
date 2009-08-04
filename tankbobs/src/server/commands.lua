@@ -880,7 +880,7 @@ end
 end
 
 local guidLen = 6
-local clientFormat = "%3s - %15s - %15s - %5s %10s - %" .. tostring(1 + 4 * (guidLen) + 1 * (guidLen - 1)) .. "s"
+local clientFormat = "%3s - %15s - %15s - %5s - %10s - %" .. tostring(1 + 4 * (guidLen) + 1 * (guidLen - 1)) .. "s"
 function clientList(line)
 	local args = commands_args(line)
 	local idOnly = args[2] == "-i" or args[2] == "--id-only"
