@@ -650,6 +650,8 @@ function c_world_tank_checkSpawn(d, tank)
 		end
 	end
 
+	-- TODO: method of preventing spawn blocking by killing blockers
+
 	-- spawn
 	tank.p(playerSpawnPoint.p)
 	return c_world_spawnTank(tank)
