@@ -539,7 +539,7 @@ function c_weapon_pickUp(tank, weaponName)
 		return
 	end
 
-	if weapon == tank.weapon then
+	if weapon == c_weapons[tank.weapon] then
 		-- add to clips
 		if weapon.clips == 0 then
 			tank.clips = tank.clips + 1

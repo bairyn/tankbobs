@@ -880,14 +880,14 @@ int w_persistWorld(lua_State *L)
 	}
 
 	/* powerups */
-	/* char index; char powerupTypeIndex; float rotation; float x; float y; float velX; float velY; float angularVelocity; */
+	/* char index; char powerupTypeIndex; char spawner; float rotation; float x; float y; float velX; float velY; float angularVelocity; */
 	++order;
 	lua_pushnil(L);
 	while(lua_next(L, order))
 	{
 		lua_getfield(L, -1, "collided");
 		if(!lua_toboolean(L, -1) &&
-				bufpos + 2 * sizeof(char) + 6 * sizeof(float) < buf + sizeof(buf))
+				bufpos + 3 * sizeof(char) + 6 * sizeof(float) < buf + sizeof(buf))
 		{
 			lua_pop(L, 1);
 
@@ -896,6 +896,11 @@ int w_persistWorld(lua_State *L)
 
 			/* set powerupType */
 			lua_getfield(L, -1, "powerupType");
+			*((char *) bufpos) = io_charNL(lua_tonumber(L, -1)); bufpos += sizeof(char);
+			lua_pop(L, 1);
+
+			/* set spawner */
+			lua_getfield(L, -1, "spawner");
 			*((char *) bufpos) = io_charNL(lua_tonumber(L, -1)); bufpos += sizeof(char);
 			lua_pop(L, 1);
 
@@ -1316,7 +1321,11 @@ int w_unpersistWorld(lua_State *L)
 
 		/* type */
 		lua_pushinteger(L, io_charNL(*((char *) data))); data += sizeof(char);
-		lua_setfield(L, -2, "powerupIndex");
+		lua_setfield(L, -2, "powerupType");
+
+		/* spawner */
+		lua_pushinteger(L, io_charNL(*((char *) data))); data += sizeof(char);
+		lua_setfield(L, -2, "spawner");
 
 		double rotation = io_floatNL(*((float *) data)); data += sizeof(float);
 		/* rotation */
@@ -1337,7 +1346,7 @@ int w_unpersistWorld(lua_State *L)
 		b2Vec2 vel;
 		vel.x = io_floatNL(*((float *) data)); data += sizeof(float);
 		vel.y = io_floatNL(*((float *) data)); data += sizeof(float);
-		body->SetLinearVelocity(b2Vec2(v->x, v->y));
+		body->SetLinearVelocity(vel);
 
 		/* angular velocity */
 		body->SetAngularVelocity(io_floatNL(*((float *) data))); data += sizeof(float);

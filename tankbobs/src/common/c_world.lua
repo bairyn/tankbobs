@@ -335,7 +335,7 @@ c_world_powerup =
 
 	p = tankbobs.m_vec2(),
 	r = 0,  -- rotation
-	spawner = nil,
+	spawner = 0,  -- index of psp
 	collided = false,  -- whether it needs to be removed
 	powerupType = nil,  -- index of type of powerup
 	spawnTime = 0,  -- the time the powerup spawned
@@ -1237,7 +1237,14 @@ function c_world_powerupSpawnPoint_step(d, powerupSpawnPoint)
 			-- spawn a powerup
 			local powerup = c_world_powerup:new()
 
-			powerup.spawner = powerupSpawnPoint
+			local index = 0
+			for k, v in pairs(c_tcm_current_map.powerupSpawnPoints) do
+				if v == index then
+					index = k
+				end
+			end
+
+			powerup.spawner = index
 
 			powerup.powerupType = nil
 

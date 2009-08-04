@@ -583,14 +583,18 @@ local function game_drawWorld(d)
 
 		-- powerups are drawn next
 		for _, v in pairs(c_world_getPowerups()) do
-			gl.PushMatrix()
-				local c = c_world_getPowerupTypeByIndex(v.powerupType).c
-				gl.Color(c.r, c.g, c.b, c.a)
-				gl.TexEnv("TEXTURE_ENV_COLOR", c.r, c.g, c.b, c.a)
-				gl.Translate(v.p.x, v.p.y, 0)
-				gl.Rotate(tankbobs.m_degrees(v.r), 0, 0, 1)
-				gl.CallList(powerup_listBase)
-			gl.PopMatrix()
+			local powerupType = c_world_getPowerupTypeByIndex(v.powerupType)
+
+			if powerupType then
+				gl.PushMatrix()
+					local c = powerupType.c
+					gl.Color(c.r, c.g, c.b, c.a)
+					gl.TexEnv("TEXTURE_ENV_COLOR", c.r, c.g, c.b, c.a)
+					gl.Translate(v.p.x, v.p.y, 0)
+					gl.Rotate(tankbobs.m_degrees(v.r), 0, 0, 1)
+					gl.CallList(powerup_listBase)
+				gl.PopMatrix()
+			end
 		end
 
 		-- melee weapons
@@ -676,7 +680,7 @@ function game_step(d)
 			end
 		end
 		for _, v in pairs(c_world_getPowerups()) do
-			if v.spawner.focus then
+			if c_tcm_current_map.powerupSpawnPoints[v.spawner] and c_tcm_current_map.powerupSpawnPoints[v.spawner].focus then
 				if not leftmost or v.p.x < leftmost then
 					leftmost = v.p.x
 				end
