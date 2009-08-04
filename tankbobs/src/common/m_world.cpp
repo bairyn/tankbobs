@@ -795,14 +795,14 @@ int w_persistWorld(lua_State *L)
 	}
 
 	/* tanks */
-	/* char index; char name[21]; char weapon; char ammo; char clips; float rotation; float x; float y; float velX; float velY; short input; float color[rgb]; */
+	/* char index; char name[21]; char weapon; char ammo; char clips; float rotation; float x; float y; float velX; float velY; short input; float color[rgb]; char teleporterID; */
 	++order;
 	lua_pushnil(L);
 	while(lua_next(L, order))
 	{
 		lua_getfield(L, -1, "exists");
 		if(lua_toboolean(L, -1) &&
-				25 * sizeof(char) + bufpos + 5 * sizeof(float) + 1 * sizeof(short) + 3 * sizeof(float) < buf + sizeof(buf))
+				25 * sizeof(char) + bufpos + 5 * sizeof(float) + 1 * sizeof(short) + 3 * sizeof(float) + 1 * sizeof(char) < buf + sizeof(buf))
 		{
 			static char name[21];
 
@@ -867,6 +867,12 @@ int w_persistWorld(lua_State *L)
 			lua_pop(L, 1);
 			lua_getfield(L, -1, "b");
 			*((float *) bufpos) = io_floatNL(lua_tonumber(L, -1)); bufpos += sizeof(float);
+			lua_pop(L, 2);
+
+			/* teleporterID */
+			lua_getfield(L, -1, "m");
+			lua_getfield(L, -1, "target");
+			*((char *) bufpos) = io_charNL(lua_tointeger(L, -1)); bufpos += sizeof(char);
 			lua_pop(L, 2);
 		}
 		else
@@ -1282,8 +1288,14 @@ int w_unpersistWorld(lua_State *L)
 		lua_setfield(L, -2, "g");
 		lua_pushnumber(L, io_floatNL(*((float *) data))); data += sizeof(float);
 		lua_setfield(L, -2, "b");
+		lua_pop(L, 1);
 
-		/* pop both color and tank */
+		/* teleporterID */
+		lua_getfield(L, -1, "m");
+		lua_pushinteger(L, io_charNL(*((char *) data))); data += sizeof(char);
+		lua_setfield(L, -2, "target");
+
+		/* pop both 'm' and tank */
 		lua_pop(L, 2);
 	}
 

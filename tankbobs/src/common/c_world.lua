@@ -1345,7 +1345,7 @@ function c_world_powerup_pickUp(tank, powerup)
 		c_weapon_pickUp(tank, powerupType.name)
 	end
 	if powerupType.name == "ammo" then
-		tank.clips = tank.clips + tank.weapon.clips
+		tank.clips = tank.clips + c_weapon_getWeapons()[tank.weapon].clips
 	end
 	if powerupType.name == "aim-aid" then
 		tank.cd.aimAid = not tank.cd.aimAid
@@ -1519,7 +1519,7 @@ function c_world_teleporter_step(d, teleporter)
 			if math.abs((v.p - teleporter.p).R) <= c_const_get("teleporter_touchDistance") then
 				local target = teleporters[teleporter.t + 1]
 
-				if teleporter.enabled and target and v.m.target ~= teleporter then
+				if teleporter.enabled and target and v.m.target ~= teleporter.id then
 					for _, v in pairs(c_world_tanks) do
 						if v.exists then
 							if math.abs((v.p - target.p).R) <= c_const_get("teleporter_touchDistance") then
@@ -1528,14 +1528,14 @@ function c_world_teleporter_step(d, teleporter)
 						end
 					end
 
-					v.m.target = target
+					v.m.target = target.id
 					v.m.lastTeleportTime = t_t_getTicks()
 					tankbobs.w_setPosition(v.body, target.p)
 					v.p(tankbobs.w_getPosition(v.body))
 				end
 
 				return
-			elseif v.m.target == teleporter then
+			elseif v.m.target == teleporter.id then
 				v.m.target = nil
 			end
 		end
