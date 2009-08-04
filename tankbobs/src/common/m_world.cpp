@@ -1334,6 +1334,18 @@ int w_unpersistWorld(lua_State *L)
 
 		/* position */
 		lua_getfield(L, -1, "p");
+		if(!lua_toboolean(L, -1))
+		{
+			lua_pop(L, 1);
+
+			vec2_t *v = reinterpret_cast<vec2_t *>(lua_newuserdata(clState, sizeof(vec2_t)));
+
+			luaL_getmetatable(clState, MATH_METATABLE);
+			lua_setmetatable(clState, -2);
+
+			lua_pushvalue(L, -1);
+			lua_setfield(L, -3, "p");
+		}
 		v = CHECKVEC(L, -1);
 		v->x = io_floatNL(*((float *) data)); data += sizeof(float);
 		v->y = io_floatNL(*((float *) data)); data += sizeof(float);
