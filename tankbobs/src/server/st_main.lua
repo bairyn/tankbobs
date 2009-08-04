@@ -38,9 +38,13 @@ function st_main_init()
 	c_world_step = _G.c_world_step
 
 	tankbobs.n_init(c_config_get("server.port", true))
+
+	c_world_newWorld()
 end
 
 function st_main_done()
+	c_world_freeWorld()
+
 	tankbobs.n_quit()
 end
 

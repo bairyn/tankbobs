@@ -51,9 +51,7 @@ end
 local function commands_private_mapSelected()
 	s_printnl("Selected level '", c_tcm_current_map.name, "' (", c_tcm_current_map.title, ")")
 
-	c_world_freeWorld()
-
-	c_world_newWorld()
+	s_restart()
 end
 
 local function commands_private_args(line)
@@ -104,7 +102,32 @@ function commands_command(line)
 			end
 		end
 
-		-- no valid command
+		-- not found, so try a case-insensitive search
+		for _, v in pairs(commands) do
+			local match = false
+
+			if type(v.name) == "string" then
+				match = tolower(v.name) == tolower(args[1])
+			elseif type(v.name) == "table" then
+				for _, v in pairs(v.name) do
+					if tolower(v) == tolower(args[1]) then
+						match = true
+
+						break
+					end
+				end
+			end
+
+			if match then
+				if v.f then
+					return v.f(line)
+				end
+
+				return
+			end
+		end
+
+		-- none found
 		s_printnl("Unknown command: ", args[1])
 	end
 end
@@ -627,8 +650,6 @@ function map(line)
 	else
 		return help("help map")
 	end
-
-	s_restart()
 end
 
 function mapT(line)
