@@ -404,7 +404,7 @@ function client_getClientsByIdentifier(identifier, idOnly)
 			end
 
 			-- name
-			if v.name:find(identifier) then
+			if v.tank.name:find(identifier) then
 				table.insert(clients, v)
 			end
 		end
