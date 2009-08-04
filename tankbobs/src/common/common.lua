@@ -367,7 +367,7 @@ function common_stringToHex(separator, prefix, str)
 
 		result = result .. prefix
 
-		local char = string.char(str:sub(i, i))
+		local char = string.byte(str, i)
 		result = result .. common_tohex(char)
 	end
 end
