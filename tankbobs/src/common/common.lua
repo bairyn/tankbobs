@@ -342,7 +342,7 @@ function common_tohex(number)
 	local result = ""
 
 	while number > 0 do
-		local mod = mathfmod(number, #hex)
+		local mod = math.fmod(number, #hex)
 		result = hex:sub(mod + 1, mod + 1) .. result
 		number = math.floor(number / #hex)
 	end
