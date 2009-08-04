@@ -901,7 +901,7 @@ function clientList(line)
 	s_printnl()
 	s_printnl(string.format(clientFormat, "ID", "name", "IP", "port", "connecting", "guid"))
 	for k, v in pairs(clients) do
-		s_printnl(string.format(clientFormat, tostring(k), v.name), v.ip, tostring(v.port), v.connecting and "connecting" or "connected", "*" .. common_stringToHex("", "", v.ui:sub(-guidLen, -1)))
+		s_printnl(string.format(clientFormat, tostring(k), v.name, v.ip, tostring(v.port), v.connecting and "connecting" or "connected", "*" .. common_stringToHex("", "", v.ui:sub(-guidLen, -1))))
 	end
 	s_printnl()
 end
