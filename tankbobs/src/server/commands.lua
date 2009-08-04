@@ -921,7 +921,7 @@ function kick(line)
 			s_printnl("kick: '", tostring(#clients) .. "' clients found matching ID, guid, IP:port, or name of ", tostring(identifier))
 
 			s_printnl()
-			return clientList("clientList " .. idOnly and "--id-only " or "" .. \"" .. identifier .. "\"")
+			return clientList("clientList " .. idOnly and "--id-only " or "" .. "\"" .. identifier .. "\"")
 		elseif #clients == 1 then
 			client_kick(clients[1], reason)
 		else--if #clients < 1 then
