@@ -370,6 +370,8 @@ function common_stringToHex(separator, prefix, str)
 		local char = string.byte(str, i)
 		result = result .. common_tohex(char)
 	end
+
+	return result
 end
 
 -- FPS to MS
