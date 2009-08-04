@@ -332,7 +332,43 @@ function common_fileMustExist(filename)
 	if f then
 		io.close(f)
 	else
-		error("common_FileMustExist: file '" .. tostring(filename) .. "' could not be opened for reading")
+		error("common_fileMustExist: file '" .. tostring(filename) .. "' could not be opened for reading")
+	end
+end
+
+do
+local hex = "0123456789ABCEF"
+function common_tohex(number)
+	local result = ""
+
+	while number > 0 do
+		local mod = mathfmod(number, #hex)
+		result = hex:sub(mod + 1, mod + 1) .. result
+		number = math.floor(number / #hex)
+	end
+
+	if result == "" then
+		result = "0"
+	end
+
+	return result
+end
+end
+local common_tohex = common_tohex
+
+-- returns a hex string
+function common_stringToHex(separator, prefix, str)
+	local result = ""
+
+	for i = 1, #str do
+		if i ~= 1 then
+			result = result .. separator
+		end
+
+		result = result .. prefix
+
+		local char = string.char(str:sub(i, i))
+		result = result .. common_tohex(char)
 	end
 end
 

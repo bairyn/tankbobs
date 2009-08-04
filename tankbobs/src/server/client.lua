@@ -372,3 +372,7 @@ function client_connectedClients()
 
 	return num
 end
+
+function client_getClients()
+	return clients
+end

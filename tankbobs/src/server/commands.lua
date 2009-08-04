@@ -252,8 +252,8 @@ command =
 	description = ""
 }
 
-local help, exec, exit, set, map, listSets, listMaps, echo, pause, restart, port, gameType
-local helpT, execT, exitT, setT, mapT, listSetsT, listMapsT, echoT, pauseT, restartT, portT, gameTypeT
+local help, exec, exit, set, map, listSets, listMaps, echo, pause, restart, port, gameType, clientList
+local helpT, execT, exitT, setT, mapT, listSetsT, listMapsT, echoT, pauseT, restartT, portT, gameTypeT, clientListT
 
 function help(line)
 	local args = commands_args(line)
@@ -447,14 +447,14 @@ function listSets(line)
 	end
 
 	if #c_tcm_current_sets > 0 then
-		s_print("             name - title\n")
+		s_printnl(string.format("             name - %16s", "title"))
 
 		for k, v in pairs(c_tcm_current_sets) do
 			if v.name:find("^" .. beginsWith) or v.title:find("^" .. beginsWith) then
-				s_print(string.format(" %16s - %16s\n", v.name, v.title))
+				s_printnl(string.format(" %16s - %16s", v.name, v.title))
 
 				if description then
-					s_print("    Description: ", v.description, "\n")
+					s_printnl("    Description: ", v.description)
 				end
 			end
 		end
@@ -512,9 +512,9 @@ function listMaps(line)
 	local beginsWith = ""
 
 	if c_tcm_current_set then
-		s_print(" listMaps: listing levels of level set '", c_tcm_current_set.name, "' (", c_tcm_current_set.title, ")\n")
+		s_printnl(" listMaps: listing levels of level set '", c_tcm_current_set.name, "' (", c_tcm_current_set.title, ")")
 	else
-		s_print(" listMaps: please select a level set.\n See \"help set\" for more information.\n")
+		s_printnl(" listMaps: please select a level set.\n See \"help set\" for more information.")
 
 		return
 	end
@@ -530,15 +530,15 @@ function listMaps(line)
 	end
 
 	if #c_tcm_current_set.maps > 0 then
-		s_print("             name - title\n")
+		s_printnl(string.format("             name - %16s", "title"))
 
 		for k, v in pairs(c_tcm_current_set.maps) do
 			if v.name:find("^" .. beginsWith) or v.title:find("^" .. beginsWith) then
-				s_print(string.format(" %16s - %16s\n", v.name, v.title))
+				s_printnl(string.format(" %16s - %16s", v.name, v.title))
 
 				if description then
-					s_print("    Authors:     ", v.authors, "\n")
-					s_print("    Description: ", v.description, "\n")
+					s_printnl("    Authors:     ", v.authors)
+					s_printnl("    Description: ", v.description)
 				end
 			end
 		end
@@ -875,6 +875,22 @@ function gameTypeT(line)
 end
 end
 
+local guidLen = 6
+local clientFormat = "%3s - %15s - %15s - %5s %10s - %" .. tostring(1 + 4 * (guidLen) + 1 * (guidLen - 1)) .. "s"
+function clientList(line)
+	local args = commands_args(line)
+
+	s_printnl("clientList: '", client_connectedClients(), "' connected clients")
+
+	s_printnl()
+	s_printnl(string.format(clientFormat, "number", "name", "IP", "port", "connecting", "guid"))
+	for k, v in pairs(client_getClients()) do
+		s_printnl(string.format(clientFormat, tostring(k, v.name), v.ip, tostring(v.port), v.connecting and "connecting" or "connected", "*" .. common_stringToHex("", "", v.ui:sub(-guidLen, -1))))
+	end
+end
+
+-- no auto completion for clientList
+
 commands =
 {
 	{
@@ -1006,5 +1022,15 @@ commands =
 		" gameType [game type]\n" ..
 		"\n" ..
 		" Sets the game type"
+	},
+
+	{
+		{"clientList", "listClients", "showClients", "showClientList"},
+		clientList,
+		clientListT,
+		"Usage:\n" ..
+		" clientList\n" ..
+		"\n" ..
+		" Lists the connected clients"
 	},
 }
