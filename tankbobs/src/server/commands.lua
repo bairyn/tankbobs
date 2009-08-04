@@ -66,12 +66,18 @@ local function commands_private_concatArgs(line, startArg)
 	end
 end
 
-local function commands_private_upToArg(line, endArg)  -- inclusive
+local function commands_private_upToArg(line, endArg, noWhitespace)  -- inclusive
+	noWhitespace = noWhitespace or false
+
 	if #commands_private_args(line) < endArg then
 		endArg = #commands_private_args(line)
 	end
 
-	return line:match("([ \t]*" .. string.rep("[^ \t]*[ \t]*", endArg - 1) .. ").*")
+	if noWhitespace then
+		return line:match("([ \t]*[^ \t]*" .. string.rep("[ \t]*[^ \t]*", endArg - 1) .. ").*")
+	else
+		return line:match("([ \t]*" .. string.rep("[^ \t]*[ \t]*", endArg) .. ").*")
+	end
 end
 
 function commands_command(line)
@@ -159,7 +165,8 @@ function commands_autoComplete(line)
 				return
 			end
 		end
-	elseif #args == 1 then
+	--elseif #args == 1 then
+	else
 		local names = {}
 
 		for _, v in pairs(commands) do
@@ -211,8 +218,8 @@ command =
 	description = ""
 }
 
-local help, exec, exit, set, map, listSets, listMaps, echo, pause, port
-local helpT, execT, exitT, setT, mapT, listSetsT, listMapsT, echoT, pauseT, port
+local help, exec, exit, set, map, listSets, listMaps, echo, pause, restart, port, gameType
+local helpT, execT, exitT, setT, mapT, listSetsT, listMapsT, echoT, pauseT, restartT, port, gameTypeT
 
 function help(line)
 	local args = commands_private_args(line)
@@ -729,6 +736,14 @@ end
 
 -- no auto completion for pause
 
+function restart(line)
+	local args = commands_private_args(line)
+
+	s_restart()
+end
+
+-- no auto completion for restart
+
 function port(line)
 	local args = commands_private_args(line)
 
@@ -748,6 +763,40 @@ function port(line)
 end
 
 -- no auto completion for port
+
+function gameType(line)
+	local args = commands_private_args(line)
+
+	if #args >= 2 then
+		local port = tonumber(args)
+
+		if not port or port > 65535 or port < 0 then
+			return help("help port")
+		end
+
+		c_config_set("server.port", port)
+
+		s_printnl("port: new port '", tostring(port), "' will be used on next restart")
+	else
+		return help("help port")
+	end
+end
+
+do
+local gameTypes = {"deathmatch", "domination", "capturetheflag"}
+function gameTypeT(line)
+	local args = commands_private_args(line)
+	local gameType = commands_private_concatArgs(line, 2)
+
+	if #args >= 2 then
+		for _, v in pairs(gameTypes) do
+			if tolower(gameType):find("^" .. tolower(v)) then
+				return commands_private_upToArg(line, 1) .. v
+			end
+		end
+	end
+end
+end
 
 commands =
 {
@@ -860,5 +909,35 @@ commands =
 		" port [port]\n" ..
 		"\n" ..
 		" Sets the port to be used on restart"
+	},
+
+	{
+		"restart",
+		restart,
+		restartT,
+		"Usage:\n" ..
+		" restart\n" ..
+		"\n" ..
+		" Restarts the game"
+	},
+
+	{
+		"port",
+		port,
+		portT,
+		"Usage:\n" ..
+		" port [port]\n" ..
+		"\n" ..
+		" Sets the port to be used on restart"
+	},
+
+	{
+		"gameType",
+		port,
+		portT,
+		"Usage:\n" ..
+		" gameType [game type]\n" ..
+		"\n" ..
+		" Sets the game type"
 	},
 }
