@@ -269,6 +269,7 @@ function help(line)
 			" -map\n" ..
 			" -listMaps\n" ..
 			" -listSets\n" ..
+			" -gameType\n" ..
 			" -exec\n" ..
 			"\n" ..
 			"See \"help help\" for usage\n"
