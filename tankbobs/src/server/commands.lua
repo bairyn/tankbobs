@@ -886,7 +886,7 @@ function clientList(line)
 	local idOnly = args[2] == "-i" or args[2] == "--id-only"
 	local clients
 
-	if #args >= idOnly and 3 or 2 then
+	if #args >= (idOnly and 3 or 2) then
 		local identifier = commands_concatArgs(line, idOnly and 3 or 2)
 
 		clients = client_getClientsByIdentifier(identifier, idOnly)
@@ -909,7 +909,7 @@ end
 function kick(line)
 	local args = commands_args(line)
 	local idOnly = args[2] == "-i" or args[2] == "--id-only"
-	local num = idOnly and #args - 1 or #args
+	local num = (idOnly and #args - 1 or #args)
 
 	if num >= 3 then
 		local identifier = args[2]
@@ -921,7 +921,7 @@ function kick(line)
 			s_printnl("kick: '", tostring(#clients) .. "' clients found matching ID, guid, IP:port, or name of ", tostring(identifier))
 
 			s_printnl()
-			return clientList("clientList " .. idOnly and "--id-only " or "" .. "\"" .. identifier .. "\"")
+			return clientList("clientList " .. (idOnly and "--id-only " or "") .. "\"" .. identifier .. "\"")
 		elseif #clients == 1 then
 			client_kick(clients[1], reason)
 		else--if #clients < 1 then
