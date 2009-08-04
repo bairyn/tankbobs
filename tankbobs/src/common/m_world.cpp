@@ -1536,7 +1536,10 @@ int w_unpersistWorld(lua_State *L)
 			/* dropped */
 			if(state & 0x02)
 			{
-				lua_getfield(L, -1, "stolen");
+				lua_pushboolean(L, true);
+				lua_setfield(L, -2, "dropped");
+
+				lua_getfield(L, -1, "pos");
 				if(!lua_toboolean(L, -1))
 				{
 					lua_pop(L, 1);
@@ -1549,6 +1552,8 @@ int w_unpersistWorld(lua_State *L)
 					v->x = droppedPosx;
 					v->y = droppedPosy;
 					MATH_POLAR(*v);
+
+					lua_setfield(L, -2, "pos");
 				}
 				else
 				{
@@ -1556,13 +1561,14 @@ int w_unpersistWorld(lua_State *L)
 					v->x = droppedPosx;
 					v->y = droppedPosy;
 					MATH_POLAR(*v);
+
+					lua_pop(L, 1);
 				}
-				lua_setfield(L, -2, "stolen");
 			}
 			else
 			{
-				lua_pushnil(L);
-				lua_setfield(L, -2, "stolen");
+				lua_pushboolean(L, false);
+				lua_setfield(L, -2, "dropped");
 			}
 
 			/* pop m and control point */
