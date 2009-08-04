@@ -758,7 +758,7 @@ function port(line)
 
 		s_printnl("port: new port '", tostring(port), "' will be used on next restart")
 	else
-		return help("help port")
+		s_printnl("port: current port is '", tostring(c_config_get("server.port")), "'")
 	end
 end
 
@@ -926,7 +926,7 @@ commands =
 		port,
 		portT,
 		"Usage:\n" ..
-		" port [port]\n" ..
+		" port (port)\n" ..
 		"\n" ..
 		" Sets the port to be used on restart"
 	},
