@@ -376,3 +376,43 @@ end
 function client_getClients()
 	return clients
 end
+
+function client_getClientsByIdentifier(identifier, idOnly)
+	identifier = identifier or ""
+	idOnly = idOnly or false
+
+	local allClients = clients
+
+	local clients = {}
+
+	for k, v in pairs(allClients) do
+		-- if identifier is a single number, return on first result if it matches a client's ID
+
+		if tonumber(identifier) and k == tonumber(identifier) then
+			return {v}
+		end
+
+		if not idOnly then
+			-- test for GUID next
+			if v.ui:find(identifier) then
+				table.insert(clients, v)
+			end
+
+			-- IP:port
+			if v.ip .. ":" .. v.port == identifier then
+				table.insert(clients, v)
+			end
+
+			-- name
+			if v.name:find(identifier) then
+				table.insert(clients, v)
+			end
+		end
+	end
+
+	return clients
+end
+
+function client_kick(client, reason)
+	client_disconnect(client, "kicked: " .. reason)
+end

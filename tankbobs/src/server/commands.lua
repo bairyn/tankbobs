@@ -28,6 +28,8 @@ local tankbobs
 local command
 local commands
 
+local lastCommand = ""
+
 function commands_init()
 	tankbobs = _G.tankbobs
 
@@ -87,6 +89,8 @@ local commands_upToArg = commands_upToArg
 
 function commands_command(line)
 	local args = commands_args(line)
+
+	lastCommand = line
 
 	if #args >= 1 then
 		for _, v in pairs(commands) do
@@ -252,8 +256,8 @@ command =
 	description = ""
 }
 
-local help, exec, exit, set, map, listSets, listMaps, echo, pause, restart, port, gameType, clientList
-local helpT, execT, exitT, setT, mapT, listSetsT, listMapsT, echoT, pauseT, restartT, portT, gameTypeT, clientListT
+local help, exec, exit, set, map, listSets, listMaps, echo, pause, restart, port, gameType, clientList, kick
+local helpT, execT, exitT, setT, mapT, listSetsT, listMapsT, echoT, pauseT, restartT, portT, gameTypeT, clientListT, kickT
 
 function help(line)
 	local args = commands_args(line)
@@ -879,17 +883,56 @@ local guidLen = 6
 local clientFormat = "%3s - %15s - %15s - %5s %10s - %" .. tostring(1 + 4 * (guidLen) + 1 * (guidLen - 1)) .. "s"
 function clientList(line)
 	local args = commands_args(line)
+	local idOnly = args[2] == "-i" or args[2] == "--id-only"
+	local clients
 
-	s_printnl("clientList: '", client_connectedClients(), "' connected clients")
+	if #args >= idOnly and 3 or 2 then
+		local identifier = commands_concatArgs(line, idOnly and 3 or 2)
+
+		clients = client_getClientsByIdentifier(identifier, idOnly)
+	else
+		clients = client_getClients()
+	end
+
+	s_printnl("clientList: '", #clients, "connected client" .. #clients == 1 and "" or "s")
 
 	s_printnl()
-	s_printnl(string.format(clientFormat, "number", "name", "IP", "port", "connecting", "guid"))
-	for k, v in pairs(client_getClients()) do
+	s_printnl(string.format(clientFormat, "ID", "name", "IP", "port", "connecting", "guid"))
+	for k, v in pairs(clients) do
 		s_printnl(string.format(clientFormat, tostring(k, v.name), v.ip, tostring(v.port), v.connecting and "connecting" or "connected", "*" .. common_stringToHex("", "", v.ui:sub(-guidLen, -1))))
 	end
+	s_printnl()
 end
 
 -- no auto completion for clientList
+
+function kick(line)
+	local args = commands_args(line)
+	local idOnly = args[2] == "-i" or args[2] == "--id-only"
+	local num = idOnly and #args - 1 or #args
+
+	if num >= 3 then
+		local identifier = args[2]
+		local reason = args[3]
+
+		local clients = client_getClientsByIdentifier(identifier, idOnly)
+
+		if #clients > 1 then
+			s_printnl("kick: '", tostring(#clients) .. "' clients found matching ID, guid, IP:port, or name of ", tostring(identifier))
+
+			s_printnl()
+			return clientList("clientList " .. idOnly and "--id-only " or "" .. \"" .. identifier .. "\"")
+		elseif #clients == 1 then
+			client_kick(clients[1], reason)
+		else--if #clients < 1 then
+			s_printnl("kick: no clients found matching ID, guid, IP:port, or name of ", tostring(identifier))
+		end
+	else
+		return help("help kick")
+	end
+end
+
+-- no auto completion for kick
 
 commands =
 {
@@ -1029,8 +1072,24 @@ commands =
 		clientList,
 		clientListT,
 		"Usage:\n" ..
-		" clientList\n" ..
+		" clientList (-i/--id-only) (client)\n" ..
 		"\n" ..
-		" Lists the connected clients"
+		" Lists the connected clients.  This list can optionally be limited\n" ..
+		" by the identifier 'client'"
+	},
+
+	{
+		{"kick", "drop"},
+		kick,
+		kickT,
+		"Usage:\n" ..
+		" kick (-i/--id-only) [client] [reason]\n" ..
+		"\n" ..
+		" Disconnects client from the server\n" ..
+		" for a reason.  Clients can be specified by ID, (partial) guid, \n" ..
+		" IP:port (both IP and port, e.g. 1.2.3.4:43210), or (partial) name (see \"help clientList\").\n" ..
+		" If multiple clients match the identifier, a list will be presented to the user, and no action\n" ..
+		" will be taken.  If the -i (id-only) option is given, only ID's will be tested\n" ..
+		" by his ID, regardless of other matches; this is the only affect of the -f (force) option."
 	},
 }
