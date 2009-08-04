@@ -231,6 +231,7 @@ int t_explode(lua_State *L)
 	int ignoreDelimitersInQuotes;  /* this variable has a different name from ignoringDelimiterInQuotes */
 	int escapeSequences;
 	int stringLen;
+	int lastArgumentEmpty;
 
 	CHECKINIT(init, L);
 
@@ -240,6 +241,7 @@ int t_explode(lua_State *L)
 	noEmptyElements = lua_toboolean(L, 3);
 	ignoreDelimitersInQuotes = lua_toboolean(L, 4);
 	escapeSequences = lua_toboolean(L, 5);
+	lastArgumentEmpty = lua_toboolean(L, 6);
 
 	if(stringLen >= BUFSIZE)
 		line = malloc((strlen(string) + 1) * sizeof(char));
@@ -297,7 +299,7 @@ int t_explode(lua_State *L)
 		}
 	}
 
-	if(!noEmptyElements || line[0])
+	if(!noEmptyElements || lastArgumentEmpty || line[0])
 	{
 		lua_pushinteger(L, ++i);
 		lua_pushstring(L, line);
@@ -605,7 +607,9 @@ static const struct luaL_Reg tankbobs[] =
 			If the third argument is true, no empty strings will be passed.
 			If the fourth argument passed is true, any delimiters between "'s will be ignored.
 			If the fifth argument passed is true, two escape sequences will be recognized:
-			\\ -> \; \" -> ".  This is useful if you want unrecognized "'s in the passed string */
+			\\ -> \; \" -> ".  This is useful if you want unrecognized "'s in the passed string.
+			The sixth argument passed will determine whether a final argument will be added if the string has
+			extra whitespace. */
 	{"t_clone", t_clone}, /* clone the first passed table into the second passed table */
 		/* If the first argument is a boolean, it determines whether all vectors are copied */
 

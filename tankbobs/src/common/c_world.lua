@@ -518,10 +518,10 @@ function c_world_freeWorld()
 end
 
 function c_world_setGameType(gameType)
-	if type(gameType) == "string" then
+	if type(gameType) ~= "string" then
 		c_world_gameType = gameType
 	else
-		local switch = c_config_get("game.gameType")
+		local switch = gameType
 		if switch == "deathmatch" then
 			c_world_gameType = DEATHMATCH
 		elseif switch == "domination" then
@@ -532,6 +532,25 @@ function c_world_setGameType(gameType)
 			c_world_gameType = DEATHMATCH
 		end
 	end
+end
+
+function c_world_getGameType()
+	return c_world_gameType
+end
+
+function c_world_getGameTypeString(gameType)
+	local gameType = "deathmatch"
+
+	local switch = c_world_getGameType()
+	if switch == DEATHMATCH then
+		gameType = "deathmatch"
+	elseif switch == DOMINATION then
+		gameType = "domination"
+	elseif switch == CAPTURETHEFLAG then
+		gameType = "capturetheflag"
+	end
+
+	return gameType
 end
 
 function c_world_testBody(ent)

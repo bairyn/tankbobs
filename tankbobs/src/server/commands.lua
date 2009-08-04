@@ -44,33 +44,37 @@ end
 function commands_done()
 end
 
-local function commands_private_setSelected()
+function commands_setSelected()
 	s_printnl("Selected level set '", c_tcm_current_set.name, "' (", c_tcm_current_set.title, ")")
 end
+local commands_setSelected = commands_setSelected
 
-local function commands_private_mapSelected()
+function commands_mapSelected()
 	s_printnl("Selected level '", c_tcm_current_map.name, "' (", c_tcm_current_map.title, ")")
 
 	s_restart()
 end
+local commands_mapSelected = commands_mapSelected
 
-local function commands_private_args(line)
-	return tankbobs.t_explode(line, " \t", true, true, true)
+function commands_args(line)
+	return tankbobs.t_explode(line, " \t", true, true, true, true)
 end
+local commands_args = commands_args
 
-local function commands_private_concatArgs(line, startArg)
-	if #commands_private_args(line) < startArg then
+function commands_concatArgs(line, startArg)
+	if #commands_args(line) < startArg then
 		return ""
 	else
 		return line:match("[ \t]*" .. string.rep("[^ \t]*[ \t]*", startArg - 1) .. "(.*)")
 	end
 end
+local commands_concatArgs = commands_concatArgs
 
-local function commands_private_upToArg(line, endArg, noWhitespace)  -- inclusive
+function commands_upToArg(line, endArg, noWhitespace)  -- inclusive
 	noWhitespace = noWhitespace or false
 
-	if #commands_private_args(line) < endArg then
-		endArg = #commands_private_args(line)
+	if #commands_args(line) < endArg then
+		endArg = #commands_args(line)
 	end
 
 	if noWhitespace then
@@ -79,9 +83,10 @@ local function commands_private_upToArg(line, endArg, noWhitespace)  -- inclusiv
 		return line:match("([ \t]*" .. string.rep("[^ \t]*[ \t]*", endArg) .. ").*")
 	end
 end
+local commands_upToArg = commands_upToArg
 
 function commands_command(line)
-	local args = commands_private_args(line)
+	local args = commands_args(line)
 
 	if #args >= 1 then
 		for _, v in pairs(commands) do
@@ -113,10 +118,10 @@ function commands_command(line)
 			local match = false
 
 			if type(v.name) == "string" then
-				match = tolower(v.name) == tolower(args[1])
+				match = v.name:lower() == args[1]:lower()
 			elseif type(v.name) == "table" then
 				for _, v in pairs(v.name) do
-					if tolower(v) == tolower(args[1]) then
+					if v:lower() == args[1]:lower() then
 						match = true
 
 						break
@@ -139,7 +144,7 @@ function commands_command(line)
 end
 
 function commands_autoComplete(line)
-	local args = commands_private_args(line)
+	local args = commands_args(line)
 
 	if #args > 1 then
 		for _, v in pairs(commands) do
@@ -150,6 +155,31 @@ function commands_autoComplete(line)
 			elseif type(v.name) == "table" then
 				for _, v in pairs(v.name) do
 					if v == args[1] then
+						match = true
+
+						break
+					end
+				end
+			end
+
+			if match then
+				if v.autoCompleteFunction then
+					return v.autoCompleteFunction(line)
+				end
+
+				return
+			end
+		end
+
+		-- not found, so try a case-insensitive search
+		for _, v in pairs(commands) do
+			local match = false
+
+			if type(v.name) == "string" then
+				match = v.name:lower() == args[1]:lower()
+			elseif type(v.name) == "table" then
+				for _, v in pairs(v.name) do
+					if v:lower() == args[1]:lower() then
 						match = true
 
 						break
@@ -197,14 +227,16 @@ function commands_autoComplete(line)
 			if #names > 1 then
 				table.sort(names)
 
-				-- print these options to the console and keep the input the same
+				-- print options to console and don't touch the input
 				for _, v in pairs(names) do
-					s_print("  - ", v, "\n")
+					s_printnl("  - ", v)
 				end
+
+				s_printnl()
 
 				return
 			else
-				return names[1]
+				return names[1] .. line:match("[ \t]*[^ \t]*([ \t]*)")
 			end
 		end
 	end
@@ -221,10 +253,10 @@ command =
 }
 
 local help, exec, exit, set, map, listSets, listMaps, echo, pause, restart, port, gameType
-local helpT, execT, exitT, setT, mapT, listSetsT, listMapsT, echoT, pauseT, restartT, port, gameTypeT
+local helpT, execT, exitT, setT, mapT, listSetsT, listMapsT, echoT, pauseT, restartT, portT, gameTypeT
 
 function help(line)
-	local args = commands_private_args(line)
+	local args = commands_args(line)
 
 	if #args > 1 then
 		if args[2] == "-l" then
@@ -280,7 +312,7 @@ function help(line)
 end
 
 function helpT(line)
-	local args = commands_private_args(line)
+	local args = commands_args(line)
 
 	if args[2] == "-l" then
 		return
@@ -293,15 +325,32 @@ function helpT(line)
 			local match = false
 
 			if type(v.name) == "string" then
-				if v.name:find("^" .. args[1]) then
+				if v.name:find("^" .. args[2]) then
 					match = v.name
 				end
 			elseif type(v.name) == "table" then
 				for _, v in pairs(v.name) do
-					if v:find("^" .. args[1]) then
+					if v:find("^" .. args[2]) then
 						match = v
 
 						break
+					end
+				end
+			end
+
+			if not match then
+				-- case-insensitive search
+				if type(v.name) == "string" then
+					if v.name:lower():find("^" .. args[2]:lower()) then
+						match = v.name
+					end
+				elseif type(v.name) == "table" then
+					for _, v in pairs(v.name) do
+						if v:lower():find("^" .. args[2]:lower()) then
+							match = v
+	
+							break
+						end
 					end
 				end
 			end
@@ -315,21 +364,23 @@ function helpT(line)
 			if #names > 1 then
 				table.sort(names)
 
-				-- print these options to the console and keep the input the same
+				-- print options to console and don't touch the input
 				for _, v in pairs(names) do
-					s_print("  - " .. v)
+					s_printnl("  - " .. v)
 				end
+
+				s_printnl()
 
 				return
 			else
-				return commands_private_upToArg(line, 1) .. names[1]
+				return commands_upToArg(line, 1) .. names[1]
 			end
 		end
 	end
 end
 
 function exit(line)
-	local args = commands_private_args(line)
+	local args = commands_args(line)
 
 	done = true
 end
@@ -337,10 +388,10 @@ end
 -- no auto completion for exit
 
 function exec(line)
-	local args = commands_private_args(line)
+	local args = commands_args(line)
 
 	if #args > 1 then
-		local execString = commands_private_concatArgs(line, 2)
+		local execString = commands_concatArgs(line, 2)
 		local toExec, err = loadstring(execString)
 
 		if not toExec then
@@ -381,17 +432,17 @@ end
 -- no auto completion for exec
 
 function listSets(line)
-	local args = commands_private_args(line)
+	local args = commands_args(line)
 	local description = args[2] == "-d"
 	local beginsWith = ""
 
 	if description then
 		if #args > 2 then
-			beginsWith = commands_private_concatArgs(line, 3)
+			beginsWith = commands_concatArgs(line, 3)
 		end
 	else
 		if #args > 1 then
-			beginsWith = commands_private_concatArgs(line, 2)
+			beginsWith = commands_concatArgs(line, 2)
 		end
 	end
 
@@ -411,17 +462,17 @@ function listSets(line)
 end
 
 function listSetsT(line)
-	local args = commands_private_args(line)
+	local args = commands_args(line)
 	local description = args[2] == "-d"
 	local beginsWith = ""
 
 	if description then
 		if #args > 2 then
-			beginsWith = commands_private_concatArgs(line, 3)
+			beginsWith = commands_concatArgs(line, 3)
 		end
 	else
 		if #args > 1 then
-			beginsWith = commands_private_concatArgs(line, 2)
+			beginsWith = commands_concatArgs(line, 2)
 		end
 	end
 
@@ -440,21 +491,23 @@ function listSetsT(line)
 			if #names > 1 then
 				table.sort(names)
 
-				-- print these options to the console and keep the input the same
+				-- print options to console and don't touch the input
 				for _, v in pairs(names) do
-					s_print("  - ", v, "\n")
+					s_printnl("  - ", v)
 				end
+
+				s_printnl()
 
 				return
 			else
-				return commands_private_upToArg(line, description and 2 or 1) .. names[1]
+				return commands_upToArg(line, description and 2 or 1) .. names[1]
 			end
 		end
 	end
 end
 
 function listMaps(line)
-	local args = commands_private_args(line)
+	local args = commands_args(line)
 	local description = args[2] == "-d"
 	local beginsWith = ""
 
@@ -468,11 +521,11 @@ function listMaps(line)
 
 	if description then
 		if #args > 2 then
-			beginsWith = commands_private_concatArgs(line, 3)
+			beginsWith = commands_concatArgs(line, 3)
 		end
 	else
 		if #args > 1 then
-			beginsWith = commands_private_concatArgs(line, 2)
+			beginsWith = commands_concatArgs(line, 2)
 		end
 	end
 
@@ -493,7 +546,7 @@ function listMaps(line)
 end
 
 function listMapsT(line)
-	local args = commands_private_args(line)
+	local args = commands_args(line)
 	local description = args[2] == "-d"
 	local beginsWith = ""
 
@@ -503,13 +556,13 @@ function listMapsT(line)
 
 	if description then
 		if #args > 2 then
-			beginsWith = commands_private_concatArgs(line, 3)
+			beginsWith = commands_concatArgs(line, 3)
 		else
 			return
 		end
 	else
 		if #args > 1 then
-			beginsWith = commands_private_concatArgs(line, 2)
+			beginsWith = commands_concatArgs(line, 2)
 		else
 			return
 		end
@@ -530,21 +583,23 @@ function listMapsT(line)
 			if #names > 1 then
 				table.sort(names)
 
-				-- print these options to the console and keep the input the same
+				-- print options to console and don't touch the input
 				for _, v in pairs(names) do
-					s_print("  - ", v, "\n")
+					s_printnl("  - ", v)
 				end
+
+				s_printnl()
 
 				return
 			else
-				return commands_private_upToArg(line, description and 2 or 1) .. names[1]
+				return commands_upToArg(line, description and 2 or 1) .. names[1]
 			end
 		end
 	end
 end
 
 function set(line)
-	local args = commands_private_args(line)
+	local args = commands_args(line)
 	local byTitle = args[2] == "-t"
 	local minArgs = byTitle and 2 and 1
 
@@ -552,9 +607,9 @@ function set(line)
 		local this, that
 
 		if byTitle then
-			this = commands_private_concatArgs(line, 3)
+			this = commands_concatArgs(line, 3)
 		else
-			this = commands_private_concatArgs(line, 2)
+			this = commands_concatArgs(line, 2)
 		end
 
 		for k, v in pairs(c_tcm_current_sets) do
@@ -566,7 +621,7 @@ function set(line)
 
 			if this == that then
 				c_tcm_current_set = v
-				commands_private_setSelected()
+				commands_setSelected()
 
 				return
 			end
@@ -577,19 +632,19 @@ function set(line)
 end
 
 function setT(line)
-	local args = commands_private_args(line)
+	local args = commands_args(line)
 	local byTitle = args[2] == "-t"
 	local beginsWith = ""
 
 	if byTitle then
 		if #args > 2 then
-			beginsWith = commands_private_concatArgs(line, 3)
+			beginsWith = commands_concatArgs(line, 3)
 		else
 			return
 		end
 	else
 		if #args > 1 then
-			beginsWith = commands_private_concatArgs(line, 2)
+			beginsWith = commands_concatArgs(line, 2)
 		else
 			return
 		end
@@ -610,21 +665,23 @@ function setT(line)
 			if #names > 1 then
 				table.sort(names)
 
-				-- print these options to the console and keep the input the same
+				-- print options to console and don't touch the input
 				for _, v in pairs(names) do
-					s_print("  - ", v, "\n")
+					s_printnl("  - ", v)
 				end
+
+				s_printnl()
 
 				return
 			else
-				return commands_private_upToArg(line, byTitle and 2 or 1) .. names[1]
+				return commands_upToArg(line, byTitle and 2 or 1) .. names[1]
 			end
 		end
 	end
 end
 
 function map(line)
-	local args = commands_private_args(line)
+	local args = commands_args(line)
 	local byTitle = args[2] == "-t"
 	local minArgs = byTitle and 2 and 1
 
@@ -638,9 +695,9 @@ function map(line)
 		local this, that
 
 		if byTitle then
-			this = commands_private_concatArgs(line, 3)
+			this = commands_concatArgs(line, 3)
 		else
-			this = commands_private_concatArgs(line, 2)
+			this = commands_concatArgs(line, 2)
 		end
 
 		for k, v in pairs(c_tcm_current_set.maps) do
@@ -652,7 +709,7 @@ function map(line)
 
 			if this == that then
 				c_tcm_current_map = v
-				commands_private_mapSelected()
+				commands_mapSelected()
 
 				return
 			end
@@ -663,7 +720,7 @@ function map(line)
 end
 
 function mapT(line)
-	local args = commands_private_args(line)
+	local args = commands_args(line)
 	local byTitle = args[2] == "-t"
 	local beginsWith
 
@@ -673,18 +730,17 @@ function mapT(line)
 
 	if byTitle then
 		if #args > 2 then
-			beginsWith = commands_private_concatArgs(line, 3)
+			beginsWith = commands_concatArgs(line, 3)
 		else
 			return
 		end
 	else
 		if #args > 1 then
-			beginsWith = commands_private_concatArgs(line, 2)
+			beginsWith = commands_concatArgs(line, 2)
 		else
 			return
 		end
 	end
-
 	if #c_tcm_current_set.maps > 0 then
 		local names = {}
 
@@ -700,24 +756,26 @@ function mapT(line)
 			if #names > 1 then
 				table.sort(names)
 
-				-- print these options to the console and keep the input the same
+				-- print options to console and don't touch the input
 				for _, v in pairs(names) do
-					s_print("  - ", v, "\n")
+					s_printnl("  - ", v)
 				end
+
+				s_printnl()
 
 				return
 			else
-				return commands_private_upToArg(line, byTitle and 2 or 1) .. names[1]
+				return commands_upToArg(line, byTitle and 2 or 1) .. names[1]
 			end
 		end
 	end
 end
 
 function echo(line)
-	local args = commands_private_args(line)
+	local args = commands_args(line)
 
 	if #args > 1 then
-		s_println(commands_private_concatArgs(line, 2))
+		s_println(commands_concatArgs(line, 2))
 	else
 		return help("help echo")
 	end
@@ -726,7 +784,7 @@ end
 -- no auto completion for echo
 
 function pause(line)
-	local args = commands_private_args(line)
+	local args = commands_args(line)
 
 	if c_world_getPaused() then
 		c_world_setPaused(false)
@@ -740,7 +798,7 @@ end
 -- no auto completion for pause
 
 function restart(line)
-	local args = commands_private_args(line)
+	local args = commands_args(line)
 
 	s_restart()
 end
@@ -748,10 +806,10 @@ end
 -- no auto completion for restart
 
 function port(line)
-	local args = commands_private_args(line)
+	local args = commands_args(line)
 
 	if #args >= 2 then
-		local port = tonumber(args)
+		local port = tonumber(args[2])
 
 		if not port or port > 65535 or port < 0 then
 			return help("help port")
@@ -768,34 +826,50 @@ end
 -- no auto completion for port
 
 function gameType(line)
-	local args = commands_private_args(line)
+	local args = commands_args(line)
 
 	if #args >= 2 then
-		local port = tonumber(args)
+		local gameType = tostring(args[2])
 
-		if not port or port > 65535 or port < 0 then
-			return help("help port")
+		if not gameType then
+			return help("help gameType")
 		end
 
-		c_config_set("server.port", port)
+		c_config_set("game.gameType", gameType)
 
-		s_printnl("port: new port '", tostring(port), "' will be used on next restart")
+		s_printnl("gameType: new game type '", tostring(gameType), "' will be used on next restart")
 	else
-		return help("help port")
+		return help("help gameType")
 	end
 end
 
 do
 local gameTypes = {"deathmatch", "domination", "capturetheflag"}
 function gameTypeT(line)
-	local args = commands_private_args(line)
-	local gameType = commands_private_concatArgs(line, 2)
+	local args = commands_args(line)
+	local gameType = commands_concatArgs(line, 2)
+	local names = {}
 
 	if #args >= 2 then
 		for _, v in pairs(gameTypes) do
-			if tolower(gameType):find("^" .. tolower(v)) then
-				return commands_private_upToArg(line, 1) .. v
+			if v:lower():find("^" .. gameType:lower()) then
+				table.insert(names, v)
 			end
+		end
+
+		if #names > 1 then
+			table.sort(names)
+
+			-- print options to console and don't touch the input
+			for _, v in pairs(names) do
+				s_printnl("  - ", v)
+			end
+
+			s_printnl()
+
+			return
+		elseif #names == 1 then
+			return commands_upToArg(line, 1) .. names[1]
 		end
 	end
 end
@@ -905,16 +979,6 @@ commands =
 	},
 
 	{
-		"port",
-		port,
-		portT,
-		"Usage:\n" ..
-		" port [port]\n" ..
-		"\n" ..
-		" Sets the port to be used on restart"
-	},
-
-	{
 		"restart",
 		restart,
 		restartT,
@@ -936,8 +1000,8 @@ commands =
 
 	{
 		"gameType",
-		port,
-		portT,
+		gameType,
+		gameTypeT,
 		"Usage:\n" ..
 		" gameType [game type]\n" ..
 		"\n" ..

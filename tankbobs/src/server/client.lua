@@ -231,7 +231,7 @@ function client_step(d)
 							-- set and map as a NULL-terminated string
 							tankbobs.n_writeToPacket(c_tcm_current_set.name .. string.char(0x00))
 							tankbobs.n_writeToPacket(c_tcm_current_map.name .. string.char(0x00))
-							tankbobs.n_writeToPacket(c_config_get("game.gameType") .. string.char(0x00))
+							tankbobs.n_writeToPacket(c_world_getGameTypeString() .. string.char(0x00))
 
 							sendToClient(client)
 						end
