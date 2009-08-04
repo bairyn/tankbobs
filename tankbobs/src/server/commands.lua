@@ -169,6 +169,8 @@ function commands_autoComplete(line)
 	else
 		local names = {}
 
+		args[1] = args[1] or ""
+
 		for _, v in pairs(commands) do
 			local match = false
 
