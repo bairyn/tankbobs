@@ -87,6 +87,11 @@ function s_print(...)
 	tankbobs.c_print(print)
 end
 
+function s_restart()
+	c_state_new(main_state)
+	s_printnl("Restarting . . .")
+end
+
 local s_print = s_print
 function s_printnl(...)
 	s_print(...)

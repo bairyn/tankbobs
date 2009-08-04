@@ -20,7 +20,7 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 --[[
 commands.lua
 
-commands typed in the server console
+Server console commands
 --]]
 
 local tankbobs
@@ -188,8 +188,8 @@ command =
 	description = ""
 }
 
-local help, exec, exit, set, map, listSets, listMaps, echo, pause
-local helpT, execT, exitT, setT, mapT, listSetsT, listMapsT, echoT, pauseT
+local help, exec, exit, set, map, listSets, listMaps, echo, pause, port
+local helpT, execT, exitT, setT, mapT, listSetsT, listMapsT, echoT, pauseT, port
 
 function help(line)
 	local args = commands_private_args(line)
@@ -238,6 +238,7 @@ function help(line)
 			" -set\n" ..
 			" -map\n" ..
 			" -listMaps\n" ..
+			" -listSets\n" ..
 			" -exec\n" ..
 			"\n" ..
 			"See \"help help\" for usage\n"
@@ -626,6 +627,8 @@ function map(line)
 	else
 		return help("help map")
 	end
+
+	s_restart()
 end
 
 function mapT(line)
@@ -704,6 +707,26 @@ function pause(line)
 end
 
 -- no auto completion for pause
+
+function port(line)
+	local args = commands_private_args(line)
+
+	if #args >= 2 then
+		local port = tonumber(args)
+
+		if not port or port > 65535 or port < 0 then
+			return help("help port")
+		end
+
+		c_config_set("server.port", port)
+
+		s_printnl("port: new port '", tostring(port), "' will be used on next restart")
+	else
+		return help("help port")
+	end
+end
+
+-- no auto completion for port
 
 commands =
 {
@@ -806,5 +829,15 @@ commands =
 		" pause\n" ..
 		"\n" ..
 		" Pauses or unpauses the game"
+	},
+
+	{
+		"port",
+		port,
+		portT,
+		"Usage:\n" ..
+		" port [port]\n" ..
+		"\n" ..
+		" Sets the port to be used on restart"
 	},
 }
