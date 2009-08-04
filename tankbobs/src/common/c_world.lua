@@ -426,7 +426,9 @@ function c_world_newWorld()
 	c_world_teams = {}
 
 	local m = c_tcm_current_map
-	assert(c_tcm_current_map)
+	if not c_tcm_current_map then
+		return false
+	end
 	tankbobs.w_newWorld(c_const_get("world_lowerbound") + t_m_vec2(m.leftmost, m.lowermost), c_const_get("world_upperbound") + t_m_vec2(m.rightmost, m.uppermost), t_m_vec2(c_const_get("world_gravityx"), c_const_get("world_gravityy")), c_const_get("world_allowSleep"), c_world_contactListener, c_world_tank_step, c_world_wall_step, c_world_projectile_step, c_world_powerupSpawnPoint_step, c_world_powerup_step, c_world_controlPoint_step, c_world_flag_step, c_world_teleporter_step, c_world_tanks, c_tcm_current_map.walls, c_weapon_getProjectiles(), c_tcm_current_map.powerupSpawnPoints, c_world_powerups, c_tcm_current_map.controlPoints, c_tcm_current_map.flags, c_tcm_current_map.teleporters)
 
 	-- set game type
@@ -496,6 +498,8 @@ function c_world_newWorld()
 	worldTime = t_t_getTicks()
 
 	worldInitialized = true
+
+	return true
 end
 
 function c_world_freeWorld()
