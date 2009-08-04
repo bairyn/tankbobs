@@ -757,7 +757,7 @@ int w_persistWorld(lua_State *L)
 
 			/* set weaponIndex */
 			lua_getfield(L, -1, "weapon");
-			*((char *) bufpos) = io_charNL(lua_tonumber(L, -1)); bufpos += sizeof(char);
+			*((char *) bufpos) = io_charNL(lua_tointeger(L, -1)); bufpos += sizeof(char);
 			lua_pop(L, 1);
 
 			/* set rotation */
@@ -809,7 +809,7 @@ int w_persistWorld(lua_State *L)
 			lua_pop(L, 1);
 
 			/* set index */
-			*((char *) bufpos) = io_charNL((unsigned int) lua_tonumber(L, -2)); bufpos += sizeof(char);
+			*((char *) bufpos) = io_charNL((unsigned int) lua_tointeger(L, -2)); bufpos += sizeof(char);
 
 			/* set name */
 			lua_getfield(L, -1, "name");
@@ -819,17 +819,17 @@ int w_persistWorld(lua_State *L)
 
 			/* set weapon */
 			lua_getfield(L, -1, "weapon");
-			*((char *) bufpos) = io_charNL((unsigned int) lua_tonumber(L, -1)); bufpos += sizeof(char);
+			*((char *) bufpos) = io_charNL((unsigned int) lua_tointeger(L, -1)); bufpos += sizeof(char);
 			lua_pop(L, 1);
 
 			/* set ammo */
 			lua_getfield(L, -1, "ammo");
-			*((char *) bufpos) = io_charNL((unsigned int) lua_tonumber(L, -1)); bufpos += sizeof(char);
+			*((char *) bufpos) = io_charNL((unsigned int) lua_tointeger(L, -1)); bufpos += sizeof(char);
 			lua_pop(L, 1);
 
 			/* set clips */
 			lua_getfield(L, -1, "clips");
-			*((char *) bufpos) = io_charNL((unsigned int) lua_tonumber(L, -1)); bufpos += sizeof(char);
+			*((char *) bufpos) = io_charNL((unsigned int) lua_tointeger(L, -1)); bufpos += sizeof(char);
 			lua_pop(L, 1);
 
 			/* set rotation */
@@ -898,16 +898,16 @@ int w_persistWorld(lua_State *L)
 			lua_pop(L, 1);
 
 			/* set index */
-			*((char *) bufpos) = io_charNL((unsigned int) lua_tonumber(L, -2)); bufpos += sizeof(char);
+			*((char *) bufpos) = io_charNL((unsigned int) lua_tointeger(L, -2)); bufpos += sizeof(char);
 
 			/* set powerupType */
 			lua_getfield(L, -1, "powerupType");
-			*((char *) bufpos) = io_charNL(lua_tonumber(L, -1)); bufpos += sizeof(char);
+			*((char *) bufpos) = io_charNL(lua_tointeger(L, -1)); bufpos += sizeof(char);
 			lua_pop(L, 1);
 
 			/* set spawner */
 			lua_getfield(L, -1, "spawner");
-			*((char *) bufpos) = io_charNL(lua_tonumber(L, -1)); bufpos += sizeof(char);
+			*((char *) bufpos) = io_charNL(lua_tointeger(L, -1)); bufpos += sizeof(char);
 			lua_pop(L, 1);
 
 			/* set rotation */
@@ -990,11 +990,11 @@ int w_persistWorld(lua_State *L)
 			lua_getfield(L, -1, "pid");
 			if(lua_toboolean(L, -1))
 			{
-				*((char *) bufpos) = io_charNL(lua_tonumber(L, -1)); bufpos += sizeof(char);
+				*((char *) bufpos) = io_charNL(lua_tointeger(L, -1)); bufpos += sizeof(char);
 				lua_pop(L, 1);
 
 				lua_getfield(L, -1, "ppid");
-				*((char *) bufpos) = io_charNL(lua_tonumber(L, -1)); bufpos += sizeof(char);
+				*((char *) bufpos) = io_charNL(lua_tointeger(L, -1)); bufpos += sizeof(char);
 				lua_pop(L, 1);
 
 				lua_getfield(L, -1, "startpos");
@@ -1084,7 +1084,7 @@ int w_persistWorld(lua_State *L)
 			if(lua_toboolean(L, -1))
 			{
 				state &= 0x01;
-				stolenIndex = lua_tonumber(L, -1);
+				stolenIndex = lua_tointeger(L, -1);
 			}
 			lua_pop(L, 1);
 			/* set dropped */
