@@ -894,7 +894,7 @@ function clientList(line)
 		clients = client_getClients()
 	end
 
-	s_printnl("clientList: '", #clients, "connected client" .. (#clients == 1 and "" or "s"))
+	s_printnl("clientList: '", #clients, "' connected client" .. (#clients == 1 and "" or "s"))
 
 	s_printnl()
 	s_printnl(string.format(clientFormat, "ID", "name", "IP", "port", "connecting", "guid"))
