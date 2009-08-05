@@ -195,7 +195,7 @@ end
 function game_refreshKeys()
 	tankbobs.in_getKeys()
 
-	for i = 1, c_config_get("game.players") do
+	for i = 1, #c_world_getTanks() do
 		local tank = c_world_getTanks()[i]
 
 		if not tank then
@@ -231,48 +231,30 @@ function game_refreshKeys()
 		end
 
 		local ks = "client.key.player" .. tostring(i) .. "."
+		local kp, kl, cg = tankbobs.in_keyPressed, c_config_keyLayoutSet, c_config_get
 
-		if pressed then
-			if button == c_config_get(ks .. "fire") then
-				tank.state = bit.bor(tank.state, FIRING)
-			end if button == c_config_get(ks .. "forward") then
-				tank.state = bit.bor(tank.state, FORWARD)
-			end if button == c_config_get(ks .. "back") then
-				tank.state = bit.bor(tank.state, BACK)
-			end if button == c_config_get(ks .. "left") then
-				tank.state = bit.bor(tank.state, LEFT)
-			end if button == c_config_get(ks .. "right") then
-				tank.state = bit.bor(tank.state, RIGHT)
-			end if button == c_config_get(ks .. "special") then
-				tank.state = bit.bor(tank.state, SPECIAL)
-			end if button == c_config_get(ks .. "reload") then
-				tank.state = bit.bor(tank.state, RELOAD)
-			--end if button == c_config_get(ks .. "reverse") then
-				--tank.state = bit.bor(tank.state, REVERSE)
-			end if button == c_config_get(ks .. "mod") then
-				tank.state = bit.bor(tank.state, MOD)
-			end
-		else
-			if button == c_config_get(ks .. "fire") then
-				tank.state = bit.band(tank.state, bit.bnot(FIRING))
-			end if button == c_config_get(ks ..           "forward") then
-				tank.state = bit.band(tank.state, bit.bnot(FORWARD))
-			end if button == c_config_get(ks ..           "back") then
-				tank.state = bit.band(tank.state, bit.bnot(BACK))
-			end if button == c_config_get(ks ..           "left") then
-				tank.state = bit.band(tank.state, bit.bnot(LEFT))
-			end if button == c_config_get(ks ..           "right") then
-				tank.state = bit.band(tank.state, bit.bnot(RIGHT))
-			end if button == c_config_get(ks ..           "special") then
-				tank.state = bit.band(tank.state, bit.bnot(SPECIAL))
-			end if button == c_config_get(ks ..           "reload") then
-				tank.state = bit.band(tank.state, bit.bnot(RELOAD))
-			--end if button == c_config_get(ks ..           "reverse") then
-				--tank.state = bit.band(tank.state, bit.bnot(REVERSE)
-			end if button == c_config_get(ks ..           "mod") then
-				tank.state = bit.band(tank.state, bit.bnot(MOD))
+		local function key(state, flag)
+			local key = cg(ks .. state)
+
+			if key ~= 303 and key ~= 304 then
+				key = kl(key)
+
+				if kp(key) then
+					tank.state = bit.bor(tank.state, flag)
+				else
+					tank.state = bit.band(tank.state, bit.bnot(flag))
+				end
 			end
 		end
+
+		key("fire", FIRING)
+		key("back", BACK)
+		key("left", LEFT)
+		key("right", RIGHT)
+		key("special", SPECIAL)
+		key("reload", RELOAD)
+		key("reverse", REVERSE)
+		key("mod", MOD)
 	end
 end
 

@@ -945,7 +945,7 @@ int w_persistWorld(lua_State *L)
 	}
 
 	/* walls */
-	/* float (x|y); float angle; float velX; float velY; float angularVelocity; float pathID; float previousPathID; float startpos(x|y); float pathPos; */
+	/* float (x|y); float angle; float velX; float velY; float angularVelocity; char pathID; char previousPathID; float startpos(x|y); float pathPos; */
 	++order;
 	lua_pushnil(L);
 	while(lua_next(L, order))
