@@ -335,7 +335,7 @@ local function game_drawWorld(d)
 
 						-- aiming aids
 						gl.EnableClientState("VERTEX_ARRAY")
-						if (v.weapon and c_weapon_getWeapons()[v.weapon].aimAid and not v.reloading) or (v.cd.aimAid) then
+						if (v.weapon and c_weapon_getWeapons()[v.weapon] and c_weapon_getWeapons()[v.weapon].aimAid and not v.reloading) or (v.cd.aimAid) then
 							gl.PushAttrib("ENABLE_BIT")
 								local b
 								local vec = tankbobs.m_vec2()
@@ -383,7 +383,7 @@ local function game_drawWorld(d)
 								c_config_set("game.player" .. tostring(k) .. ".color.a", c_config_get("game.defaultTankAlpha"))
 							end
 
-							if v.weapon and c_weapon_getWeapons()[v.weapon].capacity > 0 then
+							if v.weapon and c_weapon_getWeapons()[v.weapon] and c_weapon_getWeapons()[v.weapon].capacity > 0 then
 								gl.Color(1, 1, 1, 1)
 								gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, 1)
 								gl.CallList(ammobarBorder_listBase)
@@ -600,7 +600,7 @@ local function game_drawWorld(d)
 		-- melee weapons
 		for _, v in pairs(c_world_getTanks()) do
 			if v.exists then
-				if bit.band(v.state, FIRING) ~= 0 and v.weapon and c_weapon_getWeapons()[v.weapon].meleeRange ~= 0 and not v.reloading then
+				if bit.band(v.state, FIRING) ~= 0 and v.weapon and c_weapon_getWeapons()[v.weapon] and c_weapon_getWeapons()[v.weapon].meleeRange ~= 0 and not v.reloading then
 					gl.PushMatrix()
 						gl.Translate(v.p.x, v.p.y, 0)
 						gl.Rotate(tankbobs.m_degrees(v.r - c_const_get("tank_defaultRotation")), 0, 0, 1)
@@ -612,7 +612,7 @@ local function game_drawWorld(d)
 
 		-- projectiles
 		for _, v in pairs(c_weapon_getProjectiles()) do
-			if c_weapon_getWeapons()[v.weapon].trail == 0 and c_weapon_getWeapons()[v.weapon].trailWidth == 0 then  -- only draw the trail
+			if c_weapon_getWeapons()[v.weapon] and c_weapon_getWeapons()[v.weapon].trail == 0 and c_weapon_getWeapons()[v.weapon].trailWidth == 0 then  -- only draw the trail
 				gl.PushMatrix()
 					gl.Translate(v.p.x, v.p.y, 0)
 					gl.Rotate(tankbobs.m_degrees(v.r), 0, 0, 1)
@@ -747,7 +747,7 @@ function game_step(d)
 	for _, v in pairs(c_world_getTanks()) do
 		if v.exists then
 			-- handle melee sounds specially
-			if v.weapon and c_weapon_getWeapons()[v.weapon].meleeRange ~= 0 and not v.reloading then
+			if v.weapon and c_weapon_getWeapons()[v.weapon] and c_weapon_getWeapons()[v.weapon].meleeRange ~= 0 and not v.reloading then
 				if bit.band(v.state, FIRING) ~= 0 then
 					c_weapon_getWeapons()[v.weapon].m.used = true
 				end
@@ -837,7 +837,7 @@ function game_step(d)
 			if v.weapon and v.reloading and v.m.lastReloadTime ~= v.reloading then
 				v.m.lastReloadTime = v.reloading
 
-				if c_weapon_getWeapons()[v.weapon].shotgunClips then
+				if c_weapon_getWeapons()[v.weapon] and c_weapon_getWeapons()[v.weapon].shotgunClips then
 					if v.shotgunReloadState == 0 then
 						tankbobs.a_playSound(c_const_get("weaponAudio_dir") .. c_weapon_getWeapons()[v.weapon].reloadSound.initial)
 					elseif v.shotgunReloadState == 1 then
@@ -906,7 +906,7 @@ function game_step(d)
 	end
 
 	for _, v in pairs(c_weapon_getProjectiles()) do
-		if v.collisions > 0 and v.collisions ~= v.m.lastCollisions and c_weapon_getWeapons()[v.weapon].trail == 0 and c_weapon_getWeapons()[v.weapon].trailWidth == 0 then
+		if v.collisions > 0 and v.collisions ~= v.m.lastCollisions and c_weapon_getWeapons()[v.weapon] and c_weapon_getWeapons()[v.weapon].trail == 0 and c_weapon_getWeapons()[v.weapon].trailWidth == 0 then
 			v.m.lastCollisions = v.collisions
 
 			tankbobs.a_playSound(c_const_get("collideProjectile_sounds")[math.random(1, #c_const_get("collideProjectile_sounds"))])
