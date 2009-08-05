@@ -327,7 +327,7 @@ local function game_drawWorld(d)
 								gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, v.shield / c_const_get("tank_boostShield"))
 								gl.CallList(tankShield_listBase)
 
-								if v.weapon and not v.reloading then
+								if v.weapon and not v.reloading and c_weapon_getWeapons()[v.weapon] then
 									gl.CallList(c_weapon_getWeapons()[v.weapon].m.p.list)
 								end
 							gl.PopMatrix()
