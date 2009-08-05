@@ -40,6 +40,8 @@ function commands_init()
 		v.f                    = v[2]
 		v.autoCompleteFunction = v[3]
 		v.description          = v[4]
+
+		v.matched              = false
 	end
 end
 
@@ -201,6 +203,13 @@ function commands_autoComplete(line)
 		end
 	--elseif #args == 1 then
 	else
+		for _, v in pairs(commands) do
+			if type(v.name) == "table" then
+				table.sort(v.name)
+				v.matched = false
+			end
+		end
+
 		local names = {}
 
 		args[1] = args[1] or ""
@@ -212,10 +221,11 @@ function commands_autoComplete(line)
 				if v.name:upper():find("^" .. args[1]:upper()) then
 					match = v.name
 				end
-			elseif type(v.name) == "table" then
+			elseif type(v.name) == "table" and not v.matched then
 				for _, v in pairs(v.name) do
 					if v:upper():find("^" .. args[1]:upper()) then
 						match = v
+						v.matched = true  -- set the matched flag so that multiple aliases are not listed
 
 						break
 					end
@@ -253,7 +263,9 @@ command =
 	name = "",  -- if name is a table, all strings after the first are aliases for the command
 	f = nil,  -- function
 	autoCompleteFunction = nil,
-	description = ""
+	description = "",
+
+	matched = false
 }
 
 local help, exec, exit, set, map, listSets, listMaps, echo, pause, restart, port, gameType, clientList, kick
@@ -1070,7 +1082,7 @@ commands =
 	},
 
 	{
-		{"clientList", "listClients", "showClients", "showClientList"},
+		{"clientList", "listClients", "showClients", "showClientList", "clients"},
 		clientList,
 		clientListT,
 		"Usage:\n" ..

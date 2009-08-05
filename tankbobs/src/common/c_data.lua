@@ -90,9 +90,9 @@ function c_data_init()
 
 	local layout_qwerty =
 	{
-		{from = 97, to = 97},    -- a
-		{from = 98, to = 98},    -- b
-		{from = 99, to = 99},    -- c
+		{from = 97,  to = 97},   -- a
+		{from = 98,  to = 98},   -- b
+		{from = 99,  to = 99},   -- c
 		{from = 100, to = 100},  -- d
 		{from = 101, to = 101},  -- e
 		{from = 102, to = 102},  -- f
@@ -116,16 +116,16 @@ function c_data_init()
 		{from = 120, to = 110},  -- x
 		{from = 121, to = 121},  -- y
 		{from = 122, to = 122},  -- z
-		{from = 91, to = 91},    -- [
-		{from = 93, to = 93},    -- ]
-		{from = 92, to = 92},    -- \
-		{from = 47, to = 47},    -- /
-		{from = 61, to = 61},    -- =
-		{from = 45, to = 45},    -- -
-		{from = 39, to = 39},    -- '
-		{from = 44, to = 44},    -- ,
-		{from = 46, to = 46},    -- .
-		{from = 59, to = 59}     -- ;
+		{from = 91,  to = 91},   -- [
+		{from = 93,  to = 93},   -- ]
+		{from = 92,  to = 92},   -- \
+		{from = 47,  to = 47},   -- /
+		{from = 61,  to = 61},   -- =
+		{from = 45,  to = 45},   -- -
+		{from = 39,  to = 39},   -- '
+		{from = 44,  to = 44},   -- ,
+		{from = 46,  to = 46},   -- .
+		{from = 59,  to = 59}    -- ;
 	}
 	local layout_qwertyTo = {}
 	for _, v in pairs(layout_qwerty) do
@@ -138,9 +138,9 @@ function c_data_init()
 
 	local layout_dvorak =
 	{
-		{from = 97, to = 97},    -- a -> a
-		{from = 98, to = 120},   -- b -> x
-		{from = 99, to = 106},   -- c -> j
+		{from = 97,  to = 97},   -- a -> a
+		{from = 98,  to = 120},  -- b -> x
+		{from = 99,  to = 106},  -- c -> j
 		{from = 100, to = 101},  -- d -> e
 		{from = 101, to = 46},   -- e -> .
 		{from = 102, to = 117},  -- f -> u
@@ -164,16 +164,16 @@ function c_data_init()
 		{from = 120, to = 113},  -- x -> q
 		{from = 121, to = 102},  -- y -> f
 		{from = 122, to = 59},   -- z -> ;
-		{from = 91, to = 47},    -- [ -> /
-		{from = 93, to = 61},    -- ] -> =
-		{from = 92, to = 92},    -- \ -> \
-		{from = 47, to = 122},   -- / -> z
-		{from = 61, to = 93},    -- = -> ]
-		{from = 45, to = 91},    -- - -> [
-		{from = 39, to = 45},    -- ' -> -
-		{from = 44, to = 119},   -- , -> w
-		{from = 46, to = 118},   -- . -> v
-		{from = 59, to = 115}    -- ; -> s
+		{from = 91,  to = 47},   -- [ -> /
+		{from = 93,  to = 61},   -- ] -> =
+		{from = 92,  to = 92},   -- \ -> \
+		{from = 47,  to = 122},  -- / -> z
+		{from = 61,  to = 93},   -- = -> ]
+		{from = 45,  to = 91},   -- - -> [
+		{from = 39,  to = 45},   -- ' -> -
+		{from = 44,  to = 119},  -- , -> w
+		{from = 46,  to = 118},  -- . -> v
+		{from = 59,  to = 115}   -- ; -> s
 	}
 	local layout_dvorakTo = {}
 	for _, v in pairs(layout_dvorak) do
