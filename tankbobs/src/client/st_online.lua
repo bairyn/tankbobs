@@ -291,7 +291,9 @@ function online_readPackets(d)  -- local
 					-- disconnected from server
 					local reason = data:sub(1, data:find(tankbobs.io_fromChar(0x00)) - 1) data = data:sub(data:find(tankbobs.io_fromChar(0x00)) + 1)
 
-					gui_addLabel(tankbobs.m_vec2(20, 55), "You were disconnected from the server", nil, 2 / 3)
+					c_world_setPaused(true)
+
+					gui_addLabel(tankbobs.m_vec2(20, 55), "You were disconnected from the server", nil, 1 / 3)
 					gui_addLabel(tankbobs.m_vec2(20, 30), "Reason: " .. reason, nil, 1 / 3)
 				end
 			elseif switch == 0xA5 then
