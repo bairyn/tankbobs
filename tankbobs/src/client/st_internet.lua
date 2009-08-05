@@ -35,17 +35,19 @@ local st_internet_start
 
 UNINITIALIZED       = 0
 UNCONNECTED         = 1
-REQUESTING          = 2  -- client sent initial packet
-RESPONDED           = 3  -- server responded to connection packet
-CONNECTED           = 4  -- connected to server
+BANNED              = 2  -- banned from server
+REQUESTING          = 3  -- client sent initial packet
+RESPONDED           = 4  -- server responded to connection packet
+CONNECTED           = 5  -- connected to server
 local UNINITIALIZED = UNINITIALIZED
 local UNCONNECTED   = UNCONNECTED
+local BANNED        = BANNED
 local REQUESTING    = REQUESTING
 local RESPONDED     = RESPONDED
 local CONNECTED     = CONNECTED
 
 function st_internet_init()
-	connection = {state = UNCONNECTED, proceeding = false, lastRequestTime, challenge = 0, address = c_config_get("client.serverIP"), ip = "", port = nil, ui = "", ping = nil, offset = nil, gameType = nil, t = nil}
+	connection = {state = UNCONNECTED, proceeding = false, lastRequestTime, challenge = 0, address = c_config_get("client.serverIP"), ip = "", port = nil, ui = "", ping = nil, offset = nil, gameType = nil, t = nil, banMessage = ""}
 
 	if connection.address:find(":") then
 		connection.port = tonumber(connection.address:sub(connection.address:find(":") + 1))
@@ -69,6 +71,8 @@ function st_internet_init()
 			else
 				widget.text = "Not connected"
 			end
+		elseif switch == BANNED then
+			widget.text = string.format("%s", connection.banMessage)
 		elseif switch == REQUESTING then
 			widget.text = "Attempting connection . . ."
 		elseif switch == RESPONDED then
@@ -161,6 +165,10 @@ function st_internet_step(d)
 				if switch == nil then
 				elseif switch == 0xA1 then
 					connection.state = CONNECTED
+				elseif switch == 0xA6 then
+					local message = data:sub(1, data:find(tankbobs.io_fromChar(0x00)) - 1) data = data:sub(data:find(tankbobs.io_fromChar(0x00)) + 1)
+					connection.state = BANNED
+					connection.banMessage = message
 				end
 			end
 		until not status
@@ -193,6 +201,10 @@ function st_internet_step(d)
 
 					connection.lastRequestTime = tankbobs.t_getTicks()
 					connection.state = RESPONDED
+				elseif switch == 0xA6 then
+					local message = data:sub(1, data:find(tankbobs.io_fromChar(0x00)) - 1) data = data:sub(data:find(tankbobs.io_fromChar(0x00)) + 1)
+					connection.state = BANNED
+					connection.banMessage = message
 				end
 			end
 		until not status

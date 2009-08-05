@@ -607,7 +607,7 @@ static const struct luaL_Reg tankbobs[] =
 			If the third argument is true, no empty strings will be passed.
 			If the fourth argument passed is true, any delimiters between "'s will be ignored.
 			If the fifth argument passed is true, two escape sequences will be recognized:
-			\\ -> \; \" -> ".  This is useful if you want unrecognized "'s in the passed string.
+			\\ -> \; \" -> ".  This is useful if you want unhandled "'s in the passed string.
 			The sixth argument passed will determine whether a final argument will be added if the string has
 			extra whitespace. */
 	{"t_clone", t_clone}, /* clone the first passed table into the second passed table */

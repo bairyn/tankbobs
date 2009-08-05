@@ -46,6 +46,7 @@ Clients receives packets beginning with 0xA0-0xAF
 	- 0xA3 is a tick offset request packet
 	- 0xA4 is the head of a disconnect packet
 	- 0xA5 is a tick offset packet
+	- 0xA6 is the head of a banned packet
 --]]
 
 local tankbobs
@@ -88,11 +89,91 @@ client =
 	ui = ""  -- unique identifier
 }
 
+ban =
+{
+	new = c_class_new,
+
+	ip = "",
+	ui = "",
+
+	name = "",
+	reason = "",
+	banner = "",
+	banTime = 0,
+}
+
+
 local client_class = client
 
 local clients = {}
 
-local lastConnectTime
+local function client_banCheck(client)
+	if not client or not client.tank then
+		return
+	end
+
+	for _, v in pairs(ban) do
+		local banned = false
+
+		if client.ip == v.ip then
+			banned = true
+		elseif client.ui == v.ui then
+			banned = true
+		end
+
+		if banned then
+			return v.reason, v.banner
+		end
+	end
+
+	return
+end
+
+function client_banClient(client, reason, banner)
+	local ban = ban:new()
+	table.insert(bans, ban)
+
+	ban.ip = client.ip
+	ban.ui = common_stringToHex(client.ui)
+
+	ban.name = client.tank.name
+	ban.reason = reason
+	ban.banner = banner
+	ban.banTime = os.time()
+end
+
+function client_getBans(range, filter)
+	local result = {}
+
+	if range and type(range[1]) == "number" and type(range[2]) == "number" then
+		local ban
+
+		for i = range[1], range[2], ((range[1] < range[2]) and (1) or (-1)) do
+			ban = bans[i]
+
+			if ban then
+				if not filter or ban.name:find(filter) or ban.ui:find(filter) or ban.ip:find(filter) then
+					table.insert(result, {i, ban})
+				end
+			end
+		end
+	else
+		for k, v in pairs(bans) do
+			if not filter or v.name:find(filter) or v.ui:find(filter) or v.ip:find(filter) then
+				table.insert(result, {k, v})
+			end
+		end
+	end
+
+	return bans
+end
+
+function client_unban(banID)
+	table.remove(bans, banID)
+	if bans[banID] then
+		bans[banID] = nil
+	end
+end
 
 local function client_sanitizeName(name)
 	local sanitizedName = ""
@@ -172,6 +253,8 @@ function client_boot(client, reason)
 	client_disconnect(client, reason)
 end
 
+local lastConnectTime
+local guidLen = 6
 function client_step(d)
 	local t = tankbobs.t_getTicks()
 
@@ -218,22 +301,43 @@ function client_step(d)
 							client.tank.color.g = tankbobs.io_toDouble(data) data = data:sub(9)
 							client.tank.color.b = tankbobs.io_toDouble(data) data = data:sub(9)
 
-							s_printnl("'", client.tank.name, "' connected from ", ip, ":", port)
-
 							-- the last 32 bytes are the client's unique identifier
 							client.ui = data:sub(1, 32) data = data:sub(33)
 
-							-- send the challenge number, set, map and game type
-							tankbobs.n_newPacket(256)
-							tankbobs.n_writeToPacket(tankbobs.io_fromChar(0xA0))
-							client.challenge = math.random(0x00000000, 0x7FFFFFFF)
-							tankbobs.n_writeToPacket(tankbobs.io_fromInt(client.challenge))
-							-- set and map as a NULL-terminated string
-							tankbobs.n_writeToPacket(c_tcm_current_set.name .. string.char(0x00))
-							tankbobs.n_writeToPacket(c_tcm_current_map.name .. string.char(0x00))
-							tankbobs.n_writeToPacket(c_world_getGameTypeString() .. string.char(0x00))
+							local reason, banner = client_banCheck(client)
 
-							sendToClient(client)
+							if reason then
+								client.banned = true
+
+								s_printnl("Banned player '", client.tank.name, "' attempted to connect from ", ip, ":", port, "; GUID: *", common_stringToHex("", "", v.ui:sub(-guidLen, -1)))
+
+								local message = string.format("Banned by '%s'; reason: '%s'", reason, banner)
+								tankbobs.n_newPacket(#message + 2)
+								tankbobs.n_writeToPacket(tankbobs.io_fromChar(0xA6))
+								tankbobs.n_writeToPacket(message)
+								tankbobs.n_writeToPacket(tankbobs.io_fromChar(0x00))
+								sendToClient(client)
+								sendToClient(client)
+								sendToClient(client)
+								sendToClient(client)
+								sendToClient(client)
+							else
+								client.banned = false
+
+								s_printnl("'", client.tank.name, "' connected from ", ip, ":", port)
+
+								-- send the challenge number, set, map and game type
+								tankbobs.n_newPacket(256)
+								tankbobs.n_writeToPacket(tankbobs.io_fromChar(0xA0))
+								client.challenge = math.random(0x00000000, 0x7FFFFFFF)
+								tankbobs.n_writeToPacket(tankbobs.io_fromInt(client.challenge))
+								-- set and map as a NULL-terminated string
+								tankbobs.n_writeToPacket(c_tcm_current_set.name .. string.char(0x00))
+								tankbobs.n_writeToPacket(c_tcm_current_map.name .. string.char(0x00))
+								tankbobs.n_writeToPacket(c_world_getGameTypeString() .. string.char(0x00))
+
+								sendToClient(client)
+							end
 						end
 					end
 				end
@@ -329,33 +433,35 @@ function client_step(d)
 	local tanks = c_world_getTanks()
 	local numTanks = math.min(#tanks, 255)
 	for k, v in pairs(clients) do
-		if v.connecting then
-			if v.lastAliveTime and t > v.lastAliveTime + c_const_get("client_connectingMaxInactiveTime") then
-				client_disconnect(v, "timed out")
-			end
-		else
-			if v.ping and v.ticksOffset and v.lastTickRequestTime then
-				--if p then
-				if v.lastPTime ~= lastPTime then
-					v.lastPTime = lastPTime
-					-- send the client a snapshot of the world
-					tankbobs.n_newPacket(1024)
-					tankbobs.n_writeToPacket(tankbobs.io_fromChar(0xA2))
-					tankbobs.n_writeToPacket(tankbobs.io_fromInt(tankbobs.t_getTicks() + v.ticksOffset))
-					tankbobs.n_writeToPacket(tankbobs.io_fromChar(k))
-					tankbobs.n_writeToPacket(p)
-					sendToClient(v)
-				end
-
-				if t <= v.lastTickRequestTime + c_const_get("client_ticksCheck") then
-					client_askForTick(v)
+		if not v.banned then
+			if v.connecting then
+				if v.lastAliveTime and t > v.lastAliveTime + c_const_get("client_connectingMaxInactiveTime") then
+					client_disconnect(v, "timed out")
 				end
 			else
-				client_askForTick(v)
-			end
+				if v.ping and v.ticksOffset and v.lastTickRequestTime then
+					--if p then
+					if v.lastPTime ~= lastPTime then
+						v.lastPTime = lastPTime
+						-- send the client a snapshot of the world
+						tankbobs.n_newPacket(#p + 6)
+						tankbobs.n_writeToPacket(tankbobs.io_fromChar(0xA2))
+						tankbobs.n_writeToPacket(tankbobs.io_fromInt(tankbobs.t_getTicks() + v.ticksOffset))
+						tankbobs.n_writeToPacket(tankbobs.io_fromChar(k))
+						tankbobs.n_writeToPacket(p)
+						sendToClient(v)
+					end
 
-			if v.lastAliveTime and t > v.lastAliveTime + c_const_get("client_maxInactiveTime") then
-				client_disconnect(v, "timed out")
+					if t <= v.lastTickRequestTime + c_const_get("client_ticksCheck") then
+						client_askForTick(v)
+					end
+				else
+					client_askForTick(v)
+				end
+
+				if v.lastAliveTime and t > v.lastAliveTime + c_const_get("client_maxInactiveTime") then
+					client_disconnect(v, "timed out")
+				end
 			end
 		end
 	end
@@ -365,7 +471,7 @@ function client_connectedClients()
 	local num = 0
 
 	for _, v in pairs(clients) do
-		if not v.connecting then
+		if not v.connecting and not v.banned then
 			num = num + 1
 		end
 	end
