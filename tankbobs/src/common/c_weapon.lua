@@ -579,7 +579,7 @@ end
 function c_weapon_fire(tank)
 	local t = tankbobs.t_getTicks()
 
-	if not tank.weapon then
+	if not tank.weapon or not tank.exists then
 		return
 	end
 
