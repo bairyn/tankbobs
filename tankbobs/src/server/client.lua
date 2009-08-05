@@ -394,7 +394,7 @@ function client_getClientsByIdentifier(identifier, idOnly)
 
 		if not idOnly then
 			-- test for GUID next
-			if v.ui:find(identifier) then
+			if common_stringToHex("", "", v.ui):find(identifier) then
 				table.insert(clients, v)
 			end
 
