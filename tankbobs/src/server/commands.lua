@@ -915,7 +915,7 @@ function kick(line)
 
 	if num >= 3 then
 		local identifier = args[2]
-		local reason = args[3]
+		local reason = commands_concatArgs(line, 3)
 
 		local clients = client_getClientsByIdentifier(identifier, idOnly)
 
