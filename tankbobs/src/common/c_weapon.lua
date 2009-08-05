@@ -585,6 +585,10 @@ function c_weapon_fire(tank)
 
 	local weapon = c_weapons[tank.weapon]
 
+	if not weapon then
+		return
+	end
+
 	if tank.reloading then
 		if weapon.shotgunClips then
 			if not tank.shotgunReloadState then
