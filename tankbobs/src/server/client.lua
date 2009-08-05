@@ -142,7 +142,7 @@ local function client_validate(client, ui)
 end
 
 local function client_disconnect(client, reason)
-	tankbobs.n_newPacket(#reason + 1)
+	tankbobs.n_newPacket(#reason + 2)
 	tankbobs.n_writeToPacket(tankbobs.io_fromChar(0xA4))
 	tankbobs.n_writeToPacket(reason)
 	tankbobs.n_writeToPacket(tankbobs.io_fromChar(0x00))
