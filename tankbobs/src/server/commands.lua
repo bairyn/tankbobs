@@ -362,7 +362,7 @@ function helpT(line)
 			end
 
 			if match then
-				table.insert(names, v.name)
+				table.insert(names, match)
 			end
 		end
 
