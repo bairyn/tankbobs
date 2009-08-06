@@ -117,6 +117,8 @@ function st_selected_gameType(widget, string, index)
 
 		c_config_set("game.gameType", "capturetheflag")
 	end
+
+	c_world_setGameType(c_config_set("game.gameType", "capturetheflag"))
 end
 
 function st_selected_start(widget)
