@@ -63,12 +63,9 @@ function client_init()
 	c_const_set("client_maxInactiveTime", 120000, 1)  -- drop after 2 minutes of no packets
 	c_const_set("client_connectingMaxInactiveTime", 3000, 1)
 	c_const_set("client_maxChallengeAttempts", 3, 1)
-
-	client_loadBans(c_const_get("bans_file"))
 end
 
 function client_done()
-	client_saveBans(c_const_get("bans_file"))
 end
 
 client =
@@ -108,7 +105,19 @@ ban =
 
 local client_class = client
 
-local clients = {}
+local clients = nil
+
+function client_begin()
+	client_saveBans(c_const_get("bans_file"))
+
+	clients = {}
+end
+
+function client_finish()
+	client_loadBans(c_const_get("bans_file"))
+
+	clients = nil
+end
 
 local function client_banCheck(client)
 	if not client or not client.tank then

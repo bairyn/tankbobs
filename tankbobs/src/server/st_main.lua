@@ -39,7 +39,7 @@ function st_main_init()
 
 	tankbobs.n_init(c_config_get("server.port", true))
 
-	client_init()
+	client_begin()
 
 	c_world_setGameType(c_config_get("game.gameType"))
 
@@ -49,7 +49,7 @@ end
 function st_main_done()
 	c_world_freeWorld()
 
-	client_done()
+	client_finish()
 
 	tankbobs.n_quit()
 end

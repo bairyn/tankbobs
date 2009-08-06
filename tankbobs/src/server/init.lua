@@ -34,6 +34,8 @@ function init()
 
 	common_init()
 
+	client_init()
+
 	commands_init()
 
 	main_init()
@@ -41,6 +43,8 @@ function init()
 	main_done()
 
 	commands_done()
+
+	client_done()
 
 	common_done()
 
