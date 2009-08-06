@@ -697,7 +697,14 @@ function c_weapon_fire(tank)
 				vec.R = weapon.launchDistance
 				projectile.p(tank.p + vec)
 
-				projectile.owner = tank
+				local index = 0
+				for k, v in pairs(c_world_getTanks()) do
+					if v == tank then
+						index = k
+					end
+				end
+
+				projectile.owner = index
 
 				projectile.r = vec.t
 
@@ -743,7 +750,7 @@ function c_weapon_hit(tank, projectile)
 		c_world_tankDamage(tank, c_weapons[projectile.weapon].damage)
 
 		if tank.health <= 0 then
-			tank.killer = projectile.owner
+			tank.killer = c_world_getTanks()[projectile.owner]
 		end
 	end
 end

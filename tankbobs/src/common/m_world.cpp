@@ -744,19 +744,24 @@ int w_persistWorld(lua_State *L)
 	order = 0;
 
 	/* projectiles */
-	/* char weaponTypeIndex; float rotation; float x; float y; float velX; float velY; float angularVelocity; */
+	/* char weaponTypeIndex; char owner; float rotation; float x; float y; float velX; float velY; float angularVelocity; */
 	++order;
 	lua_pushnil(L);
 	while(lua_next(L, order))
 	{
 		lua_getfield(L, -1, "collided");
 		if(!lua_toboolean(L, -1) &&
-				bufpos + 1 * sizeof(char) + 6 * sizeof(float) < buf + sizeof(buf))
+				bufpos + 2 * sizeof(char) + 6 * sizeof(float) < buf + sizeof(buf))
 		{
 			lua_pop(L, 1);
 
 			/* set weaponIndex */
 			lua_getfield(L, -1, "weapon");
+			*((char *) bufpos) = io_charNL(lua_tointeger(L, -1)); bufpos += sizeof(char);
+			lua_pop(L, 1);
+
+			/* set owner */
+			lua_getfield(L, -1, "owner");
 			*((char *) bufpos) = io_charNL(lua_tointeger(L, -1)); bufpos += sizeof(char);
 			lua_pop(L, 1);
 
@@ -1157,6 +1162,10 @@ int w_unpersistWorld(lua_State *L)
 		/* weapon */
 		lua_pushinteger(L, io_charNL(*((char *) data))); data += sizeof(char);
 		lua_setfield(L, -2, "weapon");
+
+		/* owner */
+		lua_pushinteger(L, io_charNL(*((char *) data))); data += sizeof(char);
+		lua_setfield(L, -2, "owner");
 
 		/* rotation */
 		lua_pushinteger(L, io_floatNL(*((float *) data))); data += sizeof(float);
