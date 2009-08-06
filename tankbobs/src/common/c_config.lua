@@ -139,10 +139,26 @@ function c_config_init()
 	end
 
 	function c_config_keyLayoutGet(key)
+		--[[
+		for _, v in pairs(c_const_get("keyLayout_" .. c_config_get("client.keyLayout"))) do
+			if v.from == key then
+				return v.to
+			end
+		end
+		--]]
+
 		return c_const_get("keyLayout_" .. c_config_get("client.keyLayout") .. "To")[key] or tonumber(key) or -1
 	end
 
 	function c_config_keyLayoutSet(key)
+		--[[
+		for _, v in pairs(c_const_get("keyLayout_" .. c_config_get("client.keyLayout"))) do
+			if v.to == key then
+				return v.from
+			end
+		end
+		--]]
+
 		return c_const_get("keyLayout_" .. c_config_get("client.keyLayout") .. "From")[key] or tonumber(key) or -1
 	end
 

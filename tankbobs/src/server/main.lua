@@ -75,16 +75,9 @@ function s_print(...)
 	local p = {}
 	tankbobs.t_clone({...}, p)
 
-	-- table.concat doesn't like nil
-	for i = 1, #p do
-		if p[i] == nil then
-			p[i] = "nil"
-		end
+	for _, v in pairs(p) do
+		tankbobs.c_print(tostring(v))
 	end
-
-	local print = table.concat(p)
-
-	tankbobs.c_print(print)
 end
 
 function s_restart()

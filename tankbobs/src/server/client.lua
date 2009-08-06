@@ -115,7 +115,7 @@ local function client_banCheck(client)
 		return
 	end
 
-	for _, v in pairs(ban) do
+	for _, v in pairs(bans) do
 		local banned = false
 
 		if client.ip == v.ip then
@@ -148,7 +148,7 @@ function client_loadBans(filename)
 		if not line then
 			fin:close()
 
-			error "client_loadBans: unexpected end of file on line " .. tostring(i)
+			error("client_loadBans: unexpected end of file on line " .. tostring(i))
 		end
 		return line
 	end
@@ -177,7 +177,7 @@ function client_saveBans(filename)
 	local fout, err = io.open(filename, "w")
 
 	if not fout then
-		error "client_saveBans: could not open '" .. tostring(filename) .. "' for writing bans: " .. tostring(err)
+		error("client_saveBans: could not open '" .. tostring(filename) .. "' for writing bans: " .. tostring(err))
 	end
 
 	local first = true
@@ -204,16 +204,41 @@ function client_saveBans(filename)
 end
 
 function client_banClient(client, reason, banner)
+	-- check for identical ban
+	for _, v in pairs(bans) do
+		if ban.ip == client.ip and
+			ban.ui == common_stringToHex("", "", client.ui) then
+			s_printnl("client_banClient: '", ban.name, "' is already banned.  Nothing changed.")
+		end
+	end
+
 	local ban = ban:new()
 	table.insert(bans, ban)
 
 	ban.ip = client.ip
-	ban.ui = common_stringToHex(client.ui)
+	ban.ui = common_stringToHex("", "", client.ui)
 
 	ban.name = client.tank.name
 	ban.reason = reason
 	ban.banner = banner
 	ban.banTime = os.time()
+
+	if c_config_get("server.writeFileOnBan") then
+		client_saveBans(c_const_get("bans_file"))
+	end
+
+	s_printnl("client_banClient: added ban '", ban.name, "' at '", ban.ip, "'")
+end
+
+function client_unban(banID)
+	table.remove(bans, banID)
+	if bans[banID] then
+		bans[banID] = nil
+	end
+
+	if c_config_get("server.writeFileOnBan") then
+		client_saveBans(c_const_get("bans_file"))
+	end
 end
 
 function client_getBans(range, filter)
@@ -239,14 +264,7 @@ function client_getBans(range, filter)
 		end
 	end
 
-	return bans
-end
-
-function client_unban(banID)
-	table.remove(bans, banID)
-	if bans[banID] then
-		bans[banID] = nil
-	end
+	return result
 end
 
 local function client_sanitizeName(name)
@@ -383,7 +401,9 @@ function client_step(d)
 							if reason then
 								client.banned = true
 
-								s_printnl("Banned player '", client.tank.name, "' attempted to connect from ", ip, ":", port, "; GUID: *", common_stringToHex("", "", v.ui:sub(-guidLen, -1)))
+								client_banClient(client)
+
+								s_printnl("Banned player '", client.tank.name, "' attempted to connect from ", ip, ":", port, "; GUID: *", common_stringToHex("", "", client.ui:sub(-guidLen, -1)))
 
 								local message = string.format("Banned by '%s'; reason: '%s'", reason, banner)
 								tankbobs.n_newPacket(#message + 2)

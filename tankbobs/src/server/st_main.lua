@@ -39,6 +39,8 @@ function st_main_init()
 
 	tankbobs.n_init(c_config_get("server.port", true))
 
+	client_init()
+
 	c_world_setGameType(c_config_get("game.gameType"))
 
 	c_world_newWorld()
@@ -46,6 +48,8 @@ end
 
 function st_main_done()
 	c_world_freeWorld()
+
+	client_done()
 
 	tankbobs.n_quit()
 end

@@ -96,15 +96,15 @@ local refreshKeys = function()
 		if not (c_config_get("client.key.player" .. tostring(i) .. ".reload", true)) then
 			c_config_set("client.key.player" .. tostring(i) .. ".reload", false)
 		end
-		if not (c_config_get("client.key.player" .. tostring(i) .. ".reverse", true)) then
-			c_config_set("client.key.player" .. tostring(i) .. ".reverse", false)
-		end
+		--if not (c_config_get("client.key.player" .. tostring(i) .. ".reverse", true)) then
+			--c_config_set("client.key.player" .. tostring(i) .. ".reverse", false)
+		--end
 		if not (c_config_get("client.key.player" .. tostring(i) .. ".mod", true)) then
 			c_config_set("client.key.player" .. tostring(i) .. ".mod", false)
 		end
 
 		local ks = "client.key.player" .. tostring(i) .. "."
-		local kp, kl, cg = tankbobs.in_keyPressed, c_config_keyLayoutSet, c_config_get
+		local kp, kl, cg = tankbobs.in_keyPressed, c_config_keyLayoutGet, c_config_get
 
 		local function key(state, flag)
 			local key = cg(ks .. state)
@@ -126,7 +126,7 @@ local refreshKeys = function()
 		key("right", RIGHT)
 		key("special", SPECIAL)
 		key("reload", RELOAD)
-		key("reverse", REVERSE)
+		--key("reverse", REVERSE)
 		key("mod", MOD)
 	end
 end
@@ -167,13 +167,13 @@ function st_online_init()
 
 	-- pause
 	local function updatePause(widget)
-		if c_world_getPaused() and not endOfGame and not quitScreen then
+		if c_world_getPaused() and not endOfGame and not quitScreen and connection.state > UNCONNECTED then
 			widget.text = "Paused"
 			tankbobs.in_grabClear()
 		else
 			widget.text = ""
 
-			if quitScreen then
+			if quitScreen or connection.state < CONNECTED then
 				tankbobs.in_grabClear()
 			elseif not tankbobs.in_isGrabbed() then
 				if not c_const_get("debug") or c_config_get("debug.client.grabMouse") then
@@ -277,6 +277,8 @@ function online_readPackets(d)  -- local
 
 					gui_addLabel(tankbobs.m_vec2(20, 55), "You were disconnected from the server", nil, 1 / 3)
 					gui_addLabel(tankbobs.m_vec2(20, 30), "Reason: " .. reason, nil, 1 / 3)
+
+					connection.state = UNCONNECTED
 				end
 			elseif switch == 0xA5 then
 				if #data >= 4 then
@@ -306,15 +308,13 @@ end
 function st_online_button(button, pressed)
 	if not gui_button(button, pressed) then
 		if pressed then
-			if button == 0x0D and endOfGame then
-				c_state_new(play_state)
-			elseif button == c_config_get("client.key.pause") then
+			if button == c_config_get("client.key.pause") then
 				--if not endOfGame and not quitScreen then
 					--c_world_setPaused(not c_world_getPaused())
 				--end
-			elseif button == 0x1B or button == c_config_get("client.key.quit") then
-				if endOfGame then
-					c_state_new(play_state)
+			elseif button == 0x1B or button == c_config_get("client.key.quit") then  -- escape
+				if connection.state < CONNECTED then
+					c_state_new(title_state)
 				elseif quitScreen then
 					continue()
 				elseif c_world_getPaused() then
@@ -364,9 +364,9 @@ function st_online_button(button, pressed)
 			if not (c_config_get("client.key.player" .. tostring(i) .. ".reload", true)) then
 				c_config_set("client.key.player" .. tostring(i) .. ".reload", false)
 			end
-			if not (c_config_get("client.key.player" .. tostring(i) .. ".reverse", true)) then
-				c_config_set("client.key.player" .. tostring(i) .. ".reverse", false)
-			end
+			--if not (c_config_get("client.key.player" .. tostring(i) .. ".reverse", true)) then
+				--c_config_set("client.key.player" .. tostring(i) .. ".reverse", false)
+			--end
 			if not (c_config_get("client.key.player" .. tostring(i) .. ".mod", true)) then
 				c_config_set("client.key.player" .. tostring(i) .. ".mod", false)
 			end

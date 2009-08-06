@@ -222,9 +222,9 @@ function commands_autoComplete(line)
 					match = v.name
 				end
 			elseif type(v.name) == "table" and not v.matched then
-				for _, v in pairs(v.name) do
-					if v:upper():find("^" .. args[1]:upper()) then
-						match = v
+				for _, vs in pairs(v.name) do
+					if vs:upper():find("^" .. args[1]:upper()) then
+						match = vs
 						v.matched = true  -- set the matched flag so that multiple aliases are not listed
 
 						break
@@ -268,8 +268,8 @@ command =
 	matched = false
 }
 
-local help, exec, eval, exit, set, map, listSets, listMaps, echo, pause, restart, port, gameType, clientList, kick, ban, kickban, banList, unban
-local helpT, execT, evalT, exitT, setT, mapT, listSetsT, listMapsT, echoT, pauseT, restartT, portT, gameTypeT, clientListT, kickT, banT, kickbanT, banListT, unbanT
+local help, exec, eval, exit, set, map, listSets, listMaps, echo, pause, restart, port, gameType, clientList, kick, ban, kickban, banList, unban, saveBans, loadBans
+local helpT, execT, evalT, exitT, setT, mapT, listSetsT, listMapsT, echoT, pauseT, restartT, portT, gameTypeT, clientListT, kickT, banT, kickbanT, banListT, unbanT, saveBansT, loadBansT
 
 function help(line)
 	local args = commands_args(line)
@@ -358,9 +358,9 @@ function helpT(line)
 					match = v.name
 				end
 			elseif type(v.name) == "table" and not v.matched then
-				for _, v in pairs(v.name) do
-					if v:find("^" .. args[2]) then
-						match = v
+				for _, vs in pairs(v.name) do
+					if vs:find("^" .. args[2]) then
+						match = vs
 						v.matched = true  -- set the matched flag so that multiple aliases are not listed
 
 						break
@@ -375,9 +375,9 @@ function helpT(line)
 						match = v.name
 					end
 				elseif type(v.name) == "table" and not v.matched then
-					for _, v in pairs(v.name) do
-						if v:lower():find("^" .. args[2]:lower()) then
-							match = v
+					for _, vs in pairs(v.name) do
+						if vs:lower():find("^" .. args[2]:lower()) then
+							match = vs
 							v.matched = true  -- set the matched flag so that multiple aliases are not listed
 	
 							break
@@ -463,7 +463,8 @@ end
 -- no auto completion for exec
 
 function eval(line)
-	local commands = tankbobs.t_explode(line, ";", false, true, true, true)
+	local args = commands_args(line)
+	local commands = tankbobs.t_explode(commands_concatArgs(line, 2, true), ";", false, true, true, true)
 
 	for _, v in pairs(commands) do
 		commands_command(v)
@@ -666,9 +667,9 @@ function set(line)
 
 				return
 			end
-
-			s_printnl("set: no such set '", this, "' found")
 		end
+
+		s_printnl("set: no such set '", this, "' found")
 	else
 		return help("help set")
 	end
@@ -921,7 +922,7 @@ end
 end
 
 local guidLen = 6
-local clientFormat = "%3s - %15s - %15s - %5s - %10s - %" .. tostring(1 + 4 * (guidLen) + 1 * (guidLen - 1)) .. "s"
+local clientFormat = "%3s - %15s - %15s - %5s - %10s - %" .. tostring(1 + 2 * (guidLen)) .. "s"
 function clientList(line)
 	local args = commands_args(line)
 	local idOnly = args[2] == "-i" or args[2] == "--id-only"
@@ -992,7 +993,7 @@ function ban(line)
 			s_printnl()
 			return clientList("clientList " .. (idOnly and "--id-only " or "") .. "\"" .. identifier .. "\"")
 		elseif #clients == 1 then
-			client_ban(clients[1], reason, "console")
+			client_banClient(clients[1], reason, "console")
 		else--if #clients < 1 then
 			s_printnl("ban: no clients found matching ID, GUID, IP:port, or name of '", tostring(identifier), "'")
 		end
@@ -1011,8 +1012,8 @@ end
 -- no auto completion for kickban
 
 local guidLen = 6
-local banFormat = "%4d - %15s - %" .. tostring(1 + 4 * (guidLen) + 1 * (guidLen - 1)) .. "s - %25s - %64s"
-function listBans(line)
+local banFormat = "%4d - %15s - %" .. tostring(1 + 2 * (guidLen)) .. "s - %25s - %64s"
+function banList(line)
 	local args   = commands_args(line)
 	local range  = nil
 	local filter = nil
@@ -1043,16 +1044,16 @@ function listBans(line)
 
 	local bans = client_getBans(range, filter)
 
-	s_printnl("listBans: '", #bans, "' bans shown")
+	s_printnl("banList: '", #bans, "' bans shown")
 
 	for k, v in pairs(bans) do
-		s_printnl(string.format(banFormat, v[1], v[2].ip, "*" .. common_stringToHex("", "", v[2].ui:sub(-guidLen, -1)), v[2].name, v[2].reason))
+		s_printnl(string.format(banFormat, v[1], v[2].ip, "*" .. v[2].ui:sub(2 * -guidLen, -1), v[2].name, v[2].reason))
 	end
 
 	s_printnl()
 end
 
--- no auto completion for listBans
+-- no auto completion for banList
 
 function unban(line)
 	local args = commands_args(line)
@@ -1077,6 +1078,37 @@ function unban(line)
 end
 
 -- no auto completion for unban
+
+function saveBans(line)
+	local args = commands_args(line)
+	local filename = args[2] or c_const_get("bans_file")
+
+	client_saveBans(filename)
+
+	s_printnl("saveBans: bans saved to ", filename)
+end
+
+-- no auto completion for saveBans
+
+function saveBans(line)
+	local args = commands_args(line)
+	local filename = args[2] or c_const_get("bans_file")
+
+	client_saveBans(filename)
+
+	s_printnl("saveBans: bans saved to ", filename)
+end
+
+-- no auto completion for loadBans
+
+function loadBans(line)
+	local args = commands_args(line)
+	local filename = args[2] or c_const_get("bans_file")
+
+	client_loadBans(filename)
+
+	s_printnl("loadBans: bans read from ", filename)
+end
 
 commands =
 {
@@ -1233,9 +1265,9 @@ commands =
 		" Lists the connected clients.  This list can optionally be limited\n" ..
 		" by the identifier 'client'\n" ..
 		" If a listed client is banned, he isn't really connected.  This is a placeholder\n" ..
-		" so that the server can ignore the client on future connection attempts\n"
-		" for the current map, partly to avoid \"connection attempt\" spam.\n"
-		" This placeholder will need to be kicked after you unban a client\n"
+		" so that the server can ignore the client on future connection attempts\n" ..
+		" for the current map, partly to avoid \"connection attempt\" spam.\n" ..
+		" This placeholder will need to be kicked after you unban a client\n" ..
 		" if you want him to be able to connect after you unban him."
 	},
 
@@ -1261,7 +1293,7 @@ commands =
 		"Usage:\n" ..
 		" ban (-i/--id-only) [client] [reason]\n" ..
 		"\n" ..
-		" Prevents the client from connecting in the future until the ban is manually lifted.\n"
+		" Prevents the client from connecting in the future until the ban is manually lifted.\n" ..
 		" A ban itself will not immediately disconnect a player (see \"help kickban\")"
 	},
 
@@ -1272,7 +1304,7 @@ commands =
 		"Usage:\n" ..
 		" kickban (-i/--id-only) [client]\n" ..
 		"\n" ..
-		" \"kickban\" directly calls \"ban\" with the arguments given, and then \"kick\" with\n"
+		" \"kickban\" directly calls \"ban\" with the arguments given, and then \"kick\" with\n" ..
 		" the arguments given.  This effectively disconnects and bans a client from a server.\n" ..
 		" See \"help ban\" and \"help kick\" for more information"
 	},
@@ -1286,7 +1318,7 @@ commands =
 		"\n" ..
 		" Lists all bans by default.\n" ..
 		" If the second or third argument given matches\n" ..
-		" "^[(%d)]+# *- *[(%d)]+#$", it is treated as the ban list range, and if the\n" ..
+		" ^[(%d)]+# *- *[(%d)]+#$, it is treated as the ban list range, and if the\n" ..
 		" other argument exists, it is treated as the filter; \n" ..
 		" otherwise, the first argument given will be the filter (remember to quote spaces).  The\n" ..
 		" filter will be tested with string.find against the name of the banned client, the GID, and\n" ..
@@ -1301,6 +1333,31 @@ commands =
 		"\n" ..
 		" unban [banID]\n" ..
 		"\n" ..
-		" Removes a ban" ..
+		" Removes a ban"
+	},
+
+	{
+		{"saveBans", "writeBans"},
+		saveBans,
+		saveBansT,
+		"Usage:\n" ..
+		"\n" ..
+		" saveBans (filename)\n" ..
+		"\n" ..
+		" Writes all bans to the file given, or the bans file by default.  Tankbobs\n" ..
+		" automatically writes all bans to the\n" ..
+		" bans file on restart."
+	},
+
+	{
+		{"loadBans", "readBans"},
+		loadBans,
+		loadBansT,
+		"Usage:\n" ..
+		"\n" ..
+		" loadBans (filename)\n" ..
+		"\n" ..
+		" Reads bans from the file given, or the bans file by default.  All unsaved\n" ..
+		" bans will be lost!"
 	},
 }

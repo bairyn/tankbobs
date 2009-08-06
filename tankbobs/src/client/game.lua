@@ -223,15 +223,15 @@ function game_refreshKeys()
 		if not (c_config_get("client.key.player" .. tostring(i) .. ".reload", true)) then
 			c_config_set("client.key.player" .. tostring(i) .. ".reload", false)
 		end
-		if not (c_config_get("client.key.player" .. tostring(i) .. ".reverse", true)) then
-			c_config_set("client.key.player" .. tostring(i) .. ".reverse", false)
-		end
+		--if not (c_config_get("client.key.player" .. tostring(i) .. ".reverse", true)) then
+			--c_config_set("client.key.player" .. tostring(i) .. ".reverse", false)
+		--end
 		if not (c_config_get("client.key.player" .. tostring(i) .. ".mod", true)) then
 			c_config_set("client.key.player" .. tostring(i) .. ".mod", false)
 		end
 
 		local ks = "client.key.player" .. tostring(i) .. "."
-		local kp, kl, cg = tankbobs.in_keyPressed, c_config_keyLayoutSet, c_config_get
+		local kp, kl, cg = tankbobs.in_keyPressed, c_config_keyLayoutGet, c_config_get
 
 		local function key(state, flag)
 			local key = cg(ks .. state)
@@ -253,7 +253,7 @@ function game_refreshKeys()
 		key("right", RIGHT)
 		key("special", SPECIAL)
 		key("reload", RELOAD)
-		key("reverse", REVERSE)
+		--key("reverse", REVERSE)
 		key("mod", MOD)
 	end
 end
@@ -848,6 +848,8 @@ function game_step(d)
 
 				tankbobs.a_playSound(c_const_get("damage_sound"))
 			end
+		else
+			v.m.lastCollideTime, v.m.lastDamageTime, v.m.lastReloadTime = nil
 		end
 
 		if v.spawning and v.m.lastDieTimeB ~= v.m.lastDieTime then
