@@ -737,9 +737,9 @@ int w_persistWorld(lua_State *L)
 	numProjectiles   = lua_objlen(L, ++order); *((short *) bufpos) = io_shortNL(numProjectiles); bufpos += sizeof(short);
 	numTanks         = lua_objlen(L, ++order); *((short *) bufpos) = io_shortNL(numTanks);       bufpos += sizeof(short);
 	numPowerups      = lua_objlen(L, ++order); *((short *) bufpos) = io_shortNL(numPowerups);    bufpos += sizeof(short);
-	numWalls         = lua_objlen(L, ++order);  /* number of walls is constant */
-	numControlPoints = lua_objlen(L, ++order);  /* number of control points is constant */
-	numFlags         = lua_objlen(L, ++order);  /* number of flags is constant */
+	numWalls         = lua_objlen(L, ++order); *((short *) bufpos) = io_shortNL(numWalls);    bufpos += sizeof(short);;  /* number of walls is constant */
+	numControlPoints = lua_objlen(L, ++order); *((short *) bufpos) = io_shortNL(numControlPoints);    bufpos += sizeof(short);;  /* number of control points is constant */
+	numFlags         = lua_objlen(L, ++order); *((short *) bufpos) = io_shortNL(numFlags);    bufpos += sizeof(short);;  /* number of flags is constant */
 
 	order = 0;
 
@@ -1139,9 +1139,14 @@ int w_unpersistWorld(lua_State *L)
 	unsigned int numProjectiles    = io_shortNL(*((short *) data)); data += sizeof(short);
 	unsigned int numTanks          = io_shortNL(*((short *) data)); data += sizeof(short);
 	unsigned int numPowerups       = io_shortNL(*((short *) data)); data += sizeof(short);
-	unsigned int numWalls          = lua_objlen(L, 5);
+	/* These can remain constant, but sometimes the packet is truncated */
+	/*unsigned int numWalls          = lua_objlen(L, 5);
 	unsigned int numControlPoints  = lua_objlen(L, 6);
-	unsigned int numFlags          = lua_objlen(L, 7);
+	unsigned int numFlags          = lua_objlen(L, 7);*/
+	/* so read from the packet */
+	unsigned int numWalls          = io_shortNL(*((short *) data)); data += sizeof(short);
+	unsigned int numControlPoints  = io_shortNL(*((short *) data)); data += sizeof(short);
+	unsigned int numFlags          = io_shortNL(*((short *) data)); data += sizeof(short);
 
 	/* remove projectiles before unpersisting */
 	/*lua_pushvalue(L, 1);*/
@@ -1249,7 +1254,7 @@ int w_unpersistWorld(lua_State *L)
 				lua_pushvalue(L, -2);
 
 				/* already ahead one sizeof(char) */
-				data += 24 * sizeof(char) + 5 * sizeof(float) + 1 * sizeof(short) + 3 * sizeof(float) + 1 * sizeof(char) < buf + sizeof(buf);
+				data += 24 * sizeof(char) + 5 * sizeof(float) + 1 * sizeof(short) + 3 * sizeof(float) + 1 * sizeof(char);
 
 				continue;
 			}
