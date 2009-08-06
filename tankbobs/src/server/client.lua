@@ -105,7 +105,8 @@ ban =
 
 local client_class = client
 
-local clients = nil
+local clients = {}
+local bans = {}
 
 function client_begin()
 	client_saveBans(c_const_get("bans_file"))
