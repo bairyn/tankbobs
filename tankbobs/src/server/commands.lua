@@ -49,14 +49,18 @@ function commands_done()
 end
 
 function commands_setSelected()
+	c_tcm_current_map = nil
+
+	s_restart()
+
 	s_printnl("Selected level set '", c_tcm_current_set.name, "' (", c_tcm_current_set.title, ")")
 end
 local commands_setSelected = commands_setSelected
 
 function commands_mapSelected()
-	s_printnl("Selected level '", c_tcm_current_map.name, "' (", c_tcm_current_map.title, ")")
-
 	s_restart()
+
+	s_printnl("Selected level '", c_tcm_current_map.name, "' (", c_tcm_current_map.title, ")")
 end
 local commands_mapSelected = commands_mapSelected
 
