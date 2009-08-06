@@ -523,7 +523,7 @@ end
 
 function c_weapon_outOfAmmo(tank)
 	-- return to default weapon
-	tank.weapon = c_weapon_getByAltName("default")
+	tank.weapon = c_weapon_getByAltName("default").index
 end
 
 function c_weapon_pickUp(tank, weaponName)
