@@ -807,7 +807,7 @@ int w_persistWorld(lua_State *L)
 	{
 		lua_getfield(L, -1, "exists");
 		if(lua_toboolean(L, -1) &&
-				25 * sizeof(char) + bufpos + 5 * sizeof(float) + 1 * sizeof(short) + 3 * sizeof(float) + 1 * sizeof(char) < buf + sizeof(buf))
+				bufpos + 25 * sizeof(char) + 5 * sizeof(float) + 1 * sizeof(short) + 3 * sizeof(float) + 1 * sizeof(char) < buf + sizeof(buf))
 		{
 			static char name[21];
 
@@ -1209,10 +1209,7 @@ int w_unpersistWorld(lua_State *L)
 		lua_pushvalue(L, -2);
 		lua_setfield(L, -2, "body");
 
-		/* pop 'm' */
-		lua_pop(L, 1);
-
-		/* pop color and projectile */
+		/* pop 'm' and projectile */
 		lua_pop(L, 1);
 	}
 
@@ -1239,6 +1236,27 @@ int w_unpersistWorld(lua_State *L)
 			lua_pushvalue(L, 14 + preArgs);
 			lua_pushvalue(L, -2);
 			lua_call(L, 1, 0);
+		}
+		else
+		{
+			lua_getfield(L, -1, "exists");
+			if(!lua_toboolean(L, -1))
+			{
+				lua_pop(L, 1);
+
+				/* spawn the tank */
+				lua_pushvalue(L, 14 + preArgs);
+				lua_pushvalue(L, -2);
+
+				/* already ahead one sizeof(char) */
+				data += 24 * sizeof(char) + 5 * sizeof(float) + 1 * sizeof(short) + 3 * sizeof(float) + 1 * sizeof(char) < buf + sizeof(buf);
+
+				continue;
+			}
+			else
+			{
+				lua_pop(L, 1);
+			}
 		}
 
 		/* get body */
