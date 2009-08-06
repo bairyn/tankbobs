@@ -405,7 +405,7 @@ function client_step(d)
 
 								s_printnl("Banned player '", client.tank.name, "' attempted to connect from ", ip, ":", port, "; GUID: *", common_stringToHex("", "", client.ui:sub(-guidLen, -1)))
 
-								local message = string.format("Banned by '%s'; reason: '%s'", reason, banner)
+								local message = string.format("Banned by '%s'; reason: '%s'", banner, reason)
 								tankbobs.n_newPacket(#message + 2)
 								tankbobs.n_writeToPacket(tankbobs.io_fromChar(0xA6))
 								tankbobs.n_writeToPacket(message)
