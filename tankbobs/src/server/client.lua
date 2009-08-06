@@ -63,9 +63,12 @@ function client_init()
 	c_const_set("client_maxInactiveTime", 120000, 1)  -- drop after 2 minutes of no packets
 	c_const_set("client_connectingMaxInactiveTime", 3000, 1)
 	c_const_set("client_maxChallengeAttempts", 3, 1)
+
+	client_loadBans(c_const_get("bans_file"))
 end
 
 function client_done()
+	client_saveBans(c_const_get("bans_file"))
 end
 
 client =
@@ -127,6 +130,77 @@ local function client_banCheck(client)
 	end
 
 	return
+end
+
+function client_loadBans(filename)
+	bans = {}
+
+	local fin = io.open(filename, "r")
+
+	if not fin then
+		return
+	end
+
+	local i, line = 0
+	local function readLine()
+		i = i + 1
+		line = fin:read()
+		if not line then
+			fin:close()
+
+			error "client_loadBans: unexpected end of file on line " .. tostring(i)
+		end
+		return line
+	end
+	line = fin:read()
+	while line do
+		local ban = ban:new()
+		table.insert(bans, ban)
+
+		ban.ip = readLine()
+		ban.ui = readLine()
+
+		ban.name = readLine()
+		ban.reason = readLine()
+		ban.banner = readLine()
+		ban.banTime = readLine()
+
+		i = i + 2
+		fin:read()  -- extra newline
+		line = fin:read()
+	end
+
+	fin:close()
+end
+
+function client_saveBans(filename)
+	local fout, err = io.open(filename, "w")
+
+	if not fout then
+		error "client_saveBans: could not open '" .. tostring(filename) .. "' for writing bans: " .. tostring(err)
+	end
+
+	local first = true
+	for k, v in pairs(bans) do
+		if first then
+			fout:write("[ban #", tostring(k), "] - ip, ui, name, reason, banner, banTime", "\n")
+		else
+			fout:write("[ban #", tostring(k), "]", "\n")
+		end
+		first = false
+
+		fout:write(v.ip, "\n")
+		fout:write(v.ui, "\n")
+
+		fout:write(v.name, "\n")
+		fout:write(v.reason, "\n")
+		fout:write(v.banner, "\n")
+		fout:write(v.banTime, "\n")
+
+		fout:write("\n")
+	end
+
+	fout:close()
 end
 
 function client_banClient(client, reason, banner)
