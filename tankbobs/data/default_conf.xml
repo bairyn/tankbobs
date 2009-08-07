@@ -150,6 +150,6 @@
 	<server>
 		<fps>64</fps>
 		<pfps>8</pfps>
-		<writeFileOnBan>true</writeFileOnBan>  if false, bans are written on restart
+		<writeFileOnBan>false</writeFileOnBan>  if false, bans are written on restart
 	</server>
 </config>
