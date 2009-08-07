@@ -1306,7 +1306,7 @@ commands =
 		kickban,
 		kickbanT,
 		"Usage:\n" ..
-		" kickban (-i/--id-only) [client]\n" ..
+		" kickban (-i/--id-only) [client] [reason]\n" ..
 		"\n" ..
 		" \"kickban\" directly calls \"ban\" with the arguments given, and then \"kick\" with\n" ..
 		" the arguments given.  This effectively disconnects and bans a client from a server.\n" ..
