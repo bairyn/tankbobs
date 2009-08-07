@@ -1422,7 +1422,7 @@ function c_world_powerup_step(d, powerup)
 end
 
 function c_world_controlPoint_step(d, controlPoint)
-	if gameType ~= DOMINATION then
+	if c_world_gameType ~= DOMINATION then
 		return
 	end
 
@@ -1471,7 +1471,7 @@ function c_world_controlPoint_step(d, controlPoint)
 end
 
 function c_world_flag_step(d, flag)
-	if gameType ~= CAPTURETHEFLAG then
+	if c_world_gameType ~= CAPTURETHEFLAG then
 		return
 	end
 

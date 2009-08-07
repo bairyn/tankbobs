@@ -503,7 +503,7 @@ local function game_drawWorld(d)
 			end
 		end
 
-		if c_world_gameType == "domination" then
+		if c_world_gameType == DOMINATION then
 			-- draw control points
 			for _, v in pairs(c_tcm_current_map.controlPoints) do
 				local color
@@ -530,7 +530,7 @@ local function game_drawWorld(d)
 					gl.CallList(controlPoint_listBase)
 				gl.PopMatrix()
 			end
-		elseif c_world_gameType == "capturetheflag" then
+		elseif c_world_gameType == CAPTURETHEFLAG then
 			for _, v in pairs(c_tcm_current_map.flags) do
 				local color
 
@@ -897,7 +897,7 @@ function game_step(d)
 		end
 	end
 
-	if c_world_gameType == "domination" then
+	if c_world_gameType == DOMINATION then
 		for _, v in pairs(c_tcm_current_map.controlPoints) do
 			if v.m.teamB ~= v.m.team then
 				v.m.teamB = v.m.team
@@ -905,7 +905,7 @@ function game_step(d)
 				tankbobs.a_playSound(c_const_get("control_sound"))
 			end
 		end
-	elseif c_world_gameType == "capturetheflag" then
+	elseif c_world_gameType == CAPTURETHEFLAG then
 		for _, v in pairs(c_tcm_current_map.flags) do
 			if v.m.lastCaptureTime and v.m.lastCaptureTimeB ~= v.m.lastCaptureTime then
 				v.m.lastCaptureTimeB = v.m.lastCaptureTime
