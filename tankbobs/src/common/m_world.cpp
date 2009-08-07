@@ -734,12 +734,12 @@ int w_persistWorld(lua_State *L)
 
 	order = 0;
 
-	numProjectiles   = lua_objlen(L, ++order); *((short *) bufpos) = io_shortNL(numProjectiles); bufpos += sizeof(short);
-	numTanks         = lua_objlen(L, ++order); *((short *) bufpos) = io_shortNL(numTanks);       bufpos += sizeof(short);
-	numPowerups      = lua_objlen(L, ++order); *((short *) bufpos) = io_shortNL(numPowerups);    bufpos += sizeof(short);
-	numWalls         = lua_objlen(L, ++order); *((short *) bufpos) = io_shortNL(numWalls);    bufpos += sizeof(short);;  /* number of walls is constant */
-	numControlPoints = lua_objlen(L, ++order); *((short *) bufpos) = io_shortNL(numControlPoints);    bufpos += sizeof(short);;  /* number of control points is constant */
-	numFlags         = lua_objlen(L, ++order); *((short *) bufpos) = io_shortNL(numFlags);    bufpos += sizeof(short);;  /* number of flags is constant */
+	numProjectiles   = lua_objlen(L, ++order); *((short *) bufpos) = io_shortNL(numProjectiles);   bufpos += sizeof(short);
+	numTanks         = lua_objlen(L, ++order); *((short *) bufpos) = io_shortNL(numTanks);         bufpos += sizeof(short);
+	numPowerups      = lua_objlen(L, ++order); *((short *) bufpos) = io_shortNL(numPowerups);      bufpos += sizeof(short);
+	numWalls         = lua_objlen(L, ++order); *((short *) bufpos) = io_shortNL(numWalls);         bufpos += sizeof(short);;  /* number of walls is constant */
+	numControlPoints = lua_objlen(L, ++order); *((short *) bufpos) = io_shortNL(numControlPoints); bufpos += sizeof(short);;  /* number of control points is constant */
+	numFlags         = lua_objlen(L, ++order); *((short *) bufpos) = io_shortNL(numFlags);         bufpos += sizeof(short);;  /* number of flags is constant */
 
 	order = 0;
 
@@ -1453,16 +1453,16 @@ int w_unpersistWorld(lua_State *L)
 				body->SetLinearVelocity(vel);
 
 				/* angular velocity */
-				body->SetAngularVelocity(luaL_checknumber(L, 2));
+				body->SetAngularVelocity(io_floatNL(*((float *) data))); data += sizeof(float);
 
 				/* path ID */
 				lua_getfield(L, -1, "m");
-				lua_pushnumber(L, io_floatNL(*((float *) data)));
+				lua_pushinteger(L, io_charNL(*((char *) data))); data += sizeof(char);
 				lua_setfield(L, -2, "pid");
 				/* keep 'm' on stack */
 
 				/* previous path ID */
-				lua_pushnumber(L, io_floatNL(*((float *) data)));
+				lua_pushinteger(L, io_charNL(*((char *) data))); data += sizeof(char);
 				lua_setfield(L, -2, "ppid");
 
 				/* set startpos */
@@ -1489,10 +1489,10 @@ int w_unpersistWorld(lua_State *L)
 				lua_pop(L, 1);
 
 				/* path position */
-				lua_pushnumber(L, io_floatNL(*((float *) data)));
+				lua_pushnumber(L, io_floatNL(*((float *) data))); data += sizeof(float);
 				lua_setfield(L, -2, "ppos");
 
-				/* pop both path and wall */
+				/* pop 'm' and wall */
 				lua_pop(L, 2);
 			}
 			else

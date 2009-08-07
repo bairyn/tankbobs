@@ -20,7 +20,7 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 --[[
 client.lua
 
-clients
+Clients
 --]]
 
 --[[
