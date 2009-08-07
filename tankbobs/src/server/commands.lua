@@ -889,7 +889,7 @@ function gameType(line)
 
 		s_printnl("gameType: new game type '", tostring(gameType), "' will be used on next restart")
 	else
-		return help("help gameType")
+		s_printnl("gameType: current game type is '", c_world_getGameTypeString(), "'")
 	end
 end
 
@@ -1254,7 +1254,7 @@ commands =
 		gameType,
 		gameTypeT,
 		"Usage:\n" ..
-		" gameType [game type]\n" ..
+		" gameType (game type)\n" ..
 		"\n" ..
 		" Sets the game type"
 	},
