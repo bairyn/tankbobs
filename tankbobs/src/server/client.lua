@@ -321,7 +321,11 @@ local function client_askForTick(client)
 end
 
 local function client_validate(client, ui)
-	return client.ui == ui
+	if not client.banned then
+		return client.ui == ui
+	else
+		return false
+	end
 end
 
 local function client_disconnect(client, reason)
