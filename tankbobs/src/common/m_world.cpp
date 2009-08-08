@@ -734,6 +734,9 @@ int w_persistWorld(lua_State *L)
 
 	CHECKWORLD(world, L);
 
+	/* Make room for size check */
+	bufpos += sizeof(unsigned int);
+
 	/* Set scores before anything else */
 	lua_pushvalue(L, 1);
 	*((char *) bufpos) = io_charNL(lua_tointeger(L, -1)); bufpos += sizeof(char);
@@ -1126,6 +1129,9 @@ int w_persistWorld(lua_State *L)
 		lua_pop(L, 1);
 	}
 
+	/* Insert size at beginning of packet */
+	*((int *) buf) = io_intNL(bufpos - buf);
+
 	lua_pushlstring(L, buf, bufpos - buf);
 
 	return 1;
@@ -1141,7 +1147,10 @@ int w_unpersistWorld(lua_State *L)
 
 	static const unsigned int preArgs = 4;
 
-	const char *data = lua_tostring(L, 1);
+	const char * const dataS = lua_tostring(L, 1);
+	const char *data = dataS;
+
+	const unsigned int size = io(intNL(*((int *) data))); data += sizeof(int);
 
 	/* Set scores before anything else */
 	lua_pushvalue(L, 3);
@@ -1635,6 +1644,12 @@ int w_unpersistWorld(lua_State *L)
 			/* pop m and control point */
 			lua_pop(L, 2);
 		}
+	}
+
+	if(data - dataS != size)
+	{
+		fprintf(stderr, "w_unpersistWorld: sizes differ! (server sent %d bytes; client read %d bytes)\n", size, data - dataS);
+		abort();
 	}
 
 	return 0;
