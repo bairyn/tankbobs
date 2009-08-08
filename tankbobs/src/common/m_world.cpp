@@ -724,7 +724,7 @@ int w_persistWorld(lua_State *L)
 	static char buf[BUFSIZE - 6] = {""};
 	char   *bufpos = &buf[0];
 	short  numProjectiles, numTanks, numPowerups;
-	int    numWalls, numControlPoints, numFlags;
+	short  numWalls, numControlPoints, numFlags;
 	int    order;
 	const  vec2_t *v;
 	const  b2Body *body;
@@ -744,6 +744,8 @@ int w_persistWorld(lua_State *L)
 	lua_pushvalue(L, 2);
 	*((char *) bufpos) = io_charNL(lua_tointeger(L, -1)); bufpos += sizeof(char);
 	lua_pop(L, 1);
+
+	const char * const bufNumPos = bufpos;
 
 	order = preArgs;
 	numProjectiles   = lua_objlen(L, ++order); *((short *) bufpos) = io_shortNL(numProjectiles);   bufpos += sizeof(short);
@@ -805,7 +807,7 @@ int w_persistWorld(lua_State *L)
 		{
 			lua_pop(L, 1);
 
-			*(((short *) &buf[0]) + order - 1) = --numProjectiles;
+			*(((short *) &bufNumPos[0]) + order - 1) = io_shortNL(--numProjectiles);
 		}
 
 		lua_pop(L, 1);
@@ -896,7 +898,7 @@ int w_persistWorld(lua_State *L)
 		{
 			lua_pop(L, 1);
 
-			*(((short *) &buf[0]) + order - 1) = --numTanks;
+			*(((short *) &bufNumPos[0]) + order - 1) = io_shortNL(--numTanks);
 		}
 
 		lua_pop(L, 1);
@@ -955,7 +957,7 @@ int w_persistWorld(lua_State *L)
 		{
 			lua_pop(L, 1);
 
-			*(((short *) &buf[0]) + order - 1) = --numPowerups;
+			*(((short *) &bufNumPos[0]) + order - 1) = io_shortNL(--numPowerups);
 		}
 
 		lua_pop(L, 1);
@@ -1044,7 +1046,7 @@ int w_persistWorld(lua_State *L)
 		}
 		else
 		{
-			*(((short *) &buf[0]) + order - 1) = --numWalls;
+			*(((short *) &bufNumPos[0]) + order - 1) = io_shortNL(--numWalls);
 		}
 
 		lua_pop(L, 1);
@@ -1077,7 +1079,7 @@ int w_persistWorld(lua_State *L)
 		}
 		else
 		{
-			*(((short *) &buf[0]) + order - 1) = --numControlPoints;
+			*(((short *) &bufNumPos[0]) + order - 1) = io_shortNL(--numControlPoints);
 		}
 
 		lua_pop(L, 1);
@@ -1123,7 +1125,7 @@ int w_persistWorld(lua_State *L)
 		}
 		else
 		{
-			*(((short *) &buf[0]) + order - 1) = --numFlags;
+			*(((short *) &bufNumPos[0]) + order - 1) = io_shortNL(--numFlags);
 		}
 
 		lua_pop(L, 1);
