@@ -721,7 +721,7 @@ int w_persistWorld(lua_State *L)
 {
 	static const unsigned int preArgs = 2;
 
-	char   buf[BUFSIZE] = {""};
+	static char buf[BUFSIZE - 6] = {""};
 	char   *bufpos = &buf[0];
 	short  numProjectiles, numTanks, numPowerups;
 	int    numWalls, numControlPoints, numFlags;
@@ -735,7 +735,7 @@ int w_persistWorld(lua_State *L)
 	CHECKWORLD(world, L);
 
 	/* Make room for size check */
-	bufpos += sizeof(unsigned int);
+	bufpos += sizeof(int);
 
 	/* Set scores before anything else */
 	lua_pushvalue(L, 1);
@@ -749,9 +749,9 @@ int w_persistWorld(lua_State *L)
 	numProjectiles   = lua_objlen(L, ++order); *((short *) bufpos) = io_shortNL(numProjectiles);   bufpos += sizeof(short);
 	numTanks         = lua_objlen(L, ++order); *((short *) bufpos) = io_shortNL(numTanks);         bufpos += sizeof(short);
 	numPowerups      = lua_objlen(L, ++order); *((short *) bufpos) = io_shortNL(numPowerups);      bufpos += sizeof(short);
-	numWalls         = lua_objlen(L, ++order); *((short *) bufpos) = io_shortNL(numWalls);         bufpos += sizeof(short);;  /* number of walls is constant */
-	numControlPoints = lua_objlen(L, ++order); *((short *) bufpos) = io_shortNL(numControlPoints); bufpos += sizeof(short);;  /* number of control points is constant */
-	numFlags         = lua_objlen(L, ++order); *((short *) bufpos) = io_shortNL(numFlags);         bufpos += sizeof(short);;  /* number of flags is constant */
+	numWalls         = lua_objlen(L, ++order); *((short *) bufpos) = io_shortNL(numWalls);         bufpos += sizeof(short);  /* number of walls is constant */
+	numControlPoints = lua_objlen(L, ++order); *((short *) bufpos) = io_shortNL(numControlPoints); bufpos += sizeof(short);  /* number of control points is constant */
+	numFlags         = lua_objlen(L, ++order); *((short *) bufpos) = io_shortNL(numFlags);         bufpos += sizeof(short);  /* number of flags is constant */
 
 	order = preArgs;
 
@@ -1150,7 +1150,7 @@ int w_unpersistWorld(lua_State *L)
 	const char * const dataS = lua_tostring(L, 1);
 	const char *data = dataS;
 
-	const unsigned int size = io(intNL(*((int *) data))); data += sizeof(int);
+	const unsigned int size = io_intNL(*((int *) data)); data += sizeof(int);
 
 	/* Set scores before anything else */
 	lua_pushvalue(L, 3);
@@ -1165,7 +1165,7 @@ int w_unpersistWorld(lua_State *L)
 	unsigned int numProjectiles    = io_shortNL(*((short *) data)); data += sizeof(short);
 	unsigned int numTanks          = io_shortNL(*((short *) data)); data += sizeof(short);
 	unsigned int numPowerups       = io_shortNL(*((short *) data)); data += sizeof(short);
-	/* These can remain constant, but sometimes the packet is truncated */
+	/* These can remain constant, but the packet can be truncated */
 	/*unsigned int numWalls          = lua_objlen(L, 5);
 	unsigned int numControlPoints  = lua_objlen(L, 6);
 	unsigned int numFlags          = lua_objlen(L, 7);*/
@@ -1178,7 +1178,7 @@ int w_unpersistWorld(lua_State *L)
 	/*lua_pushvalue(L, 1);*/
 	/*t_emptyTable(L, -1);*/
 	/*lua_pop(L, 1);*/
-	/* this should already be taken care of in the game logic */
+	/* this should already be done in the game logic */
 
 	/* Projectiles */
 	for(int i = 0; i < numProjectiles; i++)
@@ -1646,11 +1646,13 @@ int w_unpersistWorld(lua_State *L)
 		}
 	}
 
+/*#ifdef TDEBUG*/
 	if(data - dataS != size)
 	{
-		fprintf(stderr, "w_unpersistWorld: sizes differ! (server sent %d bytes; client read %d bytes)\n", size, data - dataS);
+		fprintf(stderr, "w_unpersistWorld: sizes differ! (server wrote %d bytes; client read %d bytes)\n", size, data - dataS);
 		abort();
 	}
+/*#endif 8* defined TDEBUG 8/*/
 
 	return 0;
 }
