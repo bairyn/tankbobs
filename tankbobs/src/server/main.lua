@@ -122,7 +122,7 @@ function main_loop()
 
 	if c_tcm_current_map and (c_config_get("server.pfps") == 0 or not lastPTime or t - lastPTime > common_FTM(c_config_get("server.pfps"))) then
 		lastPTime = t
-		p = tankbobs.w_persistWorld(c_weapon_getProjectiles(), c_world_getTanks(), c_world_getPowerups(), c_tcm_current_map.walls, c_tcm_current_map.controlPoints, c_tcm_current_map.flags)
+		p = tankbobs.w_persistWorld(c_world_redTeam.score, c_world_blueTeam.score, c_weapon_getProjectiles(), c_world_getTanks(), c_world_getPowerups(), c_tcm_current_map.walls, c_tcm_current_map.controlPoints, c_tcm_current_map.flags)
 	end
 
 	local d = (t - lastTime) / (c_const_get("world_time") * c_config_get("game.timescale"))

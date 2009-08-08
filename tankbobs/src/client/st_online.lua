@@ -235,7 +235,7 @@ function online_readPackets(d)  -- local
 						if tank then
 							state = tank.state
 						end
-						tankbobs.w_unpersistWorld(data, connection.t, unpack(unpersistArgs))
+						tankbobs.w_unpersistWorld(data, connection.t, function (score) c_world_redTeam.score = score end, function (score) c_world_redTeam.score = score end, unpack(unpersistArgs))
 						if tank then
 							tank.state = state
 						end

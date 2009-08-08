@@ -719,6 +719,8 @@ int w_scaleVelocity(lua_State *L)
 
 int w_persistWorld(lua_State *L)
 {
+	static const unsigned int preArgs = 2;
+
 	char   buf[BUFSIZE] = {""};
 	char   *bufpos = &buf[0];
 	short  numProjectiles, numTanks, numPowerups;
@@ -732,8 +734,15 @@ int w_persistWorld(lua_State *L)
 
 	CHECKWORLD(world, L);
 
-	order = 0;
+	/* Set scores before anything else */
+	lua_pushvalue(L, 1);
+	*((char *) bufpos) = io_charNL(lua_tointeger(L, -1)); bufpos += sizeof(char);
+	lua_pop(L, 1);
+	lua_pushvalue(L, 2);
+	*((char *) bufpos) = io_charNL(lua_tointeger(L, -1)); bufpos += sizeof(char);
+	lua_pop(L, 1);
 
+	order = preArgs;
 	numProjectiles   = lua_objlen(L, ++order); *((short *) bufpos) = io_shortNL(numProjectiles);   bufpos += sizeof(short);
 	numTanks         = lua_objlen(L, ++order); *((short *) bufpos) = io_shortNL(numTanks);         bufpos += sizeof(short);
 	numPowerups      = lua_objlen(L, ++order); *((short *) bufpos) = io_shortNL(numPowerups);      bufpos += sizeof(short);
@@ -741,7 +750,7 @@ int w_persistWorld(lua_State *L)
 	numControlPoints = lua_objlen(L, ++order); *((short *) bufpos) = io_shortNL(numControlPoints); bufpos += sizeof(short);;  /* number of control points is constant */
 	numFlags         = lua_objlen(L, ++order); *((short *) bufpos) = io_shortNL(numFlags);         bufpos += sizeof(short);;  /* number of flags is constant */
 
-	order = 0;
+	order = preArgs;
 
 	/* projectiles */
 	/* char weaponTypeIndex; char owner; float rotation; float x; float y; float velX; float velY; float angularVelocity; */
@@ -1130,9 +1139,17 @@ int w_unpersistWorld(lua_State *L)
 
 	vec2_t *v;
 
-	static const unsigned int preArgs = 2;
+	static const unsigned int preArgs = 4;
 
 	const char *data = lua_tostring(L, 1);
+
+	/* Set scores before anything else */
+	lua_pushvalue(L, 3);
+	lua_pushinteger(L, io_charNL(*((char *) data))); data += sizeof(char);
+	lua_call(L, 1, 0);
+	lua_pushvalue(L, 4);
+	lua_pushinteger(L, io_charNL(*((char *) data))); data += sizeof(char);
+	lua_call(L, 1, 0);
 
 	unsigned int projectileBodyLen = lua_objlen(L, 13 + preArgs);
 
@@ -1173,7 +1190,7 @@ int w_unpersistWorld(lua_State *L)
 		lua_setfield(L, -2, "owner");
 
 		/* rotation */
-		lua_pushinteger(L, io_floatNL(*((float *) data))); data += sizeof(float);
+		lua_pushnumber(L, io_floatNL(*((float *) data))); data += sizeof(float);
 		lua_setfield(L, -2, "r");
 
 		/* push addBody function */
@@ -1271,7 +1288,7 @@ int w_unpersistWorld(lua_State *L)
 
 		/* name */
 		static char name[21];
-		strncpy(name, data, sizeof(name)); data += 21 * sizeof(char);
+		strncpy(name, data, sizeof(name)); data += sizeof(name);
 		lua_pushstring(L, name);
 		lua_setfield(L, -2, "name");
 
@@ -1552,7 +1569,7 @@ int w_unpersistWorld(lua_State *L)
 		if(lua_isnoneornil(L, -1))
 		{
 			/* This should never happen, but play safe anyway */
-			data += 2 * sizeof(char) + 1 * sizeof(int) + 2 * sizeof(float);
+			data += 2 * sizeof(char) + 2 * sizeof(float);
 
 			lua_pop(L, 1);
 		}
