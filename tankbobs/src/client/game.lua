@@ -248,6 +248,7 @@ function game_refreshKeys()
 		end
 
 		key("fire", FIRING)
+		key("forward", FORWARD)
 		key("back", BACK)
 		key("left", LEFT)
 		key("right", RIGHT)

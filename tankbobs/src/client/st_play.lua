@@ -45,7 +45,6 @@ local healthbar_listBase
 local healthbarBorder_listBase
 local c_world_findClosestIntersection
 local common_lerp
-local game_refreshKeys
 
 local st_play_init
 local st_play_done
@@ -115,6 +114,7 @@ local refreshKeys = function ()
 		end
 
 		key("fire", FIRING)
+		key("forward", FORWARD)
 		key("back", BACK)
 		key("left", LEFT)
 		key("right", RIGHT)
@@ -149,7 +149,6 @@ function st_play_init()
 	healthbarBorder_listBase = _G.healthbarBorder_listBase
 	c_world_findClosestIntersection = _G.c_world_findClosestIntersection
 	common_lerp = _G.common_lerp
-	game_refreshKeys = _G.game_refreshKeys
 
 	bit = c_module_load "bit"
 
