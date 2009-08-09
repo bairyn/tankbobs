@@ -717,6 +717,7 @@ int w_scaleVelocity(lua_State *L)
 	return 0;
 }
 
+/* TODO: properly unaligned numbers */
 int w_persistWorld(lua_State *L)
 {
 	static const unsigned int preArgs = 2;
@@ -745,7 +746,7 @@ int w_persistWorld(lua_State *L)
 	*((char *) bufpos) = io_charNL(lua_tointeger(L, -1)); bufpos += sizeof(char);
 	lua_pop(L, 1);
 
-	const char * const bufNumPos = bufpos;
+	short * const nums = ((short *) bufpos) - preArgs - 1;  /* offseting by preArgs and 1 makes retrieving and setting entity numbers easier, but this should not not dereferenced without offsetting the address since this itself can point to non-existent memory) */
 
 	order = preArgs;
 	numProjectiles   = lua_objlen(L, ++order); *((short *) bufpos) = io_shortNL(numProjectiles);   bufpos += sizeof(short);
@@ -807,7 +808,7 @@ int w_persistWorld(lua_State *L)
 		{
 			lua_pop(L, 1);
 
-			*(((short *) &bufNumPos[0]) + order - 1) = io_shortNL(--numProjectiles);
+			nums[order] = io_shortNL(--numProjectiles);
 		}
 
 		lua_pop(L, 1);
@@ -898,7 +899,7 @@ int w_persistWorld(lua_State *L)
 		{
 			lua_pop(L, 1);
 
-			*(((short *) &bufNumPos[0]) + order - 1) = io_shortNL(--numTanks);
+			nums[order] = io_shortNL(--numTanks);
 		}
 
 		lua_pop(L, 1);
@@ -957,7 +958,7 @@ int w_persistWorld(lua_State *L)
 		{
 			lua_pop(L, 1);
 
-			*(((short *) &bufNumPos[0]) + order - 1) = io_shortNL(--numPowerups);
+			nums[order] = io_shortNL(--numPowerups);
 		}
 
 		lua_pop(L, 1);
@@ -1046,7 +1047,7 @@ int w_persistWorld(lua_State *L)
 		}
 		else
 		{
-			*(((short *) &bufNumPos[0]) + order - 1) = io_shortNL(--numWalls);
+			nums[order] = io_shortNL(--numWalls);
 		}
 
 		lua_pop(L, 1);
@@ -1079,7 +1080,7 @@ int w_persistWorld(lua_State *L)
 		}
 		else
 		{
-			*(((short *) &bufNumPos[0]) + order - 1) = io_shortNL(--numControlPoints);
+			nums[order] = io_shortNL(--numControlPoints);
 		}
 
 		lua_pop(L, 1);
@@ -1125,7 +1126,7 @@ int w_persistWorld(lua_State *L)
 		}
 		else
 		{
-			*(((short *) &bufNumPos[0]) + order - 1) = io_shortNL(--numFlags);
+			nums[order] = io_shortNL(--numFlags);
 		}
 
 		lua_pop(L, 1);

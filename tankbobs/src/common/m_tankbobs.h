@@ -271,6 +271,13 @@ int c_init(lua_State *L);
 int c_quit(lua_State *L);
 int c_input(lua_State *L);
 int c_setTabFunction(lua_State *L);
+#define C_PRINTNL(L, s) \
+do \
+{ \
+	lua_pushcfunction((L), c_print); \
+	lua_pushstring((L), (s)); \
+	lua_call((L), 1, 0); \
+} while(0)
 int c_print(lua_State *L);
 int c_setHistoryFile(lua_State *L);
 int c_loadHistory(lua_State *L);
