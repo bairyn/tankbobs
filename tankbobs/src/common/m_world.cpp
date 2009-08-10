@@ -56,6 +56,8 @@ do \
 	} \
 } while(0)
 
+#define WORLDBUFSIZE BUFSIZE - 6
+
 static b2World *world = NULL;
 static b2AABB worldAABB;
 static b2Vec2 worldGravity;
@@ -706,7 +708,7 @@ int w_scaleVelocity(lua_State *L)
 
 	CHECKWORLD(world, L);
 
-	double scale = luaL_checknumber(L, 1);
+	auto double scale = luaL_checknumber(L, 1);
 
 	for(b2Body *b = world->GetBodyList(); b; b = b->GetNext())
 	{
@@ -717,13 +719,12 @@ int w_scaleVelocity(lua_State *L)
 	return 0;
 }
 
-/* TODO: properly unaligned numbers */
 int w_persistWorld(lua_State *L)
 {
 	static const unsigned int preArgs = 2;
 
-	static char buf[BUFSIZE - 6] = {""};
-	char   *bufpos = &buf[0];
+	static char buf[WORLDBUFSIZE + ALIGNMENT] = {""};
+	register size_t offset = 0;
 	short  numProjectiles, numTanks, numPowerups;
 	short  numWalls, numControlPoints, numFlags;
 	int    order;
@@ -735,26 +736,30 @@ int w_persistWorld(lua_State *L)
 
 	CHECKWORLD(world, L);
 
-	/* Make room for size check */
-	bufpos += sizeof(int);
+	/* Make room for world size */
+	offset += sizeof(io32t);
 
-	/* Set scores before anything else */
+	/* Set non-entity states */
+
+	/* Scores */
 	lua_pushvalue(L, 1);
-	*((char *) bufpos) = io_charNL(lua_tointeger(L, -1)); bufpos += sizeof(char);
+	IO_SETCHARNL(buf, offset, lua_tointeger(L, -1)); offset += sizeof(io8t);
 	lua_pop(L, 1);
 	lua_pushvalue(L, 2);
-	*((char *) bufpos) = io_charNL(lua_tointeger(L, -1)); bufpos += sizeof(char);
+	IO_SETCHARNL(buf, offset, lua_tointeger(L, -1)); offset += sizeof(io8t);
 	lua_pop(L, 1);
 
-	short * const nums = ((short *) bufpos) - preArgs - 1;  /* offseting by preArgs and 1 makes retrieving and setting entity numbers easier, but this should not not dereferenced without offsetting the address since this itself can point to non-existent memory) */
+	/* The above doesn't check for room in world buffer, but overflows should never happen since the data that the few (for now) integers take up is tiny */
+
+	void * const nums = buf + offset;
 
 	order = preArgs;
-	numProjectiles   = lua_objlen(L, ++order); *((short *) bufpos) = io_shortNL(numProjectiles);   bufpos += sizeof(short);
-	numTanks         = lua_objlen(L, ++order); *((short *) bufpos) = io_shortNL(numTanks);         bufpos += sizeof(short);
-	numPowerups      = lua_objlen(L, ++order); *((short *) bufpos) = io_shortNL(numPowerups);      bufpos += sizeof(short);
-	numWalls         = lua_objlen(L, ++order); *((short *) bufpos) = io_shortNL(numWalls);         bufpos += sizeof(short);  /* number of walls is constant */
-	numControlPoints = lua_objlen(L, ++order); *((short *) bufpos) = io_shortNL(numControlPoints); bufpos += sizeof(short);  /* number of control points is constant */
-	numFlags         = lua_objlen(L, ++order); *((short *) bufpos) = io_shortNL(numFlags);         bufpos += sizeof(short);  /* number of flags is constant */
+	numProjectiles   = lua_objlen(L, ++order); IO_SETSHORTNL(buf, offset, numProjectiles);   offset += sizeof(io16t);
+	numTanks         = lua_objlen(L, ++order); IO_SETSHORTNL(buf, offset, numTanks);         offset += sizeof(io16t);
+	numPowerups      = lua_objlen(L, ++order); IO_SETSHORTNL(buf, offset, numPowerups);      offset += sizeof(io16t);
+	numWalls         = lua_objlen(L, ++order); IO_SETSHORTNL(buf, offset, numWalls);         offset += sizeof(io16t);  /* number of walls is constant */
+	numControlPoints = lua_objlen(L, ++order); IO_SETSHORTNL(buf, offset, numControlPoints); offset += sizeof(io16t);  /* number of control points is constant */
+	numFlags         = lua_objlen(L, ++order); IO_SETSHORTNL(buf, offset, numFlags);         offset += sizeof(io16t);  /* number of flags is constant */
 
 	order = preArgs;
 
@@ -766,30 +771,30 @@ int w_persistWorld(lua_State *L)
 	{
 		lua_getfield(L, -1, "collided");
 		if(!lua_toboolean(L, -1) &&
-				bufpos + 2 * sizeof(char) + 6 * sizeof(float) < buf + sizeof(buf))
+				offset + 2 * sizeof(io8t) + 6 * sizeof(io32t) < WORLDBUFSIZE)
 		{
 			lua_pop(L, 1);
 
 			/* set weaponIndex */
 			lua_getfield(L, -1, "weapon");
-			*((char *) bufpos) = io_charNL(lua_tointeger(L, -1)); bufpos += sizeof(char);
+			IO_SETCHARNL(buf, offset, lua_tointeger(L, -1)); offset += sizeof(io8t);
 			lua_pop(L, 1);
 
 			/* set owner */
 			lua_getfield(L, -1, "owner");
-			*((char *) bufpos) = io_charNL(lua_tointeger(L, -1)); bufpos += sizeof(char);
+			IO_SETCHARNL(buf, offset, lua_tointeger(L, -1)); offset += sizeof(io8t);
 			lua_pop(L, 1);
 
 			/* set rotation */
 			lua_getfield(L, -1, "r");
-			*((float *) bufpos) = io_floatNL(lua_tonumber(L, -1)); bufpos += sizeof(float);
+			IO_SETFLOATNL(buf, offset, lua_tonumber(L, -1)); offset += sizeof(io32t);
 			lua_pop(L, 1);
 
 			/* set x and y */
 			lua_getfield(L, -1, "p");
 			v = CHECKVEC(L, -1);
-			*((float *) bufpos) = io_floatNL(v->x); bufpos += sizeof(float);
-			*((float *) bufpos) = io_floatNL(v->y); bufpos += sizeof(float);
+			IO_SETFLOATNL(buf, offset, v->x); offset += sizeof(io32t);
+			IO_SETFLOATNL(buf, offset, v->y); offset += sizeof(io32t);
 			lua_pop(L, 1);
 
 			/* velocity */
@@ -798,17 +803,17 @@ int w_persistWorld(lua_State *L)
 			body = reinterpret_cast<b2Body *>(lua_touserdata(L, -1));
 			lua_pop(L, 2);
 			vel = body->GetLinearVelocity();
-			*((float *) bufpos) = io_floatNL(vel.x); bufpos += sizeof(float);
-			*((float *) bufpos) = io_floatNL(vel.y); bufpos += sizeof(float);
+			IO_SETFLOATNL(buf, offset, vel.x); offset += sizeof(io32t);
+			IO_SETFLOATNL(buf, offset, vel.y); offset += sizeof(io32t);
 
 			/* angular velocity */
-			*((float *) bufpos) = io_floatNL(body->GetAngularVelocity()); bufpos += sizeof(float);
+			IO_SETFLOATNL(buf, offset, body->GetAngularVelocity()); offset += sizeof(io32t);
 		}
 		else
 		{
 			lua_pop(L, 1);
 
-			nums[order] = io_shortNL(--numProjectiles);
+			IO_SETSHORTNL(nums, (order - preArgs - 1) * sizeof(io16t), --numProjectiles);
 		}
 
 		lua_pop(L, 1);
@@ -822,46 +827,50 @@ int w_persistWorld(lua_State *L)
 	{
 		lua_getfield(L, -1, "exists");
 		if(lua_toboolean(L, -1) &&
-				bufpos + 25 * sizeof(char) + 5 * sizeof(float) + 1 * sizeof(short) + 3 * sizeof(float) + 1 * sizeof(char) < buf + sizeof(buf))
+				offset + 25 * sizeof(io8t) + 5 * sizeof(io32t) + 1 * sizeof(short) + 3 * sizeof(io32t) + 1 * sizeof(io8t) < WORLDBUFSIZE)
 		{
 			static char name[21];
 
 			lua_pop(L, 1);
 
 			/* set index */
-			*((char *) bufpos) = io_charNL((unsigned int) lua_tointeger(L, -2)); bufpos += sizeof(char);
+			IO_SETCHARNL(buf, offset, lua_tointeger(L, -2)); offset += sizeof(io8t);
 
 			/* set name */
 			lua_getfield(L, -1, "name");
 			strncpy(name, lua_tostring(L, -1), sizeof(name));
 			lua_pop(L, 1);
-			memcpy(bufpos, name, sizeof(name)); bufpos += sizeof(name);
+			/*memcpy(bufpos, name, sizeof(name)); bufpos += sizeof(name);*/
+			for(int i = 0; i < sizeof(name); i++)
+			{
+				IO_SETCHARNL(buf, offset, name[i]); offset += sizeof(io8t);
+			}
 
 			/* set weapon */
 			lua_getfield(L, -1, "weapon");
-			*((char *) bufpos) = io_charNL((unsigned int) lua_tointeger(L, -1)); bufpos += sizeof(char);
+			IO_SETCHARNL(buf, offset, lua_tointeger(L, -1)); offset += sizeof(io8t);
 			lua_pop(L, 1);
 
 			/* set ammo */
 			lua_getfield(L, -1, "ammo");
-			*((char *) bufpos) = io_charNL((unsigned int) lua_tointeger(L, -1)); bufpos += sizeof(char);
+			IO_SETCHARNL(buf, offset, lua_tointeger(L, -1)); offset += sizeof(io8t);
 			lua_pop(L, 1);
 
 			/* set clips */
 			lua_getfield(L, -1, "clips");
-			*((char *) bufpos) = io_charNL((unsigned int) lua_tointeger(L, -1)); bufpos += sizeof(char);
+			IO_SETCHARNL(buf, offset, lua_tointeger(L, -1)); offset += sizeof(io8t);
 			lua_pop(L, 1);
 
 			/* set rotation */
 			lua_getfield(L, -1, "r");
-			*((float *) bufpos) = io_floatNL(lua_tonumber(L, -1)); bufpos += sizeof(float);
+			IO_SETFLOATNL(buf, offset, lua_tonumber(L, -1)); offset += sizeof(io32t);
 			lua_pop(L, 1);
 
 			/* set x and y */
 			lua_getfield(L, -1, "p");
 			v = CHECKVEC(L, -1);
-			*((float *) bufpos) = io_floatNL(v->x); bufpos += sizeof(float);
-			*((float *) bufpos) = io_floatNL(v->y); bufpos += sizeof(float);
+			IO_SETFLOATNL(buf, offset, v->x); offset += sizeof(io32t);
+			IO_SETFLOATNL(buf, offset, v->y); offset += sizeof(io32t);
 			lua_pop(L, 1);
 
 			/* velocity */
@@ -869,37 +878,37 @@ int w_persistWorld(lua_State *L)
 			body = reinterpret_cast<b2Body *>(lua_touserdata(L, -1));
 			lua_pop(L, 1);
 			vel = body->GetLinearVelocity();
-			*((float *) bufpos) = io_floatNL(vel.x); bufpos += sizeof(float);
-			*((float *) bufpos) = io_floatNL(vel.y); bufpos += sizeof(float);
+			IO_SETFLOATNL(buf, offset, vel.x); offset += sizeof(io32t);
+			IO_SETFLOATNL(buf, offset, vel.y); offset += sizeof(io32t);
 
 			/* input */
 			lua_getfield(L, -1, "state");
-			*((short *) bufpos) = io_shortNL(lua_tointeger(L, -1)); bufpos += sizeof(short);
+			IO_SETSHORTNL(buf, offset, lua_tointeger(L, 1)); offset += sizeof(io16t);
 			lua_pop(L, 1);
 
 			/* color */
 			lua_getfield(L, -1, "color");
 			lua_getfield(L, -1, "r");
-			*((float *) bufpos) = io_floatNL(lua_tonumber(L, -1)); bufpos += sizeof(float);
+			IO_SETFLOATNL(buf, offset, lua_tonumber(L, -1)); offset += sizeof(io32t);
 			lua_pop(L, 1);
 			lua_getfield(L, -1, "g");
-			*((float *) bufpos) = io_floatNL(lua_tonumber(L, -1)); bufpos += sizeof(float);
+			IO_SETFLOATNL(buf, offset, lua_tonumber(L, -1)); offset += sizeof(io32t);
 			lua_pop(L, 1);
 			lua_getfield(L, -1, "b");
-			*((float *) bufpos) = io_floatNL(lua_tonumber(L, -1)); bufpos += sizeof(float);
+			IO_SETFLOATNL(buf, offset, lua_tonumber(L, -1)); offset += sizeof(io32t);
 			lua_pop(L, 2);
 
 			/* teleporterID */
 			lua_getfield(L, -1, "m");
 			lua_getfield(L, -1, "target");
-			*((char *) bufpos) = io_charNL(lua_tointeger(L, -1)); bufpos += sizeof(char);
+			IO_SETCHARNL(buf, offset, lua_tointeger(L, -1)); offset += sizeof(io8t);
 			lua_pop(L, 2);
 		}
 		else
 		{
 			lua_pop(L, 1);
 
-			nums[order] = io_shortNL(--numTanks);
+			IO_SETSHORTNL(nums, (order - preArgs - 1) * sizeof(io16t), --numTanks);
 		}
 
 		lua_pop(L, 1);
@@ -913,33 +922,33 @@ int w_persistWorld(lua_State *L)
 	{
 		lua_getfield(L, -1, "collided");
 		if(!lua_toboolean(L, -1) &&
-				bufpos + 3 * sizeof(char) + 6 * sizeof(float) < buf + sizeof(buf))
+				offset + 3 * sizeof(io8t) + 6 * sizeof(io32t) < WORLDBUFSIZE)
 		{
 			lua_pop(L, 1);
 
 			/* set index */
-			*((char *) bufpos) = io_charNL((unsigned int) lua_tointeger(L, -2)); bufpos += sizeof(char);
+			IO_SETCHARNL(buf, offset, lua_tointeger(L, -2)); offset += sizeof(io8t);
 
 			/* set powerupType */
 			lua_getfield(L, -1, "powerupType");
-			*((char *) bufpos) = io_charNL(lua_tointeger(L, -1)); bufpos += sizeof(char);
+			IO_SETCHARNL(buf, offset, lua_tointeger(L, -1)); offset += sizeof(io8t);
 			lua_pop(L, 1);
 
 			/* set spawner */
 			lua_getfield(L, -1, "spawner");
-			*((char *) bufpos) = io_charNL(lua_tointeger(L, -1)); bufpos += sizeof(char);
+			IO_SETCHARNL(buf, offset, lua_tointeger(L, -1)); offset += sizeof(io8t);
 			lua_pop(L, 1);
 
 			/* set rotation */
 			lua_getfield(L, -1, "r");
-			*((float *) bufpos) = io_floatNL(lua_tonumber(L, -1)); bufpos += sizeof(float);
+			IO_SETFLOATNL(buf, offset, lua_tonumber(L, -1)); offset += sizeof(io32t);
 			lua_pop(L, 1);
 
 			/* set x and y */
 			lua_getfield(L, -1, "p");
 			v = CHECKVEC(L, -1);
-			*((float *) bufpos) = io_floatNL(v->x); bufpos += sizeof(float);
-			*((float *) bufpos) = io_floatNL(v->y); bufpos += sizeof(float);
+			IO_SETFLOATNL(buf, offset, v->x); offset += sizeof(io32t);
+			IO_SETFLOATNL(buf, offset, v->y); offset += sizeof(io32t);
 			lua_pop(L, 1);
 
 			/* velocity */
@@ -948,17 +957,17 @@ int w_persistWorld(lua_State *L)
 			body = reinterpret_cast<b2Body *>(lua_touserdata(L, -1));
 			lua_pop(L, 2);
 			vel = body->GetLinearVelocity();
-			*((float *) bufpos) = io_floatNL(vel.x); bufpos += sizeof(float);
-			*((float *) bufpos) = io_floatNL(vel.y); bufpos += sizeof(float);
+			IO_SETFLOATNL(buf, offset, vel.x); offset += sizeof(io32t);
+			IO_SETFLOATNL(buf, offset, vel.y); offset += sizeof(io32t);
 
 			/* angular velocity */
-			*((float *) bufpos) = io_floatNL(body->GetAngularVelocity()); bufpos += sizeof(float);
+			IO_SETFLOATNL(buf, offset, body->GetAngularVelocity()); offset += sizeof(io32t);
 		}
 		else
 		{
 			lua_pop(L, 1);
 
-			nums[order] = io_shortNL(--numPowerups);
+			IO_SETSHORTNL(nums, (order - preArgs - 1) * sizeof(io16t), --numPowerups);
 		}
 
 		lua_pop(L, 1);
@@ -970,7 +979,7 @@ int w_persistWorld(lua_State *L)
 	lua_pushnil(L);
 	while(lua_next(L, order))
 	{
-		if(bufpos + 6 * sizeof(float) + 2 * sizeof(char) + 3 * sizeof(float) < buf + sizeof(buf))
+		if(offset + 6 * sizeof(io32t) + 2 * sizeof(io8t) + 3 * sizeof(io32t) < WORLDBUFSIZE)
 		{
 			/* set x and y */
 			/* (get body) */
@@ -979,65 +988,51 @@ int w_persistWorld(lua_State *L)
 			body = reinterpret_cast<b2Body *>(lua_touserdata(L, -1));
 			if(!body)
 			{
-				/*
-				*((char *) bufpos) = io_charNL(0x00); bufpos += sizeof(char);
-				*((char *) bufpos) = io_charNL(0x00); bufpos += sizeof(char);
-				*((float *) bufpos) = io_floatNL(0x00); bufpos += sizeof(float);
-				*/
-
-				bufpos += 6 * sizeof(float) + 2 * sizeof(char) + 3 * sizeof(float);
+				offset += 6 * sizeof(io32t) + 2 * sizeof(io8t) + 3 * sizeof(io32t);
 
 				lua_pop(L, 3);
 
 				continue;
 			}
 			lua_pop(L, 1);  /* keep m on the stack */
-			*((float *) bufpos) = io_floatNL(body->GetPosition().x); bufpos += sizeof(float);
-			*((float *) bufpos) = io_floatNL(body->GetPosition().y); bufpos += sizeof(float);
+			IO_SETFLOATNL(buf, offset, body->GetPosition().x); offset += sizeof(io32t);
+			IO_SETFLOATNL(buf, offset, body->GetPosition().y); offset += sizeof(io32t);
 
 			/* set angle */
-			*((float *) bufpos) = io_floatNL(body->GetAngle()); bufpos += sizeof(float);
+			IO_SETFLOATNL(buf, offset, body->GetAngle()); offset += sizeof(io32t);
 
 			/* velocity */
 			vel = body->GetLinearVelocity();
-			*((float *) bufpos) = io_floatNL(vel.x); bufpos += sizeof(float);
-			*((float *) bufpos) = io_floatNL(vel.y); bufpos += sizeof(float);
+			IO_SETFLOATNL(buf, offset, vel.x); offset += sizeof(io32t);
+			IO_SETFLOATNL(buf, offset, vel.y); offset += sizeof(io32t);
 
 			/* angular velocity */
-			*((float *) bufpos) = io_floatNL(body->GetAngularVelocity()); bufpos += sizeof(float);
+			IO_SETFLOATNL(buf, offset, body->GetAngularVelocity()); offset += sizeof(io32t);
 
 			/* path information */
 			lua_getfield(L, -1, "pid");
 			if(lua_toboolean(L, -1))
 			{
-				*((char *) bufpos) = io_charNL(lua_tointeger(L, -1)); bufpos += sizeof(char);
+				IO_SETCHARNL(buf, offset, lua_tointeger(L, -1)); offset += sizeof(io8t);
 				lua_pop(L, 1);
 
 				lua_getfield(L, -1, "ppid");
-				*((char *) bufpos) = io_charNL(lua_tointeger(L, -1)); bufpos += sizeof(char);
+				IO_SETCHARNL(buf, offset, lua_tointeger(L, -1)); offset += sizeof(io8t);
 				lua_pop(L, 1);
 
 				lua_getfield(L, -1, "startpos");
 				v = CHECKVEC(L, -1);
-				*((float *) bufpos) = io_floatNL(v->x); bufpos += sizeof(float);
-				*((float *) bufpos) = io_floatNL(v->y); bufpos += sizeof(float);
+				IO_SETCHARNL(buf, offset, v->x); offset += sizeof(io8t);
+				IO_SETCHARNL(buf, offset, v->y); offset += sizeof(io8t);
 				lua_pop(L, 1);
 
 				lua_getfield(L, -1, "ppos");
-				*((float *) bufpos) = io_floatNL(lua_tonumber(L, -1)); bufpos += sizeof(float);
+				IO_SETFLOATNL(buf, offset, lua_tonumber(L, -1)); offset += sizeof(io32t);
 				lua_pop(L, 1);
 			}
 			else
 			{
-				/*
-				*((char *) bufpos) = io_charNL(0x00); bufpos += sizeof(char);
-				*((char *) bufpos) = io_charNL(0x00); bufpos += sizeof(char);
-				*((float *) bufpos) = io_floatNL(0x00); bufpos += sizeof(float);
-				*((float *) bufpos) = io_floatNL(0x00); bufpos += sizeof(float);
-				*((float *) bufpos) = io_floatNL(0x00); bufpos += sizeof(float);
-				*/
-
-				bufpos += 2 * sizeof(char) + 3 * sizeof(float);
+				offset += 2 * sizeof(io8t) + 3 * sizeof(io32t);
 
 				lua_pop(L, 1);
 			}
@@ -1047,7 +1042,7 @@ int w_persistWorld(lua_State *L)
 		}
 		else
 		{
-			nums[order] = io_shortNL(--numWalls);
+			IO_SETSHORTNL(nums, (order - preArgs - 1) * sizeof(io16t), --numWalls);
 		}
 
 		lua_pop(L, 1);
@@ -1059,28 +1054,28 @@ int w_persistWorld(lua_State *L)
 	lua_pushnil(L);
 	while(lua_next(L, order))
 	{
-		if(bufpos + 1 * sizeof(char) < buf + sizeof(buf))
+		if(offset + 1 * sizeof(io8t) < WORLDBUFSIZE)
 		{
 			/* set team */
 			lua_getfield(L, -1, "m");
 			lua_getfield(L, -1, "team");
 			if(lua_isnoneornil(L, -1))
 			{
-				*((char *) bufpos) = io_charNL(0x00); bufpos += sizeof(char);
+				IO_SETCHARNL(buf, offset, 0x00); offset += sizeof(io8t);
 			}
 			else if(strcmp(lua_tostring(L, -1), "red"))
 			{
-				*((char *) bufpos) = io_charNL(0x01); bufpos += sizeof(char);
+				IO_SETCHARNL(buf, offset, 0x01); offset += sizeof(io8t);
 			}
 			else
 			{
-				*((char *) bufpos) = io_charNL(0x02); bufpos += sizeof(char);
+				IO_SETCHARNL(buf, offset, 0x02); offset += sizeof(io8t);
 			}
 			lua_pop(L, 2);
 		}
 		else
 		{
-			nums[order] = io_shortNL(--numControlPoints);
+			IO_SETSHORTNL(nums, (order - preArgs - 1) * sizeof(io16t), --numControlPoints);
 		}
 
 		lua_pop(L, 1);
@@ -1092,7 +1087,7 @@ int w_persistWorld(lua_State *L)
 	++order;
 	while(lua_next(L, order))
 	{
-		if(bufpos + 2 * sizeof(char) + 2 * sizeof(float) < buf + sizeof(buf))
+		if(offset + 2 * sizeof(io8t) + 2 * sizeof(io32t) < WORLDBUFSIZE)
 		{
 			unsigned char state = 0;
 			unsigned char stolenIndex;
@@ -1119,23 +1114,23 @@ int w_persistWorld(lua_State *L)
 				droppedPos[1] = v->y;
 			}
 			lua_pop(L, 2);
-			*((char *) bufpos) = io_charNL(state); bufpos += sizeof(char);
-			*((char *) bufpos) = io_charNL(stolenIndex); bufpos += sizeof(char);
-			*((float *) bufpos) = io_floatNL(droppedPos[0]); bufpos += sizeof(float);
-			*((float *) bufpos) = io_floatNL(droppedPos[1]); bufpos += sizeof(float);
+			IO_SETCHARNL(buf, offset, state); offset += sizeof(io8t);
+			IO_SETCHARNL(buf, offset, stolenIndex); offset += sizeof(io8t);
+			IO_SETFLOATNL(buf, offset, droppedPos[0]); offset += sizeof(io32t);
+			IO_SETFLOATNL(buf, offset, droppedPos[1]); offset += sizeof(io32t);
 		}
 		else
 		{
-			nums[order] = io_shortNL(--numFlags);
+			IO_SETSHORTNL(nums, (order - preArgs - 1) * sizeof(io16t), --numFlags);
 		}
 
 		lua_pop(L, 1);
 	}
 
 	/* Insert size at beginning of packet */
-	*((int *) buf) = io_intNL(bufpos - buf);
+	IO_SETINTNL(buf, 0, offset);
 
-	lua_pushlstring(L, buf, bufpos - buf);
+	lua_pushlstring(L, buf, offset);
 
 	return 1;
 }
@@ -1150,32 +1145,32 @@ int w_unpersistWorld(lua_State *L)
 
 	static const unsigned int preArgs = 4;
 
-	const char * const dataS = lua_tostring(L, 1);
-	const char *data = dataS;
+	const char * const data = lua_tostring(L, 1);
+	register size_t offset = 0;
 
-	const unsigned int size = io_intNL(*((int *) data)); data += sizeof(int);
+	const unsigned int size = IO_GETINTNL(data, offset); offset += sizeof(io32t);
 
-	/* Set scores before anything else */
+	/* Set scores */
 	lua_pushvalue(L, 3);
-	lua_pushinteger(L, io_charNL(*((char *) data))); data += sizeof(char);
+	lua_pushinteger(L, IO_GETCHARNL(data, offset)); offset += sizeof(io8t);
 	lua_call(L, 1, 0);
 	lua_pushvalue(L, 4);
-	lua_pushinteger(L, io_charNL(*((char *) data))); data += sizeof(char);
+	lua_pushinteger(L, IO_GETCHARNL(data, offset)); offset += sizeof(io8t);
 	lua_call(L, 1, 0);
 
 	unsigned int projectileBodyLen = lua_objlen(L, 13 + preArgs);
 
-	unsigned int numProjectiles    = io_shortNL(*((short *) data)); data += sizeof(short);
-	unsigned int numTanks          = io_shortNL(*((short *) data)); data += sizeof(short);
-	unsigned int numPowerups       = io_shortNL(*((short *) data)); data += sizeof(short);
+	unsigned int numProjectiles    = IO_GETSHORTNL(data, offset); offset += sizeof(io16t);
+	unsigned int numTanks          = IO_GETSHORTNL(data, offset); offset += sizeof(io16t);
+	unsigned int numPowerups       = IO_GETSHORTNL(data, offset); offset += sizeof(io16t);
 	/* These can remain constant, but the packet can be truncated */
 	/*unsigned int numWalls          = lua_objlen(L, 5);
 	unsigned int numControlPoints  = lua_objlen(L, 6);
 	unsigned int numFlags          = lua_objlen(L, 7);*/
-	/* so read from the packet */
-	unsigned int numWalls          = io_shortNL(*((short *) data)); data += sizeof(short);
-	unsigned int numControlPoints  = io_shortNL(*((short *) data)); data += sizeof(short);
-	unsigned int numFlags          = io_shortNL(*((short *) data)); data += sizeof(short);
+	/* so read them from the packet */
+	unsigned int numWalls          = IO_GETSHORTNL(data, offset); offset += sizeof(io16t);
+	unsigned int numControlPoints  = IO_GETSHORTNL(data, offset); offset += sizeof(io16t);
+	unsigned int numFlags          = IO_GETSHORTNL(data, offset); offset += sizeof(io16t);
 
 	/* remove projectiles before unpersisting */
 	/*lua_pushvalue(L, 1);*/
@@ -1194,15 +1189,15 @@ int w_unpersistWorld(lua_State *L)
 		lua_settable(L, 1 + preArgs);
 
 		/* weapon */
-		lua_pushinteger(L, io_charNL(*((char *) data))); data += sizeof(char);
+		lua_pushinteger(L, IO_GETCHARNL(data, offset)); offset += sizeof(io8t);
 		lua_setfield(L, -2, "weapon");
 
 		/* owner */
-		lua_pushinteger(L, io_charNL(*((char *) data))); data += sizeof(char);
+		lua_pushinteger(L, IO_GETCHARNL(data, offset)); offset += sizeof(io8t);
 		lua_setfield(L, -2, "owner");
 
 		/* rotation */
-		lua_pushnumber(L, io_floatNL(*((float *) data))); data += sizeof(float);
+		lua_pushnumber(L, IO_GETFLOATNL(data, offset)); offset += sizeof(io32t);
 		lua_setfield(L, -2, "r");
 
 		/* push addBody function */
@@ -1214,8 +1209,8 @@ int w_unpersistWorld(lua_State *L)
 		luaL_getmetatable(L, MATH_METATABLE);
 		lua_setmetatable(L, -2);
 
-		v->x = io_floatNL(*((float *) data)); data += sizeof(float);
-		v->y = io_floatNL(*((float *) data)); data += sizeof(float);
+		v->x = IO_GETFLOATNL(data, offset); offset += sizeof(io32t);
+		v->y = IO_GETFLOATNL(data, offset); offset += sizeof(io32t);
 		MATH_POLAR(*v);
 
 		lua_pushvalue(L, -1);  /* keep position on stack for body */
@@ -1232,12 +1227,12 @@ int w_unpersistWorld(lua_State *L)
 
 		/* velocity */
 		b2Vec2 vel;
-		vel.x = io_floatNL(*((float *) data)); data += sizeof(float);
-		vel.y = io_floatNL(*((float *) data)); data += sizeof(float);
+		vel.x = IO_GETFLOATNL(data, offset); offset += sizeof(io32t);
+		vel.y = IO_GETFLOATNL(data, offset); offset += sizeof(io32t);
 		body->SetLinearVelocity(vel);
 
 		/* angular velocity */
-		body->SetAngularVelocity(io_floatNL(*((float *) data))); data += sizeof(float);
+		body->SetAngularVelocity(IO_GETFLOATNL(data, offset)); offset += sizeof(io32t);
 
 		lua_getfield(L, -2, "m");
 		lua_pushvalue(L, -2);
@@ -1250,7 +1245,7 @@ int w_unpersistWorld(lua_State *L)
 	/* Tanks */
 	for(int i = 0; i < numTanks; i++)
 	{
-		unsigned int index = io_charNL(*((char *) data)); data += sizeof(char);
+		unsigned int index = IO_GETCHARNL(data, offset); data += sizeof(io8t);
 
 		lua_pushinteger(L, index);
 		lua_gettable(L, 2 + preArgs);
@@ -1282,8 +1277,8 @@ int w_unpersistWorld(lua_State *L)
 				lua_pushvalue(L, 14 + preArgs);
 				lua_pushvalue(L, -2);
 
-				/* already ahead one sizeof(char) */
-				data += 24 * sizeof(char) + 5 * sizeof(float) + 1 * sizeof(short) + 3 * sizeof(float) + 1 * sizeof(char);
+				/* already ahead one io8t */
+				offset += 24 * sizeof(io8t) + 5 * sizeof(io32t) + 1 * sizeof(io16t) + 3 * sizeof(io32t) + 1 * sizeof(io16t);
 
 				continue;
 			}
@@ -1300,23 +1295,27 @@ int w_unpersistWorld(lua_State *L)
 
 		/* name */
 		static char name[21];
-		strncpy(name, data, sizeof(name)); data += sizeof(name);
+		/*strncpy(name, data, sizeof(name)); data += sizeof(name);*/
+		for(int i = 0; i < sizeof(name); i++)
+		{
+			name[i] = IO_GETCHARNL(data, offset); offset += sizeof(io8t);
+		}
 		lua_pushstring(L, name);
 		lua_setfield(L, -2, "name");
 
 		/* weapon */
-		lua_pushinteger(L, io_charNL(*((char *) data))); data += sizeof(char);
+		lua_pushinteger(L, IO_GETCHARNL(data, offset)); offset += sizeof(io8t);
 		lua_setfield(L, -2, "weapon");
 
 		/* ammo */
-		lua_pushinteger(L, io_charNL(*((char *) data))); data += sizeof(char);
+		lua_pushinteger(L, IO_GETCHARNL(data, offset)); offset += sizeof(io8t);
 		lua_setfield(L, -2, "ammo");
 
 		/* clips */
-		lua_pushinteger(L, io_charNL(*((char *) data))); data += sizeof(char);
+		lua_pushinteger(L, IO_GETCHARNL(data, offset)); offset += sizeof(io8t);
 		lua_setfield(L, -2, "clips");
 
-		double rotation = io_floatNL(*((float *) data)); data += sizeof(float);
+		double rotation = IO_GETFLOATNL(data, offset); offset += sizeof(io32t);
 		/* rotation */
 		lua_pushnumber(L, rotation);
 		lua_setfield(L, -2, "r");
@@ -1324,8 +1323,8 @@ int w_unpersistWorld(lua_State *L)
 		/* position */
 		lua_getfield(L, -1, "p");
 		v = CHECKVEC(L, -1);
-		v->x = io_floatNL(*((float *) data)); data += sizeof(float);
-		v->y = io_floatNL(*((float *) data)); data += sizeof(float);
+		v->x = IO_GETFLOATNL(data, offset); offset += sizeof(io32t);
+		v->y = IO_GETFLOATNL(data, offset); offset += sizeof(io32t);
 		MATH_POLAR(*v);
 		/* set body */
 		body->SetXForm(b2Vec2(v->x, v->y), rotation);
@@ -1333,27 +1332,27 @@ int w_unpersistWorld(lua_State *L)
 
 		/* velocity */
 		b2Vec2 vel;
-		vel.x = io_floatNL(*((float *) data)); data += sizeof(float);
-		vel.y = io_floatNL(*((float *) data)); data += sizeof(float);
+		vel.x = IO_GETFLOATNL(data, offset); offset += sizeof(io32t);
+		vel.y = IO_GETFLOATNL(data, offset); offset += sizeof(io32t);
 		body->SetLinearVelocity(vel);
 
 		/* input */
-		lua_pushinteger(L, io_shortNL(*((short *) data))); data += sizeof(short);
+		lua_pushinteger(L, IO_GETSHORTNL(data, offset)); offset += sizeof(io16t);
 		lua_setfield(L, -2, "state");
 
 		/* color */
 		lua_getfield(L, -1, "color");
-		lua_pushnumber(L, io_floatNL(*((float *) data))); data += sizeof(float);
+		lua_pushnumber(L, IO_GETFLOATNL(data, offset)); offset += sizeof(io32t);
 		lua_setfield(L, -2, "r");
-		lua_pushnumber(L, io_floatNL(*((float *) data))); data += sizeof(float);
+		lua_pushnumber(L, IO_GETFLOATNL(data, offset)); offset += sizeof(io32t);
 		lua_setfield(L, -2, "g");
-		lua_pushnumber(L, io_floatNL(*((float *) data))); data += sizeof(float);
+		lua_pushnumber(L, IO_GETFLOATNL(data, offset)); offset += sizeof(io32t);
 		lua_setfield(L, -2, "b");
 		lua_pop(L, 1);
 
 		/* teleporterID */
 		lua_getfield(L, -1, "m");
-		lua_pushinteger(L, io_charNL(*((char *) data))); data += sizeof(char);
+		lua_pushinteger(L, IO_GETCHARNL(data, offset)); offset += sizeof(io8t);
 		lua_setfield(L, -2, "target");
 
 		/* pop both 'm' and tank */
@@ -1363,7 +1362,7 @@ int w_unpersistWorld(lua_State *L)
 	/* Powerups */
 	for(int i = 0; i < numPowerups; i++)
 	{
-		unsigned int index = io_charNL(*((char *) data)); data += sizeof(char);
+		unsigned int index = IO_GETCHARNL(data, offset); data += sizeof(io8t);
 
 		lua_pushinteger(L, index);
 		lua_gettable(L, 3 + preArgs);
@@ -1393,14 +1392,14 @@ int w_unpersistWorld(lua_State *L)
 		lua_pop(L, 2);
 
 		/* type */
-		lua_pushinteger(L, io_charNL(*((char *) data))); data += sizeof(char);
+		lua_pushinteger(L, IO_GETCHARNL(data, offset)); offset += sizeof(io8t);
 		lua_setfield(L, -2, "powerupType");
 
 		/* spawner */
-		lua_pushinteger(L, io_charNL(*((char *) data))); data += sizeof(char);
+		lua_pushinteger(L, IO_GETCHARNL(data, offset)); offset += sizeof(io8t);
 		lua_setfield(L, -2, "spawner");
 
-		double rotation = io_floatNL(*((float *) data)); data += sizeof(float);
+		double rotation = IO_GETFLOATNL(data, offset); offset += sizeof(io32t);
 		/* rotation */
 		lua_pushnumber(L, rotation);
 		lua_setfield(L, -2, "r");
@@ -1420,8 +1419,8 @@ int w_unpersistWorld(lua_State *L)
 			lua_setfield(L, -3, "p");
 		}
 		v = CHECKVEC(L, -1);
-		v->x = io_floatNL(*((float *) data)); data += sizeof(float);
-		v->y = io_floatNL(*((float *) data)); data += sizeof(float);
+		v->x = IO_GETFLOATNL(data, offset); offset += sizeof(io32t);
+		v->y = IO_GETFLOATNL(data, offset); offset += sizeof(io32t);
 		MATH_POLAR(*v);
 		/* set body */
 		body->SetXForm(b2Vec2(v->x, v->y), rotation);
@@ -1429,12 +1428,12 @@ int w_unpersistWorld(lua_State *L)
 
 		/* velocity */
 		b2Vec2 vel;
-		vel.x = io_floatNL(*((float *) data)); data += sizeof(float);
-		vel.y = io_floatNL(*((float *) data)); data += sizeof(float);
+		vel.x = IO_GETFLOATNL(data, offset); offset += sizeof(io32t);
+		vel.y = IO_GETFLOATNL(data, offset); offset += sizeof(io32t);
 		body->SetLinearVelocity(vel);
 
 		/* angular velocity */
-		body->SetAngularVelocity(io_floatNL(*((float *) data))); data += sizeof(float);
+		body->SetAngularVelocity(IO_GETFLOATNL(data, offset)); offset += sizeof(io32t);
 
 		lua_pop(L, 1);
 	}
@@ -1447,7 +1446,7 @@ int w_unpersistWorld(lua_State *L)
 		if(lua_isnoneornil(L, -1))
 		{
 			/* This should never happen, but play safe anyway */
-			data += 6 * sizeof(float) + 2 * sizeof(char) + 3 * sizeof(float);
+			data += 6 * sizeof(io32t) + 2 * sizeof(io8t) + 3 * sizeof(io32t);
 
 			lua_pop(L, 1);
 		}
@@ -1467,18 +1466,18 @@ int w_unpersistWorld(lua_State *L)
 
 				/* position */
 				b2Vec2 pos;
-				pos.x = io_floatNL(*((float *) data)); data += sizeof(float);
-				pos.y = io_floatNL(*((float *) data)); data += sizeof(float);
+				pos.x = IO_GETFLOATNL(data, offset); offset += sizeof(io32t);
+				pos.y = IO_GETFLOATNL(data, offset); offset += sizeof(io32t);
 
 				/* angle */
-				double angle = io_floatNL(*((float *) data)); data += sizeof(float);
+				double angle = IO_GETFLOATNL(data, offset); offset += sizeof(io32t);
 
 				body->SetXForm(pos, angle);
 
 				/* velocity */
 				b2Vec2 vel;
-				vel.x = io_floatNL(*((float *) data)); data += sizeof(float);
-				vel.y = io_floatNL(*((float *) data)); data += sizeof(float);
+				vel.x = IO_GETFLOATNL(data, offset); offset += sizeof(io32t);
+				vel.y = IO_GETFLOATNL(data, offset); offset += sizeof(io32t);
 				body->SetLinearVelocity(vel);
 
 				/* angular velocity */
@@ -1486,12 +1485,12 @@ int w_unpersistWorld(lua_State *L)
 
 				/* path ID */
 				lua_getfield(L, -1, "m");
-				lua_pushinteger(L, io_charNL(*((char *) data))); data += sizeof(char);
+				lua_pushinteger(L, IO_GETCHARNL(data, offset)); offset += sizeof(io8t);
 				lua_setfield(L, -2, "pid");
 				/* keep 'm' on stack */
 
 				/* previous path ID */
-				lua_pushinteger(L, io_charNL(*((char *) data))); data += sizeof(char);
+				lua_pushinteger(L, IO_GETCHARNL(data, offset)); offset += sizeof(io8t);
 				lua_setfield(L, -2, "ppid");
 
 				/* set startpos */
@@ -1512,13 +1511,13 @@ int w_unpersistWorld(lua_State *L)
 				{
 					v = CHECKVEC(L, -1);
 				}
-				v->x = io_floatNL(*((float *) data)); data += sizeof(float);
-				v->y = io_floatNL(*((float *) data)); data += sizeof(float);
+				v->x = IO_GETFLOATNL(data, offset); offset += sizeof(io32t);
+				v->y = IO_GETFLOATNL(data, offset); offset += sizeof(io32t);
 				MATH_POLAR(*v);
 				lua_pop(L, 1);
 
 				/* path position */
-				lua_pushnumber(L, io_floatNL(*((float *) data))); data += sizeof(float);
+				lua_pushnumber(L, IO_GETFLOATNL(data, offset)); offset += sizeof(io32t);
 				lua_setfield(L, -2, "ppos");
 
 				/* pop 'm' and wall */
@@ -1527,7 +1526,7 @@ int w_unpersistWorld(lua_State *L)
 			else
 			{
 				/* Save processing */
-				data += 6 * sizeof(float) + 2 * sizeof(char) + 3 * sizeof(float);
+				data += 6 * sizeof(io32t) + 2 * sizeof(io8t) + 3 * sizeof(io32t);
 
 				lua_pop(L, 3);
 			}
@@ -1542,13 +1541,13 @@ int w_unpersistWorld(lua_State *L)
 		if(lua_isnoneornil(L, -1))
 		{
 			/* This should never happen, but play safe anyway */
-			data += 1 * sizeof(char);
+			data += 1 * sizeof(io8t);
 
 			lua_pop(L, 1);
 		}
 		else
 		{
-			unsigned char team = io_charNL(*((char *) data)); data += sizeof(char);
+			unsigned char team = IO_GETCHARNL(data, offset); offset += sizeof(io8t);
 
 			lua_getfield(L, -1, "m");
 
@@ -1581,16 +1580,16 @@ int w_unpersistWorld(lua_State *L)
 		if(lua_isnoneornil(L, -1))
 		{
 			/* This should never happen, but play safe anyway */
-			data += 2 * sizeof(char) + 2 * sizeof(float);
+			data += 2 * sizeof(io8t) + 2 * sizeof(io32t);
 
 			lua_pop(L, 1);
 		}
 		else
 		{
-			unsigned char state = io_charNL(*((char *) data)); data += sizeof(char);
-			unsigned char stolenIndex = io_charNL(*((char *) data)); data += sizeof(char);
-			float droppedPosx = io_floatNL(*((float *) data)); data += sizeof(float);
-			float droppedPosy = io_floatNL(*((float *) data)); data += sizeof(float);
+			unsigned char state = IO_GETCHARNL(data, offset); offset += sizeof(io8t);
+			unsigned char stolenIndex = IO_GETCHARNL(data, offset); offset += sizeof(io8t);
+			float droppedPosx = IO_GETFLOATNL(data, offset); offset += sizeof(io32t);
+			float droppedPosy = IO_GETFLOATNL(data, offset); offset += sizeof(io32t);
 
 			lua_getfield(L, -1, "m");
 
@@ -1650,7 +1649,7 @@ int w_unpersistWorld(lua_State *L)
 	}
 
 /*#ifdef TDEBUG*/
-	if(data - dataS != size)
+	if(offset != size)
 	{
 		fprintf(stderr, "w_unpersistWorld: sizes differ! (server wrote %d bytes; client read %d bytes)\n", size, data - dataS);
 		abort();

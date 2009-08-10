@@ -104,8 +104,11 @@ int in_getKeys(lua_State *L);
 int in_keyPressed(lua_State *L);
 
 /* m_io.c */
+#define ALIGNMENT 4
+
 void io_init(lua_State *L);
 int io_getHomeDirectory(lua_State *L);
+
 int io_getInt(lua_State *L);
 int io_getShort(lua_State *L);
 int io_getChar(lua_State *L);
@@ -113,6 +116,7 @@ int io_getFloat(lua_State *L);
 int io_getDouble(lua_State *L);
 int io_getStr(lua_State *L);
 int io_getStrL(lua_State *L);
+
 int io_toInt(lua_State *L);
 int io_toShort(lua_State *L);
 int io_toChar(lua_State *L);
@@ -121,14 +125,100 @@ int io_toDouble(lua_State *L);
 int io_fromInt(lua_State *L);
 int io_fromShort(lua_State *L);
 int io_fromChar(lua_State *L);
+
+#define io8_t io8t
+typedef uint8_t io8t;
+
+#define io64_t io64t
+typedef uint64_t io64tv;
+typedef union io64u io64t;
+union io64u
+{
+	io8t bytes[8];
+	io64tv integer;
+	double value;
+
+#ifdef __cplusplus
+	io64u(const io64tv& d)
+	{
+		this->integer = d;
+	}
+#endif
+};
+
+#define io32_t io32t
+typedef uint32_t io32tv;
+typedef union io32u io32t;
+union io32u
+{
+	io8t bytes[4];
+	io32tv integer;
+	float value;
+
+#ifdef __cplusplus
+	io32u(const io32tv& d)
+	{
+		this->integer = d;
+	}
+#endif
+};
+
+#define io16_t io16t
+typedef uint16_t io16tv;
+typedef union io16u io16t;
+union io16u
+{
+	io8t bytes[2];
+	io16tv integer;
+
+#ifdef __cplusplus
+	io16u(const io16tv& d)
+	{
+		this->integer = d;
+	}
+#endif
+};
+
 int io_fromFloat(lua_State *L);
 int io_fromDouble(lua_State *L);
 
-int io_intNL(int integer);
-short io_shortNL(short integer);
-char io_charNL(char integer);
-float io_floatNL(float number);
-double io_doubleNL(double number);
+int io_intNL(io32t integer);
+short io_shortNL(io16t integer);
+char io_charNL(io8t integer);
+float io_floatNL(io32t number);
+double io_doubleNL(io64t number);
+
+int io_getIntNL(const void *base, const size_t offset);
+short io_getShortNL(const void *base, const size_t offset);
+char io_getCharNL(const void *base, const size_t offset);
+float io_getFloatNL(const void *base, const size_t offset);
+double io_getDoubleNL(const void *base, const size_t offset);
+void io_setIntNL(const void *base, const size_t offset, io32t integer);
+void io_setShortNL(const void *base, const size_t offset, io16t integer);
+void io_setCharNL(const void *base, const size_t offset, io8t integer);
+void io_setFloatNL(const void *base, const size_t offset, io32t number);
+void io_setDoubleNL(const void *base, const size_t offset, io64t number);
+
+/* macros to avoid casts */
+#ifdef __cplusplus
+#define IO_SETINTNL(a, b, c)   io_setIntNL((a), (b), static_cast<io32t> (static_cast<io32tv> (c)))
+#define IO_SETSHORTNL(a, b, c)  io_setShortNL((a), (b), static_cast<io16t> (static_cast<io16tv> (c)))
+#define IO_SETCHARNL(a, b, c)   io_setCharNL((a), (b), (io8t) (c))
+#define IO_SETFLOATNL(a, b, c)  io_setFloatNL((a), (b), static_cast<io32t> (static_cast<io32tv> (c)))
+#define IO_SETDOUBLENL(a, b, c) io_setDoubleNL((a), (b), static_cast<io64t> (static_cast<io64tv> (c)))
+#else
+#define IO_SETINTNL(a, b, c)   io_setIntNL((a), (b), (io32t) ((io32tv) (c)))
+#define IO_SETSHORTNL(a, b, c)  io_setShortNL((a), (b), (io16t) ((io16tv) (c)))
+#define IO_SETCHARNL(a, b, c)   io_setCharNL((a), (b), (io8t) (c))
+#define IO_SETFLOATNL(a, b, c)  io_setFloatNL((a), (b), (io32t) ((io32tv) (c)))
+#define IO_SETDOUBLENL(a, b, c) io_setDoubleNL((a), (b), (io64t) ((io64tv) (c)))
+#endif
+/* keep things consistent */
+#define IO_GETINTNL io_getIntNL
+#define IO_GETSHORTNL io_getShortNL
+#define IO_GETCHARNL io_getCharNL
+#define IO_GETFLOATNL io_getFloatNL
+#define IO_GETDOUBLENL io_getDoubleNL
 
 /* m_renderer.c */
 void r_init(lua_State *L);

@@ -17,6 +17,12 @@ This file is part of Tankbobs.
 along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/*
+ * io.c
+ *
+ * integers are stored and transfered in little-endian order
+ */
+
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -32,14 +38,19 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 #include "common.h"
 #include "m_tankbobs.h"
 
-#define EOFERROR "EOF !#\\"
-
-#define SWAP(a, b) \
+#define XORSWAP(a, b) \
 do \
 { \
 	(a) ^= (b); \
 	(b) ^= (a); \
 	(a) ^= (b); \
+} while(0)
+#define CHARSWAP(a, b) \
+do \
+{ \
+	io8t tmp = (a); \
+	(a) = (b); \
+	(b) = (a); \
 } while(0)
 
 void io_init(lua_State *l)
@@ -73,9 +84,9 @@ int io_getHomeDirectory(lua_State *L)
 
 int io_getInt(lua_State *L)
 {
-	int result, c;
-	unsigned char *p = (unsigned char *)(&result);
-	FILE *fin = *((FILE **)lua_touserdata(L, -1));
+	int c;
+	io32t integer;
+	FILE *fin = *((FILE **) lua_touserdata(L, -1));
 
 	CHECKINIT(init, L);
 
@@ -89,70 +100,70 @@ int io_getInt(lua_State *L)
 	c = fgetc(fin);
 	if(c == EOF)
 	{
-		lua_pushstring(L, EOFERROR);
+		lua_pushboolean(L, false);
 		return 1;
 	}
-	p[3] = (unsigned char)c;
+	integer.bytes[3] = (unsigned char) c;
 	c = fgetc(fin);
 	if(c == EOF)
 	{
-		lua_pushstring(L, EOFERROR);
+		lua_pushboolean(L, false);
 		return 1;
 	}
-	p[2] = (unsigned char)c;
+	integer.bytes[2] = (unsigned char) c;
 	c = fgetc(fin);
 	if(c == EOF)
 	{
-		lua_pushstring(L, EOFERROR);
+		lua_pushboolean(L, false);
 		return 1;
 	}
-	p[1] = (unsigned char)c;
+	integer.bytes[1] = (unsigned char) c;
 	c = fgetc(fin);
 	if(c == EOF)
 	{
-		lua_pushstring(L, EOFERROR);
+		lua_pushboolean(L, false);
 		return 1;
 	}
-	p[0] = (unsigned char)c;
+	integer.bytes[0] = (unsigned char) c;
 #else
 	c = fgetc(fin);
 	if(c == EOF)
 	{
-		lua_pushstring(L, EOFERROR);
+		lua_pushboolean(L, false);
 		return 1;
 	}
-	p[0] = (unsigned char)c;
+	integer.bytes[0] = (unsigned char) c;
 	c = fgetc(fin);
 	if(c == EOF)
 	{
-		lua_pushstring(L, EOFERROR);
+		lua_pushboolean(L, false);
 		return 1;
 	}
-	p[1] = (unsigned char)c;
+	integer.bytes[1] = (unsigned char) c;
 	c = fgetc(fin);
 	if(c == EOF)
 	{
-		lua_pushstring(L, EOFERROR);
+		lua_pushboolean(L, false);
 		return 1;
 	}
-	p[2] = (unsigned char)c;
+	integer.bytes[2] = (unsigned char) c;
 	c = fgetc(fin);
 	if(c == EOF)
 	{
-		lua_pushstring(L, EOFERROR);
+		lua_pushboolean(L, false);
 		return 1;
 	}
-	p[3] = (unsigned char)c;
+	integer.bytes[3] = (unsigned char) c;
 #endif
-	lua_pushinteger(L, (int)result);
+	lua_pushinteger(L, integer.integer);
+
 	return 1;
 }
 
 int io_getShort(lua_State *L)
 {
 	int c;
-	short result;
-	unsigned char *p = (unsigned char *)(&result);
+	io16t integer;
 	FILE *fin = *((FILE **)lua_touserdata(L, -1));
 
 	CHECKINIT(init, L);
@@ -167,42 +178,42 @@ int io_getShort(lua_State *L)
 	c = fgetc(fin);
 	if(c == EOF)
 	{
-		lua_pushstring(L, EOFERROR);
+		lua_pushboolean(L, false);
 		return 1;
 	}
-	p[1] = (unsigned char)c;
+	integer.bytes[1] = (unsigned char) c;
 	c = fgetc(fin);
 	if(c == EOF)
 	{
-		lua_pushstring(L, EOFERROR);
+		lua_pushboolean(L, false);
 		return 1;
 	}
-	p[0] = (unsigned char)c;
+	integer.bytes[0] = (unsigned char) c;
 #else
 	c = fgetc(fin);
 	if(c == EOF)
 	{
-		lua_pushstring(L, EOFERROR);
+		lua_pushboolean(L, false);
 		return 1;
 	}
-	p[0] = (unsigned char)c;
+	integer.bytes[0] = (unsigned char) c;
 	c = fgetc(fin);
 	if(c == EOF)
 	{
-		lua_pushstring(L, EOFERROR);
+		lua_pushboolean(L, false);
 		return 1;
 	}
-	p[1] = (unsigned char)c;
+	integer.bytes[1] = (unsigned char) c;
 #endif
-	lua_pushinteger(L, (int)result);
+	lua_pushinteger(L, integer.integer);
+
 	return 1;
 }
 
 int io_getChar(lua_State *L)
 {
 	int c;
-	char result;
-	unsigned char *p = (unsigned char *)(&result);
+	io8t integer;
 	FILE *fin = *((FILE **)lua_touserdata(L, -1));
 
 	CHECKINIT(init, L);
@@ -217,22 +228,22 @@ int io_getChar(lua_State *L)
 	c = fgetc(fin);
 	if(c == EOF)
 	{
-		lua_pushstring(L, EOFERROR);
+		lua_pushboolean(L, false);
 
 		return 1;
 	}
-	p[0] = (unsigned char) c;
+	integer = (unsigned char) c;
 #else
 	c = fgetc(fin);
 	if(c == EOF)
 	{
-		lua_pushstring(L, EOFERROR);
+		lua_pushboolean(L, false);
 
 		return 1;
 	}
-	p[0] = (unsigned char) c;
+	integer = (unsigned char) c;
 #endif
-	lua_pushinteger(L, (int) result);
+	lua_pushinteger(L, integer);
 
 	return 1;
 }
@@ -240,8 +251,7 @@ int io_getChar(lua_State *L)
 int io_getFloat(lua_State *L)
 {
 	int c;
-	float result;
-	unsigned char *p = (unsigned char *)(&result);
+	io32t number;
 	FILE *fin = *((FILE **)lua_touserdata(L, -1));
 
 	CHECKINIT(init, L);
@@ -256,62 +266,62 @@ int io_getFloat(lua_State *L)
 	c = fgetc(fin);
 	if(c == EOF)
 	{
-		lua_pushstring(L, EOFERROR);
+		lua_pushboolean(L, false);
 		return 1;
 	}
-	p[3] = (unsigned char) c;
+	number.bytes[3] = (unsigned char) c;
 	c = fgetc(fin);
 	if(c == EOF)
 	{
-		lua_pushstring(L, EOFERROR);
+		lua_pushboolean(L, false);
 		return 1;
 	}
-	p[2] = (unsigned char) c;
+	number.bytes[2] = (unsigned char) c;
 	c = fgetc(fin);
 	if(c == EOF)
 	{
-		lua_pushstring(L, EOFERROR);
+		lua_pushboolean(L, false);
 		return 1;
 	}
-	p[1] = (unsigned char) c;
+	number.bytes[1] = (unsigned char) c;
 	c = fgetc(fin);
 	if(c == EOF)
 	{
-		lua_pushstring(L, EOFERROR);
+		lua_pushboolean(L, false);
 		return 1;
 	}
-	p[0] = (unsigned char) c;
+	number.bytes[0] = (unsigned char) c;
 #else
 	c = fgetc(fin);
 	if(c == EOF)
 	{
-		lua_pushstring(L, EOFERROR);
+		lua_pushboolean(L, false);
 		return 1;
 	}
-	p[0] = (unsigned char) c;
+	number.bytes[0] = (unsigned char) c;
 	c = fgetc(fin);
 	if(c == EOF)
 	{
-		lua_pushstring(L, EOFERROR);
+		lua_pushboolean(L, false);
 		return 1;
 	}
-	p[1] = (unsigned char) c;
+	number.bytes[1] = (unsigned char) c;
 	c = fgetc(fin);
 	if(c == EOF)
 	{
-		lua_pushstring(L, EOFERROR);
+		lua_pushboolean(L, false);
 		return 1;
 	}
-	p[2] = (unsigned char) c;
+	number.bytes[2] = (unsigned char) c;
 	c = fgetc(fin);
 	if(c == EOF)
 	{
-		lua_pushstring(L, EOFERROR);
+		lua_pushboolean(L, false);
 		return 1;
 	}
-	p[3] = (unsigned char) c;
+	number.bytes[3] = (unsigned char) c;
 #endif
-	lua_pushnumber(L, (double) result);
+	lua_pushnumber(L, number.value);
 
 	return 1;
 }
@@ -319,8 +329,7 @@ int io_getFloat(lua_State *L)
 int io_getDouble(lua_State *L)
 {
 	int c;
-	double result;
-	unsigned char *p = (unsigned char *)(&result);
+	io64t number;
 	FILE *fin = *((FILE **)lua_touserdata(L, -1));
 
 	CHECKINIT(init, L);
@@ -335,125 +344,127 @@ int io_getDouble(lua_State *L)
 	c = fgetc(fin);
 	if(c == EOF)
 	{
-		lua_pushstring(L, EOFERROR);
+		lua_pushboolean(L, false);
 		return 1;
 	}
-	p[7] = (unsigned char)c;
+	number.bytes[7] = (unsigned char) c;
 	c = fgetc(fin);
 	if(c == EOF)
 	{
-		lua_pushstring(L, EOFERROR);
+		lua_pushboolean(L, false);
 		return 1;
 	}
-	p[6] = (unsigned char)c;
+	number.bytes[6] = (unsigned char) c;
 	c = fgetc(fin);
 	if(c == EOF)
 	{
-		lua_pushstring(L, EOFERROR);
+		lua_pushboolean(L, false);
 		return 1;
 	}
-	p[5] = (unsigned char)c;
+	number.bytes[5] = (unsigned char) c;
 	c = fgetc(fin);
 	if(c == EOF)
 	{
-		lua_pushstring(L, EOFERROR);
+		lua_pushboolean(L, false);
 		return 1;
 	}
-	p[4] = (unsigned char)c;
+	number.bytes[4] = (unsigned char) c;
 	c = fgetc(fin);
 	if(c == EOF)
 	{
-		lua_pushstring(L, EOFERROR);
+		lua_pushboolean(L, false);
 		return 1;
 	}
-	p[3] = (unsigned char)c;
+	number.bytes[3] = (unsigned char) c;
 	c = fgetc(fin);
 	if(c == EOF)
 	{
-		lua_pushstring(L, EOFERROR);
+		lua_pushboolean(L, false);
 		return 1;
 	}
-	p[2] = (unsigned char)c;
+	number.bytes[2] = (unsigned char) c;
 	c = fgetc(fin);
 	if(c == EOF)
 	{
-		lua_pushstring(L, EOFERROR);
+		lua_pushboolean(L, false);
 		return 1;
 	}
-	p[1] = (unsigned char)c;
+	number.bytes[1] = (unsigned char) c;
 	c = fgetc(fin);
 	if(c == EOF)
 	{
-		lua_pushstring(L, EOFERROR);
+		lua_pushboolean(L, false);
 		return 1;
 	}
-	p[0] = (unsigned char)c;
+	number.bytes[0] = (unsigned char) c;
 #else
 	c = fgetc(fin);
 	if(c == EOF)
 	{
-		lua_pushstring(L, EOFERROR);
+		lua_pushboolean(L, false);
 		return 1;
 	}
-	p[0] = (unsigned char)c;
+	number.bytes[0] = (unsigned char) c;
 	c = fgetc(fin);
 	if(c == EOF)
 	{
-		lua_pushstring(L, EOFERROR);
+		lua_pushboolean(L, false);
 		return 1;
 	}
-	p[1] = (unsigned char)c;
+	number.bytes[1] = (unsigned char) c;
 	c = fgetc(fin);
 	if(c == EOF)
 	{
-		lua_pushstring(L, EOFERROR);
+		lua_pushboolean(L, false);
 		return 1;
 	}
-	p[2] = (unsigned char)c;
+	number.bytes[2] = (unsigned char) c;
 	c = fgetc(fin);
 	if(c == EOF)
 	{
-		lua_pushstring(L, EOFERROR);
+		lua_pushboolean(L, false);
 		return 1;
 	}
-	p[3] = (unsigned char)c;
+	number.bytes[3] = (unsigned char) c;
 	c = fgetc(fin);
 	if(c == EOF)
 	{
-		lua_pushstring(L, EOFERROR);
+		lua_pushboolean(L, false);
 		return 1;
 	}
-	p[4] = (unsigned char)c;
+	number.bytes[4] = (unsigned char) c;
 	c = fgetc(fin);
 	if(c == EOF)
 	{
-		lua_pushstring(L, EOFERROR);
+		lua_pushboolean(L, false);
 		return 1;
 	}
-	p[5] = (unsigned char)c;
+	number.bytes[5] = (unsigned char) c;
 	c = fgetc(fin);
 	if(c == EOF)
 	{
-		lua_pushstring(L, EOFERROR);
+		lua_pushboolean(L, false);
 		return 1;
 	}
-	p[6] = (unsigned char)c;
+	number.bytes[6] = (unsigned char) c;
 	c = fgetc(fin);
 	if(c == EOF)
 	{
-		lua_pushstring(L, EOFERROR);
+		lua_pushboolean(L, false);
 		return 1;
 	}
-	p[7] = (unsigned char)c;
+	number.bytes[7] = (unsigned char) c;
 #endif
-	lua_pushnumber(L, (double)result);
+	lua_pushnumber(L, number.value);
+
 	return 1;
 }
 
 int io_getStr(lua_State *L)
 {
+	static io8t string[BUFSIZE];
 	int i = 0;
-	unsigned char *result;
+	int c;
 	FILE *fin = *((FILE **)lua_touserdata(L, -1));
 
 	CHECKINIT(init, L);
@@ -464,17 +475,27 @@ int io_getStr(lua_State *L)
 		lua_error(L);
 	}
 
-	result = malloc(10000);
-
-	while(i < 10000 && (result[i++] = fgetc(fin)) > 0);
-	if(result[--i] == EOF)  /* TODO: fix infinite loop if string doesn't terminate! */
+	while(i < BUFSIZE && (string[i++] = fgetc(fin)) > 0)
 	{
-		free(result);
-		lua_pushstring(L, EOFERROR);
+		c = fgetc(fin);
+#if EOF <= 0
+		if(c <= 0) /* NULL bytes terminate */
+#else
+		if(c == 0x00 || string[i] == EOF)
+#endif
+			break;
+
+		string[i++] = c;
+	}
+	if(i > 0 && string[i - 1] == EOF)
+	{
+		lua_pushboolean(L, false);
+
 		return 1;
 	}
-	lua_pushstring(L, (char *)result);
-	free(result);
+
+	lua_pushlstring(L, (char *) string, i);
+
 	return 1;
 }
 
@@ -498,267 +519,433 @@ int io_getStrL(lua_State *L)
 	for(i = 0; i < len; i++)
 	{
 		c = fgetc(fin);
-		result[i] = (unsigned char)c;
+		result[i] = (unsigned char) c;
 		if(c == EOF)
 		{
 			free(result);
-			lua_pushstring(L, EOFERROR);
+
+			lua_pushboolean(L, false);
+
 			return 1;
 		}
 	}
-	lua_pushlstring(L, (char *)result, len);
+
+	lua_pushlstring(L, (char *) result, len);
+
 	free(result);
+
 	return 1;
 }
 
 int io_toInt(lua_State *L)
 {
-	int integer;
+	io32t integer;
+
+	CHECKINIT(init, L);
 
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-	char *integer_ = (char *) &integer;
-
-	CHECKINIT(init, L);
-
-	integer = *((const int *) luaL_checkstring(L, 1));
-	SWAP(integer_[0], integer_[3]);
-	SWAP(integer_[1], integer_[2]);
+	integer.integer = ((const io32t *) luaL_checkstring(L, 1))->integer;
+	CHARSWAP(integer.bytes[0], integer.bytes[3]);
+	CHARSWAP(integer.bytes[1], integer.bytes[2]);
 #else
-	CHECKINIT(init, L);
-
-	integer = *((const int *) luaL_checkstring(L, 1));
+	integer.integer = ((const io32t *) luaL_checkstring(L, 1))->integer;
 #endif
 
-	lua_pushinteger(L, integer);
+	lua_pushinteger(L, integer.integer);
+
 	return 1;
 }
 
 int io_toShort(lua_State *L)
 {
-	short integer;
+	io16t integer;
+
+	CHECKINIT(init, L);
 
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-	char *integer_ = (char *) &integer;
-
-	CHECKINIT(init, L);
-
-	integer = *((const short *) luaL_checkstring(L, 1));
-	SWAP(integer_[0], integer_[1]);
+	integer.integer = ((const io16t *) luaL_checkstring(L, 1))->integer;
+	CHARSWAP(integer.bytes[0], integer.bytes[1]);
 #else
-	CHECKINIT(init, L);
-
-	integer = *((const short *) luaL_checkstring(L, 1));
+	integer.integer = ((const io16t *) luaL_checkstring(L, 1))->integer;
 #endif
 
-	lua_pushinteger(L, integer);
-	return 1;
+	lua_pushinteger(L, integer.integer);
 
-	CHECKINIT(init, L);
+	return 1;
 }
 
 int io_toChar(lua_State *L)
 {
 	CHECKINIT(init, L);
 
-	lua_pushinteger(L, *((const char *) luaL_checkstring(L, 1)));
+	lua_pushinteger(L, *((const io8t *) luaL_checkstring(L, 1)));
+
 	return 1;
 }
 
 int io_toFloat(lua_State *L)
 {
-	float number;
+	io32t number;
+
+	CHECKINIT(init, L);
 
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-	char *number_ = (char *) &number;
-
-	CHECKINIT(init, L);
-
-	number = *((const float *) luaL_checkstring(L, 1));
-	SWAP(number_[0], number_[3]);
-	SWAP(number_[1], number_[2]);
+	number.value = ((const io32t *) luaL_checkstring(L, 1))->value;
+	CHARSWAP(integer.bytes[0], integer.bytes[3]);
+	CHARSWAP(integer.bytes[1], integer.bytes[2]);
 #else
-	CHECKINIT(init, L);
-
-	number = *((const float *) luaL_checkstring(L, 1));
+	number.value = ((const io32t *) luaL_checkstring(L, 1))->value;
 #endif
 
-	lua_pushnumber(L, number);
+	lua_pushnumber(L, number.value);
+
 	return 1;
 }
 
 int io_toDouble(lua_State *L)
 {
-	double number;
+	io64t number;
+
+	CHECKINIT(init, L);
 
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-	char *number_ = (char *) &number;
-
-	CHECKINIT(init, L);
-
-	number = *((const double *) luaL_checkstring(L, 1));
-	SWAP(number_[0], number_[7]);
-	SWAP(number_[1], number_[6]);
-	SWAP(number_[2], number_[5]);
-	SWAP(number_[3], number_[4]);
+	number.value = ((const io64t *) luaL_checkstring(L, 1))->value;
+	CHARSWAP(integer.bytes[0], integer.bytes[7]);
+	CHARSWAP(integer.bytes[1], integer.bytes[6]);
+	CHARSWAP(integer.bytes[2], integer.bytes[5]);
+	CHARSWAP(integer.bytes[3], integer.bytes[4]);
 #else
-	CHECKINIT(init, L);
-
-	number = *((const double *) luaL_checkstring(L, 1));
+	number.value = ((const io64t *) luaL_checkstring(L, 1))->value;
 #endif
 
-	lua_pushnumber(L, number);
+	lua_pushnumber(L, number.value);
+
 	return 1;
 }
 
 int io_fromInt(lua_State *L)
 {
-	int integer;
+	io32t integer;
+
+	CHECKINIT(init, L);
+
+	integer.integer = luaL_checkinteger(L, 1);
 
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-	char *integer_ = &integer;
-
-	CHECKINIT(init, L);
-
-	integer = luaL_checkinteger(L, 1);
-	SWAP(integer_[0], integer_[3]);
-	SWAP(integer_[1], integer_[2]);
-#else
-	CHECKINIT(init, L);
-
-	integer = luaL_checkinteger(L, 1);
+	CHARSWAP(integer.bytes[0], integer.bytes[3]);
+	CHARSWAP(integer.bytes[1], integer.bytes[2]);
 #endif
 
 	lua_pushlstring(L, ((const char *) &integer), sizeof(integer));
+
 	return 1;
 }
 
 int io_fromShort(lua_State *L)
 {
-	short integer;
+	io16t integer;
+
+	CHECKINIT(init, L);
+
+	integer.integer = luaL_checkinteger(L, 1);
 
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-	char *integer_ = &integer;
-
-	CHECKINIT(init, L);
-
-	integer = luaL_checkinteger(L, 1);
-	SWAP(integer_[0], integer_[1]);
-#else
-	CHECKINIT(init, L);
-
-	integer = luaL_checkinteger(L, 1);
+	CHARSWAP(integer_[0], integer_[1]);
 #endif
 
 	lua_pushlstring(L, ((const char *) &integer), sizeof(integer));
+
 	return 1;
 }
 
 int io_fromChar(lua_State *L)
 {
-	char integer;
+	io8t integer;
 
 	CHECKINIT(init, L);
 
 	integer = luaL_checkinteger(L, 1);
 
 	lua_pushlstring(L, ((const char *) &integer), sizeof(integer));
+
 	return 1;
 }
 
 int io_fromFloat(lua_State *L)
 {
-	float number;
+	io32t number;
+
+	CHECKINIT(init, L);
+
+	number.value = luaL_checknumber(L, 1);
 
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-	char *number_ = &number;
-
-	CHECKINIT(init, L);
-
-	number = luaL_checknumber(L, 1);
-	SWAP(number_[0], number_[3]);
-	SWAP(number_[1], number_[2]);
-#else
-	CHECKINIT(init, L);
+	CHARSWAP(number.bytes[0], number.bytes[3]);
+	CHARSWAP(number.bytes[1], number.bytes[2]);
 #endif
 
 	lua_pushlstring(L, ((const char *) &number), sizeof(number));
+
 	return 1;
 }
 
 int io_fromDouble(lua_State *L)
 {
-	double number;
+	io64t number;
+
+	CHECKINIT(init, L);
+
+	number.value = luaL_checknumber(L, 1);
 
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-	char *number_ = &number;
-
-	CHECKINIT(init, L);
-
-	number = luaL_checknumber(L, 1);
-	SWAP(number_[0], number_[7]);
-	SWAP(number_[1], number_[6]);
-	SWAP(number_[2], number_[5]);
-	SWAP(number_[3], number_[4]);
-#else
-	CHECKINIT(init, L);
-
-	number = luaL_checknumber(L, 1);
+	CHARSWAP(number.bytes[0], number.bytes[7]);
+	CHARSWAP(number.bytes[1], number.bytes[6]);
+	CHARSWAP(number.bytes[2], number.bytes[5]);
+	CHARSWAP(number.bytes[3], number.bytes[4]);
 #endif
 
 	lua_pushlstring(L, ((const char *) &number), sizeof(number));
 	return 1;
 }
 
-int io_intNL(int integer)
+int io_intNL(io32t integer)
 {
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-	char *integer_ = &integer;
-
-	SWAP(integer_[0], integer_[3]);
-	SWAP(integer_[1], integer_[2]);
+	CHARSWAP(integer.bytes[0], integer.bytes[3]);
+	CHARSWAP(integer.bytes[1], integer.bytes[2]);
 #endif
 
-	return integer;
+	return integer.integer;
 }
 
-short io_shortNL(short integer)
+short io_shortNL(io16t integer)
 {
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-	char *integer_ = &integer;
-
-	SWAP(integer_[0], integer_[1]);
+	CHARSWAP(integer.bytes[0], integer.bytes[1]);
 #endif
 
-	return integer;
+	return integer.integer;
 }
 
-char io_charNL(char integer)
+char io_charNL(io8t integer)
 {
 	return integer;
 }
 
-float io_floatNL(float number)
+float io_floatNL(io32t number)
 {
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-	char *number_ = &number;
-
-	SWAP(number_[0], number_[3]);
-	SWAP(number_[1], number_[2]);
+	CHARSWAP(number.bytes[0], number.bytes[3]);
+	CHARSWAP(number.bytes[1], number.bytes[2]);
 #endif
 
-	return number;
+	return number.value;
 }
 
-double io_doubleNL(double number)
+double io_doubleNL(io64t number)
 {
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-	char *number_ = &number;
-
-	SWAP(number_[0], number_[7]);
-	SWAP(number_[1], number_[6]);
-	SWAP(number_[2], number_[5]);
-	SWAP(number_[3], number_[4]);
+	CHARSWAP(number.bytes[0], number.bytes[7]);
+	CHARSWAP(number.bytes[1], number.bytes[6]);
+	CHARSWAP(number.bytes[2], number.bytes[5]);
+	CHARSWAP(number.bytes[3], number.bytes[4]);
 #endif
 
-	return number;
+	return number.value;
+}
+
+/*
+ * Offsets are given in bytes.
+ */
+
+int io_getIntNL(const void *base, const size_t offset)
+{
+	io32t integer;
+	int alignment = offset % ALIGNMENT;
+
+	if(alignment == 0)
+	{
+		integer.integer = ((io32t *) (((io8t *) base) + offset))->integer;
+	}
+	else
+	{
+		integer.integer =
+			((io32tv) (*(((io8t *) base) + offset - alignment) << (8 * sizeof(io8t) * alignment))) |
+			((io32tv) (*(((io8t *) base) + offset + 0 + ALIGNMENT - alignment) >> (0 * sizeof(io8t) + 8 * sizeof(io8t) * (sizeof(io8t) - alignment)))) |
+			((io32tv) (*(((io8t *) base) + offset + 1 + ALIGNMENT - alignment) >> (1 * sizeof(io8t) + 8 * sizeof(io8t) * (sizeof(io8t) - alignment)))) |
+			((io32tv) (*(((io8t *) base) + offset + 2 + ALIGNMENT - alignment) >> (2 * sizeof(io8t) + 8 * sizeof(io8t) * (sizeof(io8t) - alignment)))) |
+			((io32tv) (*(((io8t *) base) + offset + 3 + ALIGNMENT - alignment) >> (3 * sizeof(io8t) + 8 * sizeof(io8t) * (sizeof(io8t) - alignment))));
+	}
+
+	return io_intNL(integer);
+}
+
+short io_getShortNL(const void *base, const size_t offset)
+{
+	io16t integer;
+	int alignment = offset % ALIGNMENT;
+
+	if(alignment == 0)
+	{
+		integer.integer = ((io16t *) (((io8t *) base) + offset))->integer;
+	}
+	else
+	{
+		integer.integer =
+			((io16tv) (*(((io8t *) base) + offset - alignment) << (8 * sizeof(io8t) * alignment))) |
+			((io16tv) (*(((io8t *) base) + offset + 0 + ALIGNMENT - alignment) >> (0 * sizeof(io8t) + 8 * sizeof(io8t) * (sizeof(io8t) - alignment)))) |
+			((io16tv) (*(((io8t *) base) + offset + 1 + ALIGNMENT - alignment) >> (1 * sizeof(io8t) + 8 * sizeof(io8t) * (sizeof(io8t) - alignment))));
+	}
+
+	return io_shortNL(integer);
+}
+
+char io_getCharNL(const void *base, const size_t offset)
+{
+	io8t integer;
+	int alignment = offset % ALIGNMENT;
+
+	if(alignment == 0)
+	{
+		integer = *((io8t *) (((io8t *) base) + offset));
+	}
+	else
+	{
+		integer =
+			((io8t) (*(((io8t *) base) + offset - alignment) << (8 * sizeof(io8t) * alignment))) |
+			((io8t) (*(((io8t *) base) + offset + 0 + ALIGNMENT - alignment) >> (0 * sizeof(io8t) + 8 * sizeof(io8t) * (sizeof(io8t) - alignment))));
+	}
+
+	return io_charNL(integer);
+}
+
+float io_getFloatNL(const void *base, const size_t offset)
+{
+	io32t number;
+	int alignment = offset % ALIGNMENT;
+
+	if(alignment == 0)
+	{
+		number.integer = ((io32t *) (((io8t *) base) + offset))->integer;
+	}
+	else
+	{
+		number.integer =
+			((io32tv) (*(((io8t *) base) + offset - alignment) << (8 * sizeof(io8t) * alignment))) |
+			((io32tv) (*(((io8t *) base) + offset + 0 + ALIGNMENT - alignment) >> (0 * sizeof(io8t) + 8 * sizeof(io8t) * (sizeof(io8t) - alignment)))) |
+			((io32tv) (*(((io8t *) base) + offset + 1 + ALIGNMENT - alignment) >> (1 * sizeof(io8t) + 8 * sizeof(io8t) * (sizeof(io8t) - alignment)))) |
+			((io32tv) (*(((io8t *) base) + offset + 2 + ALIGNMENT - alignment) >> (2 * sizeof(io8t) + 8 * sizeof(io8t) * (sizeof(io8t) - alignment)))) |
+			((io32tv) (*(((io8t *) base) + offset + 3 + ALIGNMENT - alignment) >> (3 * sizeof(io8t) + 8 * sizeof(io8t) * (sizeof(io8t) - alignment))));
+	}
+
+	return io_floatNL(number);
+}
+
+double io_getDoubleNL(const void *base, const size_t offset)
+{
+	io64t number;
+	int alignment = offset % ALIGNMENT;
+
+	if(alignment == 0)
+	{
+		number.integer = ((io64t *) (((io8t *) base) + offset))->integer;
+	}
+	else
+	{
+		number.integer =
+			((io64tv) (*(((io8t *) base) + offset - alignment) << (8 * sizeof(io8t) * alignment))) |
+			((io64tv) (*(((io8t *) base) + offset + 0 + ALIGNMENT - alignment) >> (0 * sizeof(io8t) + 8 * sizeof(io8t) * (sizeof(io8t) - alignment)))) |
+			((io64tv) (*(((io8t *) base) + offset + 1 + ALIGNMENT - alignment) >> (1 * sizeof(io8t) + 8 * sizeof(io8t) * (sizeof(io8t) - alignment)))) |
+			((io64tv) (*(((io8t *) base) + offset + 2 + ALIGNMENT - alignment) >> (2 * sizeof(io8t) + 8 * sizeof(io8t) * (sizeof(io8t) - alignment)))) |
+			((io64tv) (*(((io8t *) base) + offset + 3 + ALIGNMENT - alignment) >> (3 * sizeof(io8t) + 8 * sizeof(io8t) * (sizeof(io8t) - alignment)))) |
+			((io64tv) (*(((io8t *) base) + offset + 4 + ALIGNMENT - alignment) >> (4 * sizeof(io8t) + 8 * sizeof(io8t) * (sizeof(io8t) - alignment)))) |
+			((io64tv) (*(((io8t *) base) + offset + 5 + ALIGNMENT - alignment) >> (5 * sizeof(io8t) + 8 * sizeof(io8t) * (sizeof(io8t) - alignment)))) |
+			((io64tv) (*(((io8t *) base) + offset + 6 + ALIGNMENT - alignment) >> (6 * sizeof(io8t) + 8 * sizeof(io8t) * (sizeof(io8t) - alignment)))) |
+			((io64tv) (*(((io8t *) base) + offset + 7 + ALIGNMENT - alignment) >> (7 * sizeof(io8t) + 8 * sizeof(io8t) * (sizeof(io8t) - alignment))));
+	}
+
+	return io_doubleNL(number);
+}
+
+void io_setIntNL(const void *base, const size_t offset, io32t integer)
+{
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+	io_setCharNL(base, offset + 3 * sizeof(io8t), (io8t) integer.bytes[3]);
+	io_setCharNL(base, offset + 2 * sizeof(io8t), (io8t) integer.bytes[2]);
+	io_setCharNL(base, offset + 1 * sizeof(io8t), (io8t) integer.bytes[1]);
+	io_setCharNL(base, offset + 0 * sizeof(io8t), (io8t) integer.bytes[0]);
+#else
+	io_setCharNL(base, offset + 0 * sizeof(io8t), (io8t) integer.bytes[0]);
+	io_setCharNL(base, offset + 1 * sizeof(io8t), (io8t) integer.bytes[1]);
+	io_setCharNL(base, offset + 2 * sizeof(io8t), (io8t) integer.bytes[2]);
+	io_setCharNL(base, offset + 3 * sizeof(io8t), (io8t) integer.bytes[3]);
+#endif
+}
+
+void io_setShortNL(const void *base, const size_t offset, io16t integer)
+{
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+	io_setCharNL(base, offset + 1 * sizeof(io8t), (io8t) integer.bytes[1]);
+	io_setCharNL(base, offset + 0 * sizeof(io8t), (io8t) integer.bytes[0]);
+#else
+	io_setCharNL(base, offset + 0 * sizeof(io8t), (io8t) integer.bytes[0]);
+	io_setCharNL(base, offset + 1 * sizeof(io8t), (io8t) integer.bytes[1]);
+#endif
+}
+
+void io_setCharNL(const void *base, const size_t offset, io8t integer)
+{
+	int alignment = offset % ALIGNMENT;
+
+	integer = io_charNL(integer);
+
+	if(alignment == 0)
+	{
+		*((char *) (((unsigned char *) base) + offset)) = integer;
+	}
+	else
+	{
+		*((char *) (((unsigned char *) base) + offset - alignment)) &= 0xFF << 8 * (ALIGNMENT - alignment);
+		*((char *) (((unsigned char *) base) + offset - alignment)) |= integer >> 8 * alignment;
+		*((char *) (((unsigned char *) base) + offset + ALIGNMENT - alignment)) &= 0xFF >> 8 * alignment;
+		*((char *) (((unsigned char *) base) + offset + ALIGNMENT - alignment)) |= integer << 8 * (ALIGNMENT - alignment);
+	}
+}
+
+void io_setFloatNL(const void *base, const size_t offset, io32t number)
+{
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+	io_setCharNL(base, offset + 3 * sizeof(io8t), (io8t) number.bytes[3]);
+	io_setCharNL(base, offset + 2 * sizeof(io8t), (io8t) number.bytes[2]);
+	io_setCharNL(base, offset + 1 * sizeof(io8t), (io8t) number.bytes[1]);
+	io_setCharNL(base, offset + 0 * sizeof(io8t), (io8t) number.bytes[0]);
+#else
+	io_setCharNL(base, offset + 0 * sizeof(io8t), (io8t) number.bytes[0]);
+	io_setCharNL(base, offset + 1 * sizeof(io8t), (io8t) number.bytes[1]);
+	io_setCharNL(base, offset + 2 * sizeof(io8t), (io8t) number.bytes[2]);
+	io_setCharNL(base, offset + 3 * sizeof(io8t), (io8t) number.bytes[3]);
+#endif
+}
+
+void io_setDoubleNL(const void *base, const size_t offset, io64t number)
+{
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+	io_setCharNL(base, offset + 7 * sizeof(io8t), (io8t) number.bytes[7]);
+	io_setCharNL(base, offset + 6 * sizeof(io8t), (io8t) number.bytes[6]);
+	io_setCharNL(base, offset + 5 * sizeof(io8t), (io8t) number.bytes[5]);
+	io_setCharNL(base, offset + 4 * sizeof(io8t), (io8t) number.bytes[4]);
+	io_setCharNL(base, offset + 3 * sizeof(io8t), (io8t) number.bytes[3]);
+	io_setCharNL(base, offset + 2 * sizeof(io8t), (io8t) number.bytes[2]);
+	io_setCharNL(base, offset + 1 * sizeof(io8t), (io8t) number.bytes[1]);
+	io_setCharNL(base, offset + 0 * sizeof(io8t), (io8t) number.bytes[0]);
+#else
+	io_setCharNL(base, offset + 0 * sizeof(io8t), (io8t) number.bytes[0]);
+	io_setCharNL(base, offset + 1 * sizeof(io8t), (io8t) number.bytes[1]);
+	io_setCharNL(base, offset + 2 * sizeof(io8t), (io8t) number.bytes[2]);
+	io_setCharNL(base, offset + 3 * sizeof(io8t), (io8t) number.bytes[3]);
+	io_setCharNL(base, offset + 4 * sizeof(io8t), (io8t) number.bytes[4]);
+	io_setCharNL(base, offset + 5 * sizeof(io8t), (io8t) number.bytes[5]);
+	io_setCharNL(base, offset + 6 * sizeof(io8t), (io8t) number.bytes[6]);
+	io_setCharNL(base, offset + 7 * sizeof(io8t), (io8t) number.bytes[7]);
+#endif
 }

@@ -137,9 +137,8 @@ function c_tcm_init()
 	c_const_set("tcm_sets_dir", c_const_get("data_dir") .. "sets/")
 	local magic = 0xDEADBEEF
 	c_const_set("tcm_magic", magic)
-	c_const_set("tcm_version", 1)
+	c_const_set("tcm_version", 2)
 	c_const_set("tcm_headerLength", 11)
-	c_const_set("tcm_eof", "EOF !#\\")
 
 	c_const_set("tcm_teleporterWidth",  5, 1)
 	c_const_set("tcm_teleporterHeight", 5, 1)
@@ -380,7 +379,7 @@ end
 local function c_tcm_private_get(f, i, t, ...)
 	local d = f(i, ...)
 
-	if d == c_const_get("tcm_eof") then
+	if not d then
 		if t then
 			return nil
 		else
@@ -406,7 +405,7 @@ local function c_tcm_check_true_header(i)
 		error "Invalid map header"
 	elseif c_tcm_private_get(tankbobs.io_getChar, i) ~= c_const_get("tcm_version") then
 		i:seek("cur", -1)
-		io.stdout:write("Warning: map was built for tcm version '", tostring(c_tcm_private_get(tankbobs.io_getChar, i)), "'; you are using version '", tostring(c_const_get("tcm_version")), "'\n")
+		io.stderr:write("Warning: map was built for tcm version '", tostring(c_tcm_private_get(tankbobs.io_getChar, i)), "'; you are using version '", tostring(c_const_get("tcm_version")), "'\n")
 	end
 end
 

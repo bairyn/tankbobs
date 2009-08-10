@@ -27,7 +27,7 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <SDL/SDL_endian.h>
 
-#define VERSION 1
+#define VERSION 2
 #define MAGIC 0xDEADBEEF
 
 #define TCM_FILENAME_BUF_SIZE 256
@@ -82,7 +82,7 @@ static void put_float(FILE *fout, const float *f)
 #endif
 }
 
-static void put_int(FILE *fout, const int *i)
+static void put_int(FILE *fout, const unsigned int *i)
 {
     const unsigned char *p = (const unsigned char *)i;
 
@@ -99,7 +99,7 @@ static void put_int(FILE *fout, const int *i)
 #endif
 }
 
-static void put_short(FILE *fout, const short *s)
+static void put_short(FILE *fout, const unsigned short *s)
 {
     const unsigned char *p = (const unsigned char *)s;
 
@@ -112,7 +112,7 @@ static void put_short(FILE *fout, const short *s)
 #endif
 }
 
-static void put_char(FILE *fout, const char *c)
+static void put_char(FILE *fout, const unsigned char *c)
 {
 	const unsigned char *p = (const unsigned char *)c;
 
@@ -165,7 +165,7 @@ static void put_cfloat(FILE *fout, const float f)
 #endif
 }
 
-static void put_cint(FILE *fout, const int i)
+static void put_cint(FILE *fout, const unsigned int i)
 {
     const unsigned char *p = (const unsigned char *)&i;
 
@@ -182,7 +182,7 @@ static void put_cint(FILE *fout, const int i)
 #endif
 }
 
-static void put_cshort(FILE *fout, const short s)
+static void put_cshort(FILE *fout, const unsigned short s)
 {
     const unsigned char *p = (const unsigned char *)&s;
 
@@ -195,7 +195,7 @@ static void put_cshort(FILE *fout, const short s)
 #endif
 }
 
-static void put_cchar(FILE *fout, const char c)
+static void put_cchar(FILE *fout, const unsigned char c)
 {
 	const unsigned char *p = (const unsigned char *)&c;
 
@@ -209,7 +209,7 @@ static void put_cchar(FILE *fout, const char c)
 static void put_str(FILE *fout, const char *s, int l)
 {
 	while(l--)
-		put_char(fout, s++);
+		put_char(fout, (unsigned char *) s++);
 }
 
 static char read_getChar(const char **p)
