@@ -1245,7 +1245,7 @@ int w_unpersistWorld(lua_State *L)
 	/* Tanks */
 	for(int i = 0; i < numTanks; i++)
 	{
-		unsigned int index = IO_GETCHARNL(data, offset); data += sizeof(io8t);
+		unsigned int index = IO_GETCHARNL(data, offset); offset += sizeof(io8t);
 
 		lua_pushinteger(L, index);
 		lua_gettable(L, 2 + preArgs);
@@ -1362,7 +1362,7 @@ int w_unpersistWorld(lua_State *L)
 	/* Powerups */
 	for(int i = 0; i < numPowerups; i++)
 	{
-		unsigned int index = IO_GETCHARNL(data, offset); data += sizeof(io8t);
+		unsigned int index = IO_GETCHARNL(data, offset); offset += sizeof(io8t);
 
 		lua_pushinteger(L, index);
 		lua_gettable(L, 3 + preArgs);
@@ -1446,7 +1446,7 @@ int w_unpersistWorld(lua_State *L)
 		if(lua_isnoneornil(L, -1))
 		{
 			/* This should never happen, but play safe anyway */
-			data += 6 * sizeof(io32t) + 2 * sizeof(io8t) + 3 * sizeof(io32t);
+			offset += 6 * sizeof(io32t) + 2 * sizeof(io8t) + 3 * sizeof(io32t);
 
 			lua_pop(L, 1);
 		}
@@ -1481,7 +1481,7 @@ int w_unpersistWorld(lua_State *L)
 				body->SetLinearVelocity(vel);
 
 				/* angular velocity */
-				body->SetAngularVelocity(io_floatNL(*((float *) data))); data += sizeof(float);
+				body->SetAngularVelocity(io_floatNL(*((float *) data))); offset += sizeof(float);
 
 				/* path ID */
 				lua_getfield(L, -1, "m");
@@ -1526,7 +1526,7 @@ int w_unpersistWorld(lua_State *L)
 			else
 			{
 				/* Save processing */
-				data += 6 * sizeof(io32t) + 2 * sizeof(io8t) + 3 * sizeof(io32t);
+				offset += 6 * sizeof(io32t) + 2 * sizeof(io8t) + 3 * sizeof(io32t);
 
 				lua_pop(L, 3);
 			}
@@ -1541,7 +1541,7 @@ int w_unpersistWorld(lua_State *L)
 		if(lua_isnoneornil(L, -1))
 		{
 			/* This should never happen, but play safe anyway */
-			data += 1 * sizeof(io8t);
+			offset += 1 * sizeof(io8t);
 
 			lua_pop(L, 1);
 		}
@@ -1580,7 +1580,7 @@ int w_unpersistWorld(lua_State *L)
 		if(lua_isnoneornil(L, -1))
 		{
 			/* This should never happen, but play safe anyway */
-			data += 2 * sizeof(io8t) + 2 * sizeof(io32t);
+			offset += 2 * sizeof(io8t) + 2 * sizeof(io32t);
 
 			lua_pop(L, 1);
 		}
@@ -1651,7 +1651,7 @@ int w_unpersistWorld(lua_State *L)
 /*#ifdef TDEBUG*/
 	if(offset != size)
 	{
-		fprintf(stderr, "w_unpersistWorld: sizes differ! (server wrote %d bytes; client read %d bytes)\n", size, data - dataS);
+		fprintf(stderr, "w_unpersistWorld: sizes differ! (server wrote %d bytes; client read %d bytes)\n", size, offset);
 		abort();
 	}
 /*#endif 8* defined TDEBUG 8/*/

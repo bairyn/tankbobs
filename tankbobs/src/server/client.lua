@@ -82,6 +82,7 @@ client =
 	ip = "",
 	port = 0,
 	connecting = false,
+	challengeAttempts = 0,
 	lastAliveTime = nil,  -- number
 	lastTickSendTime = nil,   -- number
 	lastTickRequestTime = nil,   -- number (this one doesn't get reset when tick is received; used to keep track of when the server needs to update ping
