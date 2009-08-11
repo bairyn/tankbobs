@@ -629,7 +629,7 @@ int io_fromInt(lua_State *L)
 
 	CHECKINIT(init, L);
 
-	integer.integer = luaL_checkinteger(L, 1);
+	integer.integer = (io32tv) luaL_checkinteger(L, 1);
 
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
 	CHARSWAP(integer.bytes[0], integer.bytes[3]);
@@ -647,7 +647,7 @@ int io_fromShort(lua_State *L)
 
 	CHECKINIT(init, L);
 
-	integer.integer = luaL_checkinteger(L, 1);
+	integer.integer = (io32tv) luaL_checkinteger(L, 1);
 
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
 	CHARSWAP(integer_[0], integer_[1]);
@@ -664,7 +664,7 @@ int io_fromChar(lua_State *L)
 
 	CHECKINIT(init, L);
 
-	integer = luaL_checkinteger(L, 1);
+	integer = (io8t) luaL_checkinteger(L, 1);
 
 	lua_pushlstring(L, ((const char *) &integer), sizeof(integer));
 
@@ -677,7 +677,7 @@ int io_fromFloat(lua_State *L)
 
 	CHECKINIT(init, L);
 
-	number.value = luaL_checknumber(L, 1);
+	number.value = (io32tv) luaL_checknumber(L, 1);
 
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
 	CHARSWAP(number.bytes[0], number.bytes[3]);
@@ -695,7 +695,7 @@ int io_fromDouble(lua_State *L)
 
 	CHECKINIT(init, L);
 
-	number.value = luaL_checknumber(L, 1);
+	number.value = (io64tv) luaL_checknumber(L, 1);
 
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
 	CHARSWAP(number.bytes[0], number.bytes[7]);
