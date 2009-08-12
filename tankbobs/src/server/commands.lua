@@ -245,14 +245,14 @@ function commands_autoComplete(line)
 			if #names > 1 then
 				table.sort(names)
 
-				-- print options to console and don't touch the input
+				-- print options to console
 				for _, v in pairs(names) do
 					s_printnl("  - ", v)
 				end
 
 				s_printnl()
 
-				return
+				return common_commonStartString(names) .. line:match("[ \t]*[^ \t]*([ \t]*)")
 			else
 				return names[1] .. line:match("[ \t]*[^ \t]*([ \t]*)")
 			end
@@ -358,12 +358,12 @@ function helpT(line)
 			local match = false
 
 			if type(v.name) == "string" then
-				if v.name:find("^" .. args[2]) then
+				if v.name:find("^" .. common_escape(args[2])) then
 					match = v.name
 				end
 			elseif type(v.name) == "table" and not v.matched then
 				for _, vs in pairs(v.name) do
-					if vs:find("^" .. args[2]) then
+					if vs:find("^" .. common_escape(args[2])) then
 						match = vs
 						v.matched = true  -- set the matched flag so that multiple aliases are not listed
 
@@ -399,17 +399,15 @@ function helpT(line)
 			if #names > 1 then
 				table.sort(names)
 
-				-- print options to console and don't touch the input
+				-- print options to console
 				for _, v in pairs(names) do
 					s_printnl("  - " .. v)
 				end
 
 				s_printnl()
-
-				return
-			else
-				return commands_upToArg(line, 1) .. names[1]
 			end
+
+			return commands_upToArg(line, 1) .. common_commonStartString(names)
 		end
 	end
 end
@@ -496,7 +494,7 @@ function listSets(line)
 		s_printnl(string.format("             name - %16s", "title"))
 
 		for k, v in pairs(c_tcm_current_sets) do
-			if v.name:find("^" .. beginsWith) or v.title:find("^" .. beginsWith) then
+			if v.name:find("^" .. common_escape(beginsWith)) or v.title:find("^" .. common_escape(beginsWith)) then
 				s_printnl(string.format(" %16s - %16s", v.name, v.title))
 
 				if description then
@@ -526,9 +524,9 @@ function listSetsT(line)
 		local names = {}
 
 		for k, v in pairs(c_tcm_current_sets) do
-			if v.name:find("^" .. beginsWith) then
+			if v.name:find("^" .. common_escape(beginsWith)) then
 				table.insert(names, v.name)
-			elseif v.title:find("^" .. beginsWith) then
+			elseif v.title:find("^" .. common_escape(beginsWith)) then
 				table.insert(names, v.name)
 			end
 		end
@@ -537,17 +535,15 @@ function listSetsT(line)
 			if #names > 1 then
 				table.sort(names)
 
-				-- print options to console and don't touch the input
+				-- print options to console
 				for _, v in pairs(names) do
 					s_printnl("  - ", v)
 				end
 
 				s_printnl()
-
-				return
-			else
-				return commands_upToArg(line, description and 2 or 1) .. names[1]
 			end
+
+			return commands_upToArg(line, description and 2 or 1) .. common_commonStartString(names)
 		end
 	end
 end
@@ -579,7 +575,7 @@ function listMaps(line)
 		s_printnl(string.format("             name - %16s", "title"))
 
 		for k, v in pairs(c_tcm_current_set.maps) do
-			if v.name:find("^" .. beginsWith) or v.title:find("^" .. beginsWith) then
+			if v.name:find("^" .. common_escape(beginsWith)) or v.title:find("^" .. common_escape(beginsWith)) then
 				s_printnl(string.format(" %16s - %16s", v.name, v.title))
 
 				if description then
@@ -618,9 +614,9 @@ function listMapsT(line)
 		local names = {}
 
 		for k, v in pairs(c_tcm_current_set.maps) do
-			if v.name:find("^" .. beginsWith) then
+			if v.name:find("^" .. common_escape(beginsWith)) then
 				table.insert(names, v.name)
-			elseif v.title:find("^" .. beginsWith) then
+			elseif v.title:find("^" .. common_escape(beginsWith) then
 				table.insert(names, v.name)
 			end
 		end
@@ -629,17 +625,15 @@ function listMapsT(line)
 			if #names > 1 then
 				table.sort(names)
 
-				-- print options to console and don't touch the input
+				-- print options to console
 				for _, v in pairs(names) do
 					s_printnl("  - ", v)
 				end
 
 				s_printnl()
-
-				return
-			else
-				return commands_upToArg(line, description and 2 or 1) .. names[1]
 			end
+
+			return commands_upToArg(line, description and 2 or 1) .. common_commonStartString(names)
 		end
 	end
 end
@@ -702,9 +696,9 @@ function setT(line)
 		local names = {}
 
 		for k, v in pairs(c_tcm_current_sets) do
-			if not byTitle and v.name:find("^" .. beginsWith) then
+			if not byTitle and v.name:find("^" .. common_escape(beginsWith)) then
 				table.insert(names, v.name)
-			elseif byTitle and v.title:find("^" .. beginsWith) then
+			elseif byTitle and v.title:find("^" .. common_escape(beginsWith)) then
 				table.insert(names, v.title)
 			end
 		end
@@ -713,17 +707,15 @@ function setT(line)
 			if #names > 1 then
 				table.sort(names)
 
-				-- print options to console and don't touch the input
+				-- print options to console
 				for _, v in pairs(names) do
 					s_printnl("  - ", v)
 				end
 
 				s_printnl()
-
-				return
-			else
-				return commands_upToArg(line, byTitle and 2 or 1) .. names[1]
 			end
+
+			return commands_upToArg(line, byTitle and 2 or 1) .. common_commonStartString(names)
 		end
 	end
 end
@@ -795,9 +787,9 @@ function mapT(line)
 		local names = {}
 
 		for k, v in pairs(c_tcm_current_set.maps) do
-			if not byTitle and v.name:find("^" .. beginsWith) then
+			if not byTitle and v.name:find("^" .. common_escape(beginsWith)) then
 				table.insert(names, v.name)
-			elseif byTitle and v.title:find("^" .. beginsWith) then
+			elseif byTitle and v.title:find("^" .. common_escape(beginsWith)) then
 				table.insert(names, v.title)
 			end
 		end
@@ -806,17 +798,15 @@ function mapT(line)
 			if #names > 1 then
 				table.sort(names)
 
-				-- print options to console and don't touch the input
+				-- print options to console
 				for _, v in pairs(names) do
 					s_printnl("  - ", v)
 				end
 
 				s_printnl()
-
-				return
-			else
-				return commands_upToArg(line, byTitle and 2 or 1) .. names[1]
 			end
+
+			return commands_upToArg(line, byTitle and 2 or 1) .. common_commonStartString(names)
 		end
 	end
 end
@@ -910,14 +900,14 @@ function gameTypeT(line)
 		if #names > 1 then
 			table.sort(names)
 
-			-- print options to console and don't touch the input
+			-- print options to console
 			for _, v in pairs(names) do
 				s_printnl("  - ", v)
 			end
 
 			s_printnl()
 
-			return
+			return commands_upToArg(line, 1) .. common_commonStartString(names)
 		elseif #names == 1 then
 			return commands_upToArg(line, 1) .. names[1]
 		end

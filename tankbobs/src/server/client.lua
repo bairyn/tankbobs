@@ -62,7 +62,7 @@ function client_init()
 	c_const_set("client_ticksCheck", 5000, 1)
 	c_const_set("client_maxInactiveTime", 120000, 1)  -- drop after 2 minutes of no packets
 	c_const_set("client_connectingMaxInactiveTime", 3000, 1)
-	c_const_set("client_maxChallengeAttempts", 3, 1)
+	c_const_set("client_maxChallengeAttempts", 3, 1)  -- this is best at at least 2 so that the first incorrect challenge attempt can be seen on server console
 end
 
 function client_done()
@@ -479,6 +479,8 @@ function client_step(d)
 
 									if client.challengeAttempts > c_const_get("client_maxChallengeAttempts") then
 										client_disconnect(client, "too many challenge attempts")
+									else
+										s_printnl("'", client.tank.name, "' tried to connect with invalid challenge '", challenge, "' (against ", client.challenge, ")'")
 									end
 								end
 							end

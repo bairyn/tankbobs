@@ -388,6 +388,45 @@ function common_lerp(from, to, value)
 	return from - (value * (from - to))
 end
 
+-- escapes Lua string formats
+function common_escape(string)
+	local goodString = ""
+
+	for i = 1, #string do
+		local char = string:sub(i, i)
+
+		if char == '^' or char == '.' or char == '$' or char == '(' or char == ')' or char == '%' or char == '[' or char == ']' or char == '*' then
+			goodString = goodString .. "%" .. char
+		else
+			goodString = goodString .. char
+		end
+	end
+
+	return goodString
+end
+
+function common_commonStartString(strings)
+	local result = ""
+
+	if #strings < 1 then
+		return nil
+	end
+
+	for i = 1, #strings[1] do
+		local test = result .. strings[1]:sub(i, i)
+
+		for _, v in pairs(strings) do
+			if not v:find("^" .. common_escape(test)) then
+				return result
+			end
+		end
+
+		result = test
+	end
+
+	return result
+end
+
 ---[[ constants ]]---
 
 SPECIAL        = {}
