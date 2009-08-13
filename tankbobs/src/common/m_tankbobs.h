@@ -139,7 +139,7 @@ union io64u
 #ifdef __cplusplus
 	io64u(const io64tv& d)
 	{
-		this->integer = d;
+		this->integer = this->value = d;
 	}
 #endif
 };
@@ -156,7 +156,7 @@ union io32u
 #ifdef __cplusplus
 	io32u(const io32tv& d)
 	{
-		this->integer = d;
+		this->integer = this->value = d;
 	}
 #endif
 };

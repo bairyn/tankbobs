@@ -1022,8 +1022,8 @@ int w_persistWorld(lua_State *L)
 
 				lua_getfield(L, -1, "startpos");
 				v = CHECKVEC(L, -1);
-				IO_SETCHARNL(buf, offset, v->x); offset += sizeof(io8t);
-				IO_SETCHARNL(buf, offset, v->y); offset += sizeof(io8t);
+				IO_SETFLOATNL(buf, offset, v->x); offset += sizeof(io32t);
+				IO_SETFLOATNL(buf, offset, v->y); offset += sizeof(io32t);
 				lua_pop(L, 1);
 
 				lua_getfield(L, -1, "ppos");

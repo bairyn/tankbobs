@@ -474,7 +474,10 @@ function client_step(d)
 
 									-- unpause the world when the first client connects
 									if(client_connectedClients() == 1) then
-										c_world_setPaused(false)
+										if c_world_getPaused() then
+											s_printnl("The game has been automatically unpaused")
+											c_world_setPaused(false)
+										end
 									end
 
 									s_printnl("'", client.tank.name, "' entered the game from ", client.ip, ":", client.port)
