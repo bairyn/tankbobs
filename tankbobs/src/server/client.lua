@@ -460,6 +460,9 @@ function client_step(d)
 							if client.connecting then
 								local challenge = tankbobs.io_toInt(data:sub(1, 4)) data = data:sub(5)
 
+								challenge = bit.tobit(challenge)
+								client.challenge = bit.tobit(client.challenge)
+
 								if challenge == client.challenge then
 									client.connecting = false
 									table.insert(c_world_getTanks(), client.tank)
