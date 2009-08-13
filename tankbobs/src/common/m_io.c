@@ -758,194 +758,82 @@ double io_doubleNL(io64t number)
  * Offsets are given in bytes.
  */
 
-int io_getIntNL(const void *base, const size_t offset)
+int io_getIntNL(const char *base, const size_t offset)
 {
 	io32t integer;
-	int alignment = offset % ALIGNMENT;
 
-	if(alignment == 0)
-	{
-		integer.integer = ((io32t *) (((io8t *) base) + offset))->integer;
-	}
-	else
-	{
-		integer.integer =
-			((io32tv) (*(((io8t *) base) + offset - alignment) << (8 * sizeof(io8t) * alignment))) |
-			((io32tv) (*(((io8t *) base) + offset + 0 + ALIGNMENT - alignment) >> (0 * sizeof(io8t) + 8 * sizeof(io8t) * (sizeof(io8t) - alignment)))) |
-			((io32tv) (*(((io8t *) base) + offset + 1 + ALIGNMENT - alignment) >> (1 * sizeof(io8t) + 8 * sizeof(io8t) * (sizeof(io8t) - alignment)))) |
-			((io32tv) (*(((io8t *) base) + offset + 2 + ALIGNMENT - alignment) >> (2 * sizeof(io8t) + 8 * sizeof(io8t) * (sizeof(io8t) - alignment)))) |
-			((io32tv) (*(((io8t *) base) + offset + 3 + ALIGNMENT - alignment) >> (3 * sizeof(io8t) + 8 * sizeof(io8t) * (sizeof(io8t) - alignment))));
-	}
+	memcpy(integer.bytes, base + offset, sizeof(integer));
 
 	return io_intNL(integer);
 }
 
-short io_getShortNL(const void *base, const size_t offset)
+short io_getShortNL(const char *base, const size_t offset)
 {
 	io16t integer;
-	int alignment = offset % ALIGNMENT;
 
-	if(alignment == 0)
-	{
-		integer.integer = ((io16t *) (((io8t *) base) + offset))->integer;
-	}
-	else
-	{
-		integer.integer =
-			((io16tv) (*(((io8t *) base) + offset - alignment) << (8 * sizeof(io8t) * alignment))) |
-			((io16tv) (*(((io8t *) base) + offset + 0 + ALIGNMENT - alignment) >> (0 * sizeof(io8t) + 8 * sizeof(io8t) * (sizeof(io8t) - alignment)))) |
-			((io16tv) (*(((io8t *) base) + offset + 1 + ALIGNMENT - alignment) >> (1 * sizeof(io8t) + 8 * sizeof(io8t) * (sizeof(io8t) - alignment))));
-	}
+	memcpy(integer.bytes, base + offset, sizeof(integer));
 
 	return io_shortNL(integer);
 }
 
-char io_getCharNL(const void *base, const size_t offset)
+char io_getCharNL(const char *base, const size_t offset)
 {
 	io8t integer;
-	int alignment = offset % ALIGNMENT;
 
-	if(alignment == 0)
-	{
-		integer = *((io8t *) (((io8t *) base) + offset));
-	}
-	else
-	{
-		integer =
-			((io8t) (*(((io8t *) base) + offset - alignment) << (8 * sizeof(io8t) * alignment))) |
-			((io8t) (*(((io8t *) base) + offset + 0 + ALIGNMENT - alignment) >> (0 * sizeof(io8t) + 8 * sizeof(io8t) * (sizeof(io8t) - alignment))));
-	}
+	integer = *(base + offset);
 
 	return io_charNL(integer);
 }
 
-float io_getFloatNL(const void *base, const size_t offset)
+float io_getFloatNL(const char *base, const size_t offset)
 {
 	io32t number;
-	int alignment = offset % ALIGNMENT;
 
-	if(alignment == 0)
-	{
-		number.integer = ((io32t *) (((io8t *) base) + offset))->integer;
-	}
-	else
-	{
-		number.integer =
-			((io32tv) (*(((io8t *) base) + offset - alignment) << (8 * sizeof(io8t) * alignment))) |
-			((io32tv) (*(((io8t *) base) + offset + 0 + ALIGNMENT - alignment) >> (0 * sizeof(io8t) + 8 * sizeof(io8t) * (sizeof(io8t) - alignment)))) |
-			((io32tv) (*(((io8t *) base) + offset + 1 + ALIGNMENT - alignment) >> (1 * sizeof(io8t) + 8 * sizeof(io8t) * (sizeof(io8t) - alignment)))) |
-			((io32tv) (*(((io8t *) base) + offset + 2 + ALIGNMENT - alignment) >> (2 * sizeof(io8t) + 8 * sizeof(io8t) * (sizeof(io8t) - alignment)))) |
-			((io32tv) (*(((io8t *) base) + offset + 3 + ALIGNMENT - alignment) >> (3 * sizeof(io8t) + 8 * sizeof(io8t) * (sizeof(io8t) - alignment))));
-	}
+	memcpy(number.bytes, base + offset, sizeof(number));
 
 	return io_floatNL(number);
 }
 
-double io_getDoubleNL(const void *base, const size_t offset)
+double io_getDoubleNL(const char *base, const size_t offset)
 {
 	io64t number;
-	int alignment = offset % ALIGNMENT;
 
-	if(alignment == 0)
-	{
-		number.integer = ((io64t *) (((io8t *) base) + offset))->integer;
-	}
-	else
-	{
-		number.integer =
-			((io64tv) (*(((io8t *) base) + offset - alignment) << (8 * sizeof(io8t) * alignment))) |
-			((io64tv) (*(((io8t *) base) + offset + 0 + ALIGNMENT - alignment) >> (0 * sizeof(io8t) + 8 * sizeof(io8t) * (sizeof(io8t) - alignment)))) |
-			((io64tv) (*(((io8t *) base) + offset + 1 + ALIGNMENT - alignment) >> (1 * sizeof(io8t) + 8 * sizeof(io8t) * (sizeof(io8t) - alignment)))) |
-			((io64tv) (*(((io8t *) base) + offset + 2 + ALIGNMENT - alignment) >> (2 * sizeof(io8t) + 8 * sizeof(io8t) * (sizeof(io8t) - alignment)))) |
-			((io64tv) (*(((io8t *) base) + offset + 3 + ALIGNMENT - alignment) >> (3 * sizeof(io8t) + 8 * sizeof(io8t) * (sizeof(io8t) - alignment)))) |
-			((io64tv) (*(((io8t *) base) + offset + 4 + ALIGNMENT - alignment) >> (4 * sizeof(io8t) + 8 * sizeof(io8t) * (sizeof(io8t) - alignment)))) |
-			((io64tv) (*(((io8t *) base) + offset + 5 + ALIGNMENT - alignment) >> (5 * sizeof(io8t) + 8 * sizeof(io8t) * (sizeof(io8t) - alignment)))) |
-			((io64tv) (*(((io8t *) base) + offset + 6 + ALIGNMENT - alignment) >> (6 * sizeof(io8t) + 8 * sizeof(io8t) * (sizeof(io8t) - alignment)))) |
-			((io64tv) (*(((io8t *) base) + offset + 7 + ALIGNMENT - alignment) >> (7 * sizeof(io8t) + 8 * sizeof(io8t) * (sizeof(io8t) - alignment))));
-	}
+	memcpy(number.bytes, base + offset, sizeof(number));
 
 	return io_doubleNL(number);
 }
 
-void io_setIntNL(const void *base, const size_t offset, io32t integer)
+void io_setIntNL(char *base, const size_t offset, io32t integer)
 {
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-	io_setCharNL(base, offset + 3 * sizeof(io8t), (io8t) integer.bytes[3]);
-	io_setCharNL(base, offset + 2 * sizeof(io8t), (io8t) integer.bytes[2]);
-	io_setCharNL(base, offset + 1 * sizeof(io8t), (io8t) integer.bytes[1]);
-	io_setCharNL(base, offset + 0 * sizeof(io8t), (io8t) integer.bytes[0]);
-#else
-	io_setCharNL(base, offset + 0 * sizeof(io8t), (io8t) integer.bytes[0]);
-	io_setCharNL(base, offset + 1 * sizeof(io8t), (io8t) integer.bytes[1]);
-	io_setCharNL(base, offset + 2 * sizeof(io8t), (io8t) integer.bytes[2]);
-	io_setCharNL(base, offset + 3 * sizeof(io8t), (io8t) integer.bytes[3]);
-#endif
+	integer.integer = io_intNL(integer);
+
+	memcpy(base + offset, integer.bytes, sizeof(io32t));
 }
 
-void io_setShortNL(const void *base, const size_t offset, io16t integer)
+void io_setShortNL(char *base, const size_t offset, io16t integer)
 {
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-	io_setCharNL(base, offset + 1 * sizeof(io8t), (io8t) integer.bytes[1]);
-	io_setCharNL(base, offset + 0 * sizeof(io8t), (io8t) integer.bytes[0]);
-#else
-	io_setCharNL(base, offset + 0 * sizeof(io8t), (io8t) integer.bytes[0]);
-	io_setCharNL(base, offset + 1 * sizeof(io8t), (io8t) integer.bytes[1]);
-#endif
+	integer.integer = io_shortNL(integer);
+
+	memcpy(base + offset, integer.bytes, sizeof(io16t));
 }
 
-void io_setCharNL(const void *base, const size_t offset, io8t integer)
+void io_setCharNL(char *base, const size_t offset, io8t integer)
 {
-	int alignment = offset % ALIGNMENT;
-
 	integer = io_charNL(integer);
 
-	if(alignment == 0)
-	{
-		*((char *) (((unsigned char *) base) + offset)) = integer;
-	}
-	else
-	{
-		*((char *) (((unsigned char *) base) + offset - alignment)) &= 0xFF << 8 * (ALIGNMENT - alignment);
-		*((char *) (((unsigned char *) base) + offset - alignment)) |= integer >> 8 * alignment;
-		*((char *) (((unsigned char *) base) + offset + ALIGNMENT - alignment)) &= 0xFF >> 8 * alignment;
-		*((char *) (((unsigned char *) base) + offset + ALIGNMENT - alignment)) |= integer << 8 * (ALIGNMENT - alignment);
-	}
+	*(base + offset) = integer;
 }
 
-void io_setFloatNL(const void *base, const size_t offset, io32t number)
+void io_setFloatNL(char *base, const size_t offset, io32t number)
 {
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-	io_setCharNL(base, offset + 3 * sizeof(io8t), (io8t) number.bytes[3]);
-	io_setCharNL(base, offset + 2 * sizeof(io8t), (io8t) number.bytes[2]);
-	io_setCharNL(base, offset + 1 * sizeof(io8t), (io8t) number.bytes[1]);
-	io_setCharNL(base, offset + 0 * sizeof(io8t), (io8t) number.bytes[0]);
-#else
-	io_setCharNL(base, offset + 0 * sizeof(io8t), (io8t) number.bytes[0]);
-	io_setCharNL(base, offset + 1 * sizeof(io8t), (io8t) number.bytes[1]);
-	io_setCharNL(base, offset + 2 * sizeof(io8t), (io8t) number.bytes[2]);
-	io_setCharNL(base, offset + 3 * sizeof(io8t), (io8t) number.bytes[3]);
-#endif
+	number.value = io_floatNL(number);
+
+	memcpy(base + offset, number.bytes, sizeof(io32t));
 }
 
-void io_setDoubleNL(const void *base, const size_t offset, io64t number)
+void io_setDoubleNL(char *base, const size_t offset, io64t number)
 {
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-	io_setCharNL(base, offset + 7 * sizeof(io8t), (io8t) number.bytes[7]);
-	io_setCharNL(base, offset + 6 * sizeof(io8t), (io8t) number.bytes[6]);
-	io_setCharNL(base, offset + 5 * sizeof(io8t), (io8t) number.bytes[5]);
-	io_setCharNL(base, offset + 4 * sizeof(io8t), (io8t) number.bytes[4]);
-	io_setCharNL(base, offset + 3 * sizeof(io8t), (io8t) number.bytes[3]);
-	io_setCharNL(base, offset + 2 * sizeof(io8t), (io8t) number.bytes[2]);
-	io_setCharNL(base, offset + 1 * sizeof(io8t), (io8t) number.bytes[1]);
-	io_setCharNL(base, offset + 0 * sizeof(io8t), (io8t) number.bytes[0]);
-#else
-	io_setCharNL(base, offset + 0 * sizeof(io8t), (io8t) number.bytes[0]);
-	io_setCharNL(base, offset + 1 * sizeof(io8t), (io8t) number.bytes[1]);
-	io_setCharNL(base, offset + 2 * sizeof(io8t), (io8t) number.bytes[2]);
-	io_setCharNL(base, offset + 3 * sizeof(io8t), (io8t) number.bytes[3]);
-	io_setCharNL(base, offset + 4 * sizeof(io8t), (io8t) number.bytes[4]);
-	io_setCharNL(base, offset + 5 * sizeof(io8t), (io8t) number.bytes[5]);
-	io_setCharNL(base, offset + 6 * sizeof(io8t), (io8t) number.bytes[6]);
-	io_setCharNL(base, offset + 7 * sizeof(io8t), (io8t) number.bytes[7]);
-#endif
+	number.value = io_doubleNL(number);
+
+	memcpy(base + offset, number.bytes, sizeof(io64t));
 }

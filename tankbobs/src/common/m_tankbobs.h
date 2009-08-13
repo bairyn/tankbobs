@@ -104,8 +104,6 @@ int in_getKeys(lua_State *L);
 int in_keyPressed(lua_State *L);
 
 /* m_io.c */
-#define ALIGNMENT 4
-
 void io_init(lua_State *L);
 int io_getHomeDirectory(lua_State *L);
 
@@ -188,16 +186,16 @@ char io_charNL(io8t integer);
 float io_floatNL(io32t number);
 double io_doubleNL(io64t number);
 
-int io_getIntNL(const void *base, const size_t offset);
-short io_getShortNL(const void *base, const size_t offset);
-char io_getCharNL(const void *base, const size_t offset);
-float io_getFloatNL(const void *base, const size_t offset);
-double io_getDoubleNL(const void *base, const size_t offset);
-void io_setIntNL(const void *base, const size_t offset, io32t integer);
-void io_setShortNL(const void *base, const size_t offset, io16t integer);
-void io_setCharNL(const void *base, const size_t offset, io8t integer);
-void io_setFloatNL(const void *base, const size_t offset, io32t number);
-void io_setDoubleNL(const void *base, const size_t offset, io64t number);
+int io_getIntNL(const char *base, const size_t offset);
+short io_getShortNL(const char *base, const size_t offset);
+char io_getCharNL(const char *base, const size_t offset);
+float io_getFloatNL(const char *base, const size_t offset);
+double io_getDoubleNL(const char *base, const size_t offset);
+void io_setIntNL(char *base, const size_t offset, io32t integer);
+void io_setShortNL(char *base, const size_t offset, io16t integer);
+void io_setCharNL(char *base, const size_t offset, io8t integer);
+void io_setFloatNL(char *base, const size_t offset, io32t number);
+void io_setDoubleNL(char *base, const size_t offset, io64t number);
 
 /* macros to avoid casts */
 #ifdef __cplusplus
