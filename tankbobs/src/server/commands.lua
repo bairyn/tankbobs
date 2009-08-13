@@ -272,8 +272,8 @@ command =
 	matched = false
 }
 
-local help, exec, eval, exit, set, map, listSets, listMaps, echo, pause, restart, port, gameType, clientList, kick, ban, kickban, banList, unban, saveBans, loadBans
-local helpT, execT, evalT, exitT, setT, mapT, listSetsT, listMapsT, echoT, pauseT, restartT, portT, gameTypeT, clientListT, kickT, banT, kickbanT, banListT, unbanT, saveBansT, loadBansT
+local help, exec, eval, exit, set, map, listSets, listMaps, echo, pause, restart, port, gameType, clientList, kick, ban, kickban, banList, unban, saveBans, loadBans, instagib
+local helpT, execT, evalT, exitT, setT, mapT, listSetsT, listMapsT, echoT, pauseT, restartT, portT, gameTypeT, clientListT, kickT, banT, kickbanT, banListT, unbanT, saveBansT, loadBansT, instagibT
 
 function help(line)
 	local args = commands_args(line)
@@ -325,6 +325,7 @@ function help(line)
 			" -listMaps\n" ..
 			" -listSets\n" ..
 			" -gameType\n" ..
+			" -instagib\n" ..
 			" -exec\n" ..
 			" -eval\n" ..
 			" -clientList\n" ..
@@ -616,7 +617,7 @@ function listMapsT(line)
 		for k, v in pairs(c_tcm_current_set.maps) do
 			if v.name:find("^" .. common_escape(beginsWith)) then
 				table.insert(names, v.name)
-			elseif v.title:find("^" .. common_escape(beginsWith) then
+			elseif v.title:find("^" .. common_escape(beginsWith)) then
 				table.insert(names, v.name)
 			end
 		end
@@ -1104,6 +1105,47 @@ function loadBans(line)
 	s_printnl("loadBans: bans read from ", filename)
 end
 
+function instagib(line)
+	local args = commands_args(line)
+
+	if #args >= 2 then
+		local instagib = tostring(args[2]):lower()
+		local enabled = nil
+
+		local switch = instagib:sub(1, 1)
+		if switch == 't' then
+			enabled = true
+		elseif switch == 'f' then
+			enabled = false
+		elseif switch == 'y' then
+			enabled = true
+		elseif switch == 'n' then
+			enabled = false
+		elseif switch == 'o' then
+			local switch = instagib:sub(2, 2)
+			if switch == 'n' then
+				enabled = true
+			elseif switch == 'f' then
+				if instagib:sub(3, 3) == 'f' then
+					enabled = false
+				end
+			end
+		end
+
+		if enabled == nil then
+			return help("help instagib")
+		end
+
+		c_config_set("game.instagib", enabled)
+
+		s_printnl("instagib: instagib will be '", enabled and "enabled" or "disabled" ,"' next restart")
+	else
+		s_printnl("instagib: instagib is currently '", c_world_getInstagib() and "enabled" or "disabled", "'")
+	end
+end
+
+-- no auto completion for instagib
+
 commands =
 {
 	{
@@ -1246,7 +1288,7 @@ commands =
 		"Usage:\n" ..
 		" gameType (game type)\n" ..
 		"\n" ..
-		" Sets the game type"
+		" Sets the game type, or lists the current gameType when called without arguments"
 	},
 
 	{
@@ -1324,7 +1366,6 @@ commands =
 		unban,
 		unbanT,
 		"Usage:\n" ..
-		"\n" ..
 		" unban [banID]\n" ..
 		"\n" ..
 		" Removes a ban"
@@ -1335,7 +1376,6 @@ commands =
 		saveBans,
 		saveBansT,
 		"Usage:\n" ..
-		"\n" ..
 		" saveBans (filename)\n" ..
 		"\n" ..
 		" Writes all bans to the file given, or the bans file by default.  Tankbobs\n" ..
@@ -1348,10 +1388,20 @@ commands =
 		loadBans,
 		loadBansT,
 		"Usage:\n" ..
-		"\n" ..
 		" loadBans (filename)\n" ..
 		"\n" ..
 		" Reads bans from the file given, or the bans file by default.  All unsaved\n" ..
 		" bans will be lost!"
+	},
+
+	{
+		"instagib",
+		instagib,
+		instagibT,
+		"Usage:\n" ..
+		" instagib (true|false|yes|no|on|off)\n" ..
+		"\n" ,
+		" Sets instagib mode.  When called without arguments, will print the\n" ..
+		" current mode to console."
 	},
 }

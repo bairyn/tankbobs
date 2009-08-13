@@ -183,6 +183,7 @@ function st_internet_step(d)
 				if switch == nil then
 				elseif switch == 0xA0 then
 					local challenge = tankbobs.io_toInt(data:sub(1, 4)) data = data:sub(5)
+					local instagib = tankbobs.io_toChar(data:sub(1, 1)) data = data:sub(2)
 					local set = data:sub(1, data:find(tankbobs.io_fromChar(0x00)) - 1) data = data:sub(data:find(tankbobs.io_fromChar(0x00)) + 1)
 					local map = data:sub(1, data:find(tankbobs.io_fromChar(0x00)) - 1) data = data:sub(data:find(tankbobs.io_fromChar(0x00)) + 1)
 					local gameType = data:sub(1, data:find(tankbobs.io_fromChar(0x00)) - 1) data = data:sub(data:find(tankbobs.io_fromChar(0x00)) + 1)
@@ -191,6 +192,8 @@ function st_internet_step(d)
 					c_tcm_select_map(map)
 
 					c_world_setGameType(gameType)
+
+					c_world_setInstagib(instagib ~= 0x00 and true or false)
 
 					-- send the server the challenge response
 					tankbobs.n_newPacket(37)

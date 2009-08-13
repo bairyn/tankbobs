@@ -435,11 +435,12 @@ function client_step(d)
 
 								s_printnl("'", client.tank.name, "' connected from ", ip, ":", port)
 
-								-- send the challenge number, set, map and game type
+								-- send the challenge number, instagib, set, map and game type
 								tankbobs.n_newPacket(256)
 								tankbobs.n_writeToPacket(tankbobs.io_fromChar(0xA0))
 								client.challenge = math.random(0x00000000, 0x7FFFFFFF)
 								tankbobs.n_writeToPacket(tankbobs.io_fromInt(client.challenge))
+								tankbobs.n_writeToPacket(tankbobs.io_fromChar(c_world_getInstagib() and 0x01 or 0x00))
 								-- set and map as a NULL-terminated string
 								tankbobs.n_writeToPacket(c_tcm_current_set.name .. string.char(0x00))
 								tankbobs.n_writeToPacket(c_tcm_current_map.name .. string.char(0x00))

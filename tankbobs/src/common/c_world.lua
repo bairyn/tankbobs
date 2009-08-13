@@ -67,6 +67,7 @@ local c_world_testBody
 local behind
 
 local worldTime = 0
+local c_world_instagib = false
 local lastPowerupSpawnTime
 local nextPowerupSpawnPoint
 local worldInitialized = false
@@ -538,6 +539,14 @@ function c_world_getGameType()
 	return c_world_gameType
 end
 
+function c_world_setInstagib(state)
+	c_world_instagib = state
+end
+
+function c_world_getInstagib(state)
+	return c_world_instagib
+end
+
 function c_world_getGameTypeString(gameType)
 	local gameType = "deathmatch"
 
@@ -618,7 +627,7 @@ function c_world_spawnTank(tank)
 	tank.r = c_const_get("tank_defaultRotation")
 	tank.health = c_const_get("tank_health")
 	tank.shield = 0
-	if c_config_get("game.instagib") then
+	if c_world_getInstagib() then
 		tank.weapon = c_weapon_getByAltName("instagun").index
 	else
 		tank.weapon = c_weapon_getByAltName("default").index
@@ -1277,7 +1286,7 @@ function c_world_powerupSpawnPoint_step(d, powerupSpawnPoint)
 			for k, v in pairs(powerupSpawnPoint.enabledPowerups) do
 				if v then
 					if found then
-						if c_world_getPowerupTypeByName(k) and (not c_config_get("game.instagib") or c_world_getPowerupTypeByName(k).instagib) then
+						if c_world_getPowerupTypeByName(k) and (not c_world_getInstagib() or c_world_getPowerupTypeByName(k).instagib) then
 							powerupSpawnPoint.m.lastPowerup = k
 							powerup.powerupType = c_world_getPowerupTypeByName(k).index
 							break
@@ -1293,7 +1302,7 @@ function c_world_powerupSpawnPoint_step(d, powerupSpawnPoint)
 				for k, v in pairs(powerupSpawnPoint.enabledPowerups) do
 					if v then
 						if found then
-							if c_world_getPowerupTypeByName(k) and (not c_config_get("game.instagib") or c_world_getPowerupTypeByName(k).instagib) then
+							if c_world_getPowerupTypeByName(k) and (not c_world_getInstagib() or c_world_getPowerupTypeByName(k).instagib) then
 								powerupSpawnPoint.m.lastPowerup = k
 								powerup.powerupType = c_world_getPowerupTypeByName(k).index 
 								break
@@ -1607,8 +1616,8 @@ local function c_world_collide(tank, normal)
 	local vel = t_w_getLinearVelocity(tank.body)
 	local component = vel * -normal
 
-	if not c_config_get("game.instagib") and tank.shield <= 0 then
-		-- no collision damage in instagib mode or if any of the shield is left
+	if not c_world_getInstagib() and tank.shield <= 0 then
+		-- no collision damage in instagib mode or if any of the shield remains
 		if component >= c_const_get("tank_damageMinSpeed") then
 			local damage = c_const_get("tank_damageK") * (component - c_const_get("tank_damageMinSpeed"))
 

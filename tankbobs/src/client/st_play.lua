@@ -184,6 +184,9 @@ function st_play_init()
 	-- initialize the world
 	c_world_newWorld()
 
+	-- set instagib state
+	c_world_setInstagib(c_config_get("game.instagib"))
+
 	for i = 1, c_config_get("game.players") + c_config_get("game.computers") do
 		if i > c_const_get("max_tanks") then
 			break
