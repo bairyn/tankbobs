@@ -481,7 +481,7 @@ function client_step(d)
 									if client.challengeAttempts > c_const_get("client_maxChallengeAttempts") then
 										client_disconnect(client, "too many challenge attempts")
 									else
-										s_printnl("'", client.tank.name, "' tried to connect with invalid challenge '", challenge, "' (against ", client.challenge, ")'")
+										s_printnl("'", client.tank.name, "' tried to connect with invalid challenge '", challenge, "' (", bit.tohex(challenge), ") against '", client.challenge, "' (", bit.tohex(client.challenge), ")")
 									end
 								end
 							end
