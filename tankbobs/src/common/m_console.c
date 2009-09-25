@@ -50,7 +50,7 @@ static int consoleInitialized = FALSE;
 #define LOG_LINES (LINES - 4)
 #define LOG_COLS (COLS - 3)
 #define LOG_BUF_SIZE 65535
-#define INPUT_SCROLL 15
+#define INPUT_SCROLL (COLS - 6)
 #define LOG_SCROLL 5
 #define MAX_LOG_LINES 1024
 #define MAX_HISTORY_FIELDS 512
