@@ -749,8 +749,6 @@ int w_persistWorld(lua_State *L)
 	IO_SETCHARNL(buf, offset, lua_tointeger(L, -1)); offset += sizeof(io8t);
 	lua_pop(L, 1);
 
-	/* The above doesn't check for room in world buffer, but overflows should never happen since the data that the few (for now) integers take up is tiny */
-
 	void * const nums = buf + offset;
 
 	order = preArgs;
@@ -760,6 +758,8 @@ int w_persistWorld(lua_State *L)
 	numWalls         = lua_objlen(L, ++order); IO_SETSHORTNL(buf, offset, numWalls);         offset += sizeof(io16t);  /* number of walls is constant */
 	numControlPoints = lua_objlen(L, ++order); IO_SETSHORTNL(buf, offset, numControlPoints); offset += sizeof(io16t);  /* number of control points is constant */
 	numFlags         = lua_objlen(L, ++order); IO_SETSHORTNL(buf, offset, numFlags);         offset += sizeof(io16t);  /* number of flags is constant */
+
+	/* Note that nothing above doesn't check for bounds, but this should be OK since the buffer is big enough */
 
 	order = preArgs;
 
@@ -1449,10 +1449,12 @@ int w_unpersistWorld(lua_State *L)
 		lua_gettable(L, 4 + preArgs);
 		if(lua_isnoneornil(L, -1))
 		{
-			/* This should never happen, but play safe anyway */
+			/* This should not normally happen, but continue anyway */
 			offset += 6 * sizeof(io32t) + 2 * sizeof(io8t) + 3 * sizeof(io32t);
 
 			lua_pop(L, 1);
+
+			fprintf(stderr, "Warning: w_unpersistWorld: server sent too many walls in data: wall by index %d doesn't exist\n", i + 1);
 		}
 		else
 		{
@@ -1544,10 +1546,12 @@ int w_unpersistWorld(lua_State *L)
 		lua_gettable(L, 5  + preArgs);
 		if(lua_isnoneornil(L, -1))
 		{
-			/* This should never happen, but play safe anyway */
+			/* This should not normally happen, but continue anyway */
 			offset += 1 * sizeof(io8t);
 
 			lua_pop(L, 1);
+
+			fprintf(stderr, "Warning: w_unpersistWorld: server sent too many control points in data: control point by index %d doesn't exist\n", i + 1);
 		}
 		else
 		{
@@ -1583,10 +1587,12 @@ int w_unpersistWorld(lua_State *L)
 		lua_gettable(L, 6  + preArgs);
 		if(lua_isnoneornil(L, -1))
 		{
-			/* This should never happen, but play safe anyway */
+			/* This should not normally happen, but continue anyway */
 			offset += 2 * sizeof(io8t) + 2 * sizeof(io32t);
 
 			lua_pop(L, 1);
+
+			fprintf(stderr, "Warning: w_unpersistWorld: server sent too many flags in data: flag by index %d doesn't exist\n", i + 1);
 		}
 		else
 		{
@@ -1647,7 +1653,7 @@ int w_unpersistWorld(lua_State *L)
 				lua_setfield(L, -2, "dropped");
 			}
 
-			/* pop m and control point */
+			/* pop m and flag */
 			lua_pop(L, 2);
 		}
 	}
