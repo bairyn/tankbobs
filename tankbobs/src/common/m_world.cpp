@@ -868,6 +868,11 @@ int w_persistWorld(lua_State *L)
 			IO_SETINTNL(buf, offset, lua_tointeger(L, -1)); offset += sizeof(io32t);
 			lua_pop(L, 1);
 
+			/* set shield */
+			lua_getfield(L, -1, "shield");
+			IO_SETFLOATNL(buf, offset, lua_tonumber(L, -1)); offset += sizeof(io32t);
+			lua_pop(L, 1);
+
 			/* set rotation */
 			lua_getfield(L, -1, "r");
 			IO_SETFLOATNL(buf, offset, lua_tonumber(L, -1)); offset += sizeof(io32t);
@@ -1340,6 +1345,10 @@ int w_unpersistWorld(lua_State *L)
 		/* score */
 		lua_pushinteger(L, IO_GETINTNL(buf, offset)); offset += sizeof(io32t);
 		lua_setfield(L, -2, "score");
+
+		/* shield */
+		lua_pushnumber(L, IO_GETFLOATNL(buf, offset)); offset += sizeof(io32t);
+		lua_setfield(L, -2, "shield");
 
 		double rotation = IO_GETFLOATNL(buf, offset); offset += sizeof(io32t);
 		/* rotation */
