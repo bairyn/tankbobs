@@ -128,6 +128,8 @@ int io_fromChar(lua_State *L);
 typedef uint8_t io8t;
 
 #define io64_t io64t
+#define io64f_t io64ft
+typedef double io64ft;
 typedef uint64_t io64tv;
 typedef union io64u io64t;
 union io64u
@@ -145,6 +147,8 @@ union io64u
 };
 
 #define io32_t io32t
+#define io32f_t io32ft
+typedef float io32ft;
 typedef uint32_t io32tv;
 typedef union io32u io32t;
 union io32u
@@ -183,8 +187,8 @@ int io_fromDouble(lua_State *L);
 int io_intNL(io32t integer);
 short io_shortNL(io16t integer);
 char io_charNL(io8t integer);
-float io_floatNL(io32t number);
-double io_doubleNL(io64t number);
+float io_floatNL(io32ft num);
+double io_doubleNL(io64ft num);
 
 int io_getIntNL(const char *base, const size_t offset);
 short io_getShortNL(const char *base, const size_t offset);
@@ -194,22 +198,22 @@ double io_getDoubleNL(const char *base, const size_t offset);
 void io_setIntNL(char *base, const size_t offset, io32t integer);
 void io_setShortNL(char *base, const size_t offset, io16t integer);
 void io_setCharNL(char *base, const size_t offset, io8t integer);
-void io_setFloatNL(char *base, const size_t offset, io32t number);
-void io_setDoubleNL(char *base, const size_t offset, io64t number);
+void io_setFloatNL(char *base, const size_t offset, io32ft num);
+void io_setDoubleNL(char *base, const size_t offset, io64ft num);
 
-/* macros to avoid casts */
+/* macros for casts */
 #ifdef __cplusplus
 #define IO_SETINTNL(a, b, c)   io_setIntNL((a), (b), static_cast<io32t> (static_cast<io32tv> (c)))
 #define IO_SETSHORTNL(a, b, c)  io_setShortNL((a), (b), static_cast<io16t> (static_cast<io16tv> (c)))
 #define IO_SETCHARNL(a, b, c)   io_setCharNL((a), (b), (io8t) (c))
-#define IO_SETFLOATNL(a, b, c)  io_setFloatNL((a), (b), static_cast<io32t> (static_cast<io32tv> (c)))
-#define IO_SETDOUBLENL(a, b, c) io_setDoubleNL((a), (b), static_cast<io64t> (static_cast<io64tv> (c)))
+#define IO_SETFLOATNL(a, b, c)  io_setFloatNL((a), (b), static_cast<io32ft> (c))
+#define IO_SETDOUBLENL(a, b, c) io_setDoubleNL((a), (b), static_cast<io64ft> (c))
 #else
 #define IO_SETINTNL(a, b, c)   io_setIntNL((a), (b), (io32t) ((io32tv) (c)))
 #define IO_SETSHORTNL(a, b, c)  io_setShortNL((a), (b), (io16t) ((io16tv) (c)))
 #define IO_SETCHARNL(a, b, c)   io_setCharNL((a), (b), (io8t) (c))
-#define IO_SETFLOATNL(a, b, c)  io_setFloatNL((a), (b), (io32t) ((io32tv) (c)))
-#define IO_SETDOUBLENL(a, b, c) io_setDoubleNL((a), (b), (io64t) ((io64tv) (c)))
+#define IO_SETFLOATNL(a, b, c)  io_setFloatNL((a), (b), (io32ft) ((io32tv) (c)))
+#define IO_SETDOUBLENL(a, b, c) io_setDoubleNL((a), (b), (io64ft) ((io64tv) (c)))
 #endif
 /* keep things consistent */
 #define IO_GETINTNL io_getIntNL

@@ -1285,7 +1285,7 @@ int w_unpersistWorld(lua_State *L)
 				lua_call(L, 1, 0);
 
 				/* NOTE already ahead one io8t */
-				offset += 24 * sizeof(io8t) + 5 * sizeof(io32t) + 1 * sizeof(io16t) + 3 * sizeof(io32t) + 1 * sizeof(io16t);
+				offset += 24 * sizeof(io8t) + 5 * sizeof(io32t) + 1 * sizeof(io16t) + 3 * sizeof(io32t) + 1 * sizeof(io8t);
 
 				continue;
 			}

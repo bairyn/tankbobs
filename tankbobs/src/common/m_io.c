@@ -742,8 +742,12 @@ char io_charNL(io8t integer)
 	return integer;
 }
 
-float io_floatNL(io32t number)
+float io_floatNL(io32ft num)
 {
+	io32t number;
+
+	number.value = num;
+
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
 	CHARSWAP(number.bytes[0], number.bytes[3]);
 	CHARSWAP(number.bytes[1], number.bytes[2]);
@@ -752,8 +756,12 @@ float io_floatNL(io32t number)
 	return number.value;
 }
 
-double io_doubleNL(io64t number)
+double io_doubleNL(io64ft num)
 {
+	io64t number;
+
+	number.value = num;
+
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
 	CHARSWAP(number.bytes[0], number.bytes[7]);
 	CHARSWAP(number.bytes[1], number.bytes[6]);
@@ -801,7 +809,7 @@ float io_getFloatNL(const char *base, const size_t offset)
 
 	memcpy(number.bytes, base + offset, sizeof(number));
 
-	return io_floatNL(number);
+	return io_floatNL(number.value);
 }
 
 double io_getDoubleNL(const char *base, const size_t offset)
@@ -810,7 +818,7 @@ double io_getDoubleNL(const char *base, const size_t offset)
 
 	memcpy(number.bytes, base + offset, sizeof(number));
 
-	return io_doubleNL(number);
+	return io_doubleNL(number.value);
 }
 
 void io_setIntNL(char *base, const size_t offset, io32t integer)
@@ -834,16 +842,20 @@ void io_setCharNL(char *base, const size_t offset, io8t integer)
 	*(base + offset) = integer;
 }
 
-void io_setFloatNL(char *base, const size_t offset, io32t number)
+void io_setFloatNL(char *base, const size_t offset, io32ft num)
 {
-	number.value = io_floatNL(number);
+	io32t number;
+
+	number.value = io_floatNL(num);
 
 	memcpy(base + offset, number.bytes, sizeof(io32t));
 }
 
-void io_setDoubleNL(char *base, const size_t offset, io64t number)
+void io_setDoubleNL(char *base, const size_t offset, io64ft num)
 {
-	number.value = io_doubleNL(number);
+	io64t number;
+
+	number.value = io_doubleNL(num);
 
 	memcpy(base + offset, number.bytes, sizeof(io64t));
 }
