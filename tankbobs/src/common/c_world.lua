@@ -606,7 +606,8 @@ function c_world_tank_die(tank, t)
 	tank.killer = nil
 	tank.exists = false
 	tank.m.lastDieTime = t
-	tank.spawning = true
+
+	c_world_tank_spawn(tank)
 
 	tank.cd = {}
 end
@@ -642,6 +643,11 @@ function c_world_spawnTank(tank)
 		if v == tank then
 			index = k
 		end
+	end
+
+	if tank.body then
+		tankbobs.w_removeBody(tank.body)
+		tank.body = nil
 	end
 
 	-- add a physical body

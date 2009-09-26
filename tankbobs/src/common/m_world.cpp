@@ -829,7 +829,7 @@ int w_persistWorld(lua_State *L)
 	{
 		lua_getfield(L, -1, "exists");
 		if(lua_toboolean(L, -1) &&
-				offset + 25 * sizeof(io8t) + 6 * sizeof(io32t) + 1 * sizeof(io16t) + 3 * sizeof(io32t) + 1 * sizeof(io8t) < WORLDBUFSIZE)
+				offset + 25 * sizeof(io8t) + 7 * sizeof(io32t) + 1 * sizeof(io16t) + 3 * sizeof(io32t) + 1 * sizeof(io8t) < WORLDBUFSIZE)
 		{
 			static char name[21];
 
@@ -1295,7 +1295,7 @@ int w_unpersistWorld(lua_State *L)
 				lua_call(L, 1, 0);
 
 				/* NOTE already ahead one io8t */
-				offset += 24 * sizeof(io8t) + 6 * sizeof(io32t) + 1 * sizeof(io16t) + 3 * sizeof(io32t) + 1 * sizeof(io8t);
+				offset += 24 * sizeof(io8t) + 7 * sizeof(io32t) + 1 * sizeof(io16t) + 3 * sizeof(io32t) + 1 * sizeof(io8t);
 
 				continue;
 			}
@@ -1315,7 +1315,7 @@ int w_unpersistWorld(lua_State *L)
 			/* NOTE already ahead one io8t */
 			fprintf(stderr, "Warning: w_unpersistWorld: tank's body is NULL\n");
 
-			offset += 24 * sizeof(io8t) + 6 * sizeof(io32t) + 1 * sizeof(io16t) + 3 * sizeof(io32t) + 1 * sizeof(io8t);
+			offset += 24 * sizeof(io8t) + 7 * sizeof(io32t) + 1 * sizeof(io16t) + 3 * sizeof(io32t) + 1 * sizeof(io8t);
 
 			continue;
 		}
