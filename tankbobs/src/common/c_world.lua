@@ -583,8 +583,9 @@ end
 function c_world_tank_die(tank, t)
 	t = t or t_t_getTicks()
 
-	if tank.exists then
+	if tank.exists and tank.body then
 		tankbobs.w_removeBody(tank.body)
+		tank.body = nil
 	end
 
 	if tank.m.flag then

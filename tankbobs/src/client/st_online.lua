@@ -250,7 +250,7 @@ function online_readPackets(d)  -- local
 							-- so that the client sees what the server probably sees now
 							--]]
 							local tank = tankbobs.t_clone(c_world_getTanks()[connection.t])
-							if tank then
+							if tank and tank.exists then
 								c_world_step(d)
 								c_world_stepTime(timestamp + connection.offset)
 								c_world_getTanks()[connection.t] = tank
