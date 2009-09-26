@@ -53,8 +53,18 @@ do \
 	(b) = (a); \
 } while(0)
 
-void io_init(lua_State *l)
+void io_init(lua_State *L)
 {
+#define CHECKTIOSIZE(x, y) \
+	if(1 != sizeof(io8t)) \
+	{ \
+		fprintf(stderr, "Warning: size of '" #y "' was expected to be %d byte%s, but it is %d byte%s wide instead\n", x, x == 1 ? "" : "s", (int) sizeof(y), sizeof(y) == 1 ? "" : "s"); \
+	}
+
+	CHECKTIOSIZE(1, io8t);
+	CHECKTIOSIZE(2, io16t);
+	CHECKTIOSIZE(4, io32t);
+	CHECKTIOSIZE(8, io64t);
 }
 
 int io_getHomeDirectory(lua_State *L)

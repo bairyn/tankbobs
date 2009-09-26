@@ -763,6 +763,8 @@ int w_persistWorld(lua_State *L)
 
 	order = preArgs;
 
+#define DECREMENTNUM(x) IO_SETSHORTNL(reinterpret_cast<char *> (nums), (order - preArgs - 1) * sizeof(io16t), --(x))
+
 	/* projectiles */
 	/* char weaponTypeIndex; char owner; float rotation; float x; float y; float velX; float velY; float angularVelocity; */
 	++order;
@@ -813,7 +815,7 @@ int w_persistWorld(lua_State *L)
 		{
 			lua_pop(L, 1);
 
-			IO_SETSHORTNL(reinterpret_cast<char *> (nums), (order - preArgs - 1) * sizeof(io16t), --numProjectiles);
+			DECREMENTNUM(numProjectiles);
 		}
 
 		lua_pop(L, 1);
@@ -827,7 +829,7 @@ int w_persistWorld(lua_State *L)
 	{
 		lua_getfield(L, -1, "exists");
 		if(lua_toboolean(L, -1) &&
-				offset + 25 * sizeof(io8t) + 5 * sizeof(io32t) + 1 * sizeof(short) + 3 * sizeof(io32t) + 1 * sizeof(io8t) < WORLDBUFSIZE)
+				offset + 25 * sizeof(io8t) + 5 * sizeof(io32t) + 1 * sizeof(io16t) + 3 * sizeof(io32t) + 1 * sizeof(io8t) < WORLDBUFSIZE)
 		{
 			static char name[21];
 
@@ -908,7 +910,7 @@ int w_persistWorld(lua_State *L)
 		{
 			lua_pop(L, 1);
 
-			IO_SETSHORTNL(reinterpret_cast<char *> (nums), (order - preArgs - 1) * sizeof(io16t), --numTanks);
+			DECREMENTNUM(numTanks);
 		}
 
 		lua_pop(L, 1);
@@ -967,7 +969,7 @@ int w_persistWorld(lua_State *L)
 		{
 			lua_pop(L, 1);
 
-			IO_SETSHORTNL(reinterpret_cast<char *> (nums), (order - preArgs - 1) * sizeof(io16t), --numPowerups);
+			DECREMENTNUM(numPowerups);
 		}
 
 		lua_pop(L, 1);
@@ -1075,7 +1077,7 @@ int w_persistWorld(lua_State *L)
 		}
 		else
 		{
-			IO_SETSHORTNL(reinterpret_cast<char *> (nums), (order - preArgs - 1) * sizeof(io16t), --numControlPoints);
+			DECREMENTNUM(numControlPoints);
 		}
 
 		lua_pop(L, 1);
@@ -1121,7 +1123,7 @@ int w_persistWorld(lua_State *L)
 		}
 		else
 		{
-			IO_SETSHORTNL(reinterpret_cast<char *> (nums), (order - preArgs - 1) * sizeof(io16t), --numFlags);
+			DECREMENTNUM(numFlags);
 		}
 
 		lua_pop(L, 1);
@@ -1167,7 +1169,7 @@ int w_unpersistWorld(lua_State *L)
 	unsigned int numProjectiles    = IO_GETSHORTNL(buf, offset); offset += sizeof(io16t);
 	unsigned int numTanks          = IO_GETSHORTNL(buf, offset); offset += sizeof(io16t);
 	unsigned int numPowerups       = IO_GETSHORTNL(buf, offset); offset += sizeof(io16t);
-	/* These can remain constant, but the packet can be truncated */
+	/* These would remain constant, but the packet can be truncated */
 	/*unsigned int numWalls          = lua_objlen(L, 5);
 	unsigned int numControlPoints  = lua_objlen(L, 6);
 	unsigned int numFlags          = lua_objlen(L, 7);*/
@@ -1280,8 +1282,9 @@ int w_unpersistWorld(lua_State *L)
 				/* spawn the tank */
 				lua_pushvalue(L, 14 + preArgs);
 				lua_pushvalue(L, -2);
+				lua_call(L, 1, 0);
 
-				/* already ahead one io8t */
+				/* NOTE already ahead one io8t */
 				offset += 24 * sizeof(io8t) + 5 * sizeof(io32t) + 1 * sizeof(io16t) + 3 * sizeof(io32t) + 1 * sizeof(io16t);
 
 				continue;
@@ -1487,7 +1490,7 @@ int w_unpersistWorld(lua_State *L)
 				body->SetLinearVelocity(vel);
 
 				/* angular velocity */
-				body->SetAngularVelocity(io_floatNL(*((float *) data))); offset += sizeof(float);
+				body->SetAngularVelocity(IO_GETFLOATNL(buf, offset)); offset += sizeof(io32t);
 
 				/* path ID */
 				lua_getfield(L, -1, "m");
