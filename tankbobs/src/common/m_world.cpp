@@ -829,7 +829,7 @@ int w_persistWorld(lua_State *L)
 	{
 		lua_getfield(L, -1, "exists");
 		if(lua_toboolean(L, -1) &&
-				offset + 25 * sizeof(io8t) + 5 * sizeof(io32t) + 1 * sizeof(io16t) + 3 * sizeof(io32t) + 1 * sizeof(io8t) < WORLDBUFSIZE)
+				offset + 25 * sizeof(io8t) + 6 * sizeof(io32t) + 1 * sizeof(io16t) + 3 * sizeof(io32t) + 1 * sizeof(io8t) < WORLDBUFSIZE)
 		{
 			static char name[21];
 
@@ -861,6 +861,11 @@ int w_persistWorld(lua_State *L)
 			/* set clips */
 			lua_getfield(L, -1, "clips");
 			IO_SETCHARNL(buf, offset, lua_tointeger(L, -1)); offset += sizeof(io8t);
+			lua_pop(L, 1);
+
+			/* set score */
+			lua_getfield(L, -1, "score");
+			IO_SETINTNL(buf, offset, lua_tointeger(L, -1)); offset += sizeof(io32t);
 			lua_pop(L, 1);
 
 			/* set rotation */
@@ -1285,7 +1290,7 @@ int w_unpersistWorld(lua_State *L)
 				lua_call(L, 1, 0);
 
 				/* NOTE already ahead one io8t */
-				offset += 24 * sizeof(io8t) + 5 * sizeof(io32t) + 1 * sizeof(io16t) + 3 * sizeof(io32t) + 1 * sizeof(io8t);
+				offset += 24 * sizeof(io8t) + 6 * sizeof(io32t) + 1 * sizeof(io16t) + 3 * sizeof(io32t) + 1 * sizeof(io8t);
 
 				continue;
 			}
@@ -1299,6 +1304,16 @@ int w_unpersistWorld(lua_State *L)
 		lua_getfield(L, -1, "body");
 		b2Body *body = reinterpret_cast<b2Body *> (lua_touserdata(L, -1));
 		lua_pop(L, 1);
+
+		if(!body)
+		{
+			/* NOTE already ahead one io8t */
+			fprintf(stderr, "Warning: w_unpersistWorld: tank's body is NULL\n");
+
+			offset += 24 * sizeof(io8t) + 6 * sizeof(io32t) + 1 * sizeof(io16t) + 3 * sizeof(io32t) + 1 * sizeof(io8t);
+
+			continue;
+		}
 
 		/* name */
 		static char name[21];
@@ -1321,6 +1336,10 @@ int w_unpersistWorld(lua_State *L)
 		/* clips */
 		lua_pushinteger(L, IO_GETCHARNL(buf, offset)); offset += sizeof(io8t);
 		lua_setfield(L, -2, "clips");
+
+		/* score */
+		lua_pushinteger(L, IO_GETINTNL(buf, offset)); offset += sizeof(io32t);
+		lua_setfield(L, -2, "score");
 
 		double rotation = IO_GETFLOATNL(buf, offset); offset += sizeof(io32t);
 		/* rotation */
