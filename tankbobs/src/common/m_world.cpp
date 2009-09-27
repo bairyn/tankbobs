@@ -829,7 +829,7 @@ int w_persistWorld(lua_State *L)
 	{
 		lua_getfield(L, -1, "exists");
 		if(lua_toboolean(L, -1) &&
-				offset + 25 * sizeof(io8t) + 7 * sizeof(io32t) + 1 * sizeof(io16t) + 3 * sizeof(io32t) + 1 * sizeof(io8t) < WORLDBUFSIZE)
+				offset + 25 * sizeof(io8t) + 1 * sizeof(io16t) + 6 * sizeof(io32t) + 1 * sizeof(io16t) + 3 * sizeof(io32t) + 1 * sizeof(io8t) < WORLDBUFSIZE)
 		{
 			static char name[21];
 
@@ -865,7 +865,7 @@ int w_persistWorld(lua_State *L)
 
 			/* set score */
 			lua_getfield(L, -1, "score");
-			IO_SETINTNL(buf, offset, lua_tointeger(L, -1)); offset += sizeof(io32t);
+			IO_SETSHORTNL(buf, offset, lua_tointeger(L, -1)); offset += sizeof(io16t);
 			lua_pop(L, 1);
 
 			/* set shield */
@@ -1254,8 +1254,8 @@ int w_unpersistWorld(lua_State *L)
 		lua_pushvalue(L, -2);
 		lua_setfield(L, -2, "body");
 
-		/* pop 'm' and projectile */
-		lua_pop(L, 1);
+		/* pop body, 'm' and projectile */
+		lua_pop(L, 3);
 	}
 
 	/* Tanks */
@@ -1281,6 +1281,11 @@ int w_unpersistWorld(lua_State *L)
 			lua_pushvalue(L, 14 + preArgs);
 			lua_pushvalue(L, -2);
 			lua_call(L, 1, 0);
+
+			/* NOTE already ahead one io8t */
+			offset += 24 * sizeof(io8t) + 1 * sizeof(io16t) + 6 * sizeof(io32t) + 1 * sizeof(io16t) + 3 * sizeof(io32t) + 1 * sizeof(io8t);
+
+			continue;
 		}
 		else
 		{
@@ -1295,7 +1300,7 @@ int w_unpersistWorld(lua_State *L)
 				lua_call(L, 1, 0);
 
 				/* NOTE already ahead one io8t */
-				offset += 24 * sizeof(io8t) + 7 * sizeof(io32t) + 1 * sizeof(io16t) + 3 * sizeof(io32t) + 1 * sizeof(io8t);
+				offset += 24 * sizeof(io8t) + 1 * sizeof(io16t) + 6 * sizeof(io32t) + 1 * sizeof(io16t) + 3 * sizeof(io32t) + 1 * sizeof(io8t);
 
 				continue;
 			}
@@ -1315,7 +1320,7 @@ int w_unpersistWorld(lua_State *L)
 			/* NOTE already ahead one io8t */
 			fprintf(stderr, "Warning: w_unpersistWorld: tank's body is NULL\n");
 
-			offset += 24 * sizeof(io8t) + 7 * sizeof(io32t) + 1 * sizeof(io16t) + 3 * sizeof(io32t) + 1 * sizeof(io8t);
+			offset += 24 * sizeof(io8t) + 1 * sizeof(io16t) + 6 * sizeof(io32t) + 1 * sizeof(io16t) + 3 * sizeof(io32t) + 1 * sizeof(io8t);
 
 			continue;
 		}
@@ -1343,7 +1348,7 @@ int w_unpersistWorld(lua_State *L)
 		lua_setfield(L, -2, "clips");
 
 		/* score */
-		lua_pushinteger(L, IO_GETINTNL(buf, offset)); offset += sizeof(io32t);
+		lua_pushinteger(L, IO_GETSHORTNL(buf, offset)); offset += sizeof(io16t);
 		lua_setfield(L, -2, "score");
 
 		/* shield */

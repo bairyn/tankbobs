@@ -50,6 +50,10 @@
 		<keyLayout>default</keyLayout>
 		<krr>20</krr>  Key Refresh Rate
 		<musicVolume>0.6</musicVolume>
+		<online>
+			<stepAhead>true</stepAhead>
+			<unlagged>true</unlagged>
+		</online>
 		<port>0</port>
 		<renderer>
 			<font>sans</font>
@@ -97,8 +101,6 @@
 		<repeatRate>0.01785714285714285714286</repeatRate>  56 per second
 
 		<serverIP>127.0.0.1</serverIP>
-
-		<unlagged>true</unlagged>
 
 		<volume>0.8</volume>
 	</client>

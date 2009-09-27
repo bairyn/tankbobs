@@ -806,6 +806,10 @@ function c_weapon_getProjectiles()
 	return c_world_projectiles
 end
 
+function c_weapon_resetProjectiles()
+	c_world_projectiles = {}
+end
+
 function c_weapon_getWeapons()
 	return c_weapons
 end

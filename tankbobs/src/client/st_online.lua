@@ -230,7 +230,13 @@ function online_readPackets(d)  -- local
 						connection.t = tankbobs.io_toChar(data:sub(1, 1)) data = data:sub(2)
 						local tank = c_world_getTanks()[connection.t]
 						if not common_empty(c_weapon_getProjectiles()) then
-							c_world_projectiles = {}  -- TODO: better way of emptying table?
+							for k, v in pairs(c_weapon_getProjectiles()) do
+								if not v.collided and v.m.body then
+									tankbobs.w_removeBody(v.m.body)
+									v.m.body = nil
+								end
+							end
+							c_weapon_resetProjectiles()
 						end
 						local state
 						if tank then
@@ -240,8 +246,15 @@ function online_readPackets(d)  -- local
 						if tank then
 							tank.state = state
 						end
-						c_world_stepTime(timestamp)
-						if c_config_get("client.unlagged") then
+						if c_config_get("client.online.stepAhead") then
+							c_world_tank_setStepAhead(tank)
+						else
+							c_world_tank_setStepAhead(nil)
+							tank = tankbobs.t_clone(c_world_getTanks()[connection.t])
+						end
+						c_world_stepTime(timestamp) two step times?
+						local stepOffset = 0
+						if c_config_get("client.online.unlagged") then
 							--[[
 							-- step ahead twice for everything but current tank,
 							-- so that the client sees what the server will probably see
@@ -249,14 +262,18 @@ function online_readPackets(d)  -- local
 							-- otherwise, (if unlagged is disabled), only step ahead once,
 							-- so that the client sees what the server probably sees now
 							--]]
-							local tank = tankbobs.t_clone(c_world_getTanks()[connection.t])
 							if tank and tank.exists then
 								c_world_step(d)
-								c_world_stepTime(timestamp + connection.offset)
+								stepOffset = connection.offset
 								c_world_getTanks()[connection.t] = tank
-								tankbobs.w_setPosition(tank.body, tank.p)
-								tankbobs.w_setAngle(tank.body, tank.r)
 							end
+						end
+
+						c_world_stepTime(stepOffset)
+
+						if tank and tank.exists and tank.body then
+							tankbobs.w_setPosition(tank.body, tank.p)
+							tankbobs.w_setAngle(tank.body, tank.r)
 						end
 					end
 				end

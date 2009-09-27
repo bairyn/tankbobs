@@ -718,23 +718,31 @@ int io_fromDouble(lua_State *L)
 	return 1;
 }
 
-int io_intNL(io32t integer)
+int io_intNL(io32tv integer)
 {
+	io32t integer_;
+
+	integer_.integer = integer;
+
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-	CHARSWAP(integer.bytes[0], integer.bytes[3]);
-	CHARSWAP(integer.bytes[1], integer.bytes[2]);
+	CHARSWAP(integer_.bytes[0], integer_.bytes[3]);
+	CHARSWAP(integer_.bytes[1], integer_.bytes[2]);
 #endif
 
-	return integer.integer;
+	return integer_.integer;
 }
 
-short io_shortNL(io16t integer)
+short io_shortNL(io16tv integer)
 {
+	io16t integer_;
+
+	integer_.integer = integer;
+
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-	CHARSWAP(integer.bytes[0], integer.bytes[1]);
+	CHARSWAP(integer_.bytes[0], integer_.bytes[1]);
 #endif
 
-	return integer.integer;
+	return integer_.integer;
 }
 
 char io_charNL(io8t integer)
@@ -782,7 +790,7 @@ int io_getIntNL(const char *base, const size_t offset)
 
 	memcpy(integer.bytes, base + offset, sizeof(integer));
 
-	return io_intNL(integer);
+	return io_intNL(integer.integer);
 }
 
 short io_getShortNL(const char *base, const size_t offset)
@@ -791,7 +799,7 @@ short io_getShortNL(const char *base, const size_t offset)
 
 	memcpy(integer.bytes, base + offset, sizeof(integer));
 
-	return io_shortNL(integer);
+	return io_shortNL(integer.integer);
 }
 
 char io_getCharNL(const char *base, const size_t offset)
@@ -823,16 +831,20 @@ double io_getDoubleNL(const char *base, const size_t offset)
 
 void io_setIntNL(char *base, const size_t offset, io32t integer)
 {
-	integer.integer = io_intNL(integer);
+	io32t integer_;
 
-	memcpy(base + offset, integer.bytes, sizeof(io32t));
+	integer_.integer = io_intNL(integer.integer);
+
+	memcpy(base + offset, integer_.bytes, sizeof(io32t));
 }
 
 void io_setShortNL(char *base, const size_t offset, io16t integer)
 {
-	integer.integer = io_shortNL(integer);
+	io16t integer_;
 
-	memcpy(base + offset, integer.bytes, sizeof(io16t));
+	integer_.integer = io_shortNL(integer.integer);
+
+	memcpy(base + offset, integer_.bytes, sizeof(io16t));
 }
 
 void io_setCharNL(char *base, const size_t offset, io8t integer)

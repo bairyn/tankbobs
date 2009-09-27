@@ -1005,6 +1005,12 @@ function c_world_findClosestIntersection(start, endP)
 	return minDistance, minIntersection, typeOfTarget, target
 end
 
+local tankStepAhead = nil
+local history = {}
+function c_world_tank_setStepAhead(tank)
+	tankStepAhead = tank
+end
+
 function c_world_tank_step(d, tank)
 	local t = t_t_getTicks()
 
@@ -1812,13 +1818,13 @@ function c_world_setIterations()
 	return tankbobs.w_getIterations()
 end
 
-local timeStep = nil
+local timeStep = 0
 function c_world_step(d)
 	local t = timeStep or t_t_getTicks()
 	local f = 1 / (c_const_get("world_time") * c_config_get("game.timescale"))
 	local wd = common_FTM(c_const_get("world_fps")) * f
 
-	timeStep = nil
+	worldTime = worldTime - timeStep
 
 	if worldInitialized then
 		if paused then
@@ -1876,7 +1882,7 @@ function c_world_step(d)
 end
 
 function c_world_stepTime(t)
-	stepTime = t
+	timeStep = t
 end
 
 function c_world_getTanks()

@@ -184,8 +184,8 @@ union io16u
 int io_fromFloat(lua_State *L);
 int io_fromDouble(lua_State *L);
 
-int io_intNL(io32t integer);
-short io_shortNL(io16t integer);
+int io_intNL(io32tv integer);
+short io_shortNL(io16tv integer);
 char io_charNL(io8t integer);
 float io_floatNL(io32ft num);
 double io_doubleNL(io64ft num);
