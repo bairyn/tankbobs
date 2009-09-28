@@ -1005,10 +1005,72 @@ function c_world_findClosestIntersection(start, endP)
 	return minDistance, minIntersection, typeOfTarget, target
 end
 
+-- note: client-side prediction probably doesn't belong here by itself, but this code is going to be shared in a server-side unlagged implementation in the future.
+
 local tankStepAhead = nil
-local history = {}
+local record = true
+local history = nil
+local lastHistoryIndex = 0
 function c_world_tank_setStepAhead(tank)
 	tankStepAhead = tank
+
+	if not history then
+		history = {}  -- {time, state}
+
+		for i = 1, c_config_get("client.histSize") do
+			table.insert(history, {0, 0})
+		end
+	end
+end
+
+-- step ahead (ahead / forward only)
+function c_world_tank_stepAhead(fromTime, toTime)
+	local tank = tankStepAhead
+
+	if lastHistoryIndex < 1 then
+		return
+	end
+
+	record = false
+
+	local state = tank.state
+
+	local from, to
+	local i = lastHistoryIndex
+
+	while i ~= lastHistoryIndex + 1 do
+		if i < 1 then
+			i = c_config_get("client.histSize")
+		end
+
+		local h = history[i]
+
+		if h[1] <= toTime then
+			to = i
+		end
+
+		if h[1] <= fromTime then
+			from = i
+		end
+
+		if to and from then
+			break
+		end
+
+		i = i - 1
+	end
+
+	if to and from then
+		-- step tank from "from" to "to"
+		for i = from, to - 1 do
+			tank.state = history[i][2]
+			c_world_tank_step((history[i + 1][1] - history[i][1]) / c_const_get("world_time"), tank)
+		end
+	end
+
+	tank.state = state
+
+	record = true
 end
 
 function c_world_tank_step(d, tank)
@@ -1032,6 +1094,20 @@ function c_world_tank_step(d, tank)
 
 	if tank.health <= 0 then
 		return c_world_tank_die(tank, t)
+	end
+
+	if record and tank == tankStepAhead then
+		local h
+
+		lastHistoryIndex = lastHistoryIndex + 1
+		if lastHistoryIndex > c_config_get("client.histSize") then
+			lastHistoryIndex = 1
+		end
+
+		h = history[lastHistoryIndex]
+
+		h[1] = t
+		h[2] = tank.state
 	end
 
 	tank.p(t_w_getPosition(tank.body))

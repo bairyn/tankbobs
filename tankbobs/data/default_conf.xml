@@ -4,6 +4,7 @@
 		<cameraExtraFOV>25</cameraExtraFOV>
 		<cameraSpeed>5</cameraSpeed>
 		<fps>128</fps>
+		<histSize>128</histSize>  record 256 frames of input
 		<ifps>8</ifps>
 
 		These keys might conflict with the default menu keys:

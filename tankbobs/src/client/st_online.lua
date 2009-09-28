@@ -246,13 +246,20 @@ function online_readPackets(d)  -- local
 						if tank then
 							tank.state = state
 						end
+						if not tank then
+							tank = c_world_getTanks()[connection.t]
+						end
+						if not tank or not tank.exists or not tank.body then
+							return
+						end
+
+						local backupP = tankbobs.m_vec2(tank.p)
+						local backupR = tank.r
 						if c_config_get("client.online.stepAhead") then
 							c_world_tank_setStepAhead(tank)
 						else
 							c_world_tank_setStepAhead(nil)
-							tank = tankbobs.t_clone(c_world_getTanks()[connection.t])
 						end
-						c_world_stepTime(timestamp) two step times?
 						local stepOffset = 0
 						if c_config_get("client.online.unlagged") then
 							--[[
@@ -262,19 +269,23 @@ function online_readPackets(d)  -- local
 							-- otherwise, (if unlagged is disabled), only step ahead once,
 							-- so that the client sees what the server probably sees now
 							--]]
-							if tank and tank.exists then
-								c_world_step(d)
-								stepOffset = connection.offset
-								c_world_getTanks()[connection.t] = tank
+							if tank.exists then
+								stepOffset = connection.offset * 2
 							end
 						end
 
 						c_world_stepTime(stepOffset)
+						c_world_step(0)
 
-						if tank and tank.exists and tank.body then
+						tank.p = backupP
+						tank.r = backupR
+
+						if tank.exists and tank.body then
 							tankbobs.w_setPosition(tank.body, tank.p)
 							tankbobs.w_setAngle(tank.body, tank.r)
 						end
+
+						c_world_tank_stepAhead(timestamp, tankbobs.t_getTicks())
 					end
 				end
 			elseif switch == 0xA3 then

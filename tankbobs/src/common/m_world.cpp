@@ -1254,7 +1254,7 @@ int w_unpersistWorld(lua_State *L)
 		lua_pushvalue(L, -2);
 		lua_setfield(L, -2, "body");
 
-		/* pop body, 'm' and projectile */
+		/* pop 'm', body and projectile */
 		lua_pop(L, 3);
 	}
 
