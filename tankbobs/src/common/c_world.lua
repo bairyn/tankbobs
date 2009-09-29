@@ -1905,6 +1905,7 @@ function c_world_step(d)
 	local wd = common_FTM(c_const_get("world_fps")) * f
 
 	worldTime = worldTime - timeStep
+	timeStep = 0
 
 	if worldInitialized then
 		if paused then
