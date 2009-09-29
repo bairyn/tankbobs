@@ -270,7 +270,7 @@ function online_readPackets(d)  -- local
 							-- so that the client sees what the server probably sees now
 							--]]
 							if tank.exists then
-								stepOffset = connection.offset * 2
+								stepOffset = -connection.offset * 2
 							end
 						end
 
