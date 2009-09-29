@@ -1037,15 +1037,21 @@ function c_world_tank_stepAhead(fromTime, toTime)
 
 	local from, to
 	local i = lastHistoryIndex
+	local test = lastHistoryIndex + 1
 
-	while i ~= lastHistoryIndex + 1 do
+	if lastHistoryIndex == c_config_get("client.histSize") then
+		test = i
+		i = i - 1
+	end
+
+	while i ~= test do
 		if i < 1 then
 			i = c_config_get("client.histSize")
 		end
 
 		local h = history[i]
 
-		if h[1] <= toTime then
+		if not to and h[1] <= toTime then
 			to = i
 		end
 
@@ -1063,12 +1069,14 @@ function c_world_tank_stepAhead(fromTime, toTime)
 	if to and from then
 		-- step tank from "from" to "to"
 		for i = from, to - 1 do
-			tank.state = history[i][2]
-			local length = (history[i + 1][1] - history[i][1]) / c_const_get("world_time")
-			if length <= 0 then
-				length = 1.0E-6  -- inaccurate guess
-			end
-			c_world_tank_step(length, tank)
+			local breaking = false repeat
+				tank.state = history[i][2]
+				local length = (history[i + 1][1] - history[i][1]) / c_const_get("world_time")
+				if length <= 0 then
+					length = 1.0E-6  -- inaccurate guess
+				end
+				c_world_tank_step(length, tank)
+			until true if breaking then break end
 		end
 	end
 
