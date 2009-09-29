@@ -1900,7 +1900,7 @@ end
 
 local timeStep = 0
 function c_world_step(d)
-	local t = timeStep or t_t_getTicks()
+	local t = t_t_getTicks()
 	local f = 1 / (c_const_get("world_time") * c_config_get("game.timescale"))
 	local wd = common_FTM(c_const_get("world_fps")) * f
 
