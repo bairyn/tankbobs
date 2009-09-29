@@ -624,7 +624,7 @@ function c_world_tank_remove(tank)
 	end
 end
 
-function c_world_spawnTank(tank)
+local function c_world_spawnTank(tank)
 	tank.spawning = false
 	tank.r = c_const_get("tank_defaultRotation")
 	tank.health = c_const_get("tank_health")
