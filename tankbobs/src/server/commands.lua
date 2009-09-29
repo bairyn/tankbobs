@@ -429,31 +429,31 @@ function exec(line)
 		local toExec, err = loadstring(execString)
 
 		if not toExec then
-			s_print("exec: could not compile '", execString, "': ", err, "\n")
+			s_printnl("exec: could not compile '", execString, "': ", err)
 		else
 			local results = {pcall(toExec)}
 
 			if not results[1] then
-				s_print("exec: could not run '", execString, "': ", results[2], "\n")
+				s_printnl("exec: could not run '", execString, "': ", results[2])
 			else
 				table.remove(results, 1)
 				-- give the user the output
-				s_print("exec: code returned '", #results, "' results\n")
+				s_printnl("exec: code returned '", #results, "' results")
 				for _, v in pairs(results) do
 					if type(v) == "table" then
-						s_print(" ", tostring(v))
+						s_printnl(" ", tostring(v))
 						if #v > 4 then
-							s_print("   too many elements\n")
+							s_printnl("   too many elements")
 						else
 							for k, v in pairs(v) do
-								s_print("   ", k, " ", v, "\n")
+								s_printnl("   ", k, " ", v)
 							end
 						end
 					elseif type(v) == "string" or type(v) == "boolean" or type(v) == "nil" or type(v) == "number"  then
 						-- printable types
-						s_print(" ", type(v), ": ", tostring(v), "\n")
+						s_printnl(" ", type(v), ": ", tostring(v))
 					else
-						s_print(" ", tostring(v), "\n")
+						s_printnl(" ", tostring(v))
 					end
 				end
 			end
@@ -829,10 +829,10 @@ function pause(line)
 
 	if c_world_getPaused() then
 		c_world_setPaused(false)
-		s_print(" pause: the game has been unpaused")
+		s_printnl(" pause: the game has been unpaused")
 	else
 		c_world_setPaused(true)
-		s_print(" pause: the game has been paused")
+		s_printnl(" pause: the game has been paused")
 	end
 end
 
