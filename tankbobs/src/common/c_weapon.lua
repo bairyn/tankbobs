@@ -224,7 +224,7 @@ function c_weapon_init()
 	weapon.index = 4
 	weapon.name = "railgun"
 	weapon.altName = "railgun"
-	weapon.damage = 70
+	weapon.damage = 100
 	weapon.pellets = 1
 	weapon.speed = 524288
 	weapon.spread = tankbobs.m_radians(0)
@@ -336,7 +336,7 @@ function c_weapon_init()
 	weapon.index = 6
 	weapon.name = "coilgun"
 	weapon.altName = "coilgun"
-	weapon.damage = 69
+	weapon.damage = 85
 	weapon.pellets = 1
 	weapon.speed = 524288
 	weapon.spread = tankbobs.m_radians(0)
