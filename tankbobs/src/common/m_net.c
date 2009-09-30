@@ -38,11 +38,29 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 #define DEFAULTPORT   43210
 #define MAXPACKETSIZE 1024
 
+#define PACKETQUEUESIZE 1024
+
 static char      lastHostName[BUFSIZE] = {""};
 static UDPpacket *currentPacket   = NULL;
 static UDPpacket *listenPacket    = NULL;
 static UDPsocket currentSocket    = NULL;
 static Uint16    currentPort      = DEFAULTPORT;
+
+#if PACKETQUEUESIZE < 1
+#error PACKETQUEUESIZE must be positive
+#endif /* PACKETQUEUESIZE < 1 */
+typedef struct packetQueue_s packetQueue_t;
+static struct packetQueue_s
+{
+	int timestamp;
+	UDPpacket *packet;
+} sendQueue[PACKETQUEUESIZE] = {{0}}, receiveQueue[PACKETQUEUESIZE];
+static packetQueue_t * const sq = &sendQueue[0];
+static packetQueue_t * const rq = &receiveQueue[0];
+
+static int lastSentPacket = -1;
+static int lastReceivedPacket = -1;
+static int queueTime;
 
 void n_initNL(lua_State *L)
 {
@@ -135,6 +153,15 @@ int n_quit(lua_State *L)
 	return 0;
 }
 
+int n_setQueueTime(lua_State *L)
+{
+	CHECKINIT(init, L);
+
+	queueTime = luaL_checkinteger(L, 1);
+
+	return 0;
+}
+
 int n_newPacket(lua_State *L)
 {
 	int size;
@@ -202,6 +229,55 @@ int n_setPort(lua_State *L)
 	return 0;
 }
 
+static void n_sendOldestPacket(void)
+{
+	/* Note: error checking needs to be done before calling this function */
+	SDLNet_UDP_Send(currentSocket, -1, sq->packet);
+	SDLNet_FreePacket(sq->packet);
+	memmove(sq, sq + 1, sizeof(sendQueue) - sizeof(sendQueue[0]));
+	--lastSentPacket;
+}
+
+static void n_sendQueuedPackets(void)
+{
+	packetQueue_t *p = sq;
+	int t;
+
+	if(!queueTime)
+		return;
+
+	t = SDL_GetTicks();
+
+	while(lastSentPacket >= 0 && p->timestamp + queueTime <= t)
+	{
+		n_sendOldestPacket();
+	}
+}
+
+static void n_addPacketToSendQueue(void)
+{
+	int t;
+	packetQueue_t *p;
+
+	if(!currentPacket)
+		return;
+
+	t = SDL_GetTicks();
+
+	if(++lastSentPacket >= sizeof(sendQueue) / sizeof(sendQueue[0]))
+	{
+		/* send the oldest packet */
+		fprintf(stderr, "Warning: n_addPacketToSendQueue: no room left in queue for packet (%d); sending oldest packet (queued %dms ago, was going to send %dms into the future)\n", PACKETQUEUESIZE, t - sq->timestamp, sq->timestamp + queueTime - t);
+		n_sendOldestPacket();
+	}
+
+	p = &sendQueue[lastSentPacket];
+
+	p->timestamp = t;
+	p->packet = SDLNet_AllocPacket(currentPacket->maxlen);
+	memcpy(p->packet, currentPacket, sizeof(p->packet));
+}
+
 int n_sendPacket(lua_State *L)
 {
 	const char *hostName;
@@ -225,13 +301,70 @@ int n_sendPacket(lua_State *L)
 
 	SDLNet_ResolveHost(&currentPacket->address, hostName, currentPort);
 
-	SDLNet_UDP_Send(currentSocket, -1, currentPacket);
+	if(queueTime)
+	{
+		n_addPacketToSendQueue();
+
+		n_sendQueuedPackets();
+	}
+	else
+	{
+		SDLNet_UDP_Send(currentSocket, -1, currentPacket);
+	}
 
 	return 0;
 }
 
+static void n_addPacketToReceiveQueue(void)
+{
+	int t;
+	packetQueue_t *p;
+
+	if(!listenPacket)
+		return;
+
+	t = SDL_GetTicks();
+
+	if(++lastReceivedPacket >= sizeof(receiveQueue) / sizeof(receiveQueue[0]))
+	{
+		/* remove the oldest packet */
+		fprintf(stderr, "Warning: n_addPacketToReceiveQueue: no room left in queue for packet (%d); REMOVING oldest packet (queued %dms ago, was going to send %dms into the future)\n", PACKETQUEUESIZE, t - rq->timestamp, rq->timestamp + queueTime - t);
+		SDLNet_FreePacket(rq->packet);
+		memmove(rq, rq + 1, sizeof(receiveQueue) - sizeof(receiveQueue[0]));
+	}
+
+	p = &receiveQueue[lastReceivedPacket];
+
+	p->timestamp = t;
+	p->packet = SDLNet_AllocPacket(listenPacket->maxlen);
+	memcpy(p->packet, currentPacket, sizeof(p->packet));
+}
+
+static UDPpacket *n_receiveQueue(void)
+{
+	packetQueue_t *p = rq;
+	int t;
+
+	if(!queueTime)
+		return NULL;
+
+	t = SDL_GetTicks();
+
+	if(lastReceivedPacket >= 0 && p->timestamp + queueTime <= t)
+	{
+		UDPpacket *packet = p->packet;
+		memmove(rq, rq + 1, sizeof(receiveQueue) - sizeof(receiveQueue[0]));
+		--lastReceivedPacket;
+		return packet;
+	}
+
+	return NULL;
+}
+
 int n_readPacket(lua_State *L)
 {
+	UDPpacket *p = NULL;
+
 	CHECKINIT(init, L);
 
 	if(!currentSocket || !listenPacket)
@@ -241,32 +374,48 @@ int n_readPacket(lua_State *L)
 
 	if(SDLNet_UDP_Recv(currentSocket, listenPacket))
 	{
-		Uint16 port = listenPacket->address.port;
+		if(!queueTime)
+			p = listenPacket;
+		else
+			n_addPacketToReceiveQueue();
+	}
+
+	if(queueTime)
+	{
+		p = n_receiveQueue();
+	}
+
+	if(p)
+	{
+		Uint16 port = p->address.port;
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
 #else
-		unsigned char *p = (unsigned char *) &port;
+		unsigned char *port_ = (unsigned char *) &port;
 #endif
 		static char ip[BUFSIZE];
 
-		/* ip = SDLNet_PresentIP(&listenPacket->address); */
+		/* ip = SDLNet_PresentIP(&p->address); */
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-		sprintf(ip, "%d.%d.%d.%d", (listenPacket->address.host >> 24) & 0x000000FF, (listenPacket->address.host >> 16) & 0x000000FF, (listenPacket->address.host >> 8) & 0x000000FF, (listenPacket->address.host >> 0) & 0x000000FF);
+		sprintf(ip, "%d.%d.%d.%d", (p->address.host >> 24) & 0x000000FF, (p->address.host >> 16) & 0x000000FF, (p->address.host >> 8) & 0x000000FF, (p->address.host >> 0) & 0x000000FF);
 #else
-		sprintf(ip, "%d.%d.%d.%d", (listenPacket->address.host >> 0) & 0x000000FF, (listenPacket->address.host >> 8) & 0x000000FF, (listenPacket->address.host >> 16) & 0x000000FF, (listenPacket->address.host >> 24) & 0x000000FF);
+		sprintf(ip, "%d.%d.%d.%d", (p->address.host >> 0) & 0x000000FF, (p->address.host >> 8) & 0x000000FF, (p->address.host >> 16) & 0x000000FF, (p->address.host >> 24) & 0x000000FF);
 #endif
 
 		lua_pushboolean(L, TRUE);
 
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
 #else
-		p[0] ^= p[1];
-		p[1] ^= p[0];
-		p[0] ^= p[1];
+		port_[0] ^= port_[1];
+		port_[1] ^= port_[0];
+		port_[0] ^= port_[1];
 #endif
 
 		lua_pushstring(L, ip);
 		lua_pushinteger(L, port);
-		lua_pushlstring(L, (const char *) listenPacket->data, listenPacket->len);
+		lua_pushlstring(L, (const char *) p->data, p->len);
+
+		if(queueTime)
+			SDLNet_FreePacket(p);
 
 		return 4;
 	}

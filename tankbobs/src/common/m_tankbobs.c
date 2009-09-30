@@ -1006,6 +1006,8 @@ static const struct luaL_Reg tankbobs[] =
 		/* If initialization is successful, true is returned.   If not, false and the error message is returned.  The port can optionally be passed. */
 	{"n_quit", n_quit}, /* quit */
 		/* Nothing is returned; nothing is passed. */
+	{"n_setQueueTime", n_setQueueTime}, /* set packet queue time */
+		/* The packet queue time is passed as an integer.  Nothing is returned. */
 	{"n_newPacket", n_newPacket}, /* allocate a new packet (if the current packet hasn't been sent yet, it will be replaced) */
 		/* Nothing is returned.  The size of the packet is passed */
 	{"n_writeToPacket", n_writeToPacket}, /* write to the currently allocated packet */

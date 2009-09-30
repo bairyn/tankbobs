@@ -106,6 +106,12 @@
 		<volume>0.8</volume>
 	</client>
 
+	<common>
+		<online>
+			<packetDelay>0</packetDelay>
+		</online>
+	</common>
+
 	<debug>
 		<client>
 			<grabMouse>true</grabMouse>

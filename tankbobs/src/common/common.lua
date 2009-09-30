@@ -91,11 +91,15 @@ function common_init()
 
 	c_world_init()
 
+	common_misc_start()
+
 	c_mods_start()
 end
 
 function common_done()
 	c_mods_finish()
+
+	common_misc_finish()
 
 	c_world_done()
 
@@ -120,6 +124,13 @@ function common_done()
 	c_const_done()
 
 	tankbobs.t_quit()
+end
+
+function common_misc_start()
+	tankbobs.n_setQueueTime(c_config_get("common.online.packetDelay"))
+end
+
+function common_misc_finish()
 end
 
 function common_nil(...)

@@ -393,6 +393,7 @@ int a_setVolumeChunk(lua_State *L);
 void n_initNL(lua_State *L);
 int n_init(lua_State *L);
 int n_quit(lua_State *L);
+int n_setQueueTime(lua_State *L);
 int n_newPacket(lua_State *L);
 int n_writeToPacket(lua_State *L);
 int n_setPort(lua_State *L);
