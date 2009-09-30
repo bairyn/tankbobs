@@ -42,7 +42,9 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 
 static char      lastHostName[BUFSIZE] = {""};
 static UDPpacket *currentPacket   = NULL;
+static UDPpacket *currentPacketQ  = NULL;
 static UDPpacket *listenPacket    = NULL;
+static UDPpacket *listenPacketQ   = NULL;
 static UDPsocket currentSocket    = NULL;
 static Uint16    currentPort      = DEFAULTPORT;
 
@@ -53,7 +55,9 @@ typedef struct packetQueue_s packetQueue_t;
 static struct packetQueue_s
 {
 	int timestamp;
-	UDPpacket *packet;
+	IPaddress address;
+	int len;
+	char data[MAXPACKETSIZE];
 } sendQueue[PACKETQUEUESIZE] = {{0}}, receiveQueue[PACKETQUEUESIZE];
 static packetQueue_t * const sq = &sendQueue[0];
 static packetQueue_t * const rq = &receiveQueue[0];
@@ -121,6 +125,8 @@ int n_init(lua_State *L)
 	}
 
 	listenPacket = SDLNet_AllocPacket(MAXPACKETSIZE);
+	listenPacketQ = SDLNet_AllocPacket(MAXPACKETSIZE);
+	currentPacketQ = SDLNet_AllocPacket(MAXPACKETSIZE);
 
 	lua_pushboolean(L, TRUE);
 	return 1;
@@ -136,9 +142,21 @@ int n_quit(lua_State *L)
 		currentPacket = NULL;
 	}
 
+	if(currentPacketQ)
+	{
+		SDLNet_FreePacket(currentPacketQ);
+		currentPacket = NULL;
+	}
+
 	if(listenPacket)
 	{
 		SDLNet_FreePacket(listenPacket);
+		listenPacket = NULL;
+	}
+
+	if(listenPacket)
+	{
+		SDLNet_FreePacket(listenPacketQ);
 		listenPacket = NULL;
 	}
 
@@ -232,8 +250,10 @@ int n_setPort(lua_State *L)
 static void n_sendOldestPacket(void)
 {
 	/* Note: error checking needs to be done before calling this function */
-	SDLNet_UDP_Send(currentSocket, -1, sq->packet);
-	SDLNet_FreePacket(sq->packet);
+	currentPacketQ->len = sq->len;
+	memcpy(currentPacketQ->data, sq->data, sq->len);
+	memcpy(&currentPacketQ->address, &sq->address, sizeof(currentPacketQ->address));
+	SDLNet_UDP_Send(currentSocket, -1, currentPacketQ);
 	memmove(sq, sq + 1, sizeof(sendQueue) - sizeof(sendQueue[0]));
 	--lastSentPacket;
 }
@@ -274,8 +294,9 @@ static void n_addPacketToSendQueue(void)
 	p = &sendQueue[lastSentPacket];
 
 	p->timestamp = t;
-	p->packet = SDLNet_AllocPacket(currentPacket->maxlen);
-	memcpy(p->packet, currentPacket, sizeof(p->packet));
+	p->len = currentPacket->len;
+	memcpy(p->data, currentPacket->data, p->len);
+	memcpy(&p->address, &currentPacket->address, sizeof(p->address));
 }
 
 int n_sendPacket(lua_State *L)
@@ -329,36 +350,39 @@ static void n_addPacketToReceiveQueue(void)
 	{
 		/* remove the oldest packet */
 		fprintf(stderr, "Warning: n_addPacketToReceiveQueue: no room left in queue for packet (%d); REMOVING oldest packet (queued %dms ago, was going to send %dms into the future)\n", PACKETQUEUESIZE, t - rq->timestamp, rq->timestamp + queueTime - t);
-		SDLNet_FreePacket(rq->packet);
 		memmove(rq, rq + 1, sizeof(receiveQueue) - sizeof(receiveQueue[0]));
 	}
 
 	p = &receiveQueue[lastReceivedPacket];
 
 	p->timestamp = t;
-	p->packet = SDLNet_AllocPacket(listenPacket->maxlen);
-	memcpy(p->packet, currentPacket, sizeof(p->packet));
+	p->len = listenPacket->len;
+	memcpy(p->data, listenPacket->data, p->len);
+	memcpy(&p->address, &listenPacket->address, sizeof(p->address));
 }
 
-static UDPpacket *n_receiveQueue(void)
+static int n_receiveQueue(void)
 {
 	packetQueue_t *p = rq;
 	int t;
 
 	if(!queueTime)
-		return NULL;
+		return false;
 
 	t = SDL_GetTicks();
 
 	if(lastReceivedPacket >= 0 && p->timestamp + queueTime <= t)
 	{
-		UDPpacket *packet = p->packet;
+		listenPacketQ->len = p->len;
+		memcpy(listenPacketQ->data, p->data, p->len);
+		memcpy(&listenPacket->address, &p->address, sizeof(listenPacket->address));
 		memmove(rq, rq + 1, sizeof(receiveQueue) - sizeof(receiveQueue[0]));
 		--lastReceivedPacket;
-		return packet;
+
+		return true;
 	}
 
-	return NULL;
+	return false;
 }
 
 int n_readPacket(lua_State *L)
@@ -372,6 +396,9 @@ int n_readPacket(lua_State *L)
 		return 0;
 	}
 
+	/* check for packets that need to be sent */
+	n_sendQueuedPackets();
+
 	if(SDLNet_UDP_Recv(currentSocket, listenPacket))
 	{
 		if(!queueTime)
@@ -380,9 +407,9 @@ int n_readPacket(lua_State *L)
 			n_addPacketToReceiveQueue();
 	}
 
-	if(queueTime)
+	if(queueTime && n_receiveQueue())
 	{
-		p = n_receiveQueue();
+		p = listenPacketQ;
 	}
 
 	if(p)
@@ -413,9 +440,6 @@ int n_readPacket(lua_State *L)
 		lua_pushstring(L, ip);
 		lua_pushinteger(L, port);
 		lua_pushlstring(L, (const char *) p->data, p->len);
-
-		if(queueTime)
-			SDLNet_FreePacket(p);
 
 		return 4;
 	}
