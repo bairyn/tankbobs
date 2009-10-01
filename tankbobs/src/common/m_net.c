@@ -432,9 +432,12 @@ int n_readPacket(lua_State *L)
 
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
 #else
-		port_[0] ^= port_[1];
-		port_[1] ^= port_[0];
-		port_[0] ^= port_[1];
+		if(!queueTime)  // ?
+		{
+			port_[0] ^= port_[1];
+			port_[1] ^= port_[0];
+			port_[0] ^= port_[1];
+		}
 #endif
 
 		lua_pushstring(L, ip);
