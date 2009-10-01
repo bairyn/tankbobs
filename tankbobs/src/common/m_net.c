@@ -375,7 +375,7 @@ static int n_receiveQueue(void)
 	{
 		listenPacketQ->len = p->len;
 		memcpy(listenPacketQ->data, p->data, p->len);
-		memcpy(&listenPacket->address, &p->address, sizeof(listenPacket->address));
+		memcpy(&listenPacketQ->address, &p->address, sizeof(listenPacketQ->address));
 		memmove(rq, rq + 1, sizeof(receiveQueue) - sizeof(receiveQueue[0]));
 		--lastReceivedPacket;
 
@@ -429,8 +429,6 @@ int n_readPacket(lua_State *L)
 #endif
 
 		lua_pushboolean(L, TRUE);
-
-		/* FIXME: port is wrong when packets are queued? */
 
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
 #else
