@@ -209,7 +209,7 @@ function c_config_init()
 	end
 
 	function c_config_cheat_protect(key)
-		table.insert(cheats, key)
+		cheats[key] = true
 	end
 
 	local function c_config_save(key, value, config)
