@@ -392,7 +392,7 @@ local function play_testEnd()
 				end
 			end
 		end
-	if switch == CHASE then
+	elseif switch == CHASE then
 		local chaseLimit = c_config_get("game.chaseLimit")
 
 		if chaseLimit > 0 then
