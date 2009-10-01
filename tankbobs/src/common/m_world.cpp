@@ -1359,8 +1359,8 @@ int w_unpersistWorld(lua_State *L)
 #define T_STATE(x, y) \
 			do \
 			{ \
-				lua_pushboolean(L, state | x); \
-				lua_setfield(L, -1, y); \
+				lua_pushboolean(L, state & x); \
+				lua_setfield(L, -2, y); \
 			} while(0)
 			T_STATE(0x00000001, "tagged");
 			lua_getfield(L, -1, "cd");
