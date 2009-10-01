@@ -89,7 +89,7 @@ int t_isWindows(lua_State *L);
 int t_implode(lua_State *L);
 int t_explode(lua_State *L);
 int t_clone(lua_State *L);
-void t_emptyTable(lua_State *L, int tableIndex);
+int t_emptyTable(lua_State *L);
 
 /* m_input.c */
 void in_init(lua_State *L);

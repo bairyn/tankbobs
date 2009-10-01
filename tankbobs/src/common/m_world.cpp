@@ -1073,7 +1073,7 @@ int w_persistWorld(lua_State *L)
 		}
 		else
 		{
-			IO_SETSHORTNL(reinterpret_cast<char *> (nums), (order - preArgs - 1) * sizeof(io16t), --numWalls);
+			DECREMENTNUM(numWalls);
 		}
 
 		lua_pop(L, 1);
@@ -1208,16 +1208,14 @@ int w_unpersistWorld(lua_State *L)
 	unsigned int numFlags          = IO_GETSHORTNL(buf, offset); offset += sizeof(io16t);
 
 	/* remove projectiles before unpersisting */
-	/*lua_pushvalue(L, 1);*/
-	/*t_emptyTable(L, -1);*/
-	/*lua_pop(L, 1);*/
+	/*lua_pushvalue(L, 1 + preArgs);*/
+	/*lua_pushcfunction(L, t_emptyTable));*/
+	/*lua_call(L, 1, 0);*/
 	/* this should already be done in the game logic */
 
 	/* Projectiles */
 	for(int i = 0; i < numProjectiles; i++)
 	{
-		/* FIXME: unpersisting projectiles causes some memory corruption! */
-
 		lua_pushvalue(L, 7 + preArgs);
 		lua_pushvalue(L, 10 + preArgs);
 		lua_call(L, 1, 1);

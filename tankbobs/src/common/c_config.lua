@@ -53,9 +53,9 @@ function c_config_init()
 						v = oldV
 						v = string.match(v:lower(), "^[\n\t ]*nil[\n\t ]*$")
 						if v == nil then
-							v = nil
+							v = oldV
 						else
-							v = true
+							v = nil
 						end
 					else
 						v = true

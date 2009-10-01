@@ -569,15 +569,19 @@ int t_clone(lua_State *L)
 	return 1;
 }
 
-void t_emptyTable(lua_State *L, int tableIndex)
+int t_emptyTable(lua_State *L)
 {
+	CHECKINIT(init, L);
+
 	/* nil-iffies table */
-	while(lua_pushnil(L), lua_next(L, tableIndex))
+	while(lua_pushnil(L), lua_next(L, -2))
 	{
 		lua_pop(L, 1);
 		lua_pushnil(L);
-		lua_settable(L, tableIndex);
+		lua_settable(L, -3);
 	}
+
+	return 1;
 }
 
 static const struct luaL_Reg tankbobs[] =
@@ -612,6 +616,8 @@ static const struct luaL_Reg tankbobs[] =
 			extra whitespace. */
 	{"t_clone", t_clone}, /* clone the first passed table into the second passed table */
 		/* If the first argument is a boolean, it determines whether all vectors are copied */
+	{"t_emptyTable", t_emptyTable}, /* empty a table by setting all elements to nil */
+		/* Sets everything in the passed table to nil (doesn't really fields with numerical keys).  Returns nothing. */
 
 	/* m_input.c */
 	{"in_getEvents", in_getEvents}, /* store events in a userdata */

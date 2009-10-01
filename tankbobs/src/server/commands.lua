@@ -1156,6 +1156,7 @@ function c_set(line)
 	if #args >= minArgs then
 		if force or c_config_get(config, true) ~= nil then
 			c_config_set(config, val)
+			s_printnl("c_set: configurable '", config, "' set to '", tostring(val),"'")
 		else
 			s_printnl("c_set: configurable doesn't exist (see \"help c_set\")")
 		end
@@ -1455,12 +1456,13 @@ commands =
 		" even if it doesn't exist.  Setting too many non-existent variables can inflate the\n" ..
 		" configuration and make the server run slowly.\n" ..
 		"\n" ..
-		" This configurables are commonly set:\n" ..
+		" These configurables are commonly set:\n" ..
 		"   - game.fragLimit\n" ..
 		"   - game.chaseLimit\n" ..
 		"   - game.pointLimit (domination)\n" ..
 		"   - game.captureLimit\n" ..
 		"   - server.port\n" ..
+		"   - server.logFile (blank, false or nil to not record logs)\n" ..
 		"   - server.writeFileOnBan"
 	},
 

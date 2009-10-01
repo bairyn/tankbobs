@@ -143,8 +143,34 @@ function common_interrupt()
 	done = true  -- cleanly exit
 end
 
-function common_print(...)
-	print(...)
+function common_print(level, ...)
+	if level < 0 then
+		-- negative verbosity levels have the special meaning that it is possible that not everything has initialized, so print to standard output
+		io.stdout:write(...)
+	else
+		-- ignore verbosity level for now; TODO: <-
+
+		if client and not server then
+			io.stdout:write(...)
+		elseif not client and server then
+			s_printnl(...)
+		end
+	end
+end
+
+function common_printError(level, ...)
+	if level < 0 then
+		-- negative verbosity levels have the special meaning that it is possible that not everything has initialized, so print to stderr
+		io.stderr:write("(EE) ", ...)
+	else
+		-- ignore verbosity level for now; TODO: <-
+
+		if client and not server then
+			io.stderr:write("(EE) ", ...)
+		elseif not client and server then
+			s_printnl("(EE) ", ...)
+		end
+	end
 end
 
 function common_error(...)
@@ -279,16 +305,16 @@ function common_tConcat(t1, t2)
 	local r = {}
 
 	for k, v in pairs(t1) do
-		if type(v) == "table" and debug then
-			common_print("Warning: common_tConcat: copying a reference to a table")
+		if debug and type(v) == "table" then
+			common_printError(0, "Warning: common_tConcat: copying a reference to a table")
 		end
 
 		table.insert(r, v)
 	end
 
 	for k, v in pairs(t2) do
-		if type(v) == "table" and debug then
-			common_print("Warning: common_tConcat: copying a reference to a table")
+		if debug and type(v) == "table" then
+			common_printError(0, "Warning: common_tConcat: copying a reference to a table")
 		end
 
 		table.insert(r, v)

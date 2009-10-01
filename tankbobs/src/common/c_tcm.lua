@@ -390,7 +390,7 @@ local function c_tcm_private_get(f, i, t, ...)
 	return d
 end
 
-local function c_tcm_check_true_header(i)
+local function c_tcm_check_true_header(filename, i)
 	if c_tcm_private_get(tankbobs.io_getChar, i) ~= 0x00 then
 		error "Invalid map header"
 	elseif c_tcm_private_get(tankbobs.io_getChar, i) ~= 0x54 then
@@ -405,7 +405,7 @@ local function c_tcm_check_true_header(i)
 		error "Invalid map header"
 	elseif c_tcm_private_get(tankbobs.io_getChar, i) ~= c_const_get("tcm_version") then
 		i:seek("cur", -1)
-		io.stderr:write("Warning: map was built for tcm version '", tostring(c_tcm_private_get(tankbobs.io_getChar, i)), "'; you are using version '", tostring(c_const_get("tcm_version")), "'\n")
+		common_printError(-1, "Warning: map '", filename, "' was built for tcm version '", tostring(c_tcm_private_get(tankbobs.io_getChar, i)), "'; you are running version '", tostring(c_const_get("tcm_version")), "'\n")
 	end
 end
 
@@ -413,7 +413,7 @@ function c_tcm_read_map(map)
 	local r = c_tcm_map:new()
 
 	if c_const_get("debug") then
-		io.stdout:write("Parsing header of file: ", map, "\n")
+		common_print(-1, "Parsing header of file: ", map, "\n")
 	end
 
 	r.map = map
@@ -424,7 +424,7 @@ function c_tcm_read_map(map)
 		error("Could not open '" .. map .. "': " .. err .. " - error number: " .. errnum .. ".")
 	end
 	
-	c_tcm_check_true_header(i)
+	c_tcm_check_true_header(map, i)
 
 	r.name = c_tcm_private_get(tankbobs.io_getStrL, i, false, 64)
 	r.title = c_tcm_private_get(tankbobs.io_getStrL, i, false, 64)

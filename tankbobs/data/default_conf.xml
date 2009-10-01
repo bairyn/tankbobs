@@ -159,6 +159,7 @@
 
 	<server>
 		<fps>64</fps>
+		<logFile>games.log</logFile>  Make empty (or false) to not record to logs
 		<pfps>8</pfps>
 		<writeFileOnBan>false</writeFileOnBan>  if false, bans are written on restart
 	</server>

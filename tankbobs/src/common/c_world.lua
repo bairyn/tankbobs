@@ -620,7 +620,7 @@ function c_world_tank_die(tank, t)
 
 	tank.nextSpawnTime = t + c_const_get("world_time") * c_config_get("game.timescale") * c_const_get("tank_spawnTime")
 	if c_world_gameType == DEATHMATCH then
-		if tank.killer then
+		if tank.killer and tank.killer ~= tank then
 			tank.killer.score = tank.killer.score + 1
 		else
 			tank.score = tank.score - 1

@@ -93,10 +93,10 @@ function c_weapon_init()
 	weapon.projectileMaxCollisions = 0
 	weapon.projectileEndOnBody = true
 
-	weapon.projectileHull[1](0, 1)
-	weapon.projectileHull[2](0, 0)
-	weapon.projectileHull[3](1, 0)
-	weapon.projectileHull[4](1, 1)
+	weapon.projectileHull[1](-0.5,  0.5)
+	weapon.projectileHull[2](-0.5, -0.5)
+	weapon.projectileHull[3](0.5,  -0.5)
+	weapon.projectileHull[4](0.5,   0.5)
 	weapon.projectileTexturer[1](0, 1)
 	weapon.projectileTexturer[2](0, 0)
 	weapon.projectileTexturer[3](1, 0)
@@ -149,10 +149,10 @@ function c_weapon_init()
 	weapon.projectileMaxCollisions = 1
 	weapon.projectileEndOnBody = true
 
-	weapon.projectileHull[1](0, 1)
-	weapon.projectileHull[2](0, 0)
-	weapon.projectileHull[3](1, 0)
-	weapon.projectileHull[4](1, 1)
+	weapon.projectileHull[1](-0.5,  0.5)
+	weapon.projectileHull[2](-0.5, -0.5)
+	weapon.projectileHull[3](0.5,  -0.5)
+	weapon.projectileHull[4](0.5,   0.5)
 	weapon.projectileTexturer[1](0, 1)
 	weapon.projectileTexturer[2](0, 0)
 	weapon.projectileTexturer[3](1, 0)
@@ -178,7 +178,7 @@ function c_weapon_init()
 	weapon.texture = "shotgun.png"
 	weapon.fireSound = "shotgun2.wav"
 	weapon.reloadSound = {clip = "shotgun-reload.wav", initial = "shotgun-open.wav", final = "shotgun-close.wav"}
-	weapon.launchDistance = 6  -- normally 3, but an extra unit to prevent the bullets from colliding before they spread
+	weapon.launchDistance = 6  -- 3 extra units to prevent the bullets from colliding before they spread
 	weapon.aimAid = false
 	weapon.capacity = 4
 	weapon.clips = 8
@@ -204,10 +204,10 @@ function c_weapon_init()
 	weapon.projectileMaxCollisions = 0
 	weapon.projectileEndOnBody = true
 
-	weapon.projectileHull[1](0, 1)
-	weapon.projectileHull[2](0, 0)
-	weapon.projectileHull[3](1, 0)
-	weapon.projectileHull[4](1, 1)
+	weapon.projectileHull[1](-0.5,  0.5)
+	weapon.projectileHull[2](-0.5, -0.5)
+	weapon.projectileHull[3](0.5,  -0.5)
+	weapon.projectileHull[4](0.5,   0.5)
 	weapon.projectileTexturer[1](0, 1)
 	weapon.projectileTexturer[2](0, 0)
 	weapon.projectileTexturer[3](1, 0)
@@ -234,7 +234,7 @@ function c_weapon_init()
 	weapon.texture = "railgun.png"
 	weapon.fireSound = {"railgun.wav", "railgun2.wav"}
 	weapon.reloadSound = "railgun-reload.wav"
-	weapon.launchDistance = 3
+	weapon.launchDistance = 3.5  -- half unit to keep tank from shooting itself
 	weapon.aimAid = false
 	weapon.capacity = 2
 	weapon.clips = 4
@@ -260,10 +260,10 @@ function c_weapon_init()
 	weapon.projectileMaxCollisions = 0
 	weapon.projectileEndOnBody = true
 
-	weapon.projectileHull[1](0, 2)
-	weapon.projectileHull[2](0, 0)
-	weapon.projectileHull[3](2, 0)
-	weapon.projectileHull[4](2, 2)
+	weapon.projectileHull[1](-1,  1)
+	weapon.projectileHull[2](-1, -1)
+	weapon.projectileHull[3](1,  -1)
+	weapon.projectileHull[4](1,   1)
 	weapon.projectileTexturer[1](0, 1)
 	weapon.projectileTexturer[2](0, 0)
 	weapon.projectileTexturer[3](1, 0)
@@ -290,7 +290,7 @@ function c_weapon_init()
 	weapon.texture = "railgun.png"
 	weapon.fireSound = {"railgun.wav", "railgun2.wav"}
 	weapon.reloadSound = "railgun-reload.wav"
-	weapon.launchDistance = 3
+	weapon.launchDistance = 3.5  -- half unit to keep tank from shooting itself
 	weapon.aimAid = false
 	weapon.capacity = 0
 	weapon.clips = 0
@@ -316,10 +316,10 @@ function c_weapon_init()
 	weapon.projectileMaxCollisions = 0
 	weapon.projectileEndOnBody = true
 
-	weapon.projectileHull[1](0, 2)
-	weapon.projectileHull[2](0, 0)
-	weapon.projectileHull[3](2, 0)
-	weapon.projectileHull[4](2, 2)
+	weapon.projectileHull[1](-1,  1)
+	weapon.projectileHull[2](-1, -1)
+	weapon.projectileHull[3](1,  -1)
+	weapon.projectileHull[4](1,   1)
 	weapon.projectileTexturer[1](0, 1)
 	weapon.projectileTexturer[2](0, 0)
 	weapon.projectileTexturer[3](1, 0)
@@ -346,7 +346,7 @@ function c_weapon_init()
 	weapon.texture = "coilgun.png"
 	weapon.fireSound = {"coilgun.wav", "coilgun2.wav", "coilgun2.wav"}
 	weapon.reloadSound = "reload.wav"
-	weapon.launchDistance = 3
+	weapon.launchDistance = 3.5  -- half unit to keep tank from shooting itself
 	weapon.aimAid = true
 	weapon.capacity = 2
 	weapon.clips = 3
@@ -372,10 +372,10 @@ function c_weapon_init()
 	weapon.projectileMaxCollisions = 0
 	weapon.projectileEndOnBody = true
 
-	weapon.projectileHull[1](0, 2)
-	weapon.projectileHull[2](0, 0)
-	weapon.projectileHull[3](2, 0)
-	weapon.projectileHull[4](2, 2)
+	weapon.projectileHull[1](-1,  1)
+	weapon.projectileHull[2](-1, -1)
+	weapon.projectileHull[3](1,  -1)
+	weapon.projectileHull[4](1,   1)
 	weapon.projectileTexturer[1](0, 1)
 	weapon.projectileTexturer[2](0, 0)
 	weapon.projectileTexturer[3](1, 0)
@@ -402,7 +402,7 @@ function c_weapon_init()
 	weapon.texture = "saw.png"
 	weapon.fireSound = "saw.wav"
 	weapon.reloadSound = "railgun-reload.wav"
-	weapon.launchDistance = 2.1
+	weapon.launchDistance = 2.6  -- launch at center
 	weapon.aimAid = false
 	weapon.capacity = 64  -- can be used for 8 seconds
 	weapon.clips = 1
@@ -428,10 +428,10 @@ function c_weapon_init()
 	weapon.projectileMaxCollisions = 0
 	weapon.projectileEndOnBody = true
 
-	weapon.projectileHull[1](0, 1)
-	weapon.projectileHull[2](0, 0)
-	weapon.projectileHull[3](1, 0)
-	weapon.projectileHull[4](1, 1)
+	weapon.projectileHull[1](-0.5,  0.5)
+	weapon.projectileHull[2](-0.5, -0.5)
+	weapon.projectileHull[3](0.5,  -0.5)
+	weapon.projectileHull[4](0.5,   0.5)
 	weapon.projectileTexturer[1](0, 1)
 	weapon.projectileTexturer[2](0, 0)
 	weapon.projectileTexturer[3](1, 0)
@@ -807,7 +807,16 @@ function c_weapon_getProjectiles()
 end
 
 function c_weapon_resetProjectiles()
-	c_world_projectiles = {}
+	if not common_empty(c_world_projectiles) then
+		for k, v in pairs(c_world_projectiles) do
+			if not v.collided and v.m.body then
+				tankbobs.w_removeBody(v.m.body)
+				v.m.body = nil
+			end
+		end
+
+		tankbobs.t_emptyTable(c_world_projectiles)
+	end
 end
 
 function c_weapon_getWeapons()

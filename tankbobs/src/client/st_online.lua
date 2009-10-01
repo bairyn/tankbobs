@@ -229,15 +229,7 @@ function online_readPackets(d)  -- local
 						local timestamp = tankbobs.io_toInt(data:sub(1, 4)) data = data:sub(5)
 						connection.t = tankbobs.io_toChar(data:sub(1, 1)) data = data:sub(2)
 						local tank = c_world_getTanks()[connection.t]
-						if not common_empty(c_weapon_getProjectiles()) then
-							for k, v in pairs(c_weapon_getProjectiles()) do
-								if not v.collided and v.m.body then
-									tankbobs.w_removeBody(v.m.body)
-									v.m.body = nil
-								end
-							end
-							c_weapon_resetProjectiles()
-						end
+						c_weapon_resetProjectiles()
 						local state
 						if tank then
 							state = tank.state

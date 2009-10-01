@@ -48,6 +48,14 @@ function main_init()
 
 	c_state_new(main_state)
 
+	main_data = {}
+
+	if main_parseArgs(args) then
+		return
+	end
+
+	args = nil
+
 	while not done do
 		main_loop()
 	end
@@ -75,8 +83,32 @@ function s_print(...)
 	local p = {}
 	tankbobs.t_clone({...}, p)
 
+	local logFile = c_config_get("server.logFile", true)
+	if type(logFile) ~= "string" then
+		logFile = nil
+	else
+		logFile = c_const_get("user_dir") .. logFile
+	end
+
+	local fout, err
+	if logFile then
+		fout, err = io.open(logFile, "a")
+
+		if not fout then
+			tankbobs.c_print("Error: could not open '") tankbobs.c_print(logFile) tankbobs.c_print("' for appending\n")
+		end
+	end
+
 	for _, v in pairs(p) do
-		tankbobs.c_print(tostring(v))
+		local vs = tostring(v)
+		if fout then
+			fout:write(vs)
+		end
+		tankbobs.c_print(vs)
+	end
+
+	if fout then
+		fout:close()
 	end
 end
 
@@ -89,7 +121,7 @@ local s_print = s_print
 function s_printnl(...)
 	s_print(...)
 
-	tankbobs.c_print('\n')
+	s_print('\n')
 end
 s_println = s_printnl
 
@@ -133,4 +165,26 @@ function main_loop()
 	end
 
 	c_state_step(d)
+end
+
+function main_parseArgs(args)
+	local line
+
+	for k, v in pairs(args) do
+		if k > 1 then
+			if not line then
+				line = "eval " .. v
+			else
+				line = line .. " " .. v
+			end
+		end
+	end
+
+	if not line then
+		line = ""
+
+		return
+	end
+
+	return commands_command(table.concat())
 end
