@@ -242,7 +242,7 @@ int n_setPort(lua_State *L)
 {
 	CHECKINIT(init, L);
 
-	currentPort = luaL_checkinteger(L, 1);
+	currentPort = luaL_checkinteger(L, 1) & (0x0000FFFF);
 
 	return 0;
 }
@@ -430,14 +430,13 @@ int n_readPacket(lua_State *L)
 
 		lua_pushboolean(L, TRUE);
 
+		/* FIXME: port is wrong when packets are queued? */
+
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
 #else
-		if(!queueTime)  // ?
-		{
-			port_[0] ^= port_[1];
-			port_[1] ^= port_[0];
-			port_[0] ^= port_[1];
-		}
+		port_[0] ^= port_[1];
+		port_[1] ^= port_[0];
+		port_[0] ^= port_[1];
 #endif
 
 		lua_pushstring(L, ip);
