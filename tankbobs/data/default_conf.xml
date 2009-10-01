@@ -120,6 +120,7 @@
 
 	<game>
 		<captureLimit>10</captureLimit>
+		<chaseLimit>30</chaseLimit>
 		<computers>0</computers>
 		<defaultTankRed>   0.875 </defaultTankRed>  Orange
 		<defaultTankGreen> 0.750 </defaultTankGreen>

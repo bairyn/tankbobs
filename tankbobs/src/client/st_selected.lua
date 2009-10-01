@@ -44,14 +44,17 @@ function st_selected_init()
 		if type == "deathmatch" then
 		pos = 1
 		limitConfig = "game.fragLimit"
-	elseif type == "domination" then
+	elseif type == "chase" then
 		pos = 2
+		limitConfig = "game.chaseLimit"
+	elseif type == "domination" then
+		pos = 3
 		limitConfig = "game.pointLimit"
 	elseif type == "capturetheflag" then
-		pos = 3
+		pos = 4
 		limitConfig = "game.captureLimit"
 	end
-	gui_addLabel(tankbobs.m_vec2(50, 75), "Game type", nil, 1 / 3) gui_addCycle(tankbobs.m_vec2(75, 75), "Instagib", nil, st_selected_gameType, {"Deathmatch", "Domination", "Capture the Flag"}, pos, 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 75), "Game type", nil, 1 / 3) gui_addCycle(tankbobs.m_vec2(75, 75), "Instagib", nil, st_selected_gameType, {"Deathmatch", "Chase", "Domination", "Capture the Flag"}, pos, 0.5)
 	limit = gui_addLabel(tankbobs.m_vec2(50, 69), "Frag limit", nil, 1 / 3) limitInput = gui_addInput(tankbobs.m_vec2(75, 69), tostring(c_config_get(limitConfig)), nil, st_selected_limit, true, 4, 0.5)
 	gui_addLabel(tankbobs.m_vec2(50, 63), "Instagib", nil, 1 / 3) gui_addCycle(tankbobs.m_vec2(75, 63), "Instagib", nil, st_selected_instagib, {"No", "Yes"}, c_config_get("game.instagib") and 2 or 1, 0.5)
 	gui_addAction(tankbobs.m_vec2(75, 54), "Start", nil, st_selected_start)
@@ -105,12 +108,18 @@ function st_selected_gameType(widget, string, index)
 
 		c_config_set("game.gameType", "deathmatch")
 	elseif index == 2 then
+		limitConfig = "game.chaseLimit"
+		limitInput:setText(c_config_get(limitConfig))
+		limit:setText "Point Limit"
+
+		c_config_set("game.gameType", "chase")
+	elseif index == 3 then
 		limitConfig = "game.pointLimit"
 		limitInput:setText(c_config_get(limitConfig))
 		limit:setText "Point Limit"
 
 		c_config_set("game.gameType", "domination")
-	elseif index == 3 then
+	elseif index == 4 then
 		limitConfig = "game.captureLimit"
 		limitInput:setText(c_config_get(limitConfig))
 		limit:setText "Capture Limit"

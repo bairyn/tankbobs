@@ -885,7 +885,7 @@ function gameType(line)
 end
 
 do
-local gameTypes = {"deathmatch", "domination", "capturetheflag"}
+local gameTypes = {"deathmatch", "chase", "domination", "capturetheflag"}
 function gameTypeT(line)
 	local args = commands_args(line)
 	local gameType = commands_concatArgs(line, 2)

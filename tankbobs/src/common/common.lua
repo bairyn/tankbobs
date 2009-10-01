@@ -444,6 +444,7 @@ SPECIAL        = {}
 
 -- gametypes
 DEATHMATCH     = {}
+CHASE          = {}
 DOMINATION     = {}
 CAPTURETHEFLAG = {}
 

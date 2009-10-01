@@ -29,6 +29,7 @@ local tankbobs
 local tank_textures
 local tankBorder_textures
 local tankShield_textures
+local tankTagged_textures
 local powerup_textures
 local healthbar_texture 
 local healthbarBorder_texture 
@@ -102,6 +103,15 @@ function renderer_init()
 	c_const_set("tankShield_texturex3", 0.0, 1) c_const_set("tankShield_texturey3", 0.1, 1)  -- eliminate fuzzy top
 	c_const_set("tankShield_texturex4", 1.0, 1) c_const_set("tankShield_texturey4", 0.1, 1)  -- eliminate fuzzy top
 
+	c_const_set("tankTagged_renderx1", -2.33, 1) c_const_set("tankTagged_rendery1",  2.33, 1)
+	c_const_set("tankTagged_renderx2", -2.33, 1) c_const_set("tankTagged_rendery2", -2.33, 1)
+	c_const_set("tankTagged_renderx3",  2.33, 1) c_const_set("tankTagged_rendery3", -2.33, 1)
+	c_const_set("tankTagged_renderx4",  2.33, 1) c_const_set("tankTagged_rendery4",  2.33, 1)
+	c_const_set("tankTagged_texturex1", 1.0, 1) c_const_set("tankTagged_texturey1", 1.0, 1)
+	c_const_set("tankTagged_texturex2", 0.0, 1) c_const_set("tankTagged_texturey2", 1.0, 1)
+	c_const_set("tankTagged_texturex3", 0.0, 1) c_const_set("tankTagged_texturey3", 0.1, 1)  -- eliminate fuzzy top
+	c_const_set("tankTagged_texturex4", 1.0, 1) c_const_set("tankTagged_texturey4", 0.1, 1)  -- eliminate fuzzy top
+
 	c_const_set("color_red", {0.875, 0.125, 0.125, 1})
 	c_const_set("color_blue", {0.125, 0.125, 0.875, 1})
 	c_const_set("color_neutral", {0.2, 0.2, 0.33, 1})
@@ -112,6 +122,8 @@ function renderer_init()
 	tankBorder_textures = gl.GenTextures(1)
 	tankShield_listBase = gl.GenLists(1)
 	tankShield_textures = gl.GenTextures(1)
+	tankTagged_listBase = gl.GenLists(1)
+	tankTagged_textures = gl.GenTextures(1)
 
 	if tank_listBase == 0 or tankBorder_listBase == 0 then
 		error("st_play_init: could not generate lists: " .. gl.GetError())
@@ -171,6 +183,25 @@ function renderer_init()
 			gl.TexCoord(c_const_get("tankShield_texturex2"), c_const_get("tankShield_texturey2")) gl.Vertex(c_const_get("tankShield_renderx2"), c_const_get("tankShield_rendery2"))
 			gl.TexCoord(c_const_get("tankShield_texturex3"), c_const_get("tankShield_texturey3")) gl.Vertex(c_const_get("tankShield_renderx3"), c_const_get("tankShield_rendery3"))
 			gl.TexCoord(c_const_get("tankShield_texturex4"), c_const_get("tankShield_texturey4")) gl.Vertex(c_const_get("tankShield_renderx4"), c_const_get("tankShield_rendery4"))
+		gl.End()
+	gl.EndList()
+
+	gl.BindTexture("TEXTURE_2D", tankTagged_textures[1])
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_S", "REPEAT")
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_T", "REPEAT")
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_MIN_FILTER", "LINEAR")
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_MAG_FILTER", "LINEAR")
+	tankbobs.r_loadImage2D(c_const_get("tankTagged"), c_const_get("textures_default"))
+
+	gl.NewList(tankTagged_listBase, "COMPILE")
+		-- blend tank with color
+		gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
+		gl.BindTexture("TEXTURE_2D", tankTagged_textures[1])
+		gl.Begin("QUADS")
+			gl.TexCoord(c_const_get("tankTagged_texturex1"), c_const_get("tankTagged_texturey1")) gl.Vertex(c_const_get("tankTagged_renderx1"), c_const_get("tankTagged_rendery1"))
+			gl.TexCoord(c_const_get("tankTagged_texturex2"), c_const_get("tankTagged_texturey2")) gl.Vertex(c_const_get("tankTagged_renderx2"), c_const_get("tankTagged_rendery2"))
+			gl.TexCoord(c_const_get("tankTagged_texturex3"), c_const_get("tankTagged_texturey3")) gl.Vertex(c_const_get("tankTagged_renderx3"), c_const_get("tankTagged_rendery3"))
+			gl.TexCoord(c_const_get("tankTagged_texturex4"), c_const_get("tankTagged_texturey4")) gl.Vertex(c_const_get("tankTagged_renderx4"), c_const_get("tankTagged_rendery4"))
 		gl.End()
 	gl.EndList()
 
@@ -455,6 +486,8 @@ function renderer_done()
 
 	gl.DeleteLists(tank_listBase, 1)
 	gl.DeleteLists(tankBorder_listBase, 1)
+	gl.DeleteLists(tankShield_listBase, 1)
+	gl.DeleteLists(tankTagged_listBase, 1)
 	gl.DeleteLists(powerup_listBase, 1)
 	gl.DeleteLists(controlPoint_listBase, 1)
 	gl.DeleteLists(flag_listBase, 1)
@@ -462,6 +495,8 @@ function renderer_done()
 
 	gl.DeleteTextures(tank_textures)
 	gl.DeleteTextures(tankBorder_textures)
+	gl.DeleteTextures(tankShield_textures)
+	gl.DeleteTextures(tankTagged_textures)
 	gl.DeleteTextures(powerup_textures)
 	gl.DeleteTextures(controlPoint_texture)
 	gl.DeleteTextures(flag_texture)

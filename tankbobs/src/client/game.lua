@@ -105,7 +105,7 @@ function game_new()
 
 	-- scores
 	local function updateScores(widget)
-		if c_world_gameType == DEATHMATCH then
+		if not c_world_isTeamGameType() then
 			-- non-team scores
 
 			local length = 0
@@ -281,7 +281,7 @@ local function game_drawWorld(d)
 									c_config_set("game.player" .. tostring(k) .. ".color.a", c_config_get("game.defaultTankAlpha"))
 								end
 								local r, g, b, a = v.color.r, v.color.g, v.color.b, 1
-								if c_world_gameType ~= DEATHMATCH then
+								if c_world_isTeamGameType() then
 									-- team colors
 									local color = c_const_get(v.red and "color_red" or "color_blue")
 									r, g, b, a = color[1], color[2], color[3], color[4]
@@ -309,6 +309,12 @@ local function game_drawWorld(d)
 								gl.Color(1, 1, 1, v.shield / c_const_get("tank_boostShield"))
 								gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, v.shield / c_const_get("tank_boostShield"))
 								gl.CallList(tankShield_listBase)
+								-- tag
+								if c_world_gameType == CHASE and v.tagged then
+									gl.Color(1, 1, 1, 1)
+									gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, 1)
+									gl.CallList(tankTagged_listBase)
+								end
 
 								if v.weapon and not v.reloading and c_weapon_getWeapons()[v.weapon] then
 									gl.CallList(c_weapon_getWeapons()[v.weapon].m.p.list)

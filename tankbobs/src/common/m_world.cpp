@@ -829,7 +829,7 @@ int w_persistWorld(lua_State *L)
 	{
 		lua_getfield(L, -1, "exists");
 		if(lua_toboolean(L, -1) &&
-				offset + 25 * sizeof(io8t) + 1 * sizeof(io16t) + 6 * sizeof(io32t) + 1 * sizeof(io16t) + 3 * sizeof(io32t) + 1 * sizeof(io8t) < WORLDBUFSIZE)
+				offset + 22 * sizeof(io8t) + 1 * sizeof(io32t) + 3 * sizeof(io8t) + 1 * sizeof(io16t) + 6 * sizeof(io32t) + 1 * sizeof(io16t) + 3 * sizeof(io32t) + 1 * sizeof(io8t) < WORLDBUFSIZE)
 		{
 			static char name[21];
 
@@ -847,6 +847,25 @@ int w_persistWorld(lua_State *L)
 			{
 				IO_SETCHARNL(buf, offset, name[i]); offset += sizeof(io8t);
 			}
+
+			/* set misc-state */
+			int state = 0x00000000;
+#define T_STATE(x, y) \
+			do \
+			{ \
+				lua_getfield(L, -1, y); \
+				if(lua_toboolean(L, -1)) \
+					state |= x; \
+				lua_pop(L, 1); \
+			} while(0)
+			T_STATE(0x00000001, "tagged");
+			lua_getfield(L, -1, "cd");
+			T_STATE(0x00000002, "aimAid");
+			T_STATE(0x00000004, "acceleration");
+			lua_pop(L, 1);
+#undef T_STATE
+
+			IO_SETINTNL(buf, offset, state); offset += sizeof(io32t);
 
 			/* set weapon */
 			lua_getfield(L, -1, "weapon");
@@ -1283,7 +1302,7 @@ int w_unpersistWorld(lua_State *L)
 			lua_call(L, 1, 0);
 
 			/* NOTE already ahead one io8t */
-			offset += 24 * sizeof(io8t) + 1 * sizeof(io16t) + 6 * sizeof(io32t) + 1 * sizeof(io16t) + 3 * sizeof(io32t) + 1 * sizeof(io8t);
+			offset += 21 * sizeof(io8t) + 1 * sizeof(io32t) + 3 * sizeof(io8t) + 1 * sizeof(io16t) + 6 * sizeof(io32t) + 1 * sizeof(io16t) + 3 * sizeof(io32t) + 1 * sizeof(io8t);
 
 			continue;
 		}
@@ -1300,7 +1319,7 @@ int w_unpersistWorld(lua_State *L)
 				lua_call(L, 1, 0);
 
 				/* NOTE already ahead one io8t */
-				offset += 24 * sizeof(io8t) + 1 * sizeof(io16t) + 6 * sizeof(io32t) + 1 * sizeof(io16t) + 3 * sizeof(io32t) + 1 * sizeof(io8t);
+				offset += 21 * sizeof(io8t) + 1 * sizeof(io32t) + 3 * sizeof(io8t) + 1 * sizeof(io16t) + 6 * sizeof(io32t) + 1 * sizeof(io16t) + 3 * sizeof(io32t) + 1 * sizeof(io8t);
 
 				continue;
 			}
@@ -1320,7 +1339,7 @@ int w_unpersistWorld(lua_State *L)
 			/* NOTE already ahead one io8t */
 			fprintf(stderr, "Warning: w_unpersistWorld: tank's body is NULL\n");
 
-			offset += 24 * sizeof(io8t) + 1 * sizeof(io16t) + 6 * sizeof(io32t) + 1 * sizeof(io16t) + 3 * sizeof(io32t) + 1 * sizeof(io8t);
+			offset += 21 * sizeof(io8t) + 1 * sizeof(io32t) + 3 * sizeof(io8t) + 1 * sizeof(io16t) + 6 * sizeof(io32t) + 1 * sizeof(io16t) + 3 * sizeof(io32t) + 1 * sizeof(io8t);
 
 			continue;
 		}
@@ -1334,6 +1353,21 @@ int w_unpersistWorld(lua_State *L)
 		}
 		lua_pushstring(L, name);
 		lua_setfield(L, -2, "name");
+
+		/* misc-state */
+		int state = IO_GETINTNL(buf, offset); offset += sizeof(io32t);
+#define T_STATE(x, y) \
+			do \
+			{ \
+				lua_pushboolean(L, state | x); \
+				lua_setfield(L, -1, y); \
+			} while(0)
+			T_STATE(0x00000001, "tagged");
+			lua_getfield(L, -1, "cd");
+			T_STATE(0x00000002, "aimAid");
+			T_STATE(0x00000004, "acceleration");
+			lua_pop(L, 1);
+#undef T_STATE
 
 		/* weapon */
 		lua_pushinteger(L, IO_GETCHARNL(buf, offset)); offset += sizeof(io8t);

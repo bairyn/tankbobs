@@ -147,6 +147,9 @@ function c_world_init()
 	c_const_set("powerup_pushAngle", math.pi / 4, 1)
 	c_const_set("powerup_static", false, 1)
 
+	c_const_set("game_chasePointTime", 10, 1)
+	c_const_set("game_tagProtection", 0.2, 1)
+
 	-- hull of tank facing right
 	c_const_set("tank_hullx1", -2.0, 1) c_const_set("tank_hully1",  2.0, 1)
 	c_const_set("tank_hullx2", -2.0, 1) c_const_set("tank_hully2", -2.0, 1)
@@ -383,6 +386,7 @@ c_world_tank =
 	shotgunReloadState = nil,
 	red = false,
 	color = {},
+	tagged = false,
 
 	cd = {},  -- data cleared on death
 
@@ -436,6 +440,8 @@ function c_world_newWorld()
 	local switch = c_config_get("game.gameType")
 	if switch == "deathmatch" then
 		c_world_gameType = DEATHMATCH
+	elseif switch == "chase" then
+		c_world_gameType = CHASE
 	elseif switch == "domination" then
 		c_world_gameType = DOMINATION
 	elseif switch == "capturetheflag" then
@@ -539,6 +545,20 @@ function c_world_getGameType()
 	return c_world_gameType
 end
 
+function c_world_isTeamGameType(gameType)
+	if gameType == DEATHMATCH then
+		return false
+	elseif gameType == CHASE then
+		return false
+	elseif gameType == DOMINATION then
+		return true
+	elseif gameType == CAPTURETHEFLAG then
+		return true
+	else
+		return false
+	end
+end
+
 function c_world_setInstagib(state)
 	c_world_instagib = state
 end
@@ -553,6 +573,8 @@ function c_world_getGameTypeString(gameType)
 	local switch = c_world_getGameType()
 	if switch == DEATHMATCH then
 		gameType = "deathmatch"
+	elseif switch == CHASE then
+		gameType = "chase"
 	elseif switch == DOMINATION then
 		gameType = "domination"
 	elseif switch == CAPTURETHEFLAG then
@@ -597,15 +619,35 @@ function c_world_tank_die(tank, t)
 	end
 
 	tank.nextSpawnTime = t + c_const_get("world_time") * c_config_get("game.timescale") * c_const_get("tank_spawnTime")
-	if tank.killer then
-		tank.killer.score = tank.killer.score + 1
-	else
-		tank.score = tank.score - 1
+	if c_world_gameType == DEATHMATCH then
+		if tank.killer then
+			tank.killer.score = tank.killer.score + 1
+		else
+			tank.score = tank.score - 1
+		end
 	end
 	tank.shield = 0
 	tank.killer = nil
 	tank.exists = false
 	tank.m.lastDieTime = t
+
+	local tagged = false
+	for _, v in pairs(c_world_tanks) do
+		if v.tagged then
+			tagged = true
+			break
+		end
+	end
+
+	if not tagged then
+		-- reset timer
+		for _, v in pairs(c_world_tanks) do
+			tank.cd.lastChasePoint = t
+		end
+
+		-- tag the first person to die
+		tank.tagged = true
+	end
 
 	c_world_tank_spawn(tank)
 
@@ -1124,6 +1166,25 @@ function c_world_tank_step(d, tank)
 
 	tank.p(t_w_getPosition(tank.body))
 
+	if c_world_gameType == CHASE then
+		-- search for another tagged player
+		local tagged = false
+		for _, v in pairs(c_world_tanks) do
+			if v.tagged then
+				tagged = true
+				break
+			end
+		end
+
+		if not tank.cd.lastChasePoint then
+			tank.cd.lastChasePoint = t
+		elseif tank.cd.lastChasePoint + c_const_get("game_chasePointTime") * c_const_get("world_time") * c_config_get("game.timescale") <= t and not tank.tagged and tagged then
+			-- reward a point every 10 seconds alive while not tagged
+			tank.cd.lastChasePoint = t
+			tank.score = tank.score + 1
+		end
+	end
+
 	local vel = t_w_getLinearVelocity(tank.body)
 
 	if bit.band(tank.state, SPECIAL) ~= 0 then
@@ -1177,7 +1238,7 @@ function c_world_tank_step(d, tank)
 				newVel.R = newVel.R + acceleration
 				newVel.t = tank.r
 				if vel.R >= tank_rotationChangeMinSpeed * speedK then
-					-- interpolate in the right direction
+					-- interpolate in the correct direction
 					vel.t    = math.fmod(vel.t, 2 * math.pi)
 					newVel.t = math.fmod(newVel.t, 2 * math.pi)
 					if        vel.t - newVel.t > math.pi then
@@ -1804,6 +1865,30 @@ function c_world_contactListener(shape1, shape2, body1, body2, position, separat
 			end
 		end
 	end
+
+	if c_world_gameType == CHASE then
+		-- tag another player
+		if c_world_isTank(body1) and c_world_isTank(body2) then
+			local tank, tank2 = c_world_isTank(body1), c_world_isTank(body2)
+
+			local taggedTank, otherTank = nil, nil
+
+			if tank.tagged then
+				taggedTank, otherTank = tank, tank2
+			elseif tank2.tagged then
+				taggedTank, otherTank = tank2, tank
+			end
+
+			if taggedTank and otherTank then
+				if not otherTank.m.tagProtection or otherTank.m.tagProtection < t then
+					taggedTank.cd.lastChasePoint = t_t_getTicks()
+					taggedTank.tagged = false
+					otherTank.tagged = true
+					otherTank.m.tagProtection = t_t_getTicks() + c_const_get("game_tagProtection") * c_const_get("world_time") * c_config_get("game.timescale")
+				end
+			end
+		end
+	end
 end
 
 local function c_world_private_resetWorldTimers()
@@ -1818,6 +1903,10 @@ local function c_world_private_resetWorldTimers()
 
 		if v.nextSpawnTime then
 			v.nextSpawnTime = t + c_const_get("world_time") * c_config_get("game.timescale") * c_const_get("tank_spawnTime")
+		end
+
+		if v.cd.lastChasePoint then
+			v.cd.lastChasePoint = t
 		end
 	end
 
@@ -1851,6 +1940,10 @@ local function c_world_private_offsetWorldTimers(d)
 
 		if v.nextSpawnTime then
 			v.nextSpawnTime = v.nextSpawnTime + d
+		end
+
+		if v.cd.lastChasePoint then
+			v.cd.lastChasePoint = v.cd.lastChasePoint + d
 		end
 	end
 
