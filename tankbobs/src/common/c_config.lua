@@ -51,6 +51,12 @@ function c_config_init()
 					v = string.match(v:lower(), "^[\n\t ]*true[\n\t ]*$")
 					if v == nil then
 						v = oldV
+						v = string.match(v:lower(), "^[\n\t ]*nil[\n\t ]*$")
+						if v == nil then
+							v = nil
+						else
+							v = true
+						end
 					else
 						v = true
 					end
@@ -168,7 +174,11 @@ function c_config_init()
 
 	function c_config_set(key, value)
 		if cheats[key] and not cheatsEnabled then
-			io.stdout:write("c_config_set: ", key, " is cheat protected")
+			if server then
+				s_printnl("c_config_set: ", key, " is cheat protected")
+			else
+				io.stdout:write("c_config_set: ", key, " is cheat protected")
+			end
 
 			return
 		end

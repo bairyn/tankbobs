@@ -272,8 +272,8 @@ command =
 	matched = false
 }
 
-local help, exec, eval, exit, set, map, listSets, listMaps, echo, pause, restart, port, gameType, clientList, kick, ban, kickban, banList, unban, saveBans, loadBans, instagib
-local helpT, execT, evalT, exitT, setT, mapT, listSetsT, listMapsT, echoT, pauseT, restartT, portT, gameTypeT, clientListT, kickT, banT, kickbanT, banListT, unbanT, saveBansT, loadBansT, instagibT
+local help, exec, eval, exit, set, map, listSets, listMaps, echo, pause, restart, port, gameType, clientList, kick, ban, kickban, banList, unban, saveBans, loadBans, instagib, c_set, c_get
+local helpT, execT, evalT, exitT, setT, mapT, listSetsT, listMapsT, echoT, pauseT, restartT, portT, gameTypeT, clientListT, kickT, banT, kickbanT, banListT, unbanT, saveBansT, loadBansT, instagibT, c_setT, c_getT
 
 function help(line)
 	local args = commands_args(line)
@@ -1146,6 +1146,44 @@ end
 
 -- no auto completion for instagib
 
+function c_set(line)
+	local args = commands_args(line)
+	local force = args[2] == "-f"
+	local config = force and args[3] or args[2]
+	local val = force and commands_concatArgs(line, 4) or commands_concatArgs(line, 3)
+	local minArgs = args[2] == force and 4 or 3
+
+	if #args >= minArgs then
+		if force or c_config_get(config, true) ~= nil then
+			c_config_set(config, val)
+		else
+			s_printnl("c_set: configurable doesn't exist (see \"help c_set\")")
+		end
+	else
+		return help("help c_set")
+	end
+end
+
+-- no auto completion for set
+
+function c_get(line)
+	local args = commands_args(line)
+
+	if #args >= 2 then
+		local result = c_config_get(args[2], true)
+
+		if result == nil then
+			s_printnl("c_get: config '", args[2], "' doesn't exist (or is nil)")
+		else
+			s_printnl("c_get: config '", args[2], "' is currently set to '", tostring(result), "'")
+		end
+	else
+		return help("help c_get")
+	end
+end
+
+-- no auto completion for get
+
 commands =
 {
 	{
@@ -1178,8 +1216,9 @@ commands =
 		"Usage:\n" ..
 		" eval commands\n" ..
 		"\n" ..
-		" Enables multiple commands to be executed.  The commands\n" ..
-		" are separated by a semicolon.\n" ..
+		" This command evaluates multiple commands.  The commands are separated by\n" ..
+		" semicolons.  Everything passed to the server by the command line\n" ..
+		" is passed to this command, but whitespace will not be preserved in this case!  (TODO)\n" ..  -- TODO
 		" Example: \"eval echo message 1; echo message 2\""
 	},
 
@@ -1400,8 +1439,38 @@ commands =
 		instagibT,
 		"Usage:\n" ..
 		" instagib (true|false|yes|no|on|off)\n" ..
-		"\n" ,
+		"\n"  ..
 		" Sets instagib mode.  When called without arguments, will print the\n" ..
 		" current mode to console."
+	},
+
+	{
+		{"c_set", "config_set", "cset", "configSet"},
+		c_set,
+		c_setT,
+		"Usage:\n" ..
+		" c_set (-f) config val\n" ..
+		"\n" ..
+		" Sets a configurable to the given value.  The '-f' option will set a configurable\n" ..
+		" even if it doesn't exist.  Setting too many non-existent variables can inflate the\n" ..
+		" configuration and make the server run slowly.\n" ..
+		"\n" ..
+		" This configurables are commonly set:\n" ..
+		"   - game.fragLimit\n" ..
+		"   - game.chaseLimit\n" ..
+		"   - game.pointLimit (domination)\n" ..
+		"   - game.captureLimit\n" ..
+		"   - server.port\n" ..
+		"   - server.writeFileOnBan"
+	},
+
+	{
+		{"c_get", "config_get", "cget", "configGet", "get"},
+		c_get,
+		c_getT,
+		"Usage:\n" ..
+		" c_get config\n" ..
+		"\n" ..
+		" Outputs a configurable to the console."
 	},
 }

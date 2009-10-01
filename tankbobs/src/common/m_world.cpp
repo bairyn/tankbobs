@@ -1216,6 +1216,8 @@ int w_unpersistWorld(lua_State *L)
 	/* Projectiles */
 	for(int i = 0; i < numProjectiles; i++)
 	{
+		/* FIXME: unpersisting projectiles causes some memory corruption! */
+
 		lua_pushvalue(L, 7 + preArgs);
 		lua_pushvalue(L, 10 + preArgs);
 		lua_call(L, 1, 1);
