@@ -1880,7 +1880,7 @@ function c_world_contactListener(shape1, shape2, body1, body2, position, separat
 			end
 
 			if taggedTank and otherTank then
-				if not otherTank.m.tagProtection or otherTank.m.tagProtection < t then
+				if not otherTank.m.tagProtection or otherTank.m.tagProtection < t_t_getTicks() then
 					taggedTank.cd.lastChasePoint = t_t_getTicks()
 					taggedTank.tagged = false
 					otherTank.tagged = true
