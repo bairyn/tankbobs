@@ -392,6 +392,25 @@ local function play_testEnd()
 				end
 			end
 		end
+	if switch == CHASE then
+		local chaseLimit = c_config_get("game.chaseLimit")
+
+		if chaseLimit > 0 then
+			for k, v in pairs(c_world_getTanks()) do
+				if v.score >= chaseLimit then
+					c_world_setPaused(true)
+
+					local name = tostring(c_config_get("game.player" .. tostring(k) .. ".name"))
+					gui_addLabel(tankbobs.m_vec2(35, 50), name .. " wins!", nil, 1.1, v.color.r, v.color.g, v.color.b, 0.75, v.color.r, v.color.g, v.color.b, 0.8)
+
+					if not endOfGame then
+						tankbobs.a_playSound(c_const_get("win_sound"))
+					end
+
+					endOfGame = true
+				end
+			end
+		end
 	elseif switch == DOMINATION then
 		local pointLimit = c_config_get("game.pointLimit")
 
