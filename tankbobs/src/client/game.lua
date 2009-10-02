@@ -105,7 +105,7 @@ function game_new()
 
 	-- scores
 	local function updateScores(widget)
-		if not c_world_isTeamGameType() then
+		if not c_world_isTeamGameType(c_world_gameType) then
 			-- non-team scores
 
 			local length = 0
@@ -281,7 +281,7 @@ local function game_drawWorld(d)
 									c_config_set("game.player" .. tostring(k) .. ".color.a", c_config_get("game.defaultTankAlpha"))
 								end
 								local r, g, b, a = v.color.r, v.color.g, v.color.b, 1
-								if c_world_isTeamGameType() then
+								if c_world_isTeamGameType(c_world_gameType) then
 									-- team colors
 									local color = c_const_get(v.red and "color_red" or "color_blue")
 									r, g, b, a = color[1], color[2], color[3], color[4]

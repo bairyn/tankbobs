@@ -310,13 +310,14 @@ function help(line)
 			return
 		end
 	else
-		s_print(
+		s_printnl(
 			"help can give the description of a command or list all\n" ..
-			" available commands.  When a command is called, the options\n" ..
-			" must be in order .  For example,\n" ..
-			" \"command foo -bar\" will not pass the option -bar to foo.\n" ..
-			" Options start with at least one '-'.\n" ..
-			" GUID, GID, and UI are used interchangeably\n" ..
+			" available commands.  All options (those starting with '-')\n" ..
+			" must be passed before the rest of the arguments after a command.\n" ..
+			" For example, \"command foo -bar\" is not valid, whereas\n" ..
+			" \"command -quux foo\" is.  Single-character options begin\n" ..
+			" with a single '-', and multiple-character options begin with multiple '-'s\n" ..
+			" GUID, GID, and UI are used interchangeably.\n" ..
 			"\n" ..
 			"Some common commands:\n" ..
 			" -help\n" ..
@@ -333,7 +334,7 @@ function help(line)
 			" -banList\n" ..
 			" -unban\n" ..
 			"\n" ..
-			"See \"help help\" for usage\n"
+			"See \"help help\" for usage"
 		)
 	end
 end
