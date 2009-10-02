@@ -546,6 +546,8 @@ function c_world_getGameType()
 end
 
 function c_world_isTeamGameType(gameType)
+	gameType = gameType or c_world_gameType
+
 	if gameType == DEATHMATCH then
 		return false
 	elseif gameType == CHASE then
