@@ -1113,7 +1113,7 @@ function c_world_tank_stepAhead(fromTime, toTime)
 		for i = from, to - 1 do
 			local breaking = false repeat
 				tank.state = history[i][2]
-				local length = (history[i + 1][1] - history[i][1]) / c_const_get("world_time")
+				local length = (history[i + 1][1] - history[i][1]) / (c_const_get("world_time") * c_config_get("game.timescale"))
 				if length <= 0 then
 					length = 1.0E-6  -- inaccurate guess
 				end
@@ -1150,18 +1150,21 @@ function c_world_tank_step(d, tank)
 		return c_world_tank_die(tank, t)
 	end
 
-	if record and tank == tankStepAhead then
-		local h
+	if record and tank == tankStepAhead and history and lastHistoryIndex > 0 then
+		-- don't record input multiple times for the same frame
+		if t ~= history[lastHistoryIndex][1] then
+			local h
 
-		lastHistoryIndex = lastHistoryIndex + 1
-		if lastHistoryIndex > c_config_get("client.histSize") then
-			lastHistoryIndex = 1
+			lastHistoryIndex = lastHistoryIndex + 1
+			if lastHistoryIndex > c_config_get("client.histSize") then
+				lastHistoryIndex = 1
+			end
+
+			h = history[lastHistoryIndex]
+
+			h[1] = t
+			h[2] = tank.state
 		end
-
-		h = history[lastHistoryIndex]
-
-		h[1] = t
-		h[2] = tank.state
 	end
 
 	tank.p(t_w_getPosition(tank.body))

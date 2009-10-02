@@ -246,6 +246,7 @@ function online_readPackets(d)  -- local
 						end
 
 						local backupP = tankbobs.m_vec2(tank.p)
+						local backupV = tankbobs.m_vec2(tank.v)
 						local backupR = tank.r
 						if c_config_get("client.online.stepAhead") then
 							c_world_tank_setStepAhead(tank)
@@ -271,6 +272,7 @@ function online_readPackets(d)  -- local
 
 						tank.p = backupP
 						tank.r = backupR
+						tank.v = backupV
 
 						if tank.exists and tank.body then
 							tankbobs.w_setPosition(tank.body, tank.p)
