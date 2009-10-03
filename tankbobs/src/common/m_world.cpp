@@ -1477,6 +1477,10 @@ int w_unpersistWorld(lua_State *L)
 			}
 			else
 			{
+				/* ignore junk bytes */
+				/* NOTE already ahead two io8t's */
+				offset += 21 * sizeof(io8t) + 1 * sizeof(io32t) + 3 * sizeof(io8t) + 1 * sizeof(io16t) + 6 * sizeof(io32t) + 1 * sizeof(io16t) + 3 * sizeof(io32t) + 1 * sizeof(io8t);
+
 				lua_getfield(L, -1, "exists");
 				if(lua_toboolean(L, -1))
 				{
@@ -1487,9 +1491,6 @@ int w_unpersistWorld(lua_State *L)
 					lua_pushvalue(L, -2);
 					lua_call(L, 1, 0);
 
-					/* NOTE already ahead two io8t's */
-					offset += 21 * sizeof(io8t) + 1 * sizeof(io32t) + 3 * sizeof(io8t) + 1 * sizeof(io16t) + 6 * sizeof(io32t) + 1 * sizeof(io16t) + 3 * sizeof(io32t) + 1 * sizeof(io8t);
-
 					/* pop tank */
 					lua_pop(L, 1);
 
@@ -1497,6 +1498,7 @@ int w_unpersistWorld(lua_State *L)
 				}
 				else
 				{
+					/* pop exists and tank */
 					lua_pop(L, 2);
 				}
 			}
