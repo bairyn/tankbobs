@@ -79,6 +79,8 @@ local function testEnd()
 					client_sendEvent(client_getByTank(v), tankbobs.io_fromChar(0x00) .. tankbobs.io_fromInt(k))
 
 					endOfGame = true
+
+					s_printnl("(Deathmatch) '", v.name, "' Wins!")
 				end
 			end
 		end
@@ -93,6 +95,8 @@ local function testEnd()
 					client_sendEvent(client_getByTank(v), tankbobs.io_fromChar(0x00) .. tankbobs.io_fromInt(k))
 
 					endOfGame = true
+
+					s_printnl("(Chase) '", v.name, "' Wins!")
 				end
 			end
 		end
@@ -106,12 +110,16 @@ local function testEnd()
 				client_sendEvent(client_getByTank(v), tankbobs.io_fromChar(0x00) .. tankbobs.io_fromInt(0x00000001))
 
 				endOfGame = true
+
+				s_printnl("(Domination) Red Team Wins!")
 			elseif c_world_blueTeam.score >= pointLimit then
 				c_world_setPaused(true)
 
 				client_sendEvent(client_getByTank(v), tankbobs.io_fromChar(0x00) .. tankbobs.io_fromInt(0x00000000))
 
 				endOfGame = true
+
+				s_printnl("(Domination) Blue Team Wins!")
 			end
 		end
 	elseif switch == CAPTURETHEFLAG then
@@ -124,12 +132,16 @@ local function testEnd()
 				client_sendEvent(client_getByTank(v), tankbobs.io_fromChar(0x00) .. tankbobs.io_fromInt(0x00000001))
 
 				endOfGame = true
+
+				s_printnl("(Capture The Flag) Red Team Wins!")
 			elseif c_world_blueTeam.score >= captureLimit then
 				c_world_setPaused(true)
 
 				client_sendEvent(client_getByTank(v), tankbobs.io_fromChar(0x00) .. tankbobs.io_fromInt(0x00000000))
 
 				endOfGame = true
+
+				s_printnl("(Capture The Flag) Blue Team Wins!")
 			end
 		end
 	end
