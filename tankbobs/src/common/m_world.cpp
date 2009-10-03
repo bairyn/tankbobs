@@ -24,6 +24,10 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 #include <SDL/SDL_endian.h>
 #include <cmath>
 
+#ifndef MIN
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+#endif
+
 extern "C"
 {
 #include <lua.h>
@@ -1176,12 +1180,13 @@ int w_unpersistWorld(lua_State *L)
 
 	static const unsigned int preArgs = 4;
 
-	const char * const data = lua_tostring(L, 1);
+	size_t len;
+	const char * const data = lua_tolstring(L, 1, &len);
 
 	static char buf[WORLDBUFSIZE + BUFSIZE] = {""};
 	register size_t offset = 0;
 
-	memcpy(buf, data, sizeof(buf));
+	memcpy(buf, data, MIN(sizeof(buf), len));
 
 	const unsigned int size = IO_GETINTNL(data, offset); offset += sizeof(io32t);
 

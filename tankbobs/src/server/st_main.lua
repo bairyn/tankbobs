@@ -63,6 +63,10 @@ local function testEnd()
 		return
 	end
 
+	if not c_world_redTeam then
+		return  -- world probably not initialized
+	end
+
 	local switch = c_world_gameType
 	if switch == DEATHMATCH then
 		local fragLimit = c_config_get("game.fragLimit")
