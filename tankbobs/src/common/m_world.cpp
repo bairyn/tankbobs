@@ -729,8 +729,8 @@ int w_persistWorld(lua_State *L)
 
 	static char buf[WORLDBUFSIZE + BUFSIZE] = {""};
 	register size_t offset = 0;
-	short  numProjectiles, numTanks, numPowerups;
-	short  numWalls, numControlPoints, numFlags;
+	size_t numProjectiles, numTanks, numPowerups;
+	size_t numWalls, numControlPoints, numFlags;
 	int    order;
 	const  vec2_t *v;
 	const  b2Body *body;
@@ -756,18 +756,16 @@ int w_persistWorld(lua_State *L)
 	void * const nums = buf + offset;
 
 	order = preArgs;
-	numProjectiles   = lua_objlen(L, ++order); IO_SETSHORTNL(buf, offset, numProjectiles);   offset += sizeof(io16t);
-	numTanks         = lua_objlen(L, ++order); IO_SETSHORTNL(buf, offset, numTanks);         offset += sizeof(io16t);
-	numPowerups      = lua_objlen(L, ++order); IO_SETSHORTNL(buf, offset, numPowerups);      offset += sizeof(io16t);
-	numWalls         = lua_objlen(L, ++order); IO_SETSHORTNL(buf, offset, numWalls);         offset += sizeof(io16t);  /* number of walls is constant */
-	numControlPoints = lua_objlen(L, ++order); IO_SETSHORTNL(buf, offset, numControlPoints); offset += sizeof(io16t);  /* number of control points is constant */
-	numFlags         = lua_objlen(L, ++order); IO_SETSHORTNL(buf, offset, numFlags);         offset += sizeof(io16t);  /* number of flags is constant */
-
-	/* Note that nothing above doesn't check for bounds, but this should be OK since the buffer is big enough */
+	numProjectiles   = offset; IO_SETSHORTNL(buf, offset, 0); offset += sizeof(io16t);
+	numTanks         = offset; IO_SETSHORTNL(buf, offset, 0); offset += sizeof(io16t);
+	numPowerups      = offset; IO_SETSHORTNL(buf, offset, 0); offset += sizeof(io16t);
+	numWalls         = offset; IO_SETSHORTNL(buf, offset, 0); offset += sizeof(io16t);
+	numControlPoints = offset; IO_SETSHORTNL(buf, offset, 0); offset += sizeof(io16t);
+	numFlags         = offset; IO_SETSHORTNL(buf, offset, 0); offset += sizeof(io16t);
 
 	order = preArgs;
 
-#define DECREMENTNUM(x) IO_SETSHORTNL(reinterpret_cast<char *> (nums), (order - preArgs - 1) * sizeof(io16t), --(x))
+#define INCREMENTNUM(x) IO_SETSHORTNL(buf, (x), IO_GETSHORTNL(buf, (x)) + 1)
 
 	/* projectiles */
 	/* char weaponTypeIndex; char owner; float rotation; float x; float y; float velX; float velY; float angularVelocity; */
@@ -780,6 +778,7 @@ int w_persistWorld(lua_State *L)
 				offset + 2 * sizeof(io8t) + 6 * sizeof(io32t) < WORLDBUFSIZE)
 		{
 			lua_pop(L, 1);
+			INCREMENTNUM(numProjectiles);
 
 			/* set weaponIndex */
 			lua_getfield(L, -1, "weapon");
@@ -818,8 +817,6 @@ int w_persistWorld(lua_State *L)
 		else
 		{
 			lua_pop(L, 1);
-
-			DECREMENTNUM(numProjectiles);
 		}
 
 		lua_pop(L, 1);
@@ -831,119 +828,130 @@ int w_persistWorld(lua_State *L)
 	lua_pushnil(L);
 	while(lua_next(L, order))
 	{
-		lua_getfield(L, -1, "exists");
-		if(lua_toboolean(L, -1) &&
-				offset + 22 * sizeof(io8t) + 1 * sizeof(io32t) + 3 * sizeof(io8t) + 1 * sizeof(io16t) + 6 * sizeof(io32t) + 1 * sizeof(io16t) + 3 * sizeof(io32t) + 1 * sizeof(io8t) < WORLDBUFSIZE)
+		if(offset + 23 * sizeof(io8t) + 1 * sizeof(io32t) + 3 * sizeof(io8t) + 1 * sizeof(io16t) + 6 * sizeof(io32t) + 1 * sizeof(io16t) + 3 * sizeof(io32t) + 1 * sizeof(io8t) < WORLDBUFSIZE)
 		{
 			static char name[21];
 
-			lua_pop(L, 1);
+			INCREMENTNUM(numTanks);
 
 			/* set index */
 			IO_SETCHARNL(buf, offset, lua_tointeger(L, -2)); offset += sizeof(io8t);
 
-			/* set name */
-			lua_getfield(L, -1, "name");
-			strncpy(name, lua_tostring(L, -1), sizeof(name));
-			lua_pop(L, 1);
-			/*memcpy(bufpos, name, sizeof(name)); bufpos += sizeof(name);*/
-			for(int i = 0; i < sizeof(name); i++)
+			lua_getfield(L, -1, "exists");
+			if(lua_toboolean(L, -1))
 			{
-				IO_SETCHARNL(buf, offset, name[i]); offset += sizeof(io8t);
-			}
+				lua_pop(L, 1);
+				/* tank exists */
+				IO_SETCHARNL(buf, offset, 0x01); offset += sizeof(io8t);
 
-			/* set misc-state */
-			int state = 0x00000000;
+				/* set name */
+				lua_getfield(L, -1, "name");
+				strncpy(name, lua_tostring(L, -1), sizeof(name));
+				lua_pop(L, 1);
+				/*memcpy(bufpos, name, sizeof(name)); bufpos += sizeof(name);*/
+				for(int i = 0; i < sizeof(name); i++)
+				{
+					IO_SETCHARNL(buf, offset, name[i]); offset += sizeof(io8t);
+				}
+
+				/* set misc-state */
+				int state = 0x00000000;
 #define T_STATE(x, y) \
-			do \
-			{ \
-				lua_getfield(L, -1, y); \
-				if(lua_toboolean(L, -1)) \
-					state |= x; \
-				lua_pop(L, 1); \
-			} while(0)
-			T_STATE(0x00000001, "tagged");
-			lua_getfield(L, -1, "cd");
-			T_STATE(0x00000002, "aimAid");
-			T_STATE(0x00000004, "acceleration");
-			lua_pop(L, 1);
+				do \
+				{ \
+					lua_getfield(L, -1, y); \
+					if(lua_toboolean(L, -1)) \
+						state |= x; \
+					lua_pop(L, 1); \
+				} while(0)
+				T_STATE(0x00000001, "tagged");
+				lua_getfield(L, -1, "cd");
+				T_STATE(0x00000002, "aimAid");
+				T_STATE(0x00000004, "acceleration");
+				lua_pop(L, 1);
 #undef T_STATE
 
-			IO_SETINTNL(buf, offset, state); offset += sizeof(io32t);
+				IO_SETINTNL(buf, offset, state); offset += sizeof(io32t);
 
-			/* set weapon */
-			lua_getfield(L, -1, "weapon");
-			IO_SETCHARNL(buf, offset, lua_tointeger(L, -1)); offset += sizeof(io8t);
-			lua_pop(L, 1);
+				/* set weapon */
+				lua_getfield(L, -1, "weapon");
+				IO_SETCHARNL(buf, offset, lua_tointeger(L, -1)); offset += sizeof(io8t);
+				lua_pop(L, 1);
 
-			/* set ammo */
-			lua_getfield(L, -1, "ammo");
-			IO_SETCHARNL(buf, offset, lua_tointeger(L, -1)); offset += sizeof(io8t);
-			lua_pop(L, 1);
+				/* set ammo */
+				lua_getfield(L, -1, "ammo");
+				IO_SETCHARNL(buf, offset, lua_tointeger(L, -1)); offset += sizeof(io8t);
+				lua_pop(L, 1);
 
-			/* set clips */
-			lua_getfield(L, -1, "clips");
-			IO_SETCHARNL(buf, offset, lua_tointeger(L, -1)); offset += sizeof(io8t);
-			lua_pop(L, 1);
+				/* set clips */
+				lua_getfield(L, -1, "clips");
+				IO_SETCHARNL(buf, offset, lua_tointeger(L, -1)); offset += sizeof(io8t);
+				lua_pop(L, 1);
 
-			/* set score */
-			lua_getfield(L, -1, "score");
-			IO_SETSHORTNL(buf, offset, lua_tointeger(L, -1)); offset += sizeof(io16t);
-			lua_pop(L, 1);
+				/* set score */
+				lua_getfield(L, -1, "score");
+				IO_SETSHORTNL(buf, offset, lua_tointeger(L, -1)); offset += sizeof(io16t);
+				lua_pop(L, 1);
 
-			/* set shield */
-			lua_getfield(L, -1, "shield");
-			IO_SETFLOATNL(buf, offset, lua_tonumber(L, -1)); offset += sizeof(io32t);
-			lua_pop(L, 1);
+				/* set shield */
+				lua_getfield(L, -1, "shield");
+				IO_SETFLOATNL(buf, offset, lua_tonumber(L, -1)); offset += sizeof(io32t);
+				lua_pop(L, 1);
 
-			/* set rotation */
-			lua_getfield(L, -1, "r");
-			IO_SETFLOATNL(buf, offset, lua_tonumber(L, -1)); offset += sizeof(io32t);
-			lua_pop(L, 1);
+				/* set rotation */
+				lua_getfield(L, -1, "r");
+				IO_SETFLOATNL(buf, offset, lua_tonumber(L, -1)); offset += sizeof(io32t);
+				lua_pop(L, 1);
 
-			/* set x and y */
-			lua_getfield(L, -1, "p");
-			v = CHECKVEC(L, -1);
-			IO_SETFLOATNL(buf, offset, v->x); offset += sizeof(io32t);
-			IO_SETFLOATNL(buf, offset, v->y); offset += sizeof(io32t);
-			lua_pop(L, 1);
+				/* set x and y */
+				lua_getfield(L, -1, "p");
+				v = CHECKVEC(L, -1);
+				IO_SETFLOATNL(buf, offset, v->x); offset += sizeof(io32t);
+				IO_SETFLOATNL(buf, offset, v->y); offset += sizeof(io32t);
+				lua_pop(L, 1);
 
-			/* velocity */
-			lua_getfield(L, -1, "body");
-			body = reinterpret_cast<b2Body *> (lua_touserdata(L, -1));
-			lua_pop(L, 1);
-			vel = body->GetLinearVelocity();
-			IO_SETFLOATNL(buf, offset, vel.x); offset += sizeof(io32t);
-			IO_SETFLOATNL(buf, offset, vel.y); offset += sizeof(io32t);
+				/* velocity */
+				lua_getfield(L, -1, "body");
+				body = reinterpret_cast<b2Body *> (lua_touserdata(L, -1));
+				lua_pop(L, 1);
+				vel = body->GetLinearVelocity();
+				IO_SETFLOATNL(buf, offset, vel.x); offset += sizeof(io32t);
+				IO_SETFLOATNL(buf, offset, vel.y); offset += sizeof(io32t);
 
-			/* input */
-			lua_getfield(L, -1, "state");
-			IO_SETSHORTNL(buf, offset, lua_tointeger(L, 1)); offset += sizeof(io16t);
-			lua_pop(L, 1);
+				/* input */
+				lua_getfield(L, -1, "state");
+				IO_SETSHORTNL(buf, offset, lua_tointeger(L, 1)); offset += sizeof(io16t);
+				lua_pop(L, 1);
 
-			/* color */
-			lua_getfield(L, -1, "color");
-			lua_getfield(L, -1, "r");
-			IO_SETFLOATNL(buf, offset, lua_tonumber(L, -1)); offset += sizeof(io32t);
-			lua_pop(L, 1);
-			lua_getfield(L, -1, "g");
-			IO_SETFLOATNL(buf, offset, lua_tonumber(L, -1)); offset += sizeof(io32t);
-			lua_pop(L, 1);
-			lua_getfield(L, -1, "b");
-			IO_SETFLOATNL(buf, offset, lua_tonumber(L, -1)); offset += sizeof(io32t);
-			lua_pop(L, 2);
+				/* color */
+				lua_getfield(L, -1, "color");
+				lua_getfield(L, -1, "r");
+				IO_SETFLOATNL(buf, offset, lua_tonumber(L, -1)); offset += sizeof(io32t);
+				lua_pop(L, 1);
+				lua_getfield(L, -1, "g");
+				IO_SETFLOATNL(buf, offset, lua_tonumber(L, -1)); offset += sizeof(io32t);
+				lua_pop(L, 1);
+				lua_getfield(L, -1, "b");
+				IO_SETFLOATNL(buf, offset, lua_tonumber(L, -1)); offset += sizeof(io32t);
+				lua_pop(L, 2);
 
-			/* teleporterID */
-			lua_getfield(L, -1, "m");
-			lua_getfield(L, -1, "target");
-			IO_SETCHARNL(buf, offset, lua_tointeger(L, -1)); offset += sizeof(io8t);
-			lua_pop(L, 2);
+				/* teleporterID */
+				lua_getfield(L, -1, "m");
+				lua_getfield(L, -1, "target");
+				IO_SETCHARNL(buf, offset, lua_tointeger(L, -1)); offset += sizeof(io8t);
+				lua_pop(L, 2);
+			}
+			else
+			{
+				lua_pop(L, 1);
+				/* tank doesn't exist */
+				IO_SETCHARNL(buf, offset, 0x00); offset += sizeof(io8t);
+				offset += 21 * sizeof(io8t) + 1 * sizeof(io32t) + 3 * sizeof(io8t) + 1 * sizeof(io16t) + 6 * sizeof(io32t) + 1 * sizeof(io16t) + 3 * sizeof(io32t) + 1 * sizeof(io8t);  /* NOTE already 2 io8t's ahead */
+			}
 		}
 		else
 		{
 			lua_pop(L, 1);
-
-			DECREMENTNUM(numTanks);
 		}
 
 		lua_pop(L, 1);
@@ -960,6 +968,7 @@ int w_persistWorld(lua_State *L)
 				offset + 3 * sizeof(io8t) + 6 * sizeof(io32t) < WORLDBUFSIZE)
 		{
 			lua_pop(L, 1);
+			INCREMENTNUM(numPowerups);
 
 			/* set index */
 			IO_SETCHARNL(buf, offset, lua_tointeger(L, -2)); offset += sizeof(io8t);
@@ -1001,8 +1010,6 @@ int w_persistWorld(lua_State *L)
 		else
 		{
 			lua_pop(L, 1);
-
-			DECREMENTNUM(numPowerups);
 		}
 
 		lua_pop(L, 1);
@@ -1016,6 +1023,8 @@ int w_persistWorld(lua_State *L)
 	{
 		if(offset + 6 * sizeof(io32t) + 2 * sizeof(io8t) + 3 * sizeof(io32t) < WORLDBUFSIZE)
 		{
+			INCREMENTNUM(numWalls);
+
 			/* set x and y */
 			/* (get body) */
 			lua_getfield(L, -1, "m");
@@ -1077,7 +1086,6 @@ int w_persistWorld(lua_State *L)
 		}
 		else
 		{
-			DECREMENTNUM(numWalls);
 		}
 
 		lua_pop(L, 1);
@@ -1091,6 +1099,8 @@ int w_persistWorld(lua_State *L)
 	{
 		if(offset + 1 * sizeof(io8t) < WORLDBUFSIZE)
 		{
+			INCREMENTNUM(numControlPoints);
+
 			/* set team */
 			lua_getfield(L, -1, "m");
 			lua_getfield(L, -1, "team");
@@ -1110,7 +1120,6 @@ int w_persistWorld(lua_State *L)
 		}
 		else
 		{
-			DECREMENTNUM(numControlPoints);
 		}
 
 		lua_pop(L, 1);
@@ -1124,6 +1133,8 @@ int w_persistWorld(lua_State *L)
 	{
 		if(offset + 2 * sizeof(io8t) + 2 * sizeof(io32t) < WORLDBUFSIZE)
 		{
+			INCREMENTNUM(numFlags);
+
 			unsigned char state = 0;
 			unsigned char stolenIndex;
 			float droppedPos[2];
@@ -1156,7 +1167,6 @@ int w_persistWorld(lua_State *L)
 		}
 		else
 		{
-			DECREMENTNUM(numFlags);
 		}
 
 		lua_pop(L, 1);
@@ -1281,157 +1291,216 @@ int w_unpersistWorld(lua_State *L)
 	/* Tanks */
 	for(int i = 0; i < numTanks; i++)
 	{
-		unsigned int index = IO_GETCHARNL(buf, offset); offset += sizeof(io8t);
+		size_t index = IO_GETCHARNL(buf, offset); offset += sizeof(io8t);
+		int exists = IO_GETCHARNL(buf, offset); offset += sizeof(io8t);
 
-		lua_pushinteger(L, index);
-		lua_gettable(L, 2 + preArgs);
-		if(lua_isnoneornil(L, -1))
+		if(exists)
 		{
-			lua_pop(L, 1);
-
-			/* add the tank */
-			lua_pushvalue(L, 8 + preArgs);
-			lua_pushvalue(L, 11 + preArgs);
-			lua_call(L, 1, 1);
 			lua_pushinteger(L, index);
-			lua_pushvalue(L, -2);
-			lua_settable(L, 2 + preArgs);
-
-			/* spawn the tank */
-			lua_pushvalue(L, 14 + preArgs);
-			lua_pushvalue(L, -2);
-			lua_call(L, 1, 0);
-
-			/* NOTE already ahead one io8t */
-			offset += 21 * sizeof(io8t) + 1 * sizeof(io32t) + 3 * sizeof(io8t) + 1 * sizeof(io16t) + 6 * sizeof(io32t) + 1 * sizeof(io16t) + 3 * sizeof(io32t) + 1 * sizeof(io8t);
-
-			continue;
-		}
-		else
-		{
-			lua_getfield(L, -1, "exists");
-			if(!lua_toboolean(L, -1))
+			lua_gettable(L, 2 + preArgs);
+			if(lua_isnoneornil(L, -1))
 			{
 				lua_pop(L, 1);
+
+				/* add the tank */
+				lua_pushvalue(L, 8 + preArgs);
+				lua_pushvalue(L, 11 + preArgs);
+				lua_call(L, 1, 1);
+				lua_pushinteger(L, index);
+				lua_pushvalue(L, -2);
+				lua_settable(L, 2 + preArgs);
 
 				/* spawn the tank */
 				lua_pushvalue(L, 14 + preArgs);
 				lua_pushvalue(L, -2);
 				lua_call(L, 1, 0);
 
-				/* NOTE already ahead one io8t */
+				/* NOTE already ahead two io8t's */
 				offset += 21 * sizeof(io8t) + 1 * sizeof(io32t) + 3 * sizeof(io8t) + 1 * sizeof(io16t) + 6 * sizeof(io32t) + 1 * sizeof(io16t) + 3 * sizeof(io32t) + 1 * sizeof(io8t);
 
 				continue;
 			}
 			else
 			{
-				lua_pop(L, 1);
+				lua_getfield(L, -1, "exists");
+				if(!lua_toboolean(L, -1))
+				{
+					lua_pop(L, 1);
+
+					/* spawn the tank */
+					lua_pushvalue(L, 14 + preArgs);
+					lua_pushvalue(L, -2);
+					lua_call(L, 1, 0);
+
+					/* NOTE already ahead two io8t's */
+					offset += 21 * sizeof(io8t) + 1 * sizeof(io32t) + 3 * sizeof(io8t) + 1 * sizeof(io16t) + 6 * sizeof(io32t) + 1 * sizeof(io16t) + 3 * sizeof(io32t) + 1 * sizeof(io8t);
+
+					/* pop tank */
+					lua_pop(L, 1);
+
+					continue;
+				}
+				else
+				{
+					lua_pop(L, 1);
+				}
 			}
-		}
 
-		/* get body */
-		lua_getfield(L, -1, "body");
-		b2Body *body = reinterpret_cast<b2Body *> (lua_touserdata(L, -1));
-		lua_pop(L, 1);
-
-		if(!body)
-		{
-			/* NOTE already ahead one io8t */
-			fprintf(stderr, "Warning: w_unpersistWorld: tank's body is NULL\n");
-
-			offset += 21 * sizeof(io8t) + 1 * sizeof(io32t) + 3 * sizeof(io8t) + 1 * sizeof(io16t) + 6 * sizeof(io32t) + 1 * sizeof(io16t) + 3 * sizeof(io32t) + 1 * sizeof(io8t);
-
-			continue;
-		}
-
-		/* name */
-		static char name[21];
-		/*strncpy(name, buf, sizeof(name)); data += sizeof(name);*/
-		for(int i = 0; i < sizeof(name); i++)
-		{
-			name[i] = IO_GETCHARNL(buf, offset); offset += sizeof(io8t);
-		}
-		lua_pushstring(L, name);
-		lua_setfield(L, -2, "name");
-
-		/* misc-state */
-		int state = IO_GETINTNL(buf, offset); offset += sizeof(io32t);
-#define T_STATE(x, y) \
-			do \
-			{ \
-				lua_pushboolean(L, state & x); \
-				lua_setfield(L, -2, y); \
-			} while(0)
-			T_STATE(0x00000001, "tagged");
-			lua_getfield(L, -1, "cd");
-			T_STATE(0x00000002, "aimAid");
-			T_STATE(0x00000004, "acceleration");
+			/* get body */
+			lua_getfield(L, -1, "body");
+			b2Body *body = reinterpret_cast<b2Body *> (lua_touserdata(L, -1));
 			lua_pop(L, 1);
+
+			if(!body)
+			{
+				/* NOTE already ahead two io8t's */
+				fprintf(stderr, "Warning: w_unpersistWorld: tank's body is NULL\n");
+
+				offset += 21 * sizeof(io8t) + 1 * sizeof(io32t) + 3 * sizeof(io8t) + 1 * sizeof(io16t) + 6 * sizeof(io32t) + 1 * sizeof(io16t) + 3 * sizeof(io32t) + 1 * sizeof(io8t);
+
+				continue;
+			}
+
+			/* name */
+			static char name[21];
+			/*strncpy(name, buf, sizeof(name)); data += sizeof(name);*/
+			for(int i = 0; i < sizeof(name); i++)
+			{
+				name[i] = IO_GETCHARNL(buf, offset); offset += sizeof(io8t);
+			}
+			lua_pushstring(L, name);
+			lua_setfield(L, -2, "name");
+
+			/* misc-state */
+			int state = IO_GETINTNL(buf, offset); offset += sizeof(io32t);
+#define T_STATE(x, y) \
+				do \
+				{ \
+					lua_pushboolean(L, state & x); \
+					lua_setfield(L, -2, y); \
+				} while(0)
+				T_STATE(0x00000001, "tagged");
+				lua_getfield(L, -1, "cd");
+				T_STATE(0x00000002, "aimAid");
+				T_STATE(0x00000004, "acceleration");
+				lua_pop(L, 1);
 #undef T_STATE
 
-		/* weapon */
-		lua_pushinteger(L, IO_GETCHARNL(buf, offset)); offset += sizeof(io8t);
-		lua_setfield(L, -2, "weapon");
+			/* weapon */
+			lua_pushinteger(L, IO_GETCHARNL(buf, offset)); offset += sizeof(io8t);
+			lua_setfield(L, -2, "weapon");
 
-		/* ammo */
-		lua_pushinteger(L, IO_GETCHARNL(buf, offset)); offset += sizeof(io8t);
-		lua_setfield(L, -2, "ammo");
+			/* ammo */
+			lua_pushinteger(L, IO_GETCHARNL(buf, offset)); offset += sizeof(io8t);
+			lua_setfield(L, -2, "ammo");
 
-		/* clips */
-		lua_pushinteger(L, IO_GETCHARNL(buf, offset)); offset += sizeof(io8t);
-		lua_setfield(L, -2, "clips");
+			/* clips */
+			lua_pushinteger(L, IO_GETCHARNL(buf, offset)); offset += sizeof(io8t);
+			lua_setfield(L, -2, "clips");
 
-		/* score */
-		lua_pushinteger(L, IO_GETSHORTNL(buf, offset)); offset += sizeof(io16t);
-		lua_setfield(L, -2, "score");
+			/* score */
+			lua_pushinteger(L, IO_GETSHORTNL(buf, offset)); offset += sizeof(io16t);
+			lua_setfield(L, -2, "score");
 
-		/* shield */
-		lua_pushnumber(L, IO_GETFLOATNL(buf, offset)); offset += sizeof(io32t);
-		lua_setfield(L, -2, "shield");
+			/* shield */
+			lua_pushnumber(L, IO_GETFLOATNL(buf, offset)); offset += sizeof(io32t);
+			lua_setfield(L, -2, "shield");
 
-		double rotation = IO_GETFLOATNL(buf, offset); offset += sizeof(io32t);
-		/* rotation */
-		lua_pushnumber(L, rotation);
-		lua_setfield(L, -2, "r");
+			double rotation = IO_GETFLOATNL(buf, offset); offset += sizeof(io32t);
+			/* rotation */
+			lua_pushnumber(L, rotation);
+			lua_setfield(L, -2, "r");
 
-		/* position */
-		lua_getfield(L, -1, "p");
-		v = CHECKVEC(L, -1);
-		v->x = IO_GETFLOATNL(buf, offset); offset += sizeof(io32t);
-		v->y = IO_GETFLOATNL(buf, offset); offset += sizeof(io32t);
-		MATH_POLAR(*v);
-		/* set body */
-		body->SetXForm(b2Vec2(v->x, v->y), rotation);
-		lua_pop(L, 1);
+			/* position */
+			lua_getfield(L, -1, "p");
+			v = CHECKVEC(L, -1);
+			v->x = IO_GETFLOATNL(buf, offset); offset += sizeof(io32t);
+			v->y = IO_GETFLOATNL(buf, offset); offset += sizeof(io32t);
+			MATH_POLAR(*v);
+			/* set body */
+			body->SetXForm(b2Vec2(v->x, v->y), rotation);
+			lua_pop(L, 1);
 
-		/* velocity */
-		b2Vec2 vel;
-		vel.x = IO_GETFLOATNL(buf, offset); offset += sizeof(io32t);
-		vel.y = IO_GETFLOATNL(buf, offset); offset += sizeof(io32t);
-		body->SetLinearVelocity(vel);
+			/* velocity */
+			b2Vec2 vel;
+			vel.x = IO_GETFLOATNL(buf, offset); offset += sizeof(io32t);
+			vel.y = IO_GETFLOATNL(buf, offset); offset += sizeof(io32t);
+			body->SetLinearVelocity(vel);
 
-		/* input */
-		lua_pushinteger(L, IO_GETSHORTNL(buf, offset)); offset += sizeof(io16t);
-		lua_setfield(L, -2, "state");
+			/* input */
+			lua_pushinteger(L, IO_GETSHORTNL(buf, offset)); offset += sizeof(io16t);
+			lua_setfield(L, -2, "state");
 
-		/* color */
-		lua_getfield(L, -1, "color");
-		lua_pushnumber(L, IO_GETFLOATNL(buf, offset)); offset += sizeof(io32t);
-		lua_setfield(L, -2, "r");
-		lua_pushnumber(L, IO_GETFLOATNL(buf, offset)); offset += sizeof(io32t);
-		lua_setfield(L, -2, "g");
-		lua_pushnumber(L, IO_GETFLOATNL(buf, offset)); offset += sizeof(io32t);
-		lua_setfield(L, -2, "b");
-		lua_pop(L, 1);
+			/* color */
+			lua_getfield(L, -1, "color");
+			lua_pushnumber(L, IO_GETFLOATNL(buf, offset)); offset += sizeof(io32t);
+			lua_setfield(L, -2, "r");
+			lua_pushnumber(L, IO_GETFLOATNL(buf, offset)); offset += sizeof(io32t);
+			lua_setfield(L, -2, "g");
+			lua_pushnumber(L, IO_GETFLOATNL(buf, offset)); offset += sizeof(io32t);
+			lua_setfield(L, -2, "b");
+			lua_pop(L, 1);
 
-		/* teleporterID */
-		lua_getfield(L, -1, "m");
-		lua_pushinteger(L, IO_GETCHARNL(buf, offset)); offset += sizeof(io8t);
-		lua_setfield(L, -2, "target");
+			/* teleporterID */
+			lua_getfield(L, -1, "m");
+			lua_pushinteger(L, IO_GETCHARNL(buf, offset)); offset += sizeof(io8t);
+			lua_setfield(L, -2, "target");
 
-		/* pop both 'm' and tank */
-		lua_pop(L, 2);
+			/* pop both 'm' and tank */
+			lua_pop(L, 2);
+		}
+		else
+		{
+			lua_pushinteger(L, index);
+			lua_gettable(L, 2 + preArgs);
+			if(lua_isnoneornil(L, -1))
+			{
+				lua_pop(L, 1);
+
+				/* add the tank */
+				lua_pushvalue(L, 8 + preArgs);
+				lua_pushvalue(L, 11 + preArgs);
+				lua_call(L, 1, 1);
+				lua_pushinteger(L, index);
+				lua_pushvalue(L, -2);
+				lua_settable(L, 2 + preArgs);
+
+				/* spawn the tank */
+				lua_pushvalue(L, 14 + preArgs);
+				lua_pushvalue(L, -2);
+				lua_call(L, 1, 0);
+
+				/* NOTE already ahead two io8t's */
+				offset += 21 * sizeof(io8t) + 1 * sizeof(io32t) + 3 * sizeof(io8t) + 1 * sizeof(io16t) + 6 * sizeof(io32t) + 1 * sizeof(io16t) + 3 * sizeof(io32t) + 1 * sizeof(io8t);
+
+				continue;
+			}
+			else
+			{
+				lua_getfield(L, -1, "exists");
+				if(lua_toboolean(L, -1))
+				{
+					lua_pop(L, 1);
+
+					/* kill the tank */
+					lua_pushvalue(L, 16 + preArgs);
+					lua_pushvalue(L, -2);
+					lua_call(L, 1, 0);
+
+					/* NOTE already ahead two io8t's */
+					offset += 21 * sizeof(io8t) + 1 * sizeof(io32t) + 3 * sizeof(io8t) + 1 * sizeof(io16t) + 6 * sizeof(io32t) + 1 * sizeof(io16t) + 3 * sizeof(io32t) + 1 * sizeof(io8t);
+
+					/* pop tank */
+					lua_pop(L, 1);
+
+					continue;
+				}
+				else
+				{
+					lua_pop(L, 2);
+				}
+			}
+		}
 	}
 
 	/* Powerups */
