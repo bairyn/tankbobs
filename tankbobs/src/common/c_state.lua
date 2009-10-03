@@ -165,7 +165,7 @@ function c_state_button(button, pressed)  -- should only be called from the main
 		error("c_state_button: no valid state")
 	end
 
-	local res = c_state_state.cur.button(tonumber(c_config_keyLayoutGet(button)) or 0, pressed)
+	local res = c_state_state.cur.button(tonumber(c_config_keyLayoutSet(button)) or 0, pressed)
 	if res ~= nil then
 		if type(res) == "number" or type(res) == "boolean" or type(res) == "string" then
 			error("c_state_button: state " .. c_state_state.cur.name .. " returned an error value: " .. tostring(res))

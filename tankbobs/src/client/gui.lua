@@ -890,7 +890,7 @@ function gui_mouse(x, y, xrel, yrel)
 end
 
 function gui_button(button, pressed)
-	button = c_config_keyLayoutSet((button)) or button
+	button = c_config_keyLayoutGet(button) or button
 
 	if keyPressed and keyPressed == button then
 		if pressed then
