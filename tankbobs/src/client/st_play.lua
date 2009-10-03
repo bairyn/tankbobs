@@ -381,11 +381,11 @@ local function play_testEnd()
 				if v.score >= fragLimit then
 					c_world_setPaused(true)
 
-					local name = tostring(c_config_get("game.player" .. tostring(k) .. ".name"))
-					gui_addLabel(tankbobs.m_vec2(35, 50), name .. " wins!", nil, 1.1, v.color.r, v.color.g, v.color.b, 0.75, v.color.r, v.color.g, v.color.b, 0.8)
-
 					if not endOfGame then
 						tankbobs.a_playSound(c_const_get("win_sound"))
+
+						local name = tostring(v.name)
+						gui_addLabel(tankbobs.m_vec2(35, 50), name .. " wins!", nil, 1.1, v.color.r, v.color.g, v.color.b, 0.75, v.color.r, v.color.g, v.color.b, 0.8)
 					end
 
 					endOfGame = true
@@ -400,10 +400,10 @@ local function play_testEnd()
 				if v.score >= chaseLimit then
 					c_world_setPaused(true)
 
-					local name = tostring(c_config_get("game.player" .. tostring(k) .. ".name"))
-					gui_addLabel(tankbobs.m_vec2(35, 50), name .. " wins!", nil, 1.1, v.color.r, v.color.g, v.color.b, 0.75, v.color.r, v.color.g, v.color.b, 0.8)
-
 					if not endOfGame then
+						local name = tostring(c_config_get("game.player" .. tostring(k) .. ".name"))
+						gui_addLabel(tankbobs.m_vec2(35, 50), name .. " wins!", nil, 1.1, v.color.r, v.color.g, v.color.b, 0.75, v.color.r, v.color.g, v.color.b, 0.8)
+
 						tankbobs.a_playSound(c_const_get("win_sound"))
 					end
 
@@ -418,11 +418,11 @@ local function play_testEnd()
 			if c_world_redTeam.score >= pointLimit then
 				c_world_setPaused(true)
 
-				local name = "Red"
-				local color = c_const_get("color_red")
-				gui_addLabel(tankbobs.m_vec2(35, 50), name .. " wins!", nil, 1.1, color[1], color[2], color[3], 0.75, color[1], color[2], color[3], 0.8)
-
 				if not endOfGame then
+					local name = "Red"
+					local color = c_const_get("color_red")
+					gui_addLabel(tankbobs.m_vec2(35, 50), name .. " wins!", nil, 1.1, color[1], color[2], color[3], 0.75, color[1], color[2], color[3], 0.8)
+
 					tankbobs.a_playSound(c_const_get("win_sound"))
 				end
 
@@ -448,11 +448,11 @@ local function play_testEnd()
 			if c_world_redTeam.score >= captureLimit then
 				c_world_setPaused(true)
 
-				local name = "Red"
-				local color = c_const_get("color_red")
-				gui_addLabel(tankbobs.m_vec2(35, 50), name .. " wins!", nil, 1.1, color[1], color[2], color[3], 0.75, color[1], color[2], color[3], 0.8)
-
 				if not endOfGame then
+					local name = "Red"
+					local color = c_const_get("color_red")
+					gui_addLabel(tankbobs.m_vec2(35, 50), name .. " wins!", nil, 1.1, color[1], color[2], color[3], 0.75, color[1], color[2], color[3], 0.8)
+
 					tankbobs.a_playSound(c_const_get("win_sound"))
 				end
 

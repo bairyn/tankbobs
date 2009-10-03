@@ -385,7 +385,7 @@ c_world_tank =
 	reloading = false,
 	shotgunReloadState = nil,
 	red = false,
-	color = {},
+	color = {r = 0, g = 0, b = 0},
 	tagged = false,
 
 	cd = {},  -- data cleared on death

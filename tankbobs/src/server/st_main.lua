@@ -54,6 +54,83 @@ function st_main_done()
 	tankbobs.n_quit()
 end
 
+local endOfGame = false
+local function testEnd()
+	-- test for end of game
+	if endOfGame then
+		c_world_setPaused(true)
+
+		return
+	end
+
+	local switch = c_world_gameType
+	if switch == DEATHMATCH then
+		local fragLimit = c_config_get("game.fragLimit")
+
+		if fragLimit > 0 then
+			for k, v in pairs(c_world_getTanks()) do
+				if v.score >= fragLimit then
+					c_world_setPaused(true)
+
+					client_sendEvent(client_getByTank(v), tankbobs.io_fromChar(0xAA) .. tankbobs.io_fromInt(k))
+
+					endOfGame = true
+				end
+			end
+		end
+	elseif switch == CHASE then
+		local chaseLimit = c_config_get("game.chaseLimit")
+
+		if chaseLimit > 0 then
+			for k, v in pairs(c_world_getTanks()) do
+				if v.score >= chaseLimit then
+					c_world_setPaused(true)
+
+					client_sendEvent(client_getByTank(v), tankbobs.io_fromChar(0xAA) .. tankbobs.io_fromInt(k))
+
+					endOfGame = true
+				end
+			end
+		end
+	elseif switch == DOMINATION then
+		local pointLimit = c_config_get("game.pointLimit")
+
+		if pointLimit > 0 then
+			if c_world_redTeam.score >= pointLimit then
+				c_world_setPaused(true)
+
+				client_sendEvent(client_getByTank(v), tankbobs.io_fromChar(0xAA) .. tankbobs.io_fromInt(0x00000001))
+
+				endOfGame = true
+			elseif c_world_blueTeam.score >= pointLimit then
+				c_world_setPaused(true)
+
+				client_sendEvent(client_getByTank(v), tankbobs.io_fromChar(0xAA) .. tankbobs.io_fromInt(0x00000000))
+
+				endOfGame = true
+			end
+		end
+	elseif switch == CAPTURETHEFLAG then
+		local captureLimit = c_config_get("game.captureLimit")
+
+		if captureLimit > 0 then
+			if c_world_redTeam.score >= captureLimit then
+				c_world_setPaused(true)
+
+				client_sendEvent(client_getByTank(v), tankbobs.io_fromChar(0xAA) .. tankbobs.io_fromInt(0x00000001))
+
+				endOfGame = true
+			elseif c_world_blueTeam.score >= captureLimit then
+				c_world_setPaused(true)
+
+				client_sendEvent(client_getByTank(v), tankbobs.io_fromChar(0xAA) .. tankbobs.io_fromInt(0x00000000))
+
+				endOfGame = true
+			end
+		end
+	end
+end
+
 local seedCounter = 1024
 function st_main_step(d)
 	-- seed the random number generator every 1024 frames for non-gameplay purposes
@@ -72,6 +149,8 @@ function st_main_step(d)
 	end
 
 	client_step(d)
+
+	testEnd()
 
 	if(client_connectedClients() <= 0) then
 		if not c_world_getPaused() then

@@ -39,6 +39,7 @@ The server receives packets beginning with 0x00-0x0F
 	- 0x02 are input snapshot packets
 	- 0x03 is the head of a tick offset response packet
 	- 0x04 is the head of a disconnect packet
+	- 0x0A is the head of an event response packet
 Clients receives packets beginning with 0xA0-0xAF
 	- 0xA0 is a connection response packet
 	- 0xA1 is the confirmation that the server accepted the client's connection request
@@ -47,6 +48,10 @@ Clients receives packets beginning with 0xA0-0xAF
 	- 0xA4 is the head of a disconnect packet
 	- 0xA5 is a tick offset packet
 	- 0xA6 is the head of a banned packet
+	- 0xAA is the head of an event packet, in which a fixed amount of bytes always follow
+
+The first byte after the ID of an event identifies the type of event.
+	- 0x00 is a win event.  The next four bytes give the ID of the tank that won in a non-team gametype; otherwise, if any of the next four bytes are non-zero, the red team won.
 --]]
 
 local tankbobs
@@ -87,7 +92,9 @@ client =
 	lastTickSendTime = nil,   -- number
 	lastTickRequestTime = nil,   -- number (this one doesn't get reset when tick is received; used to keep track of when the server needs to update ping
 	lastPTime = nil,
-	ui = ""  -- unique identifier
+	ui = "",  -- unique identifier
+	events = {},  -- number id, string event
+	lastEventID = 0
 }
 
 ban =
@@ -539,6 +546,36 @@ function client_step(d)
 						end
 					end
 				end
+			elseif switch == 0x0A then
+				if #data >= 36 then
+					if client then
+						if client_validate(client, data:sub(1, 32)) then
+							-- client got the event
+							data = data:sub(33)
+
+							local id = tankbobs.io_toInt(data:sub(1, 4)) data = data:sub(5)
+							local toRemove
+
+							for k, v in pairs(client.events) do
+								if v[1] == id then
+									toRemove = k
+
+									break
+								end
+							end
+
+							if toRemove then
+								table.remove(client.events, toRemove)
+
+								if client.events[toRemove] then
+									client.events[toRemove] = nil
+								end
+							end
+
+							-- don't do anything if the client responded to an event that doesn't exist or has already been removed
+						end
+					end
+				end
 			end
 
 			if client then
@@ -579,6 +616,14 @@ function client_step(d)
 
 				if v.lastAliveTime and t > v.lastAliveTime + c_const_get("client_maxInactiveTime") then
 					client_disconnect(v, "timed out")
+				end
+
+				for _, vs in pairs(v.events) do
+					tankbobs.n_newPacket(1024)
+					tankbobs.n_writeToPacket(tankbobs.io_fromChar(0xAA))
+					tankbobs.n_writeToPacket(tankbobs.io_fromInt(vs[1]))
+					tankbobs.n_writeToPacket(vs[2])
+					sendToClient(v)
 				end
 			end
 		end
@@ -635,6 +680,30 @@ function client_getClientsByIdentifier(identifier, idOnly)
 	end
 
 	return clients
+end
+
+function client_sendEvent(client, event)
+	if not client then
+		for _, v in pairs(clients) do
+			client_sendEvent(v, event)
+		end
+
+		return
+	end
+
+	client.lastEventID = client.lastEventID + 1
+	table.insert(client.events, {client.lastEventID, event})
+end
+client_addEvent = client_sendEvent
+
+function client_getByTank(tank)
+	for _, v in pairs(clients) do
+		if v.tank == tank then
+			return v
+		end
+	end
+
+	return nil
 end
 
 function client_kick(client, reason)

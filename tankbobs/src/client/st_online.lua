@@ -60,6 +60,7 @@ local st_online_start
 local online_readPackets
 
 local unpersistArgs = {}
+local won
 
 local refreshKeys = function()
 	tankbobs.in_getKeys()
@@ -164,11 +165,13 @@ function st_online_init()
 
 	game_new()
 
+	won = new
+
 	-- pause label
 
 	-- pause
 	local function updatePause(widget)
-		if c_world_getPaused() and not endOfGame and not quitScreen and connection.state > UNCONNECTED then
+		if c_world_getPaused() and not won and not quitScreen and connection.state > UNCONNECTED then
 			widget.text = "Paused"
 			tankbobs.in_grabClear()
 		else
@@ -309,6 +312,52 @@ function online_readPackets(d)  -- local
 					connection.ping   = tankbobs.io_toInt(data:sub(1, 4)) data = data:sub(5)
 					connection.offset = tankbobs.io_toInt(data:sub(1, 4)) data = data:sub(5)
 				end
+			elseif switch == 0xAA then
+				if #data >= 9 then
+					-- server sent us an event
+					local id = tankbobs.io_toInt(data:sub(1, 4)) data = data:sub(5)
+
+					-- tell the server we successfully received our event
+					tankbobs.n_newPacket(37)
+					tankbobs.n_writeToPacket(tankbobs.io_fromChar(0x03))
+					tankbobs.n_writeToPacket(connection.ui)
+					tankbobs.n_writeToPacket(tankbobs.io_fromInt(id))
+					tankbobs.n_sendPacket()
+
+					local switch = string.byte(data, 1) data = data:sub(2)
+					if switch == nil then
+					elseif switch == 0x00 then
+						-- win event
+						local id = tankbobs.io_toInt(data:sub(1, 4)) data = data:sub(5)
+
+						won = id
+
+						c_world_setPaused(true)
+
+						if c_world_isTeamGameType(c_world_gameType) then
+							if id ~= 0 then
+								local name = "Blue"
+								local color = c_const_get("color_blue")
+								gui_addLabel(tankbobs.m_vec2(35, 50), name .. " wins!", nil, 1.1, color[1], color[2], color[3], 0.75, color[1], color[2], color[3], 0.8)
+							else
+								local name = "Red"
+								local color = c_const_get("color_red")
+								gui_addLabel(tankbobs.m_vec2(35, 50), name .. " wins!", nil, 1.1, color[1], color[2], color[3], 0.75, color[1], color[2], color[3], 0.8)
+							end
+						else
+							local tank = c_world_getTanks()[won]
+							if not tank then
+								gui_addLabel(tankbobs.m_vec2(35, 50), "A player wins!", nil, 1.1, 1, 0, 0, 1)
+								gui_addLabel(tankbobs.m_vec2(35, 80), "Couldn't find winning tank!", nil, 1.1, 1, 0, 0, 1)
+							end
+	
+							local name = tostring(tank.name)
+							gui_addLabel(tankbobs.m_vec2(35, 50), name .. " wins!", nil, 1.1, tank.color.r, tank.color.g, tank.color.b, 0.75, tank.color.r, tank.color.g, tank.color.b, 0.8)
+						end
+
+						tankbobs.a_playSound(c_const_get("win_sound"))
+					end
+				end
 			end
 		end
 	until not status
@@ -332,7 +381,7 @@ function st_online_button(button, pressed)
 	if not gui_button(button, pressed) then
 		if pressed then
 			if button == c_config_get("client.key.pause") then
-				--if not endOfGame and not quitScreen then
+				--if not won and not quitScreen then
 					--c_world_setPaused(not c_world_getPaused())
 				--end
 			elseif button == 0x1B or button == c_config_get("client.key.quit") then  -- escape
