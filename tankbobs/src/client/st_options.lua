@@ -728,25 +728,25 @@ end
 
 function st_optionsControls_pause(widget, button)
 	if button then
-		c_config_set("key.pause", button)
+		c_config_set("client.key.pause", c_config_keyLayoutSet(button))
 	else
-		c_config_set("key.pause", false)
+		c_config_set("client.key.pause", false)
 	end
 end
 
 function st_optionsControls_exit(widget, button)
 	if button then
-		c_config_set("key.exit", button)
+		c_config_set("client.key.exit", c_config_keyLayoutSet(button))
 	else
-		c_config_set("key.exit", false)
+		c_config_set("client.key.exit", false)
 	end
 end
 
 function st_optionsControls_quit(widget, button)
 	if button then
-		c_config_set("key.quit", button)
+		c_config_set("client.key.quit", c_config_keyLayoutSet(button))
 	else
-		c_config_set("key.quit", false)
+		c_config_set("client.key.quit", false)
 	end
 end
 
