@@ -1084,7 +1084,7 @@ int w_persistWorld(lua_State *L)
 	}
 
 	/* control points */
-	/* char team;  -- team will be 0 if it's not captured, 1 if red, and 2 if blue */
+	/* char team;  -- team will be 0 if neutral, 1 if red, and 2 if blue */
 	++order;
 	lua_pushnil(L);
 	while(lua_next(L, order))
@@ -1094,7 +1094,7 @@ int w_persistWorld(lua_State *L)
 			/* set team */
 			lua_getfield(L, -1, "m");
 			lua_getfield(L, -1, "team");
-			if(lua_isnoneornil(L, -1))
+			if(!lua_toboolean(L, -1))
 			{
 				IO_SETCHARNL(buf, offset, 0x00); offset += sizeof(io8t);
 			}
