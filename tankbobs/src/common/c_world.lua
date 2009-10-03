@@ -1089,10 +1089,6 @@ function c_world_tank_stepAhead(fromTime, toTime)
 	end
 
 	while i ~= test do
-		if i < 1 then
-			i = c_config_get("client.histSize")
-		end
-
 		local h = history[i]
 
 		if not to and h[1] <= toTime then
@@ -1108,11 +1104,23 @@ function c_world_tank_stepAhead(fromTime, toTime)
 		end
 
 		i = i - 1
+
+		if i < 1 then
+			i = c_config_get("client.histSize")
+		end
 	end
 
-	if to and from then
+	if from and to then
 		-- step tank from "from" to "to"
-		for i = from, to - 1 do
+		i = from
+		if i >= c_config_get("client.histSize") then
+			i = 1
+		end
+		to = to - 1
+		if to < 1 then
+			to = c_config_get("client.histSize")
+		end
+		while(i ~= to) do
 			local breaking = false repeat
 				tank.state = history[i][2]
 				local length = (history[i + 1][1] - history[i][1]) / (c_const_get("world_time") * c_config_get("game.timescale"))
@@ -1120,6 +1128,13 @@ function c_world_tank_stepAhead(fromTime, toTime)
 					length = 1.0E-6  -- inaccurate guess
 				end
 				c_world_tank_step(length, tank)
+
+				i = i + 1
+				if i >= c_config_get("client.histSize") then
+					if to ~= i then
+						i = 1
+					end
+				end
 			until true if breaking then break end
 		end
 	end
@@ -1152,9 +1167,9 @@ function c_world_tank_step(d, tank)
 		return c_world_tank_die(tank, t)
 	end
 
-	if record and tank == tankStepAhead and history and lastHistoryIndex > 0 then
-		-- don't record input multiple times for the same frame
-		if t ~= history[lastHistoryIndex][1] then
+	if record and tank == tankStepAhead and history then
+		-- don't record input multiple times in the same frame
+		if lastHistoryIndex == 0 or t ~= history[lastHistoryIndex][1] then
 			local h
 
 			lastHistoryIndex = lastHistoryIndex + 1

@@ -170,7 +170,7 @@ function st_main_step(d)
 
 	if(client_connectedClients() <= 0) then
 		if not c_world_getPaused() then
-			s_printnl("The game has been paused automatically")
+			s_printnl("The game has been automatically paused")
 			c_world_setPaused(true)
 		end
 	end

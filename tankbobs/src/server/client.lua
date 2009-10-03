@@ -485,7 +485,7 @@ function client_step(d)
 									-- unpause the world when the first client connects
 									if(client_connectedClients() == 1) then
 										if c_world_getPaused() then
-											s_printnl("The game has been automatically unpaused")
+											s_printnl("The game has been un-paused automatically")
 											c_world_setPaused(false)
 										end
 									end

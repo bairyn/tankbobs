@@ -165,7 +165,7 @@ function st_online_init()
 
 	game_new()
 
-	won = new
+	won = nil
 
 	-- pause label
 
@@ -198,10 +198,6 @@ end
 function st_online_done()
 	gui_finish()
 
-	game_done()
-
-	c_world_freeWorld()
-
 	if connection.state > REQUESTING then
 		-- abort the connection
 		tankbobs.n_newPacket(33)
@@ -216,6 +212,10 @@ function st_online_done()
 
 		connection.state = UNCONNECTED
 	end
+
+	game_done()
+
+	c_world_freeWorld()
 end
 
 function online_readPackets(d)  -- local
@@ -274,11 +274,12 @@ function online_readPackets(d)  -- local
 						c_world_step(0)
 
 						tank.p = backupP
-						tank.r = backupR
 						tank.v = backupV
+						tank.r = backupR
 
 						if tank.exists and tank.body then
 							tankbobs.w_setPosition(tank.body, tank.p)
+							tankbobs.w_setLinearVelocity(tank.body, tank.v)
 							tankbobs.w_setAngle(tank.body, tank.r)
 						end
 
@@ -350,10 +351,10 @@ function online_readPackets(d)  -- local
 								if not tank then
 									gui_addLabel(tankbobs.m_vec2(35, 50), "A player wins!", nil, 1.1, 1, 0, 0, 1)
 									gui_addLabel(tankbobs.m_vec2(35, 80), "Couldn't find winning tank!", nil, 1.1, 1, 0, 0, 1)
+								else
+									local name = tostring(tank.name)
+									gui_addLabel(tankbobs.m_vec2(35, 50), name .. " wins!", nil, 1.1, tank.color.r, tank.color.g, tank.color.b, 0.75, tank.color.r, tank.color.g, tank.color.b, 0.8)
 								end
-		
-								local name = tostring(tank.name)
-								gui_addLabel(tankbobs.m_vec2(35, 50), name .. " wins!", nil, 1.1, tank.color.r, tank.color.g, tank.color.b, 0.75, tank.color.r, tank.color.g, tank.color.b, 0.8)
 							end
 
 							tankbobs.a_playSound(c_const_get("win_sound"))
@@ -391,6 +392,8 @@ function st_online_button(button, pressed)
 					c_state_new(title_state)
 				elseif quitScreen then
 					continue()
+				elseif won then
+					c_state_new(title_state)
 				elseif c_world_getPaused() then
 					--c_world_setPaused(not c_world_getPaused())
 				else

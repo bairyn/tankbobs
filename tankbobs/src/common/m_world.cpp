@@ -1098,7 +1098,7 @@ int w_persistWorld(lua_State *L)
 			{
 				IO_SETCHARNL(buf, offset, 0x00); offset += sizeof(io8t);
 			}
-			else if(strcmp(lua_tostring(L, -1), "red"))
+			else if(strcmp(lua_tostring(L, -1), "red") == 0)
 			{
 				IO_SETCHARNL(buf, offset, 0x01); offset += sizeof(io8t);
 			}
@@ -1212,15 +1212,11 @@ int w_unpersistWorld(lua_State *L)
 	unsigned int numControlPoints  = IO_GETSHORTNL(buf, offset); offset += sizeof(io16t);
 	unsigned int numFlags          = IO_GETSHORTNL(buf, offset); offset += sizeof(io16t);
 
-	/* remove projectiles before unpersisting */
-	/*lua_pushvalue(L, 1 + preArgs);*/
-	/*lua_pushcfunction(L, t_emptyTable));*/
-	/*lua_call(L, 1, 0);*/
-	/* this should already be done in the game logic */
-
 	/* Projectiles */
 	for(int i = 0; i < numProjectiles; i++)
 	{
+		/* projectiles are removed before unpersisting */
+
 		lua_pushvalue(L, 7 + preArgs);
 		lua_pushvalue(L, 10 + preArgs);
 		lua_call(L, 1, 1);
