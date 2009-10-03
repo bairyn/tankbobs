@@ -76,7 +76,7 @@ local function testEnd()
 				if v.score >= fragLimit then
 					c_world_setPaused(true)
 
-					client_sendEvent(client_getByTank(v), tankbobs.io_fromChar(0xAA) .. tankbobs.io_fromInt(k))
+					client_sendEvent(client_getByTank(v), tankbobs.io_fromChar(0x00) .. tankbobs.io_fromInt(k))
 
 					endOfGame = true
 				end
@@ -90,7 +90,7 @@ local function testEnd()
 				if v.score >= chaseLimit then
 					c_world_setPaused(true)
 
-					client_sendEvent(client_getByTank(v), tankbobs.io_fromChar(0xAA) .. tankbobs.io_fromInt(k))
+					client_sendEvent(client_getByTank(v), tankbobs.io_fromChar(0x00) .. tankbobs.io_fromInt(k))
 
 					endOfGame = true
 				end
@@ -103,13 +103,13 @@ local function testEnd()
 			if c_world_redTeam.score >= pointLimit then
 				c_world_setPaused(true)
 
-				client_sendEvent(client_getByTank(v), tankbobs.io_fromChar(0xAA) .. tankbobs.io_fromInt(0x00000001))
+				client_sendEvent(client_getByTank(v), tankbobs.io_fromChar(0x00) .. tankbobs.io_fromInt(0x00000001))
 
 				endOfGame = true
 			elseif c_world_blueTeam.score >= pointLimit then
 				c_world_setPaused(true)
 
-				client_sendEvent(client_getByTank(v), tankbobs.io_fromChar(0xAA) .. tankbobs.io_fromInt(0x00000000))
+				client_sendEvent(client_getByTank(v), tankbobs.io_fromChar(0x00) .. tankbobs.io_fromInt(0x00000000))
 
 				endOfGame = true
 			end
@@ -121,13 +121,13 @@ local function testEnd()
 			if c_world_redTeam.score >= captureLimit then
 				c_world_setPaused(true)
 
-				client_sendEvent(client_getByTank(v), tankbobs.io_fromChar(0xAA) .. tankbobs.io_fromInt(0x00000001))
+				client_sendEvent(client_getByTank(v), tankbobs.io_fromChar(0x00) .. tankbobs.io_fromInt(0x00000001))
 
 				endOfGame = true
 			elseif c_world_blueTeam.score >= captureLimit then
 				c_world_setPaused(true)
 
-				client_sendEvent(client_getByTank(v), tankbobs.io_fromChar(0xAA) .. tankbobs.io_fromInt(0x00000000))
+				client_sendEvent(client_getByTank(v), tankbobs.io_fromChar(0x00) .. tankbobs.io_fromInt(0x00000000))
 
 				endOfGame = true
 			end

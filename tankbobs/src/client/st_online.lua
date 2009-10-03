@@ -237,7 +237,7 @@ function online_readPackets(d)  -- local
 						if tank then
 							state = tank.state
 						end
-						tankbobs.w_unpersistWorld(data, connection.t, function (score) c_world_redTeam.score = score end, function (score) c_world_redTeam.score = score end, unpack(unpersistArgs))
+						tankbobs.w_unpersistWorld(data, connection.t, function (score) c_world_redTeam.score = score end, function (score) c_world_blueTeam.score = score end, unpack(unpersistArgs))
 						if tank then
 							tank.state = state
 						end
@@ -319,7 +319,7 @@ function online_readPackets(d)  -- local
 
 					-- tell the server we successfully received our event
 					tankbobs.n_newPacket(37)
-					tankbobs.n_writeToPacket(tankbobs.io_fromChar(0x03))
+					tankbobs.n_writeToPacket(tankbobs.io_fromChar(0x0A))
 					tankbobs.n_writeToPacket(connection.ui)
 					tankbobs.n_writeToPacket(tankbobs.io_fromInt(id))
 					tankbobs.n_sendPacket()
@@ -328,34 +328,36 @@ function online_readPackets(d)  -- local
 					if switch == nil then
 					elseif switch == 0x00 then
 						-- win event
-						local id = tankbobs.io_toInt(data:sub(1, 4)) data = data:sub(5)
+						if not won then
+							local id = tankbobs.io_toInt(data:sub(1, 4)) data = data:sub(5)
 
-						won = id
+							won = id
 
-						c_world_setPaused(true)
+							c_world_setPaused(true)
 
-						if c_world_isTeamGameType(c_world_gameType) then
-							if id ~= 0 then
-								local name = "Blue"
-								local color = c_const_get("color_blue")
-								gui_addLabel(tankbobs.m_vec2(35, 50), name .. " wins!", nil, 1.1, color[1], color[2], color[3], 0.75, color[1], color[2], color[3], 0.8)
+							if c_world_isTeamGameType(c_world_gameType) then
+								if id ~= 0 then
+									local name = "Red"
+									local color = c_const_get("color_red")
+									gui_addLabel(tankbobs.m_vec2(35, 50), name .. " wins!", nil, 1.1, color[1], color[2], color[3], 0.75, color[1], color[2], color[3], 0.8)
+								else
+									local name = "Blue"
+									local color = c_const_get("color_blue")
+									gui_addLabel(tankbobs.m_vec2(35, 50), name .. " wins!", nil, 1.1, color[1], color[2], color[3], 0.75, color[1], color[2], color[3], 0.8)
+								end
 							else
-								local name = "Red"
-								local color = c_const_get("color_red")
-								gui_addLabel(tankbobs.m_vec2(35, 50), name .. " wins!", nil, 1.1, color[1], color[2], color[3], 0.75, color[1], color[2], color[3], 0.8)
+								local tank = c_world_getTanks()[won]
+								if not tank then
+									gui_addLabel(tankbobs.m_vec2(35, 50), "A player wins!", nil, 1.1, 1, 0, 0, 1)
+									gui_addLabel(tankbobs.m_vec2(35, 80), "Couldn't find winning tank!", nil, 1.1, 1, 0, 0, 1)
+								end
+		
+								local name = tostring(tank.name)
+								gui_addLabel(tankbobs.m_vec2(35, 50), name .. " wins!", nil, 1.1, tank.color.r, tank.color.g, tank.color.b, 0.75, tank.color.r, tank.color.g, tank.color.b, 0.8)
 							end
-						else
-							local tank = c_world_getTanks()[won]
-							if not tank then
-								gui_addLabel(tankbobs.m_vec2(35, 50), "A player wins!", nil, 1.1, 1, 0, 0, 1)
-								gui_addLabel(tankbobs.m_vec2(35, 80), "Couldn't find winning tank!", nil, 1.1, 1, 0, 0, 1)
-							end
-	
-							local name = tostring(tank.name)
-							gui_addLabel(tankbobs.m_vec2(35, 50), name .. " wins!", nil, 1.1, tank.color.r, tank.color.g, tank.color.b, 0.75, tank.color.r, tank.color.g, tank.color.b, 0.8)
-						end
 
-						tankbobs.a_playSound(c_const_get("win_sound"))
+							tankbobs.a_playSound(c_const_get("win_sound"))
+						end
 					end
 				end
 			end

@@ -291,6 +291,7 @@ function st_internet_start(widget)
 	tankbobs.n_writeToPacket(tankbobs.io_fromDouble(r))
 	tankbobs.n_writeToPacket(tankbobs.io_fromDouble(g))
 	tankbobs.n_writeToPacket(tankbobs.io_fromDouble(b))
+	tankbobs.n_writeToPacket(tankbobs.io_fromChar((c_config_get("game.player1.team") == "red") and 0x01 or 0x00))
 	tankbobs.n_writeToPacket(connection.ui)
 	tankbobs.n_sendPacket(connection.ip)
 

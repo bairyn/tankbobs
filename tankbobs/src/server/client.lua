@@ -386,7 +386,7 @@ function client_step(d)
 			local switch = string.byte(data, 1) data = data:sub(2)
 			if switch == nil then
 			elseif switch == 0x00 then
-				if #data >= 77 then  -- connection request packet needs to be at least 77 bytes, so ignore it if it's not
+				if #data >= 78 then  -- connection request packet needs to be at least 78 bytes, so ignore it if it's not
 					if not client then
 						if not lastConnectTime or t > lastConnectTime + c_const_get("client_connectFlood") then
 							lastConnectTime = t
@@ -414,6 +414,9 @@ function client_step(d)
 							client.tank.color.r = tankbobs.io_toDouble(data) data = data:sub(9)
 							client.tank.color.g = tankbobs.io_toDouble(data) data = data:sub(9)
 							client.tank.color.b = tankbobs.io_toDouble(data) data = data:sub(9)
+
+							-- the tank's team
+							client.tank.red = tankbobs.io_toChar(data) ~= 0 and true or false data = data:sub(2)
 
 							-- the last 32 bytes are the client's unique identifier
 							client.ui = data:sub(1, 32) data = data:sub(33)
