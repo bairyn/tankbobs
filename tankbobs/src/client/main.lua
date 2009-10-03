@@ -140,8 +140,8 @@ function main_loop()
 			if tankbobs.in_getEventData(lastevent, "type") == "quit" then
 				done = true
 			elseif tankbobs.in_getEventData(lastevent, "type") == "video" then
-				config_set("client.renderer.width", tankbobs.in_getEventData(lastevent, "intData0"))
-				config_set("client.renderer.height", tankbobs.in_getEventData(lastevent, "intData1"))
+				c_config_set("client.renderer.width", tankbobs.in_getEventData(lastevent, "intData0"))
+				c_config_set("client.renderer.height", tankbobs.in_getEventData(lastevent, "intData1"))
 				renderer_updateWindow()
 			elseif tankbobs.in_getEventData(lastevent, "type") == "video_focus" then
 				video_updateWindow()
@@ -208,7 +208,7 @@ function main_parseArgs(args)
 		elseif string.find(args[i], "^-c") then
 			if string.find(args[i], "^[\n\t ]*-c[\n\t ]*$") then
 				if args[i + 1] and string.find(args[i + 1], "[\n\t ]+") then
-					config_set(string.sub(args[i + 1], 1, (string.find(args[i + 1], "[\n\t ]+")) - 1), string.sub(args[i + 1], select(2, string.find(args[i + 1], "[\n\t ]+") + 1, -1)))
+					c_config_set(string.sub(args[i + 1], 1, (string.find(args[i + 1], "[\n\t ]+")) - 1), string.sub(args[i + 1], select(2, string.find(args[i + 1], "[\n\t ]+") + 1, -1)))
 					return parse(i + 2)
 				elseif args[i + 2] then
 					c_config_set(args[i + 1], args[i + 2])
@@ -216,7 +216,7 @@ function main_parseArgs(args)
 				end
 			else
 				if string.find(args[i], "[\n\t ]+", select(2, string.find(args[i], "^[\n\t ]*-c[\n\t ]*")) + 1) then
-					config_set(string.sub(args[i], select(2, string.find(args[i], "^[\n\t ]*-c[\n\t ]*")) + 1, string.find(args[i], "[\n\t ]+", select(2, string.find(args[i], "^[\n\t ]*-c[\n\t ]*")) + 1) - 1), string.sub(args[i], select(2, string.find(args[i], "[\n\t ]+", select(2, string.find(args[i], "^[\n\t ]*-c[\n\t ]*")) + 1)) + 1, -1))
+					c_config_set(string.sub(args[i], select(2, string.find(args[i], "^[\n\t ]*-c[\n\t ]*")) + 1, string.find(args[i], "[\n\t ]+", select(2, string.find(args[i], "^[\n\t ]*-c[\n\t ]*")) + 1) - 1), string.sub(args[i], select(2, string.find(args[i], "[\n\t ]+", select(2, string.find(args[i], "^[\n\t ]*-c[\n\t ]*")) + 1)) + 1, -1))
 					return parse(i + 1)
 				elseif args[i + 1] then
 					c_config_set(string.sub(args[i], select(2, string.find(args[i], "^[\n\t ]*-c[\n\t ]*")) + 1, -1), args[i + 1])
