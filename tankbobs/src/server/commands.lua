@@ -1118,6 +1118,10 @@ function instagib(line)
 			enabled = true
 		elseif switch == 'f' then
 			enabled = false
+		elseif switch == 'd' then
+			enabled = false
+		elseif switch == 'e' then
+			enabled = true
 		elseif switch == 'y' then
 			enabled = true
 		elseif switch == 'n' then
@@ -1440,7 +1444,7 @@ commands =
 		instagib,
 		instagibT,
 		"Usage:\n" ..
-		" instagib (true|false|yes|no|on|off)\n" ..
+		" instagib (true|false|enabled|disabled|yes|no|on|off)\n" ..
 		"\n"  ..
 		" Sets instagib mode.  When called without arguments, will print the\n" ..
 		" current mode to console."
