@@ -132,9 +132,26 @@ int n_init(lua_State *L)
 	return 1;
 }
 
+static void n_sendOldestPacket(void)
+{
+	/* Note: error checking needs to be done before calling this function */
+	currentPacketQ->len = sq->len;
+	memcpy(currentPacketQ->data, sq->data, sq->len);
+	memcpy(&currentPacketQ->address, &sq->address, sizeof(currentPacketQ->address));
+	SDLNet_UDP_Send(currentSocket, -1, currentPacketQ);
+	memmove(sq, sq + 1, sizeof(sendQueue) - sizeof(sendQueue[0]));
+	--lastSentPacket;
+}
+
 int n_quit(lua_State *L)
 {
 	CHECKINIT(init, L);
+
+	while(lastSentPacket >= 0)
+	{
+		/* send queued packets before closing */
+		n_sendOldestPacket();
+	}
 
 	if(currentPacket)
 	{
@@ -245,17 +262,6 @@ int n_setPort(lua_State *L)
 	currentPort = luaL_checkinteger(L, 1) & (0x0000FFFF);
 
 	return 0;
-}
-
-static void n_sendOldestPacket(void)
-{
-	/* Note: error checking needs to be done before calling this function */
-	currentPacketQ->len = sq->len;
-	memcpy(currentPacketQ->data, sq->data, sq->len);
-	memcpy(&currentPacketQ->address, &sq->address, sizeof(currentPacketQ->address));
-	SDLNet_UDP_Send(currentSocket, -1, currentPacketQ);
-	memmove(sq, sq + 1, sizeof(sendQueue) - sizeof(sendQueue[0]));
-	--lastSentPacket;
 }
 
 static void n_sendQueuedPackets(void)
