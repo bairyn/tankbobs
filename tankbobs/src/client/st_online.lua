@@ -249,7 +249,7 @@ function online_readPackets(d)  -- local
 						end
 
 						local backupP = tankbobs.m_vec2(tank.p)
-						local backupV = tankbobs.m_vec2(tank.v)
+						local backupV = tankbobs.w_getLinearVelocity(tank.body)
 						local backupR = tank.r
 						if c_config_get("client.online.stepAhead") then
 							c_world_tank_setStepAhead(tank)
@@ -266,7 +266,7 @@ function online_readPackets(d)  -- local
 							-- so that the client sees what the server probably sees now
 							--]]
 							if tank.exists then
-								stepOffset = -connection.offset * 2
+								stepOffset = connection.ping * 2
 							end
 						end
 
@@ -274,12 +274,11 @@ function online_readPackets(d)  -- local
 						c_world_step(0)
 
 						tank.p = backupP
-						tank.v = backupV
 						tank.r = backupR
 
 						if tank.exists and tank.body then
 							tankbobs.w_setPosition(tank.body, tank.p)
-							tankbobs.w_setLinearVelocity(tank.body, tank.v)
+							tankbobs.w_setLinearVelocity(tank.body, backupV)
 							tankbobs.w_setAngle(tank.body, tank.r)
 						end
 

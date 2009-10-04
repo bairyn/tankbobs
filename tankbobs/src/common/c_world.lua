@@ -1071,6 +1071,10 @@ end
 function c_world_tank_stepAhead(fromTime, toTime)
 	local tank = tankStepAhead
 
+	if not tank then
+		return
+	end
+
 	if lastHistoryIndex < 1 then
 		return
 	end
@@ -1138,6 +1142,7 @@ function c_world_tank_stepAhead(fromTime, toTime)
 			until true if breaking then break end
 		end
 	end
+
 
 	tank.state = state
 

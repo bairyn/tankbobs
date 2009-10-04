@@ -4,8 +4,8 @@
 		<cameraExtraFOV>25</cameraExtraFOV>
 		<cameraSpeed>5</cameraSpeed>
 		<fps>128</fps>
-		<histSize>128</histSize>  record 256 frames of input
-		<ifps>8</ifps>
+		<histSize>1024</histSize>  record 256 frames of input
+		<ifps>64</ifps>
 
 		These keys might conflict with the default menu keys:
 		0x08: BACKSPACE
@@ -160,7 +160,7 @@
 	<server>
 		<fps>64</fps>
 		<logFile>games.log</logFile>  Make empty (or false) to not record to logs
-		<pfps>8</pfps>
+		<pfps>32</pfps>
 		<writeFileOnBan>false</writeFileOnBan>  if false, bans are written on restart
 	</server>
 </config>
