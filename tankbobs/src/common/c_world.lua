@@ -777,7 +777,7 @@ function c_world_intersection(d, p1, p2, v1, v2)
 end
 
 -- wrapper for c_world_findClosestIntersection with a small line
-local c = tankbobs.m_vec2(0.1, 0.1)
+local c = tankbobs.m_vec2(1, 1)
 function c_world_pointIntersects(p)
 	return c_world_findClosestIntersection(p, p + c)
 end
@@ -1179,14 +1179,6 @@ function c_world_tank_step(d, tank)
 		return
 	end
 
-	if tank == ignoreTank then
-		if tank.cd.init then
-			return
-		else
-			tank.cd.init = true
-		end
-	end
-
 	if tank.health <= 0 then
 		return c_world_tank_die(tank, t)
 	end
@@ -1231,110 +1223,122 @@ function c_world_tank_step(d, tank)
 
 	local vel = t_w_getLinearVelocity(tank.body)
 
-	if bit.band(tank.state, SPECIAL) ~= 0 then
-		if bit.band(tank.state, LEFT) ~= 0 then
-			if vel.R < 0 then  -- inverse rotation
-				tank.r = tank.r - tank_rotationSpeed * vel.R / tank_rotationSpecialSpeed
-			else
-				tank.r = tank.r + tank_rotationSpeed * vel.R / tank_rotationSpecialSpeed
-			end
-		end
-
-		if bit.band(tank.state, RIGHT) ~= 0 then
-			if vel.R < 0 then  -- inverse rotation
-				tank.r = tank.r + tank_rotationSpeed * vel.R / tank_rotationSpecialSpeed
-			else
-				tank.r = tank.r - tank_rotationSpeed * vel.R / tank_rotationSpecialSpeed
-			end
-		end
-
-		vel.t = tank.r
-
-		t_w_setLinearVelocity(tank.body, vel)
-
-		if bit.band(tank.state, BACK) ~= 0 then
-			tank.state = bit.bor(tank.state, REVERSE)
+	-- ignore movement for designated tanks
+	local skip = false
+	if tank == ignoreTank then
+		if tank.cd.init then
+			skip = true
 		else
-			tank.state = bit.band(tank.state, bit.bnot(REVERSE))
+			tank.cd.init = true
 		end
-	else
-		if bit.band(tank.state, FORWARD) ~= 0 or bit.band(tank.state, BACK) ~= 0 then
-			if bit.band(tank.state, FORWARD) ~= 0 then
-				-- determine the acceleration
-				local acceleration
-				local speedK = tank_speedK
+	end
 
-				for _, v in pairs(tank_acceleration) do  -- local copy of table for optimization
-					if v[2] then
-						if vel.R >= v[2] * speedK then
-							acceleration = v[1]
-						end
-					elseif not acceleration then
-						acceleration = v[1] * speedK
-					end
-				end
-
-				if tank.cd.acceleration then
-					acceleration = acceleration * c_const_get("tank_accelerationModifier")
-				end
-
-				local newVel = t_m_vec2(vel)
-				newVel.R = newVel.R + acceleration
-				newVel.t = tank.r
-				if vel.R >= tank_rotationChangeMinSpeed * speedK then
-					-- interpolate in the correct direction
-					vel.t    = math.fmod(vel.t, 2 * math.pi)
-					newVel.t = math.fmod(newVel.t, 2 * math.pi)
-					if        vel.t - newVel.t > math.pi then
-						vel.t    =    vel.t - 2 * math.pi
-					elseif newVel.t -    vel.t > math.pi then
-						newVel.t = newVel.t - 2 * math.pi
-					end
-					newVel.t = common_lerp(vel.t, newVel.t, tank_rotationChange)
-				end
-
-				t_w_setLinearVelocity(tank.body, newVel)
-				vel(newVel)
-			end
-			if bit.band(tank.state, BACK) ~= 0 then
-				if bit.band(tank.state, REVERSE) ~= 0 and vel.R <= c_const_get("tank_decelerationMaxSpeed") then
-					-- reverse
-
-					local addVel = t_m_vec2()
-					addVel.R = c_const_get("tank_deceleration")
-					addVel.t = tank.r + math.pi
-					vel:add(addVel)
-					t_w_setLinearVelocity(tank.body, vel)
+	if not skip then
+		if bit.band(tank.state, SPECIAL) ~= 0 then
+			if bit.band(tank.state, LEFT) ~= 0 then
+				if vel.R < 0 then  -- inverse rotation
+					tank.r = tank.r - tank_rotationSpeed * vel.R / tank_rotationSpecialSpeed
 				else
-					-- break
+					tank.r = tank.r + tank_rotationSpeed * vel.R / tank_rotationSpecialSpeed
+				end
+			end
+
+			if bit.band(tank.state, RIGHT) ~= 0 then
+				if vel.R < 0 then  -- inverse rotation
+					tank.r = tank.r + tank_rotationSpeed * vel.R / tank_rotationSpecialSpeed
+				else
+					tank.r = tank.r - tank_rotationSpeed * vel.R / tank_rotationSpecialSpeed
+				end
+			end
+
+			vel.t = tank.r
+
+			t_w_setLinearVelocity(tank.body, vel)
+
+			if bit.band(tank.state, BACK) ~= 0 then
+				tank.state = bit.bor(tank.state, REVERSE)
+			else
+				tank.state = bit.band(tank.state, bit.bnot(REVERSE))
+			end
+		else
+			if bit.band(tank.state, FORWARD) ~= 0 or bit.band(tank.state, BACK) ~= 0 then
+				if bit.band(tank.state, FORWARD) ~= 0 then
+					-- determine the acceleration
+					local acceleration
+					local speedK = tank_speedK
+
+					for _, v in pairs(tank_acceleration) do  -- local copy of table for optimization
+						if v[2] then
+							if vel.R >= v[2] * speedK then
+								acceleration = v[1]
+							end
+						elseif not acceleration then
+							acceleration = v[1] * speedK
+						end
+					end
+
+					if tank.cd.acceleration then
+						acceleration = acceleration * c_const_get("tank_accelerationModifier")
+					end
 
 					local newVel = t_m_vec2(vel)
-
-					if newVel.R > 0 then
-						newVel.R = newVel.R - c_const_get("tank_deceleration")
+					newVel.R = newVel.R + acceleration
+					newVel.t = tank.r
+					if vel.R >= tank_rotationChangeMinSpeed * speedK then
+						-- interpolate in the correct direction
+						vel.t    = math.fmod(vel.t, 2 * math.pi)
+						newVel.t = math.fmod(newVel.t, 2 * math.pi)
+						if        vel.t - newVel.t > math.pi then
+							vel.t    =    vel.t - 2 * math.pi
+						elseif newVel.t -    vel.t > math.pi then
+							newVel.t = newVel.t - 2 * math.pi
+						end
+						newVel.t = common_lerp(vel.t, newVel.t, tank_rotationChange)
 					end
 
 					t_w_setLinearVelocity(tank.body, newVel)
 					vel(newVel)
 				end
+				if bit.band(tank.state, BACK) ~= 0 then
+					if bit.band(tank.state, REVERSE) ~= 0 and vel.R <= c_const_get("tank_decelerationMaxSpeed") then
+						-- reverse
+
+						local addVel = t_m_vec2()
+						addVel.R = c_const_get("tank_deceleration")
+						addVel.t = tank.r + math.pi
+						vel:add(addVel)
+						t_w_setLinearVelocity(tank.body, vel)
+					else
+						-- break
+
+						local newVel = t_m_vec2(vel)
+
+						if newVel.R > 0 then
+							newVel.R = newVel.R - c_const_get("tank_deceleration")
+						end
+
+						t_w_setLinearVelocity(tank.body, newVel)
+						vel(newVel)
+					end
+				else
+					tank.state = bit.band(tank.state, bit.bnot(REVERSE))
+				end
 			else
+				local v = t_w_getLinearVelocity(tank.body)
+
+				v.R = v.R / (1 + tank_worldFriction)
+				t_w_setLinearVelocity(tank.body, v)
+
 				tank.state = bit.band(tank.state, bit.bnot(REVERSE))
 			end
-		else
-			local v = t_w_getLinearVelocity(tank.body)
 
-			v.R = v.R / (1 + tank_worldFriction)
-			t_w_setLinearVelocity(tank.body, v)
+			if bit.band(tank.state, LEFT) ~= 0 then
+				tank.r = tank.r + tank_rotationSpeed
+			end
 
-			tank.state = bit.band(tank.state, bit.bnot(REVERSE))
-		end
-
-		if bit.band(tank.state, LEFT) ~= 0 then
-			tank.r = tank.r + tank_rotationSpeed
-		end
-
-		if bit.band(tank.state, RIGHT) ~= 0 then
-			tank.r = tank.r - tank_rotationSpeed
+			if bit.band(tank.state, RIGHT) ~= 0 then
+				tank.r = tank.r - tank_rotationSpeed
+			end
 		end
 	end
 
