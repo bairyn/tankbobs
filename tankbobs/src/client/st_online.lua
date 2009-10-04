@@ -254,7 +254,7 @@ function online_readPackets(d)  -- local
 						if c_config_get("client.online.stepAhead") then
 							c_world_tank_setStepAhead(tank)
 						else
-							c_world_tank_setStepAhead(nil)
+							c_world_tank_setIgnore(tank)
 						end
 						local stepOffset = 0
 						if c_config_get("client.online.unlagged") then

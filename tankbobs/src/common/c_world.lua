@@ -1067,6 +1067,11 @@ function c_world_tank_setStepAhead(tank)
 	end
 end
 
+local ignoreTank = nil
+function c_world_tank_setIgnore(tank)
+	ignoreTank = tank
+end
+
 -- step ahead (ahead / forward only)
 function c_world_tank_stepAhead(fromTime, toTime)
 	local tank = tankStepAhead
@@ -1166,6 +1171,14 @@ function c_world_tank_step(d, tank)
 
 	if not tank.exists then
 		return
+	end
+
+	if tank == ignoreTank then
+		if tank.cd.init then
+			return
+		else
+			tank.cd.init = true
+		end
 	end
 
 	if tank.health <= 0 then
