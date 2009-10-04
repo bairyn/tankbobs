@@ -776,6 +776,12 @@ function c_world_intersection(d, p1, p2, v1, v2)
 	return tankbobs.m_polygon(p1h, p2h)
 end
 
+-- wrapper for c_world_findClosestIntersection with a small line
+local c = tankbobs.m_vec2(0.1, 0.1)
+function c_world_pointIntersects(p)
+	return c_world_findClosestIntersection(p, p + c)
+end
+
 local c = nil
 function c_world_tankHull(tank)
 	if not c then
@@ -1760,6 +1766,10 @@ function c_world_teleporter_step(d, teleporter)
 								return
 							end
 						end
+					end
+					-- test for rest of world
+					if c_world_pointIntersects(teleporter.p) then
+						return
 					end
 
 					v.m.target = target.id
