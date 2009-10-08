@@ -24,8 +24,8 @@ Bot AI
 --]]
 
 function c_ai_init()
-	c_const_set("ai_fps", 200)
-	c_const_set("ai_fpsRelativeToSkill", 175)
+	c_const_set("ai_fps", 50)
+	c_const_set("ai_fpsRelativeToSkill", 150)
 
 	c_const_set("ai_minSkill", 1)  -- most difficult to fight against
 	c_const_set("ai_maxSkill", 16)  -- least difficult to fight against
