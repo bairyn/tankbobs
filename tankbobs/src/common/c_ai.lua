@@ -326,6 +326,46 @@ function c_ai_tankDie(tank)
 	tank.ai.close = false
 end
 
+function c_ai_findClosestWayPoint(pos)
+	local lastPoint, currentPoint = nil
+	local hull
+	local w = {}
+
+	for ks, vs in pairs(r.wayPoints) do
+		local intersection = false
+
+		for _, vss in pairs(r.walls) do
+		if not vss.detail and vss.static then  -- ignore dynamic walls when testing for intersections
+			--hull = vss.m.pos
+			hull = vss.p
+				local t = v
+				for _, vsss in pairs(hull) do
+					currentPoint = vsss
+					if not lastPoint then
+						lastPoint = hull[#hull]
+					end
+
+					if tankbobs.m_edge(lastPoint, currentPoint, pos, vs.p) then
+						intersection = true
+						break
+					end
+
+					lastPoint = currentPoint
+				end
+				lastPoint = nil
+			end
+		end
+
+		if not intersection then
+			table.insert(w, ks)
+		end
+	end
+
+	table.sort(w, function (a, b) return (r.wayPoints[a].p - v.p).R < (r.wayPoints[b].p - v.p).R end)
+
+	return w[1]
+end
+
 local p1, p2 = tankbobs.m_vec2(), tankbobs.m_vec2()
 function c_ai_followObective(tank)
 	if not tank.ai.objective then
