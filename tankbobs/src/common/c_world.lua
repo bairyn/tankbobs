@@ -702,6 +702,8 @@ local function c_world_spawnTank(tank)
 	-- add a physical body
 	tank.body = tankbobs.w_addBody(tank.p, tank.r, c_const_get("tank_canSleep"), c_const_get("tank_isBullet"), c_const_get("tank_linearDamping"), c_const_get("tank_angularDamping"), tank.h, c_const_get("tank_density"), c_const_get("tank_friction"), c_const_get("tank_restitution"), not c_const_get("tank_static"), c_const_get("tank_contentsMask"), c_const_get("tank_clipmask"), c_const_get("tank_isSensor"), index)
 
+	c_ai_tankSpawn(tank)
+
 	tank.exists = true
 end
 

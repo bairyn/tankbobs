@@ -39,6 +39,8 @@ function c_ai_init()
 	c_const_set("ai_skipUpdateRandom", 1.35)
 	c_const_set("ai_chaseEnemyChance", 6)  -- lower is more likely (chance of 1 / x)
 	c_const_set("ai_chaseEnemyChanceInstagib", 2)
+	c_const_set("ai_noFireSpawnTime", -1)
+	c_const_set("ai_noFireSpawnTimeInstagib", 0.8)
 
 	c_const_set("ai_stopCloseSpeed", 0.1)
 	c_const_set("ai_coastMinSpeed", 0.5)
@@ -260,7 +262,11 @@ function c_ai_shootEnemies(tank, enemy, angle, pos, time)
 	if math.random(1000 * c_ai_relativeTankSkill(tank), 1000 * (1 + c_const_get("ai_skipUpdateRandomReduce"))) / 1000 < c_const_get("ai_skipUpdateRandom") then
 		-- randomly skip updates to rotation depending on skill level
 		c_ai_setTankStateRotation(tank, tank.r - angle)
-		c_ai_setTankStateFire(tank, math.abs(angle - tank.r) <= tank.ai.skill * c_const_get("ai_shootAngle"))
+		if tankbobs.t_getTicks() > tank.ai.noFireTime then
+			c_ai_setTankStateFire(tank, math.abs(angle - tank.r) <= tank.ai.skill * c_const_get("ai_shootAngle"))
+		else
+			c_ai_setTankStateFire(tank, false)
+		end
 
 		-- randomly accelerate or reverse
 		if math.random(1, c_const_get("ai_accelerateByEnemyFrequency") * tank.ai.skill) == 1 then
@@ -274,6 +280,11 @@ function c_ai_shootEnemies(tank, enemy, angle, pos, time)
 			end
 		end
 	end
+end
+
+function c_ai_tankSpawn(tank)
+	local noFireTime = c_world_getInstagib() and c_const_get("ai_noFireSpawnTimeInstagib") or c_config_get("ai_noFireSpawnTime")
+	tank.ai.noFireTime = tankbobs.t_getTicks() + c_config_get("game.timescale") * c_const_get("world_time") * noFireTime
 end
 
 function c_ai_tankDie(tank)
