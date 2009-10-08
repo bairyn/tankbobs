@@ -196,10 +196,6 @@ function st_play_init()
 	c_world_setInstagib(c_config_get("game.instagib"))
 
 	for i = 1, c_config_get("game.players") + c_config_get("game.computers") do
-		if i > c_const_get("max_tanks") then
-			break
-		end
-
 		local tank = c_world_tank:new()
 		table.insert(c_world_getTanks(), tank)
 
