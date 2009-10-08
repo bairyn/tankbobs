@@ -34,11 +34,11 @@ function c_ai_init()
 	c_const_set("ai_botRange", 200)
 	c_const_set("ai_botAccuracy", 0.08)  -- accuracy of most skilled bot; lower is better (can be up to x secs off)
 	c_const_set("ai_shootAngle", (math.pi * 2) / 64)  -- (Tankbobs uses radians)
-	c_const_set("ai_maxSpeed", 1)  -- brake if above this speed, even if attacking
-	c_const_set("ai_maxSpeedInstagib", 4)  -- brake if above this speed, even if attacking
+	c_const_set("ai_maxSpeed", 12)  -- brake if above this speed, even if attacking
+	c_const_set("ai_maxSpeedInstagib", 24)  -- brake if above this speed, even if attacking
 	c_const_set("ai_maxSpecialSpeed", 2)
-	c_const_set("ai_minObjectiveSpeed", 0.9)
-	c_const_set("ai_minObjectiveSpeedInstagib", 3)
+	c_const_set("ai_minObjectiveSpeed", 8)
+	c_const_set("ai_minObjectiveSpeedInstagib", 16)
 	c_const_set("ai_accelerateByEnemyFrequency", 32)  -- lower is more
 	c_const_set("ai_skipUpdateRandomReduce", 0.5)
 	c_const_set("ai_skipUpdateRandom", 1.35)
@@ -47,7 +47,7 @@ function c_ai_init()
 	c_const_set("ai_noFireSpawnTime", -1)
 	c_const_set("ai_noFireSpawnTimeInstagib", 0.8)
 
-	c_const_set("ai_followRandom", (math.pi * 2) / 8)  -- +- x radians when least skilled bot is following an objective
+	c_const_set("ai_followRandom", (math.pi * 2) / 64)  -- +- x radians when least skilled bot is following an objective
 	c_const_set("ai_stopCloseSpeed", 0.1)
 	c_const_set("ai_coastMinSpeed", 0.5)
 	c_const_set("ai_reverseChance", 3)
