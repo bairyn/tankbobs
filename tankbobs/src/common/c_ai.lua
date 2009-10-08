@@ -24,7 +24,7 @@ Bot AI
 --]]
 
 function c_ai_init()
-	c_const_set("ai_fps", 50)
+	c_const_set("ai_fps", 200)
 	c_const_set("ai_fpsRelativeToSkill", 175)
 
 	c_const_set("ai_minSkill", 1)  -- most difficult to fight against
@@ -35,11 +35,12 @@ function c_ai_init()
 	c_const_set("ai_botAccuracy", 0.08)  -- accuracy of most skilled bot; lower is better (can be up to x secs off)
 	c_const_set("ai_shootAngle", (math.pi * 2) / 64)  -- (Tankbobs uses radians)
 	c_const_set("ai_maxSpeed", 12)  -- brake if above this speed, even if attacking
-	c_const_set("ai_maxSpeedInstagib", 24)  -- brake if above this speed, even if attacking
-	c_const_set("ai_maxSpecialSpeed", 2)
-	c_const_set("ai_minObjectiveSpeed", 8)
-	c_const_set("ai_minObjectiveSpeedInstagib", 16)
-	c_const_set("ai_accelerateByEnemyFrequency", 32)  -- lower is more
+	c_const_set("ai_maxSpeedInstagib", 56)  -- brake if above this speed, even if attacking
+	c_const_set("ai_minSpecialSpeed", 8)
+	c_const_set("ai_minSpecialSpeedInstagib", 32)
+	c_const_set("ai_minObjectiveSpeed", 24)
+	c_const_set("ai_minObjectiveSpeedInstagib", 32)
+	c_const_set("ai_accelerateNearEnemyFrequency", 32)  -- lower is more
 	c_const_set("ai_skipUpdateRandomReduce", 0.5)
 	c_const_set("ai_skipUpdateRandom", 1.35)
 	c_const_set("ai_chaseEnemyChance", 6)  -- lower is more likely (chance of 1 / x)
@@ -48,8 +49,8 @@ function c_ai_init()
 	c_const_set("ai_noFireSpawnTimeInstagib", 0.8)
 
 	c_const_set("ai_followRandom", (math.pi * 2) / 64)  -- +- x radians when least skilled bot is following an objective
-	c_const_set("ai_stopCloseSpeed", 0.1)
-	c_const_set("ai_coastMinSpeed", 0.5)
+	c_const_set("ai_stopCloseSpeed", 2)
+	c_const_set("ai_coastMinSpeed", 8)
 	c_const_set("ai_reverseChance", 3)
 	c_const_set("ai_closeWallVerySmall", 5)
 	c_const_set("ai_closeWallSmall", 25)
@@ -198,7 +199,8 @@ function c_ai_setTankStateSpecial(tank, special)  -- 0 or false; no special
 end
 
 function c_ai_relativeTankSkill(tank)
-	return common_lerp(c_const_get("ai_maxSkill"), c_const_get("ai_minSkill"), tank.ai.skill)
+	local s, m, l = c_const_get("ai_minSkill"), tank.ai.skill, c_const_get("ai_maxSkill")
+	return (m - s) / (l - s)
 end
 
 local p1, p2, tmp = tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2()
@@ -301,7 +303,7 @@ function c_ai_shootEnemies(tank, enemy, angle, pos, time)
 		end
 
 		-- randomly accelerate or reverse
-		if math.random(1, c_const_get("ai_accelerateByEnemyFrequency") * tank.ai.skill) == 1 then
+		if math.random(1, c_const_get("ai_accelerateNearEnemyFrequency") * tank.ai.skill) == 1 then
 			local s = c_ai_getTankStateForward(tank)
 			if s > 0 then
 				c_ai_setTankStateForward(tank, math.random(1, c_const_get("ai_reverseChance")) == 1 and -2 or 0)
@@ -327,6 +329,8 @@ end
 local p1, p2 = tankbobs.m_vec2(), tankbobs.m_vec2()
 function c_ai_followObective(tank)
 	if not tank.ai.objective then
+		tank.ai.followingObjective = false
+
 		return
 	end
 
@@ -355,16 +359,22 @@ function c_ai_followObective(tank)
 		local angle = (p2 - p1).t + ((1 - c_ai_relativeTankSkill(tank)) * (math.random(-c_const_get("ai_followRandom") * 1000, c_const_get("ai_followRandom") * 1000) / 1000))
 		tank.r, angle = c_ai_angleRange(tank.r, angle)
 		c_ai_setTankStateRotation(tank, tank.r - angle)
+
+		tank.ai.followingObjective = true
 	elseif tank.ai.followType >= ALWAYS then
 		-- look for shortest path to objective using the A* algorithm and waypoints
 
 		-- TODO
+		--tank.ai.followingObjective = true
 	elseif tank.ai.followType <= AVOIDINSIGHT and inSight then
 		-- go away from objective
 
 		-- TODO
+		--tank.ai.followingObjective = true
 	elseif tank.ai.followType <= AVOID then
 		-- ignore until in sight
+
+		tank.ai.followingObjective = false
 	end
 end
 
@@ -405,7 +415,8 @@ function c_ai_tank_step(tank)
 			end
 
 			if tank.ai.turning and not tank.ai.close then
-				if vel.R <= c_const_get("ai_maxSpecialSpeed") then
+				local minSpecialSpeed = c_world_getInstagib() and c_const_get("ai_minSpecialSpeedInstagib") or c_const_get("ai_minSpecialSpeed")
+				if vel.R >= minSpecialSpeed then
 					c_ai_setTankStateSpecial(tank, true)
 				end
 				c_ai_setTankStateRotation(tank, tank.ai.turning)
@@ -484,7 +495,8 @@ function c_ai_tank_step(tank)
 	end
 
 	local maxSpeed = c_world_getInstagib() and c_const_get("ai_maxSpeedInstagib") or c_const_get("ai_maxSpeed")
-	if vel.R > maxSpeed then
-		c_ai_setTankStateForward(-1)
+	if vel.R > maxSpeed and not tank.ai.followingObjective then
+		c_ai_setTankStateSpecial(tank, false)
+		c_ai_setTankStateForward(tank, -1)
 	end
 end
