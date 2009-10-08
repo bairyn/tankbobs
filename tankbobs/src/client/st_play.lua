@@ -62,66 +62,72 @@ local refreshKeys = function ()
 	tankbobs.in_getKeys()
 
 	for i = 1, #c_world_getTanks() do
-		local tank = c_world_getTanks()[i]
+		local breaking = false repeat
+			local tank = c_world_getTanks()[i]
 
-		if not tank then
-			break
-		end
+			if not tank then
+				breaking = true break
+			end
 
-		if not (c_config_get("client.key.player" .. tostring(i) .. ".fire", true)) then
-			c_config_set("client.key.player" .. tostring(i) .. ".fire", false)
-		end
-		if not (c_config_get("client.key.player" .. tostring(i) .. ".forward", true)) then
-			c_config_set("client.key.player" .. tostring(i) .. ".forward", false)
-		end
-		if not (c_config_get("client.key.player" .. tostring(i) .. ".back", true)) then
-			c_config_set("client.key.player" .. tostring(i) .. ".back", false)
-		end
-		if not (c_config_get("client.key.player" .. tostring(i) .. ".right", true)) then
-			c_config_set("client.key.player" .. tostring(i) .. ".right", false)
-		end
-		if not (c_config_get("client.key.player" .. tostring(i) .. ".left", true)) then
-			c_config_set("client.key.player" .. tostring(i) .. ".left", false)
-		end
-		if not (c_config_get("client.key.player" .. tostring(i) .. ".special", true)) then
-			c_config_set("client.key.player" .. tostring(i) .. ".special", false)
-		end
-		if not (c_config_get("client.key.player" .. tostring(i) .. ".reload", true)) then
-			c_config_set("client.key.player" .. tostring(i) .. ".reload", false)
-		end
-		--if not (c_config_get("client.key.player" .. tostring(i) .. ".reverse", true)) then
-			--c_config_set("client.key.player" .. tostring(i) .. ".reverse", false)
-		--end
-		if not (c_config_get("client.key.player" .. tostring(i) .. ".mod", true)) then
-			c_config_set("client.key.player" .. tostring(i) .. ".mod", false)
-		end
+			if tank.bot then
+				breaking = false break
+			end
 
-		local ks = "client.key.player" .. tostring(i) .. "."
-		local kp, kl, cg = tankbobs.in_keyPressed, c_config_keyLayoutGet, c_config_get
+			if not (c_config_get("client.key.player" .. tostring(i) .. ".fire", true)) then
+				c_config_set("client.key.player" .. tostring(i) .. ".fire", false)
+			end
+			if not (c_config_get("client.key.player" .. tostring(i) .. ".forward", true)) then
+				c_config_set("client.key.player" .. tostring(i) .. ".forward", false)
+			end
+			if not (c_config_get("client.key.player" .. tostring(i) .. ".back", true)) then
+				c_config_set("client.key.player" .. tostring(i) .. ".back", false)
+			end
+			if not (c_config_get("client.key.player" .. tostring(i) .. ".right", true)) then
+				c_config_set("client.key.player" .. tostring(i) .. ".right", false)
+			end
+			if not (c_config_get("client.key.player" .. tostring(i) .. ".left", true)) then
+				c_config_set("client.key.player" .. tostring(i) .. ".left", false)
+			end
+			if not (c_config_get("client.key.player" .. tostring(i) .. ".special", true)) then
+				c_config_set("client.key.player" .. tostring(i) .. ".special", false)
+			end
+			if not (c_config_get("client.key.player" .. tostring(i) .. ".reload", true)) then
+				c_config_set("client.key.player" .. tostring(i) .. ".reload", false)
+			end
+			--if not (c_config_get("client.key.player" .. tostring(i) .. ".reverse", true)) then
+				--c_config_set("client.key.player" .. tostring(i) .. ".reverse", false)
+			--end
+			if not (c_config_get("client.key.player" .. tostring(i) .. ".mod", true)) then
+				c_config_set("client.key.player" .. tostring(i) .. ".mod", false)
+			end
 
-		local function key(state, flag)
-			local key = cg(ks .. state)
+			local ks = "client.key.player" .. tostring(i) .. "."
+			local kp, kl, cg = tankbobs.in_keyPressed, c_config_keyLayoutGet, c_config_get
 
-			if key ~= 303 and key ~= 304 then
-				key = kl(key)
+			local function key(state, flag)
+				local key = cg(ks .. state)
 
-				if kp(key) then
-					tank.state = bit.bor(tank.state, flag)
-				else
-					tank.state = bit.band(tank.state, bit.bnot(flag))
+				if key ~= 303 and key ~= 304 then
+					key = kl(key)
+
+					if kp(key) then
+						tank.state = bit.bor(tank.state, flag)
+					else
+						tank.state = bit.band(tank.state, bit.bnot(flag))
+					end
 				end
 			end
-		end
 
-		key("fire", FIRING)
-		key("forward", FORWARD)
-		key("back", BACK)
-		key("left", LEFT)
-		key("right", RIGHT)
-		key("special", SPECIAL)
-		key("reload", RELOAD)
-		--key("reverse", REVERSE)
-		key("mod", MOD)
+			key("fire", FIRING)
+			key("forward", FORWARD)
+			key("back", BACK)
+			key("left", LEFT)
+			key("right", RIGHT)
+			key("special", SPECIAL)
+			key("reload", RELOAD)
+			--key("reverse", REVERSE)
+			key("mod", MOD)
+		until true if breaking then break end
 	end
 end
 
@@ -159,6 +165,8 @@ function st_play_init()
 
 	game_new()
 
+	math.randomseed(os.time())
+
 	-- pause label
 
 	-- pause
@@ -195,24 +203,28 @@ function st_play_init()
 		local tank = c_world_tank:new()
 		table.insert(c_world_getTanks(), tank)
 
-		if not (c_config_get("game.player" .. tostring(i) .. ".name", true)) then
-			c_config_set("game.player" .. tostring(i) .. ".name", "Player" .. tostring(i))
-		end
+		if i <= c_config_get("game.players") then
+			if not (c_config_get("game.player" .. tostring(i) .. ".name", true)) then
+				c_config_set("game.player" .. tostring(i) .. ".name", "Player" .. tostring(i))
+			end
 
-		tank.name = c_config_get("game.player" .. tostring(i) .. ".name")
-		if not (c_config_get("game.player" .. tostring(i) .. ".color.r", true)) then
-			c_config_set("game.player" .. tostring(i) .. ".color.r", c_config_get("game.defaultTankRed"))
-			c_config_set("game.player" .. tostring(i) .. ".color.g", c_config_get("game.defaultTankBlue"))
-			c_config_set("game.player" .. tostring(i) .. ".color.b", c_config_get("game.defaultTankGreen"))
-			c_config_set("game.player" .. tostring(i) .. ".color.a", c_config_get("game.defaultTankAlpha"))
+			tank.name = c_config_get("game.player" .. tostring(i) .. ".name")
+			if not (c_config_get("game.player" .. tostring(i) .. ".color.r", true)) then
+				c_config_set("game.player" .. tostring(i) .. ".color.r", c_config_get("game.defaultTankRed"))
+				c_config_set("game.player" .. tostring(i) .. ".color.g", c_config_get("game.defaultTankBlue"))
+				c_config_set("game.player" .. tostring(i) .. ".color.b", c_config_get("game.defaultTankGreen"))
+				c_config_set("game.player" .. tostring(i) .. ".color.a", c_config_get("game.defaultTankAlpha"))
+			end
+			if not (c_config_get("game.player" .. tostring(i) .. ".team", true)) then
+				c_config_set("game.player" .. tostring(i) .. ".team", false)
+			end
+			tank.color.r = c_config_get("game.player" .. tostring(i) .. ".color.r")
+			tank.color.g = c_config_get("game.player" .. tostring(i) .. ".color.g")
+			tank.color.b = c_config_get("game.player" .. tostring(i) .. ".color.b")
+			tank.red = c_config_get("game.player" .. tostring(i) .. ".team") == "red"
+		else
+			c_ai_initTank(tank)
 		end
-		if not (c_config_get("game.player" .. tostring(i) .. ".team", true)) then
-			c_config_set("game.player" .. tostring(i) .. ".team", false)
-		end
-		tank.color.r = c_config_get("game.player" .. tostring(i) .. ".color.r")
-		tank.color.g = c_config_get("game.player" .. tostring(i) .. ".color.g")
-		tank.color.b = c_config_get("game.player" .. tostring(i) .. ".color.b")
-		tank.red = c_config_get("game.player" .. tostring(i) .. ".team") == "red"
 
 		-- spawn
 		c_world_tank_spawn(tank)

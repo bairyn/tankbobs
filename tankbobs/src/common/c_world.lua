@@ -390,6 +390,9 @@ c_world_tank =
 
 	cd = {},  -- data cleared on death
 
+	ai = {},
+	bot = false,
+
 	m = {p = {}}
 }
 
@@ -611,6 +614,8 @@ function c_world_tank_die(tank, t)
 		tankbobs.w_removeBody(tank.body)
 		tank.body = nil
 	end
+
+	c_ai_tankDie(tank)
 
 	if tank.m.flag then
 		-- drop flag
@@ -1348,6 +1353,10 @@ function c_world_tank_step(d, tank)
 
 	-- weapons
 	c_weapon_fire(tank)
+
+	if tank.bot then
+		c_ai_tank_step(tank)
+	end
 end
 
 function c_world_wall_step(d, wall)

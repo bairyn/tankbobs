@@ -196,66 +196,73 @@ function game_refreshKeys()
 	tankbobs.in_getKeys()
 
 	for i = 1, #c_world_getTanks() do
-		local tank = c_world_getTanks()[i]
+		local breaking = false repeat
+			local tank = c_world_getTanks()[i]
 
-		if not tank then
-			break
-		end
+			if not tank then
+				breaking = true break
+			end
 
-		if not (c_config_get("client.key.player" .. tostring(i) .. ".fire", true)) then
-			c_config_set("client.key.player" .. tostring(i) .. ".fire", false)
-		end
-		if not (c_config_get("client.key.player" .. tostring(i) .. ".forward", true)) then
-			c_config_set("client.key.player" .. tostring(i) .. ".forward", false)
-		end
-		if not (c_config_get("client.key.player" .. tostring(i) .. ".back", true)) then
-			c_config_set("client.key.player" .. tostring(i) .. ".back", false)
-		end
-		if not (c_config_get("client.key.player" .. tostring(i) .. ".right", true)) then
-			c_config_set("client.key.player" .. tostring(i) .. ".right", false)
-		end
-		if not (c_config_get("client.key.player" .. tostring(i) .. ".left", true)) then
-			c_config_set("client.key.player" .. tostring(i) .. ".left", false)
-		end
-		if not (c_config_get("client.key.player" .. tostring(i) .. ".special", true)) then
-			c_config_set("client.key.player" .. tostring(i) .. ".special", false)
-		end
-		if not (c_config_get("client.key.player" .. tostring(i) .. ".reload", true)) then
-			c_config_set("client.key.player" .. tostring(i) .. ".reload", false)
-		end
-		--if not (c_config_get("client.key.player" .. tostring(i) .. ".reverse", true)) then
-			--c_config_set("client.key.player" .. tostring(i) .. ".reverse", false)
-		--end
-		if not (c_config_get("client.key.player" .. tostring(i) .. ".mod", true)) then
-			c_config_set("client.key.player" .. tostring(i) .. ".mod", false)
-		end
+			if tank.bot then
+				breaking = false break
+			end
 
-		local ks = "client.key.player" .. tostring(i) .. "."
-		local kp, kl, cg = tankbobs.in_keyPressed, c_config_keyLayoutGet, c_config_get
 
-		local function key(state, flag)
-			local key = cg(ks .. state)
+			if not (c_config_get("client.key.player" .. tostring(i) .. ".fire", true)) then
+				c_config_set("client.key.player" .. tostring(i) .. ".fire", false)
+			end
+			if not (c_config_get("client.key.player" .. tostring(i) .. ".forward", true)) then
+				c_config_set("client.key.player" .. tostring(i) .. ".forward", false)
+			end
+			if not (c_config_get("client.key.player" .. tostring(i) .. ".back", true)) then
+				c_config_set("client.key.player" .. tostring(i) .. ".back", false)
+			end
+			if not (c_config_get("client.key.player" .. tostring(i) .. ".right", true)) then
+				c_config_set("client.key.player" .. tostring(i) .. ".right", false)
+			end
+			if not (c_config_get("client.key.player" .. tostring(i) .. ".left", true)) then
+				c_config_set("client.key.player" .. tostring(i) .. ".left", false)
+			end
+			if not (c_config_get("client.key.player" .. tostring(i) .. ".special", true)) then
+				c_config_set("client.key.player" .. tostring(i) .. ".special", false)
+			end
+			if not (c_config_get("client.key.player" .. tostring(i) .. ".reload", true)) then
+				c_config_set("client.key.player" .. tostring(i) .. ".reload", false)
+			end
+			--if not (c_config_get("client.key.player" .. tostring(i) .. ".reverse", true)) then
+				--c_config_set("client.key.player" .. tostring(i) .. ".reverse", false)
+			--end
+			if not (c_config_get("client.key.player" .. tostring(i) .. ".mod", true)) then
+				c_config_set("client.key.player" .. tostring(i) .. ".mod", false)
+			end
 
-			if key ~= 303 and key ~= 304 then
-				key = kl(key)
+			local ks = "client.key.player" .. tostring(i) .. "."
+			local kp, kl, cg = tankbobs.in_keyPressed, c_config_keyLayoutGet, c_config_get
 
-				if kp(key) then
-					tank.state = bit.bor(tank.state, flag)
-				else
-					tank.state = bit.band(tank.state, bit.bnot(flag))
+			local function key(state, flag)
+				local key = cg(ks .. state)
+
+				if key ~= 303 and key ~= 304 then
+					key = kl(key)
+
+					if kp(key) then
+						tank.state = bit.bor(tank.state, flag)
+					else
+						tank.state = bit.band(tank.state, bit.bnot(flag))
+					end
 				end
 			end
-		end
 
-		key("fire", FIRING)
-		key("forward", FORWARD)
-		key("back", BACK)
-		key("left", LEFT)
-		key("right", RIGHT)
-		key("special", SPECIAL)
-		key("reload", RELOAD)
-		--key("reverse", REVERSE)
-		key("mod", MOD)
+			key("fire", FIRING)
+			key("forward", FORWARD)
+			key("back", BACK)
+			key("left", LEFT)
+			key("right", RIGHT)
+			key("special", SPECIAL)
+			key("reload", RELOAD)
+			--key("reverse", REVERSE)
+			key("mod", MOD)
+		until true if breaking then break end
 	end
 end
 
@@ -634,7 +641,7 @@ end
 local frame = 0
 function game_step(d)
 	if frame % 1024 == 0 then
-		math.randomseed(tankbobs.t_getTicks() + 10 * 768 * d)
+		math.randomseed(tankbobs.t_getTicks())
 	end
 
 	frame = frame + 1

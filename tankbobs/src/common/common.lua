@@ -91,6 +91,8 @@ function common_init()
 
 	c_world_init()
 
+	c_ai_init()
+
 	common_misc_start()
 
 	c_mods_start()
@@ -100,6 +102,8 @@ function common_done()
 	c_mods_finish()
 
 	common_misc_finish()
+
+	c_ai_done()
 
 	c_world_done()
 
