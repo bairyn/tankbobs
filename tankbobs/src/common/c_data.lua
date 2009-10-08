@@ -90,6 +90,8 @@ function c_data_init()
 
 	c_const_set("max_tanks", 64, 1)
 
+	-- key layouts enable configurations (including default keys) to be saved, loaded and shared in a standard format: qwerty
+
 	local layout_qwerty =
 	{
 		{from = 97,  to = 97},   -- a

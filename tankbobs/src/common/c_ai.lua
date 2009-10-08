@@ -68,25 +68,30 @@ function c_ai_initTank(tank, ai)
 	local maxSkillRandom = c_world_getInstagib() and c_const_get("ai_maxSkillInstagib") or c_const_get("ai_maxSkill")
 	tank.ai.skill = math.random(c_const_get("ai_minSkill"), maxSkillRandom)
 
-	-- place bot randomly on the team with fewest players
-	local balance = 0  -- -: blue; +: red
+	tank.color.r = c_config_get("game.bot.color.r")
+	tank.color.g = c_config_get("game.bot.color.g")
+	tank.color.b = c_config_get("game.bot.color.b")
 
-	for k, v in pairs(c_world_getTanks()) do
-		if tank.red then
-			balance = balance + 1
+	if c_world_isTeamGameType() then
+		-- place bot randomly on the team with fewest players
+		local balance = 0  -- -: blue; +: red
+
+		for k, v in pairs(c_world_getTanks()) do
+			if tank.red then
+				balance = balance + 1
+			else
+				balance = balance - 1
+			end
+		end
+
+		if balance > 0 then 
+			tank.red = false
+		elseif balance < 0 then
+			tank.red = true
 		else
-			balance = balance - 1
+			tank.red = math.random(0, 1) == 1 and false or true
 		end
 	end
-
-	if balance > 0 then 
-		tank.red = false
-	elseif balance < 0 then
-		tank.red = true
-	else
-		tank.red = math.random(0, 1) == 1 and false or true
-	end
-
 
 	if ai then
 		tankbobs.t_clone(ai, tank.ai)

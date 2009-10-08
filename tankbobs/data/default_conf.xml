@@ -119,6 +119,14 @@
 	</debug>
 
 	<game>
+		<bot>
+			<color>
+				<r> 0.875 </r>  Orange
+				<g> 0.750 </g>
+				<b> 0.010 </b>
+				<a> 1.000 </a>
+			<color>
+		</bot>
 		<captureLimit>10</captureLimit>
 		<chaseLimit>30</chaseLimit>
 		<computers>0</computers>
