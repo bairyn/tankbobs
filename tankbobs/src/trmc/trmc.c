@@ -27,7 +27,7 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <SDL/SDL_endian.h>
 
-#define VERSION 2
+#define VERSION 3
 #define MAGIC 0xDEADBEEF
 
 #define TCM_FILENAME_BUF_SIZE 256
@@ -519,6 +519,7 @@ static int read_reset(const char *line)
 #define MAX_PATHS 2048
 #define MAX_CONTROLPOINTS 528
 #define MAX_FLAGS 2
+#define MAX_WAYPOINTS 2048
 
 typedef struct map_s map_t;
 static struct map_s
@@ -601,6 +602,12 @@ static struct flag_s
 	int red;
 } flags[MAX_FLAGS];
 
+typedef struct wayPoint_s wayPoint_t;
+static struct wayPoint_s
+{
+	double x1; double y1;
+} wayPoints[MAX_WAYPOINTS];
+
 static int mc;
 static int wc;
 static int tc;
@@ -609,6 +616,7 @@ static int oc;
 static int pc;
 static int cc;
 static int fc;
+static int ac;
 
 static void add_map(const char *name, const char *title, const char *description, const char *authors, const char *version_s, int version)
 {
@@ -759,6 +767,20 @@ static void add_flag(double x1, double y1, int red)
 	flag->x1 = x1;
 	flag->y1 = y1;
 	flag->red = red;
+}
+
+static void add_wayPoint(double x1, double y1)
+{
+	wayPoint_t *wayPoint = &wayPoints[ac++];
+
+	if(ac > MAX_WAYPOINTS)
+	{
+		fprintf(stderr, "Error: wayPoint overflow (%d)\n", MAX_WAYPOINTS);
+		exit(1);
+	}
+
+	wayPoint->x1 = x1;
+	wayPoint->y1 = y1;
 }
 
 
@@ -1006,6 +1028,15 @@ static int compile(const char *filename)
 
 					add_flag(x1, y1, red);
 				}
+				else if(strncmp(entity, "wayPoint", sizeof(entity)) == 0)
+				{
+					double x1, y1;
+
+					x1 = read_double();
+					y1 = read_double();
+
+					add_wayPoint(x1, y1);
+				}
 
 				else
 				{
@@ -1065,6 +1096,7 @@ static int compile(const char *filename)
 	put_cint(fout, pc);
 	put_cint(fout, cc);
 	put_cint(fout, fc);
+	put_cint(fout, ac);
 
 	for(i = 0; i < wc; i++)
 	{
@@ -1244,6 +1276,15 @@ static int compile(const char *filename)
 		put_cdouble(fout, flag->x1);
 		put_cdouble(fout, flag->y1);
 		put_cchar(fout, ((flag->red) ? (1) : (0)));
+	}
+
+	for(i = 0; i < ac; i++)
+	{
+		wayPoint_t *wayPoint = &wayPoints[i];
+
+		put_cint(fout, i);
+		put_cdouble(fout, wayPoint->x1);
+		put_cdouble(fout, wayPoint->y1);
 	}
 
 	fclose(fout);

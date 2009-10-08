@@ -60,6 +60,7 @@ format:
 4 bytes number of paths
 4 bytes number of controlPoints
 4 bytes number of flags
+4 bytes number of wayPoints
 walls
  -4 bytes id (unique only to other walls)  -- NOTE: every enitity's id must increment consecutively
  -1 byte: if non-zero, the 4th coordinates are used
@@ -126,6 +127,11 @@ controlPoints
  -8 bytes y1 double float
  -1 byte red
  - 21 total bytes
+wayPoints
+ -4 bytes id
+ -8 bytes x1 double float
+ -8 bytes y1 double float
+ - 20 total bytes
 --]]
 
 local bit
@@ -137,7 +143,7 @@ function c_tcm_init()
 	c_const_set("tcm_sets_dir", c_const_get("data_dir") .. "sets/")
 	local magic = 0xDEADBEEF
 	c_const_set("tcm_magic", magic)
-	c_const_set("tcm_version", 2)
+	c_const_set("tcm_version", 3)  -- odd number versions are unstable; even number versions are stable
 	c_const_set("tcm_headerLength", 11)
 
 	c_const_set("tcm_teleporterWidth",  5, 1)
@@ -189,6 +195,7 @@ c_tcm_map =
 	paths_n = 0,
 	controlPoints_n = 0,
 	flags_n = 0,
+	wayPoints_n = 0,
 
 	walls = {},  -- table of walls
 	teleporters = {},
@@ -197,8 +204,11 @@ c_tcm_map =
 	paths = {},
 	controlPoints = {},
 	flags = {},
+	wayPoints = {},
+
 	message = "",  -- the level message
 
+	wayPointNetwork = {},
 	uppermost = 0,
 	lowermost = 0,
 	rightmost = 0,
@@ -209,6 +219,7 @@ c_tcm_entity =
 {
 	new = c_class_new,
 
+	id = 0,
 	p = tankbobs.m_vec2(),
 
 	m = {p = {}}  -- extra data (data not in tcm; eg position if on a path)
@@ -222,7 +233,6 @@ c_tcm_wall =
 		o.l = c_const_get("tcm_tankLevel")
 	end,
 
-	id = 0,
 	p = {tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2()},  -- walls have 4 (or 3) positions
 	t = {tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2()},
 	texture = "",
@@ -239,7 +249,6 @@ c_tcm_teleporter =
 	new  = c_class_new,
 	base = c_tcm_entity,
 
-	id = 0,
 	t = 0,
 }
 
@@ -247,8 +256,6 @@ c_tcm_playerSpawnPoint =
 {
 	new  = c_class_new,
 	base = c_tcm_entity,
-
-	id = 0,
 }
 
 c_tcm_powerupSpawnPoint =
@@ -256,7 +263,6 @@ c_tcm_powerupSpawnPoint =
 	new  = c_class_new,
 	base = c_tcm_entity,
 
-	id = 0,
 	enabledPowerups = {},
 	linked = false,  -- powerups will spawn in order
 	["repeat"] = 0,  -- time between each powerup
@@ -269,7 +275,6 @@ c_tcm_path =
 	new  = c_class_new,
 	base = c_tcm_entity,
 
-	id = 0,
 	t = 0,
 	time = 0,
 	enabled = false,
@@ -280,8 +285,9 @@ c_tcm_controlPoint =
 	new  = c_class_new,
 	base = c_tcm_entity,
 
-	id = 0,
 	red = false,
+
+	wayPoint = 0,
 }
 
 c_tcm_flag =
@@ -289,8 +295,15 @@ c_tcm_flag =
 	new  = c_class_new,
 	base = c_tcm_entity,
 
-	id = 0,
 	red = false,
+
+	wayPoint = 0,
+}
+
+c_tcm_wayPoint =
+{
+	new  = c_class_new,
+	base = c_tcm_entity,
 }
 
 function c_tcm_read_sets(dir, t)
@@ -447,6 +460,7 @@ function c_tcm_read_map(map)
 	r.paths_n = c_tcm_private_get(tankbobs.io_getInt, i)
 	r.controlPoints_n = c_tcm_private_get(tankbobs.io_getInt, i)
 	r.flags_n = c_tcm_private_get(tankbobs.io_getInt, i)
+	r.wayPoints_n = c_tcm_private_get(tankbobs.io_getInt, i)
 
 	local uppermost = 100
 	local lowermost = 0
@@ -565,6 +579,8 @@ function c_tcm_read_map(map)
 			teleporter.enabled = false
 		end
 
+		r.wayPointNetwork[-it] = {}
+
 		table.insert(r.teleporters, teleporter)
 	end
 
@@ -675,7 +691,7 @@ function c_tcm_read_map(map)
 	end
   
 	for it = 1, r.controlPoints_n do
-		local controlPoint = c_tcm_flag:new()
+		local controlPoint = c_tcm_controlPoint:new()
 
 		controlPoint.id = c_tcm_private_get(tankbobs.io_getInt, i)
 		controlPoint.p.x = c_tcm_private_get(tankbobs.io_getDouble, i)
@@ -703,10 +719,208 @@ function c_tcm_read_map(map)
 
 		table.insert(r.flags, flag)
 	end
+  
+	for it = 1, r.wayPoints_n do
+		local wayPoint = c_tcm_wayPoint:new()
+
+		wayPoint.id = c_tcm_private_get(tankbobs.io_getInt, i)
+		wayPoint.p.x = c_tcm_private_get(tankbobs.io_getDouble, i)
+		wayPoint.p.y = c_tcm_private_get(tankbobs.io_getDouble, i)
+
+		r.wayPointNetwork[it] = {}
+
+		table.insert(r.wayPoints, wayPoint)
+	end
 
 	i:close()
 
-	-- sort entities based on their id's, so that wall[i] has an id of i - 1
+	-- build way point network.  Positive id's are way points; negative id's are teleporters
+	local lastPoint, currentPoint = nil
+	local hull
+	local a, b
+	for i = 1, r.wayPoints_n do
+		a = r.wayPoints[i]
+		for j = i + 1, r.wayPoints_n do
+			b = r.wayPoints[j]
+
+			local intersection = false
+
+			for _, v in pairs(r.walls) do
+				if not v.detail and v.static then  -- ignore dynamic walls when testing for intersections
+					--hull = v.m.pos
+					hull = v.p
+					local t = v
+					for _, v in pairs(hull) do
+						currentPoint = v
+						if not lastPoint then
+							lastPoint = hull[#hull]
+						end
+
+						if tankbobs.m_edge(lastPoint, currentPoint, a.p, b.p) then
+							intersection = true
+							break
+						end
+
+						lastPoint = currentPoint
+					end
+					lastPoint = nil
+				end
+			end
+
+			if not intersection then
+				table.insert(r.wayPointNetwork[i], j)
+			end
+		end
+		for j = 1, r.teleporters_n do
+			b = r.teleporters[j]
+
+			local intersection = false
+
+			for _, v in pairs(r.walls) do
+				if not v.detail and v.static then  -- ignore dynamic walls when testing for intersections
+					--hull = v.m.pos
+					hull = v.p
+					local t = v
+					for _, v in pairs(hull) do
+						currentPoint = v
+						if not lastPoint then
+							lastPoint = hull[#hull]
+						end
+
+						if tankbobs.m_edge(lastPoint, currentPoint, a.p, b.p) then
+							intersection = true
+							break
+						end
+
+						lastPoint = currentPoint
+					end
+					lastPoint = nil
+				end
+			end
+
+			if not intersection then
+				table.insert(r.wayPointNetwork[i], -j)
+			end
+		end
+	end
+
+	for i = 1, r.teleporters_n do
+		a = r.teleporters[i]
+		for j = i + 1, r.wayPoints_n do
+			b = r.wayPoints[j]
+
+			local intersection = false
+
+			for _, v in pairs(r.walls) do
+				if not v.detail and v.static then  -- ignore dynamic walls when testing for intersections
+					--hull = v.m.pos
+					hull = v.p
+					local t = v
+					for _, v in pairs(hull) do
+						currentPoint = v
+						if not lastPoint then
+							lastPoint = hull[#hull]
+						end
+
+						if tankbobs.m_edge(lastPoint, currentPoint, a.p, b.p) then
+							intersection = true
+							break
+						end
+
+						lastPoint = currentPoint
+					end
+					lastPoint = nil
+				end
+			end
+
+			if not intersection then
+				table.insert(r.wayPointNetwork[-i], j)
+			end
+		end
+		for j = 1, r.teleporters_n do
+			b = r.teleporters[j]
+
+			local intersection = false
+
+			for _, v in pairs(r.walls) do
+				if not v.detail and v.static then  -- ignore dynamic walls when testing for intersections
+					--hull = v.m.pos
+					hull = v.p
+					local t = v
+					for _, v in pairs(hull) do
+						currentPoint = v
+						if not lastPoint then
+							lastPoint = hull[#hull]
+						end
+
+						if tankbobs.m_edge(lastPoint, currentPoint, a.p, b.p) then
+							intersection = true
+							break
+						end
+
+						lastPoint = currentPoint
+					end
+					lastPoint = nil
+				end
+			end
+
+			if not intersection then
+				table.insert(r.wayPointNetwork[-i], -j)
+			end
+		end
+	end
+
+	-- find closest way point in sight of all control points and flags
+	local function findClosest(t)
+		local lastPoint, currentPoint = nil
+		local hull
+		for _, v in pairs(t) do
+			local w = {}
+
+			for ks, vs in pairs(r.wayPoints) do
+				local intersection = false
+
+				for _, vss in pairs(r.walls) do
+				if not vss.detail and vss.static then  -- ignore dynamic walls when testing for intersections
+					--hull = vss.m.pos
+					hull = vss.p
+						local t = v
+						for _, vsss in pairs(hull) do
+							currentPoint = vsss
+							if not lastPoint then
+								lastPoint = hull[#hull]
+							end
+
+							if tankbobs.m_edge(lastPoint, currentPoint, v.p, vs.p) then
+								intersection = true
+								break
+							end
+
+							lastPoint = currentPoint
+						end
+						lastPoint = nil
+					end
+				end
+
+				if not intersection then
+					table.insert(w, ks)
+				end
+			end
+
+			table.sort(w, function (a, b) return (r.wayPoints[a].p - v.p).R < (r.wayPoints[b].p - v.p).R end)
+
+			if w[1] then
+				v.waypoint = w[1]
+			else
+				v.wayPoint = 0
+			end
+		end
+	end
+
+	findClosest(r.controlPoints)
+	findClosest(r.flags)
+
+	-- sort entities by id, so that wall[i] has an id of i - 1
 	table.sort(r.walls, function (e1, e2) return e1.id < e2.id end)
 	table.sort(r.teleporters, function (e1, e2) return e1.id < e2.id end)
 	table.sort(r.playerSpawnPoints, function (e1, e2) return e1.id < e2.id end)
@@ -714,6 +928,7 @@ function c_tcm_read_map(map)
 	table.sort(r.paths, function (e1, e2) return e1.id < e2.id end)
 	table.sort(r.controlPoints, function (e1, e2) return e1.id < e2.id end)
 	table.sort(r.flags, function (e1, e2) return e1.id < e2.id end)
+	table.sort(r.wayPoints, function (e1, e2) return e1.id < e2.id end)
 
 	return r
 end
@@ -791,6 +1006,14 @@ function c_tcm_unload_extra_data(clearPersitant)
 		end
 
 		for _, v in pairs(c_tcm_current_map.flags) do
+			local pers = v.m.p
+			v.m = {p = {}}
+			if not clearPersistant then
+				v.m.p = pers
+			end
+		end
+
+		for _, v in pairs(c_tcm_current_map.wayPoints) do
 			local pers = v.m.p
 			v.m = {p = {}}
 			if not clearPersistant then

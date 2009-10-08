@@ -19,3 +19,11 @@ controlPoint, 96, 58, 0
 controlPoint, 82, 58, 0
 flag, 33, 57, 0
 flag, 57, 58, 1
+wayPoint, 10, 85
+wayPoint, 8, 30
+wayPoint, 35, 31
+wayPoint, 59, 31
+wayPoint, 89, 30
+wayPoint, 88, 85
+wayPoint, 58, 85
+wayPoint, 35, 86

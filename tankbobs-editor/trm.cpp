@@ -44,6 +44,7 @@ vector<entities::Wall *>              wall;
 vector<entities::Path *>              path;
 vector<entities::ControlPoint *>      controlPoint;
 vector<entities::Flag *>              flag;
+vector<entities::WayPoint *>          wayPoint;
 vector<void *>                        selections;  // list of _previously_ selected
 //vector<void *>                        selection;  // actual selection
 
@@ -427,6 +428,7 @@ bool trm_open(const char *filename, bool import)  // Will not confirm unsaved pr
 		path.clear();
 		controlPoint.clear();
 		flag.clear();
+		wayPoint.clear();
 	}
 	else
 	{
@@ -598,6 +600,15 @@ bool trm_open(const char *filename, bool import)  // Will not confirm unsaved pr
 					red = read_int();
 
 					flag.push_back(new entities::Flag(x1, y1, red));
+				}
+				else if(strncmp(entity, "wayPoint", sizeof(entity)) == 0)
+				{
+					double x1, y1;
+
+					x1 = read_double();
+					y1 = read_double();
+
+					wayPoint.push_back(new entities::WayPoint(x1, y1));
 				}
 
 				else
@@ -805,6 +816,17 @@ bool trm_save(const char *filename)
 		<< endl;
 	}
 
+	for(vector<entities::WayPoint *>::iterator i = wayPoint.begin(); i != wayPoint.end(); ++i)
+	{
+		entities::WayPoint *e = *i;
+
+		fout << "wayPoint, "
+		<< e->x
+		<< ", "
+		<< e->y
+		<< endl;
+	}
+
 	fout.close();
 	if(fout.fail())
 		return false;
@@ -869,6 +891,15 @@ bool trm_isControlPoint(void *e)
 bool trm_isFlag(void *e)
 {
 	for(vector<entities::Flag *>::iterator i = flag.begin(); i != flag.end(); ++i)
+		if(e == *i)
+			return true;
+
+	return false;
+}
+
+bool trm_isWayPoint(void *e)
+{
+	for(vector<entities::WayPoint *>::iterator i = wayPoint.begin(); i != wayPoint.end(); ++i)
 		if(e == *i)
 			return true;
 
@@ -1069,6 +1100,31 @@ void trm_select(int x, int y)//, int multiple)
 		}
 	}
 
+	for(vector<entities::WayPoint *>::iterator i = wayPoint.begin(); i != wayPoint.end(); ++i)
+	{
+		entities::WayPoint *e = *i;
+		void *ve = reinterpret_cast<void *>(e);
+		if(x < e->x + WAYPOINT_WIDTH && x > e->x - WAYPOINT_WIDTH && y < e->y + WAYPOINT_HEIGHT && y > e->y - WAYPOINT_HEIGHT)
+		{
+			// the entity is under the cursor
+			bool listed = false;
+			for(vector<void *>::iterator i = selections.begin(); i != selections.end(); ++i)
+			{
+				if(*i == ve)
+				{
+					listed = true;
+					break;
+				}
+			}
+			if(!listed)
+			{
+				selections.push_back((selection = ve));
+				return;
+			}
+		}
+	}
+
+
 	selection = NULL;
 	selections.clear();
 }
@@ -1171,6 +1227,20 @@ void trm_newFlag(int x, int y)
 
 	flag.push_back(new entities::Flag(x, y));
 	selection = reinterpret_cast<void *>(flag[flag.size() - 1]);
+}
+
+void trm_newWayPoint(int x, int y)
+{
+	if(config_get_int(c_noModify))
+	{
+		trm_modifyAttempted();
+		return;
+	}
+
+	modified = true;
+
+	wayPoint.push_back(new entities::WayPoint(x, y));
+	selection = reinterpret_cast<void *>(wayPoint[wayPoint.size() - 1]);
 }
 
 int trm_keypress(int key, bool initial, QKeyEvent *e)
@@ -1291,6 +1361,22 @@ int trm_keypress(int key, bool initial, QKeyEvent *e)
 					return 0;
 				}
 			}
+			for(vector<entities::WayPoint *>::iterator i = wayPoint.begin(); i != wayPoint.end(); ++i)
+			{
+				if(selection == reinterpret_cast<void *>(static_cast<entities::WayPoint *>(*i)))
+				{
+					if(config_get_int(c_noModify))
+					{
+						trm_modifyAttempted();
+						return 0;
+					}
+
+					modified = true;
+					selection = NULL;
+					wayPoint.erase(i);
+					return 0;
+				}
+			}
 		}
 	}
 	else if(key == Qt::Key_Escape)
@@ -1327,10 +1413,6 @@ int trm_keypress(int key, bool initial, QKeyEvent *e)
 	{
 		selectionType = e_selectionPath;
 	}
-	else if(key == Qt::Key_P)
-	{
-		selectionType = e_selectionPath;
-	}
 	else if(key == Qt::Key_R)
 	{
 		selectionType = e_selectionControlPoint;
@@ -1338,6 +1420,10 @@ int trm_keypress(int key, bool initial, QKeyEvent *e)
 	else if(key == Qt::Key_L)
 	{
 		selectionType = e_selectionFlag;
+	}
+	else if(key == Qt::Key_Y)
+	{
+		selectionType = e_selectionWayPoint;
 	}
 	else if(key == Qt::Key_S && initial)
 	{

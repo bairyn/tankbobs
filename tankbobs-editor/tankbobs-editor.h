@@ -49,6 +49,7 @@ class Tankbobs_editor : public QMainWindow, private Ui::MainWindow
 		void selectionPath();
 		void selectionControlPoint();
 		void selectionFlag();
+		void selectionWayPoint();
 		void open();
 		void save();
 		void saveAs();

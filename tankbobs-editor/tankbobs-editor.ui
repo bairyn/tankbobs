@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>600</height>
+    <width>1020</width>
+    <height>752</height>
    </rect>
   </property>
   <property name="cursor">
@@ -26,7 +26,7 @@
       <x>10</x>
       <y>0</y>
       <width>181</width>
-      <height>299</height>
+      <height>333</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout">
@@ -191,6 +191,26 @@
       </widget>
      </item>
      <item>
+      <widget class="QPushButton" name="wayPoint">
+       <property name="cursor">
+        <cursorShape>UpArrowCursor</cursorShape>
+       </property>
+       <property name="text">
+        <string>Wa&amp;y Point</string>
+       </property>
+       <property name="icon">
+        <iconset resource="res.qrc">
+         <normaloff>:/res/icons/a.png</normaloff>:/res/icons/a.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>12</width>
+         <height>12</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="cancel0">
        <property name="cursor">
         <cursorShape>UpArrowCursor</cursorShape>
@@ -305,7 +325,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>1020</width>
      <height>25</height>
     </rect>
    </property>

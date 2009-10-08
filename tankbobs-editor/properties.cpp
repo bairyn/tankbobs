@@ -34,6 +34,7 @@ extern vector<entities::Wall *>              wall;
 extern vector<entities::Path *>              path;
 extern vector<entities::ControlPoint *>      controlPoint;
 extern vector<entities::Flag *>              flag;
+extern vector<entities::WayPoint *>          wayPoint;
 extern void *selection;
 
 Properties::Properties(QWidget *parent)
@@ -177,6 +178,13 @@ Properties::Properties(QWidget *parent)
 
 			selected = true;
 			red->setEnabled(true);
+		}
+	}
+	for(vector<entities::WayPoint *>::iterator i = wayPoint.begin(); i != wayPoint.end(); ++i)
+	{
+		if(selection == reinterpret_cast<void *>(static_cast<entities::WayPoint *>(*i)))
+		{
+			selected = true;
 		}
 	}
 	if(!selected)

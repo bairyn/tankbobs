@@ -37,6 +37,8 @@ using namespace std;
 #define CONTROLPOINT_HEIGHT      5
 #define FLAG_WIDTH               5
 #define FLAG_HEIGHT              5
+#define WAYPOINT_WIDTH           5
+#define WAYPOINT_HEIGHT          5
 
 namespace entities
 {
@@ -146,6 +148,13 @@ namespace entities
 			Flag(double Flag_x = 0.0, double Flag_y = 0.0, bool Flag_red = false) : x(Flag_x), y(Flag_y), red(Flag_red) {}
 
 	};
+
+	class WayPoint : private Entity
+	{
+		public:
+			double x, y;
+			WayPoint(double WayPoint_x = 0.0, double WayPoint_y = 0.0) : x(WayPoint_x), y(WayPoint_y) {}
+	};
 }
 
 enum
@@ -158,6 +167,7 @@ enum
 	e_selectionPath,
 	e_selectionControlPoint,
 	e_selectionFlag,
+	e_selectionWayPoint,
 
 	e_numSelection
 };
