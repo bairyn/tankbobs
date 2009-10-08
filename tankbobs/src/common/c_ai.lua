@@ -24,6 +24,9 @@ Bot AI
 --]]
 
 function c_ai_init()
+	c_const_set("ai_fps", 50)
+	c_const_set("ai_fpsRelativeToSkill", 175)
+
 	c_const_set("ai_minSkill", 1)  -- most difficult to fight against
 	c_const_set("ai_maxSkill", 16)  -- least difficult to fight against
 	c_const_set("ai_maxSkillInstagib", 8)
@@ -98,6 +101,8 @@ function c_ai_initTank(tank, ai)
 	if ai then
 		tankbobs.t_clone(ai, tank.ai)
 	end
+
+	tank.ai.nextStepTime = tankbobs.t_getTicks()
 
 	tank.name = "[BOT] (" .. tostring(tank.ai.skill) .. ") " .. names[math.random(1, #names)]
 end
@@ -305,10 +310,10 @@ function c_ai_tank_step(tank)
 	end
 
 	-- skip if thinking during same frame
-	if tank.ai.lastStepTime == t then
+	if t < tank.ai.nextStepTime then
 		return
 	end
-	tank.ai.lastStepTime = t
+	tank.ai.nextStepTime = t + common_FTM(c_const_get("ai_fps")) + (1 - c_ai_relativeTankSkill(tank)) * common_FTM(c_const_get("ai_fpsRelativeToSkill"))
 
 	local vel = tankbobs.w_getLinearVelocity(tank.body)
 
