@@ -37,6 +37,8 @@ function c_ai_init()
 	c_const_set("ai_maxSpeed", 1)  -- brake if above this speed, even if attacking
 	c_const_set("ai_maxSpeedInstagib", 4)  -- brake if above this speed, even if attacking
 	c_const_set("ai_maxSpecialSpeed", 2)
+	c_const_set("ai_minObjectiveSpeed", 0.9)
+	c_const_set("ai_minObjectiveSpeedInstagib", 3)
 	c_const_set("ai_accelerateByEnemyFrequency", 32)  -- lower is more
 	c_const_set("ai_skipUpdateRandomReduce", 0.5)
 	c_const_set("ai_skipUpdateRandom", 1.35)
@@ -45,6 +47,7 @@ function c_ai_init()
 	c_const_set("ai_noFireSpawnTime", -1)
 	c_const_set("ai_noFireSpawnTimeInstagib", 0.8)
 
+	c_const_set("ai_followRandom", (math.pi * 2) / 8)  -- +- x radians when least skilled bot is following an objective
 	c_const_set("ai_stopCloseSpeed", 0.1)
 	c_const_set("ai_coastMinSpeed", 0.5)
 	c_const_set("ai_reverseChance", 3)
@@ -65,6 +68,32 @@ local names =
 , "Shooter"
 , "Aimer"
 }
+
+-- follow type
+local AVOID        = 0
+local AVOIDINSIGHT = 0
+local INSIGHT      = 2
+local ALWAYS       = 3
+
+function c_ai_angleRange(a, b)
+	while math.abs(a - b) > math.pi + 0.001 do
+		if a > b then
+			if a > 0 then
+				a = a - 2 * math.pi
+			else
+				b = b + 2 * math.pi
+			end
+		else
+			if a < 0 then
+				a = a + 2 * math.pi
+			else
+				b = b - 2 * math.pi
+			end
+		end
+	end
+
+	return a, b
+end
 
 function c_ai_initTank(tank, ai)
 	tank.bot = true
@@ -233,6 +262,18 @@ function c_ai_closestEnemyInSite(tank)
 	end
 end
 
+function c_ai_setObjective(tank, pos, followType, objectiveType)
+	tank.ai.objective = pos
+	tank.ai.followType = followType or tank.ai.followType or INSIGHT
+	tank.ai.objectiveType = objectiveType
+end
+
+function c_ai_findClosestPowerup(tank)
+	-- nothing depends on order of powerup table, so we sort it directly
+	table.sort(c_world_getPowerups(), function (a, b) if a and b then return (a.p - tank.p).R < (b.p - tank.p).R elseif a then return true else return false end end)
+	return c_world_getPowerups()[1]
+end
+
 function c_ai_shootEnemies(tank, enemy, angle, pos, time)
 	if not tank.ai.shootingEnemies then
 		-- start shooting enemies
@@ -248,21 +289,7 @@ function c_ai_shootEnemies(tank, enemy, angle, pos, time)
 
 	tank.ai.shootingEnemies = true
 
-	while math.abs(tank.r - angle) > math.pi + 0.001 do
-		if tank.r > angle then
-			if tank.r > 0 then
-				tank.r = tank.r - 2 * math.pi
-			else
-				angle = angle + 2 * math.pi
-			end
-		else
-			if tank.r < 0 then
-				tank.r = tank.r + 2 * math.pi
-			else
-				angle = angle - 2 * math.pi
-			end
-		end
-	end
+	tank.r, angle = c_ai_angleRange(tank.r, angle)
 
 	if math.random(1000 * c_ai_relativeTankSkill(tank), 1000 * (1 + c_const_get("ai_skipUpdateRandomReduce"))) / 1000 < c_const_get("ai_skipUpdateRandom") then
 		-- randomly skip updates to rotation depending on skill level
@@ -295,6 +322,50 @@ end
 function c_ai_tankDie(tank)
 	tank.ai.turning = nil
 	tank.ai.close = false
+end
+
+local p1, p2 = tankbobs.m_vec2(), tankbobs.m_vec2()
+function c_ai_followObective(tank)
+	if not tank.ai.objective then
+		return
+	end
+
+	p1.R = 2.1
+	p1.t = tank.r
+	p1:add(tank.p)
+
+	p2(tank.ai.objective)
+
+	local s, _, t, _ = c_world_findClosestIntersection(p1, p2)
+	local inSight = not s or t ~= "wall"
+	if tank.ai.followType >= INSIGHT and inSight then
+		local vel = tankbobs.w_getLinearVelocity(tank.body)
+
+		-- the objective is in sight, so chase it
+
+		local minSpeed = c_world_getInstagib() and c_const_get("ai_minObjectiveSpeedInstagib") or c_const_get("ai_minObjectiveSpeed")
+		if vel.R < minSpeed then
+			c_ai_setTankStateForward(tank, 1)
+			c_ai_setTankStateSpecial(tank, false)
+		else
+			c_ai_setTankStateForward(tank, 0)
+			c_ai_setTankStateSpecial(tank, true)
+		end
+
+		local angle = (p2 - p1).t + ((1 - c_ai_relativeTankSkill(tank)) * (math.random(-c_const_get("ai_followRandom") * 1000, c_const_get("ai_followRandom") * 1000) / 1000))
+		tank.r, angle = c_ai_angleRange(tank.r, angle)
+		c_ai_setTankStateRotation(tank, tank.r - angle)
+	elseif tank.ai.followType >= ALWAYS then
+		-- look for shortest path to objective using the A* algorithm and waypoints
+
+		-- TODO
+	elseif tank.ai.followType <= AVOIDINSIGHT and inSight then
+		-- go away from objective
+
+		-- TODO
+	elseif tank.ai.followType <= AVOID then
+		-- ignore until in sight
+	end
 end
 
 local p1, p2 = tankbobs.m_vec2(), tankbobs.m_vec2()
@@ -396,6 +467,20 @@ function c_ai_tank_step(tank)
 				end
 			end
 		end
+
+		c_ai_followObective(tank)  -- bots will follow powerups even when an enemy is in sight
+
+		-- in deathmatch, only powerups can be objectives,
+		-- so if there aren't any, reset objective
+		if not c_ai_findClosestPowerup(tank) then
+			c_ai_setObjective(tank, nil)
+		end
+	end
+
+	-- look for powerups
+	local c = c_ai_findClosestPowerup(tank)
+	if c then
+		c_ai_setObjective(tank, c.p, INSIGHT, "powerup")
 	end
 
 	local maxSpeed = c_world_getInstagib() and c_const_get("ai_maxSpeedInstagib") or c_const_get("ai_maxSpeed")
