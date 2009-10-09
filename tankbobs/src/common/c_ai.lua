@@ -39,7 +39,8 @@ function c_ai_init()
 	c_const_set("ai_minSpecialSpeed", 8)
 	c_const_set("ai_minSpecialSpeedInstagib", 32)
 	c_const_set("ai_minObjectiveSpeed", 24)
-	c_const_set("ai_minObjectiveSpeedInstagib", 32)
+	c_const_set("ai_minObjectiveSpeedInstagib", 24)
+	c_const_set("ai_objectiveDistance", 25)
 	c_const_set("ai_accelerateNearEnemyFrequency", 32)  -- lower is more
 	c_const_set("ai_skipUpdateRandomReduce", 0.5)
 	c_const_set("ai_skipUpdateRandom", 1.35)
@@ -55,6 +56,11 @@ function c_ai_init()
 	c_const_set("ai_closeWallVerySmall", 5)
 	c_const_set("ai_closeWallSmall", 25)
 	c_const_set("ai_closeWallBig", 50)
+	c_const_set("ai_pathUpdateTime", 2)
+	c_const_set("ai_staticPathUpdateTime", 8)
+	c_const_set("ai_nextNodeDistance", 3)
+
+	c_const_set("ai_enemyControlPointRange", 25)
 end
 
 function c_ai_done()
@@ -71,10 +77,15 @@ local names =
 }
 
 -- follow type
-local AVOID        = 0
-local AVOIDINSIGHT = 0
-local INSIGHT      = 2
-local ALWAYS       = 3
+local AVOID            = 0
+local AVOIDINSIGHT     = 0
+local INSIGHT          = 2
+local ALWAYS           = 3
+local ALWAYSANDDESTROY = 4  -- shoot at nearby tanks (within ai_objectiveDistance units)
+
+-- objective indexes (objective with higher index will override other objectives)
+local GENERICINDEX = 1
+local POWERUPINDEX = 2
 
 function c_ai_angleRange(a, b)
 	while math.abs(a - b) > math.pi + 0.001 do
@@ -133,6 +144,8 @@ function c_ai_initTank(tank, ai)
 	end
 
 	tank.ai.nextStepTime = tankbobs.t_getTicks()
+
+	tank.ai.objectives = {}
 
 	tank.name = "[BOT] (" .. tostring(tank.ai.skill) .. ") " .. names[math.random(1, #names)]
 end
@@ -204,7 +217,7 @@ function c_ai_relativeTankSkill(tank)
 end
 
 local p1, p2, tmp = tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2()
-function c_ai_closestEnemyInSite(tank)
+function c_ai_closestEnemyInSite(tank, filter)
 	-- returns the closest tank that can be shot at, the angle at which the tank will need to be so that a bullet will shoot the tank, the position of the collision, and the time it takes for the projectile to reach the collision point, if its velocity is constant
 	local tanks = {}
 	local range = c_const_get("ai_botRange")
@@ -217,7 +230,7 @@ function c_ai_closestEnemyInSite(tank)
 	end
 
 	for _, v in pairs(c_world_getTanks()) do
-		if v.exists and tank ~= v then
+		if v.exists and tank ~= v and (not c_world_isTeamGameType() or tank.red ~= v.red) and (not filter or filter(v)) then
 			-- set first point to initial position of projectile
 			p1.R = weapon.launchDistance
 			p1.t = tank.r
@@ -264,10 +277,15 @@ function c_ai_closestEnemyInSite(tank)
 	end
 end
 
-function c_ai_setObjective(tank, pos, followType, objectiveType)
-	tank.ai.objective = pos
-	tank.ai.followType = followType or tank.ai.followType or INSIGHT
-	tank.ai.objectiveType = objectiveType
+function c_ai_setObjective(tank, index, pos, followType, objectiveType, static)
+	if not tank.ai.objectives[index] then
+		tank.ai.objectives[index] = {}
+	end
+
+	tank.ai.objectives[index].objective = tankbobs.m_vec2(pos)
+	tank.ai.objectives[index].followType = followType or tank.ai.followType or INSIGHT
+	tank.ai.objectives[index].objectiveType = objectiveType
+	tank.ai.objectives[index].static = static
 end
 
 function c_ai_findClosestPowerup(tank)
@@ -327,12 +345,14 @@ function c_ai_tankDie(tank)
 end
 
 function c_ai_findClosestWayPoint(pos)
+	-- returns the closest way point to and the weight of traveling from a position
 	local lastPoint, currentPoint = nil
 	local hull
 	local w = {}
 
 	for ks, vs in pairs(r.wayPoints) do
 		local intersection = false
+		local weight = (vs.p - pos).R
 
 		for _, vss in pairs(r.walls) do
 		if not vss.detail and vss.static then  -- ignore dynamic walls when testing for intersections
@@ -357,18 +377,111 @@ function c_ai_findClosestWayPoint(pos)
 		end
 
 		if not intersection then
-			table.insert(w, ks)
+			table.insert(w, {ks, weight})
 		end
 	end
 
-	table.sort(w, function (a, b) return (r.wayPoints[a].p - v.p).R < (r.wayPoints[b].p - v.p).R end)
+	table.sort(w, function (a, b) return (r.wayPoints[a[1]].p - v.p).R < (r.wayPoints[b[1]].p - v.p).R end)
 
 	return w[1]
 end
 
+function c_ai_weightOfPosToWayPoint(pos, wayPoint)
+	return (pos - wayPoint.p).R
+end
+
+function c_ai_findClosestPath(start, goal)
+	local net = c_tcm_current_map.wayPointNetwork
+
+	local path = {}
+	local closed = {}
+
+	local goalPos
+	if goal > 0 then
+		goalPos = c_tcm_current_map.wayPoints[goal].p
+	else
+		goalPos = c_tcm_current_map.teleporters[-goal].p
+	end
+
+	local function orderByWeight(a, b)
+		for _, v in pairs(closed) do
+			if v == a[1] then
+				return false  -- a is closed, b first
+			elseif v == b[1] then
+				return true  -- b is closed, a first
+			end
+		end
+
+		-- TODO: better method of calculating heuristic
+		local ga, gb
+		local ha, hb
+
+		ga = a[2]
+		if a[1] > 0 then
+			ha = (c_tcm_current_map.wayPoints[a].p - goalPos).R
+		else
+			ha = (c_tcm_current_map.teleporters[c_tcm_current_map.teleporters[-a].t].p - goalPos).R
+		end
+
+		gb = b[2]
+		if b[1] > 0 then
+			hb = (c_tcm_current_map.wayPoints[b].p - goalPos).R
+		else
+			hb = (c_tcm_current_map.teleporters[c_tcm_current_map.teleporters[-b].t].p - goalPos).R
+		end
+
+		return ga + ha < gb + gb
+	end
+
+	local function isClosed(n)
+		for _, v in pairs(closed) do
+			if v == n then
+				return true
+			end
+		end
+
+		return false
+	end
+
+	local function isGoal(ns)
+		for _, v in pairs(ns) do
+			if v == goal then
+				return true
+			end
+		end
+
+		return false
+	end
+
+	local nodes
+	local n = start.id
+	while n ~= goal do
+		nodes = net[n]
+		table.sort(nodes, orderByWeight)
+
+		table.insert(path, n)
+
+		n = nodes[1]
+
+		if not n or isClosed(n[1]) then
+			break
+		end
+
+		table.insert(closed, n[1])
+	end
+
+	if n ~= goal then
+		return nil
+	end
+
+	table.insert(path, n)  -- insert goal node
+
+	return path
+end
+
 local p1, p2 = tankbobs.m_vec2(), tankbobs.m_vec2()
-function c_ai_followObective(tank)
-	if not tank.ai.objective then
+function c_ai_followObjective(tank, objective)
+	if not objective then
 		tank.ai.followingObjective = false
 
 		return
@@ -378,14 +491,17 @@ function c_ai_followObective(tank)
 	p1.t = tank.r
 	p1:add(tank.p)
 
-	p2(tank.ai.objective)
-
 	local s, _, t, _ = c_world_findClosestIntersection(p1, p2)
 	local inSight = not s or t ~= "wall"
-	if tank.ai.followType >= INSIGHT and inSight then
+
+	p1(tank.p)
+
+	if objective.followType >= INSIGHT and inSight then
+		-- the objective is in sight, so chase it
+
 		local vel = tankbobs.w_getLinearVelocity(tank.body)
 
-		-- the objective is in sight, so chase it
+		p2(objective.objective)
 
 		local minSpeed = c_world_getInstagib() and c_const_get("ai_minObjectiveSpeedInstagib") or c_const_get("ai_minObjectiveSpeed")
 		if vel.R < minSpeed then
@@ -401,20 +517,141 @@ function c_ai_followObective(tank)
 		c_ai_setTankStateRotation(tank, tank.r - angle)
 
 		tank.ai.followingObjective = true
-	elseif tank.ai.followType >= ALWAYS then
-		-- look for shortest path to objective using the A* algorithm and waypoints
 
-		-- TODO
-		--tank.ai.followingObjective = true
-	elseif tank.ai.followType <= AVOIDINSIGHT and inSight then
+		if objective.followType >= ALWAYSANDDESTROY then
+			-- shoot at tanks near objective
+			local enemy, angle, pos, time = c_ai_closestEnemyInSite(tank, function (x) return (x.p - objective.objective).R <= c_const_get("ai_objectiveDistance") end)
+			if enemy then
+				c_ai_shootEnemies(tank, enemy, angle, pos, time)
+			end
+		end
+	elseif objective.followType >= ALWAYS then
+		if not objective.path or not objective.path[objective.nextNode] or not objective.nextPathUpdateTime or tankbobs.t_getTicks() >= objective.nextPathUpdateTime then
+			if tank.static then
+				objective.nextPathUpdateTime = tankbobs.t_getTicks() + c_const_get("world_time") * c_config_get("game.timescale") * c_const_get("ai_staticPathUpdateTime")
+			else
+				objective.nextPathUpdateTime = tankbobs.t_getTicks() + c_const_get("world_time") * c_config_get("game.timescale") * c_const_get("ai_pathUpdateTime")
+			end
+
+			objective.path = c_ai_findClosestPath(start, goal)
+
+			objective.nextNode = 1
+		end
+
+		if objective.path and objective.path[objective.nextNode] then
+			-- go to the next node
+			local vel = tankbobs.w_getLinearVelocity(tank.body)
+
+			local n = objective.path[objective.nextNode]
+
+			if n > 0 then
+				p2(c_tcm_current_map.wayPoints[n].p)
+			else
+				p2(c_tcm_current_map.teleporters[-n].p)
+			end
+
+			local minSpeed = c_world_getInstagib() and c_const_get("ai_minObjectiveSpeedInstagib") or c_const_get("ai_minObjectiveSpeed")
+			if vel.R < minSpeed then
+				c_ai_setTankStateForward(tank, 1)
+				c_ai_setTankStateSpecial(tank, false)
+			else
+				c_ai_setTankStateForward(tank, 0)
+				c_ai_setTankStateSpecial(tank, true)
+			end
+
+			local angle = (p2 - p1).t + ((1 - c_ai_relativeTankSkill(tank)) * (math.random(-c_const_get("ai_followRandom") * 1000, c_const_get("ai_followRandom") * 1000) / 1000))
+			tank.r, angle = c_ai_angleRange(tank.r, angle)
+			c_ai_setTankStateRotation(tank, tank.r - angle)
+
+			if (p2 - p1).R <= c_const_get("ai_nextNodeDistance") then
+				objective.nextNode = objective.nextNode + 1
+			end
+
+			objective.followingObjective = true
+		end
+	elseif objective.followType <= AVOIDINSIGHT and inSight then
 		-- go away from objective
 
 		-- TODO
 		--tank.ai.followingObjective = true
-	elseif tank.ai.followType <= AVOID then
+	elseif objective.followType <= AVOID then
 		-- ignore until in sight
 
 		tank.ai.followingObjective = false
+	end
+end
+
+function c_ai_followObjectives(tank)
+	for _, v in ipairs(tank.ai.objectives) do
+		c_ai_followObjective(tank, v)
+	end
+end
+
+function c_ai_cruise(tank)
+	local vel = tankbobs.w_getLinearVelocity(tank.body)
+
+	if tank.ai.turning and not tank.ai.close then
+		local minSpecialSpeed = c_world_getInstagib() and c_const_get("ai_minSpecialSpeedInstagib") or c_const_get("ai_minSpecialSpeed")
+		if vel.R >= minSpecialSpeed then
+			c_ai_setTankStateSpecial(tank, true)
+		end
+		c_ai_setTankStateRotation(tank, tank.ai.turning)
+
+		-- check for no walls
+		p1.R = 2.1
+		p1.t = tank.r
+		p1:add(tank.p)
+
+		p2.R = c_const_get("ai_closeWallBig")
+		p2.t = tank.r
+		p2:add(p1)
+
+		local s, _, t, _ = c_world_findClosestIntersection(p1, p2)
+		if not s or t ~= "wall" then
+			tank.ai.turning = nil
+		end
+
+		-- check for very close walls
+		p2.R = c_const_get("ai_closeWallVerySmall")
+		--p2.t = tank.r  -- already set
+		p2:add(p1)
+
+		local s, _, t, _ = c_world_findClosestIntersection(p1, p2)
+		if s and t == "wall" then
+			tank.ai.close = true
+		end
+
+		if vel.R < c_const_get("ai_coastMinSpeed") then
+			tank.ai.close = true
+		end
+	elseif not tank.ai.close then
+		c_ai_setTankStateSpecial(tank, false)
+		c_ai_setTankStateForward(tank, 1)
+
+		-- check for walls
+		p1.R = 2.1
+		p1.t = tank.r
+		p1:add(tank.p)
+
+		p2.R = c_const_get("ai_closeWallSmall")
+		p2.t = tank.r
+		p2:add(p1)
+
+		local s, _, t, _ = c_world_findClosestIntersection(p1, p2)
+		if s and t == "wall" then
+			if math.random(1, 2) == 1 then
+				tank.ai.turning = 1
+			else
+				tank.ai.turning = -1
+			end
+		end
+	else
+		c_ai_setTankStateForward(tank, -1)
+		c_ai_setTankStateSpecial(tank, false)
+
+		if vel.R <= c_const_get("ai_stopCloseSpeed") then
+			tank.ai.close = false
+		end
 	end
 end
 
@@ -454,84 +691,71 @@ function c_ai_tank_step(tank)
 				tank.ai.turning = nil
 			end
 
-			if tank.ai.turning and not tank.ai.close then
-				local minSpecialSpeed = c_world_getInstagib() and c_const_get("ai_minSpecialSpeedInstagib") or c_const_get("ai_minSpecialSpeed")
-				if vel.R >= minSpecialSpeed then
-					c_ai_setTankStateSpecial(tank, true)
+			c_ai_cruise(tank)
+		end
+
+		c_ai_followObjectives(tank)  -- bots will follow powerups even when an enemy is in sight
+	elseif c_world_gameType == DOMINATION then
+		local function closeToControlPoint(tank)
+			if not tank.ai.followingObjective then
+				return true
+			end
+
+			for _, v in pairs(c_tcm_current_map.controlPoints) do
+				if (v.p - tank.p).R <= c_const_get("ai_enemyControlPointRange") then
+					return true
 				end
-				c_ai_setTankStateRotation(tank, tank.ai.turning)
+			end
 
-				-- check for no walls
-				p1.R = 2.1
-				p1.t = tank.r
-				p1:add(tank.p)
+			return false
+		end
 
-				p2.R = c_const_get("ai_closeWallBig")
-				p2.t = tank.r
-				p2:add(p1)
+		local enemy, angle, pos, time = c_ai_closestEnemyInSite(tank)
+		if enemy then
+			c_ai_shootEnemies(tank, enemy, angle, pos, time)
+		else
+			if tank.ai.shootingEnemies then
+				tank.ai.shootingEnemies = false
 
-				local s, _, t, _ = c_world_findClosestIntersection(p1, p2)
-				if not s or t ~= "wall" then
-					tank.ai.turning = nil
-				end
+				-- tank has stopped shooting enemies
+				c_ai_setTankStateFire(tank, 0)
+				c_ai_setTankStateRotation(tank, 0)
+				c_ai_setTankStateForward(tank, 0)
+				tank.ai.turning = nil
+			end
 
-				-- check for very close walls
-				p2.R = c_const_get("ai_closeWallVerySmall")
-				--p2.t = tank.r  -- already set
-				p2:add(p1)
+			c_ai_cruise(tank)  -- the effects of the call to this function should be canceled by the call to the next function if the tank is following an objective
 
-				local s, _, t, _ = c_world_findClosestIntersection(p1, p2)
-				if s and t == "wall" then
-					tank.ai.close = true
-				end
+			c_ai_followObjectives(tank)  -- bots will follow powerups even when an enemy is in sight
+		end
 
-				if vel.R < c_const_get("ai_coastMinSpeed") then
-					tank.ai.close = true
-				end
-			elseif not tank.ai.close then
-				c_ai_setTankStateSpecial(tank, false)
-				c_ai_setTankStateForward(tank, 1)
-
-				-- check for walls
-				p1.R = 2.1
-				p1.t = tank.r
-				p1:add(tank.p)
-
-				p2.R = c_const_get("ai_closeWallSmall")
-				p2.t = tank.r
-				p2:add(p1)
-
-				local s, _, t, _ = c_world_findClosestIntersection(p1, p2)
-				if s and t == "wall" then
-					if math.random(1, 2) == 1 then
-						tank.ai.turning = 1
-					else
-						tank.ai.turning = -1
+		-- look for closest control point
+		if not tank.ai.cc or (tank.ai.cc.m.team == "red") == (tank.red == true) then
+			local smallestDistance
+			for _, v in pairs(c_tcm_current_map.controlPoints) do
+				if (v.m.team == "red") ~= (tank.red == true) then
+					local distance = (v.p - tank.p).R
+					if not smallestDistance or distance < smallestDistance then
+						smallestDistance = distance
+						tank.ai.cc = v
 					end
 				end
-			else
-				c_ai_setTankStateForward(tank, -1)
-				c_ai_setTankStateSpecial(tank, false)
+			end
 
-				if vel.R <= c_const_get("ai_stopCloseSpeed") then
-					tank.ai.close = false
-				end
+			if not smallestDistance then
+				tank.ai.cc = nil
 			end
 		end
 
-		c_ai_followObective(tank)  -- bots will follow powerups even when an enemy is in sight
-
-		-- in deathmatch, only powerups can be objectives,
-		-- so if there aren't any, reset objective
-		if not c_ai_findClosestPowerup(tank) then
-			c_ai_setObjective(tank, nil)
-		end
+		c_ai_setObjective(tank, GENERICINDEX, tank.ai.cc.p, ALWAYSANDDESTROY, "controlPoint", true)  -- ALWAYSANDDESTROY to shoot nearby tanks (tanks on the same team don't destroy each other)
 	end
 
 	-- look for powerups
 	local c = c_ai_findClosestPowerup(tank)
 	if c then
-		c_ai_setObjective(tank, c.p, INSIGHT, "powerup")
+		c_ai_setObjective(tank, POWERUPINDEX, c.p, INSIGHT, "powerup")
+	else
+		c_ai_setObjective(tank, POWERUPINDEX, nil)
 	end
 
 	local maxSpeed = c_world_getInstagib() and c_const_get("ai_maxSpeedInstagib") or c_const_get("ai_maxSpeed")

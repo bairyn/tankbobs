@@ -250,6 +250,7 @@ c_tcm_teleporter =
 	base = c_tcm_entity,
 
 	t = 0,
+	enabled = false,
 }
 
 c_tcm_playerSpawnPoint =
@@ -744,6 +745,7 @@ function c_tcm_read_map(map)
 			b = r.wayPoints[j]
 
 			local intersection = false
+			local weight = (b.p - a.p).R
 
 			for _, v in pairs(r.walls) do
 				if not v.detail and v.static then  -- ignore dynamic walls when testing for intersections
@@ -768,13 +770,14 @@ function c_tcm_read_map(map)
 			end
 
 			if not intersection then
-				table.insert(r.wayPointNetwork[i], j)
+				table.insert(r.wayPointNetwork[i], {j, weight})
 			end
 		end
 		for j = 1, r.teleporters_n do
 			b = r.teleporters[j]
 
 			local intersection = false
+			local weight = (b.p - a.p).R
 
 			for _, v in pairs(r.walls) do
 				if not v.detail and v.static then  -- ignore dynamic walls when testing for intersections
@@ -798,8 +801,8 @@ function c_tcm_read_map(map)
 				end
 			end
 
-			if not intersection then
-				table.insert(r.wayPointNetwork[i], -j)
+			if not intersection and b.enabled and b.t > 0 then
+				table.insert(r.wayPointNetwork[i], {-j, weight})
 			end
 		end
 	end
@@ -810,6 +813,7 @@ function c_tcm_read_map(map)
 			b = r.wayPoints[j]
 
 			local intersection = false
+			local weight = (b.p - a.p).R
 
 			for _, v in pairs(r.walls) do
 				if not v.detail and v.static then  -- ignore dynamic walls when testing for intersections
@@ -834,13 +838,15 @@ function c_tcm_read_map(map)
 			end
 
 			if not intersection then
-				table.insert(r.wayPointNetwork[-i], j)
+				table.insert(r.wayPointNetwork[-i], {j, weight})
 			end
 		end
 		for j = 1, r.teleporters_n do
 			b = r.teleporters[j]
 
 			local intersection = false
+			--local weight = (b.p - a.p).R
+			local weight = 0  -- teleporter to teleporter weighs nothing
 
 			for _, v in pairs(r.walls) do
 				if not v.detail and v.static then  -- ignore dynamic walls when testing for intersections
@@ -864,8 +870,8 @@ function c_tcm_read_map(map)
 				end
 			end
 
-			if not intersection then
-				table.insert(r.wayPointNetwork[-i], -j)
+			if not intersection and a.enabled and a.t > 0 and b.enabled and b.t > 0 then
+				table.insert(r.wayPointNetwork[-i], {-j, weight})
 			end
 		end
 	end

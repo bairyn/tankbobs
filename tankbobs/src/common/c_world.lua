@@ -1973,6 +1973,12 @@ local function c_world_private_resetWorldTimers()
 		if v.cd.lastChasePoint then
 			v.cd.lastChasePoint = t
 		end
+
+		if v.bot then
+			if v.ai.nextPathUpdateTime then
+				v.ai.nextPathUpdateTime = t + c_const_get("world_time") * c_config_get("game.timescale") * c_const_get("ai_pathUpdateTime")
+			end
+		end
 	end
 
 	for _, v in pairs(c_tcm_current_map.powerupSpawnPoints) do
@@ -2009,6 +2015,12 @@ local function c_world_private_offsetWorldTimers(d)
 
 		if v.cd.lastChasePoint then
 			v.cd.lastChasePoint = v.cd.lastChasePoint + d
+		end
+
+		if v.bot then
+			if v.ai.nextPathUpdateTime then
+				v.ai.nextPathUpdateTime = v.ai.nextPowerupTime + d
+			end
 		end
 	end
 
