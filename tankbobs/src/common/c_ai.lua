@@ -726,13 +726,13 @@ function c_ai_tank_step(tank)
 
 		c_ai_followObjectives(tank)  -- bots will follow powerups even when an enemy is in sight
 	elseif c_world_gameType == DOMINATION then
-		local function closeToControlPoint(tank)
+		local function closeToControlPoint(ttank)
 			if not tank.ai.followingObjective then
 				return true
 			end
 
 			for _, v in pairs(c_tcm_current_map.controlPoints) do
-				if (v.p - tank.p).R <= c_const_get("ai_enemyControlPointRange") then
+				if (v.p - ttank.p).R <= c_const_get("ai_enemyControlPointRange") then
 					return true
 				end
 			end
