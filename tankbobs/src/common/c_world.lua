@@ -975,7 +975,7 @@ function c_world_findClosestIntersection(start, endP)
 				end
 
 				b, intersection = tankbobs.m_edge(lastPoint, currentPoint, start, endP)
-				if b then
+				if b and intersection then  -- FIXME: figure out why b can be true while intersection is nil
 					if not minDistance then
 						minIntersection = intersection
 						minDistance = math.abs((intersection - start).R)

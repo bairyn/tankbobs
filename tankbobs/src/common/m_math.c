@@ -840,6 +840,8 @@ int m_edge(lua_State *L)  /* algorithm, by Darel Rex Finley, 2006, can be found 
 	v->y = v->t = 0.0;
 	v->x = v->R = intersection;
 
+	MATH_POLAR(*v);
+
 	return 3;
 }
 
