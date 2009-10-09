@@ -122,11 +122,13 @@ function c_ai_initTank(tank, ai)
 		-- place bot randomly on the team with fewest players
 		local balance = 0  -- -: blue; +: red
 
-		for k, v in pairs(c_world_getTanks()) do
-			if v.red then
-				balance = balance + 1
-			else
-				balance = balance - 1
+		for _, v in pairs(c_world_getTanks()) do
+			if v ~= tank then
+				if v.red then
+					balance = balance + 1
+				else
+					balance = balance - 1
+				end
 			end
 		end
 
@@ -135,7 +137,11 @@ function c_ai_initTank(tank, ai)
 		elseif balance < 0 then
 			tank.red = true
 		else
-			tank.red = math.random(0, 1) == 1 and false or true
+			if math.random(1, 2) == 1 then
+				tank.red = true
+			else
+				tank.red = false
+			end
 		end
 	end
 
@@ -408,6 +414,12 @@ function c_ai_findClosestPath(start, goal)
 	end
 
 	local function orderByWeight(a, b)
+		if not a then
+			return false
+		elseif not b then
+			return true
+		end
+
 		for _, v in pairs(closed) do
 			if v == a[1] then
 				return false  -- a is closed, b first
@@ -434,7 +446,7 @@ function c_ai_findClosestPath(start, goal)
 			hb = (c_tcm_current_map.teleporters[c_tcm_current_map.teleporters[-b[1]].t].p - goalPos).R
 		end
 
-		return ga + ha < gb + gb
+		return ga + ha < gb + hb
 	end
 
 	local function isClosed(n)
@@ -486,8 +498,6 @@ end
 local p1, p2 = tankbobs.m_vec2(), tankbobs.m_vec2()
 function c_ai_followObjective(tank, objective)
 	if not objective then
-		tank.ai.followingObjective = false
-
 		return
 	end
 
@@ -588,12 +598,11 @@ function c_ai_followObjective(tank, objective)
 		--tank.ai.followingObjective = true
 	elseif objective.followType <= AVOID then
 		-- ignore until in sight
-
-		tank.ai.followingObjective = false
 	end
 end
 
 function c_ai_followObjectives(tank)
+	tank.ai.followingObjective = false
 	for _, v in ipairs(tank.ai.objectives) do
 		c_ai_followObjective(tank, v)
 	end
@@ -731,7 +740,7 @@ function c_ai_tank_step(tank)
 			return false
 		end
 
-		local enemy, angle, pos, time = c_ai_closestEnemyInSite(tank)
+		local enemy, angle, pos, time = c_ai_closestEnemyInSite(tank, closeToControlPoint)
 		if enemy then
 			c_ai_shootEnemies(tank, enemy, angle, pos, time)
 		else
