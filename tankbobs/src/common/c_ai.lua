@@ -50,6 +50,7 @@ function c_ai_init()
 	c_const_set("ai_chaseEnemyChanceInstagib", 2)
 	c_const_set("ai_noFireSpawnTime", -1)
 	c_const_set("ai_noFireSpawnTimeInstagib", 0.8)
+	c_const_set("ai_recentAttackExpireTime", 4)
 
 	c_const_set("ai_followRandom", (math.pi * 2) / 64)  -- +- x radians when least skilled bot is following an objective
 	c_const_set("ai_stopCloseSpeed", 2)
@@ -151,9 +152,13 @@ function c_ai_initTank(tank, ai)
 		tankbobs.t_clone(ai, tank.ai)
 	end
 
+	-- nothing below should be able to be overwritten
+
 	tank.ai.nextStepTime = tankbobs.t_getTicks()
 
 	tank.ai.objectives = {}
+
+	tank.ai.lastAttackers = {}
 
 	tank.name = "[BOT] (" .. tostring(tank.ai.skill) .. ") " .. names[math.random(1, #names)]
 end
@@ -519,11 +524,11 @@ function c_ai_findClosestPath(start, goal)
 		table.insert(closed, n[1])
 	end
 
-	if n[1] ~= goal then
+	if not n or n[1] ~= goal then
 		return nil
 	end
 
-	table.insert(path, n)  -- insert goal node
+	table.insert(path, n[1])  -- insert goal node
 
 	return path
 end
@@ -650,6 +655,30 @@ function c_ai_resetObjectivePathTimer(tank, index)
 	end
 end
 
+function c_ai_hasRecentlyAttacked(tank, attacker)
+	local t = tankbobs.t_getTicks()
+
+	if not tank.bot then
+		return
+	end
+
+	for _, v in pairs(tank.ai.lastAttackers) do
+		if v[1] == attacker and t < v[2] then
+			return true
+		end
+	end
+
+	return false
+end
+
+function c_ai_tankAttacked(tank, attacker, damage)
+	if not tank.bot then
+		return
+	end
+
+	table.insert(tank.ai.lastAttackers, {attacker, tankbobs.t_getTicks() + c_config_get("game.timescale") * c_const_get("world_time") *  c_const_get("ai_recentAttackExpireTime")})
+end
+
 local p1, p2 = tankbobs.m_vec2(), tankbobs.m_vec2()
 function c_ai_cruise(tank)
 	local vel = tankbobs.w_getLinearVelocity(tank.body)
@@ -769,6 +798,11 @@ function c_ai_tank_step(tank)
 				if (v.p - ttank.p).R <= c_const_get("ai_enemyControlPointRange") then
 					return true
 				end
+			end
+
+			-- see if tank has recently attacked bot
+			if c_ai_hasRecentlyAttacked(tank, ttank) then
+				return true
 			end
 
 			return false

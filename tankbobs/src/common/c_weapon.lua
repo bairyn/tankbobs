@@ -752,6 +752,8 @@ function c_weapon_hit(tank, projectile)
 		if tank.health <= 0 then
 			tank.killer = c_world_getTanks()[projectile.owner]
 		end
+
+		c_ai_tankAttacked(tank, c_world_getTanks()[projectile.owner], c_weapons[projectile.weapon].damage)
 	end
 end
 
