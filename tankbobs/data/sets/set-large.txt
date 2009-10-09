@@ -1,5 +1,5 @@
 large
 Large Games
 -9.7
-Larger-sized levels better for 6 - 12 players
+Large levels fit for games with more players
 large_1.tcm

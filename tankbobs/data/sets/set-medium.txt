@@ -1,5 +1,5 @@
 medium
 Medium Games
 -9.8
-Medium-sized levels better for 4 - 5 players
+Medium-sized levels
 medium_1.tcm
