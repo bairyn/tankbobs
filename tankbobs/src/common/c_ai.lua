@@ -40,6 +40,8 @@ function c_ai_init()
 	c_const_set("ai_minSpecialSpeedInstagib", 32)
 	c_const_set("ai_minObjectiveSpeed", 24)
 	c_const_set("ai_minObjectiveSpeedInstagib", 24)
+	c_const_set("ai_minWayPointSpeed", 16)
+	c_const_set("ai_minWayPointSpeedInstagib", 24)
 	c_const_set("ai_objectiveDistance", 25)
 	c_const_set("ai_accelerateNearEnemyFrequency", 32)  -- lower is more
 	c_const_set("ai_skipUpdateRandomReduce", 0.5)
@@ -387,7 +389,38 @@ function c_ai_findClosestWayPoint(pos)
 		end
 	end
 
-	table.sort(w, function (a, b) return (c_tcm_current_map.wayPoints[a[1]].p - pos).R < (c_tcm_current_map.wayPoints[b[1]].p - pos).R end)
+	for ks, vs in pairs(c_tcm_current_map.teleporters) do
+		local intersection = false
+		local weight = (vs.p - pos).R
+
+		for _, vss in pairs(c_tcm_current_map.walls) do
+		if not vss.detail and vss.static then  -- ignore dynamic walls when testing for intersections
+			--hull = vss.m.pos
+			hull = vss.p
+				local t = v
+				for _, vsss in pairs(hull) do
+					currentPoint = vsss
+					if not lastPoint then
+						lastPoint = hull[#hull]
+					end
+
+					if tankbobs.m_edge(lastPoint, currentPoint, pos, vs.p) then
+						intersection = true
+						break
+					end
+
+					lastPoint = currentPoint
+				end
+				lastPoint = nil
+			end
+		end
+
+		if not intersection then
+			table.insert(w, {-ks, weight})
+		end
+	end
+
+	table.sort(w, function (a, b) local pa if a[1] > 0 then pa = c_tcm_current_map.wayPoints[a[1]].p - pos else pa = c_tcm_current_map.teleporters[-a[1]].p end local pb if b[1] > 0 then pb = c_tcm_current_map.wayPoints[b[1]].p - pos else pb = c_tcm_current_map.teleporters[-b[1]].p end return (pa - pos).R < (pb - pos).R end)
 
 	return w[1]
 end
@@ -471,7 +504,7 @@ function c_ai_findClosestPath(start, goal)
 
 	local nodes
 	local n = {start, 0}
-	while n ~= goal do
+	while n[1] ~= goal do
 		nodes = net[n[1]]
 		table.sort(nodes, orderByWeight)
 
@@ -486,7 +519,7 @@ function c_ai_findClosestPath(start, goal)
 		table.insert(closed, n[1])
 	end
 
-	if n ~= goal then
+	if n[1] ~= goal then
 		return nil
 	end
 
@@ -517,7 +550,7 @@ function c_ai_followObjective(tank, objective)
 
 		local vel = tankbobs.w_getLinearVelocity(tank.body)
 
-		local minSpeed = c_world_getInstagib() and c_const_get("ai_minObjectiveSpeedInstagib") or c_const_get("ai_minObjectiveSpeed")
+		local minSpeed = c_world_getInstagib() and c_const_get("ai_minWayPointSpeedInstagib") or c_const_get("ai_minWayPointSpeed")
 		if vel.R < minSpeed then
 			c_ai_setTankStateForward(tank, 1)
 			c_ai_setTankStateSpecial(tank, false)
@@ -555,6 +588,7 @@ function c_ai_followObjective(tank, objective)
 			if goal then
 				goal = goal[1]
 			end
+
 			objective.path = c_ai_findClosestPath(start, goal)
 
 			objective.nextNode = 1

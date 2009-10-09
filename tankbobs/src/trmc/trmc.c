@@ -807,7 +807,7 @@ static int compile(const char *filename)
 	char line[MAX_LINE_SIZE] = {""};
 
 	/* reset counters */
-	mc = wc = tc = lc = oc = pc = cc = fc = 0;
+	mc = wc = tc = lc = oc = pc = cc = fc = ac = 0;
 
 	if(hidden(filename))
 	{
