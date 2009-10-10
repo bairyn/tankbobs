@@ -460,6 +460,7 @@ bool trm_open(const char *filename, bool import)  // Will not confirm unsaved pr
 					char authors[1024];
 					char version_s[1024];
 					int version;
+					int staticCamera;
 
 					read_string(name);
 					read_string(title);
@@ -467,6 +468,7 @@ bool trm_open(const char *filename, bool import)  // Will not confirm unsaved pr
 					read_string(authors);
 					read_string(version_s);
 					version = read_int();
+					staticCamera = read_int();
 
 					tmap.name = string(name);
 					tmap.title = string(title);
@@ -474,6 +476,7 @@ bool trm_open(const char *filename, bool import)  // Will not confirm unsaved pr
 					tmap.authors = string(authors);
 					tmap.version_s = string(version_s);
 					tmap.version = version;
+					tmap.staticCamera = staticCamera;
 				}
 				else if(strncmp(entity, "wall", sizeof(entity)) == 0)
 				{
@@ -664,6 +667,8 @@ bool trm_save(const char *filename)
 		<< tmap.version_s
 		<< ", "
 		<< tmap.version
+		<< ", "
+		<< tmap.staticCamera
 		<< endl;
 
 	for(vector<entities::Wall *>::iterator i = wall.begin(); i != wall.end(); ++i)

@@ -51,8 +51,8 @@ format:
 64 bytes title
 64 bytes description
 512 bytes authors
-64 bytes map version
-4 bytes map version (for compatibility issues in the future)
+64 bytes map version; human readable NULL-terminated string
+4 bytes map version
 4 bytes number of walls
 4 bytes number of teleporters
 4 bytes number of playerSpawnPoints
@@ -187,6 +187,7 @@ c_tcm_map =
 	description = "",  -- the description
 	authors = "",
 	version_string = "",
+	staticCamera = false,
 
 	walls_n = 0,
 	teleporters_n = 0,
@@ -446,6 +447,11 @@ function c_tcm_read_map(map)
 	r.authors = c_tcm_private_get(tankbobs.io_getStrL, i, false, 512)
 	r.version_string = c_tcm_private_get(tankbobs.io_getStrL, i, false, 64)
 	r.version = c_tcm_private_get(tankbobs.io_getInt, i)
+	if c_tcm_private_get(tankbobs.io_getChar, i) ~= 0x00 then
+		r.staticCamera = true
+	else
+		r.staticCamera = false
+	end
 	-- strip trailing 0's from NULL-terminated strings passed by C
 	-- we might use getStr and avoid this but if the string uses all of the bytes getStr won't work
 	r.name = r.name:gsub("%z*$", "")

@@ -42,6 +42,7 @@ class Properties : public QDialog, private Ui::PropertiesDialog
 		void mapauthorsChanged(const QString &text);
 		void mapversionsChanged(const QString &text);
 		void mapversionChanged(const QString &text);
+		void staticCameraChanged(int state);
 		void powerupsChanged(const QString &text);
 		void levelChanged(const QString &text);
 		void timeChanged(const QString &text);

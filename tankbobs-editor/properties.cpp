@@ -195,6 +195,7 @@ Properties::Properties(QWidget *parent)
 		mapauthors->setText(QString(tmap.authors.c_str()));
 		mapversions->setText(QString(tmap.version_s.c_str()));
 		mapversion->setText(QString::number(tmap.version));
+		staticCamera->setChecked(QString::number(tmap.staticCamera));
 
 		mapname->setEnabled(true);
 		mapnameLabel->setEnabled(true);
@@ -208,6 +209,7 @@ Properties::Properties(QWidget *parent)
 		mapversionsLabel->setEnabled(true);
 		mapversion->setEnabled(true);
 		mapversionLabel->setEnabled(true);
+		staticCamera->setEnabled(true);
 	}
 
 	connect(mapname, SIGNAL(textChanged(const QString &)), this, SLOT(mapnameChanged(const QString &)));
@@ -216,6 +218,7 @@ Properties::Properties(QWidget *parent)
 	connect(mapauthors, SIGNAL(textChanged(const QString &)), this, SLOT(mapauthorsChanged(const QString &)));
 	connect(mapversions, SIGNAL(textChanged(const QString &)), this, SLOT(mapversionsChanged(const QString &)));
 	connect(mapversion, SIGNAL(textChanged(const QString &)), this, SLOT(mapversionChanged(const QString &)));
+	connect(staticCamera, SIGNAL(stateChanged(int)), this, SLOT(staticCameraChanged(int)));
 	connect(texture, SIGNAL(textChanged(const QString &)), this, SLOT(textureChanged(const QString &)));
 	connect(tx1, SIGNAL(textChanged(const QString &)), this, SLOT(tx1Changed(const QString &)));
 	connect(ty1, SIGNAL(textChanged(const QString &)), this, SLOT(ty1Changed(const QString &)));
@@ -549,4 +552,9 @@ void Properties::mapversionsChanged(const QString &text)
 void Properties::mapversionChanged(const QString &text)
 {
 	tmap.version = util_atoi(util_qtcp(text).c_str());
+}
+
+void Properties::staticCameraChanged(int state)
+{
+	tmap.staticCamera = state;
 }

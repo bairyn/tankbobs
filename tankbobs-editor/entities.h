@@ -51,7 +51,8 @@ namespace entities
 			string authors;
 			string version_s;
 			int version;
-			Map() {name = "default"; title = "default"; description = ""; authors = ""; version_s = ""; version = 0;}
+			bool staticCamera;
+			Map() {name = "default"; title = "default"; description = ""; authors = ""; version_s = ""; version = 0; staticCamera = false;}
 	};
 
 	class Entity

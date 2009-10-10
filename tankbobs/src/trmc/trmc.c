@@ -618,7 +618,7 @@ static int cc;
 static int fc;
 static int ac;
 
-static void add_map(const char *name, const char *title, const char *description, const char *authors, const char *version_s, int version)
+static void add_map(const char *name, const char *title, const char *description, const char *authors, const char *version_s, int version, int staticCamera)
 {
 	map_t *map = &maps[mc++];
 
@@ -634,6 +634,7 @@ static void add_map(const char *name, const char *title, const char *description
 	strncpy(map->authors, description, sizeof(map->authors));
 	strncpy(map->version_s, version_s, sizeof(map->version_s));
 	map->version = version;
+	map->staticCamerae = staticCamerae;
 }
 
 static void add_wall(int quad, double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double tx1, double ty1, double tx2, double ty2, double tx3, double ty3, double tx4, double ty4, const char *texture, int level, const char *target, int path, int detail, int staticW)
@@ -892,6 +893,7 @@ static int compile(const char *filename)
 					char authors[MAX_STRING_SIZE];
 					char version_s[MAX_STRING_SIZE];
 					int version;
+					int staticCamera;
 
 					read_string(name);
 					read_string(title);
@@ -899,8 +901,9 @@ static int compile(const char *filename)
 					read_string(authors);
 					read_string(version_s);
 					version = read_int();
+					staticCamera = read_int();
 
-					add_map(name, title, description, authors, version_s, version);
+					add_map(name, title, description, authors, version_s, version, staticCamera);
 				}
 				else if(strncmp(entity, "wall", sizeof(entity)) == 0)
 				{
@@ -1088,6 +1091,7 @@ static int compile(const char *filename)
 	put_str(fout, maps[0].authors, 512);
 	put_str(fout, maps[0].version_s, 64);
 	put_cint(fout, maps[0].version);
+	put_cint(fout, maps[0].staticCamera);
 
 	put_cint(fout, wc);
 	put_cint(fout, tc);

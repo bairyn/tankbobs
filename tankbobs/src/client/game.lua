@@ -413,7 +413,7 @@ local function game_drawWorld(d)
 											end
 
 											if ammo > 0 then
-												gl.VertexPointer(m, 2)  -- XXX: this call causes memory corruption on systems using older versions of LuaGL  -- TODO: update windows (32 and 64-bit) LuaGL libraries
+												gl.VertexPointer(m, 2)  -- XXX: this call causes memory corruption under older versions of LuaGL  -- TODO: update windows (32 and 64-bit) LuaGL libraries
 												gl.DrawArrays("QUADS", 0, 4 * ammo)
 											end
 										gl.DisableClientState("VERTEX_ARRAY")
@@ -502,7 +502,7 @@ local function game_drawWorld(d)
 					end
 					gl.VertexPointer(w)
 					gl.TexCoordPointer(t)
-					gl.DrawArrays("POLYGON", 0, #v.m.pos)  -- TODO: FIXME: figure out why texture coordinates are being ignored and remove immediate mode below
+					gl.DrawArrays("POLYGON", 0, #v.m.pos)  -- TODO: FIXME: figure out why texture coordinates are ignored and remove immediate mode below
 					gl.DisableClientState("VERTEX_ARRAY,TEXTURE_COORD_ARRAY")
 
 					gl.Begin(v.m.pos[4] and "QUADS" or "TRIANGLES")
@@ -699,13 +699,10 @@ function game_step(d)
 			return
 		end
 		local m = c_tcm_current_map
-		-- FIXME: this is broken
-		-- TODO
-		if m.uppermost <= 105 and m.lowermost >= -5 and m.rightmost <= 105 and m.leftmost >= -5 then uppermost, rightmost, lowermost, leftmost = 50, 50, 50, 50 end  -- TEMPORARY CODE TO KEEP LEVELS 1 AND 2 STILL
-		--uppermost = math.min(m.uppermost - (50 + c_config_get("client.cameraExtraFOV")), uppermost)
-		--lowermost = math.max(m.lowermost + (50 + c_config_get("client.cameraExtraFOV")), lowermost)
-		--rightmost = math.min(m.rightmost - (50 + c_config_get("client.cameraExtraFOV")), rightmost)
-		--leftmost  = math.max(m.leftmost  + (50 + c_config_get("client.cameraExtraFOV")),  leftmost)
+		-- ignore m.staticCamera and automatically determine whether to keep camera static
+		if m.uppermost <= 105 and m.lowermost >= -5 and m.rightmost <= 105 and m.leftmost >= -5 then
+			uppermost, rightmost, lowermost, leftmost = 50, 50, 50, 50
+		end
 
 		gl.Translate(50, 50, 0)
 
