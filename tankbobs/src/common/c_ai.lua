@@ -1162,7 +1162,7 @@ function c_ai_tank_step(tank)
 		c_ai_setObjective(tank, AVOIDENEMYINDEX, p, ALWAYSANDDESTROY, "enemy", false)
 	elseif c_world_gameType == DOMINATION then
 		local function closeToControlPoint(ttank)
-			if not tank.ai.followingObjective then
+			if not tank.ai.cc then
 				return true
 			end
 
