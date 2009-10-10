@@ -79,6 +79,7 @@ local names =
 , "Bartholomew"
 , "Botter"
 , "Ms. Durban"
+, "Ms. Durant"
 , "Dude"
 , "Shooter"
 , "Aimer"
@@ -956,7 +957,7 @@ function c_ai_tank_step(tank)
 	-- look for powerups
 	local c = c_ai_findClosestPowerup(tank)
 	if c then
-		c_ai_setObjective(tank, POWERUPINDEX, c.p, INSIGHT, "powerup")
+		c_ai_setObjective(tank, POWERUPINDEX, tankbobs.m_vec2(c.p), INSIGHT, "powerup")
 	else
 		c_ai_setObjective(tank, POWERUPINDEX, nil)
 	end
