@@ -635,7 +635,7 @@ static void add_map(const char *name, const char *title, const char *description
 	strncpy(map->authors, description, sizeof(map->authors));
 	strncpy(map->version_s, version_s, sizeof(map->version_s));
 	map->version = version;
-	map->staticCamerae = staticCamerae;
+	map->staticCamera = staticCamera;
 }
 
 static void add_wall(int quad, double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double tx1, double ty1, double tx2, double ty2, double tx3, double ty3, double tx4, double ty4, const char *texture, int level, const char *target, int path, int detail, int staticW)
