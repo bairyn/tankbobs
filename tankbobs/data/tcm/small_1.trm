@@ -15,3 +15,7 @@ controlPoint, 50, 11, 0
 controlPoint, 50, 89, 1
 flag, 50, 89, 1
 flag, 50, 11, 0
+wayPoint, 37, 85
+wayPoint, 38, 17
+wayPoint, 62, 85
+wayPoint, 63, 17
