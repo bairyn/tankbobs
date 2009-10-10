@@ -530,6 +530,7 @@ static struct map_s
 	char authors[512];
 	char version_s[64];
 	int version;
+	int staticCamera;
 } maps[MAX_MAPS];
 
 typedef struct wall_s wall_t;
