@@ -86,6 +86,17 @@ local names =
 , "Dude"
 , "Shooter"
 , "Aimer"
+, "Robert'); DROP TABLE Students;--"
+, "Ken Knot"
+, "Tom Morrow"
+, "Bob Wire"
+, "Bobby Pin"
+, "Brock Lee"
+, "Will Wynn"
+, "Summer Holiday"
+, "Summer Beach"
+, "Virginian Beach"
+, "Krabby Krap"
 }
 
 -- follow type
