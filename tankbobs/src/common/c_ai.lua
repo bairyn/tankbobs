@@ -24,8 +24,8 @@ Bot AI
 --]]
 
 function c_ai_init()
-	c_const_set("ai_fps", 50)
-	c_const_set("ai_fpsRelativeToSkill", 150)
+	c_const_set("ai_fps", 175)
+	c_const_set("ai_fpsRelativeToSkill", 100)
 
 	c_const_set("ai_minSkill", 1)  -- most difficult to fight against
 	c_const_set("ai_maxSkill", 16)  -- least difficult to fight against
@@ -259,7 +259,7 @@ function c_ai_closestEnemyInSite(tank, filter)
 	local tanks = {}
 	local range = c_const_get("ai_botRange")
 	local accuracy = 2 * c_const_get("ai_botAccuracy") * tank.ai.skill
-	local dir
+	local dir = 0
 	local weapon = c_weapon_getWeapons()[tank.weapon]
 
 	if not weapon then
