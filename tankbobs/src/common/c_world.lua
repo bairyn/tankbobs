@@ -1956,8 +1956,8 @@ function c_world_contactListener(shape1, shape2, body1, body2, position, separat
 	end
 end
 
-local function c_world_private_resetWorldTimers()
-	local t = t_t_getTicks()
+local function c_world_private_resetWorldTimers(t)
+	t = t or t_t_getTicks()
 
 	worldTime = t_t_getTicks()
 
@@ -1975,9 +1975,13 @@ local function c_world_private_resetWorldTimers()
 		end
 
 		if v.bot then
-			if v.ai.nextPathUpdateTime then
-				v.ai.nextPathUpdateTime = t + c_const_get("world_time") * c_config_get("game.timescale") * c_const_get("ai_pathUpdateTime")
+			for _, v in pairs(v.ai.objectives) do
+				if v.nextPathUpdateTime then
+					v.nextPathUpdateTime = t
+				end
 			end
+
+			v.ai.lastEnemySightedTime = t
 		end
 	end
 
@@ -2018,9 +2022,13 @@ local function c_world_private_offsetWorldTimers(d)
 		end
 
 		if v.bot then
-			if v.ai.nextPathUpdateTime then
-				v.ai.nextPathUpdateTime = v.ai.nextPowerupTime + d
+			for _, v in pairs(v.ai.objectives) do
+				if v.nextPathUpdateTime then
+					v.nextPathUpdateTime = v.nextPathUpdateTime + d
+				end
 			end
+
+			v.ai.lastEnemySightedTime = v.ai.lastEnemySightedTime + d
 		end
 	end
 

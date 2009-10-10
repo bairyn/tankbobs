@@ -51,6 +51,11 @@ function c_ai_init()
 	c_const_set("ai_noFireSpawnTime", -1)
 	c_const_set("ai_noFireSpawnTimeInstagib", 0.8)
 	c_const_set("ai_recentAttackExpireTime", 4)
+	c_const_set("ai_minAmmo", 0.4)
+	c_const_set("ai_shotgunReloadMinHealth", 20)  -- don't keep reloading shotgun near enemies with a shotgun if health is below this
+	c_const_set("ai_reloadEmptyWeaponFrequency", 24)  -- lower is more likely; chance of 1 / x for bots with skill level of 1
+	c_const_set("ai_shotgunMinAmmo", 2)
+	c_const_set("ai_enemySightedTime", 3)
 
 	c_const_set("ai_followRandom", (math.pi * 2) / 64)  -- +- x radians when least skilled bot is following an objective
 	c_const_set("ai_stopCloseSpeed", 2)
@@ -160,6 +165,8 @@ function c_ai_initTank(tank, ai)
 
 	tank.ai.lastAttackers = {}
 
+	tank.ai.lastEnemySightedTime = tankbobs.t_getTicks() - c_const_get("ai_enemySightedTime") - 1
+
 	tank.name = "[BOT] (" .. tostring(tank.ai.skill) .. ") " .. names[math.random(1, #names)]
 end
 
@@ -221,6 +228,22 @@ function c_ai_setTankStateSpecial(tank, special)  -- 0 or false; no special
 		tank.state = bit.bor(tank.state, SPECIAL)
 	else
 		tank.state = bit.band(tank.state, bit.bnot(SPECIAL))
+	end
+end
+
+function c_ai_setTankStateReload(tank, reload)  -- 0 or false; no reload
+	if reload and reload ~= 0 then
+		tank.state = bit.bor(tank.state, RELOAD)
+	else
+		tank.state = bit.band(tank.state, bit.bnot(RELOAD))
+	end
+end
+
+function c_ai_getTankStateReload(tank)
+	if bit.band(tank.state, RELOAD) then
+		return true, 1
+	else
+		return false, 0
 	end
 end
 
@@ -307,7 +330,60 @@ function c_ai_findClosestPowerup(tank)
 	return c_world_getPowerups()[1]
 end
 
+function c_ai_isWeapon(tank, weaponString)
+	local weapon = c_weapon_getByName(weaponString)
+	if not weapon then
+		weapon = c_weapon_getByAltName(weaponString)
+	end
+
+	if not weapon then
+		return false
+	end
+
+	return tank.weapon == weapon.index
+end
+
+function c_ai_isMeleeWeapon(tank)
+	if c_ai_isWeapon(tank, "saw") then
+		return true
+	end
+
+	return false
+end
+
+function c_ai_tankWeaponStep(tank, enemyInSight)
+	local t = tankbobs.t_getTicks()
+
+	local weapon = c_weapon_getWeapons()[tank.weapon]
+
+	if not enemyInSight and t > tank.ai.lastEnemySightedTime + c_const_get("ai_enemySightedTime") then
+		if weapon.capacity > 0 and tank.clips > 0 and tank.ammo / weapon.capacity < c_const_get("ai_minAmmo") then
+			c_ai_setTankStateReload(tank, 1)
+		else
+			c_ai_setTankStateReload(tank, 0)
+		end
+
+		if c_ai_isWeapon(tank, "shotgun") then
+			c_ai_setTankStateReload(tank, 1)
+		end
+	else
+		c_ai_setTankStateReload(tank, 0)
+
+		if c_ai_isWeapon(tank, "shotgun") and c_ai_getTankStateReload(tank) then
+			if tank.ammo < c_const_get("ai_shotgunMinAmmo") and tank.health >= c_const_get("ai_shotgunReloadMinHealth") then
+				c_ai_setTankStateReload(tank, 1)
+			end
+		end
+	end
+
+	if tank.clips > 0 and tank.ammo <= 0 and math.random(1, tank.ai.skill * c_const_get("ai_reloadEmptyWeaponFrequency")) == 1 then
+		c_ai_setTankStateReload(tank, 1)
+	end
+end
+
 function c_ai_shootEnemies(tank, enemy, angle, pos, time)
+	tank.ai.lastEnemySightedTime = tankbobs.t_getTicks()
+
 	if not tank.ai.shootingEnemies then
 		-- start shooting enemies
 		c_ai_setTankStateSpecial(tank, false)
@@ -317,6 +393,17 @@ function c_ai_shootEnemies(tank, enemy, angle, pos, time)
 			c_ai_setTankStateForward(tank, 1)
 		else
 			c_ai_setTankStateForward(tank, 0)
+		end
+
+		if c_ai_isMeleeWeapon(tank) then
+			c_ai_setTankStateForward(tank, 1)
+		elseif c_ai_isWeapon(tank, "shotgun") then
+			local chaseEnemyChance = c_world_getInstagib() and c_const_get("ai_chaseEnemyChanceInstagib") or c_const_get("ai_chaseEnemyChance")
+			if math.random(1, chaseEnemyChance) ~= 1 then
+				c_ai_setTankStateForward(tank, 1)
+			else
+				c_ai_setTankStateForward(tank, 0)
+			end
 		end
 	end
 
@@ -334,14 +421,18 @@ function c_ai_shootEnemies(tank, enemy, angle, pos, time)
 		end
 
 		-- randomly accelerate or reverse
-		if math.random(1, c_const_get("ai_accelerateNearEnemyFrequency") * tank.ai.skill) == 1 then
-			local s = c_ai_getTankStateForward(tank)
-			if s > 0 then
-				c_ai_setTankStateForward(tank, math.random(1, c_const_get("ai_reverseChance")) == 1 and -2 or 0)
-			elseif s < 0 then
-				c_ai_setTankStateForward(tank, math.random(1, c_const_get("ai_reverseChance")) == 1 and 0 or 1)
-			else
-				c_ai_setTankStateForward(tank, math.random(1, c_const_get("ai_reverseChance")) == 1 and -2 or 1)
+		if c_ai_isMeleeWeapon(tank) then
+			c_ai_setTankStateForward(tank, 1)
+		else
+			if math.random(1, c_const_get("ai_accelerateNearEnemyFrequency") * tank.ai.skill) == 1 then
+				local s = c_ai_getTankStateForward(tank)
+				if s > 0 then
+					c_ai_setTankStateForward(tank, math.random(1, c_const_get("ai_reverseChance")) == 1 and -2 or 0)
+				elseif s < 0 then
+					c_ai_setTankStateForward(tank, math.random(1, c_const_get("ai_reverseChance")) == 1 and 0 or 1)
+				else
+					c_ai_setTankStateForward(tank, math.random(1, c_const_get("ai_reverseChance")) == 1 and -2 or 1)
+				end
 			end
 		end
 	end
@@ -773,6 +864,8 @@ function c_ai_tank_step(tank)
 		local enemy, angle, pos, time = c_ai_closestEnemyInSite(tank)
 		if enemy then
 			c_ai_shootEnemies(tank, enemy, angle, pos, time)
+
+			c_ai_tankWeaponStep(tank, true)
 		else
 			if tank.ai.shootingEnemies then
 				tank.ai.shootingEnemies = false
@@ -785,6 +878,8 @@ function c_ai_tank_step(tank)
 			end
 
 			c_ai_cruise(tank)
+
+			c_ai_tankWeaponStep(tank, false)
 		end
 
 		c_ai_followObjectives(tank)  -- bots will follow powerups even when an enemy is in sight
@@ -811,6 +906,8 @@ function c_ai_tank_step(tank)
 		local enemy, angle, pos, time = c_ai_closestEnemyInSite(tank, closeToControlPoint)
 		if enemy then
 			c_ai_shootEnemies(tank, enemy, angle, pos, time)
+
+			c_ai_tankWeaponStep(tank, true)
 		else
 			if tank.ai.shootingEnemies then
 				tank.ai.shootingEnemies = false
@@ -825,6 +922,8 @@ function c_ai_tank_step(tank)
 			if not tank.ai.followingObjective then
 				c_ai_cruise(tank)
 			end
+
+			c_ai_tankWeaponStep(tank, false)
 
 			c_ai_followObjectives(tank)  -- bots will follow powerups even when an enemy is in sight
 		end
