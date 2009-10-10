@@ -326,9 +326,9 @@ function c_ai_setObjective(tank, index, pos, followType, objectiveType, static)
 end
 
 function c_ai_findClosestPowerup(tank)
-	-- nothing depends on order of powerup table, so we sort it directly
-	table.sort(c_world_getPowerups(), function (a, b) if a and b then return (a.p - tank.p).R < (b.p - tank.p).R elseif a then return true else return false end end)
-	return c_world_getPowerups()[1]
+	local powerups = tankbobs.t_clone(c_world_getPowerups())
+	table.sort(powerups, function (a, b) if a and b then return (a.p - tank.p).R < (b.p - tank.p).R elseif a then return true else return false end end)
+	return powerups[1]
 end
 
 function c_ai_isWeapon(tank, weaponString)

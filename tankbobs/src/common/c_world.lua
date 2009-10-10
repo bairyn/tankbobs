@@ -1786,6 +1786,7 @@ function c_world_teleporter_step(d, teleporter)
 					end
 					-- test for rest of world
 					if c_world_pointIntersects(teleporter.p) then
+						-- FIXME: this never happens (physical walls should block teleporters)
 						return
 					end
 
