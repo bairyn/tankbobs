@@ -58,9 +58,11 @@ function c_ai_init()
 	c_const_set("ai_enemySightedTime", 3)
 	c_const_set("ai_meleeFireRange", 5.5)
 	c_const_set("ai_meleeRangeSkill", 0.5)
-	c_const_set("ai_enemyMeleeFireRange", 12)
+	c_const_set("ai_enemyMeleeFireRange", 16)
 	c_const_set("ai_enemyMeleeRangeSkill", -0.6)
-	c_const_set("ai_meleeChaseTargetMinDistance", 16)
+	c_const_set("ai_meleeChaseTargetMinDistance", 5)
+	c_const_set("ai_meleeChaseTargetMinSpecialSpeed", 32)
+	c_const_set("ai_meleeChaseTargetMinSpecialSpeedInstagib", 44)
 	c_const_set("ai_minHealth", 20)
 	c_const_set("ai_minHealthInstagib", -1)
 
@@ -313,25 +315,30 @@ function c_ai_findClosestEnemyInSight(tank, filter)
 			p1:add(tank.p)
 
 			-- find the angle at which the tank will need to be to shoot the enemy
+			local time = 0
 			local vel = tankbobs.w_getLinearVelocity(v.body)
-			local low, high = 0, (range * weapon.speed + range * vel.R) / (range * range)
-			while high - low > accuracy do
-				local time = (low + high) / 2
-				local projectileDistance = time * weapon.speed
-				dir = ((v.p + time * vel) - p1).t
-				tmp.R = weapon.speed
-				tmp.t = dir
-				local distanceToTarget = ((v.p + time * vel) - (p1 + time * tmp)).R
+			if weapon.meleeRange == 0 then
+				local low, high = 0, (range * weapon.speed + range * vel.R) / (range * range)
+				while high - low > accuracy do
+					local time = (low + high) / 2
+					local projectileDistance = time * weapon.speed
+					dir = ((v.p + time * vel) - p1).t
+					tmp.R = weapon.speed
+					tmp.t = dir
+					local distanceToTarget = ((v.p + time * vel) - (p1 + time * tmp)).R
 
-				if projectileDistance < distanceToTarget then
-					low = time
-				elseif projectileDistance > distanceToTarget then
-					high = time
-				else
-					break  -- unlikely to happen
+					if projectileDistance < distanceToTarget then
+						low = time
+					elseif projectileDistance > distanceToTarget then
+						high = time
+					else
+						break  -- unlikely to happen
+					end
 				end
+				time = (low + high) / 2
+			else
+				dir = (v.p - p1).t
 			end
-			local time = (low + high) / 2
 
 			-- test if anything intersects between the tank and this point
 			p2(v.p + time * vel)
@@ -473,9 +480,20 @@ function c_ai_shootEnemies(tank, enemy, angle, pos, time)
 	-- randomly accelerate or reverse
 	if c_ai_isMeleeWeapon(tank) then
 		if (enemy.p - tank.p).R >= c_const_get("ai_meleeChaseTargetMinDistance") then
+			tank.ai.chasingWithMeleeWeapon = true
+
 			c_ai_setTankStateForward(tank, 1)
+
+			local vel = tankbobs.w_getLinearVelocity(tank.body)
+			local minSpeed = c_world_getInstagib() and c_const_get("ai_meleeChaseTargetMinSpecialSpeedInstagib") or c_const_get("ai_meleeChaseTargetMinSpecialSpeed")
+			if vel.R < minSpeed then
+				c_ai_setTankStateSpecial(tank, 0)
+			else
+				c_ai_setTankStateSpecial(tank, 1)
+			end
 		else
 			c_ai_setTankStateForward(tank, 0)
+			c_ai_setTankStateSpecial(tank, 0)
 		end
 	else
 		if math.random(1, c_const_get("ai_accelerateNearEnemyFrequency") * tank.ai.skill) == 1 then
@@ -816,6 +834,22 @@ function c_ai_followObjective(tank, objective)
 				end
 			end
 
+			if not goal then
+				-- go to a random node
+
+				if math.random(1, 3) == 1 then
+					-- teleporter
+					if #c_tcm_current_map.teleporters >= 1 then
+						goal = c_tcm_current_map.teleporters[math.random(1, #c_tcm_current_map.teleporters)].p
+					end
+				else
+					-- way point
+					if #c_tcm_current_map.wayPoints >= 1 then
+						goal = c_tcm_current_map.wayPoints[math.random(1, #c_tcm_current_map.wayPoints)].p
+					end
+				end
+			end
+
 			if goal then
 				goal = goal[1]
 			end
@@ -934,6 +968,12 @@ function c_ai_avoidIfAlmostDead(tank)
 		return
 	end
 
+	if c_ai_isMeleeWeapon(tank) then
+		c_ai_setObjective(tank, AVOIDENEMYINDEX, nil)
+
+		return
+	end
+
 	local minHealth = c_world_getInstagib() and c_const_get("ai_minHealthInstagib") or c_const_get("ai_minHealth")
 	if tank.health < minHealth then
 		local s, _, p, _= c_ai_findClosestEnemyInSight(tank)
@@ -951,6 +991,12 @@ end
 function c_ai_avoidMeleeEnemies(tank, filter)
 	-- avoid enemies that have close range weapons in close range
 	if not tank.bot then
+		return
+	end
+
+	if c_ai_isMeleeWeapon(tank) then
+		c_ai_setObjective(tank, AVOIDENEMYMEELEINDEX, nil)
+
 		return
 	end
 
@@ -1078,6 +1124,8 @@ function c_ai_tank_step(tank)
 
 	local vel = tankbobs.w_getLinearVelocity(tank.body)
 
+	tank.ai.chasingWithMeleeWeapon = false
+
 	if c_world_gameType == DEATHMATCH then
 		-- shoot any nearby enemies
 		local enemy, angle, pos, time = c_ai_findClosestEnemyInSight(tank)
@@ -1103,13 +1151,15 @@ function c_ai_tank_step(tank)
 
 		c_ai_avoid(tank)
 
-		c_ai_followObjectives(tank, true)  -- bots will follow powerups even when an enemy is in sight
+		if not enemy or not c_ai_isMeleeWeapon(tank) then
+			c_ai_followObjectives(tank, true)
+		end
 
 		local p = c_ai_findClosestEnemy(tank)
 		if p then
 			p = p.p
 		end
-		c_ai_setObjective(tank, ENEMYINDEX, p, ALWAYSANDDESTROY, "enemy", false)
+		c_ai_setObjective(tank, AVOIDENEMYINDEX, p, ALWAYSANDDESTROY, "enemy", false)
 	elseif c_world_gameType == DOMINATION then
 		local function closeToControlPoint(ttank)
 			if not tank.ai.followingObjective then
@@ -1195,9 +1245,9 @@ function c_ai_tank_step(tank)
 	end
 
 	local maxSpeed = c_world_getInstagib() and c_const_get("ai_maxSpeedInstagib") or c_const_get("ai_maxSpeed")
-	if vel.R > maxSpeed and not tank.ai.followingObjective then
+	if vel.R > maxSpeed and not tank.ai.followingObjective and not tank.ai.chasingWithMeleeWeapon then
 		c_ai_setTankStateSpecial(tank, false)
 		c_ai_setTankStateForward(tank, -1)
 	end
-if not c_ai_isMeleeWeapon(c_world_getTanks()[1]) then c_weapon_pickUp(c_world_getTanks()[1], "saw") end
+if not c_ai_isMeleeWeapon(c_world_getTanks()[2]) then c_weapon_pickUp(c_world_getTanks()[2], "saw") end
 end
