@@ -383,6 +383,8 @@ function c_ai_tankWeaponStep(tank, enemyInSight)
 end
 
 function c_ai_shootEnemies(tank, enemy, angle, pos, time)
+	-- TODO: fire melee weapons such as saw intelligently
+
 	tank.ai.lastEnemySightedTime = tankbobs.t_getTicks()
 
 	if not tank.ai.shootingEnemies then
