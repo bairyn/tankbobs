@@ -670,7 +670,7 @@ function c_ai_followObjective(tank, objective)
 		end
 	elseif objective.followType >= ALWAYS then
 		if not objective.path or not objective.path[objective.nextNode] or not objective.nextPathUpdateTime or tankbobs.t_getTicks() >= objective.nextPathUpdateTime then
-			if tank.static then
+			if objective.static then
 				objective.nextPathUpdateTime = tankbobs.t_getTicks() + c_const_get("world_time") * c_config_get("game.timescale") * c_const_get("ai_staticPathUpdateTime")
 			else
 				objective.nextPathUpdateTime = tankbobs.t_getTicks() + c_const_get("world_time") * c_config_get("game.timescale") * c_const_get("ai_pathUpdateTime")
@@ -929,7 +929,7 @@ function c_ai_tank_step(tank)
 		end
 
 		-- look for closest control point
-		if not tank.ai.cc or (tank.ai.cc.m.team == "red") == (tank.red == true) or not tank.ai.cc.m.team then
+		if not tank.ai.cc or (tank.ai.cc.m.team == "red") == (tank.red == true) then
 			local smallestDistance
 			for _, v in pairs(c_tcm_current_map.controlPoints) do
 				if (v.m.team == "red") ~= (tank.red == true) or not v.m.team then
@@ -948,7 +948,11 @@ function c_ai_tank_step(tank)
 			end
 		end
 
-		c_ai_setObjective(tank, GENERICINDEX, tank.ai.cc.p, ALWAYSANDDESTROY, "controlPoint", true)  -- ALWAYSANDDESTROY to shoot nearby tanks (tanks on the same team don't destroy each other)
+		if tank.ai.cc then
+			c_ai_setObjective(tank, GENERICINDEX, tank.ai.cc.p, ALWAYSANDDESTROY, "controlPoint", true)  -- ALWAYSANDDESTROY to shoot nearby tanks (tanks on the same team don't destroy each other)
+		else
+			c_ai_setObjective(tank, GENERICINDEX, nil)
+		end
 	end
 
 	-- look for powerups
