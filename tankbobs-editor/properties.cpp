@@ -195,7 +195,7 @@ Properties::Properties(QWidget *parent)
 		mapauthors->setText(QString(tmap.authors.c_str()));
 		mapversions->setText(QString(tmap.version_s.c_str()));
 		mapversion->setText(QString::number(tmap.version));
-		staticCamera->setChecked(QString::number(tmap.staticCamera));
+		staticCamera->setChecked(tmap.staticCamera);
 
 		mapname->setEnabled(true);
 		mapnameLabel->setEnabled(true);
