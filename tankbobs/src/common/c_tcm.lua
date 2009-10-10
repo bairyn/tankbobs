@@ -447,7 +447,7 @@ function c_tcm_read_map(map)
 	r.authors = c_tcm_private_get(tankbobs.io_getStrL, i, false, 512)
 	r.version_string = c_tcm_private_get(tankbobs.io_getStrL, i, false, 64)
 	r.version = c_tcm_private_get(tankbobs.io_getInt, i)
-	if c_tcm_private_get(tankbobs.io_getChar, i) ~= 0x00 then
+	if c_tcm_private_get(tankbobs.io_getInt, i) ~= 0 then
 		r.staticCamera = true
 	else
 		r.staticCamera = false

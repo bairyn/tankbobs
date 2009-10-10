@@ -1092,7 +1092,7 @@ static int compile(const char *filename)
 	put_str(fout, maps[0].authors, 512);
 	put_str(fout, maps[0].version_s, 64);
 	put_cint(fout, maps[0].version);
-	put_cint(fout, maps[0].staticCamera);
+	put_cchar(fout, maps[0].staticCamera);
 
 	put_cint(fout, wc);
 	put_cint(fout, tc);
