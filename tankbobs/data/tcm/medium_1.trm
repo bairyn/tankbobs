@@ -49,3 +49,9 @@ controlPoint, 15, 94, 0
 controlPoint, 194, 15, 0
 flag, 12, 24, 0
 flag, 193, 93, 1
+wayPoint, 6, 33
+wayPoint, 30, 93
+wayPoint, 67, 8
+wayPoint, 153, 92
+wayPoint, 192, 59
+wayPoint, 119, 41
