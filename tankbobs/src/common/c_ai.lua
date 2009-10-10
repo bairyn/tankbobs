@@ -58,6 +58,8 @@ function c_ai_init()
 	c_const_set("ai_enemySightedTime", 3)
 	c_const_set("ai_meleeFireRange", 5.5)
 	c_const_set("ai_meleeRangeSkill", 0.5)
+	c_const_set("ai_enemyMeleeFireRange", 12)
+	c_const_set("ai_enemyMeleeRangeSkill", -0.6)
 	c_const_set("ai_meleeChaseTargetMinDistance", 16)
 	c_const_set("ai_minHealth", 20)
 	c_const_set("ai_minHealthInstagib", -1)
@@ -109,10 +111,11 @@ local ALWAYS           = 3
 local ALWAYSANDDESTROY = 4  -- shoot at nearby tanks (within ai_objectiveDistance units)
 
 -- objective indexes (objective with lower index will likely override other objectives)
-local GENERICINDEX    = 4
-local POWERUPINDEX    = 3
-local ENEMYINDEX      = 2
-local AVOIDENEMYINDEX = 1
+local GENERICINDEX         = 5
+local POWERUPINDEX         = 4
+local ENEMYINDEX           = 3
+local AVOIDENEMYINDEX      = 2
+local AVOIDENEMYMEELEINDEX = 1
 
 function c_ai_angleRange(a, b)
 	while math.abs(a - b) > math.pi + 0.001 do
@@ -381,6 +384,8 @@ function c_ai_isWeapon(tank, weaponString)
 end
 
 function c_ai_isMeleeWeapon(tank)
+	-- this should work on all tanks
+
 	if c_ai_isWeapon(tank, "saw") then
 		return true
 	end
@@ -451,7 +456,7 @@ function c_ai_shootEnemies(tank, enemy, angle, pos, time)
 	if math.random(1000 * c_ai_relativeTankSkill(tank), 1000 * (1 + c_const_get("ai_skipUpdateRandomReduce"))) / 1000 < c_const_get("ai_skipUpdateRandom") then
 		c_ai_setTankStateRotation(tank, tank.r - angle)
 		if c_ai_isMeleeWeapon(tank) then
-			if (enemy.p - tank.p).R < c_const_get("ai_meleeFireRange") + tank.skill * c_const_get("ai_meleeRangeSkill") then
+			if (enemy.p - tank.p).R < c_const_get("ai_meleeFireRange") + tank.ai.skill * c_const_get("ai_meleeRangeSkill") then
 				c_ai_setTankStateFire(tank, 1)
 			else
 				c_ai_setTankStateFire(tank, 0)
@@ -925,6 +930,10 @@ end
 
 local p1, p2 = tankbobs.m_vec2(), tankbobs.m_vec2()
 function c_ai_avoidIfAlmostDead(tank)
+	if not tank.bot then
+		return
+	end
+
 	local minHealth = c_world_getInstagib() and c_const_get("ai_minHealthInstagib") or c_const_get("ai_minHealth")
 	if tank.health < minHealth then
 		local s, _, p, _= c_ai_findClosestEnemyInSight(tank)
@@ -937,6 +946,45 @@ function c_ai_avoidIfAlmostDead(tank)
 	else
 		c_ai_setObjective(tank, AVOIDENEMYINDEX, nil)
 	end
+end
+
+function c_ai_avoidMeleeEnemies(tank, filter)
+	-- avoid enemies that have close range weapons in close range
+	if not tank.bot then
+		return
+	end
+
+	local range = c_const_get("ai_enemyMeleeFireRange") + tank.ai.skill * c_const_get("ai_enemyMeleeRangeSkill")
+
+	local t = {}
+	for _, v in pairs(c_world_getTanks()) do
+		if v.exists and tank ~= v and (not c_world_isTeamGameType() or tank.red ~= v.red) and (not filter or filter(v)) then
+			if c_ai_isMeleeWeapon(v) then
+				local distance = (v.p - tank.p).R
+
+				if distance <= range then
+					table.insert(t, {v, distance})
+				end
+			end
+		end
+	end
+
+	table.sort(t, function (a, b) return a[2] < b[2] end)
+
+	if t[1] then
+		c_ai_setObjective(tank, AVOIDENEMYMEELEINDEX, t[1].p, AVOIDINSIGHT, "avoid enemy melee", false)  -- avoid enemies with mêlée weapons
+	else
+		c_ai_setObjective(tank, AVOIDENEMYMEELEINDEX, nil)
+	end
+end
+
+function c_ai_avoid(tank)
+	if not tank.bot then
+		return
+	end
+
+	c_ai_avoidMeleeEnemies(tank)
+	c_ai_avoidIfAlmostDead(tank)
 end
 
 local p1, p2 = tankbobs.m_vec2(), tankbobs.m_vec2()
@@ -1053,7 +1101,7 @@ function c_ai_tank_step(tank)
 			c_ai_tankWeaponStep(tank, false)
 		end
 
-		c_ai_avoidIfAlmostDead(tank)
+		c_ai_avoid(tank)
 
 		c_ai_followObjectives(tank, true)  -- bots will follow powerups even when an enemy is in sight
 
@@ -1107,7 +1155,7 @@ function c_ai_tank_step(tank)
 			c_ai_followObjectives(tank, false)
 		end
 
-		c_ai_avoidIfAlmostDead(tank)
+		c_ai_avoid(tank)
 
 		-- look for closest control point
 		if not tank.ai.cc or (tank.ai.cc.m.team == "red") == (tank.red == true) then
