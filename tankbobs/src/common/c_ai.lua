@@ -472,7 +472,7 @@ function c_ai_shootEnemies(tank, enemy, angle, pos, time)
 
 	-- randomly accelerate or reverse
 	if c_ai_isMeleeWeapon(tank) then
-		if (enemy.p - tank.p) >= c_const_get("ai_meleeChaseTargetMinDistance") then
+		if (enemy.p - tank.p).R >= c_const_get("ai_meleeChaseTargetMinDistance") then
 			c_ai_setTankStateForward(tank, 1)
 		else
 			c_ai_setTankStateForward(tank, 0)
@@ -972,6 +972,8 @@ function c_ai_avoidMeleeEnemies(tank, filter)
 	table.sort(t, function (a, b) return a[2] < b[2] end)
 
 	if t[1] then
+		local p = tankbobs.m_vec2(t[1].p)
+		p:sub(0.05 * (p - tank.p))  -- make objective slightly closer to tank so that the closest objective will be avoided properly
 		c_ai_setObjective(tank, AVOIDENEMYMEELEINDEX, t[1].p, AVOIDINSIGHT, "avoid enemy melee", false)  -- avoid enemies with mêlée weapons
 	else
 		c_ai_setObjective(tank, AVOIDENEMYMEELEINDEX, nil)
@@ -1075,8 +1077,6 @@ function c_ai_tank_step(tank)
 	tank.ai.nextStepTime = t + common_FTM(c_const_get("ai_fps")) + (1 - c_ai_relativeTankSkill(tank)) * common_FTM(c_const_get("ai_fpsRelativeToSkill"))
 
 	local vel = tankbobs.w_getLinearVelocity(tank.body)
-
-	-- TODO: avoid nearest tank if health is low
 
 	if c_world_gameType == DEATHMATCH then
 		-- shoot any nearby enemies
@@ -1199,4 +1199,5 @@ function c_ai_tank_step(tank)
 		c_ai_setTankStateSpecial(tank, false)
 		c_ai_setTankStateForward(tank, -1)
 	end
+if not c_ai_isMeleeWeapon(c_world_getTanks()[1]) then c_weapon_pickUp(c_world_getTanks()[1], "saw") end
 end
