@@ -113,9 +113,9 @@ local ALWAYS           = 3
 local ALWAYSANDDESTROY = 4  -- shoot at nearby tanks (within ai_objectiveDistance units)
 
 -- objective indexes (objective with lower index will likely override other objectives)
-local GENERICINDEX         = 5
-local POWERUPINDEX         = 4
-local ENEMYINDEX           = 3
+local ENEMYINDEX           = 5
+local GENERICINDEX         = 4
+local POWERUPINDEX         = 3
 local AVOIDENEMYINDEX      = 2
 local AVOIDENEMYMEELEINDEX = 1
 
