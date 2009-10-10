@@ -56,6 +56,9 @@ function c_ai_init()
 	c_const_set("ai_reloadEmptyWeaponFrequency", 24)  -- lower is more likely; chance of 1 / x for bots with skill level of 1
 	c_const_set("ai_shotgunMinAmmo", 2)
 	c_const_set("ai_enemySightedTime", 3)
+	c_const_set("ai_meleeFireRange", 5.5)
+	c_const_set("ai_meleeRangeSkill", 0.5)
+	c_const_set("ai_meleeChaseTargetMinDistance", 16)
 
 	c_const_set("ai_followRandom", (math.pi * 2) / 64)  -- +- x radians when least skilled bot is following an objective
 	c_const_set("ai_stopCloseSpeed", 2)
@@ -92,9 +95,10 @@ local INSIGHT          = 2
 local ALWAYS           = 3
 local ALWAYSANDDESTROY = 4  -- shoot at nearby tanks (within ai_objectiveDistance units)
 
--- objective indexes (objective with higher index will override other objectives)
-local GENERICINDEX = 1
+-- objective indexes (objective with lower index will override other objectives)
+local GENERICINDEX = 3
 local POWERUPINDEX = 2
+local ENEMYINDEX   = 1
 
 function c_ai_angleRange(a, b)
 	while math.abs(a - b) > math.pi + 0.001 do
@@ -253,9 +257,27 @@ function c_ai_relativeTankSkill(tank)
 	return (m - s) / (l - s)
 end
 
+function c_ai_findClosestEnemy(tank, filter)
+	local enemies = {}
+
+	for _, v in pairs(c_world_getTanks()) do
+		if v.exists and tank ~= v and (not c_world_isTeamGameType() or tank.red ~= v.red) and (not filter or filter(v)) then
+			table.insert(enemies, {v, (v.p - tank.p).R})
+		end
+	end
+
+	table.sort(enemies, function (a, b) return a[2] < b[2] end)
+
+	if enemies[1] then
+		return enemies[1][1]
+	else
+		return nil
+	end
+end
+
 local p1, p2, tmp = tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2()
 function c_ai_closestEnemyInSite(tank, filter)
-	-- returns the closest tank that can be shot at, the angle at which the tank will need to be so that a bullet will shoot the tank, the position of the collision, and the time it takes for the projectile to reach the collision point, if its velocity is constant
+	-- returns the closest tank that can be shot at, the angle at which the tank will need to be so that a bullet will shoot the enemy, the position of the future collision, and the time it takes for the projectile to reach the collision point, if its velocity is constant
 	local tanks = {}
 	local range = c_const_get("ai_botRange")
 	local accuracy = 2 * c_const_get("ai_botAccuracy") * tank.ai.skill
@@ -383,8 +405,6 @@ function c_ai_tankWeaponStep(tank, enemyInSight)
 end
 
 function c_ai_shootEnemies(tank, enemy, angle, pos, time)
-	-- TODO: fire melee weapons such as saw intelligently
-
 	tank.ai.lastEnemySightedTime = tankbobs.t_getTicks()
 
 	if not tank.ai.shootingEnemies then
@@ -415,27 +435,38 @@ function c_ai_shootEnemies(tank, enemy, angle, pos, time)
 	tank.r, angle = c_ai_angleRange(tank.r, angle)
 
 	if math.random(1000 * c_ai_relativeTankSkill(tank), 1000 * (1 + c_const_get("ai_skipUpdateRandomReduce"))) / 1000 < c_const_get("ai_skipUpdateRandom") then
-		-- randomly skip updates to rotation depending on skill level
 		c_ai_setTankStateRotation(tank, tank.r - angle)
-		if tankbobs.t_getTicks() > tank.ai.noFireTime then
-			c_ai_setTankStateFire(tank, math.abs(angle - tank.r) <= tank.ai.skill * c_const_get("ai_shootAngle"))
-		else
-			c_ai_setTankStateFire(tank, false)
-		end
-
-		-- randomly accelerate or reverse
 		if c_ai_isMeleeWeapon(tank) then
+			if (enemy.p - tank.p).R < c_const_get("ai_meleeFireRange") + tank.skill * c_const_get("ai_meleeRangeSkill") then
+				c_ai_setTankStateFire(tank, 1)
+			else
+				c_ai_setTankStateFire(tank, 0)
+			end
+		else
+			if tankbobs.t_getTicks() > tank.ai.noFireTime then
+				c_ai_setTankStateFire(tank, math.abs(angle - tank.r) <= tank.ai.skill * c_const_get("ai_shootAngle"))
+			else
+				c_ai_setTankStateFire(tank, false)
+			end
+		end
+	end
+
+	-- randomly accelerate or reverse
+	if c_ai_isMeleeWeapon(tank) then
+		if (enemy.p - tank.p) >= c_const_get("ai_meleeChaseTargetMinDistance") then
 			c_ai_setTankStateForward(tank, 1)
 		else
-			if math.random(1, c_const_get("ai_accelerateNearEnemyFrequency") * tank.ai.skill) == 1 then
-				local s = c_ai_getTankStateForward(tank)
-				if s > 0 then
-					c_ai_setTankStateForward(tank, math.random(1, c_const_get("ai_reverseChance")) == 1 and -2 or 0)
-				elseif s < 0 then
-					c_ai_setTankStateForward(tank, math.random(1, c_const_get("ai_reverseChance")) == 1 and 0 or 1)
-				else
-					c_ai_setTankStateForward(tank, math.random(1, c_const_get("ai_reverseChance")) == 1 and -2 or 1)
-				end
+			c_ai_setTankStateForward(tank, 0)
+		end
+	else
+		if math.random(1, c_const_get("ai_accelerateNearEnemyFrequency") * tank.ai.skill) == 1 then
+			local s = c_ai_getTankStateForward(tank)
+			if s > 0 then
+				c_ai_setTankStateForward(tank, math.random(1, c_const_get("ai_reverseChance")) == 1 and -2 or 0)
+		elseif s < 0 then
+				c_ai_setTankStateForward(tank, math.random(1, c_const_get("ai_reverseChance")) == 1 and 0 or 1)
+			else
+				c_ai_setTankStateForward(tank, math.random(1, c_const_get("ai_reverseChance")) == 1 and -2 or 1)
 			end
 		end
 	end
@@ -737,6 +768,9 @@ function c_ai_followObjectives(tank)
 	tank.ai.followingObjective = false
 	for _, v in ipairs(tank.ai.objectives) do
 		c_ai_followObjective(tank, v)
+		if tank.ai.followingObjective then
+			break
+		end
 	end
 end
 
@@ -887,6 +921,12 @@ function c_ai_tank_step(tank)
 		end
 
 		c_ai_followObjectives(tank)  -- bots will follow powerups even when an enemy is in sight
+
+		local p = c_ai_findClosestEnemy(tank)
+		if p then
+			p = p.p
+		end
+		c_ai_setObjective(tank, ENEMYINDEX, p, ALWAYSANDDESTROY, "enemy", false)
 	elseif c_world_gameType == DOMINATION then
 		local function closeToControlPoint(ttank)
 			if not tank.ai.followingObjective then
@@ -957,6 +997,8 @@ function c_ai_tank_step(tank)
 		else
 			c_ai_setObjective(tank, GENERICINDEX, nil)
 		end
+
+		-- don't set enemies as objectives in domination since it doesn't always benefit the tank
 	end
 
 	-- look for powerups
