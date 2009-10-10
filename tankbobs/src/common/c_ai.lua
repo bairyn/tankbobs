@@ -859,6 +859,8 @@ function c_ai_tank_step(tank)
 
 	local vel = tankbobs.w_getLinearVelocity(tank.body)
 
+	-- TODO: avoid nearest tank if health is low
+
 	if c_world_gameType == DEATHMATCH then
 		-- shoot any nearby enemies
 		local enemy, angle, pos, time = c_ai_closestEnemyInSite(tank)
