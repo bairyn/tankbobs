@@ -1249,5 +1249,4 @@ function c_ai_tank_step(tank)
 		c_ai_setTankStateSpecial(tank, false)
 		c_ai_setTankStateForward(tank, -1)
 	end
-if not c_ai_isMeleeWeapon(c_world_getTanks()[2]) then c_weapon_pickUp(c_world_getTanks()[2], "saw") end
 end
