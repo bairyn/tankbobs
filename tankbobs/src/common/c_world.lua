@@ -808,6 +808,8 @@ function c_world_pointIntersects(p)
 	local function t()
 		if c_world_pointInsideHull(p, hull) then
 			return true
+		else
+			return false
 		end
 	end
 
@@ -816,7 +818,9 @@ function c_world_pointIntersects(p)
 		if not v.detail then
 			hull = v.m.pos
 
-			t()
+			if t() then
+				return true
+			end
 		end
 	end
 
@@ -825,7 +829,9 @@ function c_world_pointIntersects(p)
 		if v.exists then
 			hull = t_t_clone(c_world_tankHull(v))
 
-			t()
+			if t() then
+				return true
+			end
 		end
 	end
 
@@ -834,7 +840,9 @@ function c_world_pointIntersects(p)
 		if not v.collided then
 			hull = c_world_projectileHull(v)
 
-			t()
+			if t() then
+				return true
+			end
 		end
 	end
 
@@ -843,7 +851,9 @@ function c_world_pointIntersects(p)
 		if not v.collided then
 			hull = c_world_powerupHull(v)
 
-			t()
+			if t() then
+				return true
+			end
 		end
 	end
 
