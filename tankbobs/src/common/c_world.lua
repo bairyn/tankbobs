@@ -791,7 +791,7 @@ function c_world_pointInsideHull(p, hull)
 	local j = #hull
 
 	for i = 1, #hull do
-		if (((hull[i].y <= p.y) && (p.y < hull[j].y)) || ((hull[j].y <= p.y) && (p.y < hull[i].y))) && (p.x < (hull[j].x - hull[i].x) * (p.y - hull[i].y) / (hull[j].y - hull[i].y) + hull[i].x) then
+		if ((hull[i].y <= p.y and p.y < hull[j].y) or (hull[j].y <= p.y and p.y < hull[i].y)) and (p.x < (hull[j].x - hull[i].x) * (p.y - hull[i].y) / (hull[j].y - hull[i].y) + hull[i].x) then
 			c = not c
 		end
 

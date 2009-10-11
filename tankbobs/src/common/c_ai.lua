@@ -1137,7 +1137,7 @@ function c_ai_tankRecentlyAttackedYourFlagCarrier(tank, enemy)
 	for _, v in pairs(c_tcm_current_map.flags) do
 		if v.red ~= tank.red then
 			if not v.m.stolen then
-				retutrn false
+				return false
 			end
 
 			local friend = c_world_getTanks()[v.m.stolen]
@@ -1159,8 +1159,6 @@ function c_ai_tankHasYourFlag(tank, enemy)
 	end
 
 	return false
-
-	return enemy.red == tank.red and 
 end
 
 function c_ai_yourTeamOffensive(tank)
