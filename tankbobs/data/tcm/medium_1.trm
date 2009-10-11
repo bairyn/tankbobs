@@ -16,6 +16,9 @@ wall, 1, 15, 3, 15, 12, 18, 12, 18, 3, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1
 wall, 1, 18, 3, 18, 6, 21, 6, 21, 3, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 0
 wall, 1, 9, 91, 9, 96, 3, 97, 3, 91, 0, 1, 0, 0, 1, 0, 1, 1, global/teleporter.png, 6, , 0, 1, 1
 wall, 1, 191, 9, 191, 3, 197, 3, 197, 9, 0, 1, 0, 0, 1, 0, 1, 1, global/teleporter.png, 6, , 0, 1, 1
+wall, 1, 22, 3, 22, 11, 26, 9, 26, 3, 0, 1, 0, 0, 1, 0, 1, 1, , 0, remove, 1, 0, 1
+wall, 1, 25, 9, 21, 15, 11, 21, 12, 16, 0, 1, 0, 0, 1, 0, 1, 1, , 0, remove, 1, 0, 1
+wall, 1, 9, 19, 9, 22, 2, 22, 2, 19, 0, 1, 0, 0, 1, 0, 1, 1, , 0, remove, 1, 0, 1
 teleporter, ul, br, 6, 94, 1
 teleporter, br, ul, 194, 6, 1
 playerSpawnPoint, 95, 54
@@ -42,6 +45,8 @@ powerupSpawnPoint, 20, 59, health, 0, 1800, 0, 0
 powerupSpawnPoint, 34, 76, health, 0, 1800, 0, 0
 path, down, up, 96, 83, 1, 8
 path, up, down, 97, 6, 1, 8
+path, remove, remove_destination, -10, 57, 1, 0
+path, remove_destination, , -318, 335, 0, 0
 controlPoint, 6, 7, 0
 controlPoint, 100, 54, 0
 controlPoint, 15, 6, 0
