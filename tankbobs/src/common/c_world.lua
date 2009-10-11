@@ -387,6 +387,7 @@ c_world_tank =
 	red = false,
 	color = {r = 0, g = 0, b = 0},
 	tagged = false,
+	lastAttackers = {},
 
 	cd = {},  -- data cleared on death
 
@@ -785,10 +786,68 @@ function c_world_intersection(d, p1, p2, v1, v2)
 	return tankbobs.m_polygon(p1h, p2h)
 end
 
--- wrapper for c_world_findClosestIntersection with a small line
-local c = tankbobs.m_vec2(1, 1)
+function c_world_pointInsideHull(p, hull)
+	local c = false
+	local j = #hull
+
+	for i = 1, #hull do
+		if (((hull[i].y <= p.y) && (p.y < hull[j].y)) || ((hull[j].y <= p.y) && (p.y < hull[i].y))) && (p.x < (hull[j].x - hull[i].x) * (p.y - hull[i].y) / (hull[j].y - hull[i].y) + hull[i].x) then
+			c = not c
+		end
+
+		j = i
+		i = i + 1
+	end
+
+	return c
+end
+
 function c_world_pointIntersects(p)
-	return c_world_findClosestIntersection(p, p + c)
+	local hull
+
+	local function t()
+		if c_world_pointIntersects(p, hull) then
+			return true
+		end
+	end
+
+	-- walls
+	for _, v in pairs(c_tcm_current_map.walls) do
+		if not v.detail then
+			hull = v.m.pos
+
+			t()
+		end
+	end
+
+	-- tanks
+	for _, v in pairs(c_world_tanks) do
+		if v.exists then
+			hull = t_t_clone(c_world_tankHull(v))
+
+			t()
+		end
+	end
+
+	-- projectiles
+	for _, v in pairs(c_weapon_getProjectiles()) do
+		if not v.collided then
+			hull = c_world_projectileHull(v)
+
+			t()
+		end
+	end
+
+	-- powerups
+	for _, v in pairs(c_world_powerups) do
+		if not v.collided then
+			hull = c_world_powerupHull(v)
+
+			t()
+		end
+	end
+
+	return false
 end
 
 local c = nil
@@ -1790,7 +1849,6 @@ function c_world_teleporter_step(d, teleporter)
 					end
 					-- test for rest of world
 					if c_world_pointIntersects(teleporter.p) then
-						-- FIXME: this never happens (physical walls should block teleporters)
 						return
 					end
 
