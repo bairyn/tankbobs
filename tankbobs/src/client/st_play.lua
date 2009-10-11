@@ -409,7 +409,7 @@ local function play_testEnd()
 					c_world_setPaused(true)
 
 					if not endOfGame then
-						local name = tostring(c_config_get("game.player" .. tostring(k) .. ".name"))
+						local name = tostring(v.name)
 						gui_addLabel(tankbobs.m_vec2(35, 50), name .. " wins!", nil, 1.1, v.color.r, v.color.g, v.color.b, 0.75, v.color.r, v.color.g, v.color.b, 0.8)
 
 						tankbobs.a_playSound(c_const_get("win_sound"))
