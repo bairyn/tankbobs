@@ -1,4 +1,4 @@
---[[
+--[[0
 Copyright (C) 2008-2009 Byron James Johnson
 
 This file is part of Tankbobs.
@@ -510,6 +510,10 @@ function c_ai_shootEnemies(tank, enemy, angle, pos, time)
 end
 
 function c_ai_tankSpawn(tank)
+	if not tank.bot then
+		return
+	end
+
 	local noFireTime = c_world_getInstagib() and c_const_get("ai_noFireSpawnTimeInstagib") or c_const_get("ai_noFireSpawnTime")
 	tank.ai.noFireTime = tankbobs.t_getTicks() + c_config_get("game.timescale") * c_const_get("world_time") * noFireTime
 end
