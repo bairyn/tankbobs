@@ -1397,6 +1397,7 @@ function c_world_wall_step(d, wall)
 						prevPath = paths[wall.m.ppid]
 						wall.m.startpos(c_world_wallShape(wall.m.pos)[1])
 						wall.m.pid = path.t
+						path = paths[wall.m.pid + 1]
 						wall.m.ppos = 0
 
 						tankbobs.w_setPosition(wall.m.body, wall.m.startpos + path.p - prevPath.p)
