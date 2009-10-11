@@ -711,8 +711,11 @@ function c_ai_followObjective(tank, objective)
 		return
 	end
 
+	p2(objective.p)
+	p2:sub(tank.p)
+
 	p1.R = 3
-	p1.t = tank.r
+	p1.t = p2.t
 	p1:add(tank.p)
 
 	p2(objective.p)
@@ -1405,7 +1408,7 @@ function c_ai_tank_step(tank)
 		-- don't set enemies as objectives in domination since it doesn't always benefit the tank
 	elseif c_world_getGameType() == CAPTURETHEFLAG then
 		local function filter(x)
-			if c_ai_yourTeamOffensive(tank) and not x.m.flag then
+			if c_ai_yourTeamOffensive(tank) and not tank.m.flag then
 				return true
 			end
 
@@ -1482,19 +1485,15 @@ function c_ai_tank_step(tank)
 				end
 			else
 				for _, v in pairs(c_tcm_current_map.flags) do
-					if v.red == tank.red then
-						for _, v in pairs(c_tcm_current_map.flags) do
-							if v.red ~= tank.red then
-								if v.m.stolen then
-									-- your team has stolen enemy flag and your own flag is safe, so go to teammate to protect him
-									c_ai_setObjective(tank, GENERICINDEX, tankbobs.m_vec2(c_world_getTanks()[v.m.stolen].p), NOTINSIGHT, "flagBase")
-								elseif v.m.dropped then
-									c_ai_setObjective(tank, GENERICINDEX, tankbobs.m_vec2(v.m.pos), ALWAYSANDDESTROY, "enemyFlagWhichDropped")
-								else
-									-- go to enemy flag, which is safe
-									c_ai_setObjective(tank, GENERICINDEX, tankbobs.m_vec2(v.p), ALWAYSANDDESTROY, "enemyFlag")
-								end
-							end
+					if v.red ~= tank.red then
+						if v.m.stolen then
+							-- your team has stolen enemy flag and your own flag is safe, so go to teammate to protect him
+							c_ai_setObjective(tank, GENERICINDEX, tankbobs.m_vec2(c_world_getTanks()[v.m.stolen].p), NOTINSIGHT, "flagCarrier")
+						elseif v.m.dropped then
+							c_ai_setObjective(tank, GENERICINDEX, tankbobs.m_vec2(v.m.pos), ALWAYSANDDESTROY, "enemyFlagWhichDropped")
+						else
+							-- go to enemy flag, which is safe
+							c_ai_setObjective(tank, GENERICINDEX, tankbobs.m_vec2(v.p), ALWAYSANDDESTROY, "enemyFlag")
 						end
 					end
 				end
