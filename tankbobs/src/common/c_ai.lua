@@ -23,6 +23,8 @@ c_ai.lua
 Bot AI
 --]]
 
+-- TODO: implement NOTINSIGHT follow type, and treat dropped flags as stolen flags and go to that position
+
 function c_ai_init()
 	c_const_set("ai_fps", 175)
 	c_const_set("ai_fpsRelativeToSkill", 100)
@@ -65,6 +67,9 @@ function c_ai_init()
 	c_const_set("ai_meleeChaseTargetMinSpecialSpeedInstagib", 44)
 	c_const_set("ai_minHealth", 20)
 	c_const_set("ai_minHealthInstagib", -1)
+	c_const_set("ai_taggedAvoidMaxDistance", 50)
+	c_const_set("ai_captureFlagMinHealth", 25)
+	c_const_set("ai_flagRange", 50)
 
 	c_const_set("ai_followRandom", (math.pi * 2) / 64)  -- +- x radians when least skilled bot is following an objective
 	c_const_set("ai_stopCloseSpeed", 2)
@@ -107,10 +112,11 @@ local names =
 
 -- follow type
 local AVOID            = 0
-local AVOIDINSIGHT     = 0
-local INSIGHT          = 2
-local ALWAYS           = 3
-local ALWAYSANDDESTROY = 4  -- shoot at nearby tanks (within ai_objectiveDistance units)
+local AVOIDINSIGHT     = 1
+local NOTINSIGHT       = 2
+local INSIGHT          = 3
+local ALWAYS           = 4
+local ALWAYSANDDESTROY = 5  -- shoot at nearby tanks (within ai_objectiveDistance units)
 
 -- objective indexes (objective with lower index will likely override other objectives)
 local ENEMYINDEX           = 5
@@ -186,8 +192,6 @@ function c_ai_initTank(tank, ai)
 	tank.ai.nextStepTime = tankbobs.t_getTicks()
 
 	tank.ai.objectives = {}
-
-	tank.ai.lastAttackers = {}
 
 	tank.ai.lastEnemySightedTime = tankbobs.t_getTicks() - c_const_get("ai_enemySightedTime") - 1
 
@@ -748,7 +752,11 @@ function c_ai_followObjective(tank, objective)
 				c_ai_shootEnemies(tank, enemy, angle, pos, time)
 			end
 		end
-	elseif objective.followType >= ALWAYS then
+	elseif objective.followType >= ALWAYS or objective.followType == NOTINSIGHT then
+		if objective.followType == NOTINSIGHT and inSight then
+			return
+		end
+
 		if not objective.path or not objective.path[objective.nextNode] or not objective.nextPathUpdateTime or tankbobs.t_getTicks() >= objective.nextPathUpdateTime then
 			if objective.static then
 				objective.nextPathUpdateTime = tankbobs.t_getTicks() + c_const_get("world_time") * c_config_get("game.timescale") * c_const_get("ai_staticPathUpdateTime")
@@ -826,7 +834,7 @@ function c_ai_followObjective(tank, objective)
 			local goal
 
 			p2(tank.p)
-			p2:add(2 * (p2 - objective.p))
+			p2:add(1 * (p2 - objective.p))
 
 			goal = c_ai_findClosestWayPoint(p2)
 
@@ -948,13 +956,11 @@ function c_ai_resetObjectivePathTimer(tank, index)
 end
 
 function c_ai_hasRecentlyAttacked(tank, attacker)
+	-- this should work for human-controlled tanks too
+
 	local t = tankbobs.t_getTicks()
 
-	if not tank.bot then
-		return
-	end
-
-	for _, v in pairs(tank.ai.lastAttackers) do
+	for _, v in pairs(tank.lastAttackers) do
 		if v[1] == attacker and t < v[2] then
 			return true
 		end
@@ -963,12 +969,22 @@ function c_ai_hasRecentlyAttacked(tank, attacker)
 	return false
 end
 
-function c_ai_tankAttacked(tank, attacker, damage)
-	if not tank.bot then
-		return
+function c_ai_findTaggedTank()
+	for _, v in pairs(c_world_getTanks()) do
+		if v.exists then
+			if v.tagged then
+				return v
+			end
+		end
 	end
 
-	table.insert(tank.ai.lastAttackers, {attacker, tankbobs.t_getTicks() + c_config_get("game.timescale") * c_const_get("world_time") *  c_const_get("ai_recentAttackExpireTime")})
+	return nil
+end
+
+function c_ai_tankAttacked(tank, attacker, damage)
+	-- this should work for human players too
+
+	table.insert(tank.lastAttackers, {attacker, tankbobs.t_getTicks() + c_config_get("game.timescale") * c_const_get("world_time") *  c_const_get("ai_recentAttackExpireTime")})
 end
 
 local p1, p2 = tankbobs.m_vec2(), tankbobs.m_vec2()
@@ -1113,6 +1129,57 @@ function c_ai_cruise(tank)
 	end
 end
 
+function c_ai_tankRecentlyAttackedYourFlagCarrier(tank, enemy)
+	if c_world_getGameType() ~= CAPTURETHEFLAG then
+		return false
+	end
+
+	for _, v in pairs(c_tcm_current_map.flags) do
+		if v.red ~= tank.red then
+			if not v.m.stolen then
+				retutrn false
+			end
+
+			local friend = c_world_getTanks()[v.m.stolen]
+
+			return c_ai_hasRecentlyAttacked(v, enemy)
+		end
+	end
+
+	return false
+end
+
+function c_ai_tankHasYourFlag(tank, enemy)
+	for _, v in pairs(c_tcm_current_map.flags) do
+		if v.red == tank.red then
+			if v.m.stolen and c_world_getTanks()[v.m.stolen] == enemy then
+				return true
+			end
+		end
+	end
+
+	return false
+
+	return enemy.red == tank.red and 
+end
+
+function c_ai_yourTeamOffensive(tank)
+	-- returns true when your flag is safe and the enemy flag is stolen (and neither is dropped)
+	for _, v in pairs(c_tcm_current_map.flags) do
+		if v.red == tank.red then
+			if v.m.stolen or v.m.dropped then
+				return false
+			end
+		elseif v.red ~= tank.red then
+			if not v.m.stolen or v.m.dropped then
+				return true
+			end
+		end
+	end
+
+	return true
+end
+
 local p1, p2 = tankbobs.m_vec2(), tankbobs.m_vec2()
 function c_ai_tank_step(tank)
 	local t = tankbobs.t_getTicks()
@@ -1135,7 +1202,7 @@ function c_ai_tank_step(tank)
 
 	tank.ai.chasingWithMeleeWeapon = false
 
-	if c_world_gameType == DEATHMATCH then
+	if c_world_getGameType() == DEATHMATCH then
 		-- shoot any nearby enemies
 		local enemy, angle, pos, time = c_ai_findClosestEnemyInSight(tank)
 		if enemy and not c_ai_isFollowingObjective(tank, POWERUPINDEX) then
@@ -1169,7 +1236,53 @@ function c_ai_tank_step(tank)
 			p = p.p
 		end
 		c_ai_setObjective(tank, AVOIDENEMYINDEX, p, ALWAYSANDDESTROY, "enemy", false)
-	elseif c_world_gameType == DOMINATION then
+	elseif c_world_getGameType() == CHASE then
+		local function filter(x)
+			if tank.tagged then
+				return false  -- shooting enemy tanks normally doesn't help tagged tanks much
+			end
+
+			if not x.tagged and not c_ai_hasRecentlyAttacked(tank, x) then
+				return false
+			end
+
+			if x.tagged and (x.p - tank.p).R <= c_const_get("ai_taggedAvoidMaxDistance") then
+				return false
+			end
+
+			return true
+		end
+
+		local enemy, angle, pos, time = c_ai_findClosestEnemyInSight(tank, filter)
+		if enemy and not c_ai_isFollowingObjective(tank, POWERUPINDEX) then
+			c_ai_shootEnemies(tank, enemy, angle, pos, time)
+
+			c_ai_tankWeaponStep(tank, true)
+		else
+			if tank.ai.shootingEnemies then
+				tank.ai.shootingEnemies = false
+
+				-- tank has stopped shooting enemies
+				c_ai_setTankStateFire(tank, 0)
+				c_ai_setTankStateRotation(tank, 0)
+				c_ai_setTankStateForward(tank, 0)
+				tank.ai.turning = nil
+			end
+
+			c_ai_cruise(tank)
+
+			c_ai_tankWeaponStep(tank, false)
+		end
+
+		c_ai_avoid(tank)
+
+		local x = c_ai_findTaggedTank()
+		if x and (x.p - tank.p).R <= c_const_get("ai_taggedAvoidMaxDistance") then
+			c_ai_setObjective(tank, GENERICINDEX, x.p, AVOID, "tagged", false)
+		end
+
+		c_ai_followObjectives(tank, true)
+	elseif c_world_getGameType() == DOMINATION then
 		local function closeToControlPoint(ttank)
 			if not tank.ai.cc then
 				return true
@@ -1243,6 +1356,101 @@ function c_ai_tank_step(tank)
 		end
 
 		-- don't set enemies as objectives in domination since it doesn't always benefit the tank
+	elseif c_world_getGameType() == CAPTURETHEFLAG then
+		local function filter(x)
+			if c_ai_yourTeamOffensive(tank) then
+				return true
+			end
+
+			if c_ai_tankRecentlyAttackedYourFlagCarrier(tank, x) or c_ai_tankHasYourFlag(tank, x) then
+				return true
+			end
+
+			if c_ai_hasRecentlyAttacked(tank, x) then
+				if not tank.m.flag or tank.health >= c_const_get("ai_captureFlagMinHealth") then
+					return true
+				end
+			end
+
+			return false
+		end
+
+		local enemy, angle, pos, time = c_ai_findClosestEnemyInSight(tank, filter)
+		if enemy and not c_ai_isFollowingObjective(tank, POWERUPINDEX) then
+			c_ai_shootEnemies(tank, enemy, angle, pos, time)
+
+			c_ai_tankWeaponStep(tank, true)
+		else
+			if tank.ai.shootingEnemies then
+				tank.ai.shootingEnemies = false
+
+				-- tank has stopped shooting enemies
+				c_ai_setTankStateFire(tank, 0)
+				c_ai_setTankStateRotation(tank, 0)
+				c_ai_setTankStateForward(tank, 0)
+				tank.ai.turning = nil
+			end
+
+			c_ai_cruise(tank)
+
+			c_ai_tankWeaponStep(tank, false)
+		end
+
+		c_ai_avoid(tank)
+
+		local yourFlagStolen = false  -- own flag stolen
+
+		for _, v in pairs(c_tcm_current_map.flags) do
+			if v.red == tank.red then
+				if v.m.stolen then
+					yourFlagStolen = tankbobs.m_vec2(c_world_getTanks()[v.m.stolen].p)
+				elseif v.m.dropped then
+					yourFlagStolen = tankbobs.m_vec2(v.m.pos)
+				end
+			elseif v.red ~= tank.red then
+				-- set yourFlagStolen to 0 if the enemy flag isn't stolen and you're close to it, if you're close to the dropped flag
+				if not v.m.stolen and not v.m.dropped and (v.p - tank.p).R <= c_const_get("ai_flagRange") then
+					yourFlagStolen = false
+
+					break  -- don't let yourFlagStolen be set
+				elseif not v.m.stolen and v.m.dropped and (v.m.pos - tank.p).R <= c_const_get("ai_flagRange") then
+					yourFlagStolen = false
+
+					break  -- don't let yourFlagStolen be set
+				end
+			end
+		end
+
+		if yourFlagStolen then
+			-- hunt down flag carrier
+			c_ai_setObjective(tank, GENERICINDEX, yourFlagStolen, ALWAYSANDDESTROY, "enemyFlagCarrier")
+		else
+			if tank.m.flag then
+				for _, v in pairs(c_tcm_current_map.flags) do
+					if v.red == tank.red then
+						c_ai_setObjective(tank, GENERICINDEX, tankbobs.m_vec2(v.p), ALWAYS, "flagBase")
+					end
+				end
+			else
+				for _, v in pairs(c_tcm_current_map.flags) do
+					if v.red == tank.red then
+						for _, v in pairs(c_tcm_current_map.flags) do
+							if v.red ~= tank.red then
+								if v.m.stolen then
+									-- your team has stolen enemy flag and your own flag is safe, so go to teammate to protect him
+									c_ai_setObjective(tank, GENERICINDEX, tankbobs.m_vec2(c_world_getTanks()[v.m.stolen].p), NOTINSIGHT, "flagBase")
+								elseif v.m.dropped then
+									c_ai_setObjective(tank. GENERICINDEX, tankbobs.m_vec2(v.m.pos), ALWAYSANDDESTROY, "enemyFlagWhichDropped")
+								else
+									-- go to enemy flag, which is safe
+									c_ai_setObjective(tank. GENERICINDEX, tankbobs.m_vec2(v.p), ALWAYSANDDESTROY, "enemyFlag")
+								end
+							end
+						end
+					end
+				end
+			end
+		end
 	end
 
 	-- look for powerups
