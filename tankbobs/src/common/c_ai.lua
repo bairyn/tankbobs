@@ -1405,7 +1405,7 @@ function c_ai_tank_step(tank)
 		-- don't set enemies as objectives in domination since it doesn't always benefit the tank
 	elseif c_world_getGameType() == CAPTURETHEFLAG then
 		local function filter(x)
-			if c_ai_yourTeamOffensive(tank) and not tank.m.flag then
+			if c_ai_yourTeamOffensive(tank) and not x.m.flag then
 				return true
 			end
 
@@ -1477,7 +1477,7 @@ function c_ai_tank_step(tank)
 			if tank.m.flag then
 				for _, v in pairs(c_tcm_current_map.flags) do
 					if v.red == tank.red then
-						c_ai_setObjective(tank, GENERICINDEX, tankbobs.m_vec2(v.p), ALWAYS, "flagBase")
+						c_ai_setObjective(tank, GENERICINDEX, tankbobs.m_vec2(v.p), ALWAYSANDDESTROY, "flagBase")
 					end
 				end
 			else
