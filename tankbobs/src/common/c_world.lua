@@ -806,7 +806,7 @@ function c_world_pointIntersects(p)
 	local hull
 
 	local function t()
-		if c_world_pointIntersects(p, hull) then
+		if c_world_pointInsideHull(p, hull) then
 			return true
 		end
 	end

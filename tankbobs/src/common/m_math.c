@@ -203,6 +203,7 @@ int m_vec2_index(lua_State *L)
 					(message));
 				CDLL_FUNCTION("libtstr", "tstr_free", void(*)(tstr *))
 					(message);
+
 				lua_error(L);
 			}
 			break;
