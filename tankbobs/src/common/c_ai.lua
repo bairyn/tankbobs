@@ -239,7 +239,7 @@ function c_ai_getTankStateForward(tank)
 	end
 end
 
-function c_ai_setTankStateFire(tank, fire)  -- 0 or false; no fire
+function c_ai_setTankStateFire(tank, fire)  -- 0 or false: no fire
 	if fire and fire ~= 0 then
 		tank.state = bit.bor(tank.state, FIRING)
 	else
@@ -247,7 +247,7 @@ function c_ai_setTankStateFire(tank, fire)  -- 0 or false; no fire
 	end
 end
 
-function c_ai_setTankStateSpecial(tank, special)  -- 0 or false; no special
+function c_ai_setTankStateSpecial(tank, special)  -- 0 or false: no special
 	if special and special ~= 0 then
 		tank.state = bit.bor(tank.state, SPECIAL)
 	else
@@ -255,7 +255,7 @@ function c_ai_setTankStateSpecial(tank, special)  -- 0 or false; no special
 	end
 end
 
-function c_ai_setTankStateReload(tank, reload)  -- 0 or false; no reload
+function c_ai_setTankStateReload(tank, reload)  -- 0 or false: no reload
 	if reload and reload ~= 0 then
 		tank.state = bit.bor(tank.state, RELOAD)
 	else
@@ -798,6 +798,11 @@ function c_ai_followObjective(tank, objective)
 			objective.following = true
 
 			objective.followingObjective = true
+		else
+			-- special case for control points
+			if objective.objectiveType == "controlPoint" then
+				tank.ai.cc = nil
+			end
 		end
 	elseif objective.followType <= AVOIDINSIGHT and inSight then
 		-- go away from objective
