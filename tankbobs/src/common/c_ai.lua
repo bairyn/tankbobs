@@ -105,7 +105,12 @@ local names =
 , "Summer Holiday"
 , "Summer Beach"
 , "Virginian Beach"
+, "Dr. C. Good"
+, "Candace Spencer"
 , "Krabby Krap"
+, "Jim Trainer"
+, "Jim Socks"
+, "Joe King"
 }
 
 -- follow type
