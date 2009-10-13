@@ -438,11 +438,11 @@ local function play_testEnd()
 			elseif c_world_blueTeam.score >= pointLimit then
 				c_world_setPaused(true)
 
-				local name = "Blue"
-				local color = c_const_get("color_blue")
-				gui_addLabel(tankbobs.m_vec2(35, 50), name .. " wins!", nil, 1.1, color[1], color[2], color[3], 0.75, color[1], color[2], color[3], 0.8)
-
 				if not endOfGame then
+					local name = "Blue"
+					local color = c_const_get("color_blue")
+					gui_addLabel(tankbobs.m_vec2(35, 50), name .. " wins!", nil, 1.1, color[1], color[2], color[3], 0.75, color[1], color[2], color[3], 0.8)
+
 					tankbobs.a_playSound(c_const_get("win_sound"))
 				end
 
