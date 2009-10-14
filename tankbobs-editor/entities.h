@@ -58,14 +58,13 @@ namespace entities
 
 	class Entity
 	{
-		public:
-			string misc;
 	};
 
 	class PlayerSpawnPoint : public Entity
 	{
 		public:
 			double x, y;
+			string misc;
 			PlayerSpawnPoint(double PlayerSpawnPoint_x = 0.0, double PlayerSpawnPoint_y = 0.0, string PlayerSpawnPoint_misc = "") : x(PlayerSpawnPoint_x), y(PlayerSpawnPoint_y), misc(PlayerSpawnPoint_misc) {}
 	};
 
@@ -78,6 +77,7 @@ namespace entities
 			double repeat;
 			double initial;
 			int focus;
+			string misc;
 			PowerupSpawnPoint(double PowerupSpawnPoint_x = 0.0, double PowerupSpawnPoint_y = 0.0, string PowerupSpawnPoint_powerups = "", int PowerupSpawnPoint_linked = false, double PowerupSpawnPoint_repeat = 0.0, double PowerupSpawnPoint_initial = 0.0, int PowerupSpawnPoint_focus = false, string PowerupSpawnPoint_misc = "") : x(PowerupSpawnPoint_x), y(PowerupSpawnPoint_y), powerups(PowerupSpawnPoint_powerups), linked(PowerupSpawnPoint_linked), repeat(PowerupSpawnPoint_repeat), initial(PowerupSpawnPoint_initial), focus(PowerupSpawnPoint_focus), misc(PowerupSpawnPoint_misc) {}
 	};
 
@@ -90,6 +90,7 @@ namespace entities
 			string targetName;
 			string target;
 			bool enabled;
+			string misc;
 			Teleporter(double Teleporter_x = 0.0, double Teleporter_y = 0.0, string Teleporter_targetName = "", string Teleporter_target = "", bool Teleporter_enabled = false, string Teleporter_misc = "") : x(Teleporter_x), y(Teleporter_y), targetName(Teleporter_targetName), target(Teleporter_target), enabled(Teleporter_enabled), misc(Teleporter_misc) {}
 	};
 
@@ -120,6 +121,7 @@ namespace entities
 			bool path;
 			bool detail;
 			bool staticW;
+			string misc;
 			Wall(double Wall_x1 = 0.0, double Wall_y1 = 0.0, bool Wall_quad = false, double Wall_x2 = 0.0, double Wall_y2 = 0.0, double Wall_x3 = 0.0, double Wall_y3 = 0.0, double Wall_x4 = 0.0, double Wall_y4 = 0.0, double Wall_tx1 = 0.0, double Wall_ty1 = 1.0, double Wall_tx2 = 0.0, double Wall_ty2 = 0.0, double Wall_tx3 = 1.0, double Wall_ty3 = 0.0, double Wall_tx4 = 1.0, double Wall_ty4 = 1.0, string Wall_texture = "", int Wall_level = 0, string Wall_target = "", bool Wall_path = false, bool Wall_detail = false, bool Wall_staticW = true, string Wall_misc = "") : x1(Wall_x1), y1(Wall_y1), quad(Wall_quad), x2(Wall_x2), y2(Wall_y2), x3(Wall_x3), y3(Wall_y3), x4(Wall_x4), y4(Wall_y4), tx1(Wall_tx1), ty1(Wall_ty1), tx2(Wall_tx2), ty2(Wall_ty2), tx3(Wall_tx3), ty3(Wall_ty3), tx4(Wall_tx4), ty4(Wall_ty4), texture(Wall_texture), level(Wall_level), target(Wall_target), path(Wall_path), detail(Wall_detail), staticW(Wall_staticW), misc(Wall_misc) {}  // note that static walls are default
 	};
 
@@ -131,6 +133,7 @@ namespace entities
 			string target;
 			bool enabled;
 			double time;
+			string misc;
 			Path(double Path_x = 0.0, double Path_y = 0.0, string Path_targetName = "", string Path_target = "", bool Path_enabled = false, double Path_time = 0, string Path_misc = "") : x(Path_x), y(Path_y), targetName(Path_targetName), target(Path_target), enabled(Path_enabled), time(Path_time), misc(Path_misc) {}
 	};
 
@@ -139,6 +142,7 @@ namespace entities
 		public:
 			double x, y;
 			bool red;
+			string misc;
 			ControlPoint(double ControlPoint_x = 0.0, double ControlPoint_y = 0.0, bool ControlPoint_red = false, string ControlPoint_misc = "") : x(ControlPoint_x), y(ControlPoint_y), red(ControlPoint_red), misc(ControlPoint_misc) {}
 	};
 
@@ -147,6 +151,7 @@ namespace entities
 		public:
 			double x, y;
 			bool red;
+			string misc;
 			Flag(double Flag_x = 0.0, double Flag_y = 0.0, bool Flag_red = false, string Flag_misc = "") : x(Flag_x), y(Flag_y), red(Flag_red), misc(Flag_misc) {}
 	};
 
@@ -154,6 +159,7 @@ namespace entities
 	{
 		public:
 			double x, y;
+			string misc;
 			WayPoint(double WayPoint_x = 0.0, double WayPoint_y = 0.0, string WayPoint_misc = "") : x(WayPoint_x), y(WayPoint_y), misc(WayPoint_misc) {}
 	};
 }

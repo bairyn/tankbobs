@@ -72,6 +72,8 @@ local lastPowerupSpawnTime
 local nextPowerupSpawnPoint
 local worldInitialized = false
 
+local key = {}
+
 function c_world_init()
 	c_config_set            = _G.c_config_set
 	c_config_get            = _G.c_config_get
@@ -510,6 +512,8 @@ function c_world_newWorld()
 
 	worldInitialized = true
 
+	c_const_backup(key)
+
 	if #c_tcm_current_map.script > 0 then
 		-- see if script exists
 		local filename = c_const_get("scripts_dir") .. c_tcm_current_map.script
@@ -539,6 +543,8 @@ function c_world_freeWorld()
 	if not worldInitialized then
 		return
 	end
+
+	c_const_restore(key)
 
 	worldInitialized = false
 

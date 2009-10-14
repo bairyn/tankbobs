@@ -30,6 +30,9 @@ function c_const_init()
 
 	local const = {}
 
+	local key = nil
+	local backup = nil
+
 	function c_const_get(k)
 		local cst = const
 
@@ -73,6 +76,24 @@ function c_const_init()
 
 			const[k][1] = v
 		end
+	end
+
+	function c_const_backup(k)
+		if key or backup then
+			return
+		end
+
+		key = k
+		backup = clone(const)
+	end
+
+	function c_const_restore(k)
+		if not key or not backup or k ~= key then
+			return
+		end
+
+		const = {}
+		clone(backup, const)
 	end
 
 	c_const_set("const_setError", true, -1)  -- error by default
