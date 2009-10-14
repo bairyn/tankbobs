@@ -1,150 +1,150 @@
-map, large_1, Level 1, , Byron Johnson, 1.0, 1, 0
-wall, 1, -100, 200, -100, -100, 200, -100, 200, 200, 0, 8, 0, 0, 8, 0, 8, 8, global/temporary2.png, 2, , 0, 1, 1
-wall, 1, -100, -100, -100, 200, -97, 200, -97, -100, 0, 10, 0, 0, 0.1, 0, 0.1, 10, global/temporary1.png, 6, , 0, 0, 1
-wall, 1, -100, -100, -100, -97, 200, -97, 200, -100, 0, 0.1, 0, 0, 10, 0, 10, 0.1, global/temporary1.png, 6, , 0, 0, 1
-wall, 1, 200, -100, 200, 200, 197, 200, 197, -100, 0, 10, 0, 0, 0.1, 0, 0.1, 10, global/temporary1.png, 6, , 0, 0, 1
-wall, 1, 200, 200, 200, 197, -100, 197, -100, 200, 0, 0.1, 0, 0, 10, 0, 10, 0.1, global/temporary1.png, 6, , 0, 0, 1
-wall, 1, 0, 47, 0, 100, -2, 100, -2, 47, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1
-wall, 1, 0, 100, 0, 98, 100, 98, 100, 100, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1
-wall, 1, 0, 47, 0, 50, 38, 50, 38, 47, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1
-wall, 1, 38, 47, 38, 84, 40, 84, 40, 47, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1
-wall, 1, 40, 74, 40, 70, 63, 70, 63, 74, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1
-wall, 1, 74, 74, 74, 73, 100, 73, 100, 74, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1
-wall, 1, 74, 70, 74, 69, 100, 69, 100, 70, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1
-wall, 1, 74, 98, 74, 81, 78, 81, 78, 98, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 1, 0, 1
-wall, 1, 58, 56, 58, 26, 79, 26, 79, 56, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1
-wall, 1, 38, 37, 38, 22, 40, 22, 40, 37, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1
-wall, 1, 79, 26, 79, 29, 100, 29, 100, 26, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1
-wall, 1, 79, 18, 79, -7, 76, -7, 76, 18, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1
-wall, 1, 79, -7, 79, -4, 100, -4, 100, -7, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1
-wall, 1, 100, -4, 100, 26, 98, 26, 98, -4, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1
-wall, 0, 81, -2, 88, 9, 96, -2, 88.3333, 1.66667, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 0
-wall, 1, 110, 114, 110, -7, 116, -7, 116, 114, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1
-wall, 1, -2, 37, -2, 33, 30, 33, 30, 37, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1
-wall, 1, -13, 104, -13, -20, -66, -20, -66, 104, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1
-wall, 1, -5, -21, -5, -26, 115, -26, 115, -21, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1
-wall, 1, 129, -17, 129, -13, 126, -13, 126, -17, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1
-wall, 1, 116, 53, 116, 49, 180, 49, 180, 53, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1
-wall, 1, 180, 49, 180, -28, 176, -28, 176, 49, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1
-wall, 1, 115, -21, 115, -26, 173, -26, 173, -21, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1
-wall, 1, 125, -1, 125, -5, 128, -5, 128, -1, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1
-wall, 1, 124, 13, 124, 7, 129, 7, 129, 13, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1
-wall, 1, 123, 29, 123, 18, 133, 18, 133, 29, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1
-wall, 1, 143, 28, 143, 24, 147, 24, 147, 28, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1
-wall, 1, 147, 21, 147, 13, 154, 13, 154, 21, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1
-wall, 1, 152, 6, 152, -7, 163, -7, 163, 6, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1
-wall, 1, 100, 74, 100, 69, 101, 69, 101, 74, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1
-wall, 1, 116, 125, 116, 131, 38, 131, 38, 125, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1
-wall, 1, 38, 131, 38, 125, -84, 125, -84, 131, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1
-wall, 1, 97, 115, 97, 125, 100, 125, 100, 115, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, down, 1, 0, 1
-wall, 1, 85, 110, 85, 100, 88, 100, 88, 110, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, up, 1, 0, 1
-wall, 1, 76, 125, 76, 115, 73, 115, 73, 125, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, down, 1, 0, 1
-wall, 1, 64, 110, 64, 100, 61, 100, 61, 110, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, up, 1, 0, 1
-wall, 1, 52, 125, 52, 115, 49, 115, 49, 125, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, down, 1, 0, 1
-wall, 1, 40, 110, 40, 100, 37, 100, 37, 110, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, up, 1, 0, 1
-wall, 1, 28, 125, 28, 115, 25, 115, 25, 125, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, down, 1, 0, 1
-wall, 1, 16, 110, 16, 100, 13, 100, 13, 110, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, up, 1, 0, 1
-wall, 1, 1, 125, 1, 115, 4, 115, 4, 125, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, down, 1, 0, 1
-wall, 1, 1, -33, 1, -91, 5, -91, 5, -33, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1
-wall, 1, 5, -91, 81, -33, 95, -33, 20, -91, 0, -1, 0, 0, -1, 0, -1, -1, global/temporary1.png, 6, , 0, 0, 0
-wall, 1, 95, -33, 95, -91, 99, -91, 99, -33, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1
-wall, 1, 182, -88, 182, 53, 195, 53, 195, -88, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 0
-wall, 1, 157, 69, 157, 77, 194, 77, 194, 69, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1
-wall, 1, -88, 131, -88, 125, -97, 125, -97, 131, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1
-wall, 1, 116, 131, 116, 197, 111, 197, 111, 131, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1
-wall, 1, -86, 136, -86, 131, -81, 131, -81, 136, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 0
-wall, 1, -91, 136, -91, 131, -86, 131, -86, 136, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 0
-wall, 1, -65, 196, -65, 191, -60, 191, -60, 196, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 0
-wall, 1, -65, 138, -65, 133, -60, 133, -60, 138, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 0
-wall, 1, -3, 165, -3, 160, 2, 160, 2, 165, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 0
-wall, 1, -88, 100, -88, 0, -85, 0, -85, 100, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1
-wall, 1, -85, 100, -85, 103, -97, 103, -97, 100, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1
-wall, 1, -91, 100, -91, 94, -97, 94, -97, 100, 0, 1, 0, 0, 1, 0, 1, 1, global/teleporter.png, 7, , 0, 1, 1
-wall, 1, 109, 170, 109, 164, 103, 164, 103, 170, 0, 1, 0, 0, 1, 0, 1, 1, global/teleporter.png, 7, , 0, 1, 1
-teleporter, fromBlueBase, toBlueBase, -95, 97, 1
-teleporter, toBlueBase, fromBlueBase, 106, 167, 1
-playerSpawnPoint, 9, 91
-playerSpawnPoint, 85, 91
-playerSpawnPoint, 141, -64
-playerSpawnPoint, 14, 25
-playerSpawnPoint, 168, 62
-playerSpawnPoint, -8, -62
-playerSpawnPoint, -9, 77
-powerupSpawnPoint, 51, 34, health shotgun machinegun, 0, 30, 30, 0
-powerupSpawnPoint, 97, 71.5, health, 0, 20, 20, 0
-powerupSpawnPoint, 35, 53, railgun, 0, 30, 30, 1
-powerupSpawnPoint, 119, 45, coilgun ammo, 0, 30, 30, 0
-powerupSpawnPoint, -94, -94, railgun aim-aid, 0, 30, 30, 0
-powerupSpawnPoint, 108, -61, ammo, 0, 30, 30, 0
-powerupSpawnPoint, 194, -93, shotgun machinegun, 0, 30, 30, 0
-powerupSpawnPoint, 194, 56, shotgun machinegun, 0, 30, 30, 0
-powerupSpawnPoint, -94, 194, ammo, 0, 30, 60, 0
-powerupSpawnPoint, -94, 135, ammo, 0, 30, 30, 0
-powerupSpawnPoint, 108, 194, health, 0, 30, 30, 0
-powerupSpawnPoint, 107, 135, health, 0, 30, 60, 0
-powerupSpawnPoint, 193, 192, saw, 0, 30, 30, 0
-powerupSpawnPoint, 120, 192, health, 0, 30, 30, 0
-powerupSpawnPoint, 0, 168, acceleration shield, 0, 30, 30, 0
-path, path_1, path_2, 71, 95, 1, 1
-path, path_2, path_1, 71, 88, 1, 1
-path, down, down2, 44, 117, 1, 3
-path, down2, down, 44, 102, 1, 3
-path, up, up2, 33, 102, 1, 3
-path, up2, up, 33, 117, 1, 3
-controlPoint, 139, 4, 0
-controlPoint, 0, 157, 0
-controlPoint, 93, 20, 0
-controlPoint, -89, -86, 0
-controlPoint, 187, 183, 0
-flag, 160, -84, 1
-flag, -88, 188, 0
-wayPoint, 21, 92
-wayPoint, 62, 93
-wayPoint, 70, 71
-wayPoint, 64, 61
-wayPoint, 52, 61
-wayPoint, 106, 61
-wayPoint, 105, 120
-wayPoint, 141, 120
-wayPoint, 143, 59
-wayPoint, 52, 40
-wayPoint, -8, 42
-wayPoint, -9, -31
-wayPoint, -5, -93
-wayPoint, 107, -94
-wayPoint, 107, -30
-wayPoint, -86, 92
-wayPoint, -79, -47
-wayPoint, 54, -14
-wayPoint, -10, -13
-wayPoint, 120, -10
-wayPoint, 139, -9
-wayPoint, 137, 40
-wayPoint, 120, 39
-wayPoint, 172, 39
-wayPoint, 167, -14
-wayPoint, 34, 27
-wayPoint, 34, 42
-wayPoint, -95, -3
-wayPoint, -95, 91
-wayPoint, 87, 167
-wayPoint, -1, 188
-wayPoint, 0, 141
-wayPoint, -86, 169
-wayPoint, -70, 117
-wayPoint, 65, 21
-wayPoint, 153, 182
-wayPoint, 169, 183
-wayPoint, 141, 175
-wayPoint, 144, 169
-wayPoint, 152, 162
-wayPoint, 160, 160
-wayPoint, 171, 162
-wayPoint, 178, 168
-wayPoint, 184, 176
-wayPoint, 163, -64
-wayPoint, 127, -48
-wayPoint, 140, -86
-wayPoint, -46, -78
-wayPoint, -62, -34
-wayPoint, 20, 9
+map, large_1, Level 1, , Byron Johnson, 1.0, 1, 0, official.lua
+wall, 1, -100, 200, -100, -100, 200, -100, 200, 200, 0, 8, 0, 0, 8, 0, 8, 8, global/temporary2.png, 2, , 0, 1, 1, 
+wall, 1, -100, -100, -100, 200, -97, 200, -97, -100, 0, 10, 0, 0, 0.1, 0, 0.1, 10, global/temporary1.png, 6, , 0, 0, 1, 
+wall, 1, -100, -100, -100, -97, 200, -97, 200, -100, 0, 0.1, 0, 0, 10, 0, 10, 0.1, global/temporary1.png, 6, , 0, 0, 1, 
+wall, 1, 200, -100, 200, 200, 197, 200, 197, -100, 0, 10, 0, 0, 0.1, 0, 0.1, 10, global/temporary1.png, 6, , 0, 0, 1, 
+wall, 1, 200, 200, 200, 197, -100, 197, -100, 200, 0, 0.1, 0, 0, 10, 0, 10, 0.1, global/temporary1.png, 6, , 0, 0, 1, 
+wall, 1, 0, 47, 0, 100, -2, 100, -2, 47, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1, 
+wall, 1, 0, 100, 0, 98, 100, 98, 100, 100, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1, 
+wall, 1, 0, 47, 0, 50, 38, 50, 38, 47, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1, 
+wall, 1, 38, 47, 38, 84, 40, 84, 40, 47, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1, 
+wall, 1, 40, 74, 40, 70, 63, 70, 63, 74, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1, 
+wall, 1, 74, 74, 74, 73, 100, 73, 100, 74, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1, 
+wall, 1, 74, 70, 74, 69, 100, 69, 100, 70, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1, 
+wall, 1, 74, 98, 74, 81, 78, 81, 78, 98, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 1, 0, 1, 
+wall, 1, 58, 56, 58, 26, 79, 26, 79, 56, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1, 
+wall, 1, 38, 37, 38, 22, 40, 22, 40, 37, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1, 
+wall, 1, 79, 26, 79, 29, 100, 29, 100, 26, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1, 
+wall, 1, 79, 18, 79, -7, 76, -7, 76, 18, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1, 
+wall, 1, 79, -7, 79, -4, 100, -4, 100, -7, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1, 
+wall, 1, 100, -4, 100, 26, 98, 26, 98, -4, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1, 
+wall, 0, 81, -2, 88, 9, 96, -2, 88.3333, 1.66667, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 0, 
+wall, 1, 110, 114, 110, -7, 116, -7, 116, 114, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1, 
+wall, 1, -2, 37, -2, 33, 30, 33, 30, 37, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1, 
+wall, 1, -13, 104, -13, -20, -66, -20, -66, 104, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1, 
+wall, 1, -5, -21, -5, -26, 115, -26, 115, -21, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1, 
+wall, 1, 129, -17, 129, -13, 126, -13, 126, -17, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1, 
+wall, 1, 116, 53, 116, 49, 180, 49, 180, 53, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1, 
+wall, 1, 180, 49, 180, -28, 176, -28, 176, 49, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1, 
+wall, 1, 115, -21, 115, -26, 173, -26, 173, -21, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1, 
+wall, 1, 125, -1, 125, -5, 128, -5, 128, -1, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1, 
+wall, 1, 124, 13, 124, 7, 129, 7, 129, 13, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1, 
+wall, 1, 123, 29, 123, 18, 133, 18, 133, 29, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1, 
+wall, 1, 143, 28, 143, 24, 147, 24, 147, 28, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1, 
+wall, 1, 147, 21, 147, 13, 154, 13, 154, 21, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1, 
+wall, 1, 152, 6, 152, -7, 163, -7, 163, 6, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1, 
+wall, 1, 100, 74, 100, 69, 101, 69, 101, 74, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1, 
+wall, 1, 116, 125, 116, 131, 38, 131, 38, 125, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1, 
+wall, 1, 38, 131, 38, 125, -84, 125, -84, 131, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1, 
+wall, 1, 97, 115, 97, 125, 100, 125, 100, 115, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, down, 1, 0, 1, 
+wall, 1, 85, 110, 85, 100, 88, 100, 88, 110, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, up, 1, 0, 1, 
+wall, 1, 76, 125, 76, 115, 73, 115, 73, 125, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, down, 1, 0, 1, 
+wall, 1, 64, 110, 64, 100, 61, 100, 61, 110, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, up, 1, 0, 1, 
+wall, 1, 52, 125, 52, 115, 49, 115, 49, 125, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, down, 1, 0, 1, 
+wall, 1, 40, 110, 40, 100, 37, 100, 37, 110, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, up, 1, 0, 1, 
+wall, 1, 28, 125, 28, 115, 25, 115, 25, 125, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, down, 1, 0, 1, 
+wall, 1, 16, 110, 16, 100, 13, 100, 13, 110, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, up, 1, 0, 1, 
+wall, 1, 1, 125, 1, 115, 4, 115, 4, 125, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, down, 1, 0, 1, 
+wall, 1, 1, -33, 1, -91, 5, -91, 5, -33, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1, 
+wall, 1, 5, -91, 81, -33, 95, -33, 20, -91, 0, -1, 0, 0, -1, 0, -1, -1, global/temporary1.png, 6, , 0, 0, 0, 
+wall, 1, 95, -33, 95, -91, 99, -91, 99, -33, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1, 
+wall, 1, 182, -88, 182, 53, 195, 53, 195, -88, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 0, 
+wall, 1, 157, 69, 157, 77, 194, 77, 194, 69, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1, 
+wall, 1, -88, 131, -88, 125, -97, 125, -97, 131, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1, 
+wall, 1, 116, 131, 116, 197, 111, 197, 111, 131, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1, 
+wall, 1, -86, 136, -86, 131, -81, 131, -81, 136, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 0, 
+wall, 1, -91, 136, -91, 131, -86, 131, -86, 136, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 0, 
+wall, 1, -65, 196, -65, 191, -60, 191, -60, 196, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 0, 
+wall, 1, -65, 138, -65, 133, -60, 133, -60, 138, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 0, 
+wall, 1, -3, 165, -3, 160, 2, 160, 2, 165, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 0, 
+wall, 1, -88, 100, -88, 0, -85, 0, -85, 100, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1, 
+wall, 1, -85, 100, -85, 103, -97, 103, -97, 100, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 1, 
+wall, 1, -91, 100, -91, 94, -97, 94, -97, 100, 0, 1, 0, 0, 1, 0, 1, 1, global/teleporter.png, 7, , 0, 1, 1, 
+wall, 1, 109, 170, 109, 164, 103, 164, 103, 170, 0, 1, 0, 0, 1, 0, 1, 1, global/teleporter.png, 7, , 0, 1, 1, 
+teleporter, fromBlueBase, toBlueBase, -95, 97, 1, 
+teleporter, toBlueBase, fromBlueBase, 106, 167, 1, 
+playerSpawnPoint, 9, 91, 
+playerSpawnPoint, 85, 91, 
+playerSpawnPoint, 141, -64, 
+playerSpawnPoint, 14, 25, 
+playerSpawnPoint, 168, 62, 
+playerSpawnPoint, -8, -62, 
+playerSpawnPoint, -9, 77, 
+powerupSpawnPoint, 51, 34, health shotgun machinegun, 0, 30, 30, 0, 
+powerupSpawnPoint, 97, 71.5, health, 0, 20, 20, 0, 
+powerupSpawnPoint, 35, 53, railgun, 0, 30, 30, 1, 
+powerupSpawnPoint, 119, 45, coilgun ammo, 0, 30, 30, 0, 
+powerupSpawnPoint, -94, -94, railgun aim-aid, 0, 30, 30, 0, 
+powerupSpawnPoint, 108, -61, ammo, 0, 30, 30, 0, 
+powerupSpawnPoint, 194, -93, shotgun machinegun, 0, 30, 30, 0, 
+powerupSpawnPoint, 194, 56, shotgun machinegun, 0, 30, 30, 0, 
+powerupSpawnPoint, -94, 194, ammo, 0, 30, 60, 0, 
+powerupSpawnPoint, -94, 135, ammo, 0, 30, 30, 0, 
+powerupSpawnPoint, 108, 194, health, 0, 30, 30, 0, 
+powerupSpawnPoint, 107, 135, health, 0, 30, 60, 0, 
+powerupSpawnPoint, 193, 192, saw, 0, 30, 30, 0, 
+powerupSpawnPoint, 120, 192, health, 0, 30, 30, 0, 
+powerupSpawnPoint, 0, 168, acceleration shield, 0, 30, 30, 0, 
+path, path_1, path_2, 71, 95, 1, 1, 
+path, path_2, path_1, 71, 88, 1, 1, 
+path, down, down2, 44, 117, 1, 3, 
+path, down2, down, 44, 102, 1, 3, 
+path, up, up2, 33, 102, 1, 3, 
+path, up2, up, 33, 117, 1, 3, 
+controlPoint, 139, 4, 0, 
+controlPoint, 0, 157, 0, 
+controlPoint, 93, 20, 0, 
+controlPoint, -89, -86, 0, 
+controlPoint, 187, 183, 0, 
+flag, 160, -84, 1, 
+flag, -88, 188, 0, 
+wayPoint, 21, 92, 
+wayPoint, 62, 93, 
+wayPoint, 70, 71, 
+wayPoint, 64, 61, 
+wayPoint, 52, 61, 
+wayPoint, 106, 61, 
+wayPoint, 105, 120, 
+wayPoint, 141, 120, 
+wayPoint, 143, 59, 
+wayPoint, 52, 40, 
+wayPoint, -8, 42, 
+wayPoint, -9, -31, 
+wayPoint, -5, -93, 
+wayPoint, 107, -94, 
+wayPoint, 107, -30, 
+wayPoint, -86, 92, 
+wayPoint, -79, -47, 
+wayPoint, 54, -14, 
+wayPoint, -10, -13, 
+wayPoint, 120, -10, 
+wayPoint, 139, -9, 
+wayPoint, 137, 40, 
+wayPoint, 120, 39, 
+wayPoint, 172, 39, 
+wayPoint, 167, -14, 
+wayPoint, 34, 27, 
+wayPoint, 34, 42, 
+wayPoint, -95, -3, 
+wayPoint, -95, 91, 
+wayPoint, 87, 167, 
+wayPoint, -1, 188, 
+wayPoint, 0, 141, 
+wayPoint, -86, 169, 
+wayPoint, -70, 117, 
+wayPoint, 65, 21, 
+wayPoint, 153, 182, 
+wayPoint, 169, 183, 
+wayPoint, 141, 175, 
+wayPoint, 144, 169, 
+wayPoint, 152, 162, 
+wayPoint, 160, 160, 
+wayPoint, 171, 162, 
+wayPoint, 178, 168, 
+wayPoint, 184, 176, 
+wayPoint, 163, -64, 
+wayPoint, 127, -48, 
+wayPoint, 140, -86, 
+wayPoint, -46, -78, 
+wayPoint, -62, -34, 
+wayPoint, 20, 9, 

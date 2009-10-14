@@ -52,21 +52,24 @@ namespace entities
 			string version_s;
 			int version;
 			bool staticCamera;
-			Map() {name = "default"; title = "default"; description = ""; authors = ""; version_s = ""; version = 0; staticCamera = false;}
+			string script;
+			Map() {name = "default"; title = "default"; description = ""; authors = ""; version_s = ""; version = 0; staticCamera = false; script = "";}
 	};
 
 	class Entity
 	{
+		public:
+			string misc;
 	};
 
-	class PlayerSpawnPoint : private Entity
+	class PlayerSpawnPoint : public Entity
 	{
 		public:
 			double x, y;
-			PlayerSpawnPoint(double PlayerSpawnPoint_x = 0.0, double PlayerSpawnPoint_y = 0.0) : x(PlayerSpawnPoint_x), y(PlayerSpawnPoint_y) {}
+			PlayerSpawnPoint(double PlayerSpawnPoint_x = 0.0, double PlayerSpawnPoint_y = 0.0, string PlayerSpawnPoint_misc = "") : x(PlayerSpawnPoint_x), y(PlayerSpawnPoint_y), misc(PlayerSpawnPoint_misc) {}
 	};
 
-	class PowerupSpawnPoint : private Entity
+	class PowerupSpawnPoint : public Entity
 	{
 		public:
 			double x, y;
@@ -75,10 +78,10 @@ namespace entities
 			double repeat;
 			double initial;
 			int focus;
-			PowerupSpawnPoint(double PowerupSpawnPoint_x = 0.0, double PowerupSpawnPoint_y = 0.0, string PowerupSpawnPoint_powerups = "", int PowerupSpawnPoint_linked = false, double PowerupSpawnPoint_repeat = 0.0, double PowerupSpawnPoint_initial = 0.0, int PowerupSpawnPoint_focus = false) : x(PowerupSpawnPoint_x), y(PowerupSpawnPoint_y), powerups(PowerupSpawnPoint_powerups), linked(PowerupSpawnPoint_linked), repeat(PowerupSpawnPoint_repeat), initial(PowerupSpawnPoint_initial), focus(PowerupSpawnPoint_focus) {}
+			PowerupSpawnPoint(double PowerupSpawnPoint_x = 0.0, double PowerupSpawnPoint_y = 0.0, string PowerupSpawnPoint_powerups = "", int PowerupSpawnPoint_linked = false, double PowerupSpawnPoint_repeat = 0.0, double PowerupSpawnPoint_initial = 0.0, int PowerupSpawnPoint_focus = false, string PowerupSpawnPoint_misc = "") : x(PowerupSpawnPoint_x), y(PowerupSpawnPoint_y), powerups(PowerupSpawnPoint_powerups), linked(PowerupSpawnPoint_linked), repeat(PowerupSpawnPoint_repeat), initial(PowerupSpawnPoint_initial), focus(PowerupSpawnPoint_focus), misc(PowerupSpawnPoint_misc) {}
 	};
 
-	class Teleporter : private Entity
+	class Teleporter : public Entity
 	{
 		public:
 			//string name;  // these can't go here for C++ class initilazation order issues
@@ -87,10 +90,10 @@ namespace entities
 			string targetName;
 			string target;
 			bool enabled;
-			Teleporter(double Teleporter_x = 0.0, double Teleporter_y = 0.0, string Teleporter_targetName = "", string Teleporter_target = "", bool Teleporter_enabled = false) : x(Teleporter_x), y(Teleporter_y), targetName(Teleporter_targetName), target(Teleporter_target), enabled(Teleporter_enabled) {}
+			Teleporter(double Teleporter_x = 0.0, double Teleporter_y = 0.0, string Teleporter_targetName = "", string Teleporter_target = "", bool Teleporter_enabled = false, string Teleporter_misc = "") : x(Teleporter_x), y(Teleporter_y), targetName(Teleporter_targetName), target(Teleporter_target), enabled(Teleporter_enabled), misc(Teleporter_misc) {}
 	};
 
-	class Wall : private Entity
+	class Wall : public Entity
 	{
 		public:
 			//bool quad;
@@ -117,10 +120,10 @@ namespace entities
 			bool path;
 			bool detail;
 			bool staticW;
-			Wall(double Wall_x1 = 0.0, double Wall_y1 = 0.0, bool Wall_quad = false, double Wall_x2 = 0.0, double Wall_y2 = 0.0, double Wall_x3 = 0.0, double Wall_y3 = 0.0, double Wall_x4 = 0.0, double Wall_y4 = 0.0, double Wall_tx1 = 0.0, double Wall_ty1 = 1.0, double Wall_tx2 = 0.0, double Wall_ty2 = 0.0, double Wall_tx3 = 1.0, double Wall_ty3 = 0.0, double Wall_tx4 = 1.0, double Wall_ty4 = 1.0, string Wall_texture = "", int Wall_level = 0, string Wall_target = "", bool Wall_path = false, bool Wall_detail = false, bool Wall_staticW = true) : x1(Wall_x1), y1(Wall_y1), quad(Wall_quad), x2(Wall_x2), y2(Wall_y2), x3(Wall_x3), y3(Wall_y3), x4(Wall_x4), y4(Wall_y4), tx1(Wall_tx1), ty1(Wall_ty1), tx2(Wall_tx2), ty2(Wall_ty2), tx3(Wall_tx3), ty3(Wall_ty3), tx4(Wall_tx4), ty4(Wall_ty4), texture(Wall_texture), level(Wall_level), target(Wall_target), path(Wall_path), detail(Wall_detail), staticW(Wall_staticW) {}  // note that static walls are default
+			Wall(double Wall_x1 = 0.0, double Wall_y1 = 0.0, bool Wall_quad = false, double Wall_x2 = 0.0, double Wall_y2 = 0.0, double Wall_x3 = 0.0, double Wall_y3 = 0.0, double Wall_x4 = 0.0, double Wall_y4 = 0.0, double Wall_tx1 = 0.0, double Wall_ty1 = 1.0, double Wall_tx2 = 0.0, double Wall_ty2 = 0.0, double Wall_tx3 = 1.0, double Wall_ty3 = 0.0, double Wall_tx4 = 1.0, double Wall_ty4 = 1.0, string Wall_texture = "", int Wall_level = 0, string Wall_target = "", bool Wall_path = false, bool Wall_detail = false, bool Wall_staticW = true, string Wall_misc = "") : x1(Wall_x1), y1(Wall_y1), quad(Wall_quad), x2(Wall_x2), y2(Wall_y2), x3(Wall_x3), y3(Wall_y3), x4(Wall_x4), y4(Wall_y4), tx1(Wall_tx1), ty1(Wall_ty1), tx2(Wall_tx2), ty2(Wall_ty2), tx3(Wall_tx3), ty3(Wall_ty3), tx4(Wall_tx4), ty4(Wall_ty4), texture(Wall_texture), level(Wall_level), target(Wall_target), path(Wall_path), detail(Wall_detail), staticW(Wall_staticW), misc(Wall_misc) {}  // note that static walls are default
 	};
 
-	class Path : private Entity
+	class Path : public Entity
 	{
 		public:
 			double x, y;
@@ -128,33 +131,30 @@ namespace entities
 			string target;
 			bool enabled;
 			double time;
-			Path(double Path_x = 0.0, double Path_y = 0.0, string Path_targetName = "", string Path_target = "", bool Path_enabled = false, double Path_time = 0) : x(Path_x), y(Path_y), targetName(Path_targetName), target(Path_target), enabled(Path_enabled), time(Path_time) {}
-
+			Path(double Path_x = 0.0, double Path_y = 0.0, string Path_targetName = "", string Path_target = "", bool Path_enabled = false, double Path_time = 0, string Path_misc = "") : x(Path_x), y(Path_y), targetName(Path_targetName), target(Path_target), enabled(Path_enabled), time(Path_time), misc(Path_misc) {}
 	};
 
-	class ControlPoint : private Entity
+	class ControlPoint : public Entity
 	{
 		public:
 			double x, y;
 			bool red;
-			ControlPoint(double ControlPoint_x = 0.0, double ControlPoint_y = 0.0, bool ControlPoint_red = false) : x(ControlPoint_x), y(ControlPoint_y), red(ControlPoint_red) {}
-
+			ControlPoint(double ControlPoint_x = 0.0, double ControlPoint_y = 0.0, bool ControlPoint_red = false, string ControlPoint_misc = "") : x(ControlPoint_x), y(ControlPoint_y), red(ControlPoint_red), misc(ControlPoint_misc) {}
 	};
 
-	class Flag : private Entity
+	class Flag : public Entity
 	{
 		public:
 			double x, y;
 			bool red;
-			Flag(double Flag_x = 0.0, double Flag_y = 0.0, bool Flag_red = false) : x(Flag_x), y(Flag_y), red(Flag_red) {}
-
+			Flag(double Flag_x = 0.0, double Flag_y = 0.0, bool Flag_red = false, string Flag_misc = "") : x(Flag_x), y(Flag_y), red(Flag_red), misc(Flag_misc) {}
 	};
 
-	class WayPoint : private Entity
+	class WayPoint : public Entity
 	{
 		public:
 			double x, y;
-			WayPoint(double WayPoint_x = 0.0, double WayPoint_y = 0.0) : x(WayPoint_x), y(WayPoint_y) {}
+			WayPoint(double WayPoint_x = 0.0, double WayPoint_y = 0.0, string WayPoint_misc = "") : x(WayPoint_x), y(WayPoint_y), misc(WayPoint_misc) {}
 	};
 }
 

@@ -461,6 +461,7 @@ bool trm_open(const char *filename, bool import)  // Will not confirm unsaved pr
 					char version_s[1024];
 					int version;
 					int staticCamera;
+					char script[1024];
 
 					read_string(name);
 					read_string(title);
@@ -469,6 +470,7 @@ bool trm_open(const char *filename, bool import)  // Will not confirm unsaved pr
 					read_string(version_s);
 					version = read_int();
 					staticCamera = read_int();
+					read_string(script);
 
 					tmap.name = string(name);
 					tmap.title = string(title);
@@ -477,6 +479,7 @@ bool trm_open(const char *filename, bool import)  // Will not confirm unsaved pr
 					tmap.version_s = string(version_s);
 					tmap.version = version;
 					tmap.staticCamera = staticCamera;
+					tmap.script = script;
 				}
 				else if(strncmp(entity, "wall", sizeof(entity)) == 0)
 				{
@@ -495,6 +498,7 @@ bool trm_open(const char *filename, bool import)  // Will not confirm unsaved pr
 					int path;
 					int detail;
 					int staticW;
+					char misc[1024];
 
 					quad = read_int();
 					x1 = read_double();
@@ -519,8 +523,9 @@ bool trm_open(const char *filename, bool import)  // Will not confirm unsaved pr
 					path = read_int();
 					detail = read_int();
 					staticW = read_int();
+					read_string(misc);
 
-					wall.push_back(new entities::Wall(x1, y1, quad, x2, y2, x3, y3, x4, y4, tx1, ty1, tx2, ty2, tx3, ty3, tx4, ty4, texture, level, target, path, detail, staticW));
+					wall.push_back(new entities::Wall(x1, y1, quad, x2, y2, x3, y3, x4, y4, tx1, ty1, tx2, ty2, tx3, ty3, tx4, ty4, texture, level, target, path, detail, staticW, misc));
 				}
 				else if(strncmp(entity, "teleporter", sizeof(entity)) == 0)
 				{
@@ -528,23 +533,27 @@ bool trm_open(const char *filename, bool import)  // Will not confirm unsaved pr
 					char target[1024];
 					double x1, y1;
 					int enabled;
+					char misc[1024];
 
 					read_string(targetName);
 					read_string(target);
 					x1 = read_double();
 					y1 = read_double();
 					enabled = read_int();
+					read_string(misc);
 
-					teleporter.push_back(new entities::Teleporter(x1, y1, targetName, target, enabled));
+					teleporter.push_back(new entities::Teleporter(x1, y1, targetName, target, enabled, misc));
 				}
 				else if(strncmp(entity, "playerSpawnPoint", sizeof(entity)) == 0)
 				{
 					double x1, y1;
+					char misc[1024];
 
 					x1 = read_double();
 					y1 = read_double();
+					read_string(misc);
 
-					playerSpawnPoint.push_back(new entities::PlayerSpawnPoint(x1, y1));
+					playerSpawnPoint.push_back(new entities::PlayerSpawnPoint(x1, y1, misc));
 				}
 				else if(strncmp(entity, "powerupSpawnPoint", sizeof(entity)) == 0)
 				{
@@ -554,6 +563,7 @@ bool trm_open(const char *filename, bool import)  // Will not confirm unsaved pr
 					double repeat;
 					double initial;
 					int focus;
+					char misc[1024];
 
 					x1 = read_double();
 					y1 = read_double();
@@ -562,8 +572,9 @@ bool trm_open(const char *filename, bool import)  // Will not confirm unsaved pr
 					repeat = read_double();
 					initial = read_double();
 					focus = read_int();
+					read_string(misc);
 
-					powerupSpawnPoint.push_back(new entities::PowerupSpawnPoint(x1, y1, powerupsToEnable, linked, repeat, initial, focus));
+					powerupSpawnPoint.push_back(new entities::PowerupSpawnPoint(x1, y1, powerupsToEnable, linked, repeat, initial, focus, misc));
 				}
 				else if(strncmp(entity, "path", sizeof(entity)) == 0)
 				{
@@ -572,6 +583,7 @@ bool trm_open(const char *filename, bool import)  // Will not confirm unsaved pr
 					double x1, y1;
 					int enabled;
 					double time;
+					char misc[1024];
 
 					read_string(targetName);
 					read_string(target);
@@ -579,39 +591,46 @@ bool trm_open(const char *filename, bool import)  // Will not confirm unsaved pr
 					y1 = read_double();
 					enabled = read_int();
 					time = read_double();
+					read_string(misc);
 
-					path.push_back(new entities::Path(x1, y1, targetName, target, enabled, time));
+					path.push_back(new entities::Path(x1, y1, targetName, target, enabled, time, misc));
 				}
 				else if(strncmp(entity, "controlPoint", sizeof(entity)) == 0)
 				{
 					double x1, y1;
 					int red;
+					char misc[1024];
 
 					x1 = read_double();
 					y1 = read_double();
 					red = read_int();
+					read_string(misc);
 
-					controlPoint.push_back(new entities::ControlPoint(x1, y1, red));
+					controlPoint.push_back(new entities::ControlPoint(x1, y1, red, misc));
 				}
 				else if(strncmp(entity, "flag", sizeof(entity)) == 0)
 				{
 					double x1, y1;
 					int red;
+					char misc[1024];
 
 					x1 = read_double();
 					y1 = read_double();
 					red = read_int();
+					read_string(misc);
 
-					flag.push_back(new entities::Flag(x1, y1, red));
+					flag.push_back(new entities::Flag(x1, y1, red, misc));
 				}
 				else if(strncmp(entity, "wayPoint", sizeof(entity)) == 0)
 				{
 					double x1, y1;
+					char misc[1024];
 
 					x1 = read_double();
 					y1 = read_double();
+					read_string(misc);
 
-					wayPoint.push_back(new entities::WayPoint(x1, y1));
+					wayPoint.push_back(new entities::WayPoint(x1, y1, misc));
 				}
 
 				else

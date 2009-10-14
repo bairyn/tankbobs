@@ -53,6 +53,7 @@ format:
 512 bytes authors
 64 bytes map version; human readable NULL-terminated string
 4 bytes map version
+64 bytes null-terminated script of map (run after world is initialized)
 4 bytes number of walls
 4 bytes number of teleporters
 4 bytes number of playerSpawnPoints
@@ -86,6 +87,7 @@ walls
  -1 byte static
  -4 bytes path id
  -1 byte path (whether or not the wall follows a path)
+ -64 bytes misc
  - 367 total bytes
 teleporters
  -4 bytes id
@@ -93,11 +95,13 @@ teleporters
  -8 bytes x1 double float
  -8 bytes y1 double float
  -1 byte enabled
+ -64 bytes misc
  - 33 total bytes
 playerSpawnPoints
  -4 bytes id
  -8 bytes x1 double float
  -8 bytes y1 double float
+ -64 bytes misc
  - 20 total bytes
 powerupSpawnPoints
  -4 bytes id
@@ -112,6 +116,7 @@ powerupSpawnPoints
  -8 bytes repeat double float
  -8 bytes initial double float
  -1 byte focus
+ -64 bytes misc
  - 118 total bytes
 paths
  -4 bytes id
@@ -120,17 +125,20 @@ paths
  -1 byte enabled
  -8 bytes double float time to reach other path
  -4 bites target id
+ -64 bytes misc
  - 33 total bytes
 controlPoints
  -4 bytes id
  -8 bytes x1 double float
  -8 bytes y1 double float
  -1 byte red
+ -64 bytes misc
  - 21 total bytes
 wayPoints
  -4 bytes id
  -8 bytes x1 double float
  -8 bytes y1 double float
+ -64 bytes misc
  - 20 total bytes
 --]]
 
@@ -189,6 +197,8 @@ c_tcm_map =
 	version_string = "",
 	staticCamera = false,
 
+	script = "",
+
 	walls_n = 0,
 	teleporters_n = 0,
 	playerSpawnPoints_n = 0,
@@ -223,7 +233,9 @@ c_tcm_entity =
 	id = 0,
 	p = tankbobs.m_vec2(),
 
-	m = {p = {}}  -- extra data (data not in tcm; eg position if on a path)
+	misc = "",
+
+	m = {p = {}}  -- extra and persistent data (data not directly loaded in map; e.g. position on current path
 }
 
 c_tcm_wall =
@@ -452,6 +464,7 @@ function c_tcm_read_map(map)
 	else
 		r.staticCamera = false
 	end
+	r.script = c_tcm_private_get(tankbobs.io_getStrL, i, false, 64)
 	-- strip trailing 0's from NULL-terminated strings passed by C
 	-- we might use getStr and avoid this but if the string uses all of the bytes getStr won't work
 	r.name = r.name:gsub("%z*$", "")
@@ -459,6 +472,7 @@ function c_tcm_read_map(map)
 	r.description = r.description:gsub("%z*$", "")
 	r.authors = r.authors:gsub("%z*$", "")
 	r.version_string = r.version_string:gsub("%z*$", "")
+	r.script = r.script:gsub("%z*$", "")
 
 	r.walls_n = c_tcm_private_get(tankbobs.io_getInt, i)
 	r.teleporters_n = c_tcm_private_get(tankbobs.io_getInt, i)
@@ -566,6 +580,9 @@ function c_tcm_read_map(map)
 			wall.static = false
 		end
 
+		wall.misc = c_tcm_private_get(tankbobs.io_getStrL, i, false, 64)
+		wall.misc = wall.misc:gsub("%z*$", "") 
+
 		table.insert(r.walls, wall)
 	end
 	r.uppermost = uppermost
@@ -586,6 +603,9 @@ function c_tcm_read_map(map)
 			teleporter.enabled = false
 		end
 
+		teleporter.misc = c_tcm_private_get(tankbobs.io_getStrL, i, false, 64)
+		teleporter.misc = teleporter.misc:gsub("%z*$", "") 
+
 		r.wayPointNetwork[-it] = {}
 
 		table.insert(r.teleporters, teleporter)
@@ -597,6 +617,9 @@ function c_tcm_read_map(map)
 		playerSpawnPoint.id = c_tcm_private_get(tankbobs.io_getInt, i)
 		playerSpawnPoint.p.x = c_tcm_private_get(tankbobs.io_getDouble, i)
 		playerSpawnPoint.p.y = c_tcm_private_get(tankbobs.io_getDouble, i)
+
+		playerSpawnPoint.misc = c_tcm_private_get(tankbobs.io_getStrL, i, false, 64)
+		playerSpawnPoint.misc = playerSpawnPoint.misc:gsub("%z*$", "") 
 
 		table.insert(r.playerSpawnPoints, playerSpawnPoint)
 	end
@@ -677,6 +700,9 @@ function c_tcm_read_map(map)
 			powerupSpawnPoint.focus = false
 		end
 
+		powerupSpawnPoint.misc = c_tcm_private_get(tankbobs.io_getStrL, i, false, 64)
+		powerupSpawnPoint.misc = powerupSpawnPoint.misc:gsub("%z*$", "") 
+
 		table.insert(r.powerupSpawnPoints, powerupSpawnPoint)
 	end
  
@@ -694,6 +720,9 @@ function c_tcm_read_map(map)
 		path.time = c_tcm_private_get(tankbobs.io_getDouble, i)
 		path.t = c_tcm_private_get(tankbobs.io_getInt, i)
 
+		path.misc = c_tcm_private_get(tankbobs.io_getStrL, i, false, 64)
+		path.misc = path.misc:gsub("%z*$", "") 
+
 		table.insert(r.paths, path)
 	end
   
@@ -708,6 +737,9 @@ function c_tcm_read_map(map)
 		else
 			controlPoint.red = false
 		end
+
+		controlPoint.misc = c_tcm_private_get(tankbobs.io_getStrL, i, false, 64)
+		controlPoint.misc = controlPoint.misc:gsub("%z*$", "") 
 
 		table.insert(r.controlPoints, controlPoint)
 	end
@@ -724,6 +756,9 @@ function c_tcm_read_map(map)
 			flag.red = false
 		end
 
+		flag.misc = c_tcm_private_get(tankbobs.io_getStrL, i, false, 64)
+		flag.misc = flag.misc:gsub("%z*$", "") 
+
 		table.insert(r.flags, flag)
 	end
   
@@ -735,6 +770,9 @@ function c_tcm_read_map(map)
 		wayPoint.p.y = c_tcm_private_get(tankbobs.io_getDouble, i)
 
 		r.wayPointNetwork[it] = {}
+
+		wayPoint.misc = c_tcm_private_get(tankbobs.io_getStrL, i, false, 64)
+		wayPoint.misc = wayPoint.misc:gsub("%z*$", "") 
 
 		table.insert(r.wayPoints, wayPoint)
 	end

@@ -71,6 +71,8 @@ class Properties : public QDialog, private Ui::PropertiesDialog
 		void linkedChanged(int state);
 		void focusChanged(int state);
 		void redChanged(int state);
+		void scriptChanged(const QString &text);
+		void miscChanged(const QString &text);
 };
 
 #endif

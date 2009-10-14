@@ -1,68 +1,68 @@
-map, medium_1, Forth, , Byron Johnson, 1.0, 1, 0
-wall, 1, 0, 100, 0, 97, 200, 97, 200, 100, 0, 1, 0, 0, 1, 0, 1, 1, global/brownish.png, 6, , 0, 0, 1
-wall, 1, 0, 100, 0, 0, 200, 0, 200, 100, 0, 1, 0, 0, 2, 0, 2, 1, global/abstract.png, 2, , 0, 1, 1
-wall, 1, 0, 100, 0, 0, 3, 0, 3, 100, 0, 1, 0, 0, 1, 0, 1, 1, global/brownish.png, 6, , 0, 0, 1
-wall, 1, 0, 0, 0, 3, 200, 3, 200, 0, 0, 1, 0, 0, 1, 0, 1, 1, global/brownish.png, 6, , 0, 0, 1
-wall, 1, 200, 100, 200, 0, 197, 0, 197, 100, 0, 1, 0, 0, 1, 0, 1, 1, global/brownish.png, 6, , 0, 0, 1
-wall, 1, 99, 81, 99, 97, 101, 97, 101, 81, 0, 1, 0, 0, 1, 0, 1, 1, global/brownish.png, 6, down, 1, 0, 1
-wall, 1, 197, 97, 197, 73, 186, 73, 186, 97, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary2.png, 12, , 0, 1, 1
-wall, 1, 9, 3, 9, 20, 12, 20, 12, 3, 0, 1, 0, 0, 1, 0, 1, 1, global/brownish.png, 6, , 0, 0, 1
-wall, 1, 9, 20, 6, 3, 3, 3, 6, 20, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 0
-wall, 1, 12, 6, 12, 3, 15, 3, 15, 6, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 0
-wall, 1, 12, 9, 12, 6, 15, 6, 15, 9, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 0
-wall, 1, 12, 9, 12, 12, 15, 12, 15, 9, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 0
-wall, 1, 15, 12, 15, 15, 12, 15, 12, 12, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 0
-wall, 1, 15, 3, 15, 12, 18, 12, 18, 3, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 0
-wall, 1, 18, 3, 18, 6, 21, 6, 21, 3, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 0
-wall, 1, 9, 91, 9, 96, 3, 97, 3, 91, 0, 1, 0, 0, 1, 0, 1, 1, global/teleporter.png, 6, , 0, 1, 1
-wall, 1, 191, 9, 191, 3, 197, 3, 197, 9, 0, 1, 0, 0, 1, 0, 1, 1, global/teleporter.png, 6, , 0, 1, 1
-wall, 1, 22, 3, 22, 11, 26, 9, 26, 3, 0, 1, 0, 0, 1, 0, 1, 1, , 0, remove, 1, 0, 1
-wall, 1, 25, 9, 21, 15, 11, 21, 12, 16, 0, 1, 0, 0, 1, 0, 1, 1, , 0, remove, 1, 0, 1
-wall, 1, 9, 19, 9, 22, 2, 22, 2, 19, 0, 1, 0, 0, 1, 0, 1, 1, , 0, remove, 1, 0, 1
-teleporter, ul, br, 6, 94, 1
-teleporter, br, ul, 194, 6, 1
-playerSpawnPoint, 95, 54
-playerSpawnPoint, 105, 54
-powerupSpawnPoint, 6, 6, shield health, 0, 90, 30, 0
-powerupSpawnPoint, 194, 93, railgun coilgun, 0, 30, 30, 0
-powerupSpawnPoint, 194, 6, health, 0, 30, 15, 0
-powerupSpawnPoint, 194, 6, ammo, 0, 30, 30, 0
-powerupSpawnPoint, 6, 94, health ammo, 0, 30, 30, 0
-powerupSpawnPoint, 97, 7, shotgun, 0, 30, 30, 0
-powerupSpawnPoint, 103, 7, machinegun, 0, 30, 30, 0
-powerupSpawnPoint, 6, 23, health, 0, 1800, 0, 0
-powerupSpawnPoint, 95, 54, health, 0, 1800, 0, 0
-powerupSpawnPoint, 95, 54, health, 0, 1800, 0, 0
-powerupSpawnPoint, 105, 54, health, 0, 1800, 0, 0
-powerupSpawnPoint, 105, 54, health, 0, 1800, 0, 0
-powerupSpawnPoint, 83, 42, health, 0, 1800, 0, 0
-powerupSpawnPoint, 93, 42, health, 0, 1800, 0, 0
-powerupSpawnPoint, 74, 24, saw, 0, 30, 30, 0
-powerupSpawnPoint, 195, 93, shield, 0, 30, 90, 0
-powerupSpawnPoint, 132, 44, health, 0, 1800, 0, 0
-powerupSpawnPoint, 153, 16, health, 0, 1800, 0, 0
-powerupSpawnPoint, 20, 59, health, 0, 1800, 0, 0
-powerupSpawnPoint, 34, 76, health, 0, 1800, 0, 0
-path, down, up, 96, 83, 1, 8
-path, up, down, 97, 6, 1, 8
-path, remove, remove_destination, -10, 57, 1, 0
-path, remove_destination, , -318, 335, 0, 0
-controlPoint, 6, 7, 0
-controlPoint, 100, 54, 0
-controlPoint, 15, 6, 0
-controlPoint, 15, 94, 0
-controlPoint, 194, 15, 0
-flag, 12, 24, 0
-flag, 193, 93, 1
-wayPoint, 6, 33
-wayPoint, 30, 93
-wayPoint, 67, 8
-wayPoint, 153, 92
-wayPoint, 192, 59
-wayPoint, 119, 41
-wayPoint, 42, 68
-wayPoint, 41, 55
-wayPoint, 53, 45
-wayPoint, 124, 77
-wayPoint, 130, 29
-wayPoint, 72, 70
+map, medium_1, Forth, , Byron Johnson, 1.0, 1, 0, official.lua
+wall, 1, 0, 100, 0, 97, 200, 97, 200, 100, 0, 1, 0, 0, 1, 0, 1, 1, global/brownish.png, 6, , 0, 0, 1, 
+wall, 1, 0, 100, 0, 0, 200, 0, 200, 100, 0, 1, 0, 0, 2, 0, 2, 1, global/abstract.png, 2, , 0, 1, 1, 
+wall, 1, 0, 100, 0, 0, 3, 0, 3, 100, 0, 1, 0, 0, 1, 0, 1, 1, global/brownish.png, 6, , 0, 0, 1, 
+wall, 1, 0, 0, 0, 3, 200, 3, 200, 0, 0, 1, 0, 0, 1, 0, 1, 1, global/brownish.png, 6, , 0, 0, 1, 
+wall, 1, 200, 100, 200, 0, 197, 0, 197, 100, 0, 1, 0, 0, 1, 0, 1, 1, global/brownish.png, 6, , 0, 0, 1, 
+wall, 1, 99, 81, 99, 97, 101, 97, 101, 81, 0, 1, 0, 0, 1, 0, 1, 1, global/brownish.png, 6, down, 1, 0, 1, 
+wall, 1, 197, 97, 197, 73, 186, 73, 186, 97, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary2.png, 12, , 0, 1, 1, 
+wall, 1, 9, 3, 9, 20, 12, 20, 12, 3, 0, 1, 0, 0, 1, 0, 1, 1, global/brownish.png, 6, , 0, 0, 1, 
+wall, 1, 9, 20, 6, 3, 3, 3, 6, 20, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 0, 
+wall, 1, 12, 6, 12, 3, 15, 3, 15, 6, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 0, 
+wall, 1, 12, 9, 12, 6, 15, 6, 15, 9, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 0, 
+wall, 1, 12, 9, 12, 12, 15, 12, 15, 9, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 0, 
+wall, 1, 15, 12, 15, 15, 12, 15, 12, 12, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 0, 
+wall, 1, 15, 3, 15, 12, 18, 12, 18, 3, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 0, 
+wall, 1, 18, 3, 18, 6, 21, 6, 21, 3, 0, 1, 0, 0, 1, 0, 1, 1, global/temporary1.png, 6, , 0, 0, 0, 
+wall, 1, 9, 91, 9, 96, 3, 97, 3, 91, 0, 1, 0, 0, 1, 0, 1, 1, global/teleporter.png, 6, , 0, 1, 1, 
+wall, 1, 191, 9, 191, 3, 197, 3, 197, 9, 0, 1, 0, 0, 1, 0, 1, 1, global/teleporter.png, 6, , 0, 1, 1, 
+wall, 1, 22, 3, 22, 11, 26, 9, 26, 3, 0, 1, 0, 0, 1, 0, 1, 1, , 0, remove, 1, 0, 1, 
+wall, 1, 25, 9, 21, 15, 11, 21, 12, 16, 0, 1, 0, 0, 1, 0, 1, 1, , 0, remove, 1, 0, 1, 
+wall, 1, 9, 19, 9, 22, 2, 22, 2, 19, 0, 1, 0, 0, 1, 0, 1, 1, , 0, remove, 1, 0, 1, 
+teleporter, ul, br, 6, 94, 1, 
+teleporter, br, ul, 194, 6, 1, 
+playerSpawnPoint, 95, 54, 
+playerSpawnPoint, 105, 54, 
+powerupSpawnPoint, 6, 6, shield health, 0, 90, 30, 0, 
+powerupSpawnPoint, 194, 93, railgun coilgun, 0, 30, 30, 0, 
+powerupSpawnPoint, 194, 6, health, 0, 30, 15, 0, 
+powerupSpawnPoint, 194, 6, ammo, 0, 30, 30, 0, 
+powerupSpawnPoint, 6, 94, health ammo, 0, 30, 30, 0, 
+powerupSpawnPoint, 97, 7, shotgun, 0, 30, 30, 0, 
+powerupSpawnPoint, 103, 7, machinegun, 0, 30, 30, 0, 
+powerupSpawnPoint, 6, 23, health, 0, 1800, 0, 0, 
+powerupSpawnPoint, 95, 54, health, 0, 1800, 0, 0, 
+powerupSpawnPoint, 95, 54, health, 0, 1800, 0, 0, 
+powerupSpawnPoint, 105, 54, health, 0, 1800, 0, 0, 
+powerupSpawnPoint, 105, 54, health, 0, 1800, 0, 0, 
+powerupSpawnPoint, 83, 42, health, 0, 1800, 0, 0, 
+powerupSpawnPoint, 93, 42, health, 0, 1800, 0, 0, 
+powerupSpawnPoint, 74, 24, saw, 0, 30, 30, 0, 
+powerupSpawnPoint, 195, 93, shield, 0, 30, 90, 0, 
+powerupSpawnPoint, 132, 44, health, 0, 1800, 0, 0, 
+powerupSpawnPoint, 153, 16, health, 0, 1800, 0, 0, 
+powerupSpawnPoint, 20, 59, health, 0, 1800, 0, 0, 
+powerupSpawnPoint, 34, 76, health, 0, 1800, 0, 0, 
+path, down, up, 96, 83, 1, 8, 
+path, up, down, 97, 6, 1, 8, 
+path, remove, remove_destination, -10, 57, 1, 0, 
+path, remove_destination, , -318, 335, 0, 0, 
+controlPoint, 6, 7, 0, 
+controlPoint, 100, 54, 0, 
+controlPoint, 15, 6, 0, 
+controlPoint, 15, 94, 0, 
+controlPoint, 194, 15, 0, 
+flag, 12, 24, 0, 
+flag, 193, 93, 1, 
+wayPoint, 6, 33, 
+wayPoint, 30, 93, 
+wayPoint, 67, 8, 
+wayPoint, 153, 92, 
+wayPoint, 192, 59, 
+wayPoint, 119, 41, 
+wayPoint, 42, 68, 
+wayPoint, 41, 55, 
+wayPoint, 53, 45, 
+wayPoint, 124, 77, 
+wayPoint, 130, 29, 
+wayPoint, 72, 70, 

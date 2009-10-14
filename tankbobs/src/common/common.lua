@@ -162,8 +162,12 @@ function common_print(level, ...)
 	end
 end
 
+STOP = -1337666
+
 function common_printError(level, ...)
-	if level < 0 then
+	if level == STOP then
+		error(...)
+	elseif level < 0 then
 		-- negative verbosity levels have the special meaning that it is possible that not everything has initialized, so print to stderr
 		io.stderr:write("(EE) ", ...)
 	else

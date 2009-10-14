@@ -531,6 +531,7 @@ static struct map_s
 	char version_s[64];
 	int version;
 	int staticCamera;
+	char script[64];
 } maps[MAX_MAPS];
 
 typedef struct wall_s wall_t;
@@ -551,6 +552,7 @@ static struct wall_s
 	int path;
 	int detail;
 	int staticW;
+	char misc[64];
 } walls[MAX_WALLS];
 
 typedef struct teleporter_s teleporter_t;
@@ -560,12 +562,14 @@ static struct teleporter_s
 	char target[MAX_STRING_STRUCT_CHARS];
 	double x1; double y1;
 	int enabled;
+	char misc[64];
 } teleporters[MAX_TELEPORTERS];
 
 typedef struct playerSpawnPoint_s playerSpawnPoint_t;
 static struct playerSpawnPoint_s
 {
 	double x1; double y1;
+	char misc[64];
 } playerSpawnPoints[MAX_PLAYERSPAWNPOINTS];
 
 typedef struct powerupSpawnPoint_s powerupSpawnPoint_t;
@@ -577,6 +581,7 @@ static struct powerupSpawnPoint_s
 	double repeat;
 	double initial;
 	int focus;
+	char misc[64];
 } powerupSpawnPoints[MAX_POWERUPSPAWNPOINTS];
 
 typedef struct path_s path_t;
@@ -587,6 +592,7 @@ static struct path_s
 	double x1; double y1;
 	int enabled;
 	double time;
+	char misc[64];
 } paths[MAX_PATHS];
 
 typedef struct controlPoint_s controlPoint_t;
@@ -594,6 +600,7 @@ static struct controlPoint_s
 {
 	double x1; double y1;
 	int red;
+	char misc[64];
 } controlPoints[MAX_CONTROLPOINTS];
 
 typedef struct flag_s flag_t;
@@ -601,12 +608,14 @@ static struct flag_s
 {
 	double x1; double y1;
 	int red;
+	char misc[64];
 } flags[MAX_FLAGS];
 
 typedef struct wayPoint_s wayPoint_t;
 static struct wayPoint_s
 {
 	double x1; double y1;
+	char misc[64];
 } wayPoints[MAX_WAYPOINTS];
 
 static int mc;
@@ -619,7 +628,7 @@ static int cc;
 static int fc;
 static int ac;
 
-static void add_map(const char *name, const char *title, const char *description, const char *authors, const char *version_s, int version, int staticCamera)
+static void add_map(const char *name, const char *title, const char *description, const char *authors, const char *version_s, int version, int staticCamera, const char *script)
 {
 	map_t *map = &maps[mc++];
 
@@ -636,9 +645,10 @@ static void add_map(const char *name, const char *title, const char *description
 	strncpy(map->version_s, version_s, sizeof(map->version_s));
 	map->version = version;
 	map->staticCamera = staticCamera;
+	strncpy(map->script, script, sizeof(map->script));
 }
 
-static void add_wall(int quad, double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double tx1, double ty1, double tx2, double ty2, double tx3, double ty3, double tx4, double ty4, const char *texture, int level, const char *target, int path, int detail, int staticW)
+static void add_wall(int quad, double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double tx1, double ty1, double tx2, double ty2, double tx3, double ty3, double tx4, double ty4, const char *texture, int level, const char *target, int path, int detail, int staticW, const char *misc)
 {
 	wall_t *wall = &walls[wc++];
 
@@ -673,7 +683,7 @@ static void add_wall(int quad, double x1, double y1, double x2, double y2, doubl
 	wall->staticW = staticW;
 }
 
-static void add_teleporter(const char *targetName, const char *target, double x1, double y1, int enabled)
+static void add_teleporter(const char *targetName, const char *target, double x1, double y1, int enabled, const char *misc)
 {
 	teleporter_t *teleporter = &teleporters[tc++];
 
@@ -690,7 +700,7 @@ static void add_teleporter(const char *targetName, const char *target, double x1
 	teleporter->enabled = enabled;
 }
 
-static void add_playerSpawnPoint(double x1, double y1)
+static void add_playerSpawnPoint(double x1, double y1, const char *misc)
 {
 	playerSpawnPoint_t *playerSpawnPoint = &playerSpawnPoints[lc++];
 
@@ -704,7 +714,7 @@ static void add_playerSpawnPoint(double x1, double y1)
 	playerSpawnPoint->y1 = y1;
 }
 
-static void add_powerupSpawnPoint(double x1, double y1, const char *powerupsToEnable, int linked, double repeat, double initial, int focus)
+static void add_powerupSpawnPoint(double x1, double y1, const char *powerupsToEnable, int linked, double repeat, double initial, int focus, const char *misc)
 {
 	powerupSpawnPoint_t *powerupSpawnPoint = &powerupSpawnPoints[oc++];
 
@@ -723,7 +733,7 @@ static void add_powerupSpawnPoint(double x1, double y1, const char *powerupsToEn
 	powerupSpawnPoint->focus = focus;
 }
 
-static void add_path(const char *targetName, const char *target, double x1, double y1, int enabled, double time)
+static void add_path(const char *targetName, const char *target, double x1, double y1, int enabled, double time, const char *misc)
 {
 	path_t *path = &paths[pc++];
 
@@ -741,7 +751,7 @@ static void add_path(const char *targetName, const char *target, double x1, doub
 	path->time = time;
 }
 
-static void add_controlPoint(double x1, double y1, int red)
+static void add_controlPoint(double x1, double y1, int red, const char *misc)
 {
 	controlPoint_t *controlPoint = &controlPoints[cc++];
 
@@ -756,7 +766,7 @@ static void add_controlPoint(double x1, double y1, int red)
 	controlPoint->red = red;
 }
 
-static void add_flag(double x1, double y1, int red)
+static void add_flag(double x1, double y1, int red, const char *misc)
 {
 	flag_t *flag = &flags[fc++];
 
@@ -771,7 +781,7 @@ static void add_flag(double x1, double y1, int red)
 	flag->red = red;
 }
 
-static void add_wayPoint(double x1, double y1)
+static void add_wayPoint(double x1, double y1, const char *misc)
 {
 	wayPoint_t *wayPoint = &wayPoints[ac++];
 
@@ -895,6 +905,7 @@ static int compile(const char *filename)
 					char version_s[MAX_STRING_SIZE];
 					int version;
 					int staticCamera;
+					char script[MAX_STRING_SIZE];
 
 					read_string(name);
 					read_string(title);
@@ -903,8 +914,9 @@ static int compile(const char *filename)
 					read_string(version_s);
 					version = read_int();
 					staticCamera = read_int();
+					read_string(script);
 
-					add_map(name, title, description, authors, version_s, version, staticCamera);
+					add_map(name, title, description, authors, version_s, version, staticCamera, script);
 				}
 				else if(strncmp(entity, "wall", sizeof(entity)) == 0)
 				{
@@ -923,6 +935,7 @@ static int compile(const char *filename)
 					int path;
 					int detail;
 					int staticW;
+					char misc[MAX_STRING_SIZE];
 
 					quad = read_int();
 					x1 = read_double();
@@ -947,8 +960,9 @@ static int compile(const char *filename)
 					path = read_int();
 					detail = read_int();
 					staticW = read_int();
+					read_string(misc);
 
-					add_wall(quad, x1, y1, x2, y2, x3, y3, x4, y4, tx1, ty1, tx2, ty2, tx3, ty3, tx4, ty4, texture, level, target, path, detail, staticW);
+					add_wall(quad, x1, y1, x2, y2, x3, y3, x4, y4, tx1, ty1, tx2, ty2, tx3, ty3, tx4, ty4, texture, level, target, path, detail, staticW, misc);
 				}
 				else if(strncmp(entity, "teleporter", sizeof(entity)) == 0)
 				{
@@ -956,23 +970,27 @@ static int compile(const char *filename)
 					char target[MAX_STRING_SIZE];
 					double x1, y1;
 					int enabled;
+					char misc[MAX_STRING_SIZE];
 
 					read_string(targetName);
 					read_string(target);
 					x1 = read_double();
 					y1 = read_double();
 					enabled = read_int();
+					read_string(misc);
 
-					add_teleporter(targetName, target, x1, y1, enabled);
+					add_teleporter(targetName, target, x1, y1, enabled, misc);
 				}
 				else if(strncmp(entity, "playerSpawnPoint", sizeof(entity)) == 0)
 				{
 					double x1, y1;
+					char misc[MAX_STRING_SIZE];
 
 					x1 = read_double();
 					y1 = read_double();
+					read_string(misc);
 
-					add_playerSpawnPoint(x1, y1);
+					add_playerSpawnPoint(x1, y1, misc);
 				}
 				else if(strncmp(entity, "powerupSpawnPoint", sizeof(entity)) == 0)
 				{
@@ -982,6 +1000,7 @@ static int compile(const char *filename)
 					double repeat;
 					double initial;
 					int focus;
+					char misc[MAX_STRING_SIZE];
 
 					x1 = read_double();
 					y1 = read_double();
@@ -990,8 +1009,9 @@ static int compile(const char *filename)
 					repeat = read_double();
 					initial = read_double();
 					focus = read_int();
+					read_string(misc);
 
-					add_powerupSpawnPoint(x1, y1, powerupsToEnable, linked, repeat, initial, focus);
+					add_powerupSpawnPoint(x1, y1, powerupsToEnable, linked, repeat, initial, focus, misc);
 				}
 				else if(strncmp(entity, "path", sizeof(entity)) == 0)
 				{
@@ -1000,6 +1020,7 @@ static int compile(const char *filename)
 					double x1, y1;
 					int enabled;
 					double time;
+					char misc[MAX_STRING_SIZE];
 
 					read_string(targetName);
 					read_string(target);
@@ -1007,39 +1028,46 @@ static int compile(const char *filename)
 					y1 = read_double();
 					enabled = read_int();
 					time = read_double();
+					read_string(misc);
 
-					add_path(targetName, target, x1, y1, enabled, time);
+					add_path(targetName, target, x1, y1, enabled, time, misc);
 				}
 				else if(strncmp(entity, "controlPoint", sizeof(entity)) == 0)
 				{
 					double x1, y1;
 					int red;
+					char misc[MAX_STRING_SIZE];
 
 					x1 = read_double();
 					y1 = read_double();
 					red = read_int();
+					read_string(misc);
 
-					add_controlPoint(x1, y1, red);
+					add_controlPoint(x1, y1, red, misc);
 				}
 				else if(strncmp(entity, "flag", sizeof(entity)) == 0)
 				{
 					double x1, y1;
 					int red;
+					char misc[MAX_STRING_SIZE];
 
 					x1 = read_double();
 					y1 = read_double();
 					red = read_int();
+					read_string(misc);
 
-					add_flag(x1, y1, red);
+					add_flag(x1, y1, red, misc);
 				}
 				else if(strncmp(entity, "wayPoint", sizeof(entity)) == 0)
 				{
 					double x1, y1;
+					char misc[MAX_STRING_SIZE];
 
 					x1 = read_double();
 					y1 = read_double();
+					read_string(misc);
 
-					add_wayPoint(x1, y1);
+					add_wayPoint(x1, y1, misc);
 				}
 
 				else
@@ -1093,6 +1121,7 @@ static int compile(const char *filename)
 	put_str(fout, maps[0].version_s, 64);
 	put_cint(fout, maps[0].version);
 	put_cchar(fout, maps[0].staticCamera);
+	put_str(fout, maps[0].script, 64);
 
 	put_cint(fout, wc);
 	put_cint(fout, tc);
@@ -1144,6 +1173,7 @@ static int compile(const char *filename)
 		put_cchar(fout, ((wall->path) ? (1) : (0)));
 		put_cchar(fout, ((wall->detail) ? (1) : (0)));
 		put_cchar(fout, ((wall->staticW) ? (1) : (0)));
+		put_str(fout, wall->misc, 64);
 	}
 
 	for(i = 0; i < tc; i++)
@@ -1168,6 +1198,7 @@ static int compile(const char *filename)
 		put_cdouble(fout, teleporter->x1);
 		put_cdouble(fout, teleporter->y1);
 		put_cchar(fout, ((teleporter->enabled) ? (1) : (0)));
+		put_str(fout, teleporter->misc, 64);
 	}
 
 	for(i = 0; i < lc; i++)
@@ -1177,6 +1208,7 @@ static int compile(const char *filename)
 		put_cint(fout, i);
 		put_cdouble(fout, playerSpawnPoint->x1);
 		put_cdouble(fout, playerSpawnPoint->y1);
+		put_str(fout, playerSpawnPoint->misc, 64);
 	}
 
 	for(i = 0; i < oc; i++)
@@ -1236,6 +1268,7 @@ static int compile(const char *filename)
 		put_cdouble(fout, powerupSpawnPoint->repeat);
 		put_cdouble(fout, powerupSpawnPoint->initial);
 		put_cchar(fout, powerupSpawnPoint->focus);
+		put_str(fout, powerupSpawnPoint->misc, 64);
 	}
 
 	for(i = 0; i < pc; i++)
@@ -1261,6 +1294,7 @@ static int compile(const char *filename)
 		put_cchar(fout, ((path->enabled) ? (1) : (0)));
 		put_cdouble(fout, path->time);
 		put_cint(fout, id);
+		put_str(fout, path->misc, 64);
 	}
 
 	for(i = 0; i < cc; i++)
@@ -1271,6 +1305,7 @@ static int compile(const char *filename)
 		put_cdouble(fout, controlPoint->x1);
 		put_cdouble(fout, controlPoint->y1);
 		put_cchar(fout, ((controlPoint->red) ? (1) : (0)));
+		put_str(fout, controlPoint->misc, 64);
 	}
 
 	for(i = 0; i < fc; i++)
@@ -1281,6 +1316,7 @@ static int compile(const char *filename)
 		put_cdouble(fout, flag->x1);
 		put_cdouble(fout, flag->y1);
 		put_cchar(fout, ((flag->red) ? (1) : (0)));
+		put_str(fout, flag->misc, 64);
 	}
 
 	for(i = 0; i < ac; i++)
@@ -1290,6 +1326,7 @@ static int compile(const char *filename)
 		put_cint(fout, i);
 		put_cdouble(fout, wayPoint->x1);
 		put_cdouble(fout, wayPoint->y1);
+		put_str(fout, wayPoint->misc, 64);
 	}
 
 	fclose(fout);

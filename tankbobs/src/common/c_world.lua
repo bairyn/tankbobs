@@ -510,6 +510,28 @@ function c_world_newWorld()
 
 	worldInitialized = true
 
+	if #c_tcm_current_map.script > 0 then
+		-- see if script exists
+		local filename = c_const_get("scripts_dir") .. c_tcm_current_map.script
+
+		local fin, err = io.open(filename, "r")
+		if not fin then
+			common_printError(STOP, "c_world_newWorld: map needs script '" .. c_tcm_current_map.script .. "', which doesn't exist")
+		else
+			fin:close()
+
+			local script, err = loadfile(filename)
+			if not script then
+				common_printError(STOP, "c_world_freeWorld: script '" .. c_tcm_current_map.script .. "' required by map could not compile: " .. err)
+			end
+
+			local status, err = pcall(script)
+			if not status then
+				common_printError(STOP, "c_world_freeWorld: script '" .. c_tcm_current_map.script .. "' required by map could not run: " .. err)
+			end
+		end
+	end
+
 	return true
 end
 

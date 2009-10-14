@@ -51,7 +51,10 @@ Properties::Properties(QWidget *parent)
 	{
 		if(selection == reinterpret_cast<void *>(static_cast<entities::PlayerSpawnPoint *>(*i)))
 		{
+			misc->setText(QString(reinterpret_cast<entities::PowerupSpawnPoint *>(selection)->misc.c_str()));
+
 			selected = true;
+			misc->setEnabled(true);
 		}
 	}
 	for(vector<entities::PowerupSpawnPoint *>::iterator i = powerupSpawnPoint.begin(); i != powerupSpawnPoint.end(); ++i)
@@ -63,6 +66,7 @@ Properties::Properties(QWidget *parent)
 			repeat->setText(QString::number(reinterpret_cast<entities::PowerupSpawnPoint *>(selection)->repeat));
 			initial->setText(QString::number(reinterpret_cast<entities::PowerupSpawnPoint *>(selection)->initial));
 			focus->setChecked(reinterpret_cast<entities::PowerupSpawnPoint *>(selection)->focus);
+			misc->setText(QString(reinterpret_cast<entities::PowerupSpawnPoint *>(selection)->misc.c_str()));
 
 			selected = true;
 			powerups->setEnabled(true);
@@ -73,6 +77,7 @@ Properties::Properties(QWidget *parent)
 			initial->setEnabled(true);
 			initialLabel->setEnabled(true);
 			focus->setEnabled(true);
+			misc->setEnabled(true);
 		}
 	}
 	for(vector<entities::Teleporter *>::iterator i = teleporter.begin(); i != teleporter.end(); ++i)
@@ -82,6 +87,7 @@ Properties::Properties(QWidget *parent)
 			targetName->setText(QString(reinterpret_cast<entities::Teleporter *>(selection)->targetName.c_str()));
 			target->setText(QString(reinterpret_cast<entities::Teleporter *>(selection)->target.c_str()));
 			enabled->setChecked(reinterpret_cast<entities::Teleporter *>(selection)->enabled);
+			misc->setText(QString(reinterpret_cast<entities::Teleporter *>(selection)->misc.c_str()));
 
 			selected = true;
 			targetName->setEnabled(true);
@@ -89,6 +95,7 @@ Properties::Properties(QWidget *parent)
 			target->setEnabled(true);
 			targetLabel->setEnabled(true);
 			enabled->setEnabled(true);
+			misc->setEnabled(true);
 		}
 	}
 	for(vector<entities::Wall *>::iterator i = wall.begin(); i != wall.end(); ++i)
@@ -110,6 +117,7 @@ Properties::Properties(QWidget *parent)
 			path->setChecked(reinterpret_cast<entities::Wall *>(selection)->path);
 			detail->setChecked(reinterpret_cast<entities::Wall *>(selection)->detail);
 			staticW->setChecked(reinterpret_cast<entities::Wall *>(selection)->staticW);
+			misc->setText(QString(reinterpret_cast<entities::Wall *>(selection)->misc.c_str()));
 
 			selected = true;
 			fourVertices->setEnabled(true);
@@ -139,6 +147,7 @@ Properties::Properties(QWidget *parent)
 			detail->setEnabled(true);
 			path->setEnabled(true);
 			staticW->setEnabled(true);
+			misc->setEnabled(true);
 		}
 	}
 	for(vector<entities::Path *>::iterator i = ::path.begin(); i != ::path.end(); ++i)
@@ -149,6 +158,7 @@ Properties::Properties(QWidget *parent)
 			target->setText(QString(reinterpret_cast<entities::Path *>(selection)->target.c_str()));
 			time->setText(QString::number(reinterpret_cast<entities::Path *>(selection)->time));
 			enabled->setChecked(reinterpret_cast<entities::Path *>(selection)->enabled);
+			misc->setText(QString(reinterpret_cast<entities::Path *>(selection)->misc.c_str()));
 
 			selected = true;
 			targetName->setEnabled(true);
@@ -158,6 +168,7 @@ Properties::Properties(QWidget *parent)
 			time->setEnabled(true);
 			timeLabel->setEnabled(true);
 			enabled->setEnabled(true);
+			misc->setEnabled(true);
 		}
 	}
 	for(vector<entities::ControlPoint *>::iterator i = ::controlPoint.begin(); i != ::controlPoint.end(); ++i)
@@ -165,9 +176,11 @@ Properties::Properties(QWidget *parent)
 		if(selection == reinterpret_cast<void *>(static_cast<entities::ControlPoint *>(*i)))
 		{
 			red->setChecked(reinterpret_cast<entities::ControlPoint *>(selection)->red);
+			misc->setText(QString(reinterpret_cast<entities::ControlPoint *>(selection)->misc.c_str()));
 
 			selected = true;
 			red->setEnabled(true);
+			misc->setEnabled(true);
 		}
 	}
 	for(vector<entities::Flag *>::iterator i = ::flag.begin(); i != ::flag.end(); ++i)
@@ -175,16 +188,21 @@ Properties::Properties(QWidget *parent)
 		if(selection == reinterpret_cast<void *>(static_cast<entities::Flag *>(*i)))
 		{
 			red->setChecked(reinterpret_cast<entities::Flag *>(selection)->red);
+			misc->setText(QString(reinterpret_cast<entities::Flag *>(selection)->misc.c_str()));
 
 			selected = true;
 			red->setEnabled(true);
+			misc->setEnabled(true);
 		}
 	}
 	for(vector<entities::WayPoint *>::iterator i = wayPoint.begin(); i != wayPoint.end(); ++i)
 	{
 		if(selection == reinterpret_cast<void *>(static_cast<entities::WayPoint *>(*i)))
 		{
+			misc->setText(QString(reinterpret_cast<entities::WayPoint *>(selection)->misc.c_str()));
+
 			selected = true;
+			misc->setEnabled(true);
 		}
 	}
 	if(!selected)
@@ -196,6 +214,7 @@ Properties::Properties(QWidget *parent)
 		mapversions->setText(QString(tmap.version_s.c_str()));
 		mapversion->setText(QString::number(tmap.version));
 		staticCamera->setChecked(tmap.staticCamera);
+		script->setText(tmap.script);
 
 		mapname->setEnabled(true);
 		mapnameLabel->setEnabled(true);
@@ -210,6 +229,7 @@ Properties::Properties(QWidget *parent)
 		mapversion->setEnabled(true);
 		mapversionLabel->setEnabled(true);
 		staticCamera->setEnabled(true);
+		script->setEnabled(true);
 	}
 
 	connect(mapname, SIGNAL(textChanged(const QString &)), this, SLOT(mapnameChanged(const QString &)));
@@ -247,6 +267,8 @@ Properties::Properties(QWidget *parent)
 	connect(linked, SIGNAL(stateChanged(int)), this, SLOT(linkedChanged(int)));
 	connect(focus, SIGNAL(stateChanged(int)), this, SLOT(focusChanged(int)));
 	connect(red, SIGNAL(stateChanged(int)), this, SLOT(redChanged(int)));
+	connect(script, SIGNAL(textChanged(const QString &)), this, SLOT(scriptChanged(const QString &)));
+	connect(misc, SIGNAL(textChanged(const QString &)), this, SLOT(miscChanged(const QString &)));
 }
 
 void Properties::textureChanged(const QString &text)
@@ -335,6 +357,47 @@ void Properties::targetChanged(const QString &text)
 	if(trm_isWall(selection))
 	{
 		reinterpret_cast<entities::Wall *>(selection)->target = util_qtcp(text);
+	}
+}
+
+void Properties::scriptChanged(const QString &text)
+{
+	tmap.script = util_qtcp(text);
+}
+
+void Properties::miscChanged(const QString &text)
+{
+	if(trm_isPlayerSpawnPoint(selection))
+	{
+		reinterpret_cast<entities::PlayerSpawnPoint *>(selection)->misc = util_qtcp(text);
+	}
+	if(trm_isPowerupSpawnPoint(selection))
+	{
+		reinterpret_cast<entities::PowerupSpawnPoint *>(selection)->misc = util_qtcp(text);
+	}
+	if(trm_isPath(selection))
+	{
+		reinterpret_cast<entities::Path *>(selection)->misc = util_qtcp(text);
+	}
+	if(trm_isTeleporter(selection))
+	{
+		reinterpret_cast<entities::Teleporter *>(selection)->misc = util_qtcp(text);
+	}
+	if(trm_isWall(selection))
+	{
+		reinterpret_cast<entities::Wall *>(selection)->misc = util_qtcp(text);
+	}
+	if(trm_isControlPoint(selection))
+	{
+		reinterpret_cast<entities::ControlPoint *>(selection)->misc = util_qtcp(text);
+	}
+	if(trm_isFlag(selection))
+	{
+		reinterpret_cast<entities::Flag *>(selection)->misc = util_qtcp(text);
+	}
+	if(trm_isWayPoint(selection))
+	{
+		reinterpret_cast<entities::WayPoint *>(selection)->misc = util_qtcp(text);
 	}
 }
 
