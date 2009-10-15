@@ -837,7 +837,7 @@ function c_world_pointInsideHull(p, hull)
 	return c
 end
 
-function c_world_pointIntersects(p)
+function c_world_pointIntersects(p, ignoreType)
 	local hull
 
 	local function t()
@@ -849,45 +849,53 @@ function c_world_pointIntersects(p)
 	end
 
 	-- walls
-	for _, v in pairs(c_tcm_current_map.walls) do
-		if not v.detail then
-			hull = v.m.pos
+	if ignoreType ~= "wall" then
+		for _, v in pairs(c_tcm_current_map.walls) do
+			if not v.detail then
+				hull = v.m.pos
 
-			if t() then
-				return true
+				if t() then
+					return true
+				end
 			end
 		end
 	end
 
 	-- tanks
-	for _, v in pairs(c_world_tanks) do
-		if v.exists then
-			hull = t_t_clone(c_world_tankHull(v))
+	if ignoreType ~= "tanks" then
+		for _, v in pairs(c_world_tanks) do
+			if v.exists then
+				hull = t_t_clone(c_world_tankHull(v))
 
-			if t() then
-				return true
+				if t() then
+					return true
+				end
 			end
 		end
 	end
 
 	-- projectiles
-	for _, v in pairs(c_weapon_getProjectiles()) do
-		if not v.collided then
-			hull = c_world_projectileHull(v)
+	if ignoreType ~= "projectile" then
+		for _, v in pairs(c_weapon_getProjectiles()) do
+			if not v.collided then
+				hull = c_world_projectileHull(v)
 
-			if t() then
-				return true
+				if t() then
+					return true
+				end
 			end
 		end
 	end
 
 	-- powerups
-	for _, v in pairs(c_world_powerups) do
-		if not v.collided then
-			hull = c_world_powerupHull(v)
+	if ignoreType ~= "powerup" then
+		for _, v in pairs(c_world_powerups) do
+			if not v.collided then
+				hull = c_world_powerupHull(v)
 
-			if t() then
-				return true
+				if t() then
+					return true
+				end
 			end
 		end
 	end
@@ -1919,7 +1927,15 @@ function c_world_teleporter_step(d, teleporter)
 	-- Don't handle powerups and projectiles
 end
 
-local function c_world_isTank(body)
+function c_world_isWall(body)
+	if tankbobs.w_getContents(body) == WALL then
+		return c_tcm_current_map.walls[tankbobs.w_getIndex(body)]
+	end
+
+	return nil
+end
+
+function c_world_isTank(body)
 	if tankbobs.w_getContents(body) == TANK then
 		return c_world_tanks[tankbobs.w_getIndex(body)]
 	end
@@ -1927,7 +1943,7 @@ local function c_world_isTank(body)
 	return nil
 end
 
-local function c_world_isProjectile(body)
+function c_world_isProjectile(body)
 	if tankbobs.w_getContents(body) == PROJECTILE then
 		return c_weapon_getProjectiles()[tankbobs.w_getIndex(body)]
 	end
@@ -1935,7 +1951,7 @@ local function c_world_isProjectile(body)
 	return nil
 end
 
-local function c_world_isPowerup(body)
+function c_world_isPowerup(body)
 	if tankbobs.w_getContents(body) == POWERUP then
 		return c_world_powerups[tankbobs.w_getIndex(body)]
 	end

@@ -3,3 +3,4 @@ Medium Games
 -9.8
 Medium-sized levels
 medium_1.tcm
+medium_2.tcm
