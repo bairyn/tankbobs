@@ -249,7 +249,7 @@ function client_banClient(client, reason, banner)
 end
 
 function client_unban(banID)
-	table.remove(bans, banID)
+	bans[banID] = nil
 	if bans[banID] then
 		bans[banID] = nil
 	end
@@ -356,7 +356,7 @@ local function client_disconnect(client, reason)
 			c_world_tank_remove(v.tank)
 
 			-- remove client
-			table.remove(clients, k)
+			clients[k] = nil
 
 			return
 		end

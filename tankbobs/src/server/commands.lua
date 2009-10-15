@@ -437,7 +437,7 @@ function exec(line)
 			if not results[1] then
 				s_printnl("exec: could not run '", execString, "': ", results[2])
 			else
-				table.remove(results, 1)
+				results[1] = nil
 				-- give the user the output
 				s_printnl("exec: code returned '", #results, "' results")
 				for _, v in pairs(results) do

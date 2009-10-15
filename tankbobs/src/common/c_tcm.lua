@@ -496,7 +496,7 @@ function c_tcm_read_map(map)
 			q = true
 		else
 			q = false
-			table.remove(wall.p, 4)
+			wall.p[4] = nil
 		end
 		wall.p[1].x = c_tcm_private_get(tankbobs.io_getDouble, i)
 		wall.p[1].y = c_tcm_private_get(tankbobs.io_getDouble, i)

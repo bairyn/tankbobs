@@ -693,11 +693,7 @@ end
 function c_world_tank_remove(tank)
 	for k, v in pairs(c_world_tanks) do
 		if v == tank then
-			table.remove(c_world_tanks, k)
-
-			if c_world_tanks[k] then
-				c_world_tanks[k] = nil
-			end
+			c_world_tanks[k] = nil
 		end
 	end
 end
@@ -807,7 +803,7 @@ function c_world_intersection(d, p1, p2, v1, v2)
 		if k <= lp1a then
 			v = v + d * v1
 		else
-			table.remove(p1a, k)
+			p1a[k] = nil
 		end
 	end
 	local lp2a = #p2a
@@ -815,7 +811,7 @@ function c_world_intersection(d, p1, p2, v1, v2)
 		if k <= lp2a then
 			v = v + d * v2
 		else
-			table.remove(p2a, k)
+			p2a[k] = nil
 		end
 	end
 
@@ -1001,7 +997,7 @@ function c_world_wallShape(p)
 		average:add(p[2])
 		average:add(p[3])
 		average:mul(0.3333333333333333)
-		table.remove(offsets, 4)
+		offsets[4] = nil
 		offsets[1](p[1] - average)
 		offsets[2](p[2] - average)
 		offsets[3](p[3] - average)
