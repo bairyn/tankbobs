@@ -133,6 +133,22 @@ function c_mods_prependFunction(name, f)
 	end
 end
 
+function c_mods_replaceFunction(name, f)
+	local base = _G[name]
+
+	local exists = false
+	for _, v in pairs(functions) do
+		if v[1] == name then
+			exists = true
+		end
+	end
+	if not exists then
+		table.insert(functions, {name, _G[name]})
+	end
+
+	_G[name] = f
+end
+
 function c_mods_restoreFunctions()
 	for _, v in pairs(functions) do
 		_G[v[1]] = v[2]
