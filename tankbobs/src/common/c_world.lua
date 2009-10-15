@@ -781,7 +781,12 @@ function c_world_tank_checkSpawn(d, tank)
 
 	-- spawn
 	tank.p(playerSpawnPoint.p)
-	return c_world_spawnTank(tank)
+	c_world_spawnTank(tank)
+
+	c_world_spawnTank_misc(tank)
+end
+
+function c_world_spawnTank_misc(tank)
 end
 
 local p1a = {nil, nil, nil}

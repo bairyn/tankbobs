@@ -91,9 +91,22 @@ function c_mods_finish()  -- This function is called before the cleanup code is 
 end
 
 
+local functions = {}
+
 -- c_mods_appendFunction appends f to a function by the name of 'name'.  The function must have global scope.  The results of the base function are dropped.
 function c_mods_appendFunction(name, f)
 	local base = _G[name]
+
+	local exists = false
+	for _, v in pairs(functions) do
+		if v[1] == name then
+			exists = true
+		end
+	end
+	if not exists then
+		table.insert(functions, {name, _G[name]})
+	end
+
 	_G[name] = function (...)
 		base(...)
 		return f(...)
@@ -103,10 +116,29 @@ end
 -- c_mods_appendFunction prepends f to a function by the name of 'name'.  The function must have global scope.  The results of the prepended function are dropped.
 function c_mods_prependFunction(name, f)
 	local base = _G[name]
+
+	local exists = false
+	for _, v in pairs(functions) do
+		if v[1] == name then
+			exists = true
+		end
+	end
+	if not exists then
+		table.insert(functions, {name, _G[name]})
+	end
+
 	_G[name] = function (...)
 		f(...)
 		return base(...)
 	end
+end
+
+function c_mods_restoreFunctions()
+	for _, v in pairs(functions) do
+		_G[v[1]] = v[2]
+	end
+
+	functions = {}
 end
 
 -- this function appends f to freeWorld.  This is useful to set an exit function for level scripts.
