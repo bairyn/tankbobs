@@ -274,6 +274,31 @@ local function game_drawWorld(d)
 		-- draw tanks and walls
 		for i = 1, c_const_get("tcm_maxLevel") do
 			if i == c_const_get("tcm_tankLevel") then
+				-- draw tank-level things
+
+				-- trails
+				for k, v in pairs(trails) do
+					local breaking = false repeat
+						-- {time left, maximum intensity, list}
+						v[1] = v[1] - d
+						if v[1] <= 0 then
+							gl.DeleteLists(v[3], 1)
+
+							if trails[k] then
+								trails[k] = nil
+							end
+
+							breaking = false break
+						end
+
+						gl.Color(1, 1, 1, v[1] / v[2])
+						gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, v[2] / v[3])
+						gl.PushMatrix()
+							gl.CallList(v[3])
+						gl.PopMatrix()
+					until true if breaking then break end
+				end
+
 				-- render tanks
 				for k, v in pairs(c_world_getTanks()) do
 					if v.exists then
@@ -615,29 +640,6 @@ local function game_drawWorld(d)
 					gl.CallList(c_weapon_getWeapons()[v.weapon].m.p.projectileList)
 				gl.PopMatrix()
 			end
-		end
-
-		-- trails
-		for k, v in pairs(trails) do
-			local breaking = false repeat
-				-- {time left, maximum intensity, list}
-				v[1] = v[1] - d
-				if v[1] <= 0 then
-					gl.DeleteLists(v[3], 1)
-
-					if trails[k] then
-						trails[k] = nil
-					end
-
-					breaking = false break
-				end
-
-				gl.Color(1, 1, 1, v[1] / v[2])
-				gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, v[2] / v[3])
-				gl.PushMatrix()
-					gl.CallList(v[3])
-				gl.PopMatrix()
-			until true if breaking then break end
 		end
 	gl.PopMatrix()
 end
