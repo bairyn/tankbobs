@@ -173,7 +173,7 @@ function game_end()
 
 	-- free renderer stuff
 	gl.DeleteTextures(wall_textures)
-	for k, v in pairs(trails) do
+	for _, v in pairs(trails) do
 		if gl.IsList(v[3]) then
 			gl.DeleteLists(v[3], 1)
 		end
@@ -619,21 +619,25 @@ local function game_drawWorld(d)
 
 		-- trails
 		for k, v in pairs(trails) do
-			-- {time left, maximum intensity, list}
-			v[1] = v[1] - d
-			if v[1] <= 0 then
-				gl.DeleteLists(v[3], 1)
+			local breaking = false repeat
+				-- {time left, maximum intensity, list}
+				v[1] = v[1] - d
+				if v[1] <= 0 then
+					gl.DeleteLists(v[3], 1)
 
-				table.remove(trails, k)
+					if trails[k] then
+						trails[k] = nil
+					end
 
-				return
-			end
+					breaking = false break
+				end
 
-			gl.Color(1, 1, 1, v[1] / v[2])
-			gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, v[2] / v[3])
-			gl.PushMatrix()
-				gl.CallList(v[3])
-			gl.PopMatrix()
+				gl.Color(1, 1, 1, v[1] / v[2])
+				gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, v[2] / v[3])
+				gl.PushMatrix()
+					gl.CallList(v[3])
+				gl.PopMatrix()
+			until true if breaking then break end
 		end
 	gl.PopMatrix()
 end
@@ -761,62 +765,53 @@ function game_step(d)
 						end
 
 						if c_weapon_getWeapons()[v.weapon].trail ~= 0 and c_weapon_getWeapons()[v.weapon].trailWidth ~= 0 then
-							-- calculate the beginning and end point before the insert
+							-- calculate the beginning and end point before inserting
 							local start, endP = tankbobs.m_vec2(v.p), tankbobs.m_vec2()
-							local vec = tankbobs.m_vec2()
+							local tmp = tankbobs.m_vec2()
 							local list = gl.GenLists(1)
 							local b
 
-							vec.t = v.r
-							vec.R = c_const_get("trail_startDistance")
-							start:add(vec)
+							start.R = c_const_get("trail_startDistance")
+							start.t = v.r
+							start:add(v.p)
 
 							endP(start)
-							vec.R = c_const_get("trail_maxDistance")
-							endP:add(vec)
+							tmp.R = c_const_get("trail_maxDistance")
+							tmp.t = v.r
+							endP:add(tmp)
 
-							b, vec = c_world_findClosestIntersection(start, endP)
-							if b then
+							b, vec, _, _ = c_world_findClosestIntersection(start, endP, "projectile")
+							if b and vec then  -- FIXME: vec can be nil if b is not true?
 								endP = vec
 							end
 
 							gl.NewList(list, "COMPILE")
 								local offset = tankbobs.m_vec2()
-								local tmp = tankbobs.m_vec2()
 
-								offset.t = -1 / (endP - start).t
-								offset.R = c_weapon_getWeapons()[v.weapon].trailWidth
+								offset.R = c_weapon_getWeapons()[v.weapon].trailWidth / 2
+								offset.t = (endP - start).t + (2 * math.pi / 4)
 
 								gl.BindTexture("TEXTURE_2D", c_weapon_getWeapons()[v.weapon].m.p.projectileTexture[1])
 								gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
 								gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_S", "REPEAT")
 								gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_T", "REPEAT")
 
-								gl.Begin("QUADS")
+								gl.Begin("TRIANGLES")
 									local length = (endP - start).R
 
 									tmp(c_weapon_getWeapons()[v.weapon].projectileTexturer[1])
-									tmp.R = tmp.R * length / c_weapon_getWeapons()[v.weapon].projectileRender[1].R
-									gl.TexCoord(tmp.x, tmp.y)
-									tmp = start + offset
-									gl.Vertex(tmp.x, tmp.y)
-
-									tmp(c_weapon_getWeapons()[v.weapon].projectileTexturer[2])
-									tmp.R = tmp.R * length / c_weapon_getWeapons()[v.weapon].projectileRender[2].R
 									gl.TexCoord(tmp.x, tmp.y)
 									tmp = start - offset
 									gl.Vertex(tmp.x, tmp.y)
 
-									tmp(c_weapon_getWeapons()[v.weapon].projectileTexturer[3])
-									tmp.R = tmp.R * length / c_weapon_getWeapons()[v.weapon].projectileRender[3].R
+									tmp(c_weapon_getWeapons()[v.weapon].projectileTexturer[2])
 									gl.TexCoord(tmp.x, tmp.y)
-									tmp = endP - offset
+									tmp = start + offset
 									gl.Vertex(tmp.x, tmp.y)
 
-									tmp(c_weapon_getWeapons()[v.weapon].projectileTexturer[4])
-									tmp.R = tmp.R * length / c_weapon_getWeapons()[v.weapon].projectileRender[4].R
-									gl.TexCoord(tmp.x, tmp.y)
-									tmp = endP + offset
+									tmp(c_weapon_getWeapons()[v.weapon].projectileTexturer[3])
+									gl.TexCoord(tmp.x, tmp.y * length)
+									tmp(endP)
 									gl.Vertex(tmp.x, tmp.y)
 								gl.End()
 							gl.EndList()

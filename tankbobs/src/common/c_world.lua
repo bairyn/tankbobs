@@ -120,7 +120,7 @@ function c_world_init()
 	c_const_set("projectile_clipmask", WALL + TANK + PROJECTILE, 1)
 	c_const_set("projectile_isSensor", false, 1)
 
-	c_const_set("world_behind", 5000, 1)  -- (in direct ms)
+	c_const_set("world_behind", 5000, 1)  -- in ms (compared directly against SDL_GetTicks()
 	behind = c_const_get("world_behind")
 
 	c_const_set("world_timeWrapTest", -99999)
@@ -1052,7 +1052,7 @@ function c_world_tank_canSpawn(d, tank)
 	return true
 end
 
-function c_world_findClosestIntersection(start, endP)
+function c_world_findClosestIntersection(start, endP, ignoreType)
 	-- test against the world and find the closest intersection point
 	-- returns false; or true, intersectionPoint, typeOfTarget, target
 	local lastPoint, currentPoint = nil
@@ -1061,98 +1061,104 @@ function c_world_findClosestIntersection(start, endP)
 	local b, intersection
 
 	-- walls
-	for _, v in pairs(c_tcm_current_map.walls) do
-		if not v.detail then
-			hull = v.m.pos
-			local t = v
-			for _, v in pairs(hull) do
-				currentPoint = v
-				if not lastPoint then
-					lastPoint = hull[#hull]
-				end
-
-				b, intersection = tankbobs.m_edge(lastPoint, currentPoint, start, endP)
-				if b and intersection then  -- FIXME: figure out why b can be true while intersection is nil
-					if not minDistance then
-						minIntersection = intersection
-						minDistance = math.abs((intersection - start).R)
-						typeOfTarget = "wall"
-						target = t
-					elseif math.abs((intersection - start).R) < minDistance then
-						minIntersection = intersection
-						minDistance = math.abs((intersection - start).R)
-						typeOfTarget = "wall"
-						target = t
+	if ignoreType ~= "wall" then
+		for _, v in pairs(c_tcm_current_map.walls) do
+			if not v.detail then
+				hull = v.m.pos
+				local t = v
+				for _, v in pairs(hull) do
+					currentPoint = v
+					if not lastPoint then
+						lastPoint = hull[#hull]
 					end
-				end
 
-				lastPoint = currentPoint
+					b, intersection = tankbobs.m_edge(lastPoint, currentPoint, start, endP)
+					if b and intersection then  -- FIXME: figure out why b can be true while intersection is nil
+						if not minDistance then
+							minIntersection = intersection
+							minDistance = math.abs((intersection - start).R)
+							typeOfTarget = "wall"
+							target = t
+						elseif math.abs((intersection - start).R) < minDistance then
+							minIntersection = intersection
+							minDistance = math.abs((intersection - start).R)
+							typeOfTarget = "wall"
+							target = t
+						end
+					end
+
+					lastPoint = currentPoint
+				end
+				lastPoint = nil
 			end
-			lastPoint = nil
 		end
 	end
 
 	-- tanks
-	for _, v in pairs(c_world_tanks) do
-		if v.exists then
-			hull = t_t_clone(c_world_tankHull(v))
-			local t = v
-			for _, v in pairs(hull) do
-				currentPoint = v
-				if not lastPoint then
-					lastPoint = hull[#hull]
-				end
-
-				b, intersection = tankbobs.m_edge(lastPoint, currentPoint, start, endP)
-				if b then
-					if not minDistance then
-						minIntersection = intersection
-						minDistance = math.abs((intersection - start).R)
-						typeOfTarget = "tank"
-						target = t
-					elseif math.abs((intersection - start).R) < minDistance then
-						minIntersection = intersection
-						minDistance = math.abs((intersection - start).R)
-						typeOfTarget = "tank"
-						target = t
+	if ignoreType ~= "tank" then
+		for _, v in pairs(c_world_tanks) do
+			if v.exists then
+				hull = t_t_clone(c_world_tankHull(v))
+				local t = v
+				for _, v in pairs(hull) do
+					currentPoint = v
+					if not lastPoint then
+						lastPoint = hull[#hull]
 					end
-				end
 
-				lastPoint = currentPoint
+					b, intersection = tankbobs.m_edge(lastPoint, currentPoint, start, endP)
+					if b then
+						if not minDistance then
+							minIntersection = intersection
+							minDistance = math.abs((intersection - start).R)
+							typeOfTarget = "tank"
+							target = t
+						elseif math.abs((intersection - start).R) < minDistance then
+							minIntersection = intersection
+							minDistance = math.abs((intersection - start).R)
+							typeOfTarget = "tank"
+							target = t
+						end
+					end
+
+					lastPoint = currentPoint
+				end
+				lastPoint = nil
 			end
-			lastPoint = nil
 		end
 	end
 
 	-- projectiles
-	for _, v in pairs(c_weapon_getProjectiles()) do
-		if not v.collided then
-			hull = c_world_projectileHull(v)
-			local t = v
-			for _, v in pairs(hull) do
-				currentPoint = v
-				if not lastPoint then
-					lastPoint = hull[#hull]
-				end
-
-				b, intersection = tankbobs.m_edge(lastPoint, currentPoint, start, endP)
-				if b then
-					if not minDistance then
-						minIntersection = intersection
-						minDistance = math.abs((intersection - start).R)
-						typeOfTarget = "projectile"
-						target = t
-					elseif math.abs((intersection - start).R) < minDistance then
-						minIntersection = intersection
-						minDistance = math.abs((intersection - start).R)
-						typeOfTarget = "projectile"
-						target = t
+	if ignoreType ~= "projectile" then
+		for _, v in pairs(c_weapon_getProjectiles()) do
+			if not v.collided then
+				hull = c_world_projectileHull(v)
+				local t = v
+				for _, v in pairs(hull) do
+					currentPoint = v
+					if not lastPoint then
+						lastPoint = hull[#hull]
 					end
-				end
 
-				lastPoint = currentPoint
+					b, intersection = tankbobs.m_edge(lastPoint, currentPoint, start, endP)
+					if b then
+						if not minDistance then
+							minIntersection = intersection
+							minDistance = math.abs((intersection - start).R)
+							typeOfTarget = "projectile"
+							target = t
+						elseif math.abs((intersection - start).R) < minDistance then
+							minIntersection = intersection
+							minDistance = math.abs((intersection - start).R)
+							typeOfTarget = "projectile"
+							target = t
+						end
+					end
+
+					lastPoint = currentPoint
+				end
+				lastPoint = nil
 			end
-			lastPoint = nil
 		end
 	end
 
@@ -2199,8 +2205,8 @@ function c_world_step(d)
 			c_world_private_offsetWorldTimers(d * 1000)
 		else
 			while worldTime < t do
-				if t - worldTime > behind then
-					worldTime = t_t_getTicks()
+				if c_world_isBehind() then
+					c_world_resetBehind()
 
 					break
 				end
@@ -2247,6 +2253,19 @@ function c_world_step(d)
 			end
 		end
 	end
+end
+
+function c_world_getWorldTime()
+end
+
+function c_world_isBehind()
+	if t_t_getTicks() - worldTime > behind then
+		return true
+	end
+end
+
+function c_world_resetBehind()
+	worldTime = t_t_getTicks()
 end
 
 function c_world_stepTime(t)

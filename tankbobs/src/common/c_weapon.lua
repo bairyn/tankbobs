@@ -242,8 +242,8 @@ function c_weapon_init()
 	weapon.shotgunClips = false
 	weapon.meleeRange = 0
 	weapon.width = 0
-	weapon.trail = 4
-	weapon.trailWidth = 1.5
+	weapon.trail = 1
+	weapon.trailWidth = 2
 
 	weapon.texturer[2](0, 1)
 	weapon.texturer[3](0, 0)
@@ -264,14 +264,14 @@ function c_weapon_init()
 	weapon.projectileHull[2](-1, -1)
 	weapon.projectileHull[3](1,  -1)
 	weapon.projectileHull[4](1,   1)
-	weapon.projectileTexturer[1](0, 1)
-	weapon.projectileTexturer[2](0, 0)
-	weapon.projectileTexturer[3](1, 0)
-	weapon.projectileTexturer[4](1, 1)
-	weapon.projectileRender[2](-25, 25)
-	weapon.projectileRender[3](-25, -25)
-	weapon.projectileRender[4](25, -25)
-	weapon.projectileRender[1](25, -25)
+	weapon.projectileTexturer[1](0, 0)
+	weapon.projectileTexturer[2](1, 0)
+	weapon.projectileTexturer[3](0.5, 0.2)
+	weapon.projectileTexturer[4](0, 0)
+	weapon.projectileRender[1](0, 0)
+	weapon.projectileRender[2](0, 0)
+	weapon.projectileRender[3](0, 0)
+	weapon.projectileRender[4](0, 0)
 
 	-- instagun
 	weapon = c_weapon:new()
@@ -298,8 +298,8 @@ function c_weapon_init()
 	weapon.shotgunClips = false
 	weapon.meleeRange = 0
 	weapon.width = 0
-	weapon.trail = 4
-	weapon.trailWidth = 0.5
+	weapon.trail = 1
+	weapon.trailWidth = 2
 
 	weapon.texturer[2](0, 1)
 	weapon.texturer[3](0, 0)
@@ -320,14 +320,14 @@ function c_weapon_init()
 	weapon.projectileHull[2](-1, -1)
 	weapon.projectileHull[3](1,  -1)
 	weapon.projectileHull[4](1,   1)
-	weapon.projectileTexturer[1](0, 1)
-	weapon.projectileTexturer[2](0, 0)
-	weapon.projectileTexturer[3](1, 0)
-	weapon.projectileTexturer[4](1, 1)
-	weapon.projectileRender[2](-25, 25)
-	weapon.projectileRender[3](-25, -25)
-	weapon.projectileRender[4](25, -25)
-	weapon.projectileRender[1](25, -25)
+	weapon.projectileTexturer[1](0, 0)
+	weapon.projectileTexturer[2](1, 0)
+	weapon.projectileTexturer[3](0.5, 0.2)
+	weapon.projectileTexturer[4](0, 0)
+	weapon.projectileRender[1](0, 0)
+	weapon.projectileRender[2](0, 0)
+	weapon.projectileRender[3](0, 0)
+	weapon.projectileRender[4](0, 0)
 
 	-- coilgun
 	weapon = c_weapon:new()
@@ -355,7 +355,7 @@ function c_weapon_init()
 	weapon.meleeRange = 0
 	weapon.width = 0
 	weapon.trail = 0.25
-	weapon.trailWidth = 0.75
+	weapon.trailWidth = 1.5
 
 	weapon.texturer[2](0, 1)
 	weapon.texturer[3](0, 0)
@@ -376,14 +376,14 @@ function c_weapon_init()
 	weapon.projectileHull[2](-1, -1)
 	weapon.projectileHull[3](1,  -1)
 	weapon.projectileHull[4](1,   1)
-	weapon.projectileTexturer[1](0, 1)
-	weapon.projectileTexturer[2](0, 0)
-	weapon.projectileTexturer[3](1, 0)
-	weapon.projectileTexturer[4](1, 1)
-	weapon.projectileRender[2](-20, 20)
-	weapon.projectileRender[3](-20, -20)
-	weapon.projectileRender[4](20, -20)
-	weapon.projectileRender[1](20, -20)
+	weapon.projectileTexturer[1](0, 0)
+	weapon.projectileTexturer[2](1, 0)
+	weapon.projectileTexturer[3](0.5, 0.2)
+	weapon.projectileTexturer[4](0, 0)
+	weapon.projectileRender[1](0, 0)
+	weapon.projectileRender[2](0, 0)
+	weapon.projectileRender[3](0, 0)
+	weapon.projectileRender[4](0, 0)
 
 	-- saw
 	weapon = c_weapon:new()

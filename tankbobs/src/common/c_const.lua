@@ -84,7 +84,7 @@ function c_const_init()
 		end
 
 		key = k
-		backup = clone(const)
+		backup = clone(true, const, backup)
 	end
 
 	function c_const_restore(k)
@@ -93,7 +93,7 @@ function c_const_init()
 		end
 
 		const = {}
-		clone(backup, const)
+		clone(true, backup, const)
 	end
 
 	c_const_set("const_setError", true, -1)  -- error by default

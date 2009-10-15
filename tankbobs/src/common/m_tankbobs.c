@@ -312,6 +312,8 @@ int t_explode(lua_State *L)
 	return 1;
 }
 
+#define TABLESIZE 1024 * 1024  // FIXME: fix segfault when dynamic memory is used when cloning large tables, and then lower this value
+
 typedef struct table_s table_t;
 struct table_s
 {
@@ -320,7 +322,7 @@ struct table_s
 	table_t *next;
 } moreTraversedTables;
 
-static const void *traversedTables[BUFSIZE];
+static const void *traversedTables[TABLESIZE];
 static const void **nextTable;
 static table_t *lastDynTable;
 static int tableDynMem = FALSE;
