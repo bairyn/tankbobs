@@ -492,7 +492,7 @@ function c_world_newWorld()
 	end
 
 	for k, v in pairs(c_tcm_current_map.powerupSpawnPoints) do
-		v.m.nextPowerupTime = t_t_getTicks() + c_const_get("world_time") * c_config_get("game.timescale") * v.initial
+		v.m.nextPowerupTime = t_t_getTicks() + c_world_timeMultiplier(v.initial)
 		local enabled = false
 		for k, vs in pairs(v.enabledPowerups) do
 			if vs then
@@ -654,7 +654,7 @@ function c_world_tank_die(tank, t)
 		tank.m.flag = nil
 	end
 
-	tank.nextSpawnTime = t + c_const_get("world_time") * c_config_get("game.timescale") * c_const_get("tank_spawnTime")
+	tank.nextSpawnTime = t + c_world_timeMultiplier(c_const_get("tank_spawnTime"))
 	if c_world_gameType == DEATHMATCH then
 		if tank.killer and tank.killer ~= tank then
 			tank.killer.score = tank.killer.score + 1
@@ -728,7 +728,13 @@ local function c_world_spawnTank(tank)
 		tank.body = nil
 	end
 
-	tank.lastFireTime = tankbobs.t_getTicks()
+	local weapon = c_weapon_getWeapons()[tank.weapon]
+
+	if weapon then
+		tank.lastFireTime = tankbobs.t_getTicks() - c_world_timeMultiplier(weapon.repeatRate)
+	else
+		tank.lastFireTime = tankbobs.t_getTicks()
+	end
 
 	-- add a physical body
 	tank.body = tankbobs.w_addBody(tank.p, tank.r, c_const_get("tank_canSleep"), c_const_get("tank_isBullet"), c_const_get("tank_linearDamping"), c_const_get("tank_angularDamping"), tank.h, c_const_get("tank_density"), c_const_get("tank_friction"), c_const_get("tank_restitution"), not c_const_get("tank_static"), c_const_get("tank_contentsMask"), c_const_get("tank_clipmask"), c_const_get("tank_isSensor"), index)
@@ -1250,7 +1256,7 @@ function c_world_tank_stepAhead(fromTime, toTime)
 		while(i ~= to) do
 			local breaking = false repeat
 				tank.state = history[i][2]
-				local length = (history[i + 1][1] - history[i][1]) / (c_const_get("world_time") * c_config_get("game.timescale"))
+				local length = (history[i + 1][1] - history[i][1]) / (c_world_timeMultiplier())
 				if length <= 0 then
 					length = 1.0E-6  -- inaccurate guess
 				end
@@ -1326,7 +1332,7 @@ function c_world_tank_step(d, tank)
 
 		if not tank.cd.lastChasePoint then
 			tank.cd.lastChasePoint = t
-		elseif tank.cd.lastChasePoint + c_const_get("game_chasePointTime") * c_const_get("world_time") * c_config_get("game.timescale") <= t and not tank.tagged and tagged then
+		elseif tank.cd.lastChasePoint + c_world_timeMultiplier(c_const_get("game_chasePointTime")) <= t and not tank.tagged and tagged then
 			-- reward a point every 10 seconds alive while not tagged
 			tank.cd.lastChasePoint = t
 			tank.score = tank.score + 1
@@ -1550,11 +1556,11 @@ function c_world_powerupSpawnPoint_step(d, powerupSpawnPoint)
 
 	if powerupSpawnPoint.linked then
 		if not lastPowerupSpawnTime then
-			lastPowerupSpawnTime = t + c_const_get("world_time") * c_config_get("game.timescale") * powerupSpawnPoint.initial - c_const_get("world_time") * c_config_get("game.timescale") * powerupSpawnPoint["repeat"]
+			lastPowerupSpawnTime = t + c_world_timeMultiplier(powerupSpawnPoint.initial) - c_world_timeMultiplier(powerupSpawnPoint["repeat"])
 		end
 
 		if not nextPowerupSpawnPoint or powerupSpawnPoint == nextPowerupSpawnPoint then
-			if t >= lastPowerupSpawnTime + c_const_get("world_time") * c_config_get("game.timescale") * powerupSpawnPoint["repeat"] then
+			if t >= lastPowerupSpawnTime + c_world_timeMultiplier(powerupSpawnPoint["repeat"]) then
 				lastPowerupSpawnTime = t
 				spawn = true
 
@@ -1580,7 +1586,7 @@ function c_world_powerupSpawnPoint_step(d, powerupSpawnPoint)
 	end
 
 	if spawn then
-		powerupSpawnPoint.m.nextPowerupTime = t + c_const_get("world_time") * c_config_get("game.timescale") * powerupSpawnPoint["repeat"]
+		powerupSpawnPoint.m.nextPowerupTime = t + c_world_timeMultiplier(powerupSpawnPoint["repeat"])
 
 		if c_world_canPowerupSpawn(d, powerupSpawnPoint) then
 			-- make sure there's not too many powerups
@@ -1801,10 +1807,10 @@ function c_world_controlPoint_step(d, controlPoint)
 					c_world_blueTeam.score = c_world_blueTeam.score + 1
 				end
 
-				controlPoint.m.nextPointTime = controlPoint.m.nextPointTime + c_const_get("world_time") * c_config_get("game.timescale") * c_const_get("controlPoint_rate")
+				controlPoint.m.nextPointTime = controlPoint.m.nextPointTime + c_world_timeMultiplier(c_const_get("controlPoint_rate"))
 			end
 		else
-			controlPoint.m.nextPointTime = t + c_const_get("world_time") * c_config_get("game.timescale") * c_const_get("controlPoint_rate")
+			controlPoint.m.nextPointTime = t + c_world_timeMultiplier(c_const_get("controlPoint_rate"))
 		end
 	end
 end
@@ -2056,7 +2062,7 @@ function c_world_contactListener(shape1, shape2, body1, body2, position, separat
 					taggedTank.cd.lastChasePoint = t_t_getTicks()
 					taggedTank.tagged = false
 					otherTank.tagged = true
-					otherTank.m.tagProtection = t_t_getTicks() + c_const_get("game_tagProtection") * c_const_get("world_time") * c_config_get("game.timescale")
+					otherTank.m.tagProtection = t_t_getTicks() + c_world_timeMultiplier(c_const_get("game_tagProtection"))
 				end
 			end
 		end
@@ -2074,7 +2080,7 @@ local function c_world_private_resetWorldTimers(t)
 		end
 
 		if v.nextSpawnTime then
-			v.nextSpawnTime = t + c_const_get("world_time") * c_config_get("game.timescale") * c_const_get("tank_spawnTime")
+			v.nextSpawnTime = t + c_world_timeMultiplier(c_const_get("tank_spawnTime"))
 		end
 
 		if v.cd.lastChasePoint then
@@ -2094,7 +2100,7 @@ local function c_world_private_resetWorldTimers(t)
 
 	for _, v in pairs(c_tcm_current_map.powerupSpawnPoints) do
 		if v.m.nextPowerupTime then
-			v.m.nextPowerupTime = t + c_const_get("world_time") * c_config_get("game.timescale") * c_const_get("powerupSpawnPoint_initialPowerupTime")
+			v.m.nextPowerupTime = t + c_world_timeMultiplier(c_const_get("powerupSpawnPoint_initialPowerupTime"))
 		end
 	end
 
@@ -2194,7 +2200,7 @@ end
 local timeStep = 0
 function c_world_step(d)
 	local t = t_t_getTicks()
-	local f = 1 / (c_const_get("world_time") * c_config_get("game.timescale"))
+	local f = 1 / (c_world_timeMultiplier())
 	local wd = common_FTM(c_const_get("world_fps")) * f
 
 	worldTime = worldTime - timeStep
@@ -2278,4 +2284,12 @@ end
 
 function c_world_getPowerups()
 	return c_world_powerups
+end
+
+function c_world_timeMultiplier(v)
+	if v then
+		return c_const_get("world_time") * c_config_get("game.timescale") * v
+	else
+		return c_const_get("world_time") * c_config_get("game.timescale")
+	end
 end

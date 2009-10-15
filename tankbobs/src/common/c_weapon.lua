@@ -599,7 +599,7 @@ function c_weapon_fire(tank)
 				if tank.shotgunReloadState == 0 then
 					-- initial
 
-					if t >= tank.reloading + (c_const_get("world_time") * c_config_get("game.timescale") * weapon.reloadTime.initial) then
+					if t >= tank.reloading + (c_world_timeMultiplier(weapon.reloadTime.initial)) then
 						tank.reloading = t
 
 						tank.shotgunReloadState = 1
@@ -610,7 +610,7 @@ function c_weapon_fire(tank)
 				elseif tank.shotgunReloadState == 1 then
 					-- clip
 
-					if t >= tank.reloading + (c_const_get("world_time") * c_config_get("game.timescale") * weapon.reloadTime.clip) then
+					if t >= tank.reloading + (c_world_timeMultiplier(weapon.reloadTime.clip)) then
 						if tank.ammo < weapon.capacity and tank.clips > 0 and bit.band(tank.state, RELOAD) ~= 0 then
 							tank.reloading = t
 
@@ -625,7 +625,7 @@ function c_weapon_fire(tank)
 				elseif tank.shotgunReloadState == 2 then
 					-- final
 
-					if t >= tank.reloading + (c_const_get("world_time") * c_config_get("game.timescale") * weapon.reloadTime.initial) then
+					if t >= tank.reloading + (c_world_timeMultiplier(weapon.reloadTime.initial)) then
 						tank.reloading = false
 
 						tank.shotgunReloadState = nil
@@ -633,7 +633,7 @@ function c_weapon_fire(tank)
 				end
 			end
 		else
-			if t >= tank.reloading + (c_const_get("world_time") * c_config_get("game.timescale") * weapon.reloadTime) then
+			if t >= tank.reloading + (c_world_timeMultiplier(weapon.reloadTime)) then
 				tank.reloading = false
 
 				tank.clips = tank.clips - 1
@@ -646,8 +646,8 @@ function c_weapon_fire(tank)
 		return
 	end
 
-	if not tank.lastFireTime or (tank.lastFireTime < t - (c_const_get("world_time") * c_config_get("game.timescale") * weapon.repeatRate)) then
-		tank.lastFireTime = t - (c_const_get("world_time") * c_config_get("game.timescale") * weapon.repeatRate)
+	if not tank.lastFireTime or (tank.lastFireTime < t - (c_world_timeMultiplier(weapon.repeatRate))) then
+		tank.lastFireTime = t - (c_world_timeMultiplier(weapon.repeatRate))
 
 		if bit.band(tank.state, RELOAD) ~= 0 and not tank.reloading and tank.clips > 0 and tank.ammo < weapon.capacity then
 			tank.reloading = t
@@ -660,8 +660,8 @@ function c_weapon_fire(tank)
 		return
 	end
 
-	while t >= tank.lastFireTime + (c_const_get("world_time") * c_config_get("game.timescale") * weapon.repeatRate) do
-		tank.lastFireTime = tank.lastFireTime + (c_const_get("world_time") * c_config_get("game.timescale") * weapon.repeatRate)
+	while t >= tank.lastFireTime + (c_world_timeMultiplier(weapon.repeatRate)) do
+		tank.lastFireTime = tank.lastFireTime + (c_world_timeMultiplier(weapon.repeatRate))
 
 		local angle = weapon.spread * (weapon.pellets - 1) / 2
 

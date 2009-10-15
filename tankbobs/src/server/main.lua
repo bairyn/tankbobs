@@ -157,7 +157,7 @@ function main_loop()
 		p = tankbobs.w_persistWorld(c_world_redTeam.score, c_world_blueTeam.score, c_weapon_getProjectiles(), c_world_getTanks(), c_world_getPowerups(), c_tcm_current_map.walls, c_tcm_current_map.controlPoints, c_tcm_current_map.flags)
 	end
 
-	local d = (t - lastTime) / (c_const_get("world_time") * c_config_get("game.timescale"))
+	local d = (t - lastTime) / c_world_timeMultiplier()
 	lastTime = t
 
 	if d == 0 then

@@ -522,7 +522,7 @@ function c_ai_tankSpawn(tank)
 	end
 
 	local noFireTime = c_world_getInstagib() and c_const_get("ai_noFireSpawnTimeInstagib") or c_const_get("ai_noFireSpawnTime")
-	tank.ai.noFireTime = tankbobs.t_getTicks() + c_config_get("game.timescale") * c_const_get("world_time") * noFireTime
+	tank.ai.noFireTime = tankbobs.t_getTicks() + c_world_timeMultiplier(noFireTime)
 end
 
 function c_ai_tankDie(tank)
@@ -765,9 +765,9 @@ function c_ai_followObjective(tank, objective)
 
 		if not objective.path or not objective.path[objective.nextNode] or not objective.nextPathUpdateTime or tankbobs.t_getTicks() >= objective.nextPathUpdateTime then
 			if objective.static then
-				objective.nextPathUpdateTime = tankbobs.t_getTicks() + c_const_get("world_time") * c_config_get("game.timescale") * c_const_get("ai_staticPathUpdateTime")
+				objective.nextPathUpdateTime = tankbobs.t_getTicks() + c_world_timeMultiplier(c_const_get("ai_staticPathUpdateTime"))
 			else
-				objective.nextPathUpdateTime = tankbobs.t_getTicks() + c_const_get("world_time") * c_config_get("game.timescale") * c_const_get("ai_pathUpdateTime")
+				objective.nextPathUpdateTime = tankbobs.t_getTicks() + c_world_timeMultiplier(c_const_get("ai_pathUpdateTime"))
 			end
 
 			local start = c_ai_findClosestWayPoint(tank.p)
@@ -826,9 +826,9 @@ function c_ai_followObjective(tank, objective)
 		-- go away from objective
 		if not objective.path or not objective.path[objective.nextNode] or not objective.nextPathUpdateTime or tankbobs.t_getTicks() >= objective.nextPathUpdateTime then
 			if objective.static then
-				objective.nextPathUpdateTime = tankbobs.t_getTicks() + c_const_get("world_time") * c_config_get("game.timescale") * c_const_get("ai_staticPathUpdateTime")
+				objective.nextPathUpdateTime = tankbobs.t_getTicks() + c_world_timeMultiplier(c_const_get("ai_staticPathUpdateTime"))
 			else
-				objective.nextPathUpdateTime = tankbobs.t_getTicks() + c_const_get("world_time") * c_config_get("game.timescale") * c_const_get("ai_pathUpdateTime")
+				objective.nextPathUpdateTime = tankbobs.t_getTicks() + c_world_timeMultiplier(c_const_get("ai_pathUpdateTime"))
 			end
 
 			local start = c_ai_findClosestWayPoint(tank.p)
@@ -1008,7 +1008,7 @@ function c_ai_tankAttacked(tank, attacker, damage)
 		tank.lastAttackers = {}
 	end
 
-	table.insert(tank.lastAttackers, {attacker, tankbobs.t_getTicks() + c_config_get("game.timescale") * c_const_get("world_time") *  c_const_get("ai_recentAttackExpireTime")})
+	table.insert(tank.lastAttackers, {attacker, tankbobs.t_getTicks() + c_world_timeMultiplier(c_const_get("ai_recentAttackExpireTime"))})
 end
 
 function c_ai_beginningOfChaseGame()
