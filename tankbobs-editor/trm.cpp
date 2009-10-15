@@ -688,6 +688,8 @@ bool trm_save(const char *filename)
 		<< tmap.version
 		<< ", "
 		<< tmap.staticCamera
+		<< ", "
+		<< tmap.script
 		<< endl;
 
 	for(vector<entities::Wall *>::iterator i = wall.begin(); i != wall.end(); ++i)
@@ -743,6 +745,8 @@ bool trm_save(const char *filename)
 		<< e->detail
 		<< ", "
 		<< e->staticW
+		<< ", "
+		<< tmap.misc
 		<< endl;
 	}
 
@@ -760,6 +764,8 @@ bool trm_save(const char *filename)
 		<< e->y
 		<< ", "
 		<< e->enabled
+		<< ", "
+		<< tmap.misc
 		<< endl;
 	}
 
@@ -771,6 +777,8 @@ bool trm_save(const char *filename)
 		<< e->x
 		<< ", "
 		<< e->y
+		<< ", "
+		<< tmap.misc
 		<< endl;
 	}
 
@@ -792,6 +800,8 @@ bool trm_save(const char *filename)
 		<< e->initial
 		<< ", "
 		<< e->focus
+		<< ", "
+		<< tmap.misc
 		<< endl;
 	}
 
@@ -811,6 +821,8 @@ bool trm_save(const char *filename)
 		<< e->enabled
 		<< ", "
 		<< e->time
+		<< ", "
+		<< tmap.misc
 		<< endl;
 	}
 
@@ -824,6 +836,8 @@ bool trm_save(const char *filename)
 		<< e->y
 		<< ", "
 		<< e->red
+		<< ", "
+		<< tmap.misc
 		<< endl;
 	}
 
@@ -837,6 +851,8 @@ bool trm_save(const char *filename)
 		<< e->y
 		<< ", "
 		<< e->red
+		<< ", "
+		<< tmap.misc
 		<< endl;
 	}
 
@@ -848,6 +864,8 @@ bool trm_save(const char *filename)
 		<< e->x
 		<< ", "
 		<< e->y
+		<< ", "
+		<< tmap.misc
 		<< endl;
 	}
 
