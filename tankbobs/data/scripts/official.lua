@@ -44,7 +44,7 @@ if c_tcm_current_map.name == "arena" then
 			projectile = c_world_isProjectile(body2)
 		end
 
-		if projectile then
+		if projectile and not projectile.collided then
 			local wall = c_world_isWall(body1)
 			if not wall then
 				wall = c_world_isWall(body2)
