@@ -44,7 +44,6 @@ local t_w_setAngularVelocity  = nil
 
 local bit
 
-local c_world_contactListener
 local c_world_tank_checkSpawn
 local c_world_tank_step
 local c_world_wall_step

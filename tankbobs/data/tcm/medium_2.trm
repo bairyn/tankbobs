@@ -17,5 +17,5 @@ wall, 1, 140, 20, 140, 72, 147, 82, 147, 20, 0, 1, 0, 0, 1, 0, 1, 1, global/dyna
 wall, 1, 204, 204, 204, 0, 219, 0, 219, 204, 0, 1, 0, 0, 1, 0, 1, 1, , 0, , 0, 0, 1, TODO: REMOVE
 wall, 1, 164, 63, 169, 5, 177, 18, 171, 58, 0, 1, 0, 0, 1, 0, 1, 1, global/dynamic.png, 6, , 0, 0, 0, 
 playerSpawnPoint, 46, 86, 
-path, initial_down, initial_up, 97, 73, 1, 4, 
-path, initial_up, initial_down, 97, 4, 1, 16, 
+path, initial_down, initial_up, 97, 73, 1, 16, 
+path, initial_up, initial_down, 97, 4, 1, 4, 
