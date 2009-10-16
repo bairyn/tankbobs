@@ -55,6 +55,7 @@ Properties::Properties(QWidget *parent)
 
 			selected = true;
 			misc->setEnabled(true);
+			miscLabel->setEnabled(true);
 		}
 	}
 	for(vector<entities::PowerupSpawnPoint *>::iterator i = powerupSpawnPoint.begin(); i != powerupSpawnPoint.end(); ++i)
@@ -78,6 +79,7 @@ Properties::Properties(QWidget *parent)
 			initialLabel->setEnabled(true);
 			focus->setEnabled(true);
 			misc->setEnabled(true);
+			miscLabel->setEnabled(true);
 		}
 	}
 	for(vector<entities::Teleporter *>::iterator i = teleporter.begin(); i != teleporter.end(); ++i)
@@ -96,6 +98,7 @@ Properties::Properties(QWidget *parent)
 			targetLabel->setEnabled(true);
 			enabled->setEnabled(true);
 			misc->setEnabled(true);
+			miscLabel->setEnabled(true);
 		}
 	}
 	for(vector<entities::Wall *>::iterator i = wall.begin(); i != wall.end(); ++i)
@@ -148,6 +151,7 @@ Properties::Properties(QWidget *parent)
 			path->setEnabled(true);
 			staticW->setEnabled(true);
 			misc->setEnabled(true);
+			miscLabel->setEnabled(true);
 		}
 	}
 	for(vector<entities::Path *>::iterator i = ::path.begin(); i != ::path.end(); ++i)
@@ -169,6 +173,7 @@ Properties::Properties(QWidget *parent)
 			timeLabel->setEnabled(true);
 			enabled->setEnabled(true);
 			misc->setEnabled(true);
+			miscLabel->setEnabled(true);
 		}
 	}
 	for(vector<entities::ControlPoint *>::iterator i = ::controlPoint.begin(); i != ::controlPoint.end(); ++i)
@@ -181,6 +186,7 @@ Properties::Properties(QWidget *parent)
 			selected = true;
 			red->setEnabled(true);
 			misc->setEnabled(true);
+			miscLabel->setEnabled(true);
 		}
 	}
 	for(vector<entities::Flag *>::iterator i = ::flag.begin(); i != ::flag.end(); ++i)
@@ -193,6 +199,7 @@ Properties::Properties(QWidget *parent)
 			selected = true;
 			red->setEnabled(true);
 			misc->setEnabled(true);
+			miscLabel->setEnabled(true);
 		}
 	}
 	for(vector<entities::WayPoint *>::iterator i = wayPoint.begin(); i != wayPoint.end(); ++i)
@@ -203,6 +210,7 @@ Properties::Properties(QWidget *parent)
 
 			selected = true;
 			misc->setEnabled(true);
+			miscLabel->setEnabled(true);
 		}
 	}
 	if(!selected)
@@ -230,6 +238,7 @@ Properties::Properties(QWidget *parent)
 		mapversionLabel->setEnabled(true);
 		staticCamera->setEnabled(true);
 		script->setEnabled(true);
+		scriptLabel->setEnabled(true);
 	}
 
 	connect(mapname, SIGNAL(textChanged(const QString &)), this, SLOT(mapnameChanged(const QString &)));
