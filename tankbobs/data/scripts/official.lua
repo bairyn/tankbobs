@@ -16,7 +16,7 @@ if c_tcm_current_map.title == "Arena" then
 	local function giveClips()
 		for _, v in pairs (c_world_getTanks()) do
 			if v.exists and v.weapon then
-				local weapon c_weapon_getWeapons()[v.weapon]
+				local weapon = c_weapon_getWeapons()[v.weapon]
 
 				if weapon and weapon.clips > 0 then
 					v.clips = 1
