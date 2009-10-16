@@ -1500,13 +1500,15 @@ function c_world_wall_step(d, wall)
 				local path = paths[wall.m.pid + 1]
 
 				if path and path.enabled then
-					if path.time == 0 then
-						wall.m.ppos = 1
-					else
-						wall.m.ppos = math.min(1, wall.m.ppos + (d / path.time))
-					end
-
 					local prevPath = paths[wall.m.ppid]
+
+					if prevPath then
+						if prevPath.time == 0 then
+							wall.m.ppos = 1
+						else
+							wall.m.ppos = math.min(1, wall.m.ppos + (d / path.time))
+						end
+					end
 
 					if wall.m.ppos < 1 and prevPath then
 						tankbobs.w_setPosition(wall.m.body, common_lerp(wall.m.startpos, wall.m.startpos + path.p - prevPath.p, wall.m.ppos))
