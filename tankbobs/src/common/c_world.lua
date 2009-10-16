@@ -1506,7 +1506,7 @@ function c_world_wall_step(d, wall)
 						if prevPath.time == 0 then
 							wall.m.ppos = 1
 						else
-							wall.m.ppos = math.min(1, wall.m.ppos + (d / path.time))
+							wall.m.ppos = math.min(1, wall.m.ppos + (d / prevPath.time))
 						end
 					end
 
