@@ -1958,3 +1958,19 @@ int w_luaStep(lua_State *L)
 
 	return 0;
 }
+
+int w_setContactListener(lua_State *L)
+{
+	CHECKINIT(init, L);
+
+	CHECKWORLD(world, L);
+
+	luaL_unref(clState, LUA_REGISTRYINDEX, clFunction);
+	clState = NULL;
+
+	lua_pushvalue(L, 1);
+	clFunction = luaL_ref(L, LUA_REGISTRYINDEX);
+	clState = L;
+
+	return 0;
+}

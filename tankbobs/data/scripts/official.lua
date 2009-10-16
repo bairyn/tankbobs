@@ -61,6 +61,7 @@ if c_tcm_current_map.name == "arena" then
 	end
 
 	c_mods_prependFunction("c_world_contactListener", toggleWallPath)
+	tankbobs.w_setContactListener(c_world_contactListener)
 
 	local function resetSpawnTime(tank, powerup)
 		if powerup.powerupType.name ~= "health" then

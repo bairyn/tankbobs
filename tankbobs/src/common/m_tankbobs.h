@@ -356,6 +356,7 @@ int w_getClipmask(lua_State *L);
 int w_getIndex(lua_State *L);
 int w_setIndex(lua_State *L);
 int w_luaStep(lua_State *L);
+int w_setContactListener(lua_State *L);
 
 /* m_console.c */
 void c_initNL(lua_State *L);

@@ -957,6 +957,8 @@ static const struct luaL_Reg tankbobs[] =
 	{"w_setIndex", w_setIndex}, /* Set the body's index */
 		/* Set the passed body's index to the second argument, which is passed as an integer */
 	{"w_luaStep", w_luaStep}, /* the only argument passed is the delta value */
+	{"w_setContactListener", w_setContactListener}, /* Set contact listener function */
+		/* Set contact listener function to argument passed.  Nothing is returned. */
 
 	/* m_console.c */
 	{"c_init", c_init}, /* initialize an ncurses console */
