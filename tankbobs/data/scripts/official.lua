@@ -50,7 +50,7 @@ if c_tcm_current_map.title == "Arena" then
 				wall = c_world_isWall(body2)
 			end
 
-			if wall then
+			if wall and (wall.path or wall.m.script_path) then
 				if not wall.m.script_path then
 					wall.m.script_path = {wall.path}
 				end
