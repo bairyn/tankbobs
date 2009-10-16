@@ -746,7 +746,7 @@ bool trm_save(const char *filename)
 		<< ", "
 		<< e->staticW
 		<< ", "
-		<< tmap.misc
+		<< e->misc
 		<< endl;
 	}
 
@@ -765,7 +765,7 @@ bool trm_save(const char *filename)
 		<< ", "
 		<< e->enabled
 		<< ", "
-		<< tmap.misc
+		<< e->misc
 		<< endl;
 	}
 
@@ -778,7 +778,7 @@ bool trm_save(const char *filename)
 		<< ", "
 		<< e->y
 		<< ", "
-		<< tmap.misc
+		<< e->misc
 		<< endl;
 	}
 
@@ -801,7 +801,7 @@ bool trm_save(const char *filename)
 		<< ", "
 		<< e->focus
 		<< ", "
-		<< tmap.misc
+		<< e->misc
 		<< endl;
 	}
 
@@ -822,7 +822,7 @@ bool trm_save(const char *filename)
 		<< ", "
 		<< e->time
 		<< ", "
-		<< tmap.misc
+		<< e->misc
 		<< endl;
 	}
 
@@ -837,7 +837,7 @@ bool trm_save(const char *filename)
 		<< ", "
 		<< e->red
 		<< ", "
-		<< tmap.misc
+		<< e->misc
 		<< endl;
 	}
 
@@ -852,7 +852,7 @@ bool trm_save(const char *filename)
 		<< ", "
 		<< e->red
 		<< ", "
-		<< tmap.misc
+		<< e->misc
 		<< endl;
 	}
 
@@ -865,7 +865,7 @@ bool trm_save(const char *filename)
 		<< ", "
 		<< e->y
 		<< ", "
-		<< tmap.misc
+		<< e->misc
 		<< endl;
 	}
 
