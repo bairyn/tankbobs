@@ -52,6 +52,8 @@ local trails = {}
 local camera
 local zoom
 
+local wall_textures
+
 function game_init()
 	-- localize frequently used globals
 	tankbobs = _G.tankbobs
@@ -88,19 +90,42 @@ function game_new()
 	zoom = 1
 
 	-- initialize wall textures per individual level
-	local listOffset = 0
+	wall_textures = {}
+	local function lookup(textureName)
+		for k, v in pairs(wall_textures) do
+			if v == textureName then
+				return k
+			end
+		end
 
-	wall_textures = gl.GenTextures(c_tcm_current_map.walls_n)
+		return nil
+	end
 
-	for k, v in pairs(c_tcm_current_map.walls) do
-		v.m.texture = wall_textures[k]
+	for _, v in pairs(c_tcm_current_map.walls) do
+		local texture = c_const_get("textures_dir") .. v.texture
 
-		gl.BindTexture("TEXTURE_2D", v.m.texture)
+		v.m.texture = lookup(texture)
+		if not v.m.texture then
+			table.insert(wall_textures, texture)
+			v.m.texture = lookup(texture)
+		end
+	end
+
+	local textures = gl.GenTextures(#wall_textures)
+
+	for k, v in pairs(wall_textures) do
+		wall_textures[k] = {v, textures[k]}
+
+		gl.BindTexture("TEXTURE_2D", textures[k])
 		gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_S", "REPEAT")
 		gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_T", "REPEAT")
 		gl.TexParameter("TEXTURE_2D", "TEXTURE_MIN_FILTER", "LINEAR")
 		gl.TexParameter("TEXTURE_2D", "TEXTURE_MAG_FILTER", "LINEAR")
-		tankbobs.r_loadImage2D(c_const_get("textures_dir") .. v.texture, c_const_get("textures_default"))
+		tankbobs.r_loadImage2D(wall_textures[k][1], c_const_get("textures_default"))
+	end
+
+	for _, v in pairs(c_tcm_current_map.walls) do
+		v.m.texture = wall_textures[v.m.texture][2]
 	end
 
 	-- scores
