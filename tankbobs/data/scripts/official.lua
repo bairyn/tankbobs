@@ -72,6 +72,17 @@ if c_tcm_current_map.name == "arena" then
 					wall.m.unfreezeTime = tankbobs.t_getTicks() + c_world_timeMultiplier(c_const_get("wall_freezeTime"))
 				end
 			end
+
+			if not wall then
+				local tank = c_world_isTank(body1)
+				if not tank then
+					tank = c_world_isTank(body2)
+				end
+
+				if projectile.weapon ~= c_weapon_getDefaultWeapon() then
+					tank.shield = 0  -- remove enemy shield
+				end
+			end
 		end
 	end
 
