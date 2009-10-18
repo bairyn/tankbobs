@@ -25,7 +25,6 @@ functions for playing online
 
 local tankbobs = tankbobs
 local gl = gl
-local c_world_step = c_world_step
 local gui_paint = gui_paint
 local gui_button = gui_button
 local gui_mouse = gui_mouse
@@ -138,7 +137,6 @@ function st_online_init()
 	-- localize frequently used globals
 	tankbobs = _G.tankbobs
 	gl = _G.gl
-	c_world_step = _G.c_world_step
 	gui_paint = _G.gui_paint
 	gui_button = _G.gui_button
 	gui_mouse = _G.gui_mouse
