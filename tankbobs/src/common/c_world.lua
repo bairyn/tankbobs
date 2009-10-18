@@ -1615,7 +1615,7 @@ function c_world_powerupSpawnPoint_step(d, powerupSpawnPoint)
 
 			local index = 0
 			for k, v in pairs(c_tcm_current_map.powerupSpawnPoints) do
-				if v == index then
+				if v == powerupSpawnPoint then
 					index = k
 				end
 			end
