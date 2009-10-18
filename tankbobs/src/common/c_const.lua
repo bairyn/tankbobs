@@ -84,7 +84,7 @@ function c_const_init()
 		end
 
 		key = k
-		backup = clone(true, const, backup)
+		backup = clone(true, const)
 	end
 
 	function c_const_restore(k)
