@@ -90,7 +90,7 @@ if c_tcm_current_map.name == "arena" then
 	tankbobs.w_setContactListener(c_world_contactListener)
 
 	local function resetSpawnTime(tank, powerup)
-		if powerup.powerupType.name ~= "health" then
+		if c_world_getPowerupTypeByIndex(powerup.powerupType).name ~= "health" then
 			c_tcm_current_map.powerupSpawnPoint[powerup.spawner].nextPowerupTime = tankbobs.t_getTicks()
 		end
 	end
