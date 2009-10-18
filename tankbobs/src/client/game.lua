@@ -742,10 +742,10 @@ function game_step(d)
 		if scale > 1 then
 			scale = 1
 		end
-		zoom = common_lerp(zoom, scale, d * c_config_get("client.cameraSpeed"))
+		zoom = common_lerp(zoom, scale, math.min(1, d * c_config_get("client.cameraSpeed")))
 		gl.Scale(zoom, zoom, 1)
 
-		camera = common_lerp(camera, tankbobs.m_vec2(-(rightmost + leftmost) / 2, -(uppermost + lowermost) / 2), d * c_config_get("client.cameraSpeed"))
+		camera = common_lerp(camera, tankbobs.m_vec2(-(rightmost + leftmost) / 2, -(uppermost + lowermost) / 2), math.min(1, d * c_config_get("client.cameraSpeed")))
 		gl.Translate(camera.x, camera.y, 0)
 
 		game_drawWorld(d)
