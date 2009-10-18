@@ -7,6 +7,7 @@ c_mods_exitWorldFunction(c_mods_restoreFunctions)
 if c_tcm_current_map.name == "arena" then
 	c_const_set("powerup_pushStrength", 0)
 	c_const_set("powerup_lifeTime", 0)
+	c_const_set("wall_freezeTime", 1)
 
 	local function giveShield(tank)
 		tank.shield = 99999999
@@ -22,6 +23,14 @@ if c_tcm_current_map.name == "arena" then
 				if weapon and weapon.clips > 0 then
 					v.clips = 1
 				end
+			end
+		end
+
+		-- unfreeze walls on paths
+		for _, v in pairs(c_tcm_current_map.walls) do
+			if v.m.unfreezeTime and tankbobs.t_getTicks() > v.m.unfreezeTime then
+				wall.unfreezeTime = nil
+				wall.path = true
 			end
 		end
 	end
@@ -56,7 +65,12 @@ if c_tcm_current_map.name == "arena" then
 					wall.m.script_path = {wall.path}
 				end
 
-				wall.path = not wall.path
+				--wall.path = not wall.path
+				-- temporarily freeze wall instead of toggling, if the tank has non-default weapon
+				if projectile.weapon ~= c_weapon_getDefaultWeapon() then
+					wall.path = false
+					wall.m.unfreezeTime = tankbobs.t_getTicks() + c_world_timeMultiplier(c_const_get("wall_freezeTime"))
+				end
 			end
 		end
 	end

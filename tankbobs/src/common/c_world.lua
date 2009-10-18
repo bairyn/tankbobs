@@ -702,11 +702,7 @@ local function c_world_spawnTank(tank)
 	tank.r = c_const_get("tank_defaultRotation")
 	tank.health = c_const_get("tank_health")
 	tank.shield = 0
-	if c_world_getInstagib() then
-		tank.weapon = c_weapon_getByAltName("instagun").index
-	else
-		tank.weapon = c_weapon_getByAltName("default").index
-	end
+	tank.weapon = c_weapon_getDefaultWeapon()
 	tank.cd = {}
 
 	-- find index

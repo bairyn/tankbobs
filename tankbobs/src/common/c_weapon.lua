@@ -824,3 +824,11 @@ end
 function c_weapon_getWeapons()
 	return c_weapons
 end
+
+function c_weapon_getDefaultWeapon()
+	if c_world_getInstagib() then
+		return c_weapon_getByAltName("instagun").index
+	else
+		return c_weapon_getByAltName("default").index
+	end
+end
