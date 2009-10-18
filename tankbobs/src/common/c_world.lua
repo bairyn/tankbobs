@@ -136,7 +136,7 @@ function c_world_init()
 	c_const_set("controlPoint_touchDistance", 4, 1)
 	c_const_set("flag_touchDistance", 6, 1)
 
-	c_const_set("powerup_lifeTime", 12000, 1)
+	c_const_set("powerup_lifeTime", 12, 1)
 	c_const_set("powerup_density", 1E-5, 1)
 	c_const_set("powerup_friction", 0, 1)
 	c_const_set("powerup_restitution", 1, 1)
@@ -1752,7 +1752,7 @@ function c_world_powerup_step(d, powerup)
 
 	c_world_testBody(powerup)
 
-	if t > powerup.spawnTime + c_const_get("powerup_lifeTime") and c_const_get("powerup_lifeTime") > 0 then
+	if t > powerup.spawnTime + c_world_timeMultiplier(c_const_get("powerup_lifeTime")) and c_const_get("powerup_lifeTime") > 0 then
 		powerup.collided = true
 	end
 
