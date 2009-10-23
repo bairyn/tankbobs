@@ -329,6 +329,7 @@ local function game_drawWorld(d)
 							gl.PushAttrib("CURRENT_BIT")
 								gl.PushMatrix()
 									gl.Translate(v.p.x, v.p.y, 0)
+									gl.Rotate(tankbobs.m_degrees(v.r), 0, 0, 1)
 									local r, g, b, a = v.color.r, v.color.g, v.color.b, 1
 									if c_world_isTeamGameType(c_world_gameType) then
 										-- team colors

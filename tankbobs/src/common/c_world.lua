@@ -197,12 +197,16 @@ function c_world_init()
 	c_const_set("tank_angularDamping", 0, 1)
 	c_const_set("tank_spawnTime", 0.75, 1)
 	c_const_set("tank_static", false, 1)
+	c_const_set("corpse_restitution", 0.4, 1)
 	c_const_set("corpse_canSleep", false, 1)
 	c_const_set("corpse_isBullet", true, 1)
 	c_const_set("corpse_linearDamping", 0, 1)
 	c_const_set("corpse_angularDamping", 0, 1)
 	c_const_set("corpse_spawnTime", 0.75, 1)
 	c_const_set("corpse_static", false, 1)
+	c_const_set("corpse_density", 2, 1)
+	c_const_set("corpse_friction", 0.25, 1)
+	c_const_set("corpse_worldFriction", 2 / 1000, 1)  -- damping
 	c_const_set("wall_density", 1, 1)
 	c_const_set("wall_friction", 0.25, 1)  -- deceleration caused by friction (~speed *= 1 - friction)
 	c_const_set("wall_restitution", 0.2, 1)
@@ -666,7 +670,7 @@ function c_world_tank_spawn(tank)
 	tank.spawning = true
 end
 
-function c_world_addCorpse(corpse)
+function c_world_addCorpse(tank)
 	local corpse = c_world_corpse:new()
 
 	local index = 1
@@ -678,9 +682,11 @@ function c_world_addCorpse(corpse)
 
 	t_t_clone(true, tank, corpse)
 	corpse.explodeTime = t_t_getTicks() + c_world_timeMultiplier(c_const_get("world_corpseTime"))
-	corpse.body = corpsebobs.w_addBody(corpse.p, corpse.r, c_const_get("corpse_canSleep"), c_const_get("corpse_isBullet"), c_const_get("corpse_linearDamping"), c_const_get("corpse_angularDamping"), corpse.h, c_const_get("corpse_density"), c_const_get("corpse_friction"), c_const_get("corpse_restitution"), not c_const_get("corpse_static"), c_const_get("corpse_contentsMask"), c_const_get("corpse_clipmask"), c_const_get("corpse_isSensor"), index)
+	corpse.body = tankbobs.w_addBody(corpse.p, corpse.r, c_const_get("corpse_canSleep"), c_const_get("corpse_isBullet"), c_const_get("corpse_linearDamping"), c_const_get("corpse_angularDamping"), corpse.h, c_const_get("corpse_density"), c_const_get("corpse_friction"), c_const_get("corpse_restitution"), not c_const_get("corpse_static"), c_const_get("corpse_contentsMask"), c_const_get("corpse_clipmask"), c_const_get("corpse_isSensor"), index)
 
 	corpse.exists = true
+
+	table.insert(c_world_corpses, corpse)
 end
 
 function c_world_tank_die(tank, t)
@@ -1159,6 +1165,7 @@ function c_world_findClosestIntersection(start, endP, ignoreType)
 			if not v.detail then
 				hull = v.m.pos
 				local t = v
+				lastPoint = nil
 				for _, v in pairs(hull) do
 					currentPoint = v
 					if not lastPoint then
@@ -1182,7 +1189,6 @@ function c_world_findClosestIntersection(start, endP, ignoreType)
 
 					lastPoint = currentPoint
 				end
-				lastPoint = nil
 			end
 		end
 	end
@@ -1193,6 +1199,7 @@ function c_world_findClosestIntersection(start, endP, ignoreType)
 			if v.exists then
 				hull = t_t_clone(c_world_tankHull(v))
 				local t = v
+				lastPoint = nil
 				for _, v in pairs(hull) do
 					currentPoint = v
 					if not lastPoint then
@@ -1227,6 +1234,7 @@ function c_world_findClosestIntersection(start, endP, ignoreType)
 			if not v.collided then
 				hull = c_world_projectileHull(v)
 				local t = v
+				lastPoint = nil
 				for _, v in pairs(hull) do
 					currentPoint = v
 					if not lastPoint then
@@ -1250,12 +1258,77 @@ function c_world_findClosestIntersection(start, endP, ignoreType)
 
 					lastPoint = currentPoint
 				end
-				lastPoint = nil
 			end
 		end
 	end
 
 	-- powerups
+	if ignoreType ~= "powerup" then
+		for _, v in pairs(c_world_powerups) do
+			if v.exists then
+				hull = t_t_clone(c_world_powerupHull(v))
+				local t = v
+				lastPoint = nil
+				for _, v in pairs(hull) do
+					currentPoint = v
+					if not lastPoint then
+						lastPoint = hull[#hull]
+					end
+
+					b, intersection = tankbobs.m_edge(lastPoint, currentPoint, start, endP)
+					if b then
+						if not minDistance then
+							minIntersection = intersection
+							minDistance = math.abs((intersection - start).R)
+							typeOfTarget = "tank"
+							target = t
+						elseif math.abs((intersection - start).R) < minDistance then
+							minIntersection = intersection
+							minDistance = math.abs((intersection - start).R)
+							typeOfTarget = "tank"
+							target = t
+						end
+					end
+
+					lastPoint = currentPoint
+				end
+			end
+		end
+	end
+
+	-- corpses
+	if ignoreType ~= "corpse" then
+		for _, v in pairs(c_world_corpses) do
+			if v.exists then
+				hull = t_t_clone(c_world_corpseHull(v))
+				local t = v
+				lastPoint = nil
+				for _, v in pairs(hull) do
+					currentPoint = v
+					if not lastPoint then
+						lastPoint = hull[#hull]
+					end
+
+					b, intersection = tankbobs.m_edge(lastPoint, currentPoint, start, endP)
+					if b then
+						if not minDistance then
+							minIntersection = intersection
+							minDistance = math.abs((intersection - start).R)
+							typeOfTarget = "tank"
+							target = t
+						elseif math.abs((intersection - start).R) < minDistance then
+							minIntersection = intersection
+							minDistance = math.abs((intersection - start).R)
+							typeOfTarget = "tank"
+							target = t
+						end
+					end
+
+					lastPoint = currentPoint
+				end
+			end
+		end
+	end
 
 	return minDistance, minIntersection, typeOfTarget, target
 end
@@ -1858,7 +1931,7 @@ end
 function c_world_removeCorpse(corpse)
 	for k, v in pairs(c_world_corpses) do
 		if v == corpse then
-			corpse[k] = v
+			corpse[k] = nil
 		end
 	end
 end
@@ -1894,6 +1967,14 @@ function c_world_corpse_step(d, corpse)
 	local t = t_t_getTicks()
 
 	if not corpse.exists then
+		c_world_removeCorpse(corpse)
+
+		return
+	end
+
+	if not corpse.body then
+		common_printError("c_world_corpse_step(): corpse.body is nil!\n")
+
 		c_world_removeCorpse(corpse)
 
 		return
@@ -2274,7 +2355,7 @@ local function c_world_private_resetWorldTimers(t)
 	end
 
 	for _, v in pairs(c_world_corpses) do
-		v.explodeTime = t + c_const_get("world_corpseTime")
+		v.explodeTime = t + c_world_timeMultiplier(c_const_get("world_corpseTime"))
 	end
 
 	for _, v in pairs(c_tcm_current_map.controlPoints) do

@@ -1961,6 +1961,7 @@ int w_luaStep(lua_State *L)
 	STEP(controlPointFunction, controlPointTable, d);
 	STEP(flagFunction, flagTable, d);
 	STEP(teleporterFunction, teleporterTable, d);
+	STEP(corpseFunction, corpseTable, d);
 
 	return 0;
 }
