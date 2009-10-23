@@ -322,6 +322,38 @@ local function game_drawWorld(d)
 					until true if breaking then break end
 				end
 
+				-- draw corpses
+				for _, v in pairs(c_world_getCorpses()) do
+					if v.exists then
+						if not v.explode then
+							gl.PushAttrib("CURRENT_BIT")
+								gl.PushMatrix()
+									gl.Translate(v.p.x, v.p.y, 0)
+									local r, g, b, a = v.color.r, v.color.g, v.color.b, 1
+									if c_world_isTeamGameType(c_world_gameType) then
+										-- team colors
+										local color = c_const_get(v.red and "color_red" or "color_blue")
+										r, g, b, a = color[1], color[2], color[3], color[4]
+										gl.Color(r, g, b, a)
+										gl.TexEnv("TEXTURE_ENV_COLOR", r, g, b, a)
+
+										-- corpse
+										gl.CallList(corpse_listBase)
+										-- corpse outline
+										gl.Color(1, 1, 1, 1)
+										gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, 1)
+										gl.CallList(corpseBorder_listBase)
+									end
+								gl.PopMatrix()
+							gl.PopAttrib()
+						else
+							-- draw explosions things from center
+
+							-- TODO
+						end
+					end
+				end
+
 				-- render tanks
 				for k, v in pairs(c_world_getTanks()) do
 					if v.exists then
@@ -329,12 +361,6 @@ local function game_drawWorld(d)
 							gl.PushMatrix()
 								gl.Translate(v.p.x, v.p.y, 0)
 								gl.Rotate(tankbobs.m_degrees(v.r), 0, 0, 1)
-								if not (c_config_get("game.player" .. tostring(k) .. ".color.r", true)) then
-									c_config_set("game.player" .. tostring(k) .. ".color.r", c_config_get("game.defaultTankRed"))
-									c_config_set("game.player" .. tostring(k) .. ".color.g", c_config_get("game.defaultTankBlue"))
-									c_config_set("game.player" .. tostring(k) .. ".color.b", c_config_get("game.defaultTankGreen"))
-									c_config_set("game.player" .. tostring(k) .. ".color.a", c_config_get("game.defaultTankAlpha"))
-								end
 								local r, g, b, a = v.color.r, v.color.g, v.color.b, 1
 								if c_world_isTeamGameType(c_world_gameType) then
 									-- team colors
@@ -763,6 +789,16 @@ function game_step(d)
 	for _, v in pairs(c_weapon_getWeapons()) do
 		if v.meleeRange ~= 0 then
 			v.m.used = false
+		end
+	end
+
+	for _, v in pairs(c_world_getTanks()) do
+		if v.exists then
+			if v.explode and not v.m.explodeSound then
+				if c_const_get("world_corpseTime") >= c_const_get("world_minimumCorpseTimeForDeathNoiseAndStuff") then
+					tankbobs.a_playSound(c_const_get("corpseExplode_sound"))
+				end
+			end
 		end
 	end
 

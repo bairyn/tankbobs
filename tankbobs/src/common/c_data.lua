@@ -20,7 +20,7 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 --[[
 data.lua
 
-constants
+Constants
 --]]
 
 function c_data_init()
@@ -65,6 +65,8 @@ function c_data_init()
 	c_const_set("tankBorder", c_const_get("game_dir") .. "tankBorder.png", 1)
 	c_const_set("tankShield", c_const_get("game_dir") .. "tankShield.png", 1)
 	c_const_set("tankTagged", c_const_get("game_dir") .. "tankTagged.png", 1)
+	c_const_set("corpse", c_const_get("game_dir") .. "deadTank.png", 1)
+	c_const_set("corpseBorder", c_const_get("game_dir") .. "tankBorder.png", 1)
 	c_const_set("powerup", c_const_get("game_dir") .. "powerup.png", 1)
 	c_const_set("controlPoint", c_const_get("game_dir") .. "controlPoint.png", 1)
 	c_const_set("flag", c_const_get("game_dir") .. "flag.png", 1)
@@ -75,6 +77,7 @@ function c_data_init()
 	c_const_set("weaponAudio_dir", c_const_get("audio_dir") .. "weapons/", 1)
 	c_const_set("gameAudio_dir", c_const_get("audio_dir") .. "game/", 1)
 	c_const_set("collide_sound", c_const_get("gameAudio_dir") .. "collide.wav", 1)
+	c_const_set("corpseExplode_sound", c_const_get("gameAudio_dir") .. "explode.wav", 1)
 	c_const_set("damage_sound", c_const_get("gameAudio_dir") .. "damage.wav", 1)
 	c_const_set("die_sound", c_const_get("gameAudio_dir") .. "die.wav", 1)
 	c_const_set("powerupPickup_sound", c_const_get("gameAudio_dir") .. "powerupSpawn.wav", 1)

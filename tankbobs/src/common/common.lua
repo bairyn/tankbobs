@@ -62,6 +62,7 @@ function common_init()
 	POWERUP        = bit.tobit(POWERUP)
 	TANK           = bit.tobit(TANK)
 	PROJECTILE     = bit.tobit(PROJECTILE)
+	CORPSE         = bit.tobit(CORPSE)
 
 	-- input state bitmasks
 	FIRING         = bit.tobit(FIRING)
@@ -490,6 +491,7 @@ WALL           = 0x0002
 POWERUP        = 0x0004
 TANK           = 0x0008
 PROJECTILE     = 0x0010
+CORPSE         = 0x0020
 
 -- input state bitmasks
 FIRING         = 0x0001

@@ -30,6 +30,8 @@ local tank_textures
 local tankBorder_textures
 local tankShield_textures
 local tankTagged_textures
+local corpse_textures
+local corpseBorder_textures
 local powerup_textures
 local healthbar_texture 
 local healthbarBorder_texture 
@@ -112,6 +114,24 @@ function renderer_init()
 	c_const_set("tankTagged_texturex3", 0.0, 1) c_const_set("tankTagged_texturey3", 0.1, 1)  -- eliminate fuzzy top
 	c_const_set("tankTagged_texturex4", 1.0, 1) c_const_set("tankTagged_texturey4", 0.1, 1)  -- eliminate fuzzy top
 
+	c_const_set("corpse_renderx1", -2.0, 1) c_const_set("corpse_rendery1",  2.0, 1)
+	c_const_set("corpse_renderx2", -2.0, 1) c_const_set("corpse_rendery2", -2.0, 1)
+	c_const_set("corpse_renderx3",  2.0, 1) c_const_set("corpse_rendery3", -2.0, 1)
+	c_const_set("corpse_renderx4",  2.0, 1) c_const_set("corpse_rendery4",  2.0, 1)
+	c_const_set("corpse_texturex1", 1.0, 1) c_const_set("corpse_texturey1", 1.0, 1)
+	c_const_set("corpse_texturex2", 0.0, 1) c_const_set("corpse_texturey2", 1.0, 1)
+	c_const_set("corpse_texturex3", 0.0, 1) c_const_set("corpse_texturey3", 0.1, 1)  -- eliminate fuzzy top
+	c_const_set("corpse_texturex4", 1.0, 1) c_const_set("corpse_texturey4", 0.1, 1)  -- eliminate fuzzy top
+
+	c_const_set("corpseBorder_renderx1", -2.1, 1) c_const_set("corpseBorder_rendery1",  2.1, 1)
+	c_const_set("corpseBorder_renderx2", -2.1, 1) c_const_set("corpseBorder_rendery2", -2.1, 1)
+	c_const_set("corpseBorder_renderx3",  2.1, 1) c_const_set("corpseBorder_rendery3", -2.1, 1)
+	c_const_set("corpseBorder_renderx4",  2.1, 1) c_const_set("corpseBorder_rendery4",  2.1, 1)
+	c_const_set("corpseBorder_texturex1", 0.9875, 1) c_const_set("corpseBorder_texturey1", 0.9875, 1)
+	c_const_set("corpseBorder_texturex2", 0.0125, 1) c_const_set("corpseBorder_texturey2", 0.9875, 1)
+	c_const_set("corpseBorder_texturex3", 0.0125, 1) c_const_set("corpseBorder_texturey3", 0.1, 1)  -- no outline on top
+	c_const_set("corpseBorder_texturex4", 0.9875, 1) c_const_set("corpseBorder_texturey4", 0.1, 1)  -- no outline on top
+
 	c_const_set("color_red", {0.875, 0.125, 0.125, 1})
 	c_const_set("color_blue", {0.125, 0.125, 0.875, 1})
 	c_const_set("color_neutral", {0.2, 0.2, 0.33, 1})
@@ -124,6 +144,10 @@ function renderer_init()
 	tankShield_textures = gl.GenTextures(1)
 	tankTagged_listBase = gl.GenLists(1)
 	tankTagged_textures = gl.GenTextures(1)
+	corpse_listBase = gl.GenLists(1)
+	corpse_textures = gl.GenTextures(1)
+	copersBorder_listBase = gl.GenLists(1)
+	copersBorder_textures = gl.GenTextures(1)
 
 	if tank_listBase == 0 or tankBorder_listBase == 0 then
 		error("st_play_init: could not generate lists: " .. gl.GetError())
@@ -164,6 +188,44 @@ function renderer_init()
 			gl.TexCoord(c_const_get("tankBorder_texturex2"), c_const_get("tankBorder_texturey2")) gl.Vertex(c_const_get("tankBorder_renderx2"), c_const_get("tankBorder_rendery2"))
 			gl.TexCoord(c_const_get("tankBorder_texturex3"), c_const_get("tankBorder_texturey3")) gl.Vertex(c_const_get("tankBorder_renderx3"), c_const_get("tankBorder_rendery3"))
 			gl.TexCoord(c_const_get("tankBorder_texturex4"), c_const_get("tankBorder_texturey4")) gl.Vertex(c_const_get("tankBorder_renderx4"), c_const_get("tankBorder_rendery4"))
+		gl.End()
+	gl.EndList()
+
+	gl.BindTexture("TEXTURE_2D", corpse_textures[1])
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_S", "REPEAT")
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_T", "REPEAT")
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_MIN_FILTER", "LINEAR")
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_MAG_FILTER", "LINEAR")
+	tankbobs.r_loadImage2D(c_const_get("corpse"), c_const_get("textures_default"))
+
+	gl.NewList(corpse_listBase, "COMPILE")
+		-- blend corpse with color
+		gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
+		gl.BindTexture("TEXTURE_2D", corpse_textures[1])
+		gl.Begin("QUADS")
+			gl.TexCoord(c_const_get("corpse_texturex1"), c_const_get("corpse_texturey1")) gl.Vertex(c_const_get("corpse_renderx1"), c_const_get("corpse_rendery1"))
+			gl.TexCoord(c_const_get("corpse_texturex2"), c_const_get("corpse_texturey2")) gl.Vertex(c_const_get("corpse_renderx2"), c_const_get("corpse_rendery2"))
+			gl.TexCoord(c_const_get("corpse_texturex3"), c_const_get("corpse_texturey3")) gl.Vertex(c_const_get("corpse_renderx3"), c_const_get("corpse_rendery3"))
+			gl.TexCoord(c_const_get("corpse_texturex4"), c_const_get("corpse_texturey4")) gl.Vertex(c_const_get("corpse_renderx4"), c_const_get("corpse_rendery4"))
+		gl.End()
+	gl.EndList()
+
+	gl.BindTexture("TEXTURE_2D", corpseBorder_textures[1])
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_S", "REPEAT")
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_T", "REPEAT")
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_MIN_FILTER", "LINEAR")
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_MAG_FILTER", "LINEAR")
+	tankbobs.r_loadImage2D(c_const_get("corpseBorder"), c_const_get("textures_default"))
+
+	gl.NewList(corpseBorder_listBase, "COMPILE")
+		-- blend corpse with color
+		gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
+		gl.BindTexture("TEXTURE_2D", corpseBorder_textures[1])
+		gl.Begin("QUADS")
+			gl.TexCoord(c_const_get("corpseBorder_texturex1"), c_const_get("corpseBorder_texturey1")) gl.Vertex(c_const_get("corpseBorder_renderx1"), c_const_get("corpseBorder_rendery1"))
+			gl.TexCoord(c_const_get("corpseBorder_texturex2"), c_const_get("corpseBorder_texturey2")) gl.Vertex(c_const_get("corpseBorder_renderx2"), c_const_get("corpseBorder_rendery2"))
+			gl.TexCoord(c_const_get("corpseBorder_texturex3"), c_const_get("corpseBorder_texturey3")) gl.Vertex(c_const_get("corpseBorder_renderx3"), c_const_get("corpseBorder_rendery3"))
+			gl.TexCoord(c_const_get("corpseBorder_texturex4"), c_const_get("corpseBorder_texturey4")) gl.Vertex(c_const_get("corpseBorder_renderx4"), c_const_get("corpseBorder_rendery4"))
 		gl.End()
 	gl.EndList()
 

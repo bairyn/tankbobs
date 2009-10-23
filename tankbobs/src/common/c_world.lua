@@ -53,8 +53,10 @@ local c_world_powerup_step
 local c_world_controlPoint_step
 local c_world_flag_step
 local c_world_teleporter_step
+local c_world_corpse_step
 local c_world_tanks
 local c_world_powerups
+local c_world_corpses
 local tank_acceleration
 local tank_rotationSpeed
 local tank_rotationSpecialSpeed
@@ -107,17 +109,20 @@ function c_world_init()
 	c_const_set("world_iterations", 16)
 
 	c_const_set("wall_contentsMask", WALL, 1)
-	c_const_set("wall_clipmask", WALL + POWERUP + TANK + PROJECTILE, 1)
+	c_const_set("wall_clipmask",          WALL + POWERUP + TANK + PROJECTILE + CORPSE, 1)
 	c_const_set("wall_isSensor", false, 1)
 	c_const_set("powerup_contentsMask", POWERUP, 1)
-	c_const_set("powerup_clipmask", WALL + TANK + POWERUP, 1)
+	c_const_set("powerup_clipmask",       WALL + TANK + POWERUP, 1)
 	c_const_set("powerup_isSensor", false, 1)
 	c_const_set("tank_contentsMask", TANK, 1)
-	c_const_set("tank_clipmask", WALL + POWERUP + TANK + PROJECTILE, 1)
+	c_const_set("tank_clipmask",          WALL + POWERUP + TANK + PROJECTILE + CORPSE, 1)
 	c_const_set("tank_isSensor", false, 1)
 	c_const_set("projectile_contentsMask", PROJECTILE, 1)
-	c_const_set("projectile_clipmask", WALL + TANK + PROJECTILE, 1)
+	c_const_set("projectile_clipmask" ,   WALL + TANK + PROJECTILE + CORPSE, 1)
 	c_const_set("projectile_isSensor", false, 1)
+	c_const_set("corpse_contentsMask",  CORPSE, 1)
+	c_const_set("corpse_clipmask",        WALL + POWERUP + TANK + PROJECTILE + CORPSE, 1)
+	c_const_set("corpse_isSensor", false, 1)
 
 	c_const_set("world_behind", 5000, 1)  -- in ms (compared directly against SDL_GetTicks()
 	behind = c_const_get("world_behind")
@@ -131,6 +136,14 @@ function c_world_init()
 	c_const_set("world_allowSleep", true, 1)
 
 	c_const_set("world_maxPowerups", 64, 1)
+
+	c_const_set("world_corpseTime", 3, 1)
+	c_const_set("world_corpsePostTime", 3, 1)  -- corpses exists for some time after explosion
+	c_const_set("world_minimumCorpseTimeForDeathNoiseAndStuff", 0.2, 1)  -- don't play noise if corpses explode before this value
+	c_const_set("world_corpseExplodeDamage", 80, 1)
+	c_const_set("world_corpseExplodeKnockback", 16, 1)
+	c_const_set("world_corpseExplodeRadius", 25, 1)
+	c_const_set("world_corpseExplodeRadiusReduce", 1.2, 1)
 
 	c_const_set("teleporter_touchDistance", 6, 1)
 	c_const_set("controlPoint_touchDistance", 4, 1)
@@ -184,6 +197,12 @@ function c_world_init()
 	c_const_set("tank_angularDamping", 0, 1)
 	c_const_set("tank_spawnTime", 0.75, 1)
 	c_const_set("tank_static", false, 1)
+	c_const_set("corpse_canSleep", false, 1)
+	c_const_set("corpse_isBullet", true, 1)
+	c_const_set("corpse_linearDamping", 0, 1)
+	c_const_set("corpse_angularDamping", 0, 1)
+	c_const_set("corpse_spawnTime", 0.75, 1)
+	c_const_set("corpse_static", false, 1)
 	c_const_set("wall_density", 1, 1)
 	c_const_set("wall_friction", 0.25, 1)  -- deceleration caused by friction (~speed *= 1 - friction)
 	c_const_set("wall_restitution", 0.2, 1)
@@ -398,6 +417,15 @@ c_world_tank =
 	m = {p = {}}
 }
 
+c_world_corpse =
+{
+	new = c_class_new,
+	base = c_world_tank,
+
+	explodeTime = 0,
+	explode = nil,
+}
+
 c_world_team =
 {
 	new = c_class_new,
@@ -434,12 +462,13 @@ function c_world_newWorld()
 	c_world_powerups = {}
 	c_world_tanks = {}
 	c_world_teams = {}
+	c_world_corpses = {}
 
 	local m = c_tcm_current_map
 	if not c_tcm_current_map then
 		return false
 	end
-	tankbobs.w_newWorld(c_const_get("world_lowerbound") + t_m_vec2(m.leftmost, m.lowermost), c_const_get("world_upperbound") + t_m_vec2(m.rightmost, m.uppermost), t_m_vec2(c_const_get("world_gravityx"), c_const_get("world_gravityy")), c_const_get("world_allowSleep"), c_world_contactListener, c_world_tank_step, c_world_wall_step, c_world_projectile_step, c_world_powerupSpawnPoint_step, c_world_powerup_step, c_world_controlPoint_step, c_world_flag_step, c_world_teleporter_step, c_world_tanks, c_tcm_current_map.walls, c_weapon_getProjectiles(), c_tcm_current_map.powerupSpawnPoints, c_world_powerups, c_tcm_current_map.controlPoints, c_tcm_current_map.flags, c_tcm_current_map.teleporters)
+	tankbobs.w_newWorld(c_const_get("world_lowerbound") + t_m_vec2(m.leftmost, m.lowermost), c_const_get("world_upperbound") + t_m_vec2(m.rightmost, m.uppermost), t_m_vec2(c_const_get("world_gravityx"), c_const_get("world_gravityy")), c_const_get("world_allowSleep"), c_world_contactListener, c_world_tank_step, c_world_wall_step, c_world_projectile_step, c_world_powerupSpawnPoint_step, c_world_powerup_step, c_world_controlPoint_step, c_world_flag_step, c_world_teleporter_step, c_world_corpse_step, c_world_tanks, c_tcm_current_map.walls, c_weapon_getProjectiles(), c_tcm_current_map.powerupSpawnPoints, c_world_powerups, c_tcm_current_map.controlPoints, c_tcm_current_map.flags, c_tcm_current_map.teleporters, c_world_corpses)
 
 	-- set game type
 	local switch = c_config_get("game.gameType")
@@ -553,6 +582,8 @@ function c_world_freeWorld()
 
 	c_world_powerups = {}
 	c_world_tanks = {}
+	c_world_teams = {}
+	c_world_corpses = {}
 end
 
 function c_world_setGameType(gameType)
@@ -635,12 +666,32 @@ function c_world_tank_spawn(tank)
 	tank.spawning = true
 end
 
+function c_world_addCorpse(corpse)
+	local corpse = c_world_corpse:new()
+
+	local index = 1
+	for k, v in pairs(c_world_corpses) do
+		if v == corpse then
+			index = k
+		end
+	end
+
+	t_t_clone(true, tank, corpse)
+	corpse.explodeTime = t_t_getTicks() + c_world_timeMultiplier(c_const_get("world_corpseTime"))
+	corpse.body = corpsebobs.w_addBody(corpse.p, corpse.r, c_const_get("corpse_canSleep"), c_const_get("corpse_isBullet"), c_const_get("corpse_linearDamping"), c_const_get("corpse_angularDamping"), corpse.h, c_const_get("corpse_density"), c_const_get("corpse_friction"), c_const_get("corpse_restitution"), not c_const_get("corpse_static"), c_const_get("corpse_contentsMask"), c_const_get("corpse_clipmask"), c_const_get("corpse_isSensor"), index)
+
+	corpse.exists = true
+end
+
 function c_world_tank_die(tank, t)
 	t = t or t_t_getTicks()
 
 	if tank.exists and tank.body then
+		-- things that can't be done more than once
 		tankbobs.w_removeBody(tank.body)
 		tank.body = nil
+
+		c_world_addCorpse(tank)
 	end
 
 	c_ai_tankDie(tank)
@@ -895,6 +946,19 @@ function c_world_pointIntersects(p, ignoreType)
 		end
 	end
 
+	-- corpses
+	if ignoreType ~= "corpse" then
+		for _, v in pairs(c_world_corpses) do
+			if not v.collided then
+				hull = c_world_corpseHull(v)
+
+				if t() then
+					return true
+				end
+			end
+		end
+	end
+
 	return false
 end
 
@@ -910,6 +974,25 @@ function c_world_tankHull(tank)
 	for k, v in pairs(tank.h) do
 		local h = t_m_vec2(v)
 		h.t = h.t + tank.r
+		h:add(p)
+		c[k](h)
+	end
+
+	return c
+end
+
+local c = nil
+function c_world_corpseHull(corpse)
+	if not c then
+		c = {t_m_vec2(0, 0), t_m_vec2(0, 0), t_m_vec2(0, 0), t_m_vec2(0, 0)}
+	end
+
+	-- return a table of coordinates of tank's hull
+	local p = tank.p
+
+	for k, v in pairs(tank.h) do
+		local h = t_m_vec2(v)
+		h.t = h.t + corpse.r
 		h:add(p)
 		c[k](h)
 	end
@@ -1772,6 +1855,74 @@ function c_world_powerup_step(d, powerup)
 	end
 end
 
+function c_world_removeCorpse(corpse)
+	for k, v in pairs(c_world_corpses) do
+		if v == corpse then
+			corpse[k] = v
+		end
+	end
+end
+
+function c_world_explosion(pos, damage, knockback, radius, log)
+	if radius <= 0.001 then
+		return
+	end
+
+	log = log or 1
+
+	-- iterate over tanks
+	for _, v in pairs(c_world_tanks) do
+		if v.exists and v.body then
+			if (pos - v.p).R <= radius then
+				local d = (1 - (pos - v.p).R / radius) ^ log
+
+				-- damage
+				c_world_tankDamage(v, d * damage)
+
+				-- knockback
+				local vel = t_w_getLinearVelocity(v)
+				local offset = t_m_vec2()
+				offset.R = d * knockback
+				offset.t = (pos - v.p).t
+				vel:add(offset)
+			end
+		end
+	end
+end
+
+function c_world_corpse_step(d, corpse)
+	local t = t_t_getTicks()
+
+	if not corpse.exists then
+		c_world_removeCorpse(corpse)
+
+		return
+	end
+
+	corpse.p(t_w_getPosition(corpse.body))
+	corpse.r = t_w_getAngle(corpse.body)
+
+	if t >= corpse.explodeTime + c_world_timeMultiplier(c_const_get("world_corpsePostTime")) then
+		-- remove corpse
+		corpse.exists = false
+
+		if corpse.body then
+			tankbobs.w_removeBody(corpse.body)
+		end
+
+		c_world_removeCorpse(corpse)
+	elseif t >= corpse.explodeTime then
+		-- explode corpse
+		if not corpse.explode then
+			corpse.explode = c_world_timeMultiplier(c_const_get("world_corpsePostTime"))
+
+			c_world_explosion(corpse.p, c_const_get("world_corpseExplodeDamage"), c_const_get("world_corpseExplodeKnockback"), c_const_get("world_corpseExplodeRadius"), c_const_get("world_corpseExplodeRadiusReduce"))
+		end
+
+		corpse.explode = corpse.explode - d
+	end
+end
+
 function c_world_controlPoint_step(d, controlPoint)
 	if c_world_gameType ~= DOMINATION then
 		return
@@ -2122,6 +2273,10 @@ local function c_world_private_resetWorldTimers(t)
 		v.spawnTime = t
 	end
 
+	for _, v in pairs(c_world_corpses) do
+		v.explodeTime = t + c_const_get("world_corpseTime")
+	end
+
 	for _, v in pairs(c_tcm_current_map.controlPoints) do
 		if v.m.nextPointTime then
 			v.m.nextPointTime = t
@@ -2167,6 +2322,10 @@ local function c_world_private_offsetWorldTimers(d)
 
 	for _, v in pairs(c_world_powerups) do
 		v.spawnTime = v.spawnTime + d
+	end
+
+	for _, v in pairs(c_world_corpses) do
+		v.explodeTime = v.explodeTime + d
 	end
 
 	for _, v in pairs(c_tcm_current_map.controlPoints) do
@@ -2265,6 +2424,10 @@ function c_world_step(d)
 				for _, v in pairs(c_tcm_current_map.teleporters) do
 					c_world_teleporter_step(wd, v)
 				end
+
+				for _, v in pairs(c_world_corpses) do
+					c_world_corpse_step(wd, v)
+				end
 				--]]
 
 				tankbobs.w_step()
@@ -2298,6 +2461,10 @@ end
 
 function c_world_getPowerups()
 	return c_world_powerups
+end
+
+function c_world_getCorpses()
+	return c_world_corpses
 end
 
 function c_world_timeMultiplier(v)
