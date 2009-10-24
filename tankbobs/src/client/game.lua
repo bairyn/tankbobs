@@ -793,9 +793,10 @@ function game_step(d)
 		end
 	end
 
-	for _, v in pairs(c_world_getTanks()) do
+	for _, v in pairs(c_world_getCorpses()) do
 		if v.exists then
 			if v.explode and not v.m.explodeSound then
+				v.m.explodeSound = tankbobs.t_getTicks()
 				if c_const_get("world_corpseTime") >= c_const_get("world_minimumCorpseTimeForDeathNoiseAndStuff") then
 					tankbobs.a_playSound(c_const_get("corpseExplode_sound"))
 				end
