@@ -1,0 +1,30 @@
+<?xml version="1.0" standalone="no" ?>
+<!DOCTYPE project PUBLIC "-//audacityproject-1.3.0//DTD//EN" "http://audacity.sourceforge.net/xml/audacityproject-1.3.0.dtd" >
+<project xmlns="http://audacity.sourceforge.net/xml/" projname="explode_data" version="1.3.0" audacityversion="1.3.9" sel0="0.0000000000" sel1="1.4900729167" vpos="0" h="0.0000000000" zoom="582.5218284899" rate="96000">
+	<tags>
+		<tag name="id3v2" value="1"/>
+		<tag name="YEAR" value="2009"/>
+		<tag name="ALBUM" value="Tankbobs"/>
+	</tags>
+	<wavetrack name="47252__nthompson__rocketexpl" channel="2" linked="0" mute="0" solo="0" height="150" minimized="0" rate="96000" gain="1" pan="0">
+		<waveclip offset="0.00000000">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="143047">
+				<waveblock start="0">
+					<simpleblockfile filename="e0000774.au" len="143047" min="-1" max="0.985272" rms="0.330911"/>
+				</waveblock>
+			</sequence>
+			<envelope numpoints="10">
+				<controlpoint t="0.013733390937" val="0.833333333333"/>
+				<controlpoint t="0.027466781874" val="0.805555555556"/>
+				<controlpoint t="0.042916846678" val="0.694444444444"/>
+				<controlpoint t="0.106433779762" val="0.708333333333"/>
+				<controlpoint t="0.195700820853" val="1.069444444444"/>
+				<controlpoint t="0.343334773425" val="0.666666666667"/>
+				<controlpoint t="0.494402073733" val="0.430555555556"/>
+				<controlpoint t="0.585385788690" val="0.833333333333"/>
+				<controlpoint t="0.815415086886" val="0.944444444444"/>
+				<controlpoint t="0.815420086886" val="0.861111111111"/>
+			</envelope>
+		</waveclip>
+	</wavetrack>
+</project>
