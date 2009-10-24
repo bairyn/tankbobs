@@ -141,7 +141,7 @@ function c_world_init()
 	c_const_set("world_corpsePostTime", 3, 1)  -- corpses exists for some time after explosion
 	c_const_set("world_minimumCorpseTimeForDeathNoiseAndStuff", 0.2, 1)  -- don't play noise if corpses explode before this value
 	c_const_set("world_corpseExplodeDamage", 80, 1)
-	c_const_set("world_corpseExplodeKnockback", 16, 1)
+	c_const_set("world_corpseExplodeKnockback", 64, 1)
 	c_const_set("world_corpseExplodeRadius", 25, 1)
 	c_const_set("world_corpseExplodeRadiusReduce", 1.2, 1)
 
