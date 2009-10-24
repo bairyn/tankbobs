@@ -1971,6 +1971,7 @@ function c_world_explosion(pos, damage, knockback, radius, log)
 				offset.R = d * knockback
 				offset.t = (pos - v.p).t
 				vel:add(offset)
+				t_w_setLinearVelocity(v.body, vel)
 
 				-- damage
 				c_world_tankDamage(v, d * damage)
