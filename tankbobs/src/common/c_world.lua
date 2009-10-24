@@ -900,7 +900,9 @@ function c_world_pointInsideHull(p, hull)
 	return c
 end
 
-function c_world_pointIntersects(p, ignoreType)
+function c_world_pointIntersects(p, ignoreTypes)
+	ignoreTypes = ignoreTypes or ""
+
 	local hull
 
 	local function t()
@@ -912,7 +914,7 @@ function c_world_pointIntersects(p, ignoreType)
 	end
 
 	-- walls
-	if ignoreType ~= "wall" then
+	if not ignoreTypes:find("wall") then
 		for _, v in pairs(c_tcm_current_map.walls) do
 			if not v.detail then
 				hull = v.m.pos
@@ -925,7 +927,7 @@ function c_world_pointIntersects(p, ignoreType)
 	end
 
 	-- tanks
-	if ignoreType ~= "tanks" then
+	if not ignoreTypes:find("tanks") then
 		for _, v in pairs(c_world_tanks) do
 			if v.exists then
 				hull = t_t_clone(c_world_tankHull(v))
@@ -938,7 +940,7 @@ function c_world_pointIntersects(p, ignoreType)
 	end
 
 	-- projectiles
-	if ignoreType ~= "projectile" then
+	if not ignoreTypes:find("projectile") then
 		for _, v in pairs(c_weapon_getProjectiles()) do
 			if not v.collided then
 				hull = c_world_projectileHull(v)
@@ -951,7 +953,7 @@ function c_world_pointIntersects(p, ignoreType)
 	end
 
 	-- powerups
-	if ignoreType ~= "powerup" then
+	if not ignoreTypes:find("powerup") then
 		for _, v in pairs(c_world_powerups) do
 			if not v.collided then
 				hull = c_world_powerupHull(v)
@@ -964,7 +966,7 @@ function c_world_pointIntersects(p, ignoreType)
 	end
 
 	-- corpses
-	if ignoreType ~= "corpse" then
+	if not ignoreTypes:find("corpse") then
 		for _, v in pairs(c_world_corpses) do
 			if not v.collided then
 				hull = c_world_corpseHull(v)
@@ -1162,7 +1164,7 @@ function c_world_tank_canSpawn(d, tank)
 	return true
 end
 
-function c_world_findClosestIntersection(start, endP, ignoreType)
+function c_world_findClosestIntersection(start, endP, ignoreTypes)
 	-- test against the world and find the closest intersection point
 	-- returns false; or true, intersectionPoint, typeOfTarget, target
 	local lastPoint, currentPoint = nil
@@ -1170,8 +1172,10 @@ function c_world_findClosestIntersection(start, endP, ignoreType)
 	local hull
 	local b, intersection
 
+	ignoreTypes = ignoreTypes or ""
+
 	-- walls
-	if ignoreType ~= "wall" then
+	if not ignoreTypes:find("wall") then
 		for _, v in pairs(c_tcm_current_map.walls) do
 			if not v.detail then
 				hull = v.m.pos
@@ -1205,7 +1209,7 @@ function c_world_findClosestIntersection(start, endP, ignoreType)
 	end
 
 	-- tanks
-	if ignoreType ~= "tank" then
+	if not ignoreTypes:find("tank") then
 		for _, v in pairs(c_world_tanks) do
 			if v.exists then
 				hull = t_t_clone(c_world_tankHull(v))
@@ -1240,7 +1244,7 @@ function c_world_findClosestIntersection(start, endP, ignoreType)
 	end
 
 	-- projectiles
-	if ignoreType ~= "projectile" then
+	if not ignoreTypes:find("projectile") then
 		for _, v in pairs(c_weapon_getProjectiles()) do
 			if not v.collided then
 				hull = c_world_projectileHull(v)
@@ -1274,7 +1278,7 @@ function c_world_findClosestIntersection(start, endP, ignoreType)
 	end
 
 	-- powerups
-	if ignoreType ~= "powerup" then
+	if not ignoreTypes:find("powerup") then
 		for _, v in pairs(c_world_powerups) do
 			if v.exists then
 				hull = t_t_clone(c_world_powerupHull(v))
@@ -1308,7 +1312,7 @@ function c_world_findClosestIntersection(start, endP, ignoreType)
 	end
 
 	-- corpses
-	if ignoreType ~= "corpse" then
+	if not ignoreTypes:find("corpse") then
 		for _, v in pairs(c_world_corpses) do
 			if v.exists then
 				hull = t_t_clone(c_world_corpseHull(v))
@@ -1707,10 +1711,29 @@ function c_world_wall_step(d, wall)
 end
 
 function c_world_projectile_step(d, projectile)
+	local t = t_t_getTicks()
+
 	if projectile.collided then
-		tankbobs.w_removeBody(projectile.m.body)
-		c_weapon_projectileRemove(projectile)
-		return
+		-- if explosive projectile, don't remove immediately
+		if projectile.projectileExplode then
+			if not projectile.projectileCollideTime then
+				projectile.projectileCollideTime = t + c_world_timeMultiplier(projectile.projectileExplodeTime)
+			end
+
+			if t > projectileCollideTime then
+				-- remove projectile
+
+				tankbobs.w_removeBody(projectile.m.body)
+				c_weapon_projectileRemove(projectile)
+
+				return
+			end
+		else
+			tankbobs.w_removeBody(projectile.m.body)
+			c_weapon_projectileRemove(projectile)
+
+			return
+		end
 	end
 
 	c_world_testBody(projectile)
@@ -1963,18 +1986,22 @@ function c_world_explosion(pos, damage, knockback, radius, log)
 	for _, v in pairs(c_world_tanks) do
 		if v.exists and v.body then
 			if (pos - v.p).R <= radius then
-				local d = (1 - (pos - v.p).R / radius) ^ log
+				local s, _, t, _ = c_world_findClosestIntersection(pos, v.p, "tank, projectile, powerup, corpse")
 
-				-- knockback
-				local vel = t_w_getLinearVelocity(v.body)
-				local offset = t_m_vec2()
-				offset.R = d * knockback
-				offset.t = (v.p - pos).t
-				vel:add(offset)
-				t_w_setLinearVelocity(v.body, vel)
+				if not s then
+					local d = (1 - (pos - v.p).R / radius) ^ log
 
-				-- damage
-				c_world_tankDamage(v, d * damage)
+					-- knockback
+					local vel = t_w_getLinearVelocity(v.body)
+					local offset = t_m_vec2()
+					offset.R = d * knockback
+					offset.t = (v.p - pos).t
+					vel:add(offset)
+					t_w_setLinearVelocity(v.body, vel)
+
+					-- damage
+					c_world_tankDamage(v, d * damage)
+				end
 			end
 		end
 	end
