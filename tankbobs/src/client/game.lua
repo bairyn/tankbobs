@@ -335,16 +335,16 @@ local function game_drawWorld(d)
 										-- team colors
 										local color = c_const_get(v.red and "color_red" or "color_blue")
 										r, g, b, a = color[1], color[2], color[3], color[4]
-										gl.Color(r, g, b, a)
-										gl.TexEnv("TEXTURE_ENV_COLOR", r, g, b, a)
-
-										-- corpse
-										gl.CallList(corpse_listBase)
-										-- corpse outline
-										gl.Color(1, 1, 1, 1)
-										gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, 1)
-										gl.CallList(corpseBorder_listBase)
 									end
+									gl.Color(r, g, b, a)
+									gl.TexEnv("TEXTURE_ENV_COLOR", r, g, b, a)
+
+									-- corpse
+									gl.CallList(corpse_listBase)
+									-- corpse outline
+									gl.Color(1, 1, 1, 1)
+									gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, 1)
+									gl.CallList(corpseBorder_listBase)
 								gl.PopMatrix()
 							gl.PopAttrib()
 						else

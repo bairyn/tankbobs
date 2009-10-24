@@ -402,7 +402,7 @@ c_world_tank =
 	body = nil,  -- physical body
 	health = 0,
 	nextSpawnTime = 0,
-	killer = nil,
+	killer = 0,
 	score = 0,
 	ammo = 0,
 	clips = 0,
@@ -671,7 +671,7 @@ function c_world_tank_spawn(tank)
 end
 
 function c_world_addCorpse(tank)
-	local corpse = c_world_corpse:new()
+	local corpse = c_world_corpse:new()  -- FIXME: t_clone() segfaults when overwriting a value?
 
 	local index = 1
 	for k, v in pairs(c_world_corpses) do
@@ -680,7 +680,13 @@ function c_world_addCorpse(tank)
 		end
 	end
 
+	local FIXMETODOtmpLastAttackers = tank.lastAttackers  -- HACK: work around segfault
+	tank.lastAttackers = {}  -- FIXME TODO: t_clone() segfaults when this isn't set?
+
 	t_t_clone(true, tank, corpse)
+
+	tank.lastAttackers = FIXMETODOtmpLastAttackers
+
 	corpse.explodeTime = t_t_getTicks() + c_world_timeMultiplier(c_const_get("world_corpseTime"))
 	corpse.body = tankbobs.w_addBody(corpse.p, corpse.r, c_const_get("corpse_canSleep"), c_const_get("corpse_isBullet"), c_const_get("corpse_linearDamping"), c_const_get("corpse_angularDamping"), corpse.h, c_const_get("corpse_density"), c_const_get("corpse_friction"), c_const_get("corpse_restitution"), not c_const_get("corpse_static"), c_const_get("corpse_contentsMask"), c_const_get("corpse_clipmask"), c_const_get("corpse_isSensor"), index)
 
@@ -710,12 +716,17 @@ function c_world_tank_die(tank, t)
 		tank.m.flag = nil
 	end
 
+	local killer = nil
+	if tank.killer then
+		killer = c_world_tanks[tank.killer]
+	end
+
 	tank.nextSpawnTime = t + c_world_timeMultiplier(c_const_get("tank_spawnTime"))
 	if c_world_gameType == DEATHMATCH then
-		if tank.killer and tank.killer ~= tank then
-			tank.killer.score = tank.killer.score + 1
+		if killer and killer ~= tank then
+			killer.score = killer.score + 1
 		else
-			tank.score = tank.score - 1
+			score = tank.score - 1
 		end
 	end
 	tank.shield = 0
@@ -994,9 +1005,9 @@ function c_world_corpseHull(corpse)
 	end
 
 	-- return a table of coordinates of tank's hull
-	local p = tank.p
+	local p = corpse.p
 
-	for k, v in pairs(tank.h) do
+	for k, v in pairs(corpse.h) do
 		local h = t_m_vec2(v)
 		h.t = h.t + corpse.r
 		h:add(p)
@@ -1931,6 +1942,11 @@ end
 function c_world_removeCorpse(corpse)
 	for k, v in pairs(c_world_corpses) do
 		if v == corpse then
+			if v.body then
+				tankbobs.w_removeBody(v.body)
+				v.body = nil
+			end
+
 			corpse[k] = nil
 		end
 	end
@@ -1949,15 +1965,15 @@ function c_world_explosion(pos, damage, knockback, radius, log)
 			if (pos - v.p).R <= radius then
 				local d = (1 - (pos - v.p).R / radius) ^ log
 
-				-- damage
-				c_world_tankDamage(v, d * damage)
-
 				-- knockback
-				local vel = t_w_getLinearVelocity(v)
+				local vel = t_w_getLinearVelocity(v.body)
 				local offset = t_m_vec2()
 				offset.R = d * knockback
 				offset.t = (pos - v.p).t
 				vel:add(offset)
+
+				-- damage
+				c_world_tankDamage(v, d * damage)
 			end
 		end
 	end
@@ -1986,10 +2002,6 @@ function c_world_corpse_step(d, corpse)
 	if t >= corpse.explodeTime + c_world_timeMultiplier(c_const_get("world_corpsePostTime")) then
 		-- remove corpse
 		corpse.exists = false
-
-		if corpse.body then
-			tankbobs.w_removeBody(corpse.body)
-		end
 
 		c_world_removeCorpse(corpse)
 	elseif t >= corpse.explodeTime then
