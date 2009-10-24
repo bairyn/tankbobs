@@ -216,7 +216,7 @@ int w_newWorld(lua_State *L)
 	wallFunction = luaL_ref(L, LUA_REGISTRYINDEX);
 	tankFunction = luaL_ref(L, LUA_REGISTRYINDEX);
 
-	lua_pop(L, 5);
+	lua_pop(L, 7);
 
 	return 0;
 }
