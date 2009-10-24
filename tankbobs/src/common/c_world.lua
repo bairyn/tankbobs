@@ -2007,6 +2007,11 @@ function c_world_corpse_step(d, corpse)
 		c_world_removeCorpse(corpse)
 	elseif t >= corpse.explodeTime then
 		-- explode corpse
+		if corpse.body then
+			tankbobs.w_removeBody(corpse.body)
+			corpse.body = nil
+		end
+
 		if not corpse.explode then
 			corpse.explode = c_world_timeMultiplier(c_const_get("world_corpsePostTime"))
 
