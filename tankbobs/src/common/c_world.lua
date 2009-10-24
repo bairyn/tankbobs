@@ -681,7 +681,7 @@ function c_world_tank_spawn(tank)
 	tank.spawning = true
 end
 
-function c_world_addCorpse(tank)
+function c_world_addCorpse(tank, vel)
 	local corpse = c_world_corpse:new()  -- FIXME: t_clone() segfaults when overwriting a value?
 
 	local index = 1
@@ -693,8 +693,6 @@ function c_world_addCorpse(tank)
 
 	local FIXMETODOtmpLastAttackers = tank.lastAttackers  -- HACK: work around segfault
 	tank.lastAttackers = {}  -- FIXME TODO: t_clone() segfaults when this isn't set?
-
-	local vel = t_w_getLinearVelocity(tank.body)
 
 	t_t_clone(true, tank, corpse)
 
@@ -714,10 +712,12 @@ function c_world_tank_die(tank, t)
 
 	if tank.exists and tank.body then
 		-- things that can't be done more than once
+		local vel = t_w_getLinearVelocity(tank.body)
+
 		tankbobs.w_removeBody(tank.body)
 		tank.body = nil
 
-		c_world_addCorpse(tank)
+		c_world_addCorpse(tank, vel)
 	end
 
 	c_ai_tankDie(tank)
