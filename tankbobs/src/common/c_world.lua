@@ -1989,16 +1989,10 @@ function c_world_corpse_step(d, corpse)
 		return
 	end
 
-	if not corpse.body then
-		common_printError("c_world_corpse_step(): corpse.body is nil!\n")
-
-		c_world_removeCorpse(corpse)
-
-		return
+	if corpse.body then
+		corpse.p(t_w_getPosition(corpse.body))
+		corpse.r = t_w_getAngle(corpse.body)
 	end
-
-	corpse.p(t_w_getPosition(corpse.body))
-	corpse.r = t_w_getAngle(corpse.body)
 
 	if t >= corpse.explodeTime + c_world_timeMultiplier(c_const_get("world_corpsePostTime")) then
 		-- remove corpse
