@@ -1969,7 +1969,7 @@ function c_world_explosion(pos, damage, knockback, radius, log)
 				local vel = t_w_getLinearVelocity(v.body)
 				local offset = t_m_vec2()
 				offset.R = d * knockback
-				offset.t = (pos - v.p).t
+				offset.t = (v.p - pos).t
 				vel:add(offset)
 				t_w_setLinearVelocity(v.body, vel)
 
