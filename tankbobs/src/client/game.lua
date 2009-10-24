@@ -350,7 +350,16 @@ local function game_drawWorld(d)
 						else
 							-- draw explosions things from center
 
-							-- TODO
+							gl.PushAttrib("CURRENT_BIT")
+								gl.PushMatrix()
+									gl.Translate(v.p.x, v.p.y, 0)
+									gl.Color(1, 1, 1, 1)
+									gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, 1)
+									local scale = 1 - v.explode / c_const_get("world_corpsePostTime")
+									gl.Scale(scale, scale, 1)
+									gl.CallList(explosion_listBase)
+								gl.PopMatrix()
+							gl.PopAttrib()
 						end
 					end
 				end

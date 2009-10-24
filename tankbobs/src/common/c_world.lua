@@ -138,7 +138,7 @@ function c_world_init()
 	c_const_set("world_maxPowerups", 64, 1)
 
 	c_const_set("world_corpseTime", 3, 1)
-	c_const_set("world_corpsePostTime", 3, 1)  -- corpses exists for some time after explosion
+	c_const_set("world_corpsePostTime", 0.5, 1)  -- corpses exists for some time after explosion
 	c_const_set("world_minimumCorpseTimeForDeathNoiseAndStuff", 0.2, 1)  -- don't play noise if corpses explode before this value
 	c_const_set("world_corpseExplodeDamage", 80, 1)
 	c_const_set("world_corpseExplodeKnockback", 64, 1)
@@ -2007,7 +2007,7 @@ function c_world_corpse_step(d, corpse)
 		end
 
 		if not corpse.explode then
-			corpse.explode = c_world_timeMultiplier(c_const_get("world_corpsePostTime"))
+			corpse.explode = c_const_get("world_corpsePostTime")
 
 			c_world_explosion(corpse.p, c_const_get("world_corpseExplodeDamage"), c_const_get("world_corpseExplodeKnockback"), c_const_get("world_corpseExplodeRadius"), c_const_get("world_corpseExplodeRadiusReduce"))
 		end

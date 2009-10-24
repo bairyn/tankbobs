@@ -33,12 +33,13 @@ local tankTagged_textures
 local corpse_textures
 local corpseBorder_textures
 local powerup_textures
-local healthbar_texture 
-local healthbarBorder_texture 
-local ammobarBorder_texture 
-local controlPoint_texture
-local flag_texture
-local flagBase_texture
+local healthbar_texture
+local healthbarBorder_texture
+local ammobarBorder_textures
+local controlPoint_textures
+local flag_textures
+local flagBase_textures
+local explosion_textures
 
 function renderer_init()
 	--tankbobs = _G.tankbobs
@@ -302,7 +303,7 @@ function renderer_init()
 	gl.EndList()
 
 	controlPoint_listBase = gl.GenLists(1)
-	controlPoint_texture = gl.GenTextures(1)
+	controlPoint_textures = gl.GenTextures(1)
 
 	if controlPoint_listBase == 0 then
 		error "st_play_init: could not generate lists"
@@ -319,7 +320,7 @@ function renderer_init()
 
 	c_const_set("controlPoint_rotation", -math.pi / 2, 1)
 
-	gl.BindTexture("TEXTURE_2D", controlPoint_texture[1])
+	gl.BindTexture("TEXTURE_2D", controlPoint_textures[1])
 	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_S", "REPEAT")
 	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_T", "REPEAT")
 	gl.TexParameter("TEXTURE_2D", "TEXTURE_MIN_FILTER", "LINEAR")
@@ -328,7 +329,7 @@ function renderer_init()
 
 	gl.NewList(controlPoint_listBase, "COMPILE")
 		gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
-		gl.BindTexture("TEXTURE_2D", controlPoint_texture[1])
+		gl.BindTexture("TEXTURE_2D", controlPoint_textures[1])
 		gl.Begin("QUADS")
 			gl.TexCoord(c_const_get("controlPoint_texturex1"), c_const_get("controlPoint_texturey1")) gl.Vertex(c_const_get("controlPoint_renderx1"), c_const_get("controlPoint_rendery1"))
 			gl.TexCoord(c_const_get("controlPoint_texturex2"), c_const_get("controlPoint_texturey2")) gl.Vertex(c_const_get("controlPoint_renderx2"), c_const_get("controlPoint_rendery2"))
@@ -338,7 +339,7 @@ function renderer_init()
 	gl.EndList()
 
 	flag_listBase = gl.GenLists(1)
-	flag_texture = gl.GenTextures(1)
+	flag_textures = gl.GenTextures(1)
 
 	if flag_listBase == 0 then
 		error "st_play_init: could not generate lists"
@@ -353,7 +354,7 @@ function renderer_init()
 	c_const_set("flag_texturex3", 1, 1) c_const_set("flag_texturey3", 0, 1)
 	c_const_set("flag_texturex4", 1, 1) c_const_set("flag_texturey4", 1, 1)
 
-	gl.BindTexture("TEXTURE_2D", flag_texture[1])
+	gl.BindTexture("TEXTURE_2D", flag_textures[1])
 	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_S", "REPEAT")
 	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_T", "REPEAT")
 	gl.TexParameter("TEXTURE_2D", "TEXTURE_MIN_FILTER", "LINEAR")
@@ -362,7 +363,7 @@ function renderer_init()
 
 	gl.NewList(flag_listBase, "COMPILE")
 		gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
-		gl.BindTexture("TEXTURE_2D", flag_texture[1])
+		gl.BindTexture("TEXTURE_2D", flag_textures[1])
 		gl.Begin("QUADS")
 			gl.TexCoord(c_const_get("flag_texturex1"), c_const_get("flag_texturey1")) gl.Vertex(c_const_get("flag_renderx1"), c_const_get("flag_rendery1"))
 			gl.TexCoord(c_const_get("flag_texturex2"), c_const_get("flag_texturey2")) gl.Vertex(c_const_get("flag_renderx2"), c_const_get("flag_rendery2"))
@@ -372,7 +373,7 @@ function renderer_init()
 	gl.EndList()
 
 	flagBase_listBase = gl.GenLists(1)
-	flagBase_texture = gl.GenTextures(1)
+	flagBase_textures = gl.GenTextures(1)
 
 	if flagBase_listBase == 0 then
 		error "st_play_init: could not generate lists"
@@ -387,7 +388,7 @@ function renderer_init()
 	c_const_set("flagBase_texturex3", 1, 1) c_const_set("flagBase_texturey3", 0, 1)
 	c_const_set("flagBase_texturex4", 1, 1) c_const_set("flagBase_texturey4", 1, 1)
 
-	gl.BindTexture("TEXTURE_2D", flagBase_texture[1])
+	gl.BindTexture("TEXTURE_2D", flagBase_textures[1])
 	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_S", "REPEAT")
 	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_T", "REPEAT")
 	gl.TexParameter("TEXTURE_2D", "TEXTURE_MIN_FILTER", "LINEAR")
@@ -396,13 +397,57 @@ function renderer_init()
 
 	gl.NewList(flagBase_listBase, "COMPILE")
 		gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
-		gl.BindTexture("TEXTURE_2D", flagBase_texture[1])
+		gl.BindTexture("TEXTURE_2D", flagBase_textures[1])
 		gl.Begin("QUADS")
 			gl.TexCoord(c_const_get("flagBase_texturex1"), c_const_get("flagBase_texturey1")) gl.Vertex(c_const_get("flagBase_renderx1"), c_const_get("flagBase_rendery1"))
 			gl.TexCoord(c_const_get("flagBase_texturex2"), c_const_get("flagBase_texturey2")) gl.Vertex(c_const_get("flagBase_renderx2"), c_const_get("flagBase_rendery2"))
 			gl.TexCoord(c_const_get("flagBase_texturex3"), c_const_get("flagBase_texturey3")) gl.Vertex(c_const_get("flagBase_renderx3"), c_const_get("flagBase_rendery3"))
 			gl.TexCoord(c_const_get("flagBase_texturex4"), c_const_get("flagBase_texturey4")) gl.Vertex(c_const_get("flagBase_renderx4"), c_const_get("flagBase_rendery4"))
 		gl.End()
+	gl.EndList()
+
+	explosion_listBase = gl.GenLists(1)
+	explosion_textures = gl.GenTextures(1)
+
+	if explosion_listBase == 0 then
+		error "st_play_init: could not generate lists"
+	end
+
+	c_const_set("explosion_renderx1",  -0.5, 1) c_const_set("explosion_rendery1",  3, 1)
+	c_const_set("explosion_renderx2",  -0.5, 1) c_const_set("explosion_rendery2",  0, 1)
+	c_const_set("explosion_renderx3",  0.5, 1) c_const_set("explosion_rendery3",  0, 1)
+	c_const_set("explosion_renderx4",  0.5, 1) c_const_set("explosion_rendery4",  3, 1)
+	c_const_set("explosion_texturex1", 0, 1) c_const_set("explosion_texturey1", 1, 1)
+	c_const_set("explosion_texturex2", 0, 1) c_const_set("explosion_texturey2", 0, 1)
+	c_const_set("explosion_texturex3", 1, 1) c_const_set("explosion_texturey3", 0, 1)
+	c_const_set("explosion_texturex4", 1, 1) c_const_set("explosion_texturey4", 1, 1)
+
+	gl.BindTexture("TEXTURE_2D", explosion_textures[1])
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_S", "REPEAT")
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_T", "REPEAT")
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_MIN_FILTER", "LINEAR")
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_MAG_FILTER", "LINEAR")
+	tankbobs.r_loadImage2D(c_const_get("explosion"), c_const_get("textures_default"))
+
+	gl.NewList(explosion_listBase, "COMPILE")
+		gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
+		gl.BindTexture("TEXTURE_2D", explosion_textures[1])
+		local num = 8
+
+		for i = 1, num do
+			local angle = common_lerp(0, 360, (i - 1) / (num - 1))
+
+			gl.PushMatrix()
+				gl.Rotate(angle, 0, 0, 1)
+
+				gl.Begin("QUADS")
+					gl.TexCoord(c_const_get("explosion_texturex1"), c_const_get("explosion_texturey1")) gl.Vertex(c_const_get("explosion_renderx1"), c_const_get("explosion_rendery1"))
+					gl.TexCoord(c_const_get("explosion_texturex2"), c_const_get("explosion_texturey2")) gl.Vertex(c_const_get("explosion_renderx2"), c_const_get("explosion_rendery2"))
+					gl.TexCoord(c_const_get("explosion_texturex3"), c_const_get("explosion_texturey3")) gl.Vertex(c_const_get("explosion_renderx3"), c_const_get("explosion_rendery3"))
+					gl.TexCoord(c_const_get("explosion_texturex4"), c_const_get("explosion_texturey4")) gl.Vertex(c_const_get("explosion_renderx4"), c_const_get("explosion_rendery4"))
+				gl.End()
+			gl.PopMatrix()
+		end
 	gl.EndList()
 
 	for _, v in pairs(c_weapon_getWeapons()) do
@@ -556,15 +601,19 @@ function renderer_done()
 	gl.DeleteLists(flagBase_listBase, 1)
 	gl.DeleteLists(corpse_listBase, 1)
 	gl.DeleteLists(corpseBorder_listBase, 1)
+	gl.DeleteLists(explosion_listBase, 1)
 
 	gl.DeleteTextures(tank_textures)
 	gl.DeleteTextures(tankBorder_textures)
 	gl.DeleteTextures(tankShield_textures)
 	gl.DeleteTextures(tankTagged_textures)
 	gl.DeleteTextures(powerup_textures)
-	gl.DeleteTextures(controlPoint_texture)
-	gl.DeleteTextures(flag_texture)
-	gl.DeleteTextures(flagBase_texture)
+	gl.DeleteTextures(controlPoint_textures)
+	gl.DeleteTextures(flag_textures)
+	gl.DeleteTextures(flagBase_textures)
+	gl.DeleteTextures(corpse_textures)
+	gl.DeleteTextures(corpseBorder_textures)
+	gl.DeleteTextures(explosion_textures)
 
 	for _, v in pairs(c_weapon_getWeapons()) do
 		gl.DeleteLists(v.m.p.list, 1)
