@@ -1918,7 +1918,6 @@ int w_setIndex(lua_State *L)
 	CHECKWORLD(world, L);
 
 	b2Body *body = reinterpret_cast<b2Body *> (lua_touserdata(L, 1));
-	lua_settop(L, 0);
 
 	body->SetUserData(reinterpret_cast<void *> (luaL_checkinteger(L, 2)));
 
