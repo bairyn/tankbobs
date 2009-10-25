@@ -701,7 +701,7 @@ function c_world_addCorpse(tank, vel, index)
 	corpse.explodeTime = t_t_getTicks() + c_world_timeMultiplier(c_const_get("world_corpseTime"))
 	corpse.body = tankbobs.w_addBody(corpse.p, corpse.r, c_const_get("corpse_canSleep"), c_const_get("corpse_isBullet"), c_const_get("corpse_linearDamping"), c_const_get("corpse_angularDamping"), corpse.h, c_const_get("corpse_density"), c_const_get("corpse_friction"), c_const_get("corpse_restitution"), not c_const_get("corpse_static"), c_const_get("corpse_contentsMask"), c_const_get("corpse_clipmask"), c_const_get("corpse_isSensor"), index)
 	t_w_setLinearVelocity(corpse.body, vel)
-	tankbobs.w_setIndex(index)
+	tankbobs.w_setIndex(tank.body, index)
 
 	corpse.exists = true
 
