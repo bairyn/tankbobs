@@ -31,7 +31,7 @@ function c_ai_init()
 	c_const_set("ai_maxSkill", 16)  -- least difficult to fight against
 	c_const_set("ai_maxSkillInstagib", 8)
 
-	c_const_set("ai_botRange", 200)
+	c_const_set("ai_botRange", 2000)
 	c_const_set("ai_botAccuracy", 0.08)  -- accuracy of most skilled bot; lower is better (can be up to x secs off)
 	c_const_set("ai_shootAngle", (math.pi * 2) / 64)  -- (Tankbobs uses radians)
 	c_const_set("ai_maxSpeed", 12)  -- brake if above this speed, even if attacking
@@ -325,7 +325,8 @@ function c_ai_findClosestEnemyInSight(tank, filter)
 			local time = 0
 			local vel = tankbobs.w_getLinearVelocity(v.body)
 			if weapon.meleeRange == 0 then
-				local low, high = 0, (range * weapon.speed + range * vel.R) / (range * range)
+				--local low, high = 0, (range * weapon.speed + range * vel.R) / (range * range)
+				local low, high = 0, range
 				while high - low > accuracy do
 					local time = (low + high) / 2
 					local projectileDistance = time * weapon.speed
