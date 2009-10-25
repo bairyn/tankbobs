@@ -2432,6 +2432,9 @@ local function c_world_private_resetWorldTimers(t)
 
 	for _, v in pairs(c_world_corpses) do
 		v.explodeTime = t + c_world_timeMultiplier(c_const_get("world_corpseTime"))
+		if v.collideTime then
+			v.collideTime = t + c_world_timeMultiplier(c_const_get("world_corpsePostTime"))
+		end
 	end
 
 	for _, v in pairs(c_tcm_current_map.controlPoints) do
@@ -2483,6 +2486,9 @@ local function c_world_private_offsetWorldTimers(d)
 
 	for _, v in pairs(c_world_corpses) do
 		v.explodeTime = v.explodeTime + d
+		if v.collideTime then
+			v.collideTime = v.collideTime + d
+		end
 	end
 
 	for _, v in pairs(c_tcm_current_map.controlPoints) do
