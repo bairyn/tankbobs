@@ -742,164 +742,164 @@ function game_step(d)
 	end
 
 	local function draw(filter)  -- filter tanks
-		-- adjust the camera
-		local uppermost
-		local lowermost
-		local rightmost
-		local leftmost
-		-- Position the camera so that all tanks and special powerups are shown, while zooming in as much as possible
-		for k, v in pairs(c_world_getTanks()) do
-			if not filter or filter(k, v) then
-				if not leftmost or v.p.x < leftmost then
-					leftmost = v.p.x
-				end
-				if not rightmost or v.p.x > rightmost then
-					rightmost = v.p.x
-				end
+		gl.PushMatrix()
+			-- adjust the camera
+			local uppermost
+			local lowermost
+			local rightmost
+			local leftmost
+			-- Position the camera so that all tanks and special powerups are shown, while zooming in as much as possible
+			for k, v in pairs(c_world_getTanks()) do
+				if not filter or filter(k, v) then
+					if not leftmost or v.p.x < leftmost then
+						leftmost = v.p.x
+					end
+					if not rightmost or v.p.x > rightmost then
+						rightmost = v.p.x
+					end
 
-				if not lowermost or v.p.y < lowermost then
-					lowermost = v.p.y
-				end
-				if not uppermost or v.p.y > uppermost then
-					uppermost = v.p.y
-				end
-			end
-		end
-		for _, v in pairs(c_world_getPowerups()) do
-			if not v.m.refocus or t > v.m.refocus then
-				v.m.refocus = t + c_world_timeMultiplier(c_config_get("client.powerupRefocusTime"))
-
-				v.m.focus = false
-
-				for ks, vs in pairs(c_world_getTanks()) do
-					if not filter or filter(ks, vs) then
-						if vs.exists and (vs.p - v.p).R <= c_config_get("client.powerupFocusDistance") then
-							v.m.focus = true
-
-							break
-						end
+					if not lowermost or v.p.y < lowermost then
+						lowermost = v.p.y
+					end
+					if not uppermost or v.p.y > uppermost then
+						uppermost = v.p.y
 					end
 				end
 			end
+			for _, v in pairs(c_world_getPowerups()) do
+				if not v.m.refocus or t > v.m.refocus then
+					v.m.refocus = t + c_world_timeMultiplier(c_config_get("client.powerupRefocusTime"))
 
-			--if c_tcm_current_map.powerupSpawnPoints[v.spawner] and c_tcm_current_map.powerupSpawnPoints[v.spawner].focus then
-			if v.m.focus then
-				if not leftmost or v.p.x < leftmost then
-					leftmost = v.p.x
-				end
-				if not rightmost or v.p.x > rightmost then
-					rightmost = v.p.x
+					v.m.focus = false
+
+					for ks, vs in pairs(c_world_getTanks()) do
+						if not filter or filter(ks, vs) then
+							if vs.exists and (vs.p - v.p).R <= c_config_get("client.powerupFocusDistance") then
+								v.m.focus = true
+
+								break
+							end
+						end
+					end
 				end
 
-				if not lowermost or v.p.y < lowermost then
-					lowermost = v.p.y
-				end
-				if not uppermost or v.p.y > uppermost then
-					uppermost = v.p.y
+				--if c_tcm_current_map.powerupSpawnPoints[v.spawner] and c_tcm_current_map.powerupSpawnPoints[v.spawner].focus then
+				if v.m.focus then
+					if not leftmost or v.p.x < leftmost then
+						leftmost = v.p.x
+					end
+					if not rightmost or v.p.x > rightmost then
+						rightmost = v.p.x
+					end
+
+					if not lowermost or v.p.y < lowermost then
+						lowermost = v.p.y
+					end
+					if not uppermost or v.p.y > uppermost then
+						uppermost = v.p.y
+					end
 				end
 			end
-		end
-		if not uppermost or not lowermost or not rightmost or not leftmost then
-			-- draw world in default position
+			if not uppermost or not lowermost or not rightmost or not leftmost then
+				-- draw world in default position
+				game_drawWorld(d)
+
+				return
+			end
+			local m = c_tcm_current_map
+			-- ignore m.staticCamera and automatically determine whether to keep camera static
+			if m.uppermost <= 105 and m.lowermost >= -5 and m.rightmost <= 105 and m.leftmost >= -5 then
+				uppermost, rightmost, lowermost, leftmost = 50, 50, 50, 50
+			end
+
+			gl.Translate(50, 50, 0)
+
+			local distance = math.abs(rightmost - leftmost) > math.abs(uppermost - lowermost) and math.abs(rightmost - leftmost) or math.abs(uppermost - lowermost)
+			local scale = 100 / (distance + c_config_get("client.cameraExtraFOV"))
+			if scale > 1 then
+				scale = 1
+			end
+			zoom = common_lerp(zoom, scale, math.min(1, d * c_config_get("client.cameraSpeed")))
+			gl.Scale(zoom, zoom, 1)
+
+			camera = common_lerp(camera, tankbobs.m_vec2(-(rightmost + leftmost) / 2, -(uppermost + lowermost) / 2), math.min(1, d * c_config_get("client.cameraSpeed")))
+			gl.Translate(camera.x, camera.y, 0)
+
 			game_drawWorld(d)
-
-			return
-		end
-		local m = c_tcm_current_map
-		-- ignore m.staticCamera and automatically determine whether to keep camera static
-		if m.uppermost <= 105 and m.lowermost >= -5 and m.rightmost <= 105 and m.leftmost >= -5 then
-			uppermost, rightmost, lowermost, leftmost = 50, 50, 50, 50
-		end
-
-		gl.Translate(50, 50, 0)
-
-		local distance = math.abs(rightmost - leftmost) > math.abs(uppermost - lowermost) and math.abs(rightmost - leftmost) or math.abs(uppermost - lowermost)
-		local scale = 100 / (distance + c_config_get("client.cameraExtraFOV"))
-		if scale > 1 then
-			scale = 1
-		end
-		zoom = common_lerp(zoom, scale, math.min(1, d * c_config_get("client.cameraSpeed")))
-		gl.Scale(zoom, zoom, 1)
-
-		camera = common_lerp(camera, tankbobs.m_vec2(-(rightmost + leftmost) / 2, -(uppermost + lowermost) / 2), math.min(1, d * c_config_get("client.cameraSpeed")))
-		gl.Translate(camera.x, camera.y, 0)
-
-		game_drawWorld(d)
+		gl.PopMatrix()
 	end
 
 	-- render world
-	gl.PushMatrix()
-		local screens = c_config_get("client.screens")
-		if c_config_get("client.screensEven") then
-			screens = math.min(screens, #c_world_getTanks())
-		end
-		local widthChange = c_config_get("client.screensWidthChange")  -- some space on side to avoid stretch effect
+	local screens = c_config_get("client.screens")
+	if c_config_get("client.screensEven") then
+		screens = math.min(screens, #c_world_getTanks())
+	end
+	local widthChange = c_config_get("client.screensWidthChange")  -- some space on side to avoid stretch effect
 
-		local spacing = 2
+	local spacing = 2
 
-		if screens == 0 then
-			draw()
-		elseif screens == 1 then
-			gl.Viewport(0, 0, c_config_get("client.renderer.width"), c_config_get("client.renderer.height"))
+	if screens == 0 then
+		draw()
+	elseif screens == 1 then
+		gl.Viewport(0, 0, c_config_get("client.renderer.width"), c_config_get("client.renderer.height"))
 
-			local function filter(k, v)
-				if not online or not connection or not connection.t then
-					return k == 1
-				else
-					return k == connection.t
-				end
+		local function filter(k, v)
+			if not online or not connection or not connection.t then
+				return k == 1
+			else
+				return k == connection.t
 			end
-
-			draw(filter)
-		elseif screens == 2 then
-			-- draw upper portion
-			gl.Viewport(0, c_config_get("client.renderer.height") / 2 + spacing / 2, c_config_get("client.renderer.width") * widthChange, c_config_get("client.renderer.height") / 2 - spacing / 2)
-
-			draw(function (k, v) return k == 1 end)
-
-			-- lower portion
-			gl.Viewport(0, 0, c_config_get("client.renderer.width") * widthChange, c_config_get("client.renderer.height") / 2 - spacing / 2)
-
-			draw(function (k, v) return k == 2 end)
-		elseif screens == 3 then
-			-- draw upper portion
-			gl.Viewport(0, c_config_get("client.renderer.height") / 2 + spacing / 2, c_config_get("client.renderer.width") * widthChange, c_config_get("client.renderer.height") / 2 - spacing / 2)
-
-			draw(function (k, v) return k == 1 end)
-
-			-- lower left portion
-			gl.Viewport(0, 0, c_config_get("client.renderer.width") / 2 - spacing / 2, c_config_get("client.renderer.height") / 2 - spacing / 2)
-
-			draw(function (k, v) return k == 2 end)
-
-			-- lower right portion
-			gl.Viewport(c_config_get("client.renderer.width") / 2 + spacing / 2, 0, c_config_get("client.renderer.width") / 2 - spacing / 2, c_config_get("client.renderer.height") / 2 - spacing / 2)
-
-			draw(function (k, v) return k == 3 end)
-		elseif screens == 4 then
-			-- upper left portion
-			gl.Viewport(0, c_config_get("client.renderer.height") / 2 + spacing / 2, c_config_get("client.renderer.width") / 2 - spacing / 2, c_config_get("client.renderer.height") / 2 - spacing / 2)
-
-			draw(function (k, v) return k == 1 end)
-
-			-- upper right portion
-			gl.Viewport(c_config_get("client.renderer.width") / 2 + spacing / 2, c_config_get("client.renderer.height") / 2 + spacing / 2, c_config_get("client.renderer.width") / 2 - spacing / 2, c_config_get("client.renderer.height") / 2 - spacing / 2)
-
-			draw(function (k, v) return k == 2 end)
-
-			-- lower left portion
-			gl.Viewport(0, 0, c_config_get("client.renderer.width") / 2 - spacing / 2, c_config_get("client.renderer.height") / 2 - spacing / 2)
-
-			draw(function (k, v) return k == 3 end)
-
-			-- lower right portion
-			gl.Viewport(c_config_get("client.renderer.width") / 2 + spacing / 2, 0, c_config_get("client.renderer.width") / 2 - spacing / 2, c_config_get("client.renderer.height") / 2 - spacing / 2)
-
-			draw(function (k, v) return k == 4 end)
-		else
-			c_config_set("client.screens", 0)
 		end
-	gl.PopMatrix()
+
+		draw(filter)
+	elseif screens == 2 then
+		-- draw upper portion
+		gl.Viewport(0, c_config_get("client.renderer.height") / 2 + spacing / 2, c_config_get("client.renderer.width") * widthChange, c_config_get("client.renderer.height") / 2 - spacing / 2)
+
+		draw(function (k, v) return k == 1 end)
+
+		-- lower portion
+		gl.Viewport(0, 0, c_config_get("client.renderer.width") * widthChange, c_config_get("client.renderer.height") / 2 - spacing / 2)
+
+		draw(function (k, v) return k == 2 end)
+	elseif screens == 3 then
+		-- draw upper portion
+		gl.Viewport(0, c_config_get("client.renderer.height") / 2 + spacing / 2, c_config_get("client.renderer.width") * widthChange, c_config_get("client.renderer.height") / 2 - spacing / 2)
+
+		draw(function (k, v) return k == 1 end)
+
+		-- lower left portion
+		gl.Viewport(0, 0, c_config_get("client.renderer.width") / 2 - spacing / 2, c_config_get("client.renderer.height") / 2 - spacing / 2)
+
+		draw(function (k, v) return k == 2 end)
+
+		-- lower right portion
+		gl.Viewport(c_config_get("client.renderer.width") / 2 + spacing / 2, 0, c_config_get("client.renderer.width") / 2 - spacing / 2, c_config_get("client.renderer.height") / 2 - spacing / 2)
+
+		draw(function (k, v) return k == 3 end)
+	elseif screens == 4 then
+		-- upper left portion
+		gl.Viewport(0, c_config_get("client.renderer.height") / 2 + spacing / 2, c_config_get("client.renderer.width") / 2 - spacing / 2, c_config_get("client.renderer.height") / 2 - spacing / 2)
+
+		draw(function (k, v) return k == 1 end)
+
+		-- upper right portion
+		gl.Viewport(c_config_get("client.renderer.width") / 2 + spacing / 2, c_config_get("client.renderer.height") / 2 + spacing / 2, c_config_get("client.renderer.width") / 2 - spacing / 2, c_config_get("client.renderer.height") / 2 - spacing / 2)
+
+		draw(function (k, v) return k == 2 end)
+
+		-- lower left portion
+		gl.Viewport(0, 0, c_config_get("client.renderer.width") / 2 - spacing / 2, c_config_get("client.renderer.height") / 2 - spacing / 2)
+
+		draw(function (k, v) return k == 3 end)
+
+		-- lower right portion
+		gl.Viewport(c_config_get("client.renderer.width") / 2 + spacing / 2, 0, c_config_get("client.renderer.width") / 2 - spacing / 2, c_config_get("client.renderer.height") / 2 - spacing / 2)
+
+		draw(function (k, v) return k == 4 end)
+	else
+		c_config_set("client.screens", 0)
+	end
 
 	-- reset viewport for GUI
 	gl.Viewport(0, 0, c_config_get("client.renderer.width"), c_config_get("client.renderer.height"))
