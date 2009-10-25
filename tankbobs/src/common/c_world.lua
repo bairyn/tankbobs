@@ -912,6 +912,7 @@ function c_world_pointInsideHull(p, hull)
 		i = i + 1
 	end
 
+
 	return c
 end
 
@@ -2211,7 +2212,7 @@ function c_world_teleporter_step(d, teleporter)
 						end
 					end
 					-- test for rest of world
-					if c_world_pointIntersects(teleporter.p) then
+					if c_world_pointIntersects(target.p) then
 						return
 					end
 
