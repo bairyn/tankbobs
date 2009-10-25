@@ -574,14 +574,14 @@ local function game_drawWorld(d)
 				for _, v in pairs(c_weapon_getProjectiles()) do
 					local weapon = c_weapon_getWeapons()[v.weapon]
 
-					if weapon and weapon.projectileExplode and v.collided and v.collideTime then
+					if weapon and weapon.projectileExplode and v.collided and v.m.collideTime then
 						-- draw explosions things from center
 						gl.PushAttrib("CURRENT_BIT")
 							gl.PushMatrix()
 								gl.Translate(v.p.x, v.p.y, 0)
 								gl.Color(1, 1, 1, 1)
 								gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, 1)
-								local scale = 1 - ((v.collideTime - tankbobs.t_getTicks()) / c_world_timeMultiplier()) / weapon.projectileExplodeTime
+								local scale = 1 - ((v.m.collideTime - tankbobs.t_getTicks()) / c_world_timeMultiplier()) / weapon.projectileExplodeTime
 								gl.Scale(scale, scale, 1)
 								gl.CallList(explosion_listBase)
 							gl.PopMatrix()
