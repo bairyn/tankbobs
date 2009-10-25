@@ -681,7 +681,7 @@ function c_world_tank_spawn(tank)
 	tank.spawning = true
 end
 
-function c_world_addCorpse(tank, vel)
+function c_world_addCorpse(tank, vel, index)
 	local corpse = c_world_corpse:new()  -- FIXME: t_clone() segfaults when overwriting a value?
 
 	local index = 1
@@ -701,6 +701,7 @@ function c_world_addCorpse(tank, vel)
 	corpse.explodeTime = t_t_getTicks() + c_world_timeMultiplier(c_const_get("world_corpseTime"))
 	corpse.body = tankbobs.w_addBody(corpse.p, corpse.r, c_const_get("corpse_canSleep"), c_const_get("corpse_isBullet"), c_const_get("corpse_linearDamping"), c_const_get("corpse_angularDamping"), corpse.h, c_const_get("corpse_density"), c_const_get("corpse_friction"), c_const_get("corpse_restitution"), not c_const_get("corpse_static"), c_const_get("corpse_contentsMask"), c_const_get("corpse_clipmask"), c_const_get("corpse_isSensor"), index)
 	t_w_setLinearVelocity(corpse.body, vel)
+	tankbobs.w_setIndex(index)
 
 	corpse.exists = true
 
@@ -713,11 +714,12 @@ function c_world_tank_die(tank, t)
 	if tank.exists and tank.body then
 		-- things that can't be done more than once
 		local vel = t_w_getLinearVelocity(tank.body)
+		local index = tankbobs.w_getIndex(tank.body)
 
 		tankbobs.w_removeBody(tank.body)
 		tank.body = nil
 
-		c_world_addCorpse(tank, vel)
+		c_world_addCorpse(tank, vel, index)
 	end
 
 	c_ai_tankDie(tank)
@@ -2006,7 +2008,7 @@ function c_world_removeCorpse(corpse)
 	end
 end
 
-function c_world_explosion(pos, damage, knockback, radius, log)
+function c_world_explosion(pos, damage, knockback, radius, log, attacker)
 	if radius <= 0.001 then
 		return
 	end
@@ -2032,6 +2034,10 @@ function c_world_explosion(pos, damage, knockback, radius, log)
 
 					-- damage
 					c_world_tankDamage(v, d * damage)
+
+					if v.health <= 0 then
+						v.killer = attacker
+					end
 				end
 			end
 		end
@@ -2067,7 +2073,7 @@ function c_world_corpse_step(d, corpse)
 		if not corpse.explode then
 			corpse.explode = c_const_get("world_corpsePostTime")
 
-			c_world_explosion(corpse.p, c_const_get("world_corpseExplodeDamage"), c_const_get("world_corpseExplodeKnockback"), c_const_get("world_corpseExplodeRadius"), c_const_get("world_corpseExplodeRadiusReduce"))
+			c_world_explosion(corpse.p, c_const_get("world_corpseExplodeDamage"), c_const_get("world_corpseExplodeKnockback"), c_const_get("world_corpseExplodeRadius"), c_const_get("world_corpseExplodeRadiusReduce"), tankbobs.w_getIndex(corpse))
 		end
 
 		corpse.explode = corpse.explode - d

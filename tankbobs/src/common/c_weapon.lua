@@ -944,7 +944,7 @@ function c_weapon_projectileCollided(projectile, body)
 		end
 
 		if weapon.projectileExplode then
-			c_world_explosion(projectile.p, weapon.projectileExplodeDamage, weapon.projectileExplodeKnockback, weapon.projectileExplodeRadius, weapon.projectileExplodeReduce)
+			c_world_explosion(projectile.p, weapon.projectileExplodeDamage, weapon.projectileExplodeKnockback, weapon.projectileExplodeRadius, weapon.projectileExplodeReduce, c_world_getTanks()[projectile.owner])
 		end
 
 		if projectile.collisions > weapon.projectileMaxCollisions then
