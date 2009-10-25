@@ -235,7 +235,7 @@ function st_optionsVideo_init()
 
 	gui_addLabel(tankbobs.m_vec2(50, 45), "FPS Counter", nil, 2 / 4) gui_addCycle(tankbobs.m_vec2(75, 45), "FPS Counter", nil, st_optionsVideo_fpsCounter, {"No", "Yes"}, c_config_get("client.renderer.fpsCounter") and 2 or 1)  -- Label needs to be a bit smaller
 
-	gui_addLabel(tankbobs.m_vec2(50, 39), "Screen", nil, 2 / 3) gui_addCycle(tankbobs.m_vec2(75, 39), "Fullscreen", nil, st_optionsVideo_screen, {"Single", "First Tank", "Split", "Triple", "Four"}, math.min(4, c_config_get("client.screens") + 1))
+	gui_addLabel(tankbobs.m_vec2(50, 39), "Screen", nil, 2 / 3) gui_addCycle(tankbobs.m_vec2(75, 39), "Fullscreen", nil, st_optionsVideo_screen, {"Single", "One Tank", "Split", "Triple", "Four"}, math.min(4, c_config_get("client.screens") + 1))
 end
 
 function st_optionsVideo_done()
