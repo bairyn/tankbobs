@@ -571,9 +571,9 @@ function c_weapon_init()
 
 	weapon.projectileExplode = true
 	weapon.projectileExplodeDamage = 100
-	weapon.projectileExplodeKnockback = 48
+	weapon.projectileExplodeKnockback = 56
 	weapon.projectileExplodeReduce = 1.4
-	weapon.projectileExplodeRadius = 20
+	weapon.projectileExplodeRadius = 30
 	weapon.projectileExplodeSound = "rocket-launcher-projectile-explode.wav"
 	weapon.projectileExplodeTime = 0.5
 end
