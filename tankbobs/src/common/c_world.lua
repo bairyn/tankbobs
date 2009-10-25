@@ -741,7 +741,7 @@ function c_world_tank_die(tank, t)
 		if killer and killer ~= tank then
 			killer.score = killer.score + 1
 		else
-			score = tank.score - 1
+			tank.score = tank.score - 1
 		end
 	end
 	tank.shield = 0
