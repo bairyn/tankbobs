@@ -81,6 +81,30 @@ function game_init()
 end
 
 function game_done()
+	-- reset viewport
+	gl.Viewport(0, 0, c_config_get("client.renderer.width"), c_config_get("client.renderer.height"))
+
+	-- free the cursor
+	tankbobs.in_grabClear()
+
+	-- free renderer stuff
+	gl.DeleteTextures(wall_textures)
+	for _, v in pairs(trails) do
+		if gl.IsList(v[3]) then
+			gl.DeleteLists(v[3], 1)
+		end
+	end
+
+	c_tcm_unload_extra_data(false)
+	c_weapon_clear(false)
+
+	-- free melee sounds
+	for _, v in pairs(c_weapon_getWeapons()) do
+		if v.meleeRange ~= 0 then
+			tankbobs.a_setVolumeChunk(c_const_get("weaponAudio_dir") .. v.fireSound, 0)
+			tankbobs.a_freeSound(c_const_get("weaponAudio_dir") .. v.fireSound)
+		end
+	end
 end
 
 function game_new()
@@ -186,30 +210,6 @@ function game_new()
 			tankbobs.a_setVolumeChunk(c_const_get("weaponAudio_dir") .. v.fireSound, 0)
 			tankbobs.a_playSound(c_const_get("weaponAudio_dir") .. v.fireSound, -1)
 			tankbobs.a_setVolumeChunk(c_const_get("weaponAudio_dir") .. v.fireSound, 0)
-		end
-	end
-end
-
-function game_end()
-	-- free the cursor
-	tankbobs.in_grabClear()
-
-	-- free renderer stuff
-	gl.DeleteTextures(wall_textures)
-	for _, v in pairs(trails) do
-		if gl.IsList(v[3]) then
-			gl.DeleteLists(v[3], 1)
-		end
-	end
-
-	c_tcm_unload_extra_data(false)
-	c_weapon_clear(false)
-
-	-- free melee sounds
-	for _, v in pairs(c_weapon_getWeapons()) do
-		if v.meleeRange ~= 0 then
-			tankbobs.a_setVolumeChunk(c_const_get("weaponAudio_dir") .. v.fireSound, 0)
-			tankbobs.a_freeSound(c_const_get("weaponAudio_dir") .. v.fireSound)
 		end
 	end
 end
@@ -738,27 +738,28 @@ function game_step(d)
 		game_refreshKeys()
 	end
 
-	-- render world
-	gl.PushMatrix()
+	local function draw(filter)  -- filter tanks
 		-- adjust the camera
 		local uppermost
 		local lowermost
 		local rightmost
 		local leftmost
 		-- Position the camera so that all tanks and special powerups are shown, while zooming in as much as possible
-		for _, v in pairs(c_world_getTanks()) do
-			if not leftmost or v.p.x < leftmost then
-				leftmost = v.p.x
-			end
-			if not rightmost or v.p.x > rightmost then
-				rightmost = v.p.x
-			end
+		for k, v in pairs(c_world_getTanks()) do
+			if not filter or filter(k, v) then
+				if not leftmost or v.p.x < leftmost then
+					leftmost = v.p.x
+				end
+				if not rightmost or v.p.x > rightmost then
+					rightmost = v.p.x
+				end
 
-			if not lowermost or v.p.y < lowermost then
-				lowermost = v.p.y
-			end
-			if not uppermost or v.p.y > uppermost then
-				uppermost = v.p.y
+				if not lowermost or v.p.y < lowermost then
+					lowermost = v.p.y
+				end
+				if not uppermost or v.p.y > uppermost then
+					uppermost = v.p.y
+				end
 			end
 		end
 		for _, v in pairs(c_world_getPowerups()) do
@@ -767,11 +768,13 @@ function game_step(d)
 
 				v.m.focus = false
 
-				for _, vs in pairs(c_world_getTanks()) do
-					if vs.exists and (vs.p - v.p).R <= c_config_get("client.powerupFocusDistance") then
-						v.m.focus = true
+				for ks, vs in pairs(c_world_getTanks()) do
+					if not filter or filter(ks, vs) then
+						if vs.exists and (vs.p - v.p).R <= c_config_get("client.powerupFocusDistance") then
+							v.m.focus = true
 
-						break
+							break
+						end
 					end
 				end
 			end
@@ -819,7 +822,84 @@ function game_step(d)
 		gl.Translate(camera.x, camera.y, 0)
 
 		game_drawWorld(d)
+	end
+
+	-- render world
+	gl.PushMatrix()
+		local screens = c_config_get("client.screens")
+		if c_config_get("client.screensEven") then
+			screens = math.min(screens, #c_world_getTanks())
+		end
+		local widthChange = c_config_get("client.screensWidthChange")  -- some space on side to avoid stretch effect
+
+		local spacing = 2
+
+		if screens == 0 then
+			draw()
+		elseif screens == 1 then
+			gl.Viewport(0, 0, c_config_get("client.renderer.width"), c_config_get("client.renderer.height"))
+
+			local function filter(k, v)
+				if not online or not connection or not connection.t then
+					return k == 1
+				else
+					return k == connection.t
+				end
+			end
+
+			draw(filter)
+		elseif screens == 2 then
+			-- draw upper portion
+			gl.Viewport(0, c_config_get("client.renderer.height") / 2 + spacing / 2, c_config_get("client.renderer.width") * widthChange, c_config_get("client.renderer.height") / 2 - spacing / 2)
+
+			draw(function (k, v) return k == 1 end)
+
+			-- lower portion
+			gl.Viewport(0, 0, c_config_get("client.renderer.width"), c_config_get("client.renderer.height") / 2 - spacing / 2)
+
+			draw(function (k, v) return k == 2 end)
+		elseif screens == 3 then
+			-- draw upper portion
+			gl.Viewport(0, c_config_get("client.renderer.height") / 2 + spacing / 2, c_config_get("client.renderer.width") * widthChange, c_config_get("client.renderer.height") / 2 - spacing / 2)
+
+			draw(function (k, v) return k == 1 end)
+
+			-- lower left portion
+			gl.Viewport(0, 0, c_config_get("client.renderer.width") / 2 - spacing / 2, c_config_get("client.renderer.height") / 2 - spacing / 2)
+
+			draw(function (k, v) return k == 2 end)
+
+			-- lower right portion
+			gl.Viewport(c_config_get("client.renderer.width") / 2 + spacing / 2, 0, c_config_get("client.renderer.width") / 2 - spacing / 2, c_config_get("client.renderer.height") / 2 - spacing / 2)
+
+			draw(function (k, v) return k == 3 end)
+		elseif screens == 4 then
+			-- upper left portion
+			gl.Viewport(0, c_config_get("client.renderer.height") / 2 + spacing / 2, c_config_get("client.renderer.width") / 2 - spacing / 2, c_config_get("client.renderer.height") / 2 - spacing / 2)
+
+			draw(function (k, v) return k == 1 end)
+
+			-- upper right portion
+			gl.Viewport(c_config_get("client.renderer.width") / 2 + spacing / 2, c_config_get("client.renderer.height") / 2 + spacing / 2, c_config_get("client.renderer.width") / 2 - spacing / 2, c_config_get("client.renderer.height") / 2 - spacing / 2)
+
+			draw(function (k, v) return k == 2 end)
+
+			-- lower left portion
+			gl.Viewport(0, 0, c_config_get("client.renderer.width") / 2 - spacing / 2, c_config_get("client.renderer.height") / 2 - spacing / 2)
+
+			draw(function (k, v) return k == 3 end)
+
+			-- lower right portion
+			gl.Viewport(c_config_get("client.renderer.width") / 2 + spacing / 2, 0, c_config_get("client.renderer.width") / 2 - spacing / 2, c_config_get("client.renderer.height") / 2 - spacing / 2)
+
+			draw(function (k, v) return k == 4 end)
+		else
+			c_config_set("client.screens", 0)
+		end
 	gl.PopMatrix()
+
+	-- reset viewport for GUI
+	gl.Viewport(0, 0, c_config_get("client.renderer.width"), c_config_get("client.renderer.height"))
 
 	-- play sounds and insert trails
 	if c_world_getPaused() then

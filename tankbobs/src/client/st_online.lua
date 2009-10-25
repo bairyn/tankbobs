@@ -60,6 +60,7 @@ local online_readPackets
 
 local unpersistArgs = {}
 local won
+local newScreens
 
 local refreshKeys = function()
 	tankbobs.in_getKeys()
@@ -157,6 +158,8 @@ function st_online_init()
 	connection = _G.connection
 	c_world_findClosestIntersection = _G.c_world_findClosestIntersection
 
+	online = true
+
 	bit = c_module_load "bit"
 
 	game_refreshKeys = refreshKeys
@@ -164,6 +167,7 @@ function st_online_init()
 	game_new()
 
 	won = nil
+	newScreens = nil
 
 	-- pause label
 
@@ -384,6 +388,19 @@ function st_online_button(button, pressed)
 				--if not won and not quitScreen then
 					--c_world_setPaused(not c_world_getPaused())
 				--end
+			elseif button == c_config_get("client.key.screenToggle") then
+				local screens = c_config_get("client.screens")
+
+				if not newScreens then
+					if screens == 0 then
+						newScreens = 2
+					else
+						newScreens = 0
+					end
+				end
+
+				c_config_set("client.screens", screens)
+				newScreens = screens
 			elseif button == 0x1B or button == c_config_get("client.key.quit") then  -- escape
 				if connection.state < CONNECTED then
 					c_state_new(title_state)

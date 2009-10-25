@@ -54,6 +54,7 @@ local st_play_step
 
 local endOfGame
 local quitScreen
+local newScreens
 
 local bit
 
@@ -160,6 +161,9 @@ function st_play_init()
 
 	endOfGame = false
 	quitScreen = false
+	newScreens = nil
+
+	online = false
 
 	game_new()
 
@@ -232,7 +236,7 @@ function st_play_done()
 	gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
 
 	-- end game
-	game_end()
+	game_done()
 
 	-- free the world
 	c_world_freeWorld()
@@ -261,7 +265,19 @@ function st_play_button(button, pressed)
 		if pressed then
 			if button == 0x0D and endOfGame then  -- enter
 				c_state_new(play_state)
-elseif button==0x32 then c_weapon_pickUp(c_world_getTanks()[1], "rocket-launcher")
+			elseif button == c_config_get("client.key.screenToggle") then
+				local screens = c_config_get("client.screens")
+
+				if not newScreens then
+					if screens == 0 then
+						newScreens = 2
+					else
+						newScreens = 0
+					end
+				end
+
+				c_config_set("client.screens", screens)
+				newScreens = screens
 			elseif button == c_config_get("client.key.pause") then
 				if not endOfGame and not quitScreen then
 					c_world_setPaused(not c_world_getPaused())
