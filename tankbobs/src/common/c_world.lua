@@ -2073,7 +2073,7 @@ function c_world_corpse_step(d, corpse)
 		if not corpse.explode then
 			corpse.explode = c_const_get("world_corpsePostTime")
 
-			c_world_explosion(corpse.p, c_const_get("world_corpseExplodeDamage"), c_const_get("world_corpseExplodeKnockback"), c_const_get("world_corpseExplodeRadius"), c_const_get("world_corpseExplodeRadiusReduce"), tankbobs.w_getIndex(corpse))
+			c_world_explosion(corpse.p, c_const_get("world_corpseExplodeDamage"), c_const_get("world_corpseExplodeKnockback"), c_const_get("world_corpseExplodeRadius"), c_const_get("world_corpseExplodeRadiusReduce"), tankbobs.w_getIndex(corpse.body))
 		end
 
 		corpse.explode = corpse.explode - d
