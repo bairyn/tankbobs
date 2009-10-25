@@ -684,10 +684,10 @@ end
 function c_world_addCorpse(tank, vel, index)
 	local corpse = c_world_corpse:new()  -- FIXME: t_clone() segfaults when overwriting a value?
 
-	local index = 1
+	local corpseIndex = 1
 	for k, v in pairs(c_world_corpses) do
 		if v == corpse then
-			index = k
+			corpseIndex = k
 		end
 	end
 
@@ -701,7 +701,6 @@ function c_world_addCorpse(tank, vel, index)
 	corpse.explodeTime = t_t_getTicks() + c_world_timeMultiplier(c_const_get("world_corpseTime"))
 	corpse.body = tankbobs.w_addBody(corpse.p, corpse.r, c_const_get("corpse_canSleep"), c_const_get("corpse_isBullet"), c_const_get("corpse_linearDamping"), c_const_get("corpse_angularDamping"), corpse.h, c_const_get("corpse_density"), c_const_get("corpse_friction"), c_const_get("corpse_restitution"), not c_const_get("corpse_static"), c_const_get("corpse_contentsMask"), c_const_get("corpse_clipmask"), c_const_get("corpse_isSensor"), index)
 	t_w_setLinearVelocity(corpse.body, vel)
-	tankbobs.w_setIndex(corpse.body, index)
 
 	corpse.exists = true
 
