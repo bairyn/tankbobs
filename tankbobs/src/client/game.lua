@@ -48,8 +48,8 @@ local common_lerp
 local bit
 
 local trails = {}
-local camera
-local zoom
+local camera[4]
+local zoom[4]
 
 local wall_textures
 
@@ -84,8 +84,10 @@ function game_done()
 end
 
 function game_new()
-	camera = tankbobs.m_vec2(-50, -50)
-	zoom = 1
+	for i = 1, 4 do
+		camera[i] = tankbobs.m_vec2(50, 50)
+		zoom[i] = 1
+	end
 
 	-- initialize wall textures per individual level
 	wall_textures = {}
@@ -741,7 +743,7 @@ function game_step(d)
 		game_refreshKeys()
 	end
 
-	local function draw(filter)  -- filter tanks
+	local function draw(filter, camnum)  -- filter tanks
 		gl.PushMatrix()
 			-- adjust the camera
 			local uppermost
@@ -819,11 +821,11 @@ function game_step(d)
 			if scale > 1 then
 				scale = 1
 			end
-			zoom = common_lerp(zoom, scale, math.min(1, d * c_config_get("client.cameraSpeed")))
-			gl.Scale(zoom, zoom, 1)
+			zoom[camnum] = common_lerp(zoom[camnum], scale, math.min(1, d * c_config_get("client.cameraSpeed")))
+			gl.Scale(zoom[camnum], zoom[camnum], 1)
 
-			camera = common_lerp(camera, tankbobs.m_vec2(-(rightmost + leftmost) / 2, -(uppermost + lowermost) / 2), math.min(1, d * c_config_get("client.cameraSpeed")))
-			gl.Translate(camera.x, camera.y, 0)
+			camera[camnum] = common_lerp(camera[camnum], tankbobs.m_vec2(-(rightmost + leftmost) / 2, -(uppermost + lowermost) / 2), math.min(1, d * c_config_get("client.cameraSpeed")))
+			gl.Translate(camera[camnum].x, camera[camnum].y, 0)
 
 			game_drawWorld(d)
 		gl.PopMatrix()
@@ -856,47 +858,47 @@ function game_step(d)
 		-- draw upper portion
 		gl.Viewport(0, c_config_get("client.renderer.height") / 2 + spacing / 2, c_config_get("client.renderer.width") * widthChange, c_config_get("client.renderer.height") / 2 - spacing / 2)
 
-		draw(function (k, v) return k == 1 end)
+		draw(function (k, v) return k == 1 end, 1)
 
 		-- lower portion
 		gl.Viewport(0, 0, c_config_get("client.renderer.width") * widthChange, c_config_get("client.renderer.height") / 2 - spacing / 2)
 
-		draw(function (k, v) return k == 2 end)
+		draw(function (k, v) return k == 2 end, 2)
 	elseif screens == 3 then
 		-- draw upper portion
 		gl.Viewport(0, c_config_get("client.renderer.height") / 2 + spacing / 2, c_config_get("client.renderer.width") * widthChange, c_config_get("client.renderer.height") / 2 - spacing / 2)
 
-		draw(function (k, v) return k == 1 end)
+		draw(function (k, v) return k == 1 end, 1)
 
 		-- lower left portion
 		gl.Viewport(0, 0, c_config_get("client.renderer.width") / 2 - spacing / 2, c_config_get("client.renderer.height") / 2 - spacing / 2)
 
-		draw(function (k, v) return k == 2 end)
+		draw(function (k, v) return k == 2 end, 2)
 
 		-- lower right portion
 		gl.Viewport(c_config_get("client.renderer.width") / 2 + spacing / 2, 0, c_config_get("client.renderer.width") / 2 - spacing / 2, c_config_get("client.renderer.height") / 2 - spacing / 2)
 
-		draw(function (k, v) return k == 3 end)
+		draw(function (k, v) return k == 3 end, 3)
 	elseif screens == 4 then
 		-- upper left portion
 		gl.Viewport(0, c_config_get("client.renderer.height") / 2 + spacing / 2, c_config_get("client.renderer.width") / 2 - spacing / 2, c_config_get("client.renderer.height") / 2 - spacing / 2)
 
-		draw(function (k, v) return k == 1 end)
+		draw(function (k, v) return k == 1 end, 1)
 
 		-- upper right portion
 		gl.Viewport(c_config_get("client.renderer.width") / 2 + spacing / 2, c_config_get("client.renderer.height") / 2 + spacing / 2, c_config_get("client.renderer.width") / 2 - spacing / 2, c_config_get("client.renderer.height") / 2 - spacing / 2)
 
-		draw(function (k, v) return k == 2 end)
+		draw(function (k, v) return k == 2 end, 2)
 
 		-- lower left portion
 		gl.Viewport(0, 0, c_config_get("client.renderer.width") / 2 - spacing / 2, c_config_get("client.renderer.height") / 2 - spacing / 2)
 
-		draw(function (k, v) return k == 3 end)
+		draw(function (k, v) return k == 3 end, 3)
 
 		-- lower right portion
 		gl.Viewport(c_config_get("client.renderer.width") / 2 + spacing / 2, 0, c_config_get("client.renderer.width") / 2 - spacing / 2, c_config_get("client.renderer.height") / 2 - spacing / 2)
 
-		draw(function (k, v) return k == 4 end)
+		draw(function (k, v) return k == 4 end, 4)
 	else
 		c_config_set("client.screens", 0)
 	end
