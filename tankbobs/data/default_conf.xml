@@ -56,6 +56,8 @@
 			<unlagged>true</unlagged>
 		</online>
 		<port>0</port>
+		<powerupFocusDistance>50</powerupRefocusTime>
+		<powerupRefocusTime>0.5</powerupRefocusTime>
 		<renderer>
 			<font>sans</font>
 

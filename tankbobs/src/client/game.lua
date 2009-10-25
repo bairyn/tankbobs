@@ -724,8 +724,10 @@ end
 
 local frame = 0
 function game_step(d)
+	local t = tankbobs.t_getTicks()
+
 	if frame % 1024 == 0 then
-		math.randomseed(tankbobs.t_getTicks())
+		math.randomseed(t)
 	end
 
 	frame = frame + 1
@@ -760,7 +762,22 @@ function game_step(d)
 			end
 		end
 		for _, v in pairs(c_world_getPowerups()) do
-			if c_tcm_current_map.powerupSpawnPoints[v.spawner] and c_tcm_current_map.powerupSpawnPoints[v.spawner].focus then
+			if not v.m.refocus or t > v.m.refocus then
+				v.m.refocus = t + c_world_timeMultiplier(c_config_get("client.powerupRefocusTime"))
+
+				v.m.focus = false
+
+				for _, vs in pairs(c_world_getTanks()) do
+					if vs.exists and (vs.p - v.p).R <= c_config_get("client.powerupFocusDistance") then
+						v.m.focus = true
+
+						break
+					end
+				end
+			end
+
+			--if c_tcm_current_map.powerupSpawnPoints[v.spawner] and c_tcm_current_map.powerupSpawnPoints[v.spawner].focus then
+			if v.m.focus then
 				if not leftmost or v.p.x < leftmost then
 					leftmost = v.p.x
 				end
@@ -824,7 +841,7 @@ function game_step(d)
 	for _, v in pairs(c_world_getCorpses()) do
 		if v.exists then
 			if v.explode and not v.m.explodeSound then
-				v.m.explodeSound = tankbobs.t_getTicks()
+				v.m.explodeSound = t
 				if c_const_get("world_corpseTime") >= c_const_get("world_minimumCorpseTimeForDeathNoiseAndStuff") then
 					tankbobs.a_playSound(c_const_get("corpseExplode_sound"))
 				end
