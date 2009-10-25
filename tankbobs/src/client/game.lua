@@ -744,6 +744,8 @@ function game_step(d)
 	end
 
 	local function draw(filter, camnum)  -- filter tanks
+		camnum = camnum or 1
+
 		gl.PushMatrix()
 			-- adjust the camera
 			local uppermost
