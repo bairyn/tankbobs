@@ -686,6 +686,11 @@ function c_tcm_read_map(map)
 		else
 			powerupSpawnPoint.enabledPowerups.shield = false
 		end
+		if bit.band(powerups[1], bit.tobit(0x00000400)) ~= 0 then
+			powerupSpawnPoint.enabledPowerups["rocket-launcher"] = true
+		else
+			powerupSpawnPoint.enabledPowerups["rocket-launcher"] = false
+		end
 
 		if c_tcm_private_get(tankbobs.io_getChar, i) ~= 0 then
 			powerupSpawnPoint.linked = true

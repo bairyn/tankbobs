@@ -341,6 +341,17 @@ function c_world_init()
 	powerupType.c.r, powerupType.c.g, powerupType.c.b, powerupType.c.a = 0.25, 0.5, 0.05, 0.755
 	powerupType.instagib = false
 
+	-- rocket-launcher
+	local powerupType = c_world_powerupType:new()
+
+	table.insert(c_powerupTypes, powerupType)
+
+	powerupType.index = 11
+	powerupType.name = "rocket-launcher"
+	powerupType.c.r, powerupType.c.g, powerupType.c.b, powerupType.c.a = 0.15, 0.1, 0.4, 0.333
+	powerupType.instagib = false
+
+
 	tankbobs.w_setTimeStep(c_const_get("world_timeStep"))
 	tankbobs.w_setIterations(c_const_get("world_iterations"))
 end
@@ -1941,6 +1952,9 @@ function c_world_powerup_pickUp(tank, powerup)
 	end
 	if powerupType.name == "shield" then
 		tank.shield = tank.shield + c_const_get("tank_boostShield")
+	end
+	if powerupType.name == "rocket-launcher" then
+		c_weapon_pickUp(tank, powerupType.name)
 	end
 end
 

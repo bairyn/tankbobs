@@ -1256,6 +1256,10 @@ static int compile(const char *filename)
 		{
 			powerups[0] |= 0x00000200;
 		}
+		if(strstr(powerupSpawnPoint->powerupsToEnable, "rocket-launcher"))
+		{
+			powerups[0] |= 0x00000400;
+		}
 
 		put_cint(fout, i);
 		put_cdouble(fout, powerupSpawnPoint->x1);
