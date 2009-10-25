@@ -221,6 +221,7 @@ local st_optionsVideo_width
 local st_optionsVideo_height
 local st_optionsVideo_apply
 local st_optionsVideo_fpsCounter
+local st_optionsVideo_screen
 
 function st_optionsVideo_init()
 	st_optionsVideo_renderer = {fullscreen = c_config_get("client.renderer.fullscreen"), width = c_config_get("client.renderer.width"), height = c_config_get("client.renderer.height")}
@@ -233,6 +234,8 @@ function st_optionsVideo_init()
 	gui_addAction(tankbobs.m_vec2(75, 57), "Apply", nil, st_optionsVideo_apply)
 
 	gui_addLabel(tankbobs.m_vec2(50, 45), "FPS Counter", nil, 2 / 4) gui_addCycle(tankbobs.m_vec2(75, 45), "FPS Counter", nil, st_optionsVideo_fpsCounter, {"No", "Yes"}, c_config_get("client.renderer.fpsCounter") and 2 or 1)  -- Label needs to be a bit smaller
+
+	gui_addLabel(tankbobs.m_vec2(50, 39), "Screen", nil, 2 / 3) gui_addCycle(tankbobs.m_vec2(75, 39), "Fullscreen", nil, st_optionsVideo_screen, {"Single", "First Tank", "Split", "Triple", "Four"}, math.min(4, c_config_get("client.screens") + 1))
 end
 
 function st_optionsVideo_done()
@@ -273,6 +276,10 @@ function st_optionsVideo_fpsCounter(widget, string, index)
 	elseif string == "No" then
 		c_config_set("client.renderer.fpsCounter", false)
 	end
+end
+
+function st_optionsVideo_screen(widget, string, index)
+	c_config_set("client.screens", index - 1)
 end
 
 optionsVideo_state =
