@@ -236,7 +236,7 @@ function st_play_done()
 	gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
 
 	-- end game
-	game_done()
+	game_end()
 
 	-- free the world
 	c_world_freeWorld()
@@ -276,7 +276,7 @@ function st_play_button(button, pressed)
 					end
 				end
 
-				c_config_set("client.screens", screens)
+				c_config_set("client.screens", newScreens)
 				newScreens = screens
 			elseif button == c_config_get("client.key.pause") then
 				if not endOfGame and not quitScreen then

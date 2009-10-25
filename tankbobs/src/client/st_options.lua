@@ -694,6 +694,7 @@ local optionsControls_done
 local st_optionsControls_pause
 local st_optionsControls_exit
 local st_optionsControls_quit
+local st_optionsControls_screenToggle
 local st_optionsControls_krr
 
 function st_optionsControls_init()
@@ -707,13 +708,14 @@ function st_optionsControls_init()
 			break
 		end
 	end
-	gui_addLabel(tankbobs.m_vec2(50, 65), "Key Layout", nil, 2 / 3) gui_addCycle(tankbobs.m_vec2(75, 65), "Key Layout", nil, st_optionsControls_keyLayout, c_const_get("keyLayouts"), pos)
+	gui_addLabel(tankbobs.m_vec2(50, 65), "Key Layout", nil, 1 / 3) gui_addCycle(tankbobs.m_vec2(75, 65), "Key Layout", nil, st_optionsControls_keyLayout, c_const_get("keyLayouts"), pos, 1 / 2)
 
-	gui_addLabel(tankbobs.m_vec2(50, 53), "Pause", nil, 2 / 3) gui_addKey(tankbobs.m_vec2(75, 53), c_config_get("client.key.pause"), nil, st_optionsControls_pause, c_config_get("client.key.pause"))
-	gui_addLabel(tankbobs.m_vec2(50, 37), "Back", nil, 2 / 3) gui_addKey(tankbobs.m_vec2(75, 37), c_config_get("client.key.quit"), nil, st_optionsControls_quit, c_config_get("client.key.quit"))
-	gui_addLabel(tankbobs.m_vec2(50, 31), "Quit", nil, 2 / 3) gui_addKey(tankbobs.m_vec2(75, 31), c_config_get("client.key.exit"), nil, st_optionsControls_exit, c_config_get("client.key.exit"))
+	gui_addLabel(tankbobs.m_vec2(50, 53), "Pause", nil, 1 / 3) gui_addKey(tankbobs.m_vec2(75, 53), c_config_get("client.key.pause"), nil, st_optionsControls_pause, c_config_get("client.key.pause"), 1 / 2)
+	gui_addLabel(tankbobs.m_vec2(50, 50), "Back", nil, 1 / 3) gui_addKey(tankbobs.m_vec2(75, 50), c_config_get("client.key.quit"), nil, st_optionsControls_quit, c_config_get("client.key.quit"), 1 / 2)
+	gui_addLabel(tankbobs.m_vec2(50, 47), "Quit", nil, 1 / 3) gui_addKey(tankbobs.m_vec2(75, 47), c_config_get("client.key.exit"), nil, st_optionsControls_exit, c_config_get("client.key.exit"), 1 / 2)
+	gui_addLabel(tankbobs.m_vec2(50, 44), "Toggle Split Screen", nil, 1 / 3) gui_addKey(tankbobs.m_vec2(75, 44), c_config_get("client.key.screenToggle"), nil, st_optionsControls_screenToggle, c_config_get("client.key.screenToggle"), 1 / 2)
 
-	gui_addLabel(tankbobs.m_vec2(50, 25), "Key Refresh Rate in Frames", nil, 1 / 3) gui_addInput(tankbobs.m_vec2(85, 25), tostring(c_config_get("client.krr")), nil, st_optionsControls_krr, true, 5, 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 38), "Key Refresh Rate in Frames", nil, 1 / 3) gui_addInput(tankbobs.m_vec2(85, 38), tostring(c_config_get("client.krr")), nil, st_optionsControls_krr, true, 5, 1 / 2)
 end
 
 function st_optionsControls_done()
@@ -747,6 +749,14 @@ function st_optionsControls_quit(widget, button)
 		c_config_set("client.key.quit", c_config_keyLayoutSet(button))
 	else
 		c_config_set("client.key.quit", false)
+	end
+end
+
+function st_optionsControls_screenToggle(widget, button)
+	if button then
+		c_config_set("client.key.screenToggle", c_config_keyLayoutSet(button))
+	else
+		c_config_set("client.key.screenToggle", false)
 	end
 end
 

@@ -81,30 +81,6 @@ function game_init()
 end
 
 function game_done()
-	-- reset viewport
-	gl.Viewport(0, 0, c_config_get("client.renderer.width"), c_config_get("client.renderer.height"))
-
-	-- free the cursor
-	tankbobs.in_grabClear()
-
-	-- free renderer stuff
-	gl.DeleteTextures(wall_textures)
-	for _, v in pairs(trails) do
-		if gl.IsList(v[3]) then
-			gl.DeleteLists(v[3], 1)
-		end
-	end
-
-	c_tcm_unload_extra_data(false)
-	c_weapon_clear(false)
-
-	-- free melee sounds
-	for _, v in pairs(c_weapon_getWeapons()) do
-		if v.meleeRange ~= 0 then
-			tankbobs.a_setVolumeChunk(c_const_get("weaponAudio_dir") .. v.fireSound, 0)
-			tankbobs.a_freeSound(c_const_get("weaponAudio_dir") .. v.fireSound)
-		end
-	end
 end
 
 function game_new()
@@ -210,6 +186,33 @@ function game_new()
 			tankbobs.a_setVolumeChunk(c_const_get("weaponAudio_dir") .. v.fireSound, 0)
 			tankbobs.a_playSound(c_const_get("weaponAudio_dir") .. v.fireSound, -1)
 			tankbobs.a_setVolumeChunk(c_const_get("weaponAudio_dir") .. v.fireSound, 0)
+		end
+	end
+end
+
+function game_end()
+	-- reset viewport
+	gl.Viewport(0, 0, c_config_get("client.renderer.width"), c_config_get("client.renderer.height"))
+
+	-- free the cursor
+	tankbobs.in_grabClear()
+
+	-- free renderer stuff
+	gl.DeleteTextures(wall_textures)
+	for _, v in pairs(trails) do
+		if gl.IsList(v[3]) then
+			gl.DeleteLists(v[3], 1)
+		end
+	end
+
+	c_tcm_unload_extra_data(false)
+	c_weapon_clear(false)
+
+	-- free melee sounds
+	for _, v in pairs(c_weapon_getWeapons()) do
+		if v.meleeRange ~= 0 then
+			tankbobs.a_setVolumeChunk(c_const_get("weaponAudio_dir") .. v.fireSound, 0)
+			tankbobs.a_freeSound(c_const_get("weaponAudio_dir") .. v.fireSound)
 		end
 	end
 end
@@ -855,7 +858,7 @@ function game_step(d)
 			draw(function (k, v) return k == 1 end)
 
 			-- lower portion
-			gl.Viewport(0, 0, c_config_get("client.renderer.width"), c_config_get("client.renderer.height") / 2 - spacing / 2)
+			gl.Viewport(0, 0, c_config_get("client.renderer.width") * widthChange, c_config_get("client.renderer.height") / 2 - spacing / 2)
 
 			draw(function (k, v) return k == 2 end)
 		elseif screens == 3 then

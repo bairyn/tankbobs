@@ -43,7 +43,7 @@
 				<reload>256</reload> 'KP_0'
 			</player2>
 			<quit>98</quit> 'b'
-			<screenToggle>283</screenToggle>  'F2'
+			<screenToggle>283</screenToggle> 'F2'
 			<select></select>
 			<right></right>
 			<up>280</up> 'PGUP'
@@ -106,7 +106,7 @@
 
 		<screens>0</screens>
 		<screensEven>true</screensEven>
-		<screensWidthChange>0.6</screensWidthChange>  Avoid stretch effect when upper portion is not split
+		<screensWidthChange>0.75</screensWidthChange>  Avoid stretch effect when upper portion is not split
 
 		<serverIP>127.0.0.1</serverIP>
 

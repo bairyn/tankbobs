@@ -215,7 +215,7 @@ function st_online_done()
 		connection.state = UNCONNECTED
 	end
 
-	game_done()
+	game_end()
 
 	c_world_freeWorld()
 end
