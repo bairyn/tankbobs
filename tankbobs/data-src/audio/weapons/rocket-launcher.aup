@@ -1,0 +1,31 @@
+<?xml version="1.0" standalone="no" ?>
+<!DOCTYPE project PUBLIC "-//audacityproject-1.3.0//DTD//EN" "http://audacity.sourceforge.net/xml/audacityproject-1.3.0.dtd" >
+<project xmlns="http://audacity.sourceforge.net/xml/" projname="rocket-launcher-projectile-explode_data" version="1.3.0" audacityversion="1.3.9" sel0="0.0000000000" sel1="2.2828344671" vpos="0" h="0.0000000000" zoom="91.5527343750" rate="44100">
+	<tags>
+		<tag name="id3v2" value="1"/>
+		<tag name="TITLE" value="mISSILE sTRIKE"/>
+		<tag name="YEAR" value="2009"/>
+		<tag name="Software" value="FL Studio 7"/>
+		<tag name="ALBUM" value="Tankbobs"/>
+	</tags>
+	<wavetrack name="42024__digifishmusic__Missile_Strike 1" channel="0" linked="1" mute="0" solo="0" height="150" minimized="0" rate="44100" gain="1" pan="0">
+		<waveclip offset="0.00000000">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="100673">
+				<waveblock start="0">
+					<simpleblockfile filename="e0000ffc.au" len="100673" min="-0.343442" max="0.351077" rms="0.051719"/>
+				</waveblock>
+			</sequence>
+			<envelope numpoints="0"/>
+		</waveclip>
+	</wavetrack>
+	<wavetrack name="42024__digifishmusic__Missile_Strike" channel="1" linked="0" mute="0" solo="0" height="150" minimized="0" rate="44100" gain="1" pan="0">
+		<waveclip offset="0.00000000">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="100673">
+				<waveblock start="0">
+					<simpleblockfile filename="e00009c4.au" len="100673" min="-0.341968" max="0.346349" rms="0.050463"/>
+				</waveblock>
+			</sequence>
+			<envelope numpoints="0"/>
+		</waveclip>
+	</wavetrack>
+</project>

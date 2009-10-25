@@ -261,6 +261,7 @@ function st_play_button(button, pressed)
 		if pressed then
 			if button == 0x0D and endOfGame then  -- enter
 				c_state_new(play_state)
+elseif button==0x32 then c_weapon_pickUp(c_world_getTanks()[1], "rocket-launcher")
 			elseif button == c_config_get("client.key.pause") then
 				if not endOfGame and not quitScreen then
 					c_world_setPaused(not c_world_getPaused())

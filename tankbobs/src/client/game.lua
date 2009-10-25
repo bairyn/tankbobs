@@ -564,6 +564,25 @@ local function game_drawWorld(d)
 						gl.PopMatrix()
 					end
 				end
+
+				-- render explosive projectiles
+				for _, v in pairs(c_weapon_getProjectiles()) do
+					local weapon = c_weapon_getWeapons()[v.weapon]
+
+					if weapon and weapon.projectileExplode and v.collided and v.collideTime then
+						-- draw explosions things from center
+						gl.PushAttrib("CURRENT_BIT")
+							gl.PushMatrix()
+								gl.Translate(v.p.x, v.p.y, 0)
+								gl.Color(1, 1, 1, 1)
+								gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, 1)
+								local scale = 1 - ((v.collideTime - tankbobs.t_getTicks()) / c_world_timeMultiplier()) / weapon.projectileExplodeTime
+								gl.Scale(scale, scale, 1)
+								gl.CallList(explosion_listBase)
+							gl.PopMatrix()
+						gl.PopAttrib()
+					end
+				end
 			end
 
 			for k, v in pairs(c_tcm_current_map.walls) do
@@ -968,10 +987,18 @@ function game_step(d)
 	end
 
 	for _, v in pairs(c_weapon_getProjectiles()) do
-		if v.collisions > 0 and v.collisions ~= v.m.lastCollisions and c_weapon_getWeapons()[v.weapon] and c_weapon_getWeapons()[v.weapon].trail == 0 and c_weapon_getWeapons()[v.weapon].trailWidth == 0 then
+		local weapon = c_weapon_getWeapons()[v.weapon]
+
+		if weapon and v.collisions > 0 and v.collisions ~= v.m.lastCollisions and weapon.trail == 0 and weapon.trailWidth == 0 then
 			v.m.lastCollisions = v.collisions
 
-			tankbobs.a_playSound(c_const_get("collideProjectile_sounds")[math.random(1, #c_const_get("collideProjectile_sounds"))])
+			if weapon.projectileIsCollideSound then
+				tankbobs.a_playSound(c_const_get("collideProjectile_sounds")[math.random(1, #c_const_get("collideProjectile_sounds"))])
+			end
+
+			if weapon.projectileExplode then
+				tankbobs.a_playSound(c_const_get("weaponAudio_dir") .. weapon.projectileExplodeSound)
+			end
 		end
 	end
 

@@ -1713,33 +1713,47 @@ end
 function c_world_projectile_step(d, projectile)
 	local t = t_t_getTicks()
 
+	local weapon = c_weapon_getWeapons()[projectile.weapon]
+
+	if not weapon then
+		if projectile.m.body then
+			tankbobs.w_removeBody(projectile.m.body)
+			projectile.m.body = nil
+		end
+		c_weapon_projectileRemove(projectile)
+		return
+	end
+
 	if projectile.collided then
+		if projectile.m.body then
+			tankbobs.w_removeBody(projectile.m.body)
+			projectile.m.body = nil
+		end
+
 		-- if explosive projectile, don't remove immediately
-		if projectile.projectileExplode then
-			if not projectile.projectileCollideTime then
-				projectile.projectileCollideTime = t + c_world_timeMultiplier(projectile.projectileExplodeTime)
+		if weapon.projectileExplode then
+			if not projectile.collideTime then
+				projectile.collideTime = t + c_world_timeMultiplier(weapon.projectileExplodeTime)
 			end
 
-			if t > projectileCollideTime then
+			if t > projectile.collideTime then
 				-- remove projectile
 
-				tankbobs.w_removeBody(projectile.m.body)
 				c_weapon_projectileRemove(projectile)
 
 				return
 			end
 		else
-			tankbobs.w_removeBody(projectile.m.body)
 			c_weapon_projectileRemove(projectile)
 
 			return
 		end
+	else
+		c_world_testBody(projectile)
+
+		projectile.p(t_w_getPosition(projectile.m.body))
+		projectile.r = t_w_getAngle(projectile.m.body)
 	end
-
-	c_world_testBody(projectile)
-
-	projectile.p(t_w_getPosition(projectile.m.body))
-	projectile.r = t_w_getAngle(projectile.m.body)
 end
 
 function c_world_spawnPowerup(powerup, index)

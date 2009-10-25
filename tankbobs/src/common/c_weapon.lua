@@ -101,10 +101,20 @@ function c_weapon_init()
 	weapon.projectileTexturer[2](0, 0)
 	weapon.projectileTexturer[3](1, 0)
 	weapon.projectileTexturer[4](1, 1)
-	weapon.projectileRender[2](-0.75, 0.75)
-	weapon.projectileRender[3](-0.75, -0.75)
-	weapon.projectileRender[4](0.75, -0.75)
-	weapon.projectileRender[1](0.75, -0.75)
+	weapon.projectileRender[4](-0.5, 0.5)
+	weapon.projectileRender[1](-0.5, -0.5)
+	weapon.projectileRender[2](0.5, -0.5)
+	weapon.projectileRender[3](0.5, 0.5)
+
+	weapon.projectileIsCollideSound = true
+
+	weapon.projectileExplode = false
+	weapon.projectileExplodeDamage = 0
+	weapon.projectileExplodeKnockback = 0
+	weapon.projectileExplodeReduce = 0
+	weapon.projectileExplodeRadius = 0
+	weapon.projectileExplodeSound = ""
+	weapon.projectileExplodeTime = 0
 
 	-- machinegun
 	weapon = c_weapon:new()
@@ -157,10 +167,20 @@ function c_weapon_init()
 	weapon.projectileTexturer[2](0, 0)
 	weapon.projectileTexturer[3](1, 0)
 	weapon.projectileTexturer[4](1, 1)
-	weapon.projectileRender[2](-1, 1)
-	weapon.projectileRender[3](-1, -1)
-	weapon.projectileRender[4](1, -1)
-	weapon.projectileRender[1](1, -1)
+	weapon.projectileRender[4](-0.75, 0.75)
+	weapon.projectileRender[1](-0.75, -0.75)
+	weapon.projectileRender[2](0.75, -0.75)
+	weapon.projectileRender[3](0.75, 0.75)
+
+	weapon.projectileIsCollideSound = true
+
+	weapon.projectileExplode = false
+	weapon.projectileExplodeDamage = 0
+	weapon.projectileExplodeKnockback = 0
+	weapon.projectileExplodeReduce = 0
+	weapon.projectileExplodeRadius = 0
+	weapon.projectileExplodeSound = ""
+	weapon.projectileExplodeTime = 0
 
 	-- shotgun
 	weapon = c_weapon:new()
@@ -212,10 +232,20 @@ function c_weapon_init()
 	weapon.projectileTexturer[2](0, 0)
 	weapon.projectileTexturer[3](1, 0)
 	weapon.projectileTexturer[4](1, 1)
-	weapon.projectileRender[2](-0.8, 0.8)
-	weapon.projectileRender[3](-0.8, -0.8)
-	weapon.projectileRender[4](0.8, -0.8)
-	weapon.projectileRender[1](0.8, -0.8)
+	weapon.projectileRender[4](-0.66, 0.66)
+	weapon.projectileRender[1](-0.66, -0.66)
+	weapon.projectileRender[2](0.66, -0.66)
+	weapon.projectileRender[3](0.66, 0.66)
+
+	weapon.projectileIsCollideSound = true
+
+	weapon.projectileExplode = false
+	weapon.projectileExplodeDamage = 0
+	weapon.projectileExplodeKnockback = 0
+	weapon.projectileExplodeReduce = 0
+	weapon.projectileExplodeRadius = 0
+	weapon.projectileExplodeSound = ""
+	weapon.projectileExplodeTime = 0
 
 	-- railgun
 	weapon = c_weapon:new()
@@ -268,10 +298,20 @@ function c_weapon_init()
 	weapon.projectileTexturer[2](1, 0)
 	weapon.projectileTexturer[3](0.5, 0.2)
 	weapon.projectileTexturer[4](0, 0)
+	weapon.projectileRender[4](0, 0)
 	weapon.projectileRender[1](0, 0)
 	weapon.projectileRender[2](0, 0)
 	weapon.projectileRender[3](0, 0)
-	weapon.projectileRender[4](0, 0)
+
+	weapon.projectileIsCollideSound = true
+
+	weapon.projectileExplode = false
+	weapon.projectileExplodeDamage = 0
+	weapon.projectileExplodeKnockback = 0
+	weapon.projectileExplodeReduce = 0
+	weapon.projectileExplodeRadius = 0
+	weapon.projectileExplodeSound = ""
+	weapon.projectileExplodeTime = 0
 
 	-- instagun
 	weapon = c_weapon:new()
@@ -324,10 +364,20 @@ function c_weapon_init()
 	weapon.projectileTexturer[2](1, 0)
 	weapon.projectileTexturer[3](0.5, 0.2)
 	weapon.projectileTexturer[4](0, 0)
+	weapon.projectileRender[4](0, 0)
 	weapon.projectileRender[1](0, 0)
 	weapon.projectileRender[2](0, 0)
 	weapon.projectileRender[3](0, 0)
-	weapon.projectileRender[4](0, 0)
+
+	weapon.projectileIsCollideSound = true
+
+	weapon.projectileExplode = false
+	weapon.projectileExplodeDamage = 0
+	weapon.projectileExplodeKnockback = 0
+	weapon.projectileExplodeReduce = 0
+	weapon.projectileExplodeRadius = 0
+	weapon.projectileExplodeSound = ""
+	weapon.projectileExplodeTime = 0
 
 	-- coilgun
 	weapon = c_weapon:new()
@@ -380,10 +430,20 @@ function c_weapon_init()
 	weapon.projectileTexturer[2](1, 0)
 	weapon.projectileTexturer[3](0.5, 0.2)
 	weapon.projectileTexturer[4](0, 0)
+	weapon.projectileRender[4](0, 0)
 	weapon.projectileRender[1](0, 0)
 	weapon.projectileRender[2](0, 0)
 	weapon.projectileRender[3](0, 0)
-	weapon.projectileRender[4](0, 0)
+
+	weapon.projectileIsCollideSound = true
+
+	weapon.projectileExplode = false
+	weapon.projectileExplodeDamage = 0
+	weapon.projectileExplodeKnockback = 0
+	weapon.projectileExplodeReduce = 0
+	weapon.projectileExplodeRadius = 0
+	weapon.projectileExplodeSound = ""
+	weapon.projectileExplodeTime = 0
 
 	-- saw
 	weapon = c_weapon:new()
@@ -436,10 +496,86 @@ function c_weapon_init()
 	weapon.projectileTexturer[2](0, 0)
 	weapon.projectileTexturer[3](1, 0)
 	weapon.projectileTexturer[4](1, 1)
-	weapon.projectileRender[2](-0.2, 6)
-	weapon.projectileRender[3](-0.2, 2)
-	weapon.projectileRender[4](0.2, 2)
-	weapon.projectileRender[1](0.2, 6)
+	weapon.projectileRender[4](-0.2, 6)
+	weapon.projectileRender[1](-0.2, 2)
+	weapon.projectileRender[2](0.2, 2)
+	weapon.projectileRender[3](0.2, 6)
+
+	weapon.projectileIsCollideSound = true
+
+	weapon.projectileExplode = false
+	weapon.projectileExplodeDamage = 0
+	weapon.projectileExplodeKnockback = 0
+	weapon.projectileExplodeReduce = 0
+	weapon.projectileExplodeRadius = 0
+	weapon.projectileExplodeSound = ""
+	weapon.projectileExplodeTime = 0
+
+	-- rocket launcher
+	weapon = c_weapon:new()
+	table.insert(c_weapons, weapon)
+
+	weapon.index = 8
+	weapon.name = "rocket-launcher"
+	weapon.altName = "rocket-launcher"
+	weapon.damage = 10  -- 10 damage in addition to splash
+	weapon.pellets = 1
+	weapon.speed = 64
+	weapon.spread = tankbobs.m_radians(0)
+	weapon.repeatRate = 1
+
+	weapon.knockback = 0  -- splash will take care of this
+	weapon.texture = "rocket-launcher.png"
+	weapon.fireSound = "rocket-launcher.wav"
+	weapon.reloadSound = "railgun-reload.wav"
+	weapon.launchDistance = 3.6  -- launch at center
+	weapon.aimAid = false
+	weapon.capacity = 4
+	weapon.clips = 2
+	weapon.reloadTime = 4
+	weapon.shotgunClips = false
+	weapon.meleeRange = 0
+	weapon.width = 0
+	weapon.trail = 0
+	weapon.trailWidth = 0
+
+	weapon.texturer[2](0, 1)
+	weapon.texturer[3](0, 0)
+	weapon.texturer[4](1, 0)
+	weapon.texturer[1](1, 1)
+	weapon.render[1](-1, 1)
+	weapon.render[2](-1, -1)
+	weapon.render[3](1, -1)
+	weapon.render[4](1, 1)
+
+	weapon.projectileTexture = "rocket-launcher-projectile.png"
+	weapon.projectileDensity = 1.25
+	weapon.projectileRestitution = 1
+	weapon.projectileMaxCollisions = 0
+	weapon.projectileEndOnBody = true
+
+	weapon.projectileHull[1](-0.5,  1)
+	weapon.projectileHull[2](-0.5, -1)
+	weapon.projectileHull[3](0.5,  -1)
+	weapon.projectileHull[4](0.5,   1)
+	weapon.projectileTexturer[1](0, 1)
+	weapon.projectileTexturer[2](0, 0)
+	weapon.projectileTexturer[3](1, 0)
+	weapon.projectileTexturer[4](1, 1)
+	weapon.projectileRender[4](-1, 1)
+	weapon.projectileRender[1](-1, -1)
+	weapon.projectileRender[2](1, -1)
+	weapon.projectileRender[3](1, 1)
+
+	weapon.projectileIsCollideSound = false
+
+	weapon.projectileExplode = true
+	weapon.projectileExplodeDamage = 100
+	weapon.projectileExplodeKnockback = 48
+	weapon.projectileExplodeReduce = 1.4
+	weapon.projectileExplodeRadius = 20
+	weapon.projectileExplodeSound = "rocket-launcher-projectile-explode.wav"
+	weapon.projectileExplodeTime = 0.5
 end
 
 function c_weapon_done()
@@ -482,11 +618,20 @@ c_weapon =
 	projectileMaxCollisions = 0,
 	projectileEndOnBody = false,
 
+	projectileIsCollideSound = false,
+
 	projectileTexture = "",
 
 	projectileHull = {tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2()},
 	projectileTexturer = {tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2()},
 	projectileRender = {tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2()},
+
+	projectileExplode = false,
+	projectileExplodeDamage = 0,
+	projectileExplodeKnockback = 0,
+	projectileExplodeReduce = 0,
+	projectileExplodeRadius = 0,
+	projectileExplodeSound = "",
 
 	m = {p = {}}
 }
@@ -786,6 +931,8 @@ local function c_world_isTank(body)
 end
 
 function c_weapon_projectileCollided(projectile, body)
+	local weapon = c_weapons[projectile.weapon]
+
 	if body ~= projectile.m.lastBody then
 		projectile.m.lastBody = body
 
@@ -796,12 +943,16 @@ function c_weapon_projectileCollided(projectile, body)
 			tank.m.lastDamageTime = tankbobs.t_getTicks()
 		end
 
-		if projectile.collisions > c_weapons[projectile.weapon].projectileMaxCollisions then
+		if weapon.projectileExplode then
+			c_world_explosion(projectile.p, weapon.projectileExplodeDamage, weapon.projectileExplodeKnockback, weapon.projectileExplodeRadius, weapon.projectileExplodeReduce)
+		end
+
+		if projectile.collisions > weapon.projectileMaxCollisions then
 			projectile.collided = true
 			return
 		end
 
-		if c_world_isTank(body) and c_weapons[projectile.weapon].projectileEndOnBody then
+		if c_world_isTank(body) and weapon.projectileEndOnBody then
 			projectile.collided = true
 			return
 		end
