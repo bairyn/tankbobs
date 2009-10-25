@@ -270,7 +270,7 @@ function st_play_button(button, pressed)
 
 				if not newScreens then
 					if screens == 0 then
-						newScreens = 2
+						newScreens = c_config_get("game.players")
 					else
 						newScreens = 0
 					end
