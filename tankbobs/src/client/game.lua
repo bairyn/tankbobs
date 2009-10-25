@@ -774,12 +774,16 @@ function game_step(d)
 				if not v.m.refocus or t > v.m.refocus then
 					v.m.refocus = t + c_world_timeMultiplier(c_config_get("client.powerupRefocusTime"))
 
-					v.m.focus = false
+					if not v.m.focus then
+						v.m.focus = {}
+					end
+
+					v.m.focus[camnum] = false
 
 					for ks, vs in pairs(c_world_getTanks()) do
 						if not filter or filter(ks, vs) then
 							if vs.exists and (vs.p - v.p).R <= c_config_get("client.powerupFocusDistance") then
-								v.m.focus = true
+								v.m.focus[camnum] = true
 
 								break
 							end
@@ -788,7 +792,7 @@ function game_step(d)
 				end
 
 				--if c_tcm_current_map.powerupSpawnPoints[v.spawner] and c_tcm_current_map.powerupSpawnPoints[v.spawner].focus then
-				if v.m.focus then
+				if v.m.focus and v.m.focus[camnum] then
 					if not leftmost or v.p.x < leftmost then
 						leftmost = v.p.x
 					end
