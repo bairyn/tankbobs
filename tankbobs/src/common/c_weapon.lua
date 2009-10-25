@@ -518,7 +518,7 @@ function c_weapon_init()
 	weapon.index = 8
 	weapon.name = "rocket-launcher"
 	weapon.altName = "rocket-launcher"
-	weapon.damage = 10  -- 10 damage in addition to splash
+	weapon.damage = 20  -- 20 damage in addition to splash
 	weapon.pellets = 1
 	weapon.speed = 64
 	weapon.spread = tankbobs.m_radians(0)
@@ -570,7 +570,7 @@ function c_weapon_init()
 	weapon.projectileIsCollideSound = false
 
 	weapon.projectileExplode = true
-	weapon.projectileExplodeDamage = 100
+	weapon.projectileExplodeDamage = 120
 	weapon.projectileExplodeKnockback = 56
 	weapon.projectileExplodeReduce = 1.4
 	weapon.projectileExplodeRadius = 30
