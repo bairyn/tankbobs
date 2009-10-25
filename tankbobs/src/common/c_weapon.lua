@@ -416,7 +416,7 @@ function c_weapon_init()
 	weapon.render[3](1, -1)
 	weapon.render[4](1, 1)
 
-	weapon.projectileTexture = "coilgun-projectile.png"
+	weapon.projectileTexture = "railgun-projectile.png"
 	weapon.projectileDensity = 4
 	weapon.projectileRestitution = 0.1
 	weapon.projectileMaxCollisions = 0
