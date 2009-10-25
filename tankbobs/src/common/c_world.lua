@@ -2064,15 +2064,15 @@ function c_world_corpse_step(d, corpse)
 		c_world_removeCorpse(corpse)
 	elseif t >= corpse.explodeTime then
 		-- explode corpse
-		if corpse.body then
-			tankbobs.w_removeBody(corpse.body)
-			corpse.body = nil
-		end
-
 		if not corpse.explode then
 			corpse.explode = c_const_get("world_corpsePostTime")
 
 			c_world_explosion(corpse.p, c_const_get("world_corpseExplodeDamage"), c_const_get("world_corpseExplodeKnockback"), c_const_get("world_corpseExplodeRadius"), c_const_get("world_corpseExplodeRadiusReduce"), tankbobs.w_getIndex(corpse.body))
+		end
+
+		if corpse.body then
+			tankbobs.w_removeBody(corpse.body)
+			corpse.body = nil
 		end
 
 		corpse.explode = corpse.explode - d
