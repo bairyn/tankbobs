@@ -1748,11 +1748,11 @@ function c_world_projectile_step(d, projectile)
 
 		-- if explosive projectile, don't remove immediately
 		if weapon.projectileExplode then
-			if not projectile.collideTime then
-				projectile.collideTime = t + c_world_timeMultiplier(weapon.projectileExplodeTime)
+			if not projectile.m.collideTime then
+				projectile.m.collideTime = t + c_world_timeMultiplier(weapon.projectileExplodeTime)
 			end
 
-			if t > projectile.collideTime then
+			if t > projectile.m.collideTime then
 				-- remove projectile
 
 				c_weapon_projectileRemove(projectile)
@@ -2432,8 +2432,11 @@ local function c_world_private_resetWorldTimers(t)
 
 	for _, v in pairs(c_world_corpses) do
 		v.explodeTime = t + c_world_timeMultiplier(c_const_get("world_corpseTime"))
-		if v.collideTime then
-			v.collideTime = t + c_world_timeMultiplier(c_const_get("world_corpsePostTime"))
+	end
+
+	for _, v in pairs(c_weapon_getProjectiles()) do
+		if v.m.collideTime then
+			v.m.collideTime = t + c_world_timeMultiplier(c_const_get("world_corpsePostTime"))
 		end
 	end
 
@@ -2486,8 +2489,11 @@ local function c_world_private_offsetWorldTimers(d)
 
 	for _, v in pairs(c_world_corpses) do
 		v.explodeTime = v.explodeTime + d
-		if v.collideTime then
-			v.collideTime = v.collideTime + d
+	end
+
+	for _, v in pairs(c_weapon_getProjectiles()) do
+		if v.m.collideTime then
+			v.m.collideTime = v.m.collideTime + d
 		end
 	end
 
