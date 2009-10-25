@@ -48,8 +48,8 @@ local common_lerp
 local bit
 
 local trails = {}
-local camera[4]
-local zoom[4]
+local camera = {}
+local zoom = {}
 
 local wall_textures
 
