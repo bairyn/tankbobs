@@ -111,6 +111,7 @@ local names =
 , "Jim Trainer"
 , "Jim Socks"
 , "Joe King"
+, "Richard Face"
 }
 
 -- follow type
