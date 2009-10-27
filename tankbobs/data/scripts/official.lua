@@ -39,6 +39,9 @@ if c_tcm_current_map.name == "arena" then
 
 	c_mods_prependFunction("c_world_step", giveClips)
 
+	local backupComputers = c_config_get("game.computers")
+	c_config_set("game.computers", 0)
+
 	local function resetWalls()
 		tankbobs.w_setTimeStep(c_const_get("world_timeStep"))
 		tankbobs.w_setIterations(c_const_get("world_iterations"))
@@ -48,6 +51,8 @@ if c_tcm_current_map.name == "arena" then
 				v.path = v.m.script_path[1]
 			end
 		end
+
+		c_config_set("game.computers", backupComputers)
 	end
 
 	c_mods_exitWorldFunction(resetWalls)
