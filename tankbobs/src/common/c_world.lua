@@ -1702,7 +1702,11 @@ function c_world_wall_step(d, wall)
 						path = paths[wall.m.pid + 1]
 						wall.m.ppos = 0
 
-						tankbobs.w_setPosition(wall.m.body, wall.m.startpos + path.p - prevPath.p)
+						if path.enabled then
+							tankbobs.w_setPosition(wall.m.body, wall.m.startpos)
+						else
+							tankbobs.w_setPosition(wall.m.body, wall.m.startpos + path.p - prevPath.p)
+						end
 					end
 				end
 			end
