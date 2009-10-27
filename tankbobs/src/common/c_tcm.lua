@@ -220,6 +220,7 @@ c_tcm_map =
 	message = "",  -- the level message
 
 	wayPointNetwork = {},
+	levels = {},
 	uppermost = 0,
 	lowermost = 0,
 	rightmost = 0,
@@ -968,6 +969,23 @@ function c_tcm_read_map(map)
 				v.waypoint = w[1]
 			else
 				v.wayPoint = 0
+			end
+		end
+	end
+
+	-- build level table
+	for i = 1, c_const_get("tcm_maxLevel") do
+		if i == c_const_get("tcm_tankLevel") then
+			r.levels[i] = {}
+		end
+
+		for _, v in pairs(r.walls) do
+			if v.l == i then
+				if not r.levels[i] then
+					r.levels[i] = {}
+				end
+
+				table.insert(r.levels[i], v)
 			end
 		end
 	end

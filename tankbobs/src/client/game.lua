@@ -301,36 +301,80 @@ local function game_drawWorld(d)
 	gl.PushMatrix()
 		-- draw tanks and walls
 		for i = 1, c_const_get("tcm_maxLevel") do
-			if i == c_const_get("tcm_tankLevel") then
-				-- draw tank-level things
+			local l = c_tcm_current_map.levels[i]
 
-				-- trails
-				for k, v in pairs(trails) do
-					local breaking = false repeat
-						-- {time left, maximum intensity, list}
-						v[1] = v[1] - d
-						if v[1] <= 0 then
-							gl.DeleteLists(v[3], 1)
+			if l then
+				if i == c_const_get("tcm_tankLevel") then
+					-- draw tank-level things
 
-							if trails[k] then
-								trails[k] = nil
+					-- trails
+					for k, v in pairs(trails) do
+						local breaking = false repeat
+							-- {time left, maximum intensity, list}
+							v[1] = v[1] - d
+							if v[1] <= 0 then
+								gl.DeleteLists(v[3], 1)
+
+								if trails[k] then
+									trails[k] = nil
+								end
+
+								breaking = false break
 							end
 
-							breaking = false break
+							gl.Color(1, 1, 1, v[1] / v[2])
+							gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, v[2] / v[3])
+							gl.PushMatrix()
+								gl.CallList(v[3])
+							gl.PopMatrix()
+						until true if breaking then break end
+					end
+
+					-- draw corpses
+					for _, v in pairs(c_world_getCorpses()) do
+						if v.exists then
+							if not v.explode then
+								gl.PushAttrib("CURRENT_BIT")
+									gl.PushMatrix()
+										gl.Translate(v.p.x, v.p.y, 0)
+										gl.Rotate(tankbobs.m_degrees(v.r), 0, 0, 1)
+										local r, g, b, a = v.color.r, v.color.g, v.color.b, 1
+										if c_world_isTeamGameType(c_world_gameType) then
+											-- team colors
+											local color = c_const_get(v.red and "color_red" or "color_blue")
+											r, g, b, a = color[1], color[2], color[3], color[4]
+										end
+										gl.Color(r, g, b, a)
+										gl.TexEnv("TEXTURE_ENV_COLOR", r, g, b, a)
+
+										-- corpse
+										gl.CallList(corpse_listBase)
+										-- corpse outline
+										gl.Color(1, 1, 1, 1)
+										gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, 1)
+										gl.CallList(corpseBorder_listBase)
+									gl.PopMatrix()
+								gl.PopAttrib()
+							else
+								-- draw explosions things from center
+
+								gl.PushAttrib("CURRENT_BIT")
+									gl.PushMatrix()
+										gl.Translate(v.p.x, v.p.y, 0)
+										gl.Color(1, 1, 1, 1)
+										gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, 1)
+										local scale = 1 - v.explode / c_const_get("world_corpsePostTime")
+										gl.Scale(scale, scale, 1)
+										gl.CallList(explosion_listBase)
+									gl.PopMatrix()
+								gl.PopAttrib()
+							end
 						end
+					end
 
-						gl.Color(1, 1, 1, v[1] / v[2])
-						gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, v[2] / v[3])
-						gl.PushMatrix()
-							gl.CallList(v[3])
-						gl.PopMatrix()
-					until true if breaking then break end
-				end
-
-				-- draw corpses
-				for _, v in pairs(c_world_getCorpses()) do
-					if v.exists then
-						if not v.explode then
+					-- render tanks
+					for k, v in pairs(c_world_getTanks()) do
+						if v.exists then
 							gl.PushAttrib("CURRENT_BIT")
 								gl.PushMatrix()
 									gl.Translate(v.p.x, v.p.y, 0)
@@ -341,26 +385,206 @@ local function game_drawWorld(d)
 										local color = c_const_get(v.red and "color_red" or "color_blue")
 										r, g, b, a = color[1], color[2], color[3], color[4]
 									end
+									if v.cd.acceleration then
+										if r + g + b >= 2.5 then
+											r = r + c_const_get("tank_lightAccelerationColorOffset")
+											g = g + c_const_get("tank_lightAccelerationColorOffset")
+											b = b + c_const_get("tank_lightAccelerationColorOffset")
+										else
+											r = r + c_const_get("tank_accelerationColorOffset")
+											g = g + c_const_get("tank_accelerationColorOffset")
+											b = b + c_const_get("tank_accelerationColorOffset")
+										end
+									end
 									gl.Color(r, g, b, a)
 									gl.TexEnv("TEXTURE_ENV_COLOR", r, g, b, a)
-
-									-- corpse
-									gl.CallList(corpse_listBase)
-									-- corpse outline
+									-- blend color with tank texture
+									gl.CallList(tank_listBase)
+									-- white outline
 									gl.Color(1, 1, 1, 1)
 									gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, 1)
-									gl.CallList(corpseBorder_listBase)
+									gl.CallList(tankBorder_listBase)
+									-- shield
+									gl.Color(1, 1, 1, v.shield / c_const_get("tank_boostShield"))
+									gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, v.shield / c_const_get("tank_boostShield"))
+									gl.CallList(tankShield_listBase)
+									-- tag
+									if c_world_gameType == CHASE and v.tagged then
+										gl.Color(1, 1, 1, 1)
+										gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, 1)
+										gl.CallList(tankTagged_listBase)
+									end
+
+									if v.weapon and not v.reloading and c_weapon_getWeapons()[v.weapon] then
+										gl.CallList(c_weapon_getWeapons()[v.weapon].m.p.list)
+									end
 								gl.PopMatrix()
 							gl.PopAttrib()
-						else
-							-- draw explosions things from center
 
+							-- aiming aids
+							gl.EnableClientState("VERTEX_ARRAY")
+							if (v.weapon and c_weapon_getWeapons()[v.weapon] and c_weapon_getWeapons()[v.weapon].aimAid and not v.reloading) or (v.cd.aimAid) then
+								gl.PushAttrib("ENABLE_BIT")
+									local b
+									local vec = tankbobs.m_vec2()
+									local start, endP = tankbobs.m_vec2(v.p), tankbobs.m_vec2()
+					
+									vec.t = v.r
+									vec.R = c_const_get("aimAid_startDistance")
+									start:add(vec)
+					
+									endP(start)
+									vec.R = c_const_get("aimAid_maxDistance")
+									endP:add(vec)
+					
+									b, vec = c_world_findClosestIntersection(start, endP)
+									if b then
+										endP = vec
+									end
+					
+									aa[1][1] = start.x aa[1][2] = start.y
+									aa[2][1] = endP.x aa[2][2] = endP.y
+									gl.Disable("TEXTURE_2D")
+									gl.Color(0.9, 0.1, 0.1, 1)
+									gl.TexEnv("TEXTURE_ENV_COLOR", 0.9, 0.1, 0.1, 1)
+									gl.VertexPointer(aa)
+									gl.LineWidth(c_const_get("aimAid_width"))
+									gl.DrawArrays("LINES", 0, 2)
+								gl.PopAttrib()
+							end
+							gl.DisableClientState("VERTEX_ARRAY")
+
+							-- draw name
+							gl.PushMatrix()
+								gl.Translate(v.p.x, v.p.y, 0)
+								tankbobs.r_drawString(v.name, c_const_get("tank_nameOffset"), v.color.r, v.color.g, v.color.b, c_config_get("client.renderer.scoresAlpha"), c_const_get("tank_nameScalex"), c_const_get("tank_nameScaley"), false)
+							gl.PopMatrix()
+
+							-- healthbars and ammo bars
+							gl.PushMatrix()
+								gl.Translate(v.p.x, v.p.y, 0)
+								gl.Rotate(tankbobs.m_degrees(v.r) + c_const_get("healthbar_rotation"), 0, 0, 1)
+								if not (c_config_get("game.player" .. tostring(k) .. ".color.r", true)) then
+									c_config_set("game.player" .. tostring(k) .. ".color.r", c_config_get("game.defaultTankRed"))
+									c_config_set("game.player" .. tostring(k) .. ".color.g", c_config_get("game.defaultTankBlue"))
+									c_config_set("game.player" .. tostring(k) .. ".color.b", c_config_get("game.defaultTankGreen"))
+									c_config_set("game.player" .. tostring(k) .. ".color.a", c_config_get("game.defaultTankAlpha"))
+								end
+
+								if v.weapon and c_weapon_getWeapons()[v.weapon] and c_weapon_getWeapons()[v.weapon].capacity > 0 then
+									gl.Color(1, 1, 1, 1)
+									gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, 1)
+									gl.CallList(ammobarBorder_listBase)
+									gl.Color(c_const_get("ammobar_r"), c_const_get("ammobar_g"), c_const_get("ammobar_b"), c_const_get("ammobar_a"))
+									gl.TexEnv("TEXTURE_ENV_COLOR", c_const_get("ammobar_r"), c_const_get("ammobar_g"), c_const_get("ammobar_b"), c_const_get("ammobar_a"))
+									gl.PushMatrix()
+										gl.PushAttrib("ENABLE_BIT")
+											gl.Disable("TEXTURE_2D")
+											gl.Translate((c_const_get("ammobarBorder_renderx1") + c_const_get("ammobarBorder_renderx2")) / 2, c_const_get("ammobarBorder_rendery1"), 0)
+											gl.Scale(c_const_get("ammobarBorder_renderx4") - c_const_get("ammobarBorder_renderx1"), 1, 1)
+
+											local height = c_const_get("ammobarBorder_rendery2") - c_const_get("ammobarBorder_rendery1")
+
+											gl.EnableClientState("VERTEX_ARRAY")
+												local ammo = v.ammo
+												local capacity = c_weapon_getWeapons()[v.weapon].capacity
+												local spacing = 0.1 * (3 / capacity)
+
+												local x = 0
+												local xp = x
+												for i = 1, ammo do
+													xp = x
+													x = x - spacing + 1 / capacity
+
+													m[i * 8 - 7], m[i * 8 - 6] = xp, height
+													m[i * 8 - 5], m[i * 8 - 4] = xp, 0
+													m[i * 8 - 3], m[i * 8 - 2] = x, 0
+													m[i * 8 - 1], m[i * 8 - 0] = x, height
+
+													x = x + spacing
+												end
+
+												if ammo > 0 then
+													gl.VertexPointer(m, 2)  -- XXX: this call causes memory corruption under older versions of LuaGL  -- TODO: update windows (32 and 64-bit) LuaGL libraries
+													gl.DrawArrays("QUADS", 0, 4 * ammo)
+												end
+											gl.DisableClientState("VERTEX_ARRAY")
+										gl.PopAttrib()
+									gl.PopMatrix()
+
+									-- clips
+									gl.PushMatrix()
+										gl.PushAttrib("ENABLE_BIT")
+											gl.Disable("TEXTURE_2D")
+											gl.Translate((c_const_get("ammobarBorder_renderx1") + c_const_get("ammobarBorder_renderx2")) / 2, c_const_get("ammobarBorder_rendery1") - 0.5, 0)
+											gl.Scale(c_const_get("ammobarBorder_renderx4") - c_const_get("ammobarBorder_renderx1"), 1, 1)
+
+											local height = 2 * c_const_get("ammobarBorder_rendery2") - c_const_get("ammobarBorder_rendery1")
+
+											gl.EnableClientState("VERTEX_ARRAY")
+												local clips = v.clips
+												local spacing = 1 / 8
+
+												local x = 0
+												local xp = x
+												for i = 1, clips do
+													xp = x
+													x = x + spacing
+
+													m[i * 8 - 7], m[i * 8 - 6] = xp, height
+													m[i * 8 - 5], m[i * 8 - 4] = xp, 0
+													m[i * 8 - 3], m[i * 8 - 2] = x, 0
+													m[i * 8 - 1], m[i * 8 - 0] = x, height
+
+													x = x + spacing
+												end
+
+												if clips > 0 then
+													gl.VertexPointer(m, 2)
+													gl.DrawArrays("QUADS", 0, 4 * clips)  -- this call (possibly the second call *also*) causes memory corruption on older versions of LuaGL  -- TODO: update windows and 64-bit LuaGL libraries
+												end
+											gl.DisableClientState("VERTEX_ARRAY")
+										gl.PopAttrib()
+									gl.PopMatrix()
+								end
+
+								gl.Color(v.color.r, v.color.g, v.color.b, 1)
+								gl.TexEnv("TEXTURE_ENV_COLOR", v.color.r, v.color.g, v.color.b, 1)
+								local scale = v.health / c_const_get("tank_health")
+								if scale < 1 then
+									scale = 1
+								end
+								gl.Scale(scale, 1, 1)
+								gl.CallList(healthbarBorder_listBase)
+								gl.Scale(1 / scale, 1, 1)
+								if v.health >= c_const_get("tank_highHealth") then
+									gl.Color(0.1, 1, 0.1, 1)
+									gl.TexEnv("TEXTURE_ENV_COLOR", 0.1, 1, 0.1, 1)
+								elseif v.health > c_const_get("tank_lowHealth") then
+									gl.Color(1, 1, 0.1, 1)
+									gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 0.1, 1)
+								else
+									gl.Color(1, 0.1, 0.1, 1)
+									gl.TexEnv("TEXTURE_ENV_COLOR", 1, 0.1, 0.1, 1)
+								end
+								gl.Scale(v.health / c_const_get("tank_health"), 1, 1)
+								gl.CallList(healthbar_listBase)
+							gl.PopMatrix()
+						end
+					end
+
+					-- render explosive projectiles
+					for _, v in pairs(c_weapon_getProjectiles()) do
+						local weapon = c_weapon_getWeapons()[v.weapon]
+
+						if weapon and weapon.projectileExplode and v.collided and v.m.collideTime then
+							-- draw explosions things from center
 							gl.PushAttrib("CURRENT_BIT")
 								gl.PushMatrix()
 									gl.Translate(v.p.x, v.p.y, 0)
 									gl.Color(1, 1, 1, 1)
 									gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, 1)
-									local scale = 1 - v.explode / c_const_get("world_corpsePostTime")
+									local scale = 1 - ((v.m.collideTime - tankbobs.t_getTicks()) / c_world_timeMultiplier()) / weapon.projectileExplodeTime
 									gl.Scale(scale, scale, 1)
 									gl.CallList(explosion_listBase)
 								gl.PopMatrix()
@@ -369,258 +593,38 @@ local function game_drawWorld(d)
 					end
 				end
 
-				-- render tanks
-				for k, v in pairs(c_world_getTanks()) do
-					if v.exists then
-						gl.PushAttrib("CURRENT_BIT")
-							gl.PushMatrix()
-								gl.Translate(v.p.x, v.p.y, 0)
-								gl.Rotate(tankbobs.m_degrees(v.r), 0, 0, 1)
-								local r, g, b, a = v.color.r, v.color.g, v.color.b, 1
-								if c_world_isTeamGameType(c_world_gameType) then
-									-- team colors
-									local color = c_const_get(v.red and "color_red" or "color_blue")
-									r, g, b, a = color[1], color[2], color[3], color[4]
-								end
-								if v.cd.acceleration then
-									if r + g + b >= 2.5 then
-										r = r + c_const_get("tank_lightAccelerationColorOffset")
-										g = g + c_const_get("tank_lightAccelerationColorOffset")
-										b = b + c_const_get("tank_lightAccelerationColorOffset")
-									else
-										r = r + c_const_get("tank_accelerationColorOffset")
-										g = g + c_const_get("tank_accelerationColorOffset")
-										b = b + c_const_get("tank_accelerationColorOffset")
-									end
-								end
-								gl.Color(r, g, b, a)
-								gl.TexEnv("TEXTURE_ENV_COLOR", r, g, b, a)
-								-- blend color with tank texture
-								gl.CallList(tank_listBase)
-								-- white outline
-								gl.Color(1, 1, 1, 1)
-								gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, 1)
-								gl.CallList(tankBorder_listBase)
-								-- shield
-								gl.Color(1, 1, 1, v.shield / c_const_get("tank_boostShield"))
-								gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, v.shield / c_const_get("tank_boostShield"))
-								gl.CallList(tankShield_listBase)
-								-- tag
-								if c_world_gameType == CHASE and v.tagged then
-									gl.Color(1, 1, 1, 1)
-									gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, 1)
-									gl.CallList(tankTagged_listBase)
-								end
+				for _, v in pairs(l) do
+					if v.m.pos then
+						gl.Color(1, 1, 1, 1)
+						gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1)
+						gl.BindTexture("TEXTURE_2D", v.m.texture)
 
-								if v.weapon and not v.reloading and c_weapon_getWeapons()[v.weapon] then
-									gl.CallList(c_weapon_getWeapons()[v.weapon].m.p.list)
-								end
-							gl.PopMatrix()
-						gl.PopAttrib()
-
-						-- aiming aids
-						gl.EnableClientState("VERTEX_ARRAY")
-						if (v.weapon and c_weapon_getWeapons()[v.weapon] and c_weapon_getWeapons()[v.weapon].aimAid and not v.reloading) or (v.cd.aimAid) then
-							gl.PushAttrib("ENABLE_BIT")
-								local b
-								local vec = tankbobs.m_vec2()
-								local start, endP = tankbobs.m_vec2(v.p), tankbobs.m_vec2()
-				
-								vec.t = v.r
-								vec.R = c_const_get("aimAid_startDistance")
-								start:add(vec)
-				
-								endP(start)
-								vec.R = c_const_get("aimAid_maxDistance")
-								endP:add(vec)
-				
-								b, vec = c_world_findClosestIntersection(start, endP)
-								if b then
-									endP = vec
-								end
-				
-								aa[1][1] = start.x aa[1][2] = start.y
-								aa[2][1] = endP.x aa[2][2] = endP.y
-								gl.Disable("TEXTURE_2D")
-								gl.Color(0.9, 0.1, 0.1, 1)
-								gl.TexEnv("TEXTURE_ENV_COLOR", 0.9, 0.1, 0.1, 1)
-								gl.VertexPointer(aa)
-								gl.LineWidth(c_const_get("aimAid_width"))
-								gl.DrawArrays("LINES", 0, 2)
-							gl.PopAttrib()
-						end
-						gl.DisableClientState("VERTEX_ARRAY")
-
-						-- draw name
-						gl.PushMatrix()
-							gl.Translate(v.p.x, v.p.y, 0)
-							tankbobs.r_drawString(v.name, c_const_get("tank_nameOffset"), v.color.r, v.color.g, v.color.b, c_config_get("client.renderer.scoresAlpha"), c_const_get("tank_nameScalex"), c_const_get("tank_nameScaley"), false)
-						gl.PopMatrix()
-
-						-- healthbars and ammo bars
-						gl.PushMatrix()
-							gl.Translate(v.p.x, v.p.y, 0)
-							gl.Rotate(tankbobs.m_degrees(v.r) + c_const_get("healthbar_rotation"), 0, 0, 1)
-							if not (c_config_get("game.player" .. tostring(k) .. ".color.r", true)) then
-								c_config_set("game.player" .. tostring(k) .. ".color.r", c_config_get("game.defaultTankRed"))
-								c_config_set("game.player" .. tostring(k) .. ".color.g", c_config_get("game.defaultTankBlue"))
-								c_config_set("game.player" .. tostring(k) .. ".color.b", c_config_get("game.defaultTankGreen"))
-								c_config_set("game.player" .. tostring(k) .. ".color.a", c_config_get("game.defaultTankAlpha"))
-							end
-
-							if v.weapon and c_weapon_getWeapons()[v.weapon] and c_weapon_getWeapons()[v.weapon].capacity > 0 then
-								gl.Color(1, 1, 1, 1)
-								gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, 1)
-								gl.CallList(ammobarBorder_listBase)
-								gl.Color(c_const_get("ammobar_r"), c_const_get("ammobar_g"), c_const_get("ammobar_b"), c_const_get("ammobar_a"))
-								gl.TexEnv("TEXTURE_ENV_COLOR", c_const_get("ammobar_r"), c_const_get("ammobar_g"), c_const_get("ammobar_b"), c_const_get("ammobar_a"))
-								gl.PushMatrix()
-									gl.PushAttrib("ENABLE_BIT")
-										gl.Disable("TEXTURE_2D")
-										gl.Translate((c_const_get("ammobarBorder_renderx1") + c_const_get("ammobarBorder_renderx2")) / 2, c_const_get("ammobarBorder_rendery1"), 0)
-										gl.Scale(c_const_get("ammobarBorder_renderx4") - c_const_get("ammobarBorder_renderx1"), 1, 1)
-
-										local height = c_const_get("ammobarBorder_rendery2") - c_const_get("ammobarBorder_rendery1")
-
-										gl.EnableClientState("VERTEX_ARRAY")
-											local ammo = v.ammo
-											local capacity = c_weapon_getWeapons()[v.weapon].capacity
-											local spacing = 0.1 * (3 / capacity)
-
-											local x = 0
-											local xp = x
-											for i = 1, ammo do
-												xp = x
-												x = x - spacing + 1 / capacity
-
-												m[i * 8 - 7], m[i * 8 - 6] = xp, height
-												m[i * 8 - 5], m[i * 8 - 4] = xp, 0
-												m[i * 8 - 3], m[i * 8 - 2] = x, 0
-												m[i * 8 - 1], m[i * 8 - 0] = x, height
-
-												x = x + spacing
-											end
-
-											if ammo > 0 then
-												gl.VertexPointer(m, 2)  -- XXX: this call causes memory corruption under older versions of LuaGL  -- TODO: update windows (32 and 64-bit) LuaGL libraries
-												gl.DrawArrays("QUADS", 0, 4 * ammo)
-											end
-										gl.DisableClientState("VERTEX_ARRAY")
-									gl.PopAttrib()
-								gl.PopMatrix()
-
-								-- clips
-								gl.PushMatrix()
-									gl.PushAttrib("ENABLE_BIT")
-										gl.Disable("TEXTURE_2D")
-										gl.Translate((c_const_get("ammobarBorder_renderx1") + c_const_get("ammobarBorder_renderx2")) / 2, c_const_get("ammobarBorder_rendery1") - 0.5, 0)
-										gl.Scale(c_const_get("ammobarBorder_renderx4") - c_const_get("ammobarBorder_renderx1"), 1, 1)
-
-										local height = 2 * c_const_get("ammobarBorder_rendery2") - c_const_get("ammobarBorder_rendery1")
-
-										gl.EnableClientState("VERTEX_ARRAY")
-											local clips = v.clips
-											local spacing = 1 / 8
-
-											local x = 0
-											local xp = x
-											for i = 1, clips do
-												xp = x
-												x = x + spacing
-
-												m[i * 8 - 7], m[i * 8 - 6] = xp, height
-												m[i * 8 - 5], m[i * 8 - 4] = xp, 0
-												m[i * 8 - 3], m[i * 8 - 2] = x, 0
-												m[i * 8 - 1], m[i * 8 - 0] = x, height
-
-												x = x + spacing
-											end
-
-											if clips > 0 then
-												gl.VertexPointer(m, 2)
-												gl.DrawArrays("QUADS", 0, 4 * clips)  -- this call (possibly the second call *also*) causes memory corruption on older versions of LuaGL  -- TODO: update windows and 64-bit LuaGL libraries
-											end
-										gl.DisableClientState("VERTEX_ARRAY")
-									gl.PopAttrib()
-								gl.PopMatrix()
-							end
-
-							gl.Color(v.color.r, v.color.g, v.color.b, 1)
-							gl.TexEnv("TEXTURE_ENV_COLOR", v.color.r, v.color.g, v.color.b, 1)
-							local scale = v.health / c_const_get("tank_health")
-							if scale < 1 then
-								scale = 1
-							end
-							gl.Scale(scale, 1, 1)
-							gl.CallList(healthbarBorder_listBase)
-							gl.Scale(1 / scale, 1, 1)
-							if v.health >= c_const_get("tank_highHealth") then
-								gl.Color(0.1, 1, 0.1, 1)
-								gl.TexEnv("TEXTURE_ENV_COLOR", 0.1, 1, 0.1, 1)
-							elseif v.health > c_const_get("tank_lowHealth") then
-								gl.Color(1, 1, 0.1, 1)
-								gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 0.1, 1)
-							else
-								gl.Color(1, 0.1, 0.1, 1)
-								gl.TexEnv("TEXTURE_ENV_COLOR", 1, 0.1, 0.1, 1)
-							end
-							gl.Scale(v.health / c_const_get("tank_health"), 1, 1)
-							gl.CallList(healthbar_listBase)
-						gl.PopMatrix()
-					end
-				end
-
-				-- render explosive projectiles
-				for _, v in pairs(c_weapon_getProjectiles()) do
-					local weapon = c_weapon_getWeapons()[v.weapon]
-
-					if weapon and weapon.projectileExplode and v.collided and v.m.collideTime then
-						-- draw explosions things from center
-						gl.PushAttrib("CURRENT_BIT")
-							gl.PushMatrix()
-								gl.Translate(v.p.x, v.p.y, 0)
-								gl.Color(1, 1, 1, 1)
-								gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, 1)
-								local scale = 1 - ((v.m.collideTime - tankbobs.t_getTicks()) / c_world_timeMultiplier()) / weapon.projectileExplodeTime
-								gl.Scale(scale, scale, 1)
-								gl.CallList(explosion_listBase)
-							gl.PopMatrix()
-						gl.PopAttrib()
-					end
-				end
-			end
-
-			for k, v in pairs(c_tcm_current_map.walls) do
-				if v.l == i and v.m.pos then
-					gl.Color(1, 1, 1, 1)
-					gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1)
-					gl.BindTexture("TEXTURE_2D", v.m.texture)
-
-					gl.EnableClientState("VERTEX_ARRAY,TEXTURE_COORD_ARRAY")
-					w[1][1], w[1][2] = v.m.pos[1].x, v.m.pos[1].y
-					w[2][1], w[2][2] = v.m.pos[2].x, v.m.pos[2].y
-					w[3][1], w[3][2] = v.m.pos[3].x, v.m.pos[3].y
-					t[1][1], t[1][2] = v.t[1].x, v.t[1].y
-					t[2][1], t[2][2] = v.t[2].x, v.t[2].y
-					t[3][1], t[3][2] = v.t[3].x, v.t[3].y
-					if v.m.pos[4] then
-						w[4][1], w[4][2] = v.m.pos[4].x, v.m.pos[4].y
-					else
-						t[4][1], t[4][2] = v.t[4].x, v.t[4].y
-					end
-					gl.VertexPointer(w)
-					gl.TexCoordPointer(t)
-					gl.DrawArrays("POLYGON", 0, #v.m.pos)  -- TODO: FIXME: figure out why texture coordinates are ignored and remove immediate mode below
-					gl.DisableClientState("VERTEX_ARRAY,TEXTURE_COORD_ARRAY")
-
-					gl.Begin(v.m.pos[4] and "QUADS" or "TRIANGLES")
-						gl.TexCoord(v.t[1].x, v.t[1].y) gl.Vertex(v.m.pos[1].x, v.m.pos[1].y)
-						gl.TexCoord(v.t[2].x, v.t[2].y) gl.Vertex(v.m.pos[2].x, v.m.pos[2].y)
-						gl.TexCoord(v.t[3].x, v.t[3].y) gl.Vertex(v.m.pos[3].x, v.m.pos[3].y)
+						gl.EnableClientState("VERTEX_ARRAY,TEXTURE_COORD_ARRAY")
+						w[1][1], w[1][2] = v.m.pos[1].x, v.m.pos[1].y
+						w[2][1], w[2][2] = v.m.pos[2].x, v.m.pos[2].y
+						w[3][1], w[3][2] = v.m.pos[3].x, v.m.pos[3].y
+						t[1][1], t[1][2] = v.t[1].x, v.t[1].y
+						t[2][1], t[2][2] = v.t[2].x, v.t[2].y
+						t[3][1], t[3][2] = v.t[3].x, v.t[3].y
 						if v.m.pos[4] then
-							gl.TexCoord(v.t[4].x, v.t[4].y) gl.Vertex(v.m.pos[4].x, v.m.pos[4].y)
+							w[4][1], w[4][2] = v.m.pos[4].x, v.m.pos[4].y
+						else
+							t[4][1], t[4][2] = v.t[4].x, v.t[4].y
 						end
-					gl.End()
+						gl.VertexPointer(w)
+						gl.TexCoordPointer(t)
+						gl.DrawArrays("POLYGON", 0, #v.m.pos)  -- TODO: FIXME: figure out why texture coordinates are ignored and remove immediate mode below
+						gl.DisableClientState("VERTEX_ARRAY,TEXTURE_COORD_ARRAY")
+
+						gl.Begin(v.m.pos[4] and "QUADS" or "TRIANGLES")
+							gl.TexCoord(v.t[1].x, v.t[1].y) gl.Vertex(v.m.pos[1].x, v.m.pos[1].y)
+							gl.TexCoord(v.t[2].x, v.t[2].y) gl.Vertex(v.m.pos[2].x, v.m.pos[2].y)
+							gl.TexCoord(v.t[3].x, v.t[3].y) gl.Vertex(v.m.pos[3].x, v.m.pos[3].y)
+							if v.m.pos[4] then
+								gl.TexCoord(v.t[4].x, v.t[4].y) gl.Vertex(v.m.pos[4].x, v.m.pos[4].y)
+							end
+						gl.End()
+					end
 				end
 			end
 		end
