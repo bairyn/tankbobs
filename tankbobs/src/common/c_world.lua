@@ -423,6 +423,7 @@ c_world_tank =
 	color = {r = 0, g = 0, b = 0},
 	tagged = false,
 	lastAttackers = {},
+	notFireReset = false,
 
 	cd = {},  -- data cleared on death
 

@@ -62,6 +62,7 @@ function c_weapon_init()
 	weapon.speed = 768
 	weapon.spread = tankbobs.m_radians(0)
 	weapon.repeatRate = 0.2
+	weapon.sa = false
 
 	weapon.knockback = 256
 	weapon.texture = "weak-machinegun.png"
@@ -128,6 +129,7 @@ function c_weapon_init()
 	weapon.speed = 1536
 	weapon.spread = tankbobs.m_radians(0)
 	weapon.repeatRate = 0.2
+	weapon.sa = false
 
 	weapon.knockback = 384
 	weapon.texture = "machinegun.png"
@@ -194,6 +196,8 @@ function c_weapon_init()
 	weapon.speed = 1024
 	weapon.spread = tankbobs.m_radians(12)  -- the angle between each pellet
 	weapon.repeatRate = 1
+	weapon.sa = false
+
 	weapon.knockback = 512  -- (per pellet)
 	weapon.texture = "shotgun.png"
 	weapon.fireSound = "shotgun2.wav"
@@ -259,6 +263,7 @@ function c_weapon_init()
 	weapon.speed = 524288
 	weapon.spread = tankbobs.m_radians(0)
 	weapon.repeatRate = 2
+	weapon.sa = false
 
 	weapon.knockback = 1024
 	weapon.texture = "railgun.png"
@@ -325,6 +330,7 @@ function c_weapon_init()
 	weapon.speed = 524288
 	weapon.spread = tankbobs.m_radians(0)
 	weapon.repeatRate = 2
+	weapon.sa = false
 
 	weapon.knockback = 1024
 	weapon.texture = "railgun.png"
@@ -386,21 +392,22 @@ function c_weapon_init()
 	weapon.index = 6
 	weapon.name = "coilgun"
 	weapon.altName = "coilgun"
-	weapon.damage = 85
+	weapon.damage = 20
 	weapon.pellets = 1
 	weapon.speed = 524288
 	weapon.spread = tankbobs.m_radians(0)
-	weapon.repeatRate = 2
+	weapon.repeatRate = 0.25
+	weapon.sa = true
 
-	weapon.knockback = 8192
+	weapon.knockback = 2048
 	weapon.texture = "coilgun.png"
 	weapon.fireSound = {"coilgun.wav", "coilgun2.wav", "coilgun2.wav"}
-	weapon.reloadSound = "reload.wav"
+	weapon.reloadSound = "coilgun-reload.wav"
 	weapon.launchDistance = 3.5  -- half unit to keep tank from shooting itself
 	weapon.aimAid = true
-	weapon.capacity = 2
-	weapon.clips = 3
-	weapon.reloadTime = 2
+	weapon.capacity = 12
+	weapon.clips = 2
+	weapon.reloadTime = 1
 	weapon.shotgunClips = false
 	weapon.meleeRange = 0
 	weapon.width = 0
@@ -457,6 +464,7 @@ function c_weapon_init()
 	weapon.speed = 0
 	weapon.spread = tankbobs.m_radians(0)
 	weapon.repeatRate = 0.125  -- 1 / 8
+	weapon.sa = false
 
 	weapon.knockback = 16384
 	weapon.texture = "saw.png"
@@ -523,6 +531,7 @@ function c_weapon_init()
 	weapon.speed = 64
 	weapon.spread = tankbobs.m_radians(0)
 	weapon.repeatRate = 1
+	weapon.sa = false
 
 	weapon.knockback = 0  -- splash will take care of this
 	weapon.texture = "rocket-launcher.png"
@@ -592,6 +601,7 @@ c_weapon =
 	pellets = 0,
 	spread = 0,
 	repeatRate = 0,
+	sa = false,
 	speed = 0,
 	knockBack = 0,
 	launchDistance = 0,
@@ -734,6 +744,12 @@ function c_weapon_fire(tank)
 		return
 	end
 
+	if not (bit.band(tank.state, FIRING) ~= 0) and (not tank.lastFireTime or t >= tank.lastFireTime + c_world_timeMultiplier(weapon.repeatRate)) then
+		tank.notFireReset = false
+	elseif tank.notFireReset then
+		return
+	end
+
 	if tank.reloading then
 		if weapon.shotgunClips then
 			if not tank.shotgunReloadState then
@@ -805,8 +821,13 @@ function c_weapon_fire(tank)
 		return
 	end
 
-	while t >= tank.lastFireTime + (c_world_timeMultiplier(weapon.repeatRate)) do
+	while t >= tank.lastFireTime + (c_world_timeMultiplier(weapon.repeatRate)) and not tank.notFireReset do
 		tank.lastFireTime = tank.lastFireTime + (c_world_timeMultiplier(weapon.repeatRate))
+
+		if weapon.sa then
+			bit.band(tank.state, bit.bnot(FIRING))
+			tank.notFireReset = true
+		end
 
 		local angle = weapon.spread * (weapon.pellets - 1) / 2
 
