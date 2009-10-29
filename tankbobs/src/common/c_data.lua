@@ -134,11 +134,9 @@ function c_data_init()
 		{from = 59,  to = 59}    -- ;
 	}
 	local layout_qwertyTo = {}
-	for _, v in pairs(layout_qwerty) do
-		layout_qwertyTo[v.from] = v.to
-	end
 	local layout_qwertyFrom = {}
 	for _, v in pairs(layout_qwerty) do
+		layout_qwertyTo[v.from] = v.to
 		layout_qwertyFrom[v.to] = v.from
 	end
 
@@ -182,11 +180,9 @@ function c_data_init()
 		{from = 59,  to = 115}   -- ; -> s
 	}
 	local layout_dvorakTo = {}
-	for _, v in pairs(layout_dvorak) do
-		layout_dvorakTo[v.from] = v.to
-	end
 	local layout_dvorakFrom = {}
 	for _, v in pairs(layout_dvorak) do
+		layout_dvorakTo[v.from] = v.to
 		layout_dvorakFrom[v.to] = v.from
 	end
 
