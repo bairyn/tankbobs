@@ -153,7 +153,7 @@ function c_config_init()
 		end
 		--]]
 
-		local layout = c_const_get("keyLayout__" .. c_config_get("client.keyLayout") .. "To")
+		local layout = c_const_get("keyLayout_" .. c_config_get("client.keyLayout") .. "To")
 
 		return (layout and layout[key]) or tonumber(key) or -1
 	end
@@ -167,7 +167,7 @@ function c_config_init()
 		end
 		--]]
 
-		local layout = c_const_get("keyLayout__" .. c_config_get("client.keyLayout") .. "From")
+		local layout = c_const_get("keyLayout_" .. c_config_get("client.keyLayout") .. "From")
 
 		return (layout and layout[key]) or tonumber(key) or -1
 	end
