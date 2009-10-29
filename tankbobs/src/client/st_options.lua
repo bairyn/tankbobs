@@ -698,6 +698,7 @@ optionsPlayers_state =
 local optionsControls_init
 local optionsControls_done
 
+local st_optionsControls_keyLayout
 local st_optionsControls_pause
 local st_optionsControls_exit
 local st_optionsControls_quit
