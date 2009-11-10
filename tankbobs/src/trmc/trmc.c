@@ -681,6 +681,7 @@ static void add_wall(int quad, double x1, double y1, double x2, double y2, doubl
 	wall->path = path;
 	wall->detail = detail;
 	wall->staticW = staticW;
+	strncpy(wall->misc, misc, sizeof(wall->misc));
 }
 
 static void add_teleporter(const char *targetName, const char *target, double x1, double y1, int enabled, const char *misc)
@@ -698,6 +699,7 @@ static void add_teleporter(const char *targetName, const char *target, double x1
 	teleporter->x1 = x1;
 	teleporter->y1 = y1;
 	teleporter->enabled = enabled;
+	strncpy(teleporter->misc, misc, sizeof(teleporter->misc));
 }
 
 static void add_playerSpawnPoint(double x1, double y1, const char *misc)
@@ -712,6 +714,7 @@ static void add_playerSpawnPoint(double x1, double y1, const char *misc)
 
 	playerSpawnPoint->x1 = x1;
 	playerSpawnPoint->y1 = y1;
+	strncpy(playerSpawnPoint->misc, misc, sizeof(playerSpawnPoint->misc));
 }
 
 static void add_powerupSpawnPoint(double x1, double y1, const char *powerupsToEnable, int linked, double repeat, double initial, int focus, const char *misc)
@@ -731,6 +734,7 @@ static void add_powerupSpawnPoint(double x1, double y1, const char *powerupsToEn
 	powerupSpawnPoint->repeat = repeat;
 	powerupSpawnPoint->initial = initial;
 	powerupSpawnPoint->focus = focus;
+	strncpy(powerupSpawnPoint->misc, misc, sizeof(powerupSpawnPoint->misc));
 }
 
 static void add_path(const char *targetName, const char *target, double x1, double y1, int enabled, double time, const char *misc)
@@ -749,6 +753,7 @@ static void add_path(const char *targetName, const char *target, double x1, doub
 	path->y1 = y1;
 	path->enabled = enabled;
 	path->time = time;
+	strncpy(path->misc, misc, sizeof(path->misc));
 }
 
 static void add_controlPoint(double x1, double y1, int red, const char *misc)
@@ -764,6 +769,7 @@ static void add_controlPoint(double x1, double y1, int red, const char *misc)
 	controlPoint->x1 = x1;
 	controlPoint->y1 = y1;
 	controlPoint->red = red;
+	strncpy(controlPoint->misc, misc, sizeof(controlPoint->misc));
 }
 
 static void add_flag(double x1, double y1, int red, const char *misc)
@@ -779,6 +785,7 @@ static void add_flag(double x1, double y1, int red, const char *misc)
 	flag->x1 = x1;
 	flag->y1 = y1;
 	flag->red = red;
+	strncpy(flag->misc, misc, sizeof(flag->misc));
 }
 
 static void add_wayPoint(double x1, double y1, const char *misc)
@@ -793,6 +800,7 @@ static void add_wayPoint(double x1, double y1, const char *misc)
 
 	wayPoint->x1 = x1;
 	wayPoint->y1 = y1;
+	strncpy(wayPoint->misc, misc, sizeof(wayPoint->misc));
 }
 
 
