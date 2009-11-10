@@ -109,6 +109,9 @@ function c_config_init()
 
 		-- default configuration
 
+		local oldCheatsEnabled = cheatsEnabled
+		cheatsEnabled = true
+
 		local fin, err = io.open(c_const_get("data_conf"), "r")
 
 		if not fin then
@@ -119,10 +122,12 @@ function c_config_init()
 		fin:close()
 
 		if not data then
-			io.stderr:write("Warning: cannot parse default configuration: - ", err, '\n')
+			stderr:write("Warning: cannot parse default configuration: - ", err, '\n')
 		elseif data.tag then
 			parse(data)
 		end
+
+		cheatsEnabled = oldCheatsEnabled
 
 		if defaults then
 			return
@@ -137,7 +142,7 @@ function c_config_init()
 			fin:close()
 
 			if not data then
-				io.stderr:write("Warning: cannot parse user configuration: - ", err, '\n')
+				stderr:write("Warning: cannot parse user configuration: - ", err, '\n')
 			else
 				parse(data)
 			end
@@ -181,7 +186,7 @@ function c_config_init()
 			if server then
 				s_printnl("c_config_set: ", key, " is cheat protected")
 			else
-				io.stdout:write("c_config_set: ", key, " is cheat protected")
+				stdout:write("c_config_set: ", key, " is cheat protected")
 			end
 
 			return
