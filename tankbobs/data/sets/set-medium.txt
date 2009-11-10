@@ -1,6 +1,5 @@
 medium
-Medium Games
+Medium Levels
 -9.8
 Medium-sized levels
 medium_1.tcm
-medium_2.tcm

@@ -1,5 +1,5 @@
 small
-Small Games
+Small Levels
 -9.9
 Small levels
 small_1.tcm

@@ -781,7 +781,8 @@ function c_world_tank_remove(tank)
 	end
 end
 
-local function c_world_spawnTank(tank)
+-- this is only called when a tank spawns immediately; this should not normally be called outside of this file!
+function c_world_spawnTank(tank)
 	tank.spawning = false
 	tank.r = c_const_get("tank_defaultRotation")
 	tank.health = c_const_get("tank_health")
@@ -869,16 +870,19 @@ local p2a = {nil, nil, nil}
 function c_world_intersection(d, p1, p2, v1, v2)
 	-- test if two polygons can collide
 
+	v1 = v1 or tankbobs.m_vec2(0, 0)
+	v2 = v2 or tankbobs.m_vec2(0, 0)
+
 	local p1h = {nil, nil, nil}
 	local p2h = {nil, nil, nil}
 
-	tankbobs.t_clone(p1, p1h)
-	tankbobs.t_clone(p2, p2h)
-	tankbobs.t_clone(p1h, p1a)
-	tankbobs.t_clone(p2h, p2a)
+	tankbobs.t_clone(true, p1, p1h)
+	tankbobs.t_clone(true, p2, p2h)
+	tankbobs.t_clone(true, p1h, p1a)
+	tankbobs.t_clone(true, p2h, p2a)
 
 	local lp1a = #p1a
-	for k, v in pairs(p1a) do
+	for k, v in ipairs(p1a) do
 		if k <= lp1a then
 			v = v + d * v1
 		else
@@ -886,7 +890,7 @@ function c_world_intersection(d, p1, p2, v1, v2)
 		end
 	end
 	local lp2a = #p2a
-	for k, v in pairs(p2a) do
+	for k, v in ipairs(p2a) do
 		if k <= lp2a then
 			v = v + d * v2
 		else
@@ -894,10 +898,20 @@ function c_world_intersection(d, p1, p2, v1, v2)
 		end
 	end
 
-	tankbobs.t_clone(p1a, p1h)
-	tankbobs.t_clone(p2a, p2h)
+	tankbobs.t_clone(true, p1a, p1h)
+	tankbobs.t_clone(true, p2a, p2h)
 
-	return tankbobs.m_polygon(p1h, p2h)
+	if tankbobs.m_polygon(p1h, p2h) then
+		return true
+	else
+		-- test if either polygon lies completely inside of the other
+		if c_world_pointInsideHull(p1h[1], p2h) or
+		   c_world_pointInsideHull(p2h[1], p1h) then
+		   return true
+		end
+	end
+
+	return false
 end
 
 function c_world_pointInsideHull(p, hull)
@@ -1193,12 +1207,12 @@ function c_world_findClosestIntersection(start, endP, ignoreTypes)
 
 	-- walls
 	if not ignoreTypes:find("wall") then
-		for _, v in pairs(c_tcm_current_map.walls) do
+		for _, v in ipairs(c_tcm_current_map.walls) do
 			if not v.detail then
 				hull = v.m.pos
 				local t = v
 				lastPoint = nil
-				for _, v in pairs(hull) do
+				for _, v in ipairs(hull) do
 					currentPoint = v
 					if not lastPoint then
 						lastPoint = hull[#hull]
@@ -1227,12 +1241,12 @@ function c_world_findClosestIntersection(start, endP, ignoreTypes)
 
 	-- tanks
 	if not ignoreTypes:find("tank") then
-		for _, v in pairs(c_world_tanks) do
+		for _, v in ipairs(c_world_tanks) do
 			if v.exists then
 				hull = t_t_clone(c_world_tankHull(v))
 				local t = v
 				lastPoint = nil
-				for _, v in pairs(hull) do
+				for _, v in ipairs(hull) do
 					currentPoint = v
 					if not lastPoint then
 						lastPoint = hull[#hull]
@@ -1262,12 +1276,12 @@ function c_world_findClosestIntersection(start, endP, ignoreTypes)
 
 	-- projectiles
 	if not ignoreTypes:find("projectile") then
-		for _, v in pairs(c_weapon_getProjectiles()) do
+		for _, v in ipairs(c_weapon_getProjectiles()) do
 			if not v.collided then
 				hull = c_world_projectileHull(v)
 				local t = v
 				lastPoint = nil
-				for _, v in pairs(hull) do
+				for _, v in ipairs(hull) do
 					currentPoint = v
 					if not lastPoint then
 						lastPoint = hull[#hull]
@@ -1296,12 +1310,12 @@ function c_world_findClosestIntersection(start, endP, ignoreTypes)
 
 	-- powerups
 	if not ignoreTypes:find("powerup") then
-		for _, v in pairs(c_world_powerups) do
+		for _, v in ipairs(c_world_powerups) do
 			if v.exists then
 				hull = t_t_clone(c_world_powerupHull(v))
 				local t = v
 				lastPoint = nil
-				for _, v in pairs(hull) do
+				for _, v in ipairs(hull) do
 					currentPoint = v
 					if not lastPoint then
 						lastPoint = hull[#hull]
@@ -1330,12 +1344,12 @@ function c_world_findClosestIntersection(start, endP, ignoreTypes)
 
 	-- corpses
 	if not ignoreTypes:find("corpse") then
-		for _, v in pairs(c_world_corpses) do
+		for _, v in ipairs(c_world_corpses) do
 			if v.exists then
 				hull = t_t_clone(c_world_corpseHull(v))
 				local t = v
 				lastPoint = nil
-				for _, v in pairs(hull) do
+				for _, v in ipairs(hull) do
 					currentPoint = v
 					if not lastPoint then
 						lastPoint = hull[#hull]

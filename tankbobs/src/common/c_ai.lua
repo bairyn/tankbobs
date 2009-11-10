@@ -543,11 +543,11 @@ function c_ai_findClosestWayPoint(pos)
 		local weight = (vs.p - pos).R
 
 		for _, vss in pairs(c_tcm_current_map.walls) do
-		if not vss.detail and vss.static then  -- ignore dynamic walls when testing for intersections
-			--hull = vss.m.pos
-			hull = vss.p
+			if not vss.detail and vss.static then  -- ignore dynamic walls when testing for intersections
+				--hull = vss.m.pos
+				hull = vss.p
 				local t = v
-				for _, vsss in pairs(hull) do
+				for _, vsss in ipairs(hull) do
 					currentPoint = vsss
 					if not lastPoint then
 						lastPoint = hull[#hull]
@@ -574,11 +574,11 @@ function c_ai_findClosestWayPoint(pos)
 		local weight = (vs.p - pos).R
 
 		for _, vss in pairs(c_tcm_current_map.walls) do
-		if not vss.detail and vss.static then  -- ignore dynamic walls when testing for intersections
-			--hull = vss.m.pos
-			hull = vss.p
+			if not vss.detail and vss.static then  -- ignore dynamic walls when testing for intersections
+				--hull = vss.m.pos
+				hull = vss.p
 				local t = v
-				for _, vsss in pairs(hull) do
+				for _, vsss in ipairs(hull) do
 					currentPoint = vsss
 					if not lastPoint then
 						lastPoint = hull[#hull]
