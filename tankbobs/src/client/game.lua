@@ -831,6 +831,7 @@ function game_step(d)
 			if scale > 1 then
 				scale = 1
 			end
+			scale = scale * c_config_get("client.cameraZoom") * c_world_getZoom()
 			zoom[camnum] = common_lerp(zoom[camnum], scale, math.min(1, d * c_config_get("client.cameraSpeed")))
 			gl.Scale(zoom[camnum], zoom[camnum], 1)
 

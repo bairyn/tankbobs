@@ -72,6 +72,7 @@ local c_world_instagib = false
 local lastPowerupSpawnTime
 local nextPowerupSpawnPoint
 local worldInitialized = false
+local zoom = 0
 
 local key = {}
 
@@ -480,6 +481,8 @@ function c_world_newWorld()
 	c_world_teams = {}
 	c_world_corpses = {}
 
+	zoom = 1
+
 	local m = c_tcm_current_map
 	if not c_tcm_current_map then
 		return false
@@ -617,6 +620,14 @@ function c_world_setGameType(gameType)
 			c_world_gameType = DEATHMATCH
 		end
 	end
+end
+
+function c_world_getZoom()
+	return zoom
+end
+
+function c_world_setZoom(x)
+	zoom = x
 end
 
 function c_world_getGameType()
