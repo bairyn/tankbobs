@@ -87,6 +87,15 @@ if [ "$1" == "make" ]; then
 		cp ./src/lib/LuaJIT/jit/opt_inline.lua ./build/jit/
 	fi
 
+	# build physfs (PhysicsFS)
+	#if ! cmake ./src/lib/physfs-2.0.0/; then
+	if ! cmake -Wno-dev ./src/lib/physfs-2.0.0/; then  # Remove annoying warning
+		exit 1
+	fi
+	if ! make -C ./src/lib/physfs-2.0.0; then
+		exit 1
+	fi
+
 	# build tankbobs
 	cd ./build/
 	if [ $skipc == 0 ]; then

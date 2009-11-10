@@ -23,6 +23,11 @@ common.lua
 Common functions
 --]]
 
+-- All code should use the PhysicsFS interface
+stdout = io.stdout
+stderr = io.stderr
+--io = nil  -- TODO
+
 require "libmtankbobs"
 tankbobs.t_initialize("common_interrupt", false)
 
@@ -151,12 +156,12 @@ end
 function common_print(level, ...)
 	if level < 0 then
 		-- negative verbosity levels have the special meaning that it is possible that not everything has initialized, so print to standard output
-		io.stdout:write(...)
+		stdout:write(...)
 	else
 		-- ignore verbosity level for now; TODO: <-
 
 		if client and not server then
-			io.stdout:write(...)
+			stdout:write(...)
 		elseif not client and server then
 			s_printnl(...)
 		end
@@ -170,12 +175,12 @@ function common_printError(level, ...)
 		error(...)
 	elseif level < 0 then
 		-- negative verbosity levels have the special meaning that it is possible that not everything has initialized, so print to stderr
-		io.stderr:write("(EE) ", ...)
+		stderr:write("(EE) ", ...)
 	else
 		-- ignore verbosity level for now; TODO: <-
 
 		if client and not server then
-			io.stderr:write("(EE) ", ...)
+			stderr:write("(EE) ", ...)
 		elseif not client and server then
 			s_printnl("(EE) ", ...)
 		end
