@@ -104,6 +104,46 @@ static void in_private_freeEvents(in_sdlevent *e)
 	free(e);
 }
 
+int in_getResolutions(lua_State *L)
+{
+	int i;
+	SDL_Rect **modes;
+
+	CHECKINIT(init, L);
+
+	modes = SDL_ListModes(NULL, sdlFlags);
+
+	if(modes == (SDL_Rect **) -1 || modes == NULL)
+	{
+		modes = SDL_ListModes(NULL, sdlFlags | SDL_FULLSCREEN);
+
+		if(modes == (SDL_Rect **) -1 || modes == NULL)
+		{
+			lua_pushnil(L);
+
+			return 1;
+		}
+	}
+
+	lua_newtable(L);
+
+	for(i = 0; modes[i]; ++i);
+	for(i = i - 1; i >= 0; --i)
+	{
+		lua_pushinteger(L, i + 1);
+		lua_newtable(L);
+		lua_pushinteger(L, 1);
+		lua_pushinteger(L, modes[i]->w);
+		lua_settable(L, -3);
+		lua_pushinteger(L, 2);
+		lua_pushinteger(L, modes[i]->h);
+		lua_settable(L, -3);
+		lua_settable(L, -3);
+	}
+
+	return 1;
+}
+
 int in_getEvents(lua_State *L)
 {
 	SDL_Event event;

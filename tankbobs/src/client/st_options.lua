@@ -217,25 +217,48 @@ local st_optionsVideo_done
 local st_optionsVideo_renderer
 
 local st_optionsVideo_fullscreen
+local st_optionsVideo_resolution
 local st_optionsVideo_width
 local st_optionsVideo_height
 local st_optionsVideo_apply
 local st_optionsVideo_fpsCounter
 local st_optionsVideo_screen
 
+local custom = false
+
 function st_optionsVideo_init()
 	st_optionsVideo_renderer = {fullscreen = c_config_get("client.renderer.fullscreen"), width = c_config_get("client.renderer.width"), height = c_config_get("client.renderer.height")}
 
 	gui_addAction(tankbobs.m_vec2(25, 85), "Back", nil, c_state_advance)
 
+	local offset = 0
+	local pos = 1
+	local rresolutions = tankbobs.in_getResolutions()
+	resolutions = {"Custom"}
+	if rresolutions then
+		for k, v in pairs(rresolutions) do
+			if not custom and st_optionsVideo_renderer.width == v[1] and st_optionsVideo_renderer.height == v[2] then
+				pos = k + 1
+			end
+			resolutions[k + 1] = tostring(v[1]) .. "x" .. tostring(v[2])
+		end
+	end
+
+	custom = false
+
 	gui_addLabel(tankbobs.m_vec2(50, 75), "Fullscreen", nil, 2 / 3) gui_addCycle(tankbobs.m_vec2(75, 75), "Fullscreen", nil, st_optionsVideo_fullscreen, {"No", "Yes"}, c_config_get("client.renderer.fullscreen") and 2 or 1)
-	gui_addLabel(tankbobs.m_vec2(50, 69), "Width", nil, 2 / 3) gui_addInput(tankbobs.m_vec2(75, 69), tostring(c_config_get("client.renderer.width")), nil, st_optionsVideo_width, true, 5)
-	gui_addLabel(tankbobs.m_vec2(50, 63), "Height", nil, 2 / 3) gui_addInput(tankbobs.m_vec2(75, 63), tostring(c_config_get("client.renderer.height")), nil, st_optionsVideo_height, true, 5)
-	gui_addAction(tankbobs.m_vec2(75, 57), "Apply", nil, st_optionsVideo_apply)
+	gui_addLabel(tankbobs.m_vec2(50, 69), "Resolution", nil, 2 / 3) gui_addCycle(tankbobs.m_vec2(75, 69), "Resolution", nil, st_optionsVideo_resolution, resolutions, pos)
+	if pos == 1 then
+		offset = -12
 
-	gui_addLabel(tankbobs.m_vec2(50, 45), "FPS Counter", nil, 2 / 4) gui_addCycle(tankbobs.m_vec2(75, 45), "FPS Counter", nil, st_optionsVideo_fpsCounter, {"No", "Yes"}, c_config_get("client.renderer.fpsCounter") and 2 or 1)  -- Label needs to be a bit smaller
+		gui_addLabel(tankbobs.m_vec2(50, 75 + offset), "Width", nil, 2 / 3) gui_addInput(tankbobs.m_vec2(75, 75 + offset), tostring(c_config_get("client.renderer.width")), nil, st_optionsVideo_width, true, 5)
+		gui_addLabel(tankbobs.m_vec2(50, 69 + offset), "Height", nil, 2 / 3) gui_addInput(tankbobs.m_vec2(75, 69 + offset), tostring(c_config_get("client.renderer.height")), nil, st_optionsVideo_height, true, 5)
+	end
+	gui_addAction(tankbobs.m_vec2(75, 63 + offset), "Apply", nil, st_optionsVideo_apply)
 
-	gui_addLabel(tankbobs.m_vec2(50, 39), "Screen", nil, 2 / 3) gui_addCycle(tankbobs.m_vec2(75, 39), "Fullscreen", nil, st_optionsVideo_screen, {"Single", "One Tank", "Split", "Triple", "Four"}, math.min(4, c_config_get("client.screens") + 1))
+	gui_addLabel(tankbobs.m_vec2(50, 54 + offset), "FPS Counter", nil, 2 / 4) gui_addCycle(tankbobs.m_vec2(75, 54 + offset), "FPS Counter", nil, st_optionsVideo_fpsCounter, {"No", "Yes"}, c_config_get("client.renderer.fpsCounter") and 2 or 1)  -- Label needs to be a bit smaller
+
+	gui_addLabel(tankbobs.m_vec2(50, 48 + offset), "Screen", nil, 2 / 3) gui_addCycle(tankbobs.m_vec2(75, 48 + offset), "Fullscreen", nil, st_optionsVideo_screen, {"Single", "One Tank", "Split", "Triple", "Four"}, math.min(4, c_config_get("client.screens") + 1))
 end
 
 function st_optionsVideo_done()
@@ -249,6 +272,16 @@ function st_optionsVideo_fullscreen(widget, string, index)
 		st_optionsVideo_renderer.fullscreen = true
 	elseif string == "No" then
 		st_optionsVideo_renderer.fullscreen = false
+	end
+end
+
+function st_optionsVideo_resolution(widget, string, index)
+	if string:find("x") and index > 1 then
+		st_optionsVideo_renderer.width = tonumber(string:sub(1, string:find("x") - 1))
+		st_optionsVideo_renderer.height = tonumber(string:sub(string:find("x") + 1, -1))
+	else
+		custom = true
+		c_state_new(optionsVideo_state)
 	end
 end
 
@@ -267,6 +300,7 @@ function st_optionsVideo_apply(widget)
 		c_config_set("client.renderer.height", st_optionsVideo_renderer.height)
 		renderer_updateWindow()  -- in case SDL forgets to send a resize signal
 		tankbobs.r_newWindow(c_config_get("client.renderer.width"), c_config_get("client.renderer.height"), c_config_get("client.renderer.fullscreen"), c_const_get("title"), c_const_get("icon"))
+		c_state_new(optionsVideo_state)
 	end
 end
 

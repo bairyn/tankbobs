@@ -102,11 +102,11 @@ function st_internet_init()
 			fout:write(ui)
 
 			if c_const_get("debug") then
-				io.stdout:write("Generating GUID\n")
+				stdout:write("Generating GUID\n")
 			end
 		else
 			if c_const_get("debug") then
-				io.stderr:write("Warning: could not write GUID to '", c_const_get("ui_file"), "'\n")
+				stderr:write("Warning: could not write GUID to '", c_const_get("ui_file"), "'\n")
 			end
 		end
 	end
@@ -259,7 +259,7 @@ function st_internet_start(widget)
 
 	local status, err = tankbobs.n_init(c_config_get("client.port", true))
 	if not status then
-		io.stderr:write(err)
+		stderr:write(err)
 
 		connection.state = UNINITIALIZED
 

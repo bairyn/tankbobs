@@ -109,7 +109,7 @@ function main_loop()
 
 	if tankbobs.t_getTicks() - lastTime < c_const_get("world_timeWrapTest") then
 		--handle time wrap here
-		io.stdout:write("Time wrapped\n")
+		stdout:write("Time wrapped\n")
 		lastTime = tankbobs.t_getTicks()
 		c_world_timeWrapped()
 		return
@@ -185,7 +185,7 @@ end
 
 function main_parseArgs(args)
 	local function main_usage()
-		io.stdout:write("Usage\n\n-h: print this help message\n-d: use default configuration (old configuration may be lost)/rc.xml\n-c x y: set config x to y\n")
+		stdout:write("Usage\n\n-h: print this help message\n-d: use default configuration (old configuration may be lost)/rc.xml\n-c x y: set config x to y\n")
 		return true
 	end
 

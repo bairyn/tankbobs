@@ -75,6 +75,7 @@ do                                                                              
 #define BUFSIZE 1024
 
 extern int init;
+extern Uint32 sdlFlags;
 
 /* m_tankbobs.c */
 void t_init(lua_State *L);
@@ -93,6 +94,7 @@ int t_emptyTable(lua_State *L);
 
 /* m_input.c */
 void in_init(lua_State *L);
+int in_getResolutions(lua_State *L);
 int in_getEvents(lua_State *L);
 int in_getEventData(lua_State *L);
 int in_nextEvent(lua_State *L);

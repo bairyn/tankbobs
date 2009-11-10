@@ -210,51 +210,37 @@ int r_newWindow(lua_State *L)
 	SDL_FreeSurface(SDL_GetVideoSurface());
 
 #ifdef FONT_USEBLIT
-	if(!SDL_SetVideoMode(w, h, 0, SDL_OPENGL | ((f) ? (SDL_FULLSCREEN) : (0)) | SDL_OPENGLBLIT))
+	sdlFlags = SDL_OPENGL | ((f) ? (SDL_FULLSCREEN) : (0)) | SDL_OPENGLBLIT;
 #else
-	if(!SDL_SetVideoMode(w, h, 0, SDL_OPENGL | ((f) ? (SDL_FULLSCREEN) : (0))))
+	sdlFlags = SDL_OPENGL | ((f) ? (SDL_FULLSCREEN) : (0));
 #endif
+
+	if(!SDL_SetVideoMode(w, h, 0, sdlFlags))
 	{
 #ifdef TDEBUG
 		fprintf(stdout, "Warning: could not init video mode.  Trying again with lower antialias multisampling\n");
 #endif
 		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 8);
-#ifdef FONT_USEBLIT
-		if(!SDL_SetVideoMode(w, h, 0, SDL_OPENGL | ((f) ? (SDL_FULLSCREEN) : (0)) | SDL_OPENGLBLIT))
-#else
-		if(!SDL_SetVideoMode(w, h, 0, SDL_OPENGL | ((f) ? (SDL_FULLSCREEN) : (0))))
-#endif
+		if(!SDL_SetVideoMode(w, h, 0, sdlFlags))
 		{
 #ifdef TDEBUG
 			fprintf(stdout, "Warning: could not init video mode.  Trying again with lower antialias multisampling\n");
 #endif
 			SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
-#ifdef FONT_USEBLIT
-			if(!SDL_SetVideoMode(w, h, 0, SDL_OPENGL | ((f) ? (SDL_FULLSCREEN) : (0)) | SDL_OPENGLBLIT))
-#else
-			if(!SDL_SetVideoMode(w, h, 0, SDL_OPENGL | ((f) ? (SDL_FULLSCREEN) : (0))))
-#endif
+			if(!SDL_SetVideoMode(w, h, 0, sdlFlags))
 			{
 #ifdef TDEBUG
 				fprintf(stdout, "Warning: could not init video mode.  Trying again again with no antialias multisampling\n");
 #endif
 				SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 0);
 				SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 0);
-#ifdef FONT_USEBLIT
-				if(!SDL_SetVideoMode(w, h, 0, SDL_OPENGL | ((f) ? (SDL_FULLSCREEN) : (0)) | SDL_OPENGLBLIT))
-#else
-				if(!SDL_SetVideoMode(w, h, 0, SDL_OPENGL | ((f) ? (SDL_FULLSCREEN) : (0))))
-#endif
+				if(!SDL_SetVideoMode(w, h, 0, sdlFlags))
 				{
 #ifdef TDEBUG
 					fprintf(stdout, "Warning: could not init video mode.  Trying again again again with no doublebuffer\n");
 #endif
 					SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 0);
-#ifdef FONT_USEBLIT
-					if(!SDL_SetVideoMode(w, h, 0, SDL_OPENGL | ((f) ? (SDL_FULLSCREEN) : (0)) | SDL_OPENGLBLIT))
-#else
-					if(!SDL_SetVideoMode(w, h, 0, SDL_OPENGL | ((f) ? (SDL_FULLSCREEN) : (0))))
-#endif
+					if(!SDL_SetVideoMode(w, h, 0, sdlFlags))
 					{
 #ifdef TDEBUG
 						fprintf(stderr, "Video mode failed: %s\n", SDL_GetError());

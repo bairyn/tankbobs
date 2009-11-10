@@ -136,7 +136,7 @@ function main_loop()
 
 	if tankbobs.t_getTicks() - lastTime < c_const_get("world_timeWrapTest") then
 		--handle time wrap here
-		io.stdout:write("Time wrapped\n")
+		stdout:write("Time wrapped\n")
 		lastTime = tankbobs.t_getTicks()
 		c_world_timeWrapped()
 		return

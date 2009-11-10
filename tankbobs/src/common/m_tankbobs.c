@@ -42,6 +42,7 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 #include "crossdll.h"
 
 int init = false;
+Uint32 sdlFlags;
 
 void t_init(lua_State *L)
 {
@@ -622,6 +623,9 @@ static const struct luaL_Reg tankbobs[] =
 		/* Sets everything in the passed table to nil (doesn't really fields with numerical keys).  Returns nothing. */
 
 	/* m_input.c */
+	{"in_getResolutions", in_getResolutions}, /* get a table of resolutions */
+		/* Nothing is passed.  Returns a table of resolutions.  Example:
+			{{800, 600}, {1024, 768}}.  Nil is returned if something else happened. */
 	{"in_getEvents", in_getEvents}, /* store events in a userdata */
 		/* if there are no events to be queued, nil is returned - otherwise,
 			the number of events processed and a userdatum pointing to the event

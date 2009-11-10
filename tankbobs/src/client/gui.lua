@@ -801,7 +801,7 @@ function gui_private_inputKey(button)  -- local
 		return true
 	else
 		--if c_const_get("debug") then
-			--io.stderr:write("Warning: unrecognized key pressed: '", tostring(button), "' (", tostring(char(button)), ")\n")
+			--stderr:write("Warning: unrecognized key pressed: '", tostring(button), "' (", tostring(char(button)), ")\n")
 		--end
 	end
 end

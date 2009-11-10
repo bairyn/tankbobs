@@ -67,7 +67,7 @@ function c_const_init()
 				--error("attempt to change constant '" .. tostring(k) .. "' from '" .. tostring(c_const_get(k)) .. "' to '" .. tostring(v) .. "'")
 			--end
 			if c_const_get("debug") then
-				io.stderr:write("Warning: attempt to change constant '" .. tostring(k) .. "' from '" .. tostring(c_const_get(k)) .. "' to '" .. tostring(v) .. "'\n")
+				stderr:write("Warning: attempt to change constant '" .. tostring(k) .. "' from '" .. tostring(c_const_get(k)) .. "' to '" .. tostring(v) .. "'\n")
 			end
 		else
 			if const[k][2] ~= -1 then
