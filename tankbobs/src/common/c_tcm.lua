@@ -424,7 +424,7 @@ local function c_tcm_check_true_header(filename, i)
 	elseif string.format("%X", c_tcm_private_get(tankbobs.fs_getInt, i)):sub(-8) ~= string.format("%X", c_const_get("tcm_magic")):sub(-8) then
 		error "Invalid map header"
 	elseif c_tcm_private_get(tankbobs.fs_getChar, i) ~= c_const_get("tcm_version") then
-		i:seek("cur", -1)
+		tankbobs.fs_seekFromStart(i, tankbobs.fs_tell(i) - 1)
 		common_printError(-1, "Warning: map '", filename, "' was built for tcm version '", tostring(c_tcm_private_get(tankbobs.fs_getChar, i)), "'; you are running version '", tostring(c_const_get("tcm_version")), "'\n")
 	end
 end
@@ -511,7 +511,7 @@ function c_tcm_read_map(filename)
 				end
 			end
 		else
-			i:seek("cur", 16)
+			tankbobs.fs_seekFromStart(i, tankbobs.fs_tell(i) + 16)
 			--for its = 1, 2 do
 				--c_tcm_private_get(tankbobs.fs_getDouble, i)
 			--end
@@ -540,7 +540,7 @@ function c_tcm_read_map(filename)
 			wall.t[4].x = c_tcm_private_get(tankbobs.fs_getDouble, i)
 			wall.t[4].y = c_tcm_private_get(tankbobs.fs_getDouble, i)
 		else
-			i:seek("cur", 16)
+			tankbobs.fs_seekFromStart(i, tankbobs.fs_tell(i) + 16)
 			--for its = 1, 2 do
 				--c_tcm_private_get(tankbobs.fs_getDouble, i)
 			--end
