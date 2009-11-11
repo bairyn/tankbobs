@@ -326,8 +326,6 @@ function c_tcm_read_sets(dir, t)
 		error "Invalid set directory."
 	end
 
-	mods_data = {}  -- defines, values, other uses, etc; for mods
-
 	for filename in pairs(tankbobs.fs_listFiles(dir)) do
 		if filename:find("^set-") and common_endsIn(filename, ".txt") then
 			c_tcm_read_set(dir .. filename, t)
