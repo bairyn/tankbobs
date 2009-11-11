@@ -1644,9 +1644,9 @@ int fs_mount(lua_State *L)
 	CHECKINIT(init, L);
 	CHECKFSINIT(init, L);
 
-	len = lua_objlen(L, 1);
+	len = lua_objlen(L, 2);
 
-	status = PHYSFS_mount(((len > 0) ? (luaL_checkstring(L, 1)) : (NULL)), luaL_checkstring(L, 2), lua_toboolean(L, 3));
+	status = PHYSFS_mount(luaL_checkstring(L, 1), ((len > 0) ? (luaL_checkstring(L, 2)) : (NULL)), lua_toboolean(L, 3));
 
 	if(!status)
 	{

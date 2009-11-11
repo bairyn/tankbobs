@@ -322,16 +322,14 @@ c_tcm_wayPoint =
 }
 
 function c_tcm_read_sets(dir, t)
-	require "lfs"
-
 	if not dir or dir == "" then
 		error "Invalid set directory."
 	end
 
 	mods_data = {}  -- defines, values, other uses, etc; for mods
 
-	for filename in lfs.dir(dir) do
-		if not filename:find("^%.") and filename:find("^set-") and common_endsIn(filename, ".txt") then
+	for filename in pairs(tankbobs.fs_listFiles(dir)) do
+		if filename:find("^set-") and common_endsIn(filename, ".txt") then
 			c_tcm_read_set(dir .. filename, t)
 		end
 	end

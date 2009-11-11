@@ -59,7 +59,6 @@ function c_files_init()
 	local d = tankbobs.fs_getRawDirectorySeparator()
 
 	-- order in which to search for files
-	-- FIXME: these aren't being mounted?  TODO
 	for _, v in pairs(tankbobs.fs_getCDDirectories()) do
 		tankbobs.fs_mount(v, "", true)
 	end
@@ -75,6 +74,7 @@ function c_files_init()
 	loadfile = tankbobs.loadfile
 
 	if debug then
+		-- FIXME: no output?  TODO
 		common_print(-1, "Current search path:\n")
 		for _, v in pairs(tankbobs.fs_getSearchPath()) do
 			common_print(-1, v .. "\n")
