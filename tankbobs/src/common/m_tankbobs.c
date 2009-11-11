@@ -1042,6 +1042,8 @@ static const struct luaL_Reg tankbobs[] =
 		/* Initializes PhysicsFS.   Nothing is returned.  fs_setArgv0 should be called before this, even though the
 		    command line will be attempt to be read automatically if it hasn't been called.  The optional first argument
 			will determine whether or not symbolic links are permitted. */
+	{"fs_quit", fs_quit}, /* de-initialize the filesystem */
+		/* De-initializes PhysicsFS.  Nothing is returned; nothing is passed. */
 	{"fs_getRawDirectorySeparator", fs_getRawDirectorySeparator}, /* get the raw directory separator */
 		/* Nothing is passed.  A string of the directory separator is returned.  This should only be used when setting up the
 			search or write paths; otherwise, use the platform-independent directory separator of '/' */
