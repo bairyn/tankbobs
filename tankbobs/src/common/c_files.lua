@@ -74,7 +74,6 @@ function c_files_init()
 	loadfile = tankbobs.loadfile
 
 	if debug then
-		-- FIXME: no output?  TODO
 		common_print(-1, "Current search path:\n")
 		for _, v in pairs(tankbobs.fs_getSearchPath()) do
 			common_print(-1, v .. "\n")

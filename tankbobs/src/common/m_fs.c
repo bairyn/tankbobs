@@ -889,7 +889,7 @@ int fs_getSearchPath(lua_State *L)
 	{
 		lua_pushinteger(L, searchPath - i + 1);
 		lua_pushstring(L, *i);
-		lua_settop(L, -3);
+		lua_settable(L, -3);
 	}
 
 	PHYSFS_freeList(searchPath);
