@@ -245,7 +245,7 @@ function c_config_init()
 			if type(v) == "table" then
 				tankbobs.fs_write(fout, string.rep('\t', tabs))
 				tankbobs.fs_write(fout, string.format("<%s>\n", k, tostring(v), k))
-				c_config_write(tankbobs.fs_write(fout, bs + 1))
+				c_config_write(fout, v, tabs + 1)
 				tankbobs.fs_write(fout, string.rep('\t', tabs))
 				tankbobs.fs_write(fout, string.format("</%s>\n", k, tostring(v), k))
 			else
