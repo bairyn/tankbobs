@@ -38,9 +38,12 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 #include "crossdll.h"
 #include "tstr.h"
 
-#define MIN_VID_MEM    256
+#define MIN_VID_MEM  256
 
 #define POWER_OF_TWO 1
+#define FONT_PHYSFS
+#define IMAGE_PHYSFS
+/* #define FONT_USEBLIT */
 
 #define CHECKCURRENTFONT(L) \
 do \
@@ -52,7 +55,9 @@ do \
 	} \
 } while(0)
 
-/* #define FONT_USEBLIT */
+#ifdef FONT_PHYSFS
+#include "physfs.h"
+#endif
 
 typedef struct r_font_s r_font_t;
 struct r_font_s
@@ -314,6 +319,13 @@ int r_swapBuffers(lua_State *L)
 
 int r_newFont(lua_State *L)
 {
+#ifdef FONT_PHYSFS
+	char c;
+	FILE *fout;
+	int status;
+	PHYSFS_File *fin;
+	const char *filename;
+#endif
 	r_font_t *font;
 
 	font = malloc(sizeof(r_font_t));
@@ -328,7 +340,64 @@ int r_newFont(lua_State *L)
 	memset(r_fontCaches, 0, sizeof(r_fontCaches));
 #endif
 
+#ifdef FONT_PHYSFS
+	/* Copy file to a temporary file */
+	fin = PHYSFS_openRead(font->filename);
+	if(!fin)
+	{
+		lua_pushstring(L, PHYSFS_getLastError());
+		lua_error(L);
+
+		return 0;
+	}
+
+	/*filename = tempnam(NULL, "tfsttf");*/
+	filename = tmpnam(NULL);
+	if(!filename)
+	{
+		lua_pushstring(L, "could not create temporary file for loading font");
+		lua_error(L);
+
+		/*free(filename);*/
+		return 0;
+	}
+
+	fout = fopen(filename, "w");
+	if(!fout)
+	{
+		lua_pushstring(L, "could not open temporary file for loading font");
+		lua_error(L);
+
+		/*free(filename);*/
+		return 0;
+	}
+
+	while(PHYSFS_read(fin, &c, 1, 1) >= 1 && (status = fputc(c, fout)) != EOF);
+	if(status == EOF)
+	{
+		lua_pushstring(L, "could not write temporary file for loading font");
+		lua_error(L);
+
+		/*free(filename);*/
+		return 0;
+	}
+
+	status = PHYSFS_close(fin);
+	if(!status)
+	{
+		lua_pushstring(L, PHYSFS_getLastError());
+		lua_error(L);
+	}
+	fclose(fout);
+
+	/*free(filename);*/
+#endif
+
+#ifdef FONT_PHYSFS
+	font->font = TTF_OpenFont(filename, font->size);
+#else
 	font->font = TTF_OpenFont(font->filename, font->size);
+#endif
 	if(!font->font)
 	{
 		tstr *message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
@@ -850,6 +919,13 @@ void r_quitFont(void)
 
 int r_loadImage2D(lua_State *L)
 {
+#ifdef IMAGE_PHYSFS
+	char c;
+	FILE *fout;
+	int status;
+	PHYSFS_File *fin;
+	const char *tmpfilename;
+#endif
 	const char *filename;
 	SDL_Surface *img, *converted;
 	SDL_PixelFormat fmt;
@@ -858,7 +934,64 @@ int r_loadImage2D(lua_State *L)
 
 	filename = luaL_checkstring(L, 1);
 
+#ifdef FONT_PHYSFS
+	/* Copy file to a temporary file */
+	fin = PHYSFS_openRead(filename);
+	if(!fin)
+	{
+		lua_pushstring(L, PHYSFS_getLastError());
+		lua_error(L);
+
+		return 0;
+	}
+
+	/*tmpfilename = tempnam(NULL, "tfsimg");*/
+	tmpfilename = tmpnam(NULL);
+	if(!tmpfilename)
+	{
+		lua_pushstring(L, "could not create temporary file for loading font");
+		lua_error(L);
+
+		/*free(tmpfilename);*/
+		return 0;
+	}
+
+	fout = fopen(tmpfilename, "w");
+	if(!fout)
+	{
+		lua_pushstring(L, "could not open temporary file for loading font");
+		lua_error(L);
+
+		/*free(tmpfilename);*/
+		return 0;
+	}
+
+	while(PHYSFS_read(fin, &c, 1, 1) >= 1 && (status = fputc(c, fout)) != EOF);
+	if(status == EOF)
+	{
+		lua_pushstring(L, "could not write temporary file for loading font");
+		lua_error(L);
+
+		/*free(tmpfilename);*/
+		return 0;
+	}
+
+	status = PHYSFS_close(fin);
+	if(!status)
+	{
+		lua_pushstring(L, PHYSFS_getLastError());
+		lua_error(L);
+	}
+	fclose(fout);
+
+	/*free(tmpfilename);*/
+#endif
+
+#ifdef FONT_PHYSFS
+	img = IMG_Load(tmpfilename);
+#else
 	img = IMG_Load(filename);
+#endif
 	if(!img)
 	{
 		filename = luaL_checkstring(L, 2);
