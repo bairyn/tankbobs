@@ -565,12 +565,9 @@ function c_world_newWorld()
 		-- see if script exists
 		local filename = c_const_get("scripts_dir") .. c_tcm_current_map.script
 
-		local fin, err = io.open(filename, "r")
-		if not fin then
+		if not tankbobs.fs_fileExists(filename) then
 			common_printError(STOP, "c_world_newWorld: map needs script '" .. c_tcm_current_map.script .. "', which doesn't exist")
 		else
-			fin:close()
-
 			local script, err = loadfile(filename)
 			if not script then
 				common_printError(STOP, "c_world_freeWorld: script '" .. c_tcm_current_map.script .. "' required by map could not compile: " .. err)

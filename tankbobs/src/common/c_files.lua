@@ -71,7 +71,7 @@ function c_files_init()
 		tankbobs.fs_mount(c_const_get("data_absoluteDir") .. d .. v, "", true)
 	end
 
-	loadfile = tankbobs.loadfile
+	loadfile = tankbobs.fs_loadfile
 
 	if debug then
 		common_print(-1, "Current search path:\n")
