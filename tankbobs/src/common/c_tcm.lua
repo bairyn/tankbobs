@@ -328,7 +328,7 @@ function c_tcm_read_sets(dir, t)
 
 	for _, v in pairs(tankbobs.fs_listFiles(dir)) do
 		if v:find("^set-") and common_endsIn(v, ".txt") then
-			c_tcm_read_set(dir .. filename, t)
+			c_tcm_read_set(dir .. v, t)
 		end
 	end
 
