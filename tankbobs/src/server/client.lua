@@ -153,24 +153,20 @@ end
 function client_loadBans(filename)
 	bans = {}
 
-	local fin = io.open(filename, "r")
-
-	if not fin then
-		return
-	end
+	local fin = fs_openRead(filename)
 
 	local i, line = 0
 	local function readLine()
 		i = i + 1
-		line = fin:read()
+		line = tankbobs.fs_getStr(fin, '\n')
 		if not line then
-			fin:close()
+			tankbobs.fs_close(fin)
 
 			error("client_loadBans: unexpected end of file on line " .. tostring(i))
 		end
 		return line
 	end
-	line = fin:read()
+	line = tankbobs.fs_getStr(fin, '\n')
 	while line do
 		local ban = ban:new()
 		table.insert(bans, ban)
@@ -184,19 +180,15 @@ function client_loadBans(filename)
 		ban.banTime = readLine()
 
 		i = i + 2
-		fin:read()  -- extra newline
-		line = fin:read()
+		tankbobs.fs_getStr(fin, '\n')  -- extra newline
+		line = tankbobs.fs_getStr(fin, '\n')
 	end
 
-	fin:close()
+	tankbobs.fs_close(fin)
 end
 
 function client_saveBans(filename)
-	local fout, err = io.open(filename, "w")
-
-	if not fout then
-		error("client_saveBans: could not open '" .. tostring(filename) .. "' for writing bans: " .. tostring(err))
-	end
+	local fout = tankbobs.fs_openWrite(filename)
 
 	local first = true
 	for k, v in pairs(bans) do
@@ -207,18 +199,18 @@ function client_saveBans(filename)
 		end
 		first = false
 
-		fout:write(v.ip, "\n")
-		fout:write(v.ui, "\n")
+		tankbobs.fs_write(fout, v.ip .. "\n")
+		tankbobs.fs_write(fout, v.ui .. "\n")
 
-		fout:write(v.name, "\n")
-		fout:write(v.reason, "\n")
-		fout:write(v.banner, "\n")
-		fout:write(v.banTime, "\n")
+		tankbobs.fs_write(fout, v.name .. "\n")
+		tankbobs.fs_write(fout, v.reason .. "\n")
+		tankbobs.fs_write(fout, v.banner .. "\n")
+		tankbobs.fs_write(fout, v.banTime .. "\n")
 
-		fout:write("\n")
+		tankbobs.fs_write(fout, "\n")
 	end
 
-	fout:close()
+	tankbobs.fs_close(fout)
 end
 
 function client_banClient(client, reason, banner)

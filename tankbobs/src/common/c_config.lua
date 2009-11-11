@@ -76,6 +76,8 @@ function c_config_init()
 	end
 
 	local function c_config_init(defaults)
+		-- this function can be called multiple times
+
 		config = {}
 
 		local function parse(data, key)
@@ -112,14 +114,10 @@ function c_config_init()
 		local oldCheatsEnabled = cheatsEnabled
 		cheatsEnabled = true
 
-		local fin, err = io.open(c_const_get("data_conf"), "r")
+		local fin = tankbobs.fs_openRead(c_const_get("data_conf"))
 
-		if not fin then
-			error("Couldn't load default conifguration: " .. err)
-		end
-
-		local data, err = lxp.lom.parse(fin:read("*all"))
-		fin:close()
+		local data, err = lxp.lom.parse(tankbobs.fs_getStr(fin, nil, true))
+		tankbobs.fs_close(fin)
 
 		if not data then
 			stderr:write("Warning: cannot parse default configuration: - ", err, '\n')
@@ -130,16 +128,17 @@ function c_config_init()
 		cheatsEnabled = oldCheatsEnabled
 
 		if defaults then
+			c_files_configLoaded()
+
 			return
 		end
 
 		-- user configuration
 
-		local fin = io.open(c_const_get("user_conf"), "r")
-
-		if fin then
-			local data, err = lxp.lom.parse(fin:read("*all"))
-			fin:close()
+		if tankbobs.fs_fileExists(c_const_get("user_conf")) then
+			local fin = tankbobs.fs_openRead(c_const_get("user_conf"))
+			local data, err = lxp.lom.parse(tankbobs.fs_getStr(fin, nil, true))
+			tankbobs.fs_close(fin)
 
 			if not data then
 				stderr:write("Warning: cannot parse user configuration: - ", err, '\n')
@@ -147,6 +146,8 @@ function c_config_init()
 				parse(data)
 			end
 		end
+
+		c_files_configLoaded()
 	end
 
 	function c_config_keyLayoutGet(key)
@@ -242,14 +243,14 @@ function c_config_init()
 
 		for k, v in pairs(config) do
 			if type(v) == "table" then
-				fout:write(string.rep('\t', tabs))
-				fout:write(string.format("<%s>\n", k, tostring(v), k))
-				c_config_write(fout, v, tabs + 1)
-				fout:write(string.rep('\t', tabs))
-				fout:write(string.format("</%s>\n", k, tostring(v), k))
+				tankbobs.fs_write(fout, string.rep('\t', tabs))
+				tankbobs.fs_write(fout, string.format("<%s>\n", k, tostring(v), k))
+				c_config_write(tankbobs.fs_write(fout, bs + 1))
+				tankbobs.fs_write(fout, string.rep('\t', tabs))
+				tankbobs.fs_write(fout, string.format("</%s>\n", k, tostring(v), k))
 			else
-				fout:write(string.rep('\t', tabs))
-				fout:write(string.format("<%s>%s</%s>\n", k, tostring(v), k))
+				tankbobs.fs_write(fout, string.rep('\t', tabs))
+				tankbobs.fs_write(fout, string.format("<%s>%s</%s>\n", k, tostring(v), k))
 			end
 		end
 	end
@@ -259,11 +260,7 @@ function c_config_init()
 
 		lfs.mkdir(c_const_get("user_dir"):sub(1, -2))  -- trim trailing '/'
 
-		local fout, err = io.open(c_const_get("user_conf"), "w")
-
-		if not fout then
-			error("c_config_done: error saving user configuration file '" .. c_const_get("user_conf") .. "': " .. err)
-		end
+		local fout = tankbobs.fs_openWrite(c_const_get("user_conf"))
 
 		-- put configuration into a table
 		local save = {config = {}}
@@ -275,7 +272,7 @@ function c_config_init()
 		-- write configuration
 		c_config_write(fout, save)
 
-		fout:close()
+		tankbobs.fs_close(fout)
 	end
 
 	function c_config_done()

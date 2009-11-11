@@ -31,12 +31,12 @@ include_directories(${include_dirs})
 
 set(trmc_srcs src/trmc/trmc.c)
 
-set(tankbobs_srcs src/common/m_input.c src/common/m_io.c src/common/m_math.c src/common/m_console.c src/common/m_renderer.c src/common/m_net.c src/common/m_audio.c src/common/m_tankbobs.c src/lib/crossdll.c)
+set(tankbobs_srcs src/common/m_input.c src/common/m_fs.c src/common/m_io.c src/common/m_math.c src/common/m_console.c src/common/m_renderer.c src/common/m_net.c src/common/m_audio.c src/common/m_tankbobs.c src/lib/crossdll.c)
 set(tankbobs_Box2D_srcs src/common/m_world.cpp)
 if(WIN32)
-	set(tankbobs_libs lua SDL SDL_mixer SDL_image SDL_ttf SDL_net GL GLU box2d.a physfs.a m dl pdcurses)
+	set(tankbobs_libs lua SDL SDL_mixer SDL_image SDL_ttf SDL_net GL GLU box2d.a physfs.a m z dl pdcurses)
 else(WIN32)
-	set(tankbobs_libs lua SDL SDL_mixer SDL_image SDL_ttf SDL_net GL GLU box2d.a physfs.a m dl ncurses)
+	set(tankbobs_libs lua SDL SDL_mixer SDL_image SDL_ttf SDL_net GL GLU box2d.a physfs.a m z dl ncurses)
 endif(WIN32)
 if(NOJIT MATCHES True)
 	set(tankbobs_libdirs ../src/lib/Box2D/Source/Gen/float ../src/lib/physfs-2.0.0)
@@ -58,6 +58,9 @@ else(NOJIT MATCHES True)
 	set(server_libdirs ../src/lib/LuaJIT/src)
 endif(NOJIT MATCHES True)
 
+set(client_libs lua m z dl physfs.a)
+set(server_libs lua m z dl physfs.a)
+
 set(tstr_srcs src/lib/tstr/tstr.c)
 
 add_executable(trmc ${trmc_srcs})
@@ -68,10 +71,10 @@ target_link_libraries(mtankbobs ${tankbobs_libs})
 
 link_directories(${client_libdirs})
 add_executable(tankbobs ${client_srcs})
-target_link_libraries(tankbobs lua m dl)
+target_link_libraries(tankbobs ${client_libs})
 
 link_directories(${server_libdirs})
 add_executable(tankbobs-server ${server_srcs})
-target_link_libraries(tankbobs-server lua m dl)
+target_link_libraries(tankbobs-server ${server_libs})
 
 add_library(tstr SHARED ${tstr_srcs})

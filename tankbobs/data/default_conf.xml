@@ -115,6 +115,7 @@
 	</client>
 
 	<common>
+		<permitSymbolicLinks>false</permitSymbolicLinks>
 		<online>
 			<packetDelay>0</packetDelay>
 		</online>

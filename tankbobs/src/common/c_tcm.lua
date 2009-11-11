@@ -344,32 +344,28 @@ end
 
 function c_tcm_read_set(filename, t)
 	local s = c_tcm_set:new()
-	local set_f, err = io.open(filename, "r")
+	local set_f = tankbobs.fs_openRead(filename)
 	local line
-
-	if not set_f then
-		error("Error opening '" .. filename .. "': " .. err)
-	end
 
 	-- read the set file line by line:
 	-- The 1st line is the set's name
-	line, err = set_f:read()
+	line = tankbobs.fs_getStr(set_f, '\n')
 	if not line then
-		error("c_tcm_read_set: unexpected EOF while reading '" .. filename .. "': " .. err)
+		error("c_tcm_read_set: unexpected EOF while reading '" .. filename .. "'")
 	end
 	s.name = line
 
 	-- The 2nd line is the set's title
-	line, err = set_f:read()
+	line = tankbobs.fs_getStr(set_f, '\n')
 	if not line then
-		error("c_tcm_read_set: unexpected EOF while reading '" .. filename .. "': " .. err)
+		error("c_tcm_read_set: unexpected EOF while reading '" .. filename .. "'")
 	end
 	s.title = line
 
 	-- The 3rd line is the set's order
-	line, err = set_f:read()
+	line = tankbobs.fs_getStr(set_f, '\n')
 	if not line then
-		error("c_tcm_read_set: unexpected EOF while reading '" .. filename .. "': " .. err)
+		error("c_tcm_read_set: unexpected EOF while reading '" .. filename .. "'")
 	end
 	s.order = line
 	if(s.order:match("^[\n\t ]*([%d%.]+)[\n\t ]*$")) then
@@ -378,36 +374,36 @@ function c_tcm_read_set(filename, t)
 	s.order = tonumber(s.order)
 
 	-- The 4th line is the set's description
-	line, err = set_f:read()
+	line = tankbobs.fs_getStr(set_f, '\n')
 	if not line then
-		error("c_tcm_read_set: unexpected EOF while reading '" .. filename .. "': " .. err)
+		error("c_tcm_read_set: unexpected EOF while reading '" .. filename .. "'")
 	end
 	s.description = line
 
 	-- read the set's filenames and read their headers
-	line, err = set_f:read()
+	line = tankbobs.fs_getStr(set_f, '\n')
 	if not line then
-		error("c_tcm_read_set: unexpected EOF while reading '" .. filename .. "': " .. err)
+		error("c_tcm_read_set: unexpected EOF while reading '" .. filename .. "'")
 	end
 	while line and type(line) == "string" and line ~= "" do
 		table.insert(s.maps, c_tcm_read_map(c_const_get("tcm_dir") .. line))
 
-		line = set_f:read()
+		line = tankbobs.fs_getStr(set_f, '\n')
 	end
 
-	set_f:close()
+	tankbobs.fs_close(set_f)
 
 	table.insert(t, s)
 end
 
--- f: io function (e.g. tankbobs.io_getChar)
+-- f: io function (e.g. tankbobs.fs_getChar)
 -- i: input file
 -- t: if this argument is true, instead of giving an error, nil is returned
 -- ...: extra arguments to pass (t can be false)
 local function c_tcm_private_get(f, i, t, ...)
-	local d = f(i, ...)
+	local d, d2 = f(i, ...)
 
-	if not d then
+	if d2 or not d then
 		if t then
 			return nil
 		else
@@ -419,53 +415,49 @@ local function c_tcm_private_get(f, i, t, ...)
 end
 
 local function c_tcm_check_true_header(filename, i)
-	if c_tcm_private_get(tankbobs.io_getChar, i) ~= 0x00 then
+	if c_tcm_private_get(tankbobs.fs_getChar, i) ~= 0x00 then
 		error "Invalid map header"
-	elseif c_tcm_private_get(tankbobs.io_getChar, i) ~= 0x54 then
+	elseif c_tcm_private_get(tankbobs.fs_getChar, i) ~= 0x54 then
 		error "Invalid map header"
-	elseif c_tcm_private_get(tankbobs.io_getChar, i) ~= 0x43 then
+	elseif c_tcm_private_get(tankbobs.fs_getChar, i) ~= 0x43 then
 		error "Invalid map header"
-	elseif c_tcm_private_get(tankbobs.io_getChar, i) ~= 0x4D then
+	elseif c_tcm_private_get(tankbobs.fs_getChar, i) ~= 0x4D then
 		error "Invalid map header"
-	elseif c_tcm_private_get(tankbobs.io_getChar, i) ~= 0x01 then
+	elseif c_tcm_private_get(tankbobs.fs_getChar, i) ~= 0x01 then
 		error "Invalid map header"
-	elseif string.format("%X", c_tcm_private_get(tankbobs.io_getInt, i)):sub(-8) ~= string.format("%X", c_const_get("tcm_magic")):sub(-8) then
+	elseif string.format("%X", c_tcm_private_get(tankbobs.fs_getInt, i)):sub(-8) ~= string.format("%X", c_const_get("tcm_magic")):sub(-8) then
 		error "Invalid map header"
-	elseif c_tcm_private_get(tankbobs.io_getChar, i) ~= c_const_get("tcm_version") then
+	elseif c_tcm_private_get(tankbobs.fs_getChar, i) ~= c_const_get("tcm_version") then
 		i:seek("cur", -1)
-		common_printError(-1, "Warning: map '", filename, "' was built for tcm version '", tostring(c_tcm_private_get(tankbobs.io_getChar, i)), "'; you are running version '", tostring(c_const_get("tcm_version")), "'\n")
+		common_printError(-1, "Warning: map '", filename, "' was built for tcm version '", tostring(c_tcm_private_get(tankbobs.fs_getChar, i)), "'; you are running version '", tostring(c_const_get("tcm_version")), "'\n")
 	end
 end
 
-function c_tcm_read_map(map)
+function c_tcm_read_map(filename)
 	local r = c_tcm_map:new()
 
 	if c_const_get("debug") then
-		common_print(-1, "Parsing header of file: ", map, "\n")
+		common_print(-1, "Parsing header of file: ", filename, "\n")
 	end
 
-	r.map = map
+	r.map = filename
 
-	local i, err, errnum = io.open(map, "r")
-
-	if not i then
-		error("Could not open '" .. map .. "': " .. err .. " - error number: " .. errnum .. ".")
-	end
+	local i = tankbobs.fs_openRead(filename)
 	
-	c_tcm_check_true_header(map, i)
+	c_tcm_check_true_header(filename, i)
 
-	r.name = c_tcm_private_get(tankbobs.io_getStrL, i, false, 64)
-	r.title = c_tcm_private_get(tankbobs.io_getStrL, i, false, 64)
-	r.description = c_tcm_private_get(tankbobs.io_getStrL, i, false, 64)
-	r.authors = c_tcm_private_get(tankbobs.io_getStrL, i, false, 512)
-	r.version_string = c_tcm_private_get(tankbobs.io_getStrL, i, false, 64)
-	r.version = c_tcm_private_get(tankbobs.io_getInt, i)
-	if c_tcm_private_get(tankbobs.io_getChar, i) ~= 0 then
+	r.name = c_tcm_private_get(tankbobs.fs_read, i, false, 64)
+	r.title = c_tcm_private_get(tankbobs.fs_read, i, false, 64)
+	r.description = c_tcm_private_get(tankbobs.fs_read, i, false, 64)
+	r.authors = c_tcm_private_get(tankbobs.fs_read, i, false, 512)
+	r.version_string = c_tcm_private_get(tankbobs.fs_read, i, false, 64)
+	r.version = c_tcm_private_get(tankbobs.fs_getInt, i)
+	if c_tcm_private_get(tankbobs.fs_getChar, i) ~= 0 then
 		r.staticCamera = true
 	else
 		r.staticCamera = false
 	end
-	r.script = c_tcm_private_get(tankbobs.io_getStrL, i, false, 64)
+	r.script = c_tcm_private_get(tankbobs.fs_read, i, false, 64)
 	-- strip trailing 0's from NULL-terminated strings passed by C
 	-- we might use getStr and avoid this but if the string uses all of the bytes getStr won't work
 	r.name = r.name:gsub("%z*$", "")
@@ -475,14 +467,14 @@ function c_tcm_read_map(map)
 	r.version_string = r.version_string:gsub("%z*$", "")
 	r.script = r.script:gsub("%z*$", "")
 
-	r.walls_n = c_tcm_private_get(tankbobs.io_getInt, i)
-	r.teleporters_n = c_tcm_private_get(tankbobs.io_getInt, i)
-	r.playerSpawnPoints_n = c_tcm_private_get(tankbobs.io_getInt, i)
-	r.powerupSpawnPoints_n = c_tcm_private_get(tankbobs.io_getInt, i)
-	r.paths_n = c_tcm_private_get(tankbobs.io_getInt, i)
-	r.controlPoints_n = c_tcm_private_get(tankbobs.io_getInt, i)
-	r.flags_n = c_tcm_private_get(tankbobs.io_getInt, i)
-	r.wayPoints_n = c_tcm_private_get(tankbobs.io_getInt, i)
+	r.walls_n = c_tcm_private_get(tankbobs.fs_getInt, i)
+	r.teleporters_n = c_tcm_private_get(tankbobs.fs_getInt, i)
+	r.playerSpawnPoints_n = c_tcm_private_get(tankbobs.fs_getInt, i)
+	r.powerupSpawnPoints_n = c_tcm_private_get(tankbobs.fs_getInt, i)
+	r.paths_n = c_tcm_private_get(tankbobs.fs_getInt, i)
+	r.controlPoints_n = c_tcm_private_get(tankbobs.fs_getInt, i)
+	r.flags_n = c_tcm_private_get(tankbobs.fs_getInt, i)
+	r.wayPoints_n = c_tcm_private_get(tankbobs.fs_getInt, i)
 
 	local uppermost = 100
 	local lowermost = 0
@@ -492,22 +484,22 @@ function c_tcm_read_map(map)
 		local wall = c_tcm_wall:new()
 		local q = false
 
-		wall.id = c_tcm_private_get(tankbobs.io_getInt, i)
-		if c_tcm_private_get(tankbobs.io_getChar, i) ~= 0 then
+		wall.id = c_tcm_private_get(tankbobs.fs_getInt, i)
+		if c_tcm_private_get(tankbobs.fs_getChar, i) ~= 0 then
 			q = true
 		else
 			q = false
 			wall.p[4] = nil
 		end
-		wall.p[1].x = c_tcm_private_get(tankbobs.io_getDouble, i)
-		wall.p[1].y = c_tcm_private_get(tankbobs.io_getDouble, i)
-		wall.p[2].x = c_tcm_private_get(tankbobs.io_getDouble, i)
-		wall.p[2].y = c_tcm_private_get(tankbobs.io_getDouble, i)
-		wall.p[3].x = c_tcm_private_get(tankbobs.io_getDouble, i)
-		wall.p[3].y = c_tcm_private_get(tankbobs.io_getDouble, i)
+		wall.p[1].x = c_tcm_private_get(tankbobs.fs_getDouble, i)
+		wall.p[1].y = c_tcm_private_get(tankbobs.fs_getDouble, i)
+		wall.p[2].x = c_tcm_private_get(tankbobs.fs_getDouble, i)
+		wall.p[2].y = c_tcm_private_get(tankbobs.fs_getDouble, i)
+		wall.p[3].x = c_tcm_private_get(tankbobs.fs_getDouble, i)
+		wall.p[3].y = c_tcm_private_get(tankbobs.fs_getDouble, i)
 		if q then
-			wall.p[4].x = c_tcm_private_get(tankbobs.io_getDouble, i)
-			wall.p[4].y = c_tcm_private_get(tankbobs.io_getDouble, i)
+			wall.p[4].x = c_tcm_private_get(tankbobs.fs_getDouble, i)
+			wall.p[4].y = c_tcm_private_get(tankbobs.fs_getDouble, i)
 
 			for i = 1, 4 do
 				if wall.p[i].x < leftmost then
@@ -525,7 +517,7 @@ function c_tcm_read_map(map)
 		else
 			i:seek("cur", 16)
 			--for its = 1, 2 do
-				--c_tcm_private_get(tankbobs.io_getDouble, i)
+				--c_tcm_private_get(tankbobs.fs_getDouble, i)
 			--end
 
 			for i = 1, 3 do
@@ -542,46 +534,46 @@ function c_tcm_read_map(map)
 				end
 			end
 		end
-		wall.t[1].x = c_tcm_private_get(tankbobs.io_getDouble, i)
-		wall.t[1].y = c_tcm_private_get(tankbobs.io_getDouble, i)
-		wall.t[2].x = c_tcm_private_get(tankbobs.io_getDouble, i)
-		wall.t[2].y = c_tcm_private_get(tankbobs.io_getDouble, i)
-		wall.t[3].x = c_tcm_private_get(tankbobs.io_getDouble, i)
-		wall.t[3].y = c_tcm_private_get(tankbobs.io_getDouble, i)
+		wall.t[1].x = c_tcm_private_get(tankbobs.fs_getDouble, i)
+		wall.t[1].y = c_tcm_private_get(tankbobs.fs_getDouble, i)
+		wall.t[2].x = c_tcm_private_get(tankbobs.fs_getDouble, i)
+		wall.t[2].y = c_tcm_private_get(tankbobs.fs_getDouble, i)
+		wall.t[3].x = c_tcm_private_get(tankbobs.fs_getDouble, i)
+		wall.t[3].y = c_tcm_private_get(tankbobs.fs_getDouble, i)
 		if q then
-			wall.t[4].x = c_tcm_private_get(tankbobs.io_getDouble, i)
-			wall.t[4].y = c_tcm_private_get(tankbobs.io_getDouble, i)
+			wall.t[4].x = c_tcm_private_get(tankbobs.fs_getDouble, i)
+			wall.t[4].y = c_tcm_private_get(tankbobs.fs_getDouble, i)
 		else
 			i:seek("cur", 16)
 			--for its = 1, 2 do
-				--c_tcm_private_get(tankbobs.io_getDouble, i)
+				--c_tcm_private_get(tankbobs.fs_getDouble, i)
 			--end
 		end
 
-		wall.texture = c_tcm_private_get(tankbobs.io_getStrL, i, false, 256)
+		wall.texture = c_tcm_private_get(tankbobs.fs_read, i, false, 256)
 		wall.texture = wall.texture:gsub("%z*$", "")
-		wall.l = c_tcm_private_get(tankbobs.io_getInt, i)
+		wall.l = c_tcm_private_get(tankbobs.fs_getInt, i)
 
-		wall.pid = c_tcm_private_get(tankbobs.io_getInt, i)
-		if c_tcm_private_get(tankbobs.io_getChar, i) ~= 0 then
+		wall.pid = c_tcm_private_get(tankbobs.fs_getInt, i)
+		if c_tcm_private_get(tankbobs.fs_getChar, i) ~= 0 then
 			wall.path = true
 		else
 			wall.path = false
 		end
 
-		if c_tcm_private_get(tankbobs.io_getChar, i) ~= 0 then
+		if c_tcm_private_get(tankbobs.fs_getChar, i) ~= 0 then
 			wall.detail = true
 		else
 			wall.detail = false
 		end
 
-		if c_tcm_private_get(tankbobs.io_getChar, i) ~= 0 then
+		if c_tcm_private_get(tankbobs.fs_getChar, i) ~= 0 then
 			wall.static = true
 		else
 			wall.static = false
 		end
 
-		wall.misc = c_tcm_private_get(tankbobs.io_getStrL, i, false, 64)
+		wall.misc = c_tcm_private_get(tankbobs.fs_read, i, false, 64)
 		wall.misc = wall.misc:gsub("%z*$", "") 
 
 		table.insert(r.walls, wall)
@@ -594,17 +586,17 @@ function c_tcm_read_map(map)
 	for it = 1, r.teleporters_n do
 		local teleporter = c_tcm_teleporter:new()
 
-		teleporter.id = c_tcm_private_get(tankbobs.io_getInt, i)
-		teleporter.t = c_tcm_private_get(tankbobs.io_getInt, i)
-		teleporter.p.x = c_tcm_private_get(tankbobs.io_getDouble, i)
-		teleporter.p.y = c_tcm_private_get(tankbobs.io_getDouble, i)
-		if c_tcm_private_get(tankbobs.io_getChar, i) ~= 0 then
+		teleporter.id = c_tcm_private_get(tankbobs.fs_getInt, i)
+		teleporter.t = c_tcm_private_get(tankbobs.fs_getInt, i)
+		teleporter.p.x = c_tcm_private_get(tankbobs.fs_getDouble, i)
+		teleporter.p.y = c_tcm_private_get(tankbobs.fs_getDouble, i)
+		if c_tcm_private_get(tankbobs.fs_getChar, i) ~= 0 then
 			teleporter.enabled = true
 		else
 			teleporter.enabled = false
 		end
 
-		teleporter.misc = c_tcm_private_get(tankbobs.io_getStrL, i, false, 64)
+		teleporter.misc = c_tcm_private_get(tankbobs.fs_read, i, false, 64)
 		teleporter.misc = teleporter.misc:gsub("%z*$", "") 
 
 		r.wayPointNetwork[-it] = {}
@@ -615,11 +607,11 @@ function c_tcm_read_map(map)
 	for it = 1, r.playerSpawnPoints_n do
 		local playerSpawnPoint = c_tcm_playerSpawnPoint:new()
 
-		playerSpawnPoint.id = c_tcm_private_get(tankbobs.io_getInt, i)
-		playerSpawnPoint.p.x = c_tcm_private_get(tankbobs.io_getDouble, i)
-		playerSpawnPoint.p.y = c_tcm_private_get(tankbobs.io_getDouble, i)
+		playerSpawnPoint.id = c_tcm_private_get(tankbobs.fs_getInt, i)
+		playerSpawnPoint.p.x = c_tcm_private_get(tankbobs.fs_getDouble, i)
+		playerSpawnPoint.p.y = c_tcm_private_get(tankbobs.fs_getDouble, i)
 
-		playerSpawnPoint.misc = c_tcm_private_get(tankbobs.io_getStrL, i, false, 64)
+		playerSpawnPoint.misc = c_tcm_private_get(tankbobs.fs_read, i, false, 64)
 		playerSpawnPoint.misc = playerSpawnPoint.misc:gsub("%z*$", "") 
 
 		table.insert(r.playerSpawnPoints, playerSpawnPoint)
@@ -628,13 +620,13 @@ function c_tcm_read_map(map)
 	for it = 1, r.powerupSpawnPoints_n do
 		local powerupSpawnPoint = c_tcm_powerupSpawnPoint:new()
 
-		powerupSpawnPoint.id = c_tcm_private_get(tankbobs.io_getInt, i)
-		powerupSpawnPoint.p.x = c_tcm_private_get(tankbobs.io_getDouble, i)
-		powerupSpawnPoint.p.y = c_tcm_private_get(tankbobs.io_getDouble, i)
+		powerupSpawnPoint.id = c_tcm_private_get(tankbobs.fs_getInt, i)
+		powerupSpawnPoint.p.x = c_tcm_private_get(tankbobs.fs_getDouble, i)
+		powerupSpawnPoint.p.y = c_tcm_private_get(tankbobs.fs_getDouble, i)
 
 		local powerups = {}
 		for it = 1, 16 do  -- the format includes 16 ints for different powerup possibilities
-			table.insert(powerups, c_tcm_private_get(tankbobs.io_getInt, i))
+			table.insert(powerups, c_tcm_private_get(tankbobs.fs_getInt, i))
 		end
 
 		if bit.band(powerups[1], bit.tobit(0x00000001)) ~= 0 then
@@ -693,20 +685,20 @@ function c_tcm_read_map(map)
 			powerupSpawnPoint.enabledPowerups["rocket-launcher"] = false
 		end
 
-		if c_tcm_private_get(tankbobs.io_getChar, i) ~= 0 then
+		if c_tcm_private_get(tankbobs.fs_getChar, i) ~= 0 then
 			powerupSpawnPoint.linked = true
 		else
 			powerupSpawnPoint.linked = false
 		end
-		powerupSpawnPoint["repeat"] = c_tcm_private_get(tankbobs.io_getDouble, i)
-		powerupSpawnPoint.initial = c_tcm_private_get(tankbobs.io_getDouble, i)
-		if c_tcm_private_get(tankbobs.io_getChar, i) ~= 0 then
+		powerupSpawnPoint["repeat"] = c_tcm_private_get(tankbobs.fs_getDouble, i)
+		powerupSpawnPoint.initial = c_tcm_private_get(tankbobs.fs_getDouble, i)
+		if c_tcm_private_get(tankbobs.fs_getChar, i) ~= 0 then
 			powerupSpawnPoint.focus = true
 		else
 			powerupSpawnPoint.focus = false
 		end
 
-		powerupSpawnPoint.misc = c_tcm_private_get(tankbobs.io_getStrL, i, false, 64)
+		powerupSpawnPoint.misc = c_tcm_private_get(tankbobs.fs_read, i, false, 64)
 		powerupSpawnPoint.misc = powerupSpawnPoint.misc:gsub("%z*$", "") 
 
 		table.insert(r.powerupSpawnPoints, powerupSpawnPoint)
@@ -715,18 +707,18 @@ function c_tcm_read_map(map)
 	for it = 1, r.paths_n do
 		local path = c_tcm_path:new()
 
-		path.id = c_tcm_private_get(tankbobs.io_getInt, i)
-		path.p.x = c_tcm_private_get(tankbobs.io_getDouble, i)
-		path.p.y = c_tcm_private_get(tankbobs.io_getDouble, i)
-		if c_tcm_private_get(tankbobs.io_getChar, i) ~= 0 then
+		path.id = c_tcm_private_get(tankbobs.fs_getInt, i)
+		path.p.x = c_tcm_private_get(tankbobs.fs_getDouble, i)
+		path.p.y = c_tcm_private_get(tankbobs.fs_getDouble, i)
+		if c_tcm_private_get(tankbobs.fs_getChar, i) ~= 0 then
 			path.enabled = true
 		else
 			path.enabled = false
 		end
-		path.time = c_tcm_private_get(tankbobs.io_getDouble, i)
-		path.t = c_tcm_private_get(tankbobs.io_getInt, i)
+		path.time = c_tcm_private_get(tankbobs.fs_getDouble, i)
+		path.t = c_tcm_private_get(tankbobs.fs_getInt, i)
 
-		path.misc = c_tcm_private_get(tankbobs.io_getStrL, i, false, 64)
+		path.misc = c_tcm_private_get(tankbobs.fs_read, i, false, 64)
 		path.misc = path.misc:gsub("%z*$", "") 
 
 		table.insert(r.paths, path)
@@ -735,16 +727,16 @@ function c_tcm_read_map(map)
 	for it = 1, r.controlPoints_n do
 		local controlPoint = c_tcm_controlPoint:new()
 
-		controlPoint.id = c_tcm_private_get(tankbobs.io_getInt, i)
-		controlPoint.p.x = c_tcm_private_get(tankbobs.io_getDouble, i)
-		controlPoint.p.y = c_tcm_private_get(tankbobs.io_getDouble, i)
-		if c_tcm_private_get(tankbobs.io_getChar, i) ~= 0 then
+		controlPoint.id = c_tcm_private_get(tankbobs.fs_getInt, i)
+		controlPoint.p.x = c_tcm_private_get(tankbobs.fs_getDouble, i)
+		controlPoint.p.y = c_tcm_private_get(tankbobs.fs_getDouble, i)
+		if c_tcm_private_get(tankbobs.fs_getChar, i) ~= 0 then
 			controlPoint.red = true
 		else
 			controlPoint.red = false
 		end
 
-		controlPoint.misc = c_tcm_private_get(tankbobs.io_getStrL, i, false, 64)
+		controlPoint.misc = c_tcm_private_get(tankbobs.fs_read, i, false, 64)
 		controlPoint.misc = controlPoint.misc:gsub("%z*$", "") 
 
 		table.insert(r.controlPoints, controlPoint)
@@ -753,16 +745,16 @@ function c_tcm_read_map(map)
 	for it = 1, r.flags_n do
 		local flag = c_tcm_flag:new()
 
-		flag.id = c_tcm_private_get(tankbobs.io_getInt, i)
-		flag.p.x = c_tcm_private_get(tankbobs.io_getDouble, i)
-		flag.p.y = c_tcm_private_get(tankbobs.io_getDouble, i)
-		if c_tcm_private_get(tankbobs.io_getChar, i) ~= 0 then
+		flag.id = c_tcm_private_get(tankbobs.fs_getInt, i)
+		flag.p.x = c_tcm_private_get(tankbobs.fs_getDouble, i)
+		flag.p.y = c_tcm_private_get(tankbobs.fs_getDouble, i)
+		if c_tcm_private_get(tankbobs.fs_getChar, i) ~= 0 then
 			flag.red = true
 		else
 			flag.red = false
 		end
 
-		flag.misc = c_tcm_private_get(tankbobs.io_getStrL, i, false, 64)
+		flag.misc = c_tcm_private_get(tankbobs.fs_read, i, false, 64)
 		flag.misc = flag.misc:gsub("%z*$", "") 
 
 		table.insert(r.flags, flag)
@@ -771,19 +763,19 @@ function c_tcm_read_map(map)
 	for it = 1, r.wayPoints_n do
 		local wayPoint = c_tcm_wayPoint:new()
 
-		wayPoint.id = c_tcm_private_get(tankbobs.io_getInt, i)
-		wayPoint.p.x = c_tcm_private_get(tankbobs.io_getDouble, i)
-		wayPoint.p.y = c_tcm_private_get(tankbobs.io_getDouble, i)
+		wayPoint.id = c_tcm_private_get(tankbobs.fs_getInt, i)
+		wayPoint.p.x = c_tcm_private_get(tankbobs.fs_getDouble, i)
+		wayPoint.p.y = c_tcm_private_get(tankbobs.fs_getDouble, i)
 
 		r.wayPointNetwork[it] = {}
 
-		wayPoint.misc = c_tcm_private_get(tankbobs.io_getStrL, i, false, 64)
+		wayPoint.misc = c_tcm_private_get(tankbobs.fs_read, i, false, 64)
 		wayPoint.misc = wayPoint.misc:gsub("%z*$", "") 
 
 		table.insert(r.wayPoints, wayPoint)
 	end
 
-	i:close()
+	tankbobs.fs_close(i)
 
 	-- build way point network.  Positive id's are way points; negative id's are teleporters
 	local lastPoint, currentPoint = nil

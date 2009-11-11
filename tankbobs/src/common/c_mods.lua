@@ -30,13 +30,11 @@ function c_mods_done()
 end
 
 function c_mods_load(dir)
-	require "lfs"
-
 	local mods = {}
 
-	for filename in lfs.dir(dir) do
-		if not filename:find("^%.") and common_endsIn(filename, ".lua") then
-			table.insert(mods, {dir .. filename, loadfile(dir .. filename)})
+	for _, v in pairs(tankbobs.fs_listFiles(dir)) do
+		if common_endsIn(v, ".lua") then
+			table.insert(mods, {dir .. v, loadfile(dir .. v)})
 		end
 	end
 

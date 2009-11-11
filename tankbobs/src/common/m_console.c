@@ -54,6 +54,7 @@ static int consoleInitialized = FALSE;
 #define LOG_SCROLL 5
 #define MAX_LOG_LINES 1024
 #define MAX_HISTORY_FIELDS 512
+#define HIST_PHYSFS
 
 static WINDOW *win_border, *win_log, *win_input, *win_scroll;
 static char logbuf[LOG_BUF_SIZE];
@@ -71,6 +72,10 @@ static int lastLine = 1;
 #define SCRLBAR_LINE ACS_VLINE
 #define SCRLBAR_UP ACS_HLINE
 #define SCRLBAR_DOWN ACS_HLINE
+#endif
+
+#ifdef HIST_PHYSFS
+#include "physfs.h"
 #endif
 
 #define MAX_EDIT_LINE BUFSIZE
@@ -633,6 +638,7 @@ int c_loadHistory(lua_State *L)
 
 	if(historyFile[0])
 	{
+#ifndef HIST_PHYSFS
 		FILE *fin = fopen(historyFile, "r");
 
 		if(fin)
@@ -672,6 +678,55 @@ int c_loadHistory(lua_State *L)
 
 			fclose(fin);
 		}
+#else
+		PHYSFS_File *fin = PHYSFS_openRead(historyFile);
+
+		if(fin)
+		{
+			char line[MAX_EDIT_LINE] = {""};
+			int i = 0;
+			char c;
+			int newline = TRUE;
+			int status;
+
+			while((status = PHYSFS_read(fin, &c, 1, 1)) >= 1)
+			{
+				if(c == 0)
+				{
+					/* ignore null bytes if they somehow get inside the file */
+
+					newline = FALSE;
+				}
+				else if(c == '\n' || c == '\r')
+				{
+					if(!newline)
+					{
+						c_private_addHistoryField(line);
+
+						line[0] = i = 0;
+					}
+
+					newline = TRUE;
+				}
+				else
+				{
+					line[i++] = c;
+					line[i]   = 0;
+
+					newline = FALSE;
+				}
+			}
+
+			status = PHYSFS_close(fin);
+			if(!status)
+			{
+				lua_pushstring(L, PHYSFS_getLastError());
+				lua_error(L);
+
+				return 0;
+			}
+		}
+#endif
 		else
 		{
 			/* silently ignore */
@@ -687,6 +742,7 @@ int c_saveHistory(lua_State *L)
 
 	if(historyFile[0])
 	{
+#ifndef HIST_PHYSFS
 		FILE *fout = fopen(historyFile, "w");
 
 		if(fout)
@@ -708,6 +764,38 @@ int c_saveHistory(lua_State *L)
 
 			fclose(fout);
 		}
+#else
+		PHYSFS_File *fout = PHYSFS_openWrite(historyFile);
+
+		if(fout)
+		{
+			int i;
+			int status;
+			historyField_t *historyField;
+
+			for(i = 0, historyField = &history[0]; i < MAX_HISTORY_FIELDS; i++, historyField++)
+			{
+				if(historyField->text[0])
+				{
+					const char *p = historyField->text;
+
+					while(*p && status >= 1)
+						PHYSFS_write(fout, p++, 1, 1);
+					if(status <= 0)
+					{
+						lua_pushstring(L, PHYSFS_getLastError());
+						lua_error(L);
+
+						return 0;
+					}
+
+					PHYSFS_write(fout, "\n", 1, 1);
+				}
+			}
+
+			PHYSFS_close(fout);
+		}
+#endif
 		else
 		{
 			/* silently ignore */

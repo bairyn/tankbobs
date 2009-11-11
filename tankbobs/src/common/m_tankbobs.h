@@ -32,6 +32,10 @@ extern "C"
 #include <luaconf.h>
 #include <stdio.h>
 
+#if defined(__WINDOWS__) || defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__TOS_WIN__)
+#include <windows.h>
+#endif
+
 #include "common.h"
 
 #if defined(__FILE) && defined(__LINE) && defined(TDEBUG)
@@ -41,7 +45,7 @@ do                                                                              
 	if(!i)                                                                         \
 	{                                                                              \
 		char buf[1024];                                                            \
-		sprintf(buf, "module used before module initialization on line %d of %s.", \
+		sprintf(buf, "module used before module initialization in line %d of %s.", \
 			__LINE, __FILE);                                                       \
 		lua_pushstring(L, buf);                                                    \
 		lua_error(L);                                                              \
@@ -54,7 +58,7 @@ do                                                                              
 	if(!i)                                                                         \
 	{                                                                              \
 		char buf[1024];                                                            \
-		sprintf(buf, "module used before module initialization on line %d of %s.", \
+		sprintf(buf, "module used before module initialization in line %d of %s.", \
 			__LINE__, __FILE__);                                                   \
 		lua_pushstring(L, buf);                                                    \
 		lua_error(L);                                                              \
@@ -402,6 +406,50 @@ int n_writeToPacket(lua_State *L);
 int n_setPort(lua_State *L);
 int n_sendPacket(lua_State *L);
 int n_readPacket(lua_State *L);
+
+/* m_fs.c */
+void fs_initNL(lua_State *L);
+int fs_init(lua_State *L);
+int fs_quit(lua_State *L);
+int fs_setArgv0(lua_State *L);
+int fs_getRawDirectorySeparator(lua_State *L);
+int fs_getCDDirectories(lua_State *L);
+int fs_getBaseDirectory(lua_State *L);
+int fs_getUserDirectory(lua_State *L);
+int fs_getWriteDirectory(lua_State *L);
+int fs_setWriteDirectory(lua_State *L);
+int fs_getSearchPath(lua_State *L);
+int fs_mkdir(lua_State *L);
+int fs_remove(lua_State *L);
+int fs_which(lua_State *L);
+int fs_listFiles(lua_State *L);
+int fs_fileExists(lua_State *L);
+int fs_directoryExists(lua_State *L);
+int fs_symbolicLinkExists(lua_State *L);
+int fs_getModificationTime(lua_State *L);
+int fs_openWrite(lua_State *L);
+int fs_openAppend(lua_State *L);
+int fs_openRead(lua_State *L);
+int fs_close(lua_State *L);
+int fs_read(lua_State *L);
+int fs_write(lua_State *L);
+int fs_tell(lua_State *L);
+int fs_seekFromStart(lua_State *L);
+int fs_fileLength(lua_State *L);
+int fs_getInt(lua_State *L);
+int fs_getShort(lua_State *L);
+int fs_getChar(lua_State *L);
+int fs_getDouble(lua_State *L);
+int fs_getFloat(lua_State *L);
+int fs_getStr(lua_State *L);
+int fs_putInt(lua_State *L);
+int fs_putShort(lua_State *L);
+int fs_putChar(lua_State *L);
+int fs_putDouble(lua_State *L);
+int fs_putFloat(lua_State *L);
+int fs_mount(lua_State *L);
+int fs_loadfile(lua_State *L);
+int fs_permitSymbolicLinks(lua_State *L);
 
 #ifdef __cplusplus
 }

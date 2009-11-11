@@ -23,6 +23,7 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 #include <lualib.h>
 #include <luaconf.h>
 #include <stdio.h>
+#include "physfs.h"
 #include "common.h"
 
 #ifndef NOJIT
@@ -68,6 +69,25 @@ int main(int argc, char **argv)
 	}
 	lua_setglobal(L, "args");
 	lua_settop(L, 0);
+
+	/* Temporarily initialize PhysicsFS so that we can append the base directory to package.cpath */
+	PHYSFS_init(argv[0]);
+	lua_getglobal(L, "package");
+	lua_getfield(L, -1, "cpath");
+	lua_pushstring(L, PHYSFS_getBaseDir());
+	lua_pushstring(L, PHYSFS_getDirSeparator());
+	lua_pushstring(L, "?.so;");
+	lua_concat(L, 4);
+	lua_setfield(L, -2, "cpath");
+	lua_getfield(L, -1, "cpath");
+	lua_pushstring(L, PHYSFS_getBaseDir());
+	lua_pushstring(L, PHYSFS_getDirSeparator());
+	lua_pushstring(L, "?.dll;");
+	lua_concat(L, 4);
+	lua_setfield(L, -2, "cpath");
+	lua_pop(L, 1);
+	PHYSFS_deinit();
+
 	if((err = luaL_dofile(L, "client")))
 	{
 		const char *message = lua_tostring(L, -1);

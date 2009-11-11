@@ -26,7 +26,7 @@ Common functions
 -- All code should use the PhysicsFS interface
 stdout = io.stdout
 stderr = io.stderr
---io = nil  -- TODO
+io = nil
 
 require "libmtankbobs"
 tankbobs.t_initialize("common_interrupt", false)
@@ -59,6 +59,11 @@ function common_init()
 
 	c_module_init()
 
+	c_files_init()
+
+	c_config_init()
+
+	-- load the bit module
 	local bit = c_module_load "bit"
 
 	-- contents
@@ -79,8 +84,6 @@ function common_init()
 	RELOAD         = bit.tobit(RELOAD)
 	REVERSE        = bit.tobit(REVERSE)
 	MOD            = bit.tobit(MOD)
-
-	c_config_init()
 
 	c_mods_init()
 	b_mods()  -- anything below this is moddable
@@ -127,6 +130,8 @@ function common_done()
 
 	c_config_done()
 
+	c_files_done()
+
 	c_module_done()
 
 	c_data_done()
@@ -151,6 +156,43 @@ function common_interrupt()
 	--common_done()
 
 	done = true  -- cleanly exit
+end
+
+function common_listFiles(dir, extension)
+	require "lfs"
+
+	local files = {}
+
+	extension = extension or ".tpk"
+
+	for filename in lfs.dir(dir) do
+		if not filename:find("^%.") and common_endsIn(filename, extension) then
+			table.insert(files, filename)
+		end
+	end
+
+	return files
+end
+
+function common_deepClone(object)
+	-- http://lua-users.org/wiki/CopyTable
+
+	local lookup_table = {}
+	local function copy(object)
+		if type(object) ~= "table" then
+			return object
+		elseif lookup_table[object] then
+			return lookup_table[object]
+		end
+		local new_table = {}
+		lookup_table[object] = new_table
+		for k, v in pairs(object) do
+			new_table[copy(k)] = copy(v)
+		end
+		return setmetatable(new_table, getmetatable(object))
+	end
+
+	return copy(object)
 end
 
 function common_print(level, ...)
