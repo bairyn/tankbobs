@@ -42,6 +42,11 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 #define CHUNKSIZE 3 * 1024
 #define CACHEDSOUNDS 64
 #define FADE_MS 1000
+#define AUDIO_PHYSFS
+
+#ifdef AUDIO_PHYSFS
+#include "physfs.h"
+#endif
 
 typedef struct sound_s sound_t;
 struct sound_s
@@ -143,6 +148,13 @@ int a_quit(lua_State *L)
 
 int a_initSound(lua_State *L)
 {
+#ifdef AUDIO_PHYSFS
+	char c;
+	FILE *fout;
+	int status;
+	PHYSFS_File *fin;
+	const char *tmpfilename;
+#endif
 	const char *filename = NULL;
 
 	CHECKINIT(init, L);
@@ -166,7 +178,64 @@ int a_initSound(lua_State *L)
 				if(i->chunk)
 					Mix_FreeChunk(i->chunk);
 
+#ifdef AUDIO_PHYSFS
+				/* Copy file to a temporary file */
+				fin = PHYSFS_openRead(filename);
+				if(!fin)
+				{
+					lua_pushstring(L, PHYSFS_getLastError());
+					lua_error(L);
+
+					return 0;
+				}
+
+				/*tmpfilename = tempnam(NULL, "tfsimg");*/
+				tmpfilename = tmpnam(NULL);
+				if(!tmpfilename)
+				{
+					lua_pushstring(L, "could not create temporary file for loading font");
+					lua_error(L);
+
+					/*free(tmpfilename);*/
+					return 0;
+				}
+
+				fout = fopen(tmpfilename, "w");
+				if(!fout)
+				{
+					lua_pushstring(L, "could not open temporary file for loading font");
+					lua_error(L);
+
+					/*free(tmpfilename);*/
+					return 0;
+				}
+
+				while(PHYSFS_read(fin, &c, 1, 1) >= 1 && (status = fputc(c, fout)) != EOF);
+				if(status == EOF)
+				{
+					lua_pushstring(L, "could not write temporary file for loading font");
+					lua_error(L);
+
+					/*free(tmpfilename);*/
+					return 0;
+				}
+
+				status = PHYSFS_close(fin);
+				if(!status)
+				{
+					lua_pushstring(L, PHYSFS_getLastError());
+					lua_error(L);
+				}
+				fclose(fout);
+
+				/*free(tmpfilename);*/
+#endif
+
+#ifdef AUDIO_PHYSFS
+				i->chunk = Mix_LoadWAV(tmpfilename);
+#else
 				i->chunk = Mix_LoadWAV(filename);
+#endif
 
 				i->lastUsedTime = SDL_GetTicks();
 				i->active = TRUE;
@@ -180,7 +249,64 @@ int a_initSound(lua_State *L)
 		{
 			if(!i->active)
 			{
+#ifdef AUDIO_PHYSFS
+				/* Copy file to a temporary file */
+				fin = PHYSFS_openRead(filename);
+				if(!fin)
+				{
+					lua_pushstring(L, PHYSFS_getLastError());
+					lua_error(L);
+
+					return 0;
+				}
+
+				/*tmpfilename = tempnam(NULL, "tfsimg");*/
+				tmpfilename = tmpnam(NULL);
+				if(!tmpfilename)
+				{
+					lua_pushstring(L, "could not create temporary file for loading font");
+					lua_error(L);
+
+					/*free(tmpfilename);*/
+					return 0;
+				}
+
+				fout = fopen(tmpfilename, "w");
+				if(!fout)
+				{
+					lua_pushstring(L, "could not open temporary file for loading font");
+					lua_error(L);
+
+					/*free(tmpfilename);*/
+					return 0;
+				}
+
+				while(PHYSFS_read(fin, &c, 1, 1) >= 1 && (status = fputc(c, fout)) != EOF);
+				if(status == EOF)
+				{
+					lua_pushstring(L, "could not write temporary file for loading font");
+					lua_error(L);
+
+					/*free(tmpfilename);*/
+					return 0;
+				}
+
+				status = PHYSFS_close(fin);
+				if(!status)
+				{
+					lua_pushstring(L, PHYSFS_getLastError());
+					lua_error(L);
+				}
+				fclose(fout);
+
+				/*free(tmpfilename);*/
+#endif
+
+#ifdef AUDIO_PHYSFS
+				i->chunk = Mix_LoadWAV(tmpfilename);
+#else
 				i->chunk = Mix_LoadWAV(filename);
+#endif
 
 				strncpy(i->filename, filename, sizeof(i->filename));
 				i->lastUsedTime = SDL_GetTicks();
@@ -265,6 +391,13 @@ int a_freeSound(lua_State *L)
 
 int a_startMusic(lua_State *L)
 {
+#ifdef AUDIO_PHYSFS
+	char c;
+	FILE *fout;
+	int status;
+	PHYSFS_File *fin;
+	const char *tmpfilename;
+#endif
 	const char *filename = NULL;
 
 	CHECKINIT(init, L);
@@ -287,8 +420,67 @@ int a_startMusic(lua_State *L)
 
 	if(!strcmp(musicFilename, filename))
 	{
+#ifdef AUDIO_PHYSFS
+		/* Copy file to a temporary file */
+		fin = PHYSFS_openRead(filename);
+		if(!fin)
+		{
+			lua_pushstring(L, PHYSFS_getLastError());
+			lua_error(L);
+
+			return 0;
+		}
+
+		/*tmpfilename = tempnam(NULL, "tfsimg");*/
+		tmpfilename = tmpnam(NULL);
+		if(!tmpfilename)
+		{
+			lua_pushstring(L, "could not create temporary file for loading font");
+			lua_error(L);
+
+			/*free(tmpfilename);*/
+			return 0;
+		}
+
+		fout = fopen(tmpfilename, "w");
+		if(!fout)
+		{
+			lua_pushstring(L, "could not open temporary file for loading font");
+			lua_error(L);
+
+			/*free(tmpfilename);*/
+			return 0;
+		}
+
+		while(PHYSFS_read(fin, &c, 1, 1) >= 1 && (status = fputc(c, fout)) != EOF);
+		if(status == EOF)
+		{
+			lua_pushstring(L, "could not write temporary file for loading font");
+			lua_error(L);
+
+			/*free(tmpfilename);*/
+			return 0;
+		}
+
+		status = PHYSFS_close(fin);
+		if(!status)
+		{
+			lua_pushstring(L, PHYSFS_getLastError());
+			lua_error(L);
+		}
+		fclose(fout);
+
+		/*free(tmpfilename);*/
+#endif
+
 		if(!music)
+		{
+#ifdef AUDIO_PHYSFS
+			music = Mix_LoadMUS(tmpfilename);
+#else
 			music = Mix_LoadMUS(filename);
+#endif
+		}
 
 		else if(Mix_PausedMusic())
 		{
@@ -340,6 +532,13 @@ int a_stopMusic(lua_State *L)
 int a_playSound(lua_State *L)
 {
 	/* similar to a_initSound */
+#ifdef AUDIO_PHYSFS
+	char c;
+	FILE *fout;
+	int status;
+	PHYSFS_File *fin;
+	const char *tmpfilename;
+#endif
 	int loops = 0;
 	const char *filename = NULL;
 
@@ -379,7 +578,64 @@ int a_playSound(lua_State *L)
 		{
 			if(!i->active)
 			{
+#ifdef AUDIO_PHYSFS
+				/* Copy file to a temporary file */
+				fin = PHYSFS_openRead(filename);
+				if(!fin)
+				{
+					lua_pushstring(L, PHYSFS_getLastError());
+					lua_error(L);
+
+					return 0;
+				}
+
+				/*tmpfilename = tempnam(NULL, "tfsimg");*/
+				tmpfilename = tmpnam(NULL);
+				if(!tmpfilename)
+				{
+					lua_pushstring(L, "could not create temporary file for loading font");
+					lua_error(L);
+
+					/*free(tmpfilename);*/
+					return 0;
+				}
+
+				fout = fopen(tmpfilename, "w");
+				if(!fout)
+				{
+					lua_pushstring(L, "could not open temporary file for loading font");
+					lua_error(L);
+
+					/*free(tmpfilename);*/
+					return 0;
+				}
+
+				while(PHYSFS_read(fin, &c, 1, 1) >= 1 && (status = fputc(c, fout)) != EOF);
+				if(status == EOF)
+				{
+					lua_pushstring(L, "could not write temporary file for loading font");
+					lua_error(L);
+
+					/*free(tmpfilename);*/
+					return 0;
+				}
+
+				status = PHYSFS_close(fin);
+				if(!status)
+				{
+					lua_pushstring(L, PHYSFS_getLastError());
+					lua_error(L);
+				}
+				fclose(fout);
+
+				/*free(tmpfilename);*/
+#endif
+
+#ifdef AUDIO_PHYSFS
+				i->chunk = Mix_LoadWAV(tmpfilename);
+#else
 				i->chunk = Mix_LoadWAV(filename);
+#endif
 
 				if(!i->chunk)
 					continue;
@@ -474,6 +730,13 @@ int a_setVolume(lua_State *L)
 int a_setVolumeChunk(lua_State *L)
 {
 	/* similar to a_initSound */
+#ifdef AUDIO_PHYSFS
+	char c;
+	FILE *fout;
+	int status;
+	PHYSFS_File *fin;
+	const char *tmpfilename;
+#endif
 	int volume; 
 	const char *filename = NULL;
 
@@ -512,7 +775,64 @@ int a_setVolumeChunk(lua_State *L)
 		{
 			if(!i->active)
 			{
+#ifdef AUDIO_PHYSFS
+				/* Copy file to a temporary file */
+				fin = PHYSFS_openRead(filename);
+				if(!fin)
+				{
+					lua_pushstring(L, PHYSFS_getLastError());
+					lua_error(L);
+
+					return 0;
+				}
+
+				/*tmpfilename = tempnam(NULL, "tfsimg");*/
+				tmpfilename = tmpnam(NULL);
+				if(!tmpfilename)
+				{
+					lua_pushstring(L, "could not create temporary file for loading font");
+					lua_error(L);
+
+					/*free(tmpfilename);*/
+					return 0;
+				}
+
+				fout = fopen(tmpfilename, "w");
+				if(!fout)
+				{
+					lua_pushstring(L, "could not open temporary file for loading font");
+					lua_error(L);
+
+					/*free(tmpfilename);*/
+					return 0;
+				}
+
+				while(PHYSFS_read(fin, &c, 1, 1) >= 1 && (status = fputc(c, fout)) != EOF);
+				if(status == EOF)
+				{
+					lua_pushstring(L, "could not write temporary file for loading font");
+					lua_error(L);
+
+					/*free(tmpfilename);*/
+					return 0;
+				}
+
+				status = PHYSFS_close(fin);
+				if(!status)
+				{
+					lua_pushstring(L, PHYSFS_getLastError());
+					lua_error(L);
+				}
+				fclose(fout);
+
+				/*free(tmpfilename);*/
+#endif
+
+#ifdef AUDIO_PHYSFS
+				i->chunk = Mix_LoadWAV(tmpfilename);
+#else
 				i->chunk = Mix_LoadWAV(filename);
+#endif
 
 				if(!i->chunk)
 					continue;

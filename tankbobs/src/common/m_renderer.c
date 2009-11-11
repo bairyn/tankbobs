@@ -934,7 +934,7 @@ int r_loadImage2D(lua_State *L)
 
 	filename = luaL_checkstring(L, 1);
 
-#ifdef FONT_PHYSFS
+#ifdef IMAGE_PHYSFS
 	/* Copy file to a temporary file */
 	fin = PHYSFS_openRead(filename);
 	if(!fin)
@@ -987,7 +987,7 @@ int r_loadImage2D(lua_State *L)
 	/*free(tmpfilename);*/
 #endif
 
-#ifdef FONT_PHYSFS
+#ifdef IMAGE_PHYSFS
 	img = IMG_Load(tmpfilename);
 #else
 	img = IMG_Load(filename);
