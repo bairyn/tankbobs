@@ -966,7 +966,7 @@ int fs_listFiles(lua_State *L)
 	{
 		lua_pushinteger(L, files - i + 1);
 		lua_pushstring(L, *i);
-		lua_settop(L, -3);
+		lua_settable(L, -3);
 	}
 
 	PHYSFS_freeList(files);
