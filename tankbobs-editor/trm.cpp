@@ -488,10 +488,11 @@ bool trm_open(const char *filename, bool import)  // Will not confirm unsaved pr
 					double x2, y2;
 					double x3, y3;
 					double x4, y4;
-					double tx1, ty1;
-					double tx2, ty2;
-					double tx3, ty3;
-					double tx4, ty4;
+					double tht;
+					double tvt;
+					double ths;
+					double tvs;
+					double tr;
 					char texture[1024];
 					int level;
 					char target[1024];
@@ -501,22 +502,19 @@ bool trm_open(const char *filename, bool import)  // Will not confirm unsaved pr
 					char misc[1024];
 
 					quad = read_int();
-					x1 = read_double();
-					y1 = read_double();
-					x2 = read_double();
-					y2 = read_double();
-					x3 = read_double();
-					y3 = read_double();
-					x4 = read_double();
-					y4 = read_double();
-					tx1 = read_double();
-					ty1 = read_double();
-					tx2 = read_double();
-					ty2 = read_double();
-					tx3 = read_double();
-					ty3 = read_double();
-					tx4 = read_double();
-					ty4 = read_double();
+					x1   = read_double();
+					y1   = read_double();
+					x2   = read_double();
+					y2   = read_double();
+					x3   = read_double();
+					y3   = read_double();
+					x4   = read_double();
+					y4   = read_double();
+					tht  = read_double();
+					tvt  = read_double();
+					ths  = read_double();
+					tvs  = read_double();
+					tr   = read_double();
 					read_string(texture);
 					level = read_int();
 					read_string(target);
@@ -525,7 +523,7 @@ bool trm_open(const char *filename, bool import)  // Will not confirm unsaved pr
 					staticW = read_int();
 					read_string(misc);
 
-					wall.push_back(new entities::Wall(x1, y1, quad, x2, y2, x3, y3, x4, y4, tx1, ty1, tx2, ty2, tx3, ty3, tx4, ty4, texture, level, target, path, detail, staticW, misc));
+					wall.push_back(new entities::Wall(x1, y1, quad, x2, y2, x3, y3, x4, y4, tht, tvt, ths, tvs, tr, texture, level, target, path, detail, staticW, misc));
 				}
 				else if(strncmp(entity, "teleporter", sizeof(entity)) == 0)
 				{
@@ -718,21 +716,15 @@ bool trm_save(const char *filename)
 		<< ", "
 		<< e->y4
 		<< ", "
-		<< e->tx1
+		<< e->tht
 		<< ", "
-		<< e->ty1
+		<< e->tvt
 		<< ", "
-		<< e->tx2
+		<< e->ths
 		<< ", "
-		<< e->ty2
+		<< e->tvs
 		<< ", "
-		<< e->tx3
-		<< ", "
-		<< e->ty3
-		<< ", "
-		<< e->tx4
-		<< ", "
-		<< e->ty4
+		<< e->tr
 		<< ", "
 		<< e->texture
 		<< ", "

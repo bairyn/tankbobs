@@ -107,14 +107,11 @@ namespace entities
 			double y3;
 			double x4;
 			double y4;
-			double tx1;
-			double ty1;
-			double tx2;
-			double ty2;
-			double tx3;
-			double ty3;
-			double tx4;
-			double ty4;
+			double tht;
+			double tvt;
+			double ths;
+			double tvs;
+			double tr;
 			string texture;
 			int level;
 			string target;
@@ -122,7 +119,7 @@ namespace entities
 			bool detail;
 			bool staticW;
 			string misc;
-			Wall(double Wall_x1 = 0.0, double Wall_y1 = 0.0, bool Wall_quad = false, double Wall_x2 = 0.0, double Wall_y2 = 0.0, double Wall_x3 = 0.0, double Wall_y3 = 0.0, double Wall_x4 = 0.0, double Wall_y4 = 0.0, double Wall_tx1 = 0.0, double Wall_ty1 = 1.0, double Wall_tx2 = 0.0, double Wall_ty2 = 0.0, double Wall_tx3 = 1.0, double Wall_ty3 = 0.0, double Wall_tx4 = 1.0, double Wall_ty4 = 1.0, string Wall_texture = "", int Wall_level = 0, string Wall_target = "", bool Wall_path = false, bool Wall_detail = false, bool Wall_staticW = true, string Wall_misc = "") : x1(Wall_x1), y1(Wall_y1), quad(Wall_quad), x2(Wall_x2), y2(Wall_y2), x3(Wall_x3), y3(Wall_y3), x4(Wall_x4), y4(Wall_y4), tx1(Wall_tx1), ty1(Wall_ty1), tx2(Wall_tx2), ty2(Wall_ty2), tx3(Wall_tx3), ty3(Wall_ty3), tx4(Wall_tx4), ty4(Wall_ty4), texture(Wall_texture), level(Wall_level), target(Wall_target), path(Wall_path), detail(Wall_detail), staticW(Wall_staticW), misc(Wall_misc) {}  // note that static walls are default
+			Wall(double Wall_x1 = 0.0, double Wall_y1 = 0.0, bool Wall_quad = false, double Wall_x2 = 0.0, double Wall_y2 = 0.0, double Wall_x3 = 0.0, double Wall_y3 = 0.0, double Wall_x4 = 0.0, double Wall_y4 = 0.0, double Wall_tht = 0.0, double Wall_tvt = 0.0, double Wall_ths = 1.0, double Wall_tvs = 1.0, double Wall_tr = 0.0, string Wall_texture = "", int Wall_level = 0, string Wall_target = "", bool Wall_path = false, bool Wall_detail = false, bool Wall_staticW = true, string Wall_misc = "") : x1(Wall_x1), y1(Wall_y1), quad(Wall_quad), x2(Wall_x2), y2(Wall_y2), x3(Wall_x3), y3(Wall_y3), x4(Wall_x4), y4(Wall_y4), tht(Wall_tht), tvt(Wall_tvt), ths(Wall_ths), tvs(Wall_tvs), tr(Wall_tr), texture(Wall_texture), level(Wall_level), target(Wall_target), path(Wall_path), detail(Wall_detail), staticW(Wall_staticW), misc(Wall_misc) {}
 	};
 
 	class Path : public Entity
