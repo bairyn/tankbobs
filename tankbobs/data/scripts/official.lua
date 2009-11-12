@@ -119,7 +119,7 @@ elseif c_tcm_current_map.name == "race-track" then
 	c_mods_exitWorldFunction(resetAI)
 
 	-- zoom out
-	c_world_setZoom(0.5)
+	c_world_setZoom(0.66)
 
 	-- first look for number of laps by score limit
 	local laps
