@@ -9,5 +9,6 @@ mod-server
 modules
 NOTICE
 server
+jit
 tankbobs*
 trmc*
