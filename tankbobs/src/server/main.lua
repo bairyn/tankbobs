@@ -90,25 +90,23 @@ function s_print(...)
 		logFile = c_const_get("user_dir") .. logFile
 	end
 
-	local fout, err
+	local fout
 	if logFile then
-		fout, err = io.open(logFile, "a")
-
-		if not fout then
-			tankbobs.c_print("Error: could not open '") tankbobs.c_print(logFile) tankbobs.c_print("' for appending\n")
-		end
+		fout = tankbobs.fs_openAppend(logFile)
 	end
 
 	for _, v in pairs(p) do
 		local vs = tostring(v)
+
 		if fout then
-			fout:write(vs)
+			tankbobs.fs_write(fout, vs)
 		end
+
 		tankbobs.c_print(vs)
 	end
 
 	if fout then
-		fout:close()
+		tankbobs.fs_close(fout)
 	end
 end
 
