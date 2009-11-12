@@ -215,7 +215,7 @@ if [ "$1" == "make" ]; then
 	fi
 
 	for FILE in `cat ./BUILDFILES`; do
-		if ! cp -R ${FILE} ./dist_pk_tmp/; then
+		if ! cp -L -R ${FILE} ./dist_pk_tmp/; then
 			exit 1
 		fi
 	done
