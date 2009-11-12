@@ -88,6 +88,37 @@ void fs_initNL(lua_State *L)
 {
 }
 
+void fs_errorNL(lua_State *L, void *f_, const char *filename)
+{
+	int num = 0;
+	const char *e;
+	PHYSFS_File *f = (PHYSFS_File *) f_;
+
+	++num; lua_pushstring(L, "file error");
+	if((e = PHYSFS_getLastError()))
+	{
+		++num; lua_pushstring(L, ": \"");
+		++num; lua_pushstring(L, e);
+		++num; lua_pushstring(L, "\"");
+	}
+	if(filename)
+	{
+		++num; lua_pushstring(L, " (");
+		++num; lua_pushstring(L, filename);
+		++num; lua_pushstring(L, " )");
+	}
+	if(f)
+	{
+	}
+
+	if(num <= 0)
+	{
+		++num; lua_pushstring(L, "");
+	}
+	lua_concat(L, num);
+	lua_error(L);
+}
+
 /* Here we rewrite some lua loader code */
 
 typedef struct fs_LoadF
@@ -152,8 +183,7 @@ static int fs_luaL_loadfile(lua_State *L, const char *filename)
 		lf.f = PHYSFS_openRead(filename);
 		if(!lf.f)
 		{
-			lua_pushstring(L, PHYSFS_getLastError());
-			lua_error(L);
+			fs_errorNL(L, lf.f, filename);
 
 			return 0;
 		}
@@ -165,8 +195,7 @@ static int fs_luaL_loadfile(lua_State *L, const char *filename)
 	status = PHYSFS_read(lf.f, &c, 1, 1);
 	if(status < 1 && !PHYSFS_eof(lf.f))
 	{
-		lua_pushstring(L, PHYSFS_getLastError());
-		lua_error(L);
+		fs_errorNL(L, lf.f, filename);
 
 		return 0;
 	}
@@ -178,8 +207,7 @@ static int fs_luaL_loadfile(lua_State *L, const char *filename)
 			while ((status = PHYSFS_read(lf.f, &c, 1, 1)) >= 1 && c != '\n') ;  /* skip first line */
 			if(status < 1 && !PHYSFS_eof(lf.f))
 			{
-				lua_pushstring(L, PHYSFS_getLastError());
-				lua_error(L);
+				fs_errorNL(L, lf.f, filename);
 
 				return 0;
 			}
@@ -189,8 +217,7 @@ static int fs_luaL_loadfile(lua_State *L, const char *filename)
 					status = PHYSFS_read(lf.f, &c, 1, 1);
 				if(status < 1 && !PHYSFS_eof(lf.f))
 				{
-					lua_pushstring(L, PHYSFS_getLastError());
-					lua_error(L);
+					fs_errorNL(L, lf.f, filename);
 
 					return 0;
 				}
@@ -204,8 +231,7 @@ static int fs_luaL_loadfile(lua_State *L, const char *filename)
 			lf.f = freopen(filename, "rb", lf.f);  /8 reopen in binary mode 8/
 			if(!lf.f)
 			{
-				lua_pushstring(L, PHYSFS_getLastError());
-				lua_error(L);
+				fs_errorNL(L, lf.f, filename);
 
 				return 0;
 			}
@@ -217,8 +243,7 @@ static int fs_luaL_loadfile(lua_State *L, const char *filename)
 			while ((status = PHYSFS_read(lf.f, &c, 1, 1)) >= 1 && c != LUA_SIGNATURE[0]) ;
 			if(status < 1 && !PHYSFS_eof(lf.f))
 			{
-				lua_pushstring(L, PHYSFS_getLastError());
-				lua_error(L);
+				fs_errorNL(L, lf.f, filename);
 
 				return 0;
 			}
@@ -233,8 +258,7 @@ static int fs_luaL_loadfile(lua_State *L, const char *filename)
 	status_ = PHYSFS_close(lf.f);  /* close file (even in case of errors) */
 	if(!status_)
 	{
-		lua_pushstring(L, PHYSFS_getLastError());
-		lua_error(L);
+		fs_errorNL(L, lf.f, filename);
 
 		return 0;
 	}
@@ -399,6 +423,7 @@ static void *fs_ll_load(lua_State *L, const char *path)
 	if(!fin)
 	{
 		lua_pushstring(L, PHYSFS_getLastError());
+		/*fs_errorNL(L, fin, path);*/
 
 		return NULL;
 	}
@@ -444,6 +469,9 @@ static void *fs_ll_load(lua_State *L, const char *path)
 	if(!status)
 	{
 		lua_pushstring(L, PHYSFS_getLastError());
+		/*fs_errorNL(L, fin, path);*/
+
+		return NULL;
 	}
 	fclose(fout);
 
@@ -487,6 +515,7 @@ static void *fs_ll_load(lua_State *L, const char *path)
 	if(!fin)
 	{
 		lua_pushstring(L, PHYSFS_getLastError());
+		/*fs_errorNL(L, fin, path);*/
 
 		return NULL;
 	}
@@ -523,6 +552,9 @@ static void *fs_ll_load(lua_State *L, const char *path)
 	if(!status)
 	{
 		lua_pushstring(L, PHYSFS_getLastError());
+		/*fs_errorNL(L, fin, path);*/
+
+		return NULL;
 	}
 	fclose(fout);
 
@@ -729,8 +761,7 @@ int fs_init(lua_State *L)
 
 	if(!status)
 	{
-		lua_pushstring(L, PHYSFS_getLastError());
-		lua_error(L);
+		fs_errorNL(L, NULL, NULL);
 
 		return 0;
 	}
@@ -768,8 +799,7 @@ int fs_quit(lua_State *L)
 
 	if(!status)
 	{
-		lua_pushstring(L, PHYSFS_getLastError());
-		lua_error(L);
+		fs_errorNL(L, NULL, NULL);
 
 		return 0;
 	}
@@ -906,8 +936,7 @@ int fs_mkdir(lua_State *L)
 
 	if(!status)
 	{
-		lua_pushstring(L, PHYSFS_getLastError());
-		lua_error(L);
+		fs_errorNL(L, NULL, luaL_checkstring(L, 1));
 
 		return 0;
 	}
@@ -920,12 +949,11 @@ int fs_remove(lua_State *L)
 	CHECKINIT(init, L);
 	CHECKFSINIT(init, L);
 
-	int status = PHYSFS_mkdir(luaL_checkstring(L, 1));
+	int status = PHYSFS_delete(luaL_checkstring(L, 1));
 
 	if(!status)
 	{
-		lua_pushstring(L, PHYSFS_getLastError());
-		lua_error(L);
+		fs_errorNL(L, NULL, luaL_checkstring(L, 1));
 
 		return 0;
 	}
@@ -1032,8 +1060,7 @@ int fs_openWrite(lua_State *L)
 
 	if(!fout)
 	{
-		lua_pushstring(L, PHYSFS_getLastError());
-		lua_error(L);
+		fs_errorNL(L, fout, luaL_checkstring(L, 1));
 
 		return 0;
 	}
@@ -1054,8 +1081,7 @@ int fs_openAppend(lua_State *L)
 
 	if(!fout)
 	{
-		lua_pushstring(L, PHYSFS_getLastError());
-		lua_error(L);
+		fs_errorNL(L, fout, luaL_checkstring(L, 1));
 
 		return 0;
 	}
@@ -1076,8 +1102,7 @@ int fs_openRead(lua_State *L)
 
 	if(!fin)
 	{
-		lua_pushstring(L, PHYSFS_getLastError());
-		lua_error(L);
+		fs_errorNL(L, fin, luaL_checkstring(L, 1));
 
 		return 0;
 	}
@@ -1103,8 +1128,7 @@ int fs_close(lua_State *L)
 
 		if(!status)
 		{
-			lua_pushstring(L, PHYSFS_getLastError());
-			lua_error(L);
+			fs_errorNL(L, file, NULL);
 
 			return 0;
 		}
@@ -1158,8 +1182,7 @@ int fs_read(lua_State *L)
 		}
 		else
 		{
-			lua_pushstring(L, PHYSFS_getLastError());
-			lua_error(L);
+			fs_errorNL(L, fin, NULL);
 
 			return 0;
 		}
@@ -1189,8 +1212,7 @@ int fs_write(lua_State *L)
 
 	if(num < len)
 	{
-		lua_pushstring(L, PHYSFS_getLastError());
-		lua_error(L);
+		fs_errorNL(L, fout, NULL);
 
 		return 0;
 	}
@@ -1212,8 +1234,7 @@ int fs_tell(lua_State *L)
 
 	if(offset == -1)
 	{
-		lua_pushstring(L, PHYSFS_getLastError());
-		lua_error(L);
+		fs_errorNL(L, file, NULL);
 
 		return 0;
 	}
@@ -1240,8 +1261,7 @@ int fs_seekFromStart(lua_State *L)
 
 	if(!status)
 	{
-		lua_pushstring(L, PHYSFS_getLastError());
-		lua_error(L);
+		fs_errorNL(L, file, NULL);
 
 		return 0;
 	}
@@ -1261,8 +1281,7 @@ int fs_fileLength(lua_State *L)
 
 	if(len == -1)
 	{
-		lua_pushstring(L, PHYSFS_getLastError());
-		lua_error(L);
+		fs_errorNL(L, file, NULL);
 
 		return 0;
 	}
@@ -1293,8 +1312,7 @@ int fs_getInt(lua_State *L)
 		}
 		else
 		{
-			lua_pushstring(L, PHYSFS_getLastError());
-			lua_error(L);
+			fs_errorNL(L, fin, NULL);
 
 			return 0;
 		}
@@ -1328,8 +1346,7 @@ int fs_getShort(lua_State *L)
 		}
 		else
 		{
-			lua_pushstring(L, PHYSFS_getLastError());
-			lua_error(L);
+			fs_errorNL(L, fin, NULL);
 
 			return 0;
 		}
@@ -1363,8 +1380,7 @@ int fs_getChar(lua_State *L)
 		}
 		else
 		{
-			lua_pushstring(L, PHYSFS_getLastError());
-			lua_error(L);
+			fs_errorNL(L, fin, NULL);
 
 			return 0;
 		}
@@ -1398,8 +1414,7 @@ int fs_getDouble(lua_State *L)
 		}
 		else
 		{
-			lua_pushstring(L, PHYSFS_getLastError());
-			lua_error(L);
+			fs_errorNL(L, fin, NULL);
 
 			return 0;
 		}
@@ -1433,8 +1448,7 @@ int fs_getFloat(lua_State *L)
 		}
 		else
 		{
-			lua_pushstring(L, PHYSFS_getLastError());
-			lua_error(L);
+			fs_errorNL(L, fin, NULL);
 
 			return 0;
 		}
@@ -1494,8 +1508,7 @@ int fs_getStr(lua_State *L)
 		}
 		else if(!all)
 		{
-			lua_pushstring(L, PHYSFS_getLastError());
-			lua_error(L);
+			fs_errorNL(L, fin, NULL);
 
 			return 0;
 		}
@@ -1523,8 +1536,7 @@ int fs_putInt(lua_State *L)
 
 	if(!status)
 	{
-		lua_pushstring(L, PHYSFS_getLastError());
-		lua_error(L);
+		fs_errorNL(L, fout, NULL);
 
 		return 0;
 	}
@@ -1548,8 +1560,7 @@ int fs_putShort(lua_State *L)
 
 	if(!status)
 	{
-		lua_pushstring(L, PHYSFS_getLastError());
-		lua_error(L);
+		fs_errorNL(L, fout, NULL);
 
 		return 0;
 	}
@@ -1573,8 +1584,7 @@ int fs_putChar(lua_State *L)
 
 	if(status < 1)
 	{
-		lua_pushstring(L, PHYSFS_getLastError());
-		lua_error(L);
+		fs_errorNL(L, fout, NULL);
 
 		return 0;
 	}
@@ -1600,8 +1610,7 @@ int fs_putDouble(lua_State *L)
 
 	if(!status)
 	{
-		lua_pushstring(L, PHYSFS_getLastError());
-		lua_error(L);
+		fs_errorNL(L, fout, NULL);
 
 		return 0;
 	}
@@ -1627,8 +1636,7 @@ int fs_putFloat(lua_State *L)
 
 	if(!status)
 	{
-		lua_pushstring(L, PHYSFS_getLastError());
-		lua_error(L);
+		fs_errorNL(L, fout, NULL);
 
 		return 0;
 	}
@@ -1650,8 +1658,7 @@ int fs_mount(lua_State *L)
 
 	if(!status)
 	{
-		lua_pushstring(L, PHYSFS_getLastError());
-		lua_error(L);
+		fs_errorNL(L, NULL, luaL_checkstring(L, 1));
 
 		return 0;
 	}

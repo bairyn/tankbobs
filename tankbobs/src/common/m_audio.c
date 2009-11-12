@@ -183,8 +183,7 @@ int a_initSound(lua_State *L)
 				fin = PHYSFS_openRead(filename);
 				if(!fin)
 				{
-					lua_pushstring(L, PHYSFS_getLastError());
-					lua_error(L);
+					fs_errorNL(L, fin, filename);
 
 					return 0;
 				}
@@ -223,8 +222,9 @@ int a_initSound(lua_State *L)
 				status = PHYSFS_close(fin);
 				if(!status)
 				{
-					lua_pushstring(L, PHYSFS_getLastError());
-					lua_error(L);
+					fs_errorNL(L, fin, filename);
+
+					return 0;
 				}
 				fclose(fout);
 
@@ -254,8 +254,7 @@ int a_initSound(lua_State *L)
 				fin = PHYSFS_openRead(filename);
 				if(!fin)
 				{
-					lua_pushstring(L, PHYSFS_getLastError());
-					lua_error(L);
+					fs_errorNL(L, fin, filename);
 
 					return 0;
 				}
@@ -294,8 +293,9 @@ int a_initSound(lua_State *L)
 				status = PHYSFS_close(fin);
 				if(!status)
 				{
-					lua_pushstring(L, PHYSFS_getLastError());
-					lua_error(L);
+					fs_errorNL(L, fin, filename);
+
+					return 0;
 				}
 				fclose(fout);
 
@@ -425,8 +425,7 @@ int a_startMusic(lua_State *L)
 		fin = PHYSFS_openRead(filename);
 		if(!fin)
 		{
-			lua_pushstring(L, PHYSFS_getLastError());
-			lua_error(L);
+			fs_errorNL(L, fin, filename);
 
 			return 0;
 		}
@@ -465,8 +464,9 @@ int a_startMusic(lua_State *L)
 		status = PHYSFS_close(fin);
 		if(!status)
 		{
-			lua_pushstring(L, PHYSFS_getLastError());
-			lua_error(L);
+			fs_errorNL(L, fin, filename);
+
+			return 0;
 		}
 		fclose(fout);
 
@@ -583,8 +583,7 @@ int a_playSound(lua_State *L)
 				fin = PHYSFS_openRead(filename);
 				if(!fin)
 				{
-					lua_pushstring(L, PHYSFS_getLastError());
-					lua_error(L);
+					fs_errorNL(L, fin, filename);
 
 					return 0;
 				}
@@ -623,8 +622,9 @@ int a_playSound(lua_State *L)
 				status = PHYSFS_close(fin);
 				if(!status)
 				{
-					lua_pushstring(L, PHYSFS_getLastError());
-					lua_error(L);
+					fs_errorNL(L, fin, filename);
+
+					return 0;
 				}
 				fclose(fout);
 
@@ -780,8 +780,7 @@ int a_setVolumeChunk(lua_State *L)
 				fin = PHYSFS_openRead(filename);
 				if(!fin)
 				{
-					lua_pushstring(L, PHYSFS_getLastError());
-					lua_error(L);
+					fs_errorNL(L, fin, filename);
 
 					return 0;
 				}
@@ -820,8 +819,9 @@ int a_setVolumeChunk(lua_State *L)
 				status = PHYSFS_close(fin);
 				if(!status)
 				{
-					lua_pushstring(L, PHYSFS_getLastError());
-					lua_error(L);
+					fs_errorNL(L, fin, filename);
+
+					return 0;
 				}
 				fclose(fout);
 

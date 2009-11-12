@@ -409,6 +409,7 @@ int n_readPacket(lua_State *L);
 
 /* m_fs.c */
 void fs_initNL(lua_State *L);
+void fs_errorNL(lua_State *L, void *f_, const char *filename);
 int fs_init(lua_State *L);
 int fs_quit(lua_State *L);
 int fs_setArgv0(lua_State *L);

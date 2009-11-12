@@ -345,8 +345,7 @@ int r_newFont(lua_State *L)
 	fin = PHYSFS_openRead(font->filename);
 	if(!fin)
 	{
-		lua_pushstring(L, PHYSFS_getLastError());
-		lua_error(L);
+		fs_errorNL(L, fin, font->filename);
 
 		return 0;
 	}
@@ -385,8 +384,9 @@ int r_newFont(lua_State *L)
 	status = PHYSFS_close(fin);
 	if(!status)
 	{
-		lua_pushstring(L, PHYSFS_getLastError());
-		lua_error(L);
+		fs_errorNL(L, fin, font->filename);
+
+		return 0;
 	}
 	fclose(fout);
 
@@ -939,8 +939,7 @@ int r_loadImage2D(lua_State *L)
 	fin = PHYSFS_openRead(filename);
 	if(!fin)
 	{
-		lua_pushstring(L, PHYSFS_getLastError());
-		lua_error(L);
+		fs_errorNL(L, fin, filename);
 
 		return 0;
 	}
@@ -979,8 +978,9 @@ int r_loadImage2D(lua_State *L)
 	status = PHYSFS_close(fin);
 	if(!status)
 	{
-		lua_pushstring(L, PHYSFS_getLastError());
-		lua_error(L);
+		fs_errorNL(L, fin, filename);
+
+		return 0;
 	}
 	fclose(fout);
 
@@ -1001,8 +1001,7 @@ int r_loadImage2D(lua_State *L)
 		fin = PHYSFS_openRead(filename);
 		if(!fin)
 		{
-			lua_pushstring(L, PHYSFS_getLastError());
-			lua_error(L);
+			fs_errorNL(L, fin, filename);
 
 			return 0;
 		}
@@ -1041,8 +1040,9 @@ int r_loadImage2D(lua_State *L)
 		status = PHYSFS_close(fin);
 		if(!status)
 		{
-			lua_pushstring(L, PHYSFS_getLastError());
-			lua_error(L);
+			fs_errorNL(L, fin, filename);
+
+			return 0;
 		}
 		fclose(fout);
 
