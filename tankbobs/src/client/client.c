@@ -43,9 +43,9 @@ static const luaL_Reg lualibs[] =
 
 LUALIB_API void luaL_openlibs (lua_State *L)
 {
-	const luaL_Reg *lib = lualibs;
+	const luaL_Reg *lib;
 
-	for( ; lib->func; lib++)
+	for(lib = lualibs; lib->func; lib++)
 	{
 		lua_pushcfunction(L, lib->func);
 		lua_pushstring(L, lib->name);
@@ -57,6 +57,7 @@ LUALIB_API void luaL_openlibs (lua_State *L)
 int main(int argc, char **argv)
 {
 	int i, err;
+	static char filename[4096];
 
 	lua_State *L = luaL_newstate();
 	luaL_openlibs(L);
@@ -88,9 +89,10 @@ int main(int argc, char **argv)
 	lua_concat(L, 5);
 	lua_setfield(L, -2, "cpath");
 	lua_pop(L, 1);
+	sprintf(filename, "%s%s%s", PHYSFS_getBaseDir(), PHYSFS_getDirSeparator(), "client");
 	PHYSFS_deinit();
 
-	if((err = luaL_dofile(L, "client")))
+	if((err = luaL_dofile(L, filename)))
 	{
 		const char *message = lua_tostring(L, -1);
 		fprintf(stderr, "Error: %s\n", message);
