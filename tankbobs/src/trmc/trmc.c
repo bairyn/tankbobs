@@ -24,6 +24,7 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <stdio.h>
+#include <math.h>
 
 #include <SDL/SDL_endian.h>
 
@@ -35,6 +36,26 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 #define MAX_STRING_STRUCT_CHARS 256
 #define MAX_LINE_SIZE 1024
 
+#define SCALE 100  /* Untransformed textures repeat one screen-full at a time */
+
+/* Some math */
+
+typedef double vec2_t[2];
+
+#ifndef M_PI
+#define M_PI 3.1415926535897932
+#endif
+
+double m_degreesNL(double radians)
+{
+	return radians * 180 / M_PI;
+}
+
+double m_radiansNL(double degrees)
+{
+	return degrees * M_PI / 180;
+}
+
 static int m_force = 0;  /* force overwriting compiled maps */
 
 static const char *read_line = NULL;
@@ -45,23 +66,23 @@ static void put_double(FILE *fout, const double *d)
     const unsigned char * const p = (const unsigned char *)d;
 
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-    fputc((const unsigned char)p[7], fout);
-    fputc((const unsigned char)p[6], fout);
-    fputc((const unsigned char)p[5], fout);
-    fputc((const unsigned char)p[4], fout);
-    fputc((const unsigned char)p[3], fout);
-    fputc((const unsigned char)p[2], fout);
-    fputc((const unsigned char)p[1], fout);
-    fputc((const unsigned char)p[0], fout);
+    fputc((const unsigned char) p[7], fout);
+    fputc((const unsigned char) p[6], fout);
+    fputc((const unsigned char) p[5], fout);
+    fputc((const unsigned char) p[4], fout);
+    fputc((const unsigned char) p[3], fout);
+    fputc((const unsigned char) p[2], fout);
+    fputc((const unsigned char) p[1], fout);
+    fputc((const unsigned char) p[0], fout);
 #else
-    fputc((const unsigned char)p[0], fout);
-    fputc((const unsigned char)p[1], fout);
-    fputc((const unsigned char)p[2], fout);
-    fputc((const unsigned char)p[3], fout);
-    fputc((const unsigned char)p[4], fout);
-    fputc((const unsigned char)p[5], fout);
-    fputc((const unsigned char)p[6], fout);
-    fputc((const unsigned char)p[7], fout);
+    fputc((const unsigned char) p[0], fout);
+    fputc((const unsigned char) p[1], fout);
+    fputc((const unsigned char) p[2], fout);
+    fputc((const unsigned char) p[3], fout);
+    fputc((const unsigned char) p[4], fout);
+    fputc((const unsigned char) p[5], fout);
+    fputc((const unsigned char) p[6], fout);
+    fputc((const unsigned char) p[7], fout);
 #endif
 }
 
@@ -70,15 +91,15 @@ static void put_float(FILE *fout, const float *f)
     const unsigned char *p = (const unsigned char *)f;
 
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-    fputc((const unsigned char)p[3], fout);
-    fputc((const unsigned char)p[2], fout);
-    fputc((const unsigned char)p[1], fout);
-    fputc((const unsigned char)p[0], fout);
+    fputc((const unsigned char) p[3], fout);
+    fputc((const unsigned char) p[2], fout);
+    fputc((const unsigned char) p[1], fout);
+    fputc((const unsigned char) p[0], fout);
 #else
-    fputc((const unsigned char)p[0], fout);
-    fputc((const unsigned char)p[1], fout);
-    fputc((const unsigned char)p[2], fout);
-    fputc((const unsigned char)p[3], fout);
+    fputc((const unsigned char) p[0], fout);
+    fputc((const unsigned char) p[1], fout);
+    fputc((const unsigned char) p[2], fout);
+    fputc((const unsigned char) p[3], fout);
 #endif
 }
 
@@ -87,15 +108,15 @@ static void put_int(FILE *fout, const unsigned int *i)
     const unsigned char *p = (const unsigned char *)i;
 
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-    fputc((const unsigned char)p[3], fout);
-    fputc((const unsigned char)p[2], fout);
-    fputc((const unsigned char)p[1], fout);
-    fputc((const unsigned char)p[0], fout);
+    fputc((const unsigned char) p[3], fout);
+    fputc((const unsigned char) p[2], fout);
+    fputc((const unsigned char) p[1], fout);
+    fputc((const unsigned char) p[0], fout);
 #else
-    fputc((const unsigned char)p[0], fout);
-    fputc((const unsigned char)p[1], fout);
-    fputc((const unsigned char)p[2], fout);
-    fputc((const unsigned char)p[3], fout);
+    fputc((const unsigned char) p[0], fout);
+    fputc((const unsigned char) p[1], fout);
+    fputc((const unsigned char) p[2], fout);
+    fputc((const unsigned char) p[3], fout);
 #endif
 }
 
@@ -104,11 +125,11 @@ static void put_short(FILE *fout, const unsigned short *s)
     const unsigned char *p = (const unsigned char *)s;
 
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-    fputc((const unsigned char)p[1], fout);
-    fputc((const unsigned char)p[0], fout);
+    fputc((const unsigned char) p[1], fout);
+    fputc((const unsigned char) p[0], fout);
 #else
-    fputc((const unsigned char)p[0], fout);
-    fputc((const unsigned char)p[1], fout);
+    fputc((const unsigned char) p[0], fout);
+    fputc((const unsigned char) p[1], fout);
 #endif
 }
 
@@ -117,9 +138,9 @@ static void put_char(FILE *fout, const unsigned char *c)
 	const unsigned char *p = (const unsigned char *)c;
 
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-    fputc((const unsigned char)p[0], fout);
+    fputc((const unsigned char) p[0], fout);
 #else
-    fputc((const unsigned char)p[0], fout);
+    fputc((const unsigned char) p[0], fout);
 #endif
 }
 
@@ -128,23 +149,23 @@ static void put_cdouble(FILE *fout, const double d)
     const unsigned char *p = (const unsigned char *)&d;
 
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-    fputc((const unsigned char)p[7], fout);
-    fputc((const unsigned char)p[6], fout);
-    fputc((const unsigned char)p[5], fout);
-    fputc((const unsigned char)p[4], fout);
-    fputc((const unsigned char)p[3], fout);
-    fputc((const unsigned char)p[2], fout);
-    fputc((const unsigned char)p[1], fout);
-    fputc((const unsigned char)p[0], fout);
+    fputc((const unsigned char) p[7], fout);
+    fputc((const unsigned char) p[6], fout);
+    fputc((const unsigned char) p[5], fout);
+    fputc((const unsigned char) p[4], fout);
+    fputc((const unsigned char) p[3], fout);
+    fputc((const unsigned char) p[2], fout);
+    fputc((const unsigned char) p[1], fout);
+    fputc((const unsigned char) p[0], fout);
 #else
-    fputc((const unsigned char)p[0], fout);
-    fputc((const unsigned char)p[1], fout);
-    fputc((const unsigned char)p[2], fout);
-    fputc((const unsigned char)p[3], fout);
-    fputc((const unsigned char)p[4], fout);
-    fputc((const unsigned char)p[5], fout);
-    fputc((const unsigned char)p[6], fout);
-    fputc((const unsigned char)p[7], fout);
+    fputc((const unsigned char) p[0], fout);
+    fputc((const unsigned char) p[1], fout);
+    fputc((const unsigned char) p[2], fout);
+    fputc((const unsigned char) p[3], fout);
+    fputc((const unsigned char) p[4], fout);
+    fputc((const unsigned char) p[5], fout);
+    fputc((const unsigned char) p[6], fout);
+    fputc((const unsigned char) p[7], fout);
 #endif
 }
 
@@ -153,15 +174,15 @@ static void put_cfloat(FILE *fout, const float f)
     const unsigned char *p = (const unsigned char *)&f;
 
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-    fputc((const unsigned char)p[3], fout);
-    fputc((const unsigned char)p[2], fout);
-    fputc((const unsigned char)p[1], fout);
-    fputc((const unsigned char)p[0], fout);
+    fputc((const unsigned char) p[3], fout);
+    fputc((const unsigned char) p[2], fout);
+    fputc((const unsigned char) p[1], fout);
+    fputc((const unsigned char) p[0], fout);
 #else
-    fputc((const unsigned char)p[0], fout);
-    fputc((const unsigned char)p[1], fout);
-    fputc((const unsigned char)p[2], fout);
-    fputc((const unsigned char)p[3], fout);
+    fputc((const unsigned char) p[0], fout);
+    fputc((const unsigned char) p[1], fout);
+    fputc((const unsigned char) p[2], fout);
+    fputc((const unsigned char) p[3], fout);
 #endif
 }
 
@@ -170,15 +191,15 @@ static void put_cint(FILE *fout, const unsigned int i)
     const unsigned char *p = (const unsigned char *)&i;
 
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-    fputc((const unsigned char)p[3], fout);
-    fputc((const unsigned char)p[2], fout);
-    fputc((const unsigned char)p[1], fout);
-    fputc((const unsigned char)p[0], fout);
+    fputc((const unsigned char) p[3], fout);
+    fputc((const unsigned char) p[2], fout);
+    fputc((const unsigned char) p[1], fout);
+    fputc((const unsigned char) p[0], fout);
 #else
-    fputc((const unsigned char)p[0], fout);
-    fputc((const unsigned char)p[1], fout);
-    fputc((const unsigned char)p[2], fout);
-    fputc((const unsigned char)p[3], fout);
+    fputc((const unsigned char) p[0], fout);
+    fputc((const unsigned char) p[1], fout);
+    fputc((const unsigned char) p[2], fout);
+    fputc((const unsigned char) p[3], fout);
 #endif
 }
 
@@ -187,11 +208,11 @@ static void put_cshort(FILE *fout, const unsigned short s)
     const unsigned char *p = (const unsigned char *)&s;
 
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-    fputc((const unsigned char)p[1], fout);
-    fputc((const unsigned char)p[0], fout);
+    fputc((const unsigned char) p[1], fout);
+    fputc((const unsigned char) p[0], fout);
 #else
-    fputc((const unsigned char)p[0], fout);
-    fputc((const unsigned char)p[1], fout);
+    fputc((const unsigned char) p[0], fout);
+    fputc((const unsigned char) p[1], fout);
 #endif
 }
 
@@ -200,9 +221,9 @@ static void put_cchar(FILE *fout, const unsigned char c)
 	const unsigned char *p = (const unsigned char *)&c;
 
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-    fputc((const unsigned char)p[0], fout);
+    fputc((const unsigned char) p[0], fout);
 #else
-    fputc((const unsigned char)p[0], fout);
+    fputc((const unsigned char) p[0], fout);
 #endif
 }
 
@@ -518,7 +539,7 @@ static int read_reset(const char *line)
 #define MAX_POWERUPSPAWNPOINTS 528
 #define MAX_PATHS 2048
 #define MAX_CONTROLPOINTS 528
-#define MAX_FLAGS 2
+#define MAX_FLAGS 256
 #define MAX_WAYPOINTS 2048
 
 typedef struct map_s map_t;
@@ -542,10 +563,11 @@ static struct wall_s
 	double x2; double y2;
 	double x3; double y3;
 	double x4; double y4;
-	double tx1; double ty1;
-	double tx2; double ty2;
-	double tx3; double ty3;
-	double tx4; double ty4;
+	double tht;
+	double tvt;
+	double ths;
+	double tvs;
+	double tr;
 	char texture[256];  /* hardcoded for format */
 	int level;
 	char target[MAX_STRING_STRUCT_CHARS];
@@ -618,6 +640,69 @@ static struct wayPoint_s
 	char misc[64];
 } wayPoints[MAX_WAYPOINTS];
 
+
+static void calculateTextureCoordinates(wall_t *wall, vec2_t t[4])
+{
+	int i;
+	double th, r;
+
+	/* calculate texture coordinates by rotation and horizontal and vertical translation and scale */
+	t[0][0] = (wall->x1 + wall->tht) / SCALE;
+	t[1][0] = (wall->x2 + wall->tht) / SCALE;
+	t[2][0] = (wall->x3 + wall->tht) / SCALE;
+	t[3][0] = (wall->x4 + wall->tht) / SCALE;
+	t[0][1] = (wall->y1 + wall->tvt) / SCALE;
+	t[1][1] = (wall->y2 + wall->tvt) / SCALE;
+	t[2][1] = (wall->y3 + wall->tvt) / SCALE;
+	t[3][1] = (wall->y4 + wall->tvt) / SCALE;
+
+	t[0][0] *= wall->ths;
+	t[1][0] *= wall->ths;
+	t[2][0] *= wall->ths;
+	t[3][0] *= wall->ths;
+	t[0][1] *= wall->tvs;
+	t[1][1] *= wall->tvs;
+	t[2][1] *= wall->tvs;
+	t[3][1] *= wall->tvs;
+
+	for(i = 0; i < ((wall->quad) ? (4) : (3)); i++)
+	{
+		if(t[i][0] != 0.0 || t[i][1] != 0.0)
+		{
+			th = atan2(t[i][1], t[i][0]) + m_radiansNL(wall->tr);
+			r = sqrt(t[i][0] * t[i][0] + t[i][1] * t[i][1]);
+			t[i][0] = r * cos(th);
+			t[i][1] = r * sin(th);
+		}
+	}
+
+	/*
+	/8 shift vertices until t[0] matches the lowest vertex 8/
+	k = 0;
+	while(k++ < 4 && ((t[0][1] > t[1][1]) || (t[0][1] > t[2][1]) || (wall->quad && t[0][1] > t[3][3])))
+	{
+		t[0][0] ^= t[1][0];
+		t[1][0] ^= t[0][0];
+		t[0][0] ^= t[1][0];
+		t[1][0] ^= t[2][0];
+		t[2][0] ^= t[1][0];
+		t[1][0] ^= t[2][0];
+		t[0][1] ^= t[1][1];
+		t[1][1] ^= t[0][1];
+		t[0][1] ^= t[1][1];
+		t[1][1] ^= t[2][1];
+		t[2][1] ^= t[1][1];
+		t[1][1] ^= t[2][1];
+		if(wall->quad)
+		{
+			t[2][1] ^= t[3][1];
+			t[3][1] ^= t[2][1];
+			t[2][1] ^= t[3][1];
+		}
+	}
+	*/
+}
+
 static int mc;
 static int wc;
 static int tc;
@@ -648,7 +733,7 @@ static void add_map(const char *name, const char *title, const char *description
 	strncpy(map->script, script, sizeof(map->script));
 }
 
-static void add_wall(int quad, double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double tx1, double ty1, double tx2, double ty2, double tx3, double ty3, double tx4, double ty4, const char *texture, int level, const char *target, int path, int detail, int staticW, const char *misc)
+static void add_wall(int quad, double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double tht, double tvt, double ths, double tvs, double tr, const char *texture, int level, const char *target, int path, int detail, int staticW, const char *misc)
 {
 	wall_t *wall = &walls[wc++];
 
@@ -667,14 +752,11 @@ static void add_wall(int quad, double x1, double y1, double x2, double y2, doubl
 	wall->y3 = y3;
 	wall->x4 = x4;
 	wall->y4 = y4;
-	wall->tx1 = tx1;
-	wall->ty1 = ty1;
-	wall->tx2 = tx2;
-	wall->ty2 = ty2;
-	wall->tx3 = tx3;
-	wall->ty3 = ty3;
-	wall->tx4 = tx4;
-	wall->ty4 = ty4;
+	wall->tht = tht;
+	wall->tvt = tvt;
+	wall->ths = ths;
+	wall->tvs = tvs;
+	wall->tr = tr;
 	strncpy(wall->texture, texture, sizeof(wall->texture));
 	wall->level = level;
 	strncpy(wall->target, target, sizeof(wall->target));
@@ -823,7 +905,7 @@ static int compile(const char *filename)
 	FILE *fin;
 	FILE *fout;
 	int i = 0;
-	int j;
+	int j, k;
 	char line[MAX_LINE_SIZE] = {""};
 
 	/* reset counters */
@@ -933,10 +1015,11 @@ static int compile(const char *filename)
 					double x2, y2;
 					double x3, y3;
 					double x4, y4;
-					double tx1, ty1;
-					double tx2, ty2;
-					double tx3, ty3;
-					double tx4, ty4;
+					double tht;
+					double tvt;
+					double ths;
+					double tvs;
+					double tr;
 					char texture[MAX_STRING_SIZE];
 					int level;
 					char target[MAX_STRING_SIZE];
@@ -946,22 +1029,19 @@ static int compile(const char *filename)
 					char misc[MAX_STRING_SIZE];
 
 					quad = read_int();
-					x1 = read_double();
-					y1 = read_double();
-					x2 = read_double();
-					y2 = read_double();
-					x3 = read_double();
-					y3 = read_double();
-					x4 = read_double();
-					y4 = read_double();
-					tx1 = read_double();
-					ty1 = read_double();
-					tx2 = read_double();
-					ty2 = read_double();
-					tx3 = read_double();
-					ty3 = read_double();
-					tx4 = read_double();
-					ty4 = read_double();
+					x1   = read_double();
+					y1   = read_double();
+					x2   = read_double();
+					y2   = read_double();
+					x3   = read_double();
+					y3   = read_double();
+					x4   = read_double();
+					y4   = read_double();
+					tht  = read_double();
+					tvt  = read_double();
+					ths  = read_double();
+					tvs  = read_double();
+					tr   = read_double();
 					read_string(texture);
 					level = read_int();
 					read_string(target);
@@ -970,7 +1050,7 @@ static int compile(const char *filename)
 					staticW = read_int();
 					read_string(misc);
 
-					add_wall(quad, x1, y1, x2, y2, x3, y3, x4, y4, tx1, ty1, tx2, ty2, tx3, ty3, tx4, ty4, texture, level, target, path, detail, staticW, misc);
+					add_wall(quad, x1, y1, x2, y2, x3, y3, x4, y4, tht, tvt, ths, tvs, tr, texture, level, target, path, detail, staticW, misc);
 				}
 				else if(strncmp(entity, "teleporter", sizeof(entity)) == 0)
 				{
@@ -1143,6 +1223,7 @@ static int compile(const char *filename)
 	for(i = 0; i < wc; i++)
 	{
 		int id = 0;
+		vec2_t t[4];
 		wall_t *wall = &walls[i];
 
 		/* find the target (it might not exist) */
@@ -1157,6 +1238,8 @@ static int compile(const char *filename)
 			}
 		}
 
+		calculateTextureCoordinates(wall, t);
+
 		put_cint(fout, i);
 		put_cchar(fout, ((wall->quad) ? (1) : (0)));
 		put_cdouble(fout, wall->x1);
@@ -1167,14 +1250,13 @@ static int compile(const char *filename)
 		put_cdouble(fout, wall->y3);
 		put_cdouble(fout, wall->x4);
 		put_cdouble(fout, wall->y4);
-		put_cdouble(fout, wall->tx1);
-		put_cdouble(fout, wall->ty1);
-		put_cdouble(fout, wall->tx2);
-		put_cdouble(fout, wall->ty2);
-		put_cdouble(fout, wall->tx3);
-		put_cdouble(fout, wall->ty3);
-		put_cdouble(fout, wall->tx4);
-		put_cdouble(fout, wall->ty4);
+		for(j = 0; j < 4; j++)
+		{
+			for(k = 0; k < 2; k++)
+			{
+				put_cdouble(fout, t[j][k]);
+			}
+		}
 		put_str(fout, wall->texture, 256);
 		put_cint(fout, wall->level);
 		put_cint(fout, id);

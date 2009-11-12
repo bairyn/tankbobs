@@ -30,6 +30,7 @@ endif(NOJIT MATCHES True)
 include_directories(${include_dirs})
 
 set(trmc_srcs src/trmc/trmc.c)
+set(trmc_libs m)
 
 set(tankbobs_srcs src/common/m_input.c src/common/m_fs.c src/common/m_io.c src/common/m_math.c src/common/m_console.c src/common/m_renderer.c src/common/m_net.c src/common/m_audio.c src/common/m_tankbobs.c src/lib/crossdll.c)
 set(tankbobs_Box2D_srcs src/common/m_world.cpp)
@@ -64,6 +65,7 @@ set(server_libs lua.a m z dl physfs.a)
 set(tstr_srcs src/lib/tstr/tstr.c)
 
 add_executable(trmc ${trmc_srcs})
+target_link_libraries(trmc ${trmc_libs})
 
 link_directories(${tankbobs_libdirs})
 add_library(mtankbobs SHARED ${tankbobs_srcs} ${tankbobs_Box2D_srcs})
