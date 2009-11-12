@@ -24,6 +24,8 @@ Common functions
 --]]
 
 -- All code should use the PhysicsFS interface
+path = package.path
+cpath = package.cpath
 stdout = io.stdout
 stderr = io.stderr
 io = nil
@@ -35,6 +37,9 @@ tankbobs.t_initialize("common_interrupt", false)
 math.randomseed(os.time())
 
 function common_init()
+	package.path = package.path
+	package.cpath = package.cpath
+
 	c_const_init()
 
 	c_data_init()
