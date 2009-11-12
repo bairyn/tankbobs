@@ -73,17 +73,19 @@ int main(int argc, char **argv)
 	/* Temporarily initialize PhysicsFS so that we can append the base directory to package.cpath */
 	PHYSFS_init(argv[0]);
 	lua_getglobal(L, "package");
-	lua_getfield(L, -1, "cpath");
 	lua_pushstring(L, PHYSFS_getBaseDir());
+	lua_pushstring(L, "?.so;");
 	lua_pushstring(L, PHYSFS_getDirSeparator());
 	lua_pushstring(L, "?.so;");
-	lua_concat(L, 4);
+	lua_getfield(L, -5, "cpath");
+	lua_concat(L, 5);
 	lua_setfield(L, -2, "cpath");
-	lua_getfield(L, -1, "cpath");
 	lua_pushstring(L, PHYSFS_getBaseDir());
+	lua_pushstring(L, "?.dll;");
 	lua_pushstring(L, PHYSFS_getDirSeparator());
 	lua_pushstring(L, "?.dll;");
-	lua_concat(L, 4);
+	lua_getfield(L, -5, "cpath");
+	lua_concat(L, 5);
 	lua_setfield(L, -2, "cpath");
 	lua_pop(L, 1);
 	PHYSFS_deinit();
