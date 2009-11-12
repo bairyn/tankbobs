@@ -11,6 +11,7 @@ cd `dirname $0`
 
 REVISION=$(git rev-list master | wc -l)
 PAKNAME="data-tankbobs-v${VERSION}-R${REVISION}.tpk"
+BUILDNAME="tankbobs-build-v${VERSION}-R${REVISION}.tar.gz"
 CMAKEFLAGS="-D PEDANTIC=TRUE"
 
 if ! [ -d "./build" ]; then
@@ -176,6 +177,12 @@ if [ "$1" == "make" ]; then
 		fi
 	fi
 
+	# remove old packages
+	rm data-tankbobs-*.tpk
+	rm tankbobs-build-*.tar.gz
+
+	echo -ne "Packing data"
+
 	# pak data
 	cd ./data/
 	if ! zip -9r "./../${PAKNAME}" *; then
@@ -188,6 +195,42 @@ if [ "$1" == "make" ]; then
 	#if ! cp -R ${COPYDATA} ${HOME}/.tankbobs/; then
 		#exit 1
 	#fi
+
+	# copy files listed in BUILDFILES to ./dist/
+
+	echo -ne "Creating \"${BUILDNAME}\"\n"
+
+	if [ -d ./dist_pk_tmp ]; then
+		echo -ne "Recursively removing \"./dist_pk_tmp\"\n"
+		if ! rm -r ./dist_pk_tmp; then
+			exit 1
+		fi
+	elif [ -e ./dist_pk_tmp ]; then
+		echo -ne "\"./dist_pk_tmp\" is not a directory\n"
+		exit 1
+	fi
+
+	if ! mkdir ./dist_pk_tmp; then
+		exit 1
+	fi
+
+	for FILE in `cat ./BUILDFILES`; do
+		if ! cp -R ${FILE} ./dist_pk_tmp/; then
+			exit 1
+		fi
+	done
+
+	cd ./dist_pk_tmp/
+	if ! tar -zcf ./../${BUILDNAME} ./*; then
+		exit 1
+	fi
+	cd ./../
+
+	if [ -d ./dist_pk_tmp ]; then
+		if ! rm -r ./dist_pk_tmp; then
+			exit 1
+		fi
+	fi
 
 	echo -ne "Build ended successfully\n"
 elif [ "$1" == "-h" ]; then

@@ -9,6 +9,5 @@ mod-server
 modules
 NOTICE
 server
-tankbobs
-tankbobs-server
-trmc
+tankbobs*
+trmc*
