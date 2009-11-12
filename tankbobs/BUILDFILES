@@ -1,0 +1,14 @@
+CHANGELOG
+client
+COPYING
+data-tankbobs-v*-R*.tpk
+libmtankbobs.so
+libtstr.so
+mod-client
+mod-server
+modules
+NOTICE
+server
+tankbobs
+tankbobs-server
+trmc
