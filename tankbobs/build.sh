@@ -178,8 +178,8 @@ if [ "$1" == "make" ]; then
 	fi
 
 	# remove old packages
-	rm data-tankbobs-*.tpk
-	rm tankbobs-build-*.tar.gz
+	rm ./data-tankbobs-*.tpk
+	rm ./tankbobs-build-*.tar.gz
 
 	echo -ne "Packing data"
 
