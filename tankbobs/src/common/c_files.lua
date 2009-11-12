@@ -25,16 +25,26 @@ Files
 
 function c_files_init()
 	-- since we need the list after fs initialization, but we can only call common_listFiles before initialization, we load the 'lfs' module before initiazilation and use it to list files afterward
-	require "lfs"
+	--require "lfs"  -- since module loading bypasses fs, we can require this after initialization (for now)
 
 	tankbobs.fs_setArgv0_(args[1])
-	tankbobs.fs_init();
+	tankbobs.fs_init()
 
 	-- set some constants and list files now that fs is initialized
 	local d = tankbobs.fs_getRawDirectorySeparator()
 
 	c_const_set("data_absoluteDir", tankbobs.fs_getBaseDirectory())
 	c_const_set("user_absoluteDir", tankbobs.fs_getUserDirectory() .. d .. ".tankbobs", 1)
+
+	c_const_set("module_absoluteDir", c_const_get("data_absoluteDir") .. c_const_get("module_dir"), 1)
+	c_const_set("module64_absoluteDir", c_const_get("data_absoluteDir") .. c_const_get("module64_dir"), 1)
+	c_const_set("module-win_absoluteDir", c_const_get("data_absoluteDir") .. c_const_get("module-win_dir"), 1)
+	c_const_set("module64-win_absoluteDir", c_const_get("data_absoluteDir") .. c_const_get("module64-win_dir"), 1)
+	c_const_set("jit_absoluteDir", c_const_get("data_absoluteDir") .. c_const_get("jit_dir"), 1)
+	c_module_initAbsoluteDirs()
+
+	require "lfs"  -- since module loading bypasses fs, we can require this after initialization (for now)
+
 
 	local function common_listFiles(dir, extension)
 		local files = {}
@@ -72,13 +82,6 @@ function c_files_init()
 	end
 
 	loadfile = tankbobs.fs_loadfile
-
-	c_const_set("module_absoluteDir", c_const_get("data_absoluteDir") .. c_const_get("module_dir"), 1)
-	c_const_set("module64_absoluteDir", c_const_get("data_absoluteDir") .. c_const_get("module64_dir"), 1)
-	c_const_set("module-win_absoluteDir", c_const_get("data_absoluteDir") .. c_const_get("module-win_dir"), 1)
-	c_const_set("module64-win_absoluteDir", c_const_get("data_absoluteDir") .. c_const_get("module64-win_dir"), 1)
-	c_const_set("jit_absoluteDir", c_const_get("data_absoluteDir") .. c_const_get("jit_dir"), 1)
-	c_module_initAbsoluteDirs()
 
 	if debug then
 		common_print(-1, "Current search path:\n")
