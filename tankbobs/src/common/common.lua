@@ -35,11 +35,6 @@ tankbobs.t_initialize("common_interrupt", false)
 math.randomseed(os.time())
 
 function common_init()
-	if jit then
-		require "jit.opt".start()
-		require "jit.opt_inline".start()
-	end
-
 	c_const_init()
 
 	c_data_init()
@@ -51,15 +46,22 @@ function common_init()
 
 	if c_const_get("debug") then
 		if jit then
-			print("JIT enabled")
+			common_print(-1, "JIT enabled")
 		else
-			print("JIT disabled")
+			common_print(-1, "JIT disabled")
 		end
 	end
 
 	c_module_init()
 
 	c_files_init()
+
+	-- the filesystem is initialized, so now we can start optimizing
+	if jit then
+		require "jit.opt".start()
+		require "jit.opt_inline".start()
+	end
+
 
 	c_config_init()
 
