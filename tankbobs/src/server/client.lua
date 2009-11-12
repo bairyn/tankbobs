@@ -153,7 +153,7 @@ end
 function client_loadBans(filename)
 	bans = {}
 
-	local fin = fs_openRead(filename)
+	local fin = tankbobs.fs_openRead(filename)
 
 	local i, line = 0
 	local function readLine()
