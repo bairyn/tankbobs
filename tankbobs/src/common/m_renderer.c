@@ -969,7 +969,7 @@ int r_loadImage2D(lua_State *L)
 	while(PHYSFS_read(fin, &c, 1, 1) >= 1 && (status = fputc(c, fout)) != EOF);
 	if(status == EOF)
 	{
-		lua_pushstring(L, "could not write temporary file for loading font");
+		lua_pushstring(L, "could not write temporary file for loading image");
 		lua_error(L);
 
 		/*free(tmpfilename);*/
@@ -996,7 +996,64 @@ int r_loadImage2D(lua_State *L)
 	{
 		filename = luaL_checkstring(L, 2);
 
+#ifdef IMAGE_PHYSFS
+		/* Copy file to a temporary file */
+		fin = PHYSFS_openRead(filename);
+		if(!fin)
+		{
+			lua_pushstring(L, PHYSFS_getLastError());
+			lua_error(L);
+
+			return 0;
+		}
+
+		/*tmpfilename = tempnam(NULL, "tfsimg");*/
+		tmpfilename = tmpnam(NULL);
+		if(!tmpfilename)
+		{
+			lua_pushstring(L, "could not create temporary file for loading font");
+			lua_error(L);
+
+			/*free(tmpfilename);*/
+			return 0;
+		}
+
+		fout = fopen(tmpfilename, "w");
+		if(!fout)
+		{
+			lua_pushstring(L, "could not open temporary file for loading font");
+			lua_error(L);
+
+			/*free(tmpfilename);*/
+			return 0;
+		}
+
+		while(PHYSFS_read(fin, &c, 1, 1) >= 1 && (status = fputc(c, fout)) != EOF);
+		if(status == EOF)
+		{
+			lua_pushstring(L, "could not write temporary file for loading image");
+			lua_error(L);
+
+			/*free(tmpfilename);*/
+			return 0;
+		}
+
+		status = PHYSFS_close(fin);
+		if(!status)
+		{
+			lua_pushstring(L, PHYSFS_getLastError());
+			lua_error(L);
+		}
+		fclose(fout);
+
+		/*free(tmpfilename);*/
+#endif
+
+#ifdef IMAGE_PHYSFS
+		img = IMG_Load(tmpfilename);
+#else
 		img = IMG_Load(filename);
+#endif
 		if(!img)
 		{
 			tstr *message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
@@ -1010,7 +1067,18 @@ int r_loadImage2D(lua_State *L)
 			CDLL_FUNCTION("libtstr", "tstr_cat", void(*)(tstr *, const char *))
 				(message, filename);
 			CDLL_FUNCTION("libtstr", "tstr_base_cat", void(*)(tstr *, const char *))
-				(message, "'\n");
+				(message, "'");
+			if(SDL_GetError())
+			{
+				CDLL_FUNCTION("libtstr", "tstr_base_cat", void(*)(tstr *, const char *))
+					(message, "; error: '");
+				CDLL_FUNCTION("libtstr", "tstr_base_cat", void(*)(tstr *, const char *))
+					(message, SDL_GetError());
+				CDLL_FUNCTION("libtstr", "tstr_base_cat", void(*)(tstr *, const char *))
+					(message, "'");
+			}
+			CDLL_FUNCTION("libtstr", "tstr_base_cat", void(*)(tstr *, const char *))
+				(message, "\n");
 			lua_pushstring(L, CDLL_FUNCTION("libtstr", "tstr_cstr", const char *(*)(tstr *))
 								(message));
 			CDLL_FUNCTION("libtstr", "tstr_free", void(*)(tstr *))
