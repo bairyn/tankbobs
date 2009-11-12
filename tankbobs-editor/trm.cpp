@@ -969,6 +969,7 @@ void trm_select(int x, int y)//, int multiple)
 			}
 			if(!listed)
 			{
+				window->statusAppend(QString("Selected player spawn point at ") + QString::number(e->x) + QString(", ") + QString::number(e->y));
 				selections.push_back((selection = ve));
 				return;
 			}
@@ -994,6 +995,7 @@ void trm_select(int x, int y)//, int multiple)
 			}
 			if(!listed)
 			{
+				window->statusAppend(QString("Selected powerup spawn point at ") + QString::number(e->x) + QString(", ") + QString::number(e->y));
 				selections.push_back((selection = ve));
 				return;
 			}
@@ -1019,6 +1021,7 @@ void trm_select(int x, int y)//, int multiple)
 			}
 			if(!listed)
 			{
+				window->statusAppend(QString("Selected teleporter at ") + QString::number(e->x) + QString(", ") + QString::number(e->y));
 				selections.push_back((selection = ve));
 				return;
 			}
@@ -1053,6 +1056,10 @@ void trm_select(int x, int y)//, int multiple)
 			}
 			if(!listed)
 			{
+				if(e->quad)
+					window->statusAppend(QString("Selected wall with vertices (") + QString::number(e->x1) + QString(", ") + QString::number(e->y1) + QString(") (") + QString::number(e->x2) + QString(", ") + QString::number(e->y2) + QString(") (") + QString::number(e->x3) + QString(", ") + QString::number(e->y3) + QString(") (") + QString::number(e->x4) + QString(", ") + QString::number(e->y4) + QString(")"));
+				else
+					window->statusAppend(QString("Selected wall with vertices (") + QString::number(e->x1) + QString(", ") + QString::number(e->y1) + QString(") (") + QString::number(e->x2) + QString(", ") + QString::number(e->y2) + QString(") (") + QString::number(e->x3) + QString(", ") + QString::number(e->y3) + QString(")"));
 				selections.push_back((selection = ve));
 				return;
 			}
@@ -1078,6 +1085,7 @@ void trm_select(int x, int y)//, int multiple)
 			}
 			if(!listed)
 			{
+				window->statusAppend(QString("Selected path at ") + QString::number(e->x) + QString(", ") + QString::number(e->y));
 				selections.push_back((selection = ve));
 				return;
 			}
@@ -1103,6 +1111,7 @@ void trm_select(int x, int y)//, int multiple)
 			}
 			if(!listed)
 			{
+				window->statusAppend(QString("Selected control point at ") + QString::number(e->x) + QString(", ") + QString::number(e->y));
 				selections.push_back((selection = ve));
 				return;
 			}
@@ -1128,6 +1137,7 @@ void trm_select(int x, int y)//, int multiple)
 			}
 			if(!listed)
 			{
+				window->statusAppend(QString("Selected flag at ") + QString::number(e->x) + QString(", ") + QString::number(e->y));
 				selections.push_back((selection = ve));
 				return;
 			}
@@ -1152,6 +1162,7 @@ void trm_select(int x, int y)//, int multiple)
 			}
 			if(!listed)
 			{
+				window->statusAppend(QString("Selected way point at ") + QString::number(e->x) + QString(", ") + QString::number(e->y));
 				selections.push_back((selection = ve));
 				return;
 			}
