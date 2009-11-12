@@ -7,6 +7,9 @@ libtstr.so
 mod-client
 mod-server
 modules
+modules64
+modules-win
+modules64-win
 NOTICE
 server
 jit
