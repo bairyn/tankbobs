@@ -669,7 +669,7 @@ static void calculateTextureCoordinates(wall_t *wall, vec2_t t[4])
 	{
 		if(t[i][0] != 0.0 || t[i][1] != 0.0)
 		{
-			th = atan2(t[i][1], t[i][0]) + m_radiansNL(wall->tr);
+			th = atan2(t[i][1], t[i][0]) + m_radiansNL(wall->tr + 180);  /* correct upside-down-ness */
 			r = sqrt(t[i][0] * t[i][0] + t[i][1] * t[i][1]);
 			t[i][0] = r * cos(th);
 			t[i][1] = r * sin(th);
