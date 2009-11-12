@@ -73,6 +73,13 @@ function c_files_init()
 
 	loadfile = tankbobs.fs_loadfile
 
+	c_const_set("module_absoluteDir", c_const_get("data_absoluteDir") .. c_const_get("module_dir"), 1)
+	c_const_set("module64_absoluteDir", c_const_get("data_absoluteDir") .. c_const_get("module64_dir"), 1)
+	c_const_set("module-win_absoluteDir", c_const_get("data_absoluteDir") .. c_const_get("module-win_dir"), 1)
+	c_const_set("module64-win_absoluteDir", c_const_get("data_absoluteDir") .. c_const_get("module64-win_dir"), 1)
+	c_const_set("jit_absoluteDir", c_const_get("data_absoluteDir") .. c_const_get("jit_dir"), 1)
+	c_module_initAbsoluteDirs()
+
 	if debug then
 		common_print(-1, "Current search path:\n")
 		for _, v in pairs(tankbobs.fs_getSearchPath()) do

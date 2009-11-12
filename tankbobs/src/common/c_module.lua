@@ -26,6 +26,10 @@ Interface to modules
 function c_module_init()
 	c_module_init = nil
 
+	package.cpath = c_const_get("data_dir") .. "?.lua" .. ";" .. package.cpath
+	package.path = c_const_get("data_dir") .. "?.lua" .. ";" .. package.path
+	package.path = c_const_get("jit_dir") .. "?.lua" .. ";" .. package.path
+
 	if tankbobs.t_isWindows() then
 		if tankbobs.t_is64Bit() then
 			package.cpath = c_const_get("module64-win_dir") .. "?.dll" .. ";" .. package.cpath
@@ -47,6 +51,27 @@ function c_module_done()
 	common_print(-1, "Tankbobs v" .. c_const_get("version") .. " shutdown\n")
 
 	c_module_done = nil
+end
+
+function c_module_initAbsoluteDirs()
+	--package.cpath = c_const_get("data_absoluteDir") .. "?.lua" .. ";" .. package.path
+	--package.cpath = c_const_get("jit_absoluteDir") .. "?.lua" .. ";" .. package.path
+	package.path = c_const_get("data_absoluteDir") .. "?.lua" .. ";" .. package.path
+	package.path = c_const_get("jit_absoluteDir") .. "?.lua" .. ";" .. package.path
+
+	if tankbobs.t_isWindows() then
+		if tankbobs.t_is64Bit() then
+			package.cpath = c_const_get("module64-win_absoluteDir") .. "?.dll" .. ";" .. package.cpath
+		else
+			package.cpath = c_const_get("module-win_absoluteDir") .. "?.dll" .. ";" .. package.cpath
+		end
+	else
+		if tankbobs.t_is64Bit() then
+			package.cpath = c_const_get("module64_absoluteDir") .. "?.so" .. ";" .. package.cpath
+		else
+			package.cpath = c_const_get("module_absoluteDir") .. "?.so" .. ";" .. package.cpath
+		end
+	end
 end
 
 function c_module_load(mod)
