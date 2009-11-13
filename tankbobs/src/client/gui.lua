@@ -1432,7 +1432,7 @@ function gui_char(c)
 	elseif c == 0x7E then
 		return "~", "Tilde"
 	elseif c == 0x7F then
-		return "", "Delete"
+		return "Delete", "Delete"
 	elseif c == 8 then
 		return "Backspace", "Backspace"
 	elseif c == 9 then
