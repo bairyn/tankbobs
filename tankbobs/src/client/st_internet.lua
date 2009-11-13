@@ -87,9 +87,10 @@ function st_internet_init()
 	gui_addAction(tankbobs.m_vec2(55, 72), "Connect", nil, st_internet_start, 2 / 3)
 
 	local ui = ""
-	local fin = io.open(c_const_get("ui_file"), "rb")
-	if fin then
-		ui = fin:read("*a")
+	if tankbobs.fs_fileExists(c_const_get("ui_file")) then
+		local fin = tankbobs.fs_openRead(c_const_get("ui_file"))
+		ui = tankbobs.fs_read(fin, 32)
+		tankbobs.fs_close(fin)
 	end
 	if #ui ~= 32 then
 		math.randomseed(os.time())
@@ -97,18 +98,13 @@ function st_internet_init()
 		for i = 1, 32 do
 			ui = ui .. string.char(math.random(0x00, 0x7F))
 		end
-		local fout = io.open(c_const_get("ui_file"), "wb")
-		if fout then
-			fout:write(ui)
+		local fout = tankbobs.fs_openWrite(c_const_get("ui_file"))
+		tankbobs.fs_write(fout, ui)
+		tankbobs.fs_close(fout)
 
-			if c_const_get("debug") then
-				stdout:write("Generating GUID\n")
-			end
-		else
-			if c_const_get("debug") then
-				stderr:write("Warning: could not write GUID to '", c_const_get("ui_file"), "'\n")
-			end
-		end
+		--if c_const_get("debug") then
+			common_print(2, "New GUID generated\n")
+		--end
 	end
 
 	connection.ui = ui
