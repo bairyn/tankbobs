@@ -826,7 +826,7 @@ function game_step(d)
 
 			gl.Translate(50, 50, 0)
 
-			if c_config_get("client.screens") > 0 and c_config_get("client.rotateCamera") then
+			if c_config_get("client.screens") > 0 and c_config_get("client.cameraRotate") then
 				local tank = c_world_getTanks()[camnum]
 
 				if tank and tank.exists then
