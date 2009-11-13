@@ -224,7 +224,7 @@ elseif c_tcm_current_map.name == "race-track" then
 	c_const_set("powerup_lifeTime", 0, -1)
 
 	-- when a powerup is picked up, reset its spawn timer
-	c_const_set("powerup_restartTime", 2, -1)
+	c_const_set("powerup_restartTime", 8, -1)
 
 	local function resetSpawnTime(tank, powerup)
 		c_tcm_current_map.powerupSpawnPoints[powerup.spawner].m.nextPowerupTime = tankbobs.t_getTicks() + c_world_timeMultiplier(c_const_get("powerup_restartTime"))
