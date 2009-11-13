@@ -222,6 +222,7 @@ local st_optionsVideo_width
 local st_optionsVideo_height
 local st_optionsVideo_apply
 local st_optionsVideo_fpsCounter
+local st_optionsVideo_rotateCamera
 local st_optionsVideo_screen
 
 local custom = false
@@ -258,7 +259,9 @@ function st_optionsVideo_init()
 
 	gui_addLabel(tankbobs.m_vec2(50, 54 + offset), "FPS Counter", nil, 2 / 4) gui_addCycle(tankbobs.m_vec2(75, 54 + offset), "FPS Counter", nil, st_optionsVideo_fpsCounter, {"No", "Yes"}, c_config_get("client.renderer.fpsCounter") and 2 or 1)  -- Label needs to be a bit smaller
 
-	gui_addLabel(tankbobs.m_vec2(50, 48 + offset), "Screen", nil, 2 / 3) gui_addCycle(tankbobs.m_vec2(75, 48 + offset), "Fullscreen", nil, st_optionsVideo_screen, {"Single", "One Tank", "Split", "Triple", "Four"}, math.min(4, c_config_get("client.screens") + 1))
+	gui_addLabel(tankbobs.m_vec2(50, 48 + offset), "Rotate Camera", nil, 2 / 4) gui_addCycle(tankbobs.m_vec2(75, 48 + offset), "Rotate Camera", nil, st_optionsVideo_rotateCamera, {"No", "Yes"}, c_config_get("client.cameraRotate") and 2 or 1)  -- Label needs to be a bit smaller
+
+	gui_addLabel(tankbobs.m_vec2(50, 42 + offset), "Screen", nil, 2 / 3) gui_addCycle(tankbobs.m_vec2(75, 42 + offset), "Fullscreen", nil, st_optionsVideo_screen, {"Single", "One Tank", "Split", "Triple", "Four"}, math.min(4, c_config_get("client.screens") + 1))
 end
 
 function st_optionsVideo_done()
@@ -309,6 +312,14 @@ function st_optionsVideo_fpsCounter(widget, string, index)
 		c_config_set("client.renderer.fpsCounter", true)
 	elseif string == "No" then
 		c_config_set("client.renderer.fpsCounter", false)
+	end
+end
+
+function st_optionsVideo_rotateCamera(widget, string, index)
+	if string == "Yes" then
+		c_config_set("client.cameraRotate", true)
+	elseif string == "No" then
+		c_config_set("client.cameraRotate", false)
 	end
 end
 
