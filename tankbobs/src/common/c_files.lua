@@ -88,7 +88,7 @@ function c_files_init()
 		for _, v in pairs(tankbobs.fs_getSearchPath()) do
 			common_print(-1, v .. "\n")
 		end
-		common_print(-1, "End of search path:\n")
+		common_print(-1, "End of search path\n")
 	end
 end
 
