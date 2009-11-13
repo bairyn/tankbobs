@@ -297,7 +297,7 @@ end
 local aa = {{0, 0}, {0, 0}}  -- aim-aid table
 local m = {0, 0, 0, 0, 0, 0, 0, 0}  -- ammobar table
 local w, t = {{0, 0}, {0, 0}, {0, 0}, {0, 0}}, {{0, 0}, {0, 0}, {0, 0}, {0, 0}}
-function game_drawWorld(d)
+function game_drawWorld(d, M, rotM)
 	gl.PushMatrix()
 		-- draw tanks and walls
 		for i = 1, c_const_get("tcm_maxLevel") do
@@ -454,10 +454,26 @@ function game_drawWorld(d)
 							end
 							gl.DisableClientState("VERTEX_ARRAY")
 
+
 							-- draw name
 							gl.PushMatrix()
+								-- Un-rotate
+								-- TODO: FIXME
+								--[[
+								if M and rotM then
+									renderer_setMatrix(M)
+								end
+								--]]
+
 								gl.Translate(v.p.x, v.p.y, 0)
 								tankbobs.r_drawString(v.name, c_const_get("tank_nameOffset"), v.color.r, v.color.g, v.color.b, c_config_get("client.renderer.scoresAlpha"), c_const_get("tank_nameScalex"), c_const_get("tank_nameScaley"), false)
+
+								-- Re-rotate
+								--[[
+								if M and rotM then
+									renderer_setMatrix(rotM)
+								end
+								--]]
 							gl.PopMatrix()
 
 							-- healthbars and ammo bars
@@ -814,7 +830,7 @@ function game_step(d)
 			end
 			if not uppermost or not lowermost or not rightmost or not leftmost then
 				-- draw world in default position
-				game_drawWorld(d)
+				game_drawWorld(d, nil, nil)
 
 				return
 			end
@@ -826,14 +842,6 @@ function game_step(d)
 
 			gl.Translate(50, 50, 0)
 
-			if c_config_get("client.screens") > 0 and c_config_get("client.cameraRotate") then
-				local tank = c_world_getTanks()[camnum]
-
-				if tank and tank.exists then
-					gl.Rotate(-tankbobs.m_degrees(tank.r - c_const_get("tank_defaultRotation")), 0, 0, 1)
-				end
-			end
-
 			local distance = math.abs(rightmost - leftmost) > math.abs(uppermost - lowermost) and math.abs(rightmost - leftmost) or math.abs(uppermost - lowermost)
 			local scale = 100 / (distance + c_config_get("client.cameraExtraFOV"))
 			if scale > 1 then
@@ -844,9 +852,28 @@ function game_step(d)
 			gl.Scale(zoom[camnum], zoom[camnum], 1)
 
 			camera[camnum] = common_lerp(camera[camnum], tankbobs.m_vec2(-(rightmost + leftmost) / 2, -(uppermost + lowermost) / 2), math.min(1, d * c_config_get("client.cameraSpeed")))
+
+			local M, rotM
+
+			gl.PushMatrix()
+				gl.Translate(camera[camnum].x, camera[camnum].y, 0)
+
+				M = renderer_getMatrix()  -- rotM can be identical to M
+			gl.PopMatrix()
+
+			if c_config_get("client.screens") > 0 and c_config_get("client.cameraRotate") then
+				local tank = c_world_getTanks()[camnum]
+
+				if tank and tank.exists then
+					gl.Rotate(-tankbobs.m_degrees(tank.r - c_const_get("tank_defaultRotation")), 0, 0, 1)
+				end
+			end
+
 			gl.Translate(camera[camnum].x, camera[camnum].y, 0)
 
-			game_drawWorld(d)
+			rotM = renderer_getMatrix()
+
+			game_drawWorld(d, M, rotM)
 		gl.PopMatrix()
 	end
 
