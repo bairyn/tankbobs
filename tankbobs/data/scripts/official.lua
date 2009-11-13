@@ -180,6 +180,7 @@ elseif c_tcm_current_map.name == "race-track" then
 	local function die(tank, t)
 		t = t or tankbobs.t_getTicks()
 
+		--[[
 		local p = c_ai_findClosestWayPoint(tank.p)
 		if p then
 			 p = p[1]
@@ -192,6 +193,9 @@ elseif c_tcm_current_map.name == "race-track" then
 		else
 			p = tankbobs.m_vec2(c_tcm_current_map.teleport_sound[-p].p)
 		end
+		--]]
+		-- instead of respawning at the nearest way point, spawn at the position at which the tank was when it died
+		local p = tankbobs.m_vec2(tank.p)
 
 		tank.m.respawnPos = p
 		tank.m.respawnRot = tank.r

@@ -553,7 +553,7 @@ function c_ai_findClosestWayPoint(pos)
 						lastPoint = hull[#hull]
 					end
 
-					if tankbobs.m_edge(lastPoint, currentPoint, pos, vs.p) then
+					if tankbobs.m_edge(lastPoint, currentPoint, tankbobs.m_vec2(pos), tankbobs.m_vec2(vs.p)) then
 						intersection = true
 						break
 					end
@@ -584,7 +584,7 @@ function c_ai_findClosestWayPoint(pos)
 						lastPoint = hull[#hull]
 					end
 
-					if tankbobs.m_edge(lastPoint, currentPoint, pos, vs.p) then
+					if tankbobs.m_edge(lastPoint, currentPoint, tankbobs.m_vec2(pos), tankbobs.m_vec2(vs.p)) then
 						intersection = true
 						break
 					end
