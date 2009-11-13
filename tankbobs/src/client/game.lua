@@ -297,7 +297,7 @@ end
 local aa = {{0, 0}, {0, 0}}  -- aim-aid table
 local m = {0, 0, 0, 0, 0, 0, 0, 0}  -- ammobar table
 local w, t = {{0, 0}, {0, 0}, {0, 0}, {0, 0}}, {{0, 0}, {0, 0}, {0, 0}, {0, 0}}
-local function game_drawWorld(d)
+function game_drawWorld(d)
 	gl.PushMatrix()
 		-- draw tanks and walls
 		for i = 1, c_const_get("tcm_maxLevel") do
