@@ -826,6 +826,14 @@ function game_step(d)
 
 			gl.Translate(50, 50, 0)
 
+			if c_config_get("client.mod.rotateCamera") then
+				local tank = c_world_getTanks()[camnum]
+
+				if tank and tank.exists then
+					gl.Rotate(-tankbobs.m_degrees(tank.r - c_const_get("tank_defaultRotation")), 0, 0, 1)
+				end
+			end
+
 			local distance = math.abs(rightmost - leftmost) > math.abs(uppermost - lowermost) and math.abs(rightmost - leftmost) or math.abs(uppermost - lowermost)
 			local scale = 100 / (distance + c_config_get("client.cameraExtraFOV"))
 			if scale > 1 then

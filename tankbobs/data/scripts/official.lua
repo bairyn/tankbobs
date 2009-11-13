@@ -116,6 +116,7 @@ elseif c_tcm_current_map.name == "race-track" then
 		c_config_set("game.computers", backupComputers)
 	end
 
+	-- when the world exits, call resetAI
 	c_mods_exitWorldFunction(resetAI)
 
 	-- zoom out
@@ -145,6 +146,7 @@ elseif c_tcm_current_map.name == "race-track" then
 		c_config_set("game.fragLimit", backupFragLimit)
 	end
 
+	-- when the world exits, also call resetFragLimit
 	c_mods_exitWorldFunction(resetFragLimit)
 
 	-- killing players doesn't reward points
@@ -159,6 +161,7 @@ elseif c_tcm_current_map.name == "race-track" then
 		end
 	end
 
+	-- when c_world_tank_die is called, call our local function "die" first with the same arguments
 	c_mods_prependFunction("c_world_tank_die", die)
 
 	-- find race walls; they will be designated by having a number in the misc field
@@ -201,6 +204,7 @@ elseif c_tcm_current_map.name == "race-track" then
 		tank.m.respawnRot = tank.r
 	end
 
+	-- we redefined "die" to another function.  Our second "die" function will be called, and then the first, and then the real c_world_tank_die.
 	c_mods_prependFunction("c_world_tank_die", die)
 
 	-- when a tank respawns, spawn at its respawn position
@@ -212,6 +216,7 @@ elseif c_tcm_current_map.name == "race-track" then
 		end
 	end
 
+	-- here, instead of prepending a function, we append a function.  Our local function will be called after c_world_spawnTank.
 	c_mods_appendFunction("c_world_spawnTank", setPosition)
 
 	-- powerups are stationary and never disappear
