@@ -600,7 +600,7 @@ function c_ai_findClosestWayPoint(pos)
 		end
 	end
 
-	table.sort(w, function (a, b) local pa if a[1] > 0 then pa = c_tcm_current_map.wayPoints[a[1]].p - pos else pa = c_tcm_current_map.teleporters[-a[1]].p end local pb if b[1] > 0 then pb = c_tcm_current_map.wayPoints[b[1]].p - pos else pb = c_tcm_current_map.teleporters[-b[1]].p end return (pa - pos).R < (pb - pos).R end)
+	table.sort(w, function (a, b) return a[2] < b[2] end)
 
 	return w[1]
 end
