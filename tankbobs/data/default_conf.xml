@@ -23,26 +23,26 @@
 			<left></left>
 			<pause>112</pause> 'p'
 			<player1>
-				<fire>306</fire> 'LCTRL'
+				<fire>107</fire> 'k'
 				<forward>119</forward> 'w'
 				<back>115</back> 's'
 				<left>97</left> 'a'
 				<mod></mod>
 				<reverse></reverse>
 				<right>100</right> 'd'
-				<special>304</special> 'LSHIFT'
-				<reload>114</reload> 'r'
+				<special>106</special> 'j'
+				<reload>108</reload> 'l'
 			</player1>
 			<player2>
-				<fire>305</fire> 'RCTRL'
+				<fire>279</fire> 'END'
 				<forward>273</forward> 'UP'
 				<back>274</back> 'DOWN'
 				<left>276</left> 'LEFT
 				<mod></mod>
 				<reverse></reverse>
 				<right>275</right> 'RIGHT'
-				<special>303</special> 'RSHIFT'
-				<reload>256</reload> 'KP_0'
+				<special>281</special> 'PGDOWN'
+				<reload>127</reload> 'DEL'
 			</player2>
 			<quit>98</quit> 'b'
 			<screenToggle>283</screenToggle> 'F2'
