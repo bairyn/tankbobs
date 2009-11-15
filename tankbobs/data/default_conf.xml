@@ -124,6 +124,7 @@
 
 	<debug>
 		<client>
+			<drawTrailProjectiles>false</drawTrailProjectiles>
 			<grabMouse>true</grabMouse>
 		</client>
 	</debug>

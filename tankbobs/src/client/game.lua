@@ -736,12 +736,30 @@ function game_drawWorld(d, M, rotM)
 
 		-- projectiles
 		for _, v in pairs(c_weapon_getProjectiles()) do
-			if c_weapon_getWeapons()[v.weapon] and c_weapon_getWeapons()[v.weapon].trail == 0 and c_weapon_getWeapons()[v.weapon].trailWidth == 0 then  -- only draw the trail
-				gl.PushMatrix()
-					gl.Translate(v.p.x, v.p.y, 0)
-					gl.Rotate(tankbobs.m_degrees(v.r), 0, 0, 1)
-					gl.CallList(c_weapon_getWeapons()[v.weapon].m.p.projectileList)
-				gl.PopMatrix()
+			if c_weapon_getWeapons()[v.weapon] then
+				if c_weapon_getWeapons()[v.weapon].trail == 0 and c_weapon_getWeapons()[v.weapon].trailWidth == 0 then  -- only draw the trail
+					gl.PushMatrix()
+						gl.Translate(v.p.x, v.p.y, 0)
+						gl.Rotate(tankbobs.m_degrees(v.r), 0, 0, 1)
+						gl.CallList(c_weapon_getWeapons()[v.weapon].m.p.projectileList)
+					gl.PopMatrix()
+				elseif debug and c_config_get("debug.client.drawTrailProjectiles") then  -- TODO client.debug.etc
+					-- draw a red square
+					gl.PushAttrib("ENABLE_BIT")
+						gl.PushMatrix()
+							gl.Disable("TEXTURE_2D")
+							gl.Translate(v.p.x, v.p.y, 0)
+							gl.Scale(2, 2, 1)
+							gl.Color(1, 0, 0, 1)
+							gl.Begin("QUADS")
+								gl.Vertex(-1,  1)
+								gl.Vertex(-1, -1)
+								gl.Vertex( 1, -1)
+								gl.Vertex( 1,  1)
+							gl.End()
+						gl.PopMatrix()
+					gl.PopAttrib()
+				end
 			end
 		end
 	gl.PopMatrix()
