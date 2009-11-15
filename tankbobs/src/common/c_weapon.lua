@@ -59,7 +59,7 @@ function c_weapon_init()
 	weapon.altName = "default"
 	weapon.damage = 4
 	weapon.pellets = 1
-	weapon.speed = 768
+	weapon.speed = 200
 	weapon.spread = tankbobs.m_radians(0)
 	weapon.repeatRate = 0.2
 	weapon.sa = false
@@ -126,7 +126,7 @@ function c_weapon_init()
 	weapon.altName = "machinegun"
 	weapon.damage = 4
 	weapon.pellets = 1
-	weapon.speed = 1536
+	weapon.speed = 200
 	weapon.spread = tankbobs.m_radians(0)
 	weapon.repeatRate = 0.2
 	weapon.sa = false
@@ -193,7 +193,7 @@ function c_weapon_init()
 	weapon.altName = "shotgun"
 	weapon.damage = 25
 	weapon.pellets = 5
-	weapon.speed = 1024
+	weapon.speed = 200
 	weapon.spread = tankbobs.m_radians(12)  -- the angle between each pellet
 	weapon.repeatRate = 1
 	weapon.sa = false
@@ -260,7 +260,7 @@ function c_weapon_init()
 	weapon.altName = "railgun"
 	weapon.damage = 100
 	weapon.pellets = 1
-	weapon.speed = 524288
+	weapon.speed = 2000
 	weapon.spread = tankbobs.m_radians(0)
 	weapon.repeatRate = 2
 	weapon.sa = false
@@ -327,7 +327,7 @@ function c_weapon_init()
 	weapon.altName = "instagun"
 	weapon.damage = 100
 	weapon.pellets = 1.5
-	weapon.speed = 524288
+	weapon.speed = 2000
 	weapon.spread = tankbobs.m_radians(0)
 	weapon.repeatRate = 2
 	weapon.sa = false
@@ -394,7 +394,7 @@ function c_weapon_init()
 	weapon.altName = "coilgun"
 	weapon.damage = 20
 	weapon.pellets = 1
-	weapon.speed = 524288
+	weapon.speed = 2000
 	weapon.spread = tankbobs.m_radians(0)
 	weapon.repeatRate = 0.25
 	weapon.sa = true
