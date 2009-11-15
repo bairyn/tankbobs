@@ -720,8 +720,7 @@ int c_loadHistory(lua_State *L)
 			status = PHYSFS_close(fin);
 			if(!status)
 			{
-				lua_pushstring(L, PHYSFS_getLastError());
-				lua_error(L);
+				fs_errorNL(L, fin, historyFile);
 
 				return 0;
 			}
@@ -770,7 +769,7 @@ int c_saveHistory(lua_State *L)
 		if(fout)
 		{
 			int i;
-			int status;
+			int status = 1;
 			historyField_t *historyField;
 
 			for(i = 0, historyField = &history[0]; i < MAX_HISTORY_FIELDS; i++, historyField++)
@@ -779,12 +778,10 @@ int c_saveHistory(lua_State *L)
 				{
 					const char *p = historyField->text;
 
-					while(*p && status >= 1)
-						PHYSFS_write(fout, p++, 1, 1);
+					while(*p && (status = PHYSFS_write(fout, p++, 1, 1)) >= 1);
 					if(status <= 0)
 					{
-						lua_pushstring(L, PHYSFS_getLastError());
-						lua_error(L);
+						fs_errorNL(L, fout, historyFile);
 
 						return 0;
 					}

@@ -151,7 +151,7 @@ int a_initSound(lua_State *L)
 #ifdef AUDIO_PHYSFS
 	char c;
 	FILE *fout;
-	int status;
+	int status = 1;
 	PHYSFS_File *fin;
 	const char *tmpfilename;
 #endif
@@ -394,7 +394,7 @@ int a_startMusic(lua_State *L)
 #ifdef AUDIO_PHYSFS
 	char c;
 	FILE *fout;
-	int status;
+	int status = 1;
 	PHYSFS_File *fin;
 	const char *tmpfilename;
 #endif
@@ -535,7 +535,7 @@ int a_playSound(lua_State *L)
 #ifdef AUDIO_PHYSFS
 	char c;
 	FILE *fout;
-	int status;
+	int status = 1;
 	PHYSFS_File *fin;
 	const char *tmpfilename;
 #endif
@@ -733,7 +733,7 @@ int a_setVolumeChunk(lua_State *L)
 #ifdef AUDIO_PHYSFS
 	char c;
 	FILE *fout;
-	int status;
+	int status = 1;
 	PHYSFS_File *fin;
 	const char *tmpfilename;
 #endif

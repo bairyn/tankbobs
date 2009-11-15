@@ -476,7 +476,7 @@ static void *fs_ll_load(lua_State *L, const char *path)
 	fclose(fout);
 
 	/*LoadLibraryA(path);*/
-	LoadLibraryA(filename);
+	lib = LoadLibraryA(filename);
 	if (lib == NULL)
 		pusherror(L);
 	return lib;
@@ -560,7 +560,7 @@ static void *fs_ll_load(lua_State *L, const char *path)
 
 
 	/*dlopen(path, RTLD_NOW);*/
-	dlopen(filename, RTLD_NOW);
+	lib = dlopen(filename, RTLD_NOW);
 	/*free(filename);*/
 	if(lib == NULL)
 		lua_pushstring(L, dlerror());
@@ -1277,6 +1277,8 @@ int fs_fileLength(lua_State *L)
 	CHECKINIT(init, L);
 	CHECKFSINIT(init, L);
 
+	file = lua_touserdata(L, 1);
+
 	len = PHYSFS_fileLength(file);
 
 	if(len == -1)
@@ -1396,6 +1398,7 @@ int fs_getDouble(lua_State *L)
 	int status;
 	PHYSFS_file *fin;
 	PHYSFS_uint64 value;
+	double *n = (double *) &value;
 
 	CHECKINIT(init, L);
 	CHECKFSINIT(init, L);
@@ -1420,7 +1423,7 @@ int fs_getDouble(lua_State *L)
 		}
 	}
 
-	lua_pushnumber(L, *((double *) &value));
+	lua_pushnumber(L, *n);
 
 	return 1;
 }
@@ -1430,6 +1433,7 @@ int fs_getFloat(lua_State *L)
 	int status;
 	PHYSFS_file *fin;
 	PHYSFS_uint32 value;
+	float *n = (float *) &value;
 
 	CHECKINIT(init, L);
 	CHECKFSINIT(init, L);
@@ -1454,7 +1458,7 @@ int fs_getFloat(lua_State *L)
 		}
 	}
 
-	lua_pushnumber(L, *((float *) &value));
+	lua_pushnumber(L, *n);
 
 	return 1;
 }

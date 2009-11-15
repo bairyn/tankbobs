@@ -322,7 +322,7 @@ int r_newFont(lua_State *L)
 #ifdef FONT_PHYSFS
 	char c;
 	FILE *fout;
-	int status;
+	int status = EOF + 1;
 	PHYSFS_File *fin;
 	const char *filename;
 #endif
@@ -922,7 +922,7 @@ int r_loadImage2D(lua_State *L)
 #ifdef IMAGE_PHYSFS
 	char c;
 	FILE *fout;
-	int status;
+	int status = EOF + 1;
 	PHYSFS_File *fin;
 	const char *tmpfilename;
 #endif
