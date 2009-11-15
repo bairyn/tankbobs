@@ -327,7 +327,7 @@ function c_weapon_init()
 	weapon.altName = "instagun"
 	weapon.damage = 100
 	weapon.pellets = 1.5
-	weapon.speed = 10000
+	weapon.speed = 524288
 	weapon.spread = tankbobs.m_radians(0)
 	weapon.repeatRate = 2
 	weapon.sa = false

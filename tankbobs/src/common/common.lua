@@ -51,9 +51,9 @@ function common_init()
 
 	if c_const_get("debug") then
 		if jit then
-			common_print(-1, "JIT enabled")
+			common_print(-1, "JIT enabled\n")
 		else
-			common_print(-1, "JIT disabled")
+			common_print(-1, "JIT disabled\n")
 		end
 	end
 
