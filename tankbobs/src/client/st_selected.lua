@@ -54,9 +54,18 @@ function st_selected_init()
 		pos = 4
 		limitConfig = "game.captureLimit"
 	end
+	local instagibPos = 0
+	local switch = c_config_get("game.instagib")
+	if switch == true then
+		instagibPos = 1
+	elseif switch == "semi" then
+		instagibPos = 2
+	else
+		instagibPos = 3
+	end
 	gui_addLabel(tankbobs.m_vec2(50, 75), "Game type", nil, 1 / 3) gui_addCycle(tankbobs.m_vec2(75, 75), "Instagib", nil, st_selected_gameType, {"Deathmatch", "Chase", "Domination", "Capture the Flag"}, pos, 0.5)
 	limit = gui_addLabel(tankbobs.m_vec2(50, 69), "Frag limit", nil, 1 / 3) limitInput = gui_addInput(tankbobs.m_vec2(75, 69), tostring(c_config_get(limitConfig)), nil, st_selected_limit, true, 4, 0.5)
-	gui_addLabel(tankbobs.m_vec2(50, 63), "Instagib", nil, 1 / 3) gui_addCycle(tankbobs.m_vec2(75, 63), "Instagib", nil, st_selected_instagib, {"No", "Yes"}, c_config_get("game.instagib") and 2 or 1, 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 63), "Instagib", nil, 1 / 3) gui_addCycle(tankbobs.m_vec2(75, 63), "Instagib", nil, st_selected_instagib, {"No", "Semi", "Yes"}, c_config_get("game.instagib") and 2 or 1, 0.5)
 	gui_addAction(tankbobs.m_vec2(75, 54), "Start", nil, st_selected_start)
 end
 
@@ -95,6 +104,8 @@ end
 function st_selected_instagib(widget, string, index)
 	if string == "Yes" then
 		c_config_set("game.instagib", true)
+	elseif string == "Semi" then
+		c_config_set("game.instagib", "semi")
 	elseif string == "No" then
 		c_config_set("game.instagib", false)
 	end

@@ -1135,6 +1135,12 @@ function instagib(line)
 					enabled = false
 				end
 			end
+		elseif switch == 's' then
+			enabled = "semi"
+		elseif switch == '/' then
+			enabled = "semi"
+		elseif switch == 'p' then
+			enabled = "semi"
 		end
 
 		if enabled == nil then
@@ -1143,9 +1149,29 @@ function instagib(line)
 
 		c_config_set("game.instagib", enabled)
 
-		s_printnl("instagib: instagib will be '", enabled and "enabled" or "disabled" ,"' next restart")
+		s_printnl("instagib: instagib will be set to '", tostring(enabled),"' at next restart")
 	else
-		s_printnl("instagib: instagib is currently '", c_world_getInstagib() and "enabled" or "disabled", "'")
+		local instagib
+		local nextInstagib
+
+		local function textify(instagib)
+			local switch = c_world_getInstagib()
+			if switch == true then
+				return "enabled"
+			elseif switch == "semi" then
+				return "semi"
+			else
+				return "disabled"
+			end
+		end
+
+		instagib = textify(c_world_getInstagib())
+		nextInstagib = textify(c_config_get("game.instagib"))
+
+		s_printnl("instagib: instagib is currently set to '", instagib, "'")
+		if nextInstagib ~= instagib then
+			s_printnl("instagib: instagib will be set to '", nextInstagib, "' at next restart")
+		end
 	end
 end
 

@@ -318,15 +318,82 @@ function c_weapon_init()
 	weapon.projectileExplodeSound = ""
 	weapon.projectileExplodeTime = 0
 
-	-- instagun
+	-- semi-instagun
 	weapon = c_weapon:new()
 	table.insert(c_weapons, weapon)
 
 	weapon.index = 5
+	weapon.name = "semi-instagun"
+	weapon.altName = "semi-instagun"
+	weapon.damage = 100
+	weapon.pellets = 1
+	weapon.speed = 2000
+	weapon.spread = tankbobs.m_radians(0)
+	weapon.repeatRate = 2
+	weapon.sa = false
+
+	weapon.knockback = 1024
+	weapon.texture = "railgun.png"
+	weapon.fireSound = {"railgun.wav", "railgun2.wav"}
+	weapon.reloadSound = "railgun-reload.wav"
+	weapon.launchDistance = 3.5  -- half unit to keep tank from shooting itself
+	weapon.aimAid = false
+	weapon.capacity = 0
+	weapon.clips = 0
+	weapon.reloadTime = 0
+	weapon.shotgunClips = false
+	weapon.meleeRange = 0
+	weapon.width = 0
+	weapon.trail = 1
+	weapon.trailWidth = 2
+
+	weapon.texturer[2](0, 1)
+	weapon.texturer[3](0, 0)
+	weapon.texturer[4](1, 0)
+	weapon.texturer[1](1, 1)
+	weapon.render[1](-1, 1)
+	weapon.render[2](-1, -1)
+	weapon.render[3](1, -1)
+	weapon.render[4](1, 1)
+
+	weapon.projectileTexture = "railgun-projectile.png"
+	weapon.projectileDensity = 1
+	weapon.projectileRestitution = 0.1
+	weapon.projectileMaxCollisions = 0
+	weapon.projectileEndOnBody = true
+
+	weapon.projectileHull[1](-1,  1)
+	weapon.projectileHull[2](-1, -1)
+	weapon.projectileHull[3](1,  -1)
+	weapon.projectileHull[4](1,   1)
+	weapon.projectileTexturer[1](0, 0)
+	weapon.projectileTexturer[2](1, 0)
+	weapon.projectileTexturer[3](0.5, 0.2)
+	weapon.projectileTexturer[4](0, 0)
+	weapon.projectileRender[4](0, 0)
+	weapon.projectileRender[1](0, 0)
+	weapon.projectileRender[2](0, 0)
+	weapon.projectileRender[3](0, 0)
+
+	weapon.projectileIsCollideSound = true
+
+	weapon.projectileExplode = false
+	weapon.projectileExplodeDamage = 0
+	weapon.projectileExplodeKnockback = 0
+	weapon.projectileExplodeReduce = 0
+	weapon.projectileExplodeRadius = 0
+	weapon.projectileExplodeSound = ""
+	weapon.projectileExplodeTime = 0
+
+	-- instagun
+	weapon = c_weapon:new()
+	table.insert(c_weapons, weapon)
+
+	weapon.index = 6
 	weapon.name = "instagun"
 	weapon.altName = "instagun"
-	weapon.damage = 100
-	weapon.pellets = 1.5
+	weapon.damage = 1000000
+	weapon.pellets = 1
 	weapon.speed = 2000
 	weapon.spread = tankbobs.m_radians(0)
 	weapon.repeatRate = 2
@@ -389,7 +456,7 @@ function c_weapon_init()
 	weapon = c_weapon:new()
 	table.insert(c_weapons, weapon)
 
-	weapon.index = 6
+	weapon.index = 7
 	weapon.name = "coilgun"
 	weapon.altName = "coilgun"
 	weapon.damage = 20
@@ -456,11 +523,11 @@ function c_weapon_init()
 	weapon = c_weapon:new()
 	table.insert(c_weapons, weapon)
 
-	weapon.index = 7
+	weapon.index = 8
 	weapon.name = "saw"
 	weapon.altName = "saw"
 	weapon.damage = 150 / 8
-	weapon.pellets = 1
+	weapon.pellets = 0
 	weapon.speed = 0
 	weapon.spread = tankbobs.m_radians(0)
 	weapon.repeatRate = 0.125  -- 1 / 8
@@ -523,7 +590,7 @@ function c_weapon_init()
 	weapon = c_weapon:new()
 	table.insert(c_weapons, weapon)
 
-	weapon.index = 8
+	weapon.index = 9
 	weapon.name = "rocket-launcher"
 	weapon.altName = "rocket-launcher"
 	weapon.damage = 20  -- 20 damage in addition to splash
@@ -1002,8 +1069,11 @@ function c_weapon_getWeapons()
 end
 
 function c_weapon_getDefaultWeapon()
-	if c_world_getInstagib() then
+	local switch = c_world_getInstagib()
+	if switch == true then
 		return c_weapon_getByAltName("instagun").index
+	elseif switch == "semi" then
+		return c_weapon_getByAltName("semi-instagun").index
 	else
 		return c_weapon_getByAltName("default").index
 	end

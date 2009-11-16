@@ -2305,8 +2305,8 @@ local function c_world_collide(tank, normal)
 	local vel = t_w_getLinearVelocity(tank.body)
 	local component = vel * -normal
 
-	if not c_world_getInstagib() and tank.shield <= 0 then
-		-- no collision damage in instagib mode or if any of the shield remains
+	if c_world_getInstagib() ~= "semi" and tank.shield <= 0 then
+		-- no collision damage in semi-instagib mode or if any of the shield remains
 		if component >= c_const_get("tank_damageMinSpeed") then
 			local damage = c_const_get("tank_damageK") * (component - c_const_get("tank_damageMinSpeed"))
 
