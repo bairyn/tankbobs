@@ -190,6 +190,14 @@ function game_new()
 			tankbobs.a_setVolumeChunk(c_const_get("weaponAudio_dir") .. v.fireSound, 0)
 		end
 	end
+
+	-- randomly play ambience
+	if c_config_get("client.ambience") then
+		local a = c_const_get("ambience_sounds")[math.random(1, c_const_get("ambience_chanceDenom"))]
+		if a then
+			tankbobs.a_playSound(a)
+		end
+	end
 end
 
 function game_end()

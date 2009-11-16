@@ -1,5 +1,6 @@
 <config>
 	<client>
+		<ambience>true</ambience>
 		<audioChunkSize>3072</audioChunkSize>
 		<cameraExtraFOV>25</cameraExtraFOV>
 		<cameraRotate>false</cameraRotate>

@@ -100,6 +100,8 @@ function c_data_init()
 	c_const_set("flagPickUp_sound", c_const_get("gameAudio_dir") .. "controlPoint.wav", 1)
 	c_const_set("flagReturn_sound", c_const_get("gameAudio_dir") .. "controlPoint.wav", 1)
 	c_const_set("win_sound", c_const_get("gameAudio_dir") .. "win.wav", 1)
+	c_const_set("ambience_sounds", {c_const_get("gameAudio_dir") .. "storm.mp3"}, 1)
+	c_const_set("ambience_chanceDenom", 64, 1)  -- will play 1 - 64 ambience sounds, or nothing if doesn't exist
 
 	-- key layouts enable configurations (including default keys) to be saved, loaded and shared in a standard format: qwerty
 
