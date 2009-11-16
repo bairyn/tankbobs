@@ -290,7 +290,7 @@ function c_weapon_init()
 	weapon.render[4](1, 1)
 
 	weapon.projectileTexture = "railgun-projectile.png"
-	weapon.projectileDensity = 12
+	weapon.projectileDensity = 1
 	weapon.projectileRestitution = 0.1
 	weapon.projectileMaxCollisions = 0
 	weapon.projectileEndOnBody = true
@@ -357,7 +357,7 @@ function c_weapon_init()
 	weapon.render[4](1, 1)
 
 	weapon.projectileTexture = "railgun-projectile.png"
-	weapon.projectileDensity = 8
+	weapon.projectileDensity = 1
 	weapon.projectileRestitution = 0.1
 	weapon.projectileMaxCollisions = 0
 	weapon.projectileEndOnBody = true
@@ -424,7 +424,7 @@ function c_weapon_init()
 	weapon.render[4](1, 1)
 
 	weapon.projectileTexture = "railgun-projectile.png"
-	weapon.projectileDensity = 4
+	weapon.projectileDensity = 0.25
 	weapon.projectileRestitution = 0.1
 	weapon.projectileMaxCollisions = 0
 	weapon.projectileEndOnBody = true
