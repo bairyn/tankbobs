@@ -7,7 +7,7 @@ c_mods_exitWorldFunction(c_mods_restoreFunctions)
 if c_tcm_current_map.name == "arena" then
 	c_const_set("powerup_pushStrength", 0, -1)
 	c_const_set("powerup_lifeTime", 0, -1)
-	c_const_set("powerup_restartTime", 2, -1)
+	c_const_set("powerup_restartTime", 8, -1)
 	c_const_set("wall_freezeTime", 1, -1)
 
 	local function giveShield(tank)
