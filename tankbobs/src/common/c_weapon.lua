@@ -466,7 +466,7 @@ function c_weapon_init()
 	weapon.repeatRate = 0.125  -- 1 / 8
 	weapon.sa = false
 
-	weapon.knockback = 16384
+	weapon.knockback = 0
 	weapon.texture = "saw.png"
 	weapon.fireSound = "saw.wav"
 	weapon.reloadSound = "railgun-reload.wav"
@@ -533,7 +533,7 @@ function c_weapon_init()
 	weapon.repeatRate = 1
 	weapon.sa = false
 
-	weapon.knockback = 0  -- splash will take care of this
+	weapon.knockback = 4096  -- splash will take care of this
 	weapon.texture = "rocket-launcher.png"
 	weapon.fireSound = "rocket-launcher.wav"
 	weapon.reloadSound = "railgun-reload.wav"
