@@ -40,11 +40,11 @@ else(WIN32)
 	set(tankbobs_libs lua.a SDL SDL_mixer.a SDL_image.a SDL_ttf.a SDL_net.a GL GLU box2d.a physfs.a png.a freetype.a m z dl ncurses)
 endif(WIN32)
 if(NOJIT MATCHES True)
-	#set(tankbobs_libdirs ../src/lib/Box2D/Source/Gen/float ../src/lib/physfs-2.0.0)
-	set(tankbobs_libdirs ../src/lib/Box2D/Source/Gen/fixed ../src/lib/physfs-2.0.0)
+	set(tankbobs_libdirs ../src/lib/Box2D/Source/Gen/float ../src/lib/physfs-2.0.0)
+	#set(tankbobs_libdirs ../src/lib/Box2D/Source/Gen/fixed ../src/lib/physfs-2.0.0)  # FIXME: why does linking with this cause linker errors?; TODO
 else(NOJIT MATCHES True)
-	#set(tankbobs_libdirs ../src/lib/Box2D/Source/Gen/float ../src/lib/physfs-2.0.0 ../src/lib/LuaJIT/src)
-	set(tankbobs_libdirs ../src/lib/Box2D/Source/Gen/fixed ../src/lib/physfs-2.0.0 ../src/lib/LuaJIT/src)
+	set(tankbobs_libdirs ../src/lib/Box2D/Source/Gen/float ../src/lib/physfs-2.0.0 ../src/lib/LuaJIT/src)
+	#set(tankbobs_libdirs ../src/lib/Box2D/Source/Gen/fixed ../src/lib/physfs-2.0.0 ../src/lib/LuaJIT/src)  # FIXME: why does linking with this cause linker errors?; TODO
 endif(NOJIT MATCHES True)
 
 set(client_srcs src/client/client.c)
