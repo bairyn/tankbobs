@@ -2006,6 +2006,12 @@ function c_world_powerup_pickUp(tank, powerup)
 	if powerupType.name == "rocket-launcher" then
 		c_weapon_pickUp(tank, powerupType.name)
 	end
+	if powerupType.name == "laser-gun" then
+		c_weapon_pickUp(tank, powerupType.name)
+	end
+	if powerupType.name == "plasma-gun" then
+		c_weapon_pickUp(tank, powerupType.name)
+	end
 end
 
 function c_world_powerup_step(d, powerup)
