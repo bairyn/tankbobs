@@ -1219,7 +1219,7 @@ function c_ai_yourTeamOffensive(tank)
 end
 
 local p1, p2 = tankbobs.m_vec2(), tankbobs.m_vec2()
-function c_ai_tank_step(tank)
+function c_ai_tank_step(tank, d)
 	local t = tankbobs.t_getTicks()
 
 	if c_world_isBehind() then

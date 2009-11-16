@@ -526,7 +526,7 @@ function c_weapon_init()
 	weapon.index = 8
 	weapon.name = "saw"
 	weapon.altName = "saw"
-	weapon.damage = 150 / 8
+	weapon.damage = 150 / 8  -- 150 per second
 	weapon.pellets = 0
 	weapon.speed = 0
 	weapon.spread = tankbobs.m_radians(0)
@@ -652,6 +652,140 @@ function c_weapon_init()
 	weapon.projectileExplodeRadius = 30
 	weapon.projectileExplodeSound = "rocket-launcher-projectile-explode.wav"
 	weapon.projectileExplodeTime = 0.5
+
+	-- laser-gun
+	weapon = c_weapon:new()
+	table.insert(c_weapons, weapon)
+
+	weapon.index = 10
+	weapon.name = "laser-gun"
+	weapon.altName = "laser-gun"
+	weapon.damage = 60 / 8
+	weapon.pellets = 0
+	weapon.speed = 0
+	weapon.spread = tankbobs.m_radians(0)
+	weapon.repeatRate = 0.125  -- 1 / 8
+	weapon.sa = false
+
+	weapon.knockback = 0
+	weapon.texture = "laser-gun.png"
+	weapon.fireSound = "laser-gun.wav"
+	weapon.reloadSound = "railgun-reload.wav"
+	weapon.launchDistance = 2.6  -- launch at center
+	weapon.aimAid = false
+	weapon.capacity = 64  -- can be used for 8 seconds
+	weapon.clips = 1
+	weapon.reloadTime = 2
+	weapon.shotgunClips = false
+	weapon.meleeRange = 50
+	weapon.width = 1.5
+	weapon.trail = 0
+	weapon.trailWidth = 0
+
+	weapon.texturer[2](0, 1)
+	weapon.texturer[3](0, 0)
+	weapon.texturer[4](1, 0)
+	weapon.texturer[1](1, 1)
+	weapon.render[1](-1, 1)
+	weapon.render[2](-1, -1)
+	weapon.render[3](1, -1)
+	weapon.render[4](1, 1)
+
+	weapon.projectileTexture = "laser-gun-projectile.png"
+	weapon.projectileDensity = 0
+	weapon.projectileRestitution = 0.1
+	weapon.projectileMaxCollisions = 0
+	weapon.projectileEndOnBody = true
+
+	weapon.projectileHull[1](-0.5,  0.5)
+	weapon.projectileHull[2](-0.5, -0.5)
+	weapon.projectileHull[3](0.5,  -0.5)
+	weapon.projectileHull[4](0.5,   0.5)
+	weapon.projectileTexturer[1](0, 1)
+	weapon.projectileTexturer[2](0, 0)
+	weapon.projectileTexturer[3](1, 0)
+	weapon.projectileTexturer[4](1, 1)
+	weapon.projectileRender[4](-0.75, 50)
+	weapon.projectileRender[1](-0.75, 2)
+	weapon.projectileRender[2](0.75, 2)
+	weapon.projectileRender[3](0.75, 50)
+
+	weapon.projectileIsCollideSound = true
+
+	weapon.projectileExplode = false
+	weapon.projectileExplodeDamage = 0
+	weapon.projectileExplodeKnockback = 0
+	weapon.projectileExplodeReduce = 0
+	weapon.projectileExplodeRadius = 0
+	weapon.projectileExplodeSound = ""
+	weapon.projectileExplodeTime = 0
+
+	-- plasma gun
+	weapon = c_weapon:new()
+	table.insert(c_weapons, weapon)
+
+	weapon.index = 11
+	weapon.name = "plasma-gun"
+	weapon.altName = "plasma-gun"
+	weapon.damage = 60 / 8
+	weapon.pellets = 0
+	weapon.speed = 0
+	weapon.spread = tankbobs.m_radians(0)
+	weapon.repeatRate = 0.125  -- 1 / 8
+	weapon.sa = false
+
+	weapon.knockback = 0
+	weapon.texture = "plasma-gun.png"
+	weapon.fireSound = "plasma-gun.wav"
+	weapon.reloadSound = "plasma-gun-reload.wav"
+	weapon.launchDistance = 2.6  -- launch at center
+	weapon.aimAid = false
+	weapon.capacity = 64  -- can be used for 8 seconds
+	weapon.clips = 2
+	weapon.reloadTime = 4
+	weapon.shotgunClips = false
+	weapon.meleeRange = -12.5 / 8
+	weapon.width = 1.5
+	weapon.trail = 0
+	weapon.trailWidth = 0
+
+	weapon.texturer[2](0, 1)
+	weapon.texturer[3](0, 0)
+	weapon.texturer[4](1, 0)
+	weapon.texturer[1](1, 1)
+	weapon.render[1](-0.5, 0.5)
+	weapon.render[2](-0.5, -0.5)
+	weapon.render[3](0.5, -0.5)
+	weapon.render[4](0.5, 0.5)
+
+	weapon.projectileTexture = "plasma-gun-projectile.png"
+	weapon.projectileDensity = 0
+	weapon.projectileRestitution = 0.1
+	weapon.projectileMaxCollisions = 0
+	weapon.projectileEndOnBody = true
+
+	weapon.projectileHull[1](-0.5,  0.5)
+	weapon.projectileHull[2](-0.5, -0.5)
+	weapon.projectileHull[3](0.5,  -0.5)
+	weapon.projectileHull[4](0.5,   0.5)
+	weapon.projectileTexturer[1](0, 1)
+	weapon.projectileTexturer[2](0, 0)
+	weapon.projectileTexturer[3](1, 0)
+	weapon.projectileTexturer[4](1, 1)
+	weapon.projectileRender[4](-0.5, 0.5)
+	weapon.projectileRender[1](-0.5, -0.5)
+	weapon.projectileRender[2](0.5, -0.5)
+	weapon.projectileRender[3](0.5, 0.5)
+
+	weapon.projectileIsCollideSound = true
+
+	weapon.projectileExplode = false
+	weapon.projectileExplodeDamage = 0
+	weapon.projectileExplodeKnockback = 0
+	weapon.projectileExplodeReduce = 0
+	weapon.projectileExplodeRadius = 0
+	weapon.projectileExplodeSound = ""
+	weapon.projectileExplodeTime = 0
 end
 
 function c_weapon_done()
@@ -780,26 +914,38 @@ function c_weapon_pickUp(tank, weaponName)
 end
 
 function c_weapon_fireMeleeWeapon(tank, weapon)
-	local start, endP, tmp = tankbobs.m_vec2(tank.p), tankbobs.m_vec2(), tankbobs.m_vec2()
+	if weapon.meleeRange > 0 then
+		local start, endP, tmp = tankbobs.m_vec2(tank.p), tankbobs.m_vec2(), tankbobs.m_vec2()
 
-	tmp.t = tank.r
-	tmp.R = weapon.launchDistance
-	start:add(tmp)
+		tmp.t = tank.r
+		tmp.R = weapon.launchDistance
+		start:add(tmp)
 
-	endP(start)
-	tmp.R = weapon.meleeRange
-	endP:add(tmp)
+		endP(start)
+		tmp.R = weapon.meleeRange
+		endP:add(tmp)
 
-	local status, _, typeOfTarget, target = c_world_findClosestIntersection(start, endP)
-	if status then
-		if typeOfTarget == "tank" then
-			c_weapon_meleeHit(target, tank)
+		local status, _, typeOfTarget, target = c_world_findClosestIntersection(start, endP)
+		if status then
+			if typeOfTarget == "tank" then
+				c_weapon_meleeHit(target, tank)
+			end
+		end
+	elseif weapon.meleeRange < 0 then
+		for _, v in pairs(c_world_getTanks()) do
+			if v.exists and v ~= tank then
+				if (v.p - tank.p).R <= tank.radiusFireTime + 2 then
+					c_weapon_meleeHit(v, tank)
+				end
+			end
 		end
 	end
 end
 
-function c_weapon_fire(tank)
+function c_weapon_fire(tank, d)
 	local t = tankbobs.t_getTicks()
+
+	tank.m.firing = false
 
 	if not tank.weapon or not tank.exists then
 		return
@@ -811,9 +957,28 @@ function c_weapon_fire(tank)
 		return
 	end
 
+	if weapon.meleeRange < 0 then
+		tank.radiusFireTime = math.max(0, tank.radiusFireTime - d * math.abs(weapon.meleeRange))
+	else
+		tank.radiusFireTime = 0
+	end
+
+	local function ret()
+		-- damage tanks for some weapons even when not firing
+		if weapon.meleeRange < 0 then
+			while t >= tank.lastFireTime + (c_world_timeMultiplier(weapon.repeatRate)) and not tank.notFireReset do
+				tank.lastFireTime = tank.lastFireTime + (c_world_timeMultiplier(weapon.repeatRate))
+
+				c_weapon_fireMeleeWeapon(tank, weapon)
+			end
+		end
+	end
+
 	if not (bit.band(tank.state, FIRING) ~= 0) and (not tank.lastFireTime or t >= tank.lastFireTime + c_world_timeMultiplier(weapon.repeatRate)) then
 		tank.notFireReset = false
 	elseif tank.notFireReset then
+		ret()
+
 		return
 	end
 
@@ -871,6 +1036,8 @@ function c_weapon_fire(tank)
 
 		tank.m.fired = false
 
+		ret()
+
 		return
 	end
 
@@ -880,13 +1047,23 @@ function c_weapon_fire(tank)
 		if bit.band(tank.state, RELOAD) ~= 0 and not tank.reloading and tank.clips > 0 and tank.ammo < weapon.capacity then
 			tank.reloading = t
 
+			ret()
+
 			return
 		end
 	end
 
 	if bit.band(tank.state, FIRING) == 0 then
+		ret()
+
 		return
 	end
+
+	if weapon.meleeRange < 0 then
+		tank.radiusFireTime = tank.radiusFireTime + 2 * d * math.abs(weapon.meleeRange)
+	end
+
+	tank.m.firing = true
 
 	while t >= tank.lastFireTime + (c_world_timeMultiplier(weapon.repeatRate)) and not tank.notFireReset do
 		tank.lastFireTime = tank.lastFireTime + (c_world_timeMultiplier(weapon.repeatRate))

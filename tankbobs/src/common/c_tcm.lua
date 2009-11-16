@@ -680,6 +680,16 @@ function c_tcm_read_map(filename)
 		else
 			powerupSpawnPoint.enabledPowerups["rocket-launcher"] = false
 		end
+		if bit.band(powerups[1], bit.tobit(0x00000800)) ~= 0 then
+			powerupSpawnPoint.enabledPowerups["laser-gun"] = true
+		else
+			powerupSpawnPoint.enabledPowerups["laser-gun"] = false
+		end
+		if bit.band(powerups[1], bit.tobit(0x00001000)) ~= 0 then
+			powerupSpawnPoint.enabledPowerups["plasma-gun"] = true
+		else
+			powerupSpawnPoint.enabledPowerups["plasma-gun"] = false
+		end
 
 		if c_tcm_private_get(tankbobs.fs_getChar, i) ~= 0 then
 			powerupSpawnPoint.linked = true

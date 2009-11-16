@@ -723,12 +723,16 @@ function game_drawWorld(d, M, rotM)
 
 		-- melee weapons
 		for _, v in pairs(c_world_getTanks()) do
-			if v.exists then
-				if bit.band(v.state, FIRING) ~= 0 and v.weapon and c_weapon_getWeapons()[v.weapon] and c_weapon_getWeapons()[v.weapon].meleeRange ~= 0 and not v.reloading then
+			if v.exists and v.weapon then
+				local weapon = c_weapon_getWeapons()[v.weapon]
+				if weapon and ((bit.band(v.state, FIRING) ~= 0 and not v.reloading) or weapon.meleeRange < 0) and weapon.meleeRange ~= 0 then
 					gl.PushMatrix()
 						gl.Translate(v.p.x, v.p.y, 0)
 						gl.Rotate(tankbobs.m_degrees(v.r - c_const_get("tank_defaultRotation")), 0, 0, 1)
-						gl.CallList(c_weapon_getWeapons()[v.weapon].m.p.projectileList)
+						if weapon.meleeRange < 0 then
+							gl.Scale(v.radiusFireTime * 2, v.radiusFireTime * 2, 1)
+						end
+						gl.CallList(weapon.m.p.projectileList)
 					gl.PopMatrix()
 				end
 			end

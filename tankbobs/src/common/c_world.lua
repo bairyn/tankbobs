@@ -352,6 +352,26 @@ function c_world_init()
 	powerupType.c.r, powerupType.c.g, powerupType.c.b, powerupType.c.a = 0.15, 0.1, 0.4, 0.333
 	powerupType.instagib = false
 
+	-- laser-gun
+	local powerupType = c_world_powerupType:new()
+
+	table.insert(c_powerupTypes, powerupType)
+
+	powerupType.index = 12
+	powerupType.name = "laser-gun"
+	powerupType.c.r, powerupType.c.g, powerupType.c.b, powerupType.c.a = 0.4, 0.4, 0.8, 0.666
+	powerupType.instagib = false
+
+	-- plasma gun
+	local powerupType = c_world_powerupType:new()
+
+	table.insert(c_powerupTypes, powerupType)
+
+	powerupType.index = 13
+	powerupType.name = "plasma-gun"
+	powerupType.c.r, powerupType.c.g, powerupType.c.b, powerupType.c.a = 0.15, 0.4, 0.6, 1
+	powerupType.instagib = false
+
 
 	tankbobs.w_setTimeStep(c_const_get("world_timeStep"))
 	tankbobs.w_setIterations(c_const_get("world_iterations"))
@@ -425,6 +445,7 @@ c_world_tank =
 	tagged = false,
 	lastAttackers = {},
 	notFireReset = false,
+	radiusFireTime = 0,
 
 	cd = {},  -- data cleared on death
 
@@ -1679,10 +1700,10 @@ function c_world_tank_step(d, tank)
 	t_w_setAngularVelocity(tank.body, 0)  -- reset the tank's angular velocity
 
 	-- weapons
-	c_weapon_fire(tank)
+	c_weapon_fire(tank, d)
 
 	if tank.bot then
-		c_ai_tank_step(tank)
+		c_ai_tank_step(tank, d)
 	end
 end
 

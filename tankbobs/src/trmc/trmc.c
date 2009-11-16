@@ -1350,6 +1350,14 @@ static int compile(const char *filename)
 		{
 			powerups[0] |= 0x00000400;
 		}
+		if(strstr(powerupSpawnPoint->powerupsToEnable, "laser-gun"))
+		{
+			powerups[0] |= 0x00000800;
+		}
+		if(strstr(powerupSpawnPoint->powerupsToEnable, "plasma-gun"))
+		{
+			powerups[0] |= 0x00001000;
+		}
 
 		put_cint(fout, i);
 		put_cdouble(fout, powerupSpawnPoint->x1);
