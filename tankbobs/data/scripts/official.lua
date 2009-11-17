@@ -153,7 +153,7 @@ elseif c_tcm_current_map.name == "race-track" then
 	local function die(tank, t)
 		t = t or tankbobs.t_getTicks()
 
-		if tank.killer and c_world_getTanks()[tank.killer] then
+		if tank.killer and c_world_getTanks()[tank.killer] and tank.killer ~= tank then
 			local killer = c_world_getTanks()[tank.killer]
 			killer.score = killer.score - 1
 		else
