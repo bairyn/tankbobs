@@ -125,6 +125,8 @@ int a_quit(lua_State *L)
 	if(!audioInitialized)
 		return 0;
 
+	audioInitialized = FALSE;
+
 	if(music)
 		Mix_FreeMusic(music);
 	music = NULL;
