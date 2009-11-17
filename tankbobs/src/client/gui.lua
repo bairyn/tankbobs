@@ -187,7 +187,7 @@ function gui_init()
 	c_const_set("scale_scrollSpeed", 0.5, 1)
 
 	c_const_set("select_init", 0.25, 1)
-	c_const_set("select_drop", 1.0, 1)
+	c_const_set("select_drop", 2.0, 1)
 end
 
 function gui_done()
