@@ -817,7 +817,7 @@ function c_ai_followObjective(tank, objective)
 
 			objective.following = true
 
-			objective.followingObjective = true
+			tank.ai.followingObjective = true
 		else
 			-- special case for control points
 			if objective.objectiveType == "controlPoint" then
@@ -914,7 +914,7 @@ function c_ai_followObjective(tank, objective)
 
 			objective.following = true
 
-			objective.followingObjective = true
+			tank.ai.followingObjective = true
 		end
 
 		tank.ai.followingObjective = true
