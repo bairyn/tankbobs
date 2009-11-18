@@ -76,7 +76,8 @@ do                                                                              
 } while(0)
 #endif
 
-#define BUFSIZE 1024
+#define BUFSIZE  1024
+#define FBUFSIZE 4096
 
 extern int init;
 extern Uint32 sdlFlags;

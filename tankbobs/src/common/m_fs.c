@@ -1710,7 +1710,7 @@ const char *fs_createTemporaryFile(lua_State *L, const char *filename, const cha
 	FILE *fout;
 	int status = 1;
 	PHYSFS_File *fin;
-	static char buf[BUFSIZE];
+	static char buf[FBUFSIZE];
 	const char *tmpfilename;
 
 	/* Copy file to a temporary file */
