@@ -105,7 +105,7 @@ void fs_errorNL(lua_State *L, void *f_, const char *filename)
 	{
 		++num; lua_pushstring(L, " (");
 		++num; lua_pushstring(L, filename);
-		++num; lua_pushstring(L, " )");
+		++num; lua_pushstring(L, ")");
 	}
 	if(f)
 	{
@@ -1703,4 +1703,94 @@ int fs_permitSymbolicLinks(lua_State *L)
 	PHYSFS_permitSymbolicLinks(lua_toboolean(L, 1));
 
 	return 0;
+}
+
+const char *fs_createTemporaryFile(lua_State *L, const char *filename, const char *ext)
+{
+	FILE *fout;
+	int status = 1;
+	PHYSFS_File *fin;
+	static char buf[BUFSIZE];
+	const char *tmpfilename;
+
+	/* Copy file to a temporary file */
+	fin = PHYSFS_openRead(filename);
+	if(!fin)
+	{
+		fs_errorNL(L, fin, filename);
+
+		return NULL;
+	}
+
+	/*tmpfilename = tempnam(NULL, "ext");*/
+	tmpfilename = tmpnam(NULL);
+	if(!tmpfilename)
+	{
+		lua_pushstring(L, "could not create temporary file for file");
+		lua_error(L);
+
+		/*free(tmpfilename);*/
+		return NULL;
+	}
+
+	fout = fopen(tmpfilename, "w");
+	if(!fout)
+	{
+		lua_pushstring(L, "could not open temporary file for file");
+		lua_error(L);
+
+		/*free(tmpfilename);*/
+		return NULL;
+	}
+
+	while((status = PHYSFS_read(fin, buf, 1, sizeof(buf))) >= sizeof(buf))
+	{
+		int status2;
+
+		status2 = fwrite(buf, 1, status, fout);
+		/*if(status2 == EOF)*/
+		if(status2 != status)
+		{
+			lua_pushstring(L, "could not write temporary file for file");
+			lua_error(L);
+
+			/*free(tmpfilename);*/
+			return NULL;
+		}
+	}
+	if(status < sizeof(buf) && !PHYSFS_eof(fin))
+	{
+		fs_errorNL(L, fin, filename);
+
+		/*free(tmpfilename);*/
+		return NULL;
+	}
+	else if(status < sizeof(buf))
+	{
+		int status2;
+
+		status2 = fwrite(buf, 1, status, fout);
+		/*if(status2 == EOF)*/
+		if(status2 != status)
+		{
+			lua_pushstring(L, "could not write temporary file for file");
+			lua_error(L);
+
+			/*free(tmpfilename);*/
+			return NULL;
+		}
+	}
+
+	status = PHYSFS_close(fin);
+	if(!status)
+	{
+		fs_errorNL(L, fin, filename);
+
+		return NULL;
+	}
+	fclose(fout);
+
+	/*free(tmpfilename);*/
+
+	return tmpfilename;
 }
