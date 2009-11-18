@@ -609,6 +609,66 @@ function c_ai_weightOfPosToWayPoint(pos, wayPoint)
 	return (pos - wayPoint.p).R
 end
 
+--[[
+Here's an example of a waypoint graph:
+   4     |
+         |
+   1     |
+         |
+         |
+         |
+         |
+         |
+         |
+         |
+         |
+         |
+         |
+          
+   2                   3
+
+Now, net[x] would be a table of {waypoint, weight}'s.  The weights are approximate in this example.
+
+net[1] = {{2, 8.0}, {4, 2.0}}
+net[2] = {{1, 8.0}, {3, 8.0}, {4, 10.0}}
+net[3] = {{2, 8.0}}
+net[4] = {{1, 2.0}, {2, 10.0}}
+
+General example:
+start: 1
+goal: 3
+c_ai_findClosestPath(1, 3, nil)
+	path = {}
+	nodes = {{2, 8.0}, {4, 2.0}}
+	orderByWeight({2, 8.0}, {4, 2.0}) =
+		return whichever is goal as first, or if neither, then weight of wa < wb
+		where
+			wa = c_ai_findClosestPath(2, 3, {2, 4})
+				nodes = {{1, 8.0}, {3, 8.0}}  -- waypoint 4, which exists in net[2], isn't in nodes because it is closed
+				orderByWeight({1, 8.0}, {3, 8.0}}) = the latter, since it is the goal.  Weight of 8
+			wb = c_ai_findClosestPath(4, 3, {2, 4})
+				nodes = {{2, 10.0}}  -- waypoint 1, which exists in net[4], isn't in nodes because it is closed
+				only node is returned.  Weight of 10
+
+		Now, since 3 is the goal, wa (2) is first
+
+	The next step in the path is waypoint 2.  The order of table nodes is unchanged.
+	path is now {2}
+	closed is now {2, 4}
+	Nodes is now that which is in net[2] that isn't closed:
+	nodes = {{1, 8.0}, {3, 8.0}}
+	orderByWeight({1, 8.0}, {3, 8.0}) =
+		swap order of nodes since waypoint 3 is the goal
+	nodes now = {{3, 8.0}, {1, 8.0}}
+	(since nodes[1] exists, continue)
+	We add the first node (3) to path
+	path is now {2, 3}
+
+	#path = 2
+	path[#path] == goal
+	goal = 3
+	since path[#path] == goal, then break
+--]]
 function c_ai_findClosestPath(start, goal, closed)
 	if not start or not goal then
 		return nil
@@ -634,9 +694,18 @@ function c_ai_findClosestPath(start, goal, closed)
 			return false
 		end
 
-		local wa, wb
-		_, wa = c_ai_findClosestPath(a[1], goal, closed)
-		_, wb = c_ai_findClosestPath(b[1], goal, closed)
+		local wa, wb, na, nb
+		na, wa = c_ai_findClosestPath(a[1], goal, tankbobs.t_clone(closed))
+		nb, wb = c_ai_findClosestPath(b[1], goal, tankbobs.t_clone(closed))
+
+		-- we only place a waypoint first if it's the goal itself, not if it's a waypoint directly linked to the goal
+		--[[
+		if na and na[1] == goal then
+			return true
+		elseif nb and nb[1] == goal then
+			return false
+		end
+		--]]
 
 		if not wa then
 			return false
@@ -677,7 +746,7 @@ function c_ai_findClosestPath(start, goal, closed)
 		table.sort(nodes, orderByWeight)
 
 		weight = weight + nodes[1][2]
-		table.insert(path, nodes[1][1], nodes[1][2])
+		table.insert(path, nodes[1][1])
 	end
 
 	if path[#path] ~= goal then
@@ -756,15 +825,6 @@ function c_ai_followObjective(tank, objective)
 			objective.path = c_ai_findClosestPath(start, goal)
 
 			objective.nextNode = 1
-if tank == c_world_getTanks()[1] then if not c then c = 0 end c = c + 1
-print(c + 1, start, goal, objective.path)
-if objective.path then
-local n = objective.path[objective.nextNode]
-local a = (n > 0) and c_tcm_current_map.wayPoints[n].p or c_tcm_current_map.teleporters[-n].p
-print("", a.x, a.y)
-print()
-end
-end
 		end
 
 		if objective.path and objective.path[objective.nextNode] then
