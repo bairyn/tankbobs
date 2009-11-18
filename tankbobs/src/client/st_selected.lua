@@ -56,7 +56,7 @@ function st_selected_init()
 	end
 	local instagibPos = 0
 	local switch = c_config_get("game.instagib")
-	if switch == true then
+	if switch == false then
 		instagibPos = 1
 	elseif switch == "semi" then
 		instagibPos = 2
@@ -65,7 +65,7 @@ function st_selected_init()
 	end
 	gui_addLabel(tankbobs.m_vec2(50, 75), "Game type", nil, 1 / 3) gui_addCycle(tankbobs.m_vec2(75, 75), "Instagib", nil, st_selected_gameType, {"Deathmatch", "Chase", "Domination", "Capture the Flag"}, pos, 0.5)
 	limit = gui_addLabel(tankbobs.m_vec2(50, 69), "Frag limit", nil, 1 / 3) limitInput = gui_addInput(tankbobs.m_vec2(75, 69), tostring(c_config_get(limitConfig)), nil, st_selected_limit, true, 4, 0.5)
-	gui_addLabel(tankbobs.m_vec2(50, 63), "Instagib", nil, 1 / 3) gui_addCycle(tankbobs.m_vec2(75, 63), "Instagib", nil, st_selected_instagib, {"No", "Semi", "Yes"}, c_config_get("game.instagib") and 2 or 1, 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 63), "Instagib", nil, 1 / 3) gui_addCycle(tankbobs.m_vec2(75, 63), "Instagib", nil, st_selected_instagib, {"No", "Semi", "Yes"}, instagibPos, 0.5)
 	gui_addAction(tankbobs.m_vec2(75, 54), "Start", nil, st_selected_start)
 end
 
@@ -83,7 +83,7 @@ function st_selected_button(button, pressed)
 			if button == 0x1B or button == c_config_get("client.key.quit") then
 				c_state_advance()
 			elseif button == c_config_get("client.key.exit") then
-				c_state_new(exit_state)
+				c_state_goto(exit_state)
 			end
 		end
 	end
@@ -143,7 +143,8 @@ end
 
 function st_selected_start(widget)
 	if c_config_get(limitConfig) > 0 then
-		c_state_new(play_state)
+		renderer_clear()
+		c_state_goto(play_state)
 	end
 end
 

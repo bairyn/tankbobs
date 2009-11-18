@@ -784,3 +784,8 @@ function renderer_end()
 	gl.Flush()
 	tankbobs.r_swapBuffers()
 end
+
+function renderer_clear()
+	renderer_end()
+	renderer_start()
+end

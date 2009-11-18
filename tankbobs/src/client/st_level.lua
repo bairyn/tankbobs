@@ -63,7 +63,7 @@ function st_level_button(button, pressed)
 			if button == 0x1B or button == c_config_get("client.key.quit") then
 				c_state_advance()
 			elseif button == c_config_get("client.key.exit") then
-				c_state_new(exit_state)
+				c_state_goto(exit_state)
 			end
 		end
 	end
@@ -78,8 +78,8 @@ function st_level_step(d)
 end
 
 function st_level_select(widget)
-	c_tcm_select_map(widget.m.info.name)
-	c_state_new(selected_state)
+	c_config_set("game.lastMap", widget.m.info.name)  -- don't load level yet (background can still be running)
+	c_state_goto(selected_state)
 end
 
 function st_level_levelSelected(widget)

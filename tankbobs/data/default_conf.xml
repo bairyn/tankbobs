@@ -62,6 +62,7 @@
 		<port>0</port>
 		<powerupFocusDistance>50</powerupFocusDistance>
 		<powerupRefocusTime>0.5</powerupRefocusTime>
+		<preview>true</preview>
 		<renderer>
 			<font>sans</font>
 
@@ -150,6 +151,8 @@
 		<fragLimit>15</fragLimit>
 		<gameType>deathmatch</gameType>
 		<instagib>false</instagib>
+		<lastMap>small_1</lastMap>
+		<lastSet>small</lastSet>
 		<overview>1</overview>
 		<player1>
 			<name>Player1</name>

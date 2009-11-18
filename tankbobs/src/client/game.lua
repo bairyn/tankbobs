@@ -25,9 +25,6 @@ Game play functions shared by both offline and online states
 
 local tankbobs = tankbobs
 local gl = gl
-local gui_paint = gui_paint
-local gui_button = gui_button
-local gui_mouse = gui_mouse
 local c_world_getPowerups = c_world_getPowerups
 local c_weapon_getProjectiles = c_weapon_getProjectiles
 local c_world_getTanks = c_world_getTanks
@@ -57,9 +54,6 @@ function game_init()
 	-- localize frequently used globals
 	tankbobs = _G.tankbobs
 	gl = _G.gl
-	gui_paint = _G.gui_paint
-	gui_button = _G.gui_button
-	gui_mouse = _G.gui_mouse
 	c_world_getPowerups = _G.c_world_getPowerups
 	c_weapon_getProjectiles = _G.c_weapon_getProjectiles
 	c_world_getTanks = _G.c_world_getTanks
@@ -84,6 +78,12 @@ function game_done()
 end
 
 function game_new()
+	-- stop background state *only* if a game is being started from foreground state
+	if c_state_getCurrentState() == 1 and backgroundState then
+		c_state_backgroundStop(backgroundState)
+		backgroundState = nil
+	end
+
 	for i = 1, 4 do
 		camera[i] = tankbobs.m_vec2(50, 50)
 		zoom[i] = 1
@@ -169,17 +169,20 @@ function game_new()
 		end
 	end
 
-	gui_addLabel(tankbobs.m_vec2(7.5, 92.5), "", updateScores, 0.5, c_config_get("client.renderer.scoresRed"), c_config_get("client.renderer.scoresGreen"), c_config_get("client.renderer.scoresBlue"), c_config_get("client.renderer.scoresAlpha"), c_config_get("client.renderer.scoresRed"), c_config_get("client.renderer.scoresGreen"), c_config_get("client.renderer.scoresGreen"), c_config_get("client.renderer.scoresAlpha"))
+	-- GUI if in foreground
+	if c_state_getCurrentState() == 1 then
+		gui_addLabel(tankbobs.m_vec2(7.5, 92.5), "", updateScores, 0.5, c_config_get("client.renderer.scoresRed"), c_config_get("client.renderer.scoresGreen"), c_config_get("client.renderer.scoresBlue"), c_config_get("client.renderer.scoresAlpha"), c_config_get("client.renderer.scoresRed"), c_config_get("client.renderer.scoresGreen"), c_config_get("client.renderer.scoresGreen"), c_config_get("client.renderer.scoresAlpha"))
 
-	-- fps counter
-	local function updateFPS(widget)
-		local fps = fps
+		-- fps counter
+		local function updateFPS(widget)
+			local fps = fps
 
-		widget.text = tostring(fps - (fps % 1))
-	end
+			widget.text = tostring(fps - (fps % 1))
+		end
 
-	if c_config_get("client.renderer.fpsCounter") then
-		gui_addLabel(tankbobs.m_vec2(92.5, 92.5), "", updateFPS, 0.5, c_config_get("client.renderer.fpsRed"), c_config_get("client.renderer.fpsGreen"), c_config_get("client.renderer.fpsBlue"), c_config_get("client.renderer.fpsAlpha"), c_config_get("client.renderer.fpsRed"), c_config_get("client.renderer.fpsGreen"), c_config_get("client.renderer.fpsGreen"), c_config_get("client.renderer.fpsAlpha"))
+		if c_config_get("client.renderer.fpsCounter") then
+			gui_addLabel(tankbobs.m_vec2(92.5, 92.5), "", updateFPS, 0.5, c_config_get("client.renderer.fpsRed"), c_config_get("client.renderer.fpsGreen"), c_config_get("client.renderer.fpsBlue"), c_config_get("client.renderer.fpsAlpha"), c_config_get("client.renderer.fpsRed"), c_config_get("client.renderer.fpsGreen"), c_config_get("client.renderer.fpsGreen"), c_config_get("client.renderer.fpsAlpha"))
+		end
 	end
 
 	-- initialize melee sounds
@@ -224,6 +227,11 @@ function game_end()
 			tankbobs.a_setVolumeChunk(c_const_get("weaponAudio_dir") .. v.fireSound, 0)
 			tankbobs.a_freeSound(c_const_get("weaponAudio_dir") .. v.fireSound)
 		end
+	end
+
+	-- start background game *only* if the game ended from foreground state
+	if c_state_getCurrentState() == 1 and c_config_get("client.preview") then
+		backgroundState = c_state_backgroundStart(background_state)
 	end
 end
 

@@ -165,9 +165,11 @@ function st_play_init()
 
 	online = false
 
-	game_new()
-
 	math.randomseed(os.time())
+
+	c_tcm_select_map(c_config_get("game.lastMap"))
+
+	game_new()
 
 	-- pause label
 
@@ -235,18 +237,18 @@ function st_play_done()
 	-- reset texenv
 	gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
 
-	-- end game
-	game_end()
-
 	-- free the world
 	c_world_freeWorld()
+
+	-- end game
+	game_end()
 end
 
 function st_play_click(button, pressed, x, y)
 	gui_click(button, pressed, x, y)
 
 	if pressed and endOfGame then
-		c_state_new(play_state)
+		c_state_goto(play_state)
 	end
 end
 
@@ -264,7 +266,7 @@ function st_play_button(button, pressed)
 	if not gui_button(button, pressed) then
 		if pressed then
 			if button == 0x0D and endOfGame then  -- enter
-				c_state_new(play_state)
+				c_state_goto(play_state)
 			elseif button == c_config_get("client.key.screenToggle") then
 				local screens = c_config_get("client.screens")
 
@@ -284,7 +286,7 @@ function st_play_button(button, pressed)
 				end
 			elseif button == 0x1B or button == c_config_get("client.key.quit") then  -- escape
 				if endOfGame then
-					c_state_new(play_state)
+					c_state_goto(play_state)
 				elseif quitScreen then
 					continue()
 				elseif c_world_getPaused() then
@@ -297,7 +299,7 @@ function st_play_button(button, pressed)
 					quitScreen = true
 				end
 			elseif button == c_config_get("client.key.exit") then
-				c_state_new(exit_state)
+				c_state_goto(exit_state)
 			end
 		end
 

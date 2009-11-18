@@ -46,7 +46,7 @@ function main_init()
 
 	tankbobs.c_init()
 
-	c_state_new(main_state)
+	c_state_goto(main_state)
 
 	main_data = {}
 
@@ -111,7 +111,7 @@ function s_print(...)
 end
 
 function s_restart()
-	c_state_new(main_state)
+	c_state_goto(main_state)
 	s_printnl("Restarting . . .")
 end
 

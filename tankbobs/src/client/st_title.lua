@@ -36,6 +36,10 @@ function st_title_init()
 		-- ungrab mouse on init
 		tankbobs.in_grabMouse(c_config_get("client.renderer.width") / 2, c_config_get("client.renderer.height") / 2)
 		tankbobs.in_grabClear()
+
+		if c_config_get("client.preview") then
+			backgroundState = c_state_backgroundStart(background_state)
+		end
 	end
 	init = true
 
@@ -75,19 +79,19 @@ function st_title_step(d)
 end
 
 function st_title_play()
-	c_state_new(set_state)
+	c_state_goto(set_state)
 end
 
 function st_title_internet()
-	c_state_new(internet_state)
+	c_state_goto(internet_state)
 end
 
 function st_title_options()
-	c_state_new(options_state)
+	c_state_goto(options_state)
 end
 
 function st_title_help()
-	c_state_new(help_state)
+	c_state_goto(help_state)
 end
 
 title_state =

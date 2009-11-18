@@ -215,9 +215,9 @@ function st_online_done()
 		connection.state = UNCONNECTED
 	end
 
-	game_end()
-
 	c_world_freeWorld()
+
+	game_end()
 end
 
 function online_readPackets(d)  -- local
@@ -403,11 +403,11 @@ function st_online_button(button, pressed)
 				newScreens = screens
 			elseif button == 0x1B or button == c_config_get("client.key.quit") then  -- escape
 				if connection.state < CONNECTED then
-					c_state_new(title_state)
+					c_state_goto(title_state)
 				elseif quitScreen then
 					continue()
 				elseif won then
-					c_state_new(title_state)
+					c_state_goto(title_state)
 				elseif c_world_getPaused() then
 					--c_world_setPaused(not c_world_getPaused())
 				else
@@ -418,7 +418,7 @@ function st_online_button(button, pressed)
 					quitScreen = true
 				end
 			elseif button == c_config_get("client.key.exit") then
-				c_state_new(exit_state)
+				c_state_goto(exit_state)
 			end
 		end
 

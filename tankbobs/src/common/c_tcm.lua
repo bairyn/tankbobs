@@ -1005,25 +1005,31 @@ function c_tcm_read_map(filename)
 end
 
 function c_tcm_select_set(name)
+	c_config_set("game.lastSet", name)
+
 	for k, v in pairs(c_tcm_current_sets) do
 		if v.name == name then
 			c_tcm_current_set = v
+
 			return
 		end
 	end
 
-	error("c_tcm_select_set: set '" .. name .. "' not found")
+	common_printError(1, "warning: c_tcm_select_set: set '" .. name .. "' not found\n")
 end
 
 function c_tcm_select_map(name)
+	c_config_set("game.lastMap", name)
+
 	for k, v in pairs(c_tcm_current_set.maps) do
 		if v.name == name then
 			c_tcm_current_map = v
+
 			return
 		end
 	end
 
-	error("c_tcm_select_map: map '" .. name .. "' not found")
+	common_printError(1, "warning: c_tcm_select_map: map '" .. name .. "' not found\n")
 end
 
 function c_tcm_unload_extra_data(clearPersitant)

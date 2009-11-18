@@ -50,7 +50,7 @@ function st_help_button(button, pressed)
 			if button == 0x1B or button == c_config_get("client.key.quit") then
 				c_state_advance()
 			elseif button == c_config_get("client.key.exit") then
-				c_state_new(exit_state)
+				c_state_goto(exit_state)
 			end
 		end
 	end
@@ -65,11 +65,11 @@ function st_help_step(d)
 end
 
 function st_help_manual()
-	c_state_new(manual_state)
+	c_state_goto(manual_state)
 end
 
 function st_help_licensing()
-	c_state_new(license_state)
+	c_state_goto(license_state)
 end
 
 help_state =

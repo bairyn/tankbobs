@@ -43,7 +43,7 @@ function st_options_button(button, pressed)
 	if not gui_button(button, pressed) then
 		if pressed then
 			if button == c_config_get("client.key.exit") then
-				c_state_new(exit_state)
+				c_state_goto(exit_state)
 			elseif button == 0x1B or button == c_config_get("client.key.quit") then
 				c_state_advance()
 			end
@@ -284,7 +284,7 @@ function st_optionsVideo_resolution(widget, string, index)
 		st_optionsVideo_renderer.height = tonumber(string:sub(string:find("x") + 1, -1))
 	else
 		custom = true
-		c_state_new(optionsVideo_state)
+		c_state_goto(optionsVideo_state)
 	end
 end
 
@@ -303,7 +303,7 @@ function st_optionsVideo_apply(widget)
 		c_config_set("client.renderer.height", st_optionsVideo_renderer.height)
 		renderer_updateWindow()  -- in case SDL forgets to send a resize signal
 		tankbobs.r_newWindow(c_config_get("client.renderer.width"), c_config_get("client.renderer.height"), c_config_get("client.renderer.fullscreen"), c_const_get("title"), c_const_get("icon"))
-		c_state_new(optionsVideo_state)
+		c_state_goto(optionsVideo_state)
 	end
 end
 
@@ -910,27 +910,27 @@ function st_options_done()
 end
 
 function st_options_game()
-	c_state_new(optionsGame_state)
+	c_state_goto(optionsGame_state)
 end
 
 function st_options_video()
-	c_state_new(optionsVideo_state)
+	c_state_goto(optionsVideo_state)
 end
 
 function st_options_audio()
-	c_state_new(optionsAudio_state)
+	c_state_goto(optionsAudio_state)
 end
 
 function st_options_players()
-	c_state_new(optionsPlayers_state)
+	c_state_goto(optionsPlayers_state)
 end
 
 function st_options_controls()
-	c_state_new(optionsControls_state)
+	c_state_goto(optionsControls_state)
 end
 
 function st_options_internet()
-	c_state_new(optionsInternet_state)
+	c_state_goto(optionsInternet_state)
 end
 
 options_state =

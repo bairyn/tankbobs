@@ -149,7 +149,7 @@ function st_internet_step(d)
 
 	if connection.state == CONNECTED then
 		connection.proceeding = true
-		c_state_new(online_state)
+		c_state_goto(online_state)
 	elseif connection.state == RESPONDED then
 		local status, ip, port, data
 
@@ -270,7 +270,7 @@ function st_internet_start(widget)
 	tankbobs.n_writeToPacket(tankbobs.io_fromChar(0x00))
 	if not c_config_get("game.player1.name", true) or not c_config_get("game.player1.color.r", true) or not c_config_get("game.player1.color.g", true) or not c_config_get("game.player1.color.b", true) then
 		-- forward player to configuration if player 1 isn't set up
-		c_state_new(options_state)
+		c_state_goto(options_state)
 
 		return
 	end

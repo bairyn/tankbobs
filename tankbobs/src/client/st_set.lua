@@ -64,7 +64,7 @@ function st_set_button(button, pressed)
 			if button == 0x1B or button == c_config_get("client.key.quit") then
 				c_state_advance()
 			elseif button == c_config_get("client.key.exit") then
-				c_state_new(exit_state)
+				c_state_goto(exit_state)
 			end
 		end
 	end
@@ -80,7 +80,7 @@ end
 
 function st_set_select(widget)
 	c_tcm_select_set(widget.m.info.name)
-	c_state_new(level_state)
+	c_state_goto(level_state)
 end
 
 function st_set_setSelected(widget)

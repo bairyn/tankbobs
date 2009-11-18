@@ -71,7 +71,7 @@ function main_done()
 end
 
 function main_start()
-	c_state_new(title_state)
+	c_state_goto(title_state)
 
 	while not done do
 		main_loop()
