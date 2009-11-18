@@ -451,6 +451,7 @@ int fs_putFloat(lua_State *L);
 int fs_mount(lua_State *L);
 int fs_loadfile(lua_State *L);
 int fs_permitSymbolicLinks(lua_State *L);
+const char *fs_createTemporaryFile(lua_State *L, const char *filename, const char *ext);
 
 #ifdef __cplusplus
 }

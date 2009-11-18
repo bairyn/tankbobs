@@ -273,4 +273,5 @@ elseif c_tcm_current_map.name == "race-track" then
 	end
 
 	c_mods_prependFunction("c_world_step", frame)
+elseif c_tcm_current_map.name == "large 1" then
 end

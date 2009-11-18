@@ -609,57 +609,42 @@ function c_ai_weightOfPosToWayPoint(pos, wayPoint)
 	return (pos - wayPoint.p).R
 end
 
-function c_ai_findClosestPath(start, goal)
+function c_ai_findClosestPath(start, goal, closed)
 	if not start or not goal then
 		return nil
 	end
 
 	local net = c_tcm_current_map.wayPointNetwork
 
-	local path = {}
-	local closed = {}
+	local weight = 0
 
-	local goalPos
-	if goal > 0 then
-		goalPos = c_tcm_current_map.wayPoints[goal].p
-	else
-		goalPos = c_tcm_current_map.teleporters[-goal].p
-	end
+	closed = closed or {}
+	path = {start}
 
 	local function orderByWeight(a, b)
 		if not a then
-			return false
+			return false  -- a is closed, b first
 		elseif not b then
 			return true
 		end
 
-		for _, v in pairs(closed) do
-			if v == a[1] then
-				return false  -- a is closed, b first
-			elseif v == b[1] then
-				return true  -- b is closed, a first
-			end
+		if a[1] == goal then
+			return true
+		elseif b[1] == goal then
+			return false
 		end
 
-		-- TODO: better method of calculating heuristic
-		local ga, gb
-		local ha, hb
+		local wa, wb
+		_, wa = c_ai_findClosestPath(a[1], goal, closed)
+		_, wb = c_ai_findClosestPath(b[1], goal, closed)
 
-		ga = a[2]
-		if a[1] > 0 then
-			ha = (c_tcm_current_map.wayPoints[a[1]].p - goalPos).R
-		else
-			ha = (c_tcm_current_map.teleporters[c_tcm_current_map.teleporters[-a[1]].t].p - goalPos).R
+		if not wa then
+			return false
+		elseif not wb then
+			return true
 		end
 
-		gb = b[2]
-		if b[1] > 0 then
-			hb = (c_tcm_current_map.wayPoints[b[1]].p - goalPos).R
-		else
-			hb = (c_tcm_current_map.teleporters[c_tcm_current_map.teleporters[-b[1]].t].p - goalPos).R
-		end
-
-		return ga + ha < gb + hb
+		return wa < wb
 	end
 
 	local function isClosed(n)
@@ -672,40 +657,34 @@ function c_ai_findClosestPath(start, goal)
 		return false
 	end
 
-	local function isGoal(ns)
-		for _, v in pairs(ns) do
-			if v == goal then
-				return true
-			end
-		end
-
-		return false
-	end
-
-	local nodes
-	local n = {start, 0}
-	while n[1] ~= goal do
-		nodes = net[n[1]]
-		table.sort(nodes, orderByWeight)
-
-		table.insert(path, n[1])
-
-		n = nodes[1]
-
-		if not n or isClosed(n[1]) then
+	while path[#path] ~= goal do
+		if not net[path[#path]][1] then
 			break
 		end
 
-		table.insert(closed, n[1])
+		local nodes = {}
+		for _, v in pairs(net[path[#path]]) do
+			if not isClosed(v[1]) then
+				table.insert(closed, v[1])
+				table.insert(nodes, v)
+			end
+		end
+
+		if not nodes[1] then
+			break
+		end
+
+		table.sort(nodes, orderByWeight)
+
+		weight = weight + nodes[1][2]
+		table.insert(path, nodes[1][1], nodes[1][2])
 	end
 
-	if not n or n[1] ~= goal then
+	if path[#path] ~= goal then
 		return nil
 	end
 
-	table.insert(path, n[1])  -- insert goal node
-
-	return path
+	return path, weight
 end
 
 function c_ai_isFollowingObjective(tank, objectiveIndex)
@@ -718,19 +697,12 @@ function c_ai_followObjective(tank, objective)
 		return
 	end
 
-	p2(objective.p)
-	p2:sub(tank.p)
-
-	p1.R = 3
-	p1.t = p2.t
-	p1:add(tank.p)
-
-	p2(objective.p)
-
-	local s, _, t, _ = c_world_findClosestIntersection(p1, p2)
-	local inSight = not s or t ~= "wall"
-
 	p1(tank.p)
+	p2(objective.p)
+
+	local s, _, t, _ = c_world_findClosestIntersection(p1, p2, "tank, corpse")
+	local inSight = not s
+
 	if objective.followType >= INSIGHT and inSight then
 		-- the objective is in sight, so chase it
 
@@ -784,6 +756,15 @@ function c_ai_followObjective(tank, objective)
 			objective.path = c_ai_findClosestPath(start, goal)
 
 			objective.nextNode = 1
+if tank == c_world_getTanks()[1] then if not c then c = 0 end c = c + 1
+print(c + 1, start, goal, objective.path)
+if objective.path then
+local n = objective.path[objective.nextNode]
+local a = (n > 0) and c_tcm_current_map.wayPoints[n].p or c_tcm_current_map.teleporters[-n].p
+print("", a.x, a.y)
+print()
+end
+end
 		end
 
 		if objective.path and objective.path[objective.nextNode] then
@@ -800,9 +781,11 @@ function c_ai_followObjective(tank, objective)
 
 			local minSpeed = c_world_getInstagib() and c_const_get("ai_minWayPointSpeedInstagib") or c_const_get("ai_minWayPointSpeed")
 			if vel.R < minSpeed then
+--print("accelerating", math.random(1, 9))
 				c_ai_setTankStateForward(tank, 1)
 				c_ai_setTankStateSpecial(tank, false)
 			else
+--print("decelerating", math.random(1, 9))
 				c_ai_setTankStateForward(tank, 0)
 				c_ai_setTankStateSpecial(tank, true)
 			end
