@@ -20,10 +20,10 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include <SDL/SDL.h>
-#include <SDL/SDL_image.h>
-#include <SDL/SDL_mixer.h>
-#include <SDL/SDL_endian.h>
+#include <SDL.h>
+#include <SDL_image.h>
+#include <SDL_mixer.h>
+#include <SDL_endian.h>
 #include <lua.h>
 #include <lauxlib.h>
 #include <lualib.h>
@@ -53,6 +53,10 @@ struct sound_s
 	char filename[FILENAME_MAX];
 	Mix_Chunk *chunk;
 } sounds[CACHEDSOUNDS];
+
+#ifdef AUDIO_PHYSFS
+#include "physfsrwops.h"
+#endif
 
 static char musicFilename[FILENAME_MAX] = {""};
 static Mix_Music *music = NULL;
@@ -146,6 +150,9 @@ int a_quit(lua_State *L)
 
 int a_initSound(lua_State *L)
 {
+#ifdef AUDIO_PHYSFS
+	SDL_RWops *rw;
+#endif
 	const char *filename = NULL;
 
 	CHECKINIT(init, L);
@@ -169,9 +176,16 @@ int a_initSound(lua_State *L)
 				if(i->chunk)
 					Mix_FreeChunk(i->chunk);
 
-
 #ifdef AUDIO_PHYSFS
-				i->chunk = Mix_LoadWAV(fs_createTemporaryFile(L, filename, "tnk"));
+				rw = PHYSFSRWOPS_openRead(filename);
+				if(!rw)
+				{
+					fs_errorNL(L, NULL, filename);
+
+					return 0;
+				}
+
+				i->chunk = Mix_LoadWAV_RW(rw, true);
 #else
 				i->chunk = Mix_LoadWAV(filename);
 #endif
@@ -188,9 +202,16 @@ int a_initSound(lua_State *L)
 		{
 			if(!i->active)
 			{
-
 #ifdef AUDIO_PHYSFS
-				i->chunk = Mix_LoadWAV(fs_createTemporaryFile(L, filename, "tnk"));
+				rw = PHYSFSRWOPS_openRead(filename);
+				if(!rw)
+				{
+					fs_errorNL(L, NULL, filename);
+
+					return 0;
+				}
+
+				i->chunk = Mix_LoadWAV_RW(rw, true);
 #else
 				i->chunk = Mix_LoadWAV(filename);
 #endif
@@ -278,6 +299,11 @@ int a_freeSound(lua_State *L)
 
 int a_startMusic(lua_State *L)
 {
+#ifdef AUDIO_PHYSFS
+	/*
+	SDL_RWops *rw;
+	*/
+#endif
 	const char *filename = NULL;
 
 	CHECKINIT(init, L);
@@ -303,7 +329,25 @@ int a_startMusic(lua_State *L)
 		if(!music)
 		{
 #ifdef AUDIO_PHYSFS
-			music = Mix_LoadMUS(fs_createTemporaryFile(L, filename, "tnk"));
+			/*
+			rw = PHYSFSRWOPS_openRead(filename);
+			if(!rw)
+			{
+				fs_errorNL(L, NULL, filename);
+
+				return 0;
+			}
+
+			music = Mix_LoadMUS_RW(rw, true);
+			*/
+
+			/* Mix_LoadMUS_RW isn't well supported */
+
+			const char *tmpfilename = fs_createTemporaryFile(L, filename, "tnk");
+
+			music = Mix_LoadMUS(tmpfilename);
+
+			remove(tmpfilename);
 #else
 			music = Mix_LoadMUS(filename);
 #endif
@@ -360,6 +404,9 @@ int a_playSound(lua_State *L)
 {
 	/* similar to a_initSound */
 	int loops = 0;
+#ifdef AUDIO_PHYSFS
+	SDL_RWops *rw;
+#endif
 	const char *filename = NULL;
 
 	CHECKINIT(init, L);
@@ -399,7 +446,15 @@ int a_playSound(lua_State *L)
 			if(!i->active)
 			{
 #ifdef AUDIO_PHYSFS
-				i->chunk = Mix_LoadWAV(fs_createTemporaryFile(L, filename, "tnk"));
+				rw = PHYSFSRWOPS_openRead(filename);
+				if(!rw)
+				{
+					fs_errorNL(L, NULL, filename);
+
+					return 0;
+				}
+
+				i->chunk = Mix_LoadWAV_RW(rw, true);
 #else
 				i->chunk = Mix_LoadWAV(filename);
 #endif
@@ -498,6 +553,9 @@ int a_setVolumeChunk(lua_State *L)
 {
 	/* similar to a_initSound */
 	int volume; 
+#ifdef AUDIO_PHYSFS
+	SDL_RWops *rw;
+#endif
 	const char *filename = NULL;
 
 	CHECKINIT(init, L);
@@ -536,7 +594,15 @@ int a_setVolumeChunk(lua_State *L)
 			if(!i->active)
 			{
 #ifdef AUDIO_PHYSFS
-				i->chunk = Mix_LoadWAV(fs_createTemporaryFile(L, filename, "tnk"));
+				rw = PHYSFSRWOPS_openRead(filename);
+				if(!rw)
+				{
+					fs_errorNL(L, NULL, filename);
+
+					return 0;
+				}
+
+				i->chunk = Mix_LoadWAV_RW(rw, true);
 #else
 				i->chunk = Mix_LoadWAV(filename);
 #endif

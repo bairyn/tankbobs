@@ -20,10 +20,10 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include <SDL/SDL.h>
-#include <SDL/SDL_image.h>
-#include <SDL/SDL_ttf.h>
-#include <SDL/SDL_endian.h>
+#include <SDL.h>
+#include <SDL_image.h>
+#include <SDL_ttf.h>
+#include <SDL_endian.h>
 #include <lua.h>
 #include <lauxlib.h>
 #include <lualib.h>
@@ -54,6 +54,10 @@ do \
 		lua_error(L); \
 	} \
 } while(0)
+
+#if defined(IMAGE_PHYSFS) || defined(FONT_PHYSFS)
+#include "physfsrwops.h"
+#endif
 
 typedef struct r_font_s r_font_t;
 struct r_font_s
@@ -315,6 +319,9 @@ int r_swapBuffers(lua_State *L)
 
 int r_newFont(lua_State *L)
 {
+#ifdef FONT_PHYSFS
+	SDL_RWops *rw;
+#endif
 	r_font_t *font;
 
 	font = malloc(sizeof(r_font_t));
@@ -330,7 +337,15 @@ int r_newFont(lua_State *L)
 #endif
 
 #ifdef FONT_PHYSFS
-	font->font = TTF_OpenFont(fs_createTemporaryFile(L, font->filename, "tnk"), font->size);
+	rw = PHYSFSRWOPS_openRead(font->filename);
+	if(!rw)
+	{
+		fs_errorNL(L, NULL, font->filename);
+
+		return 0;
+	}
+
+	font->font = TTF_OpenFontRW(rw, true, font->size);
 #else
 	font->font = TTF_OpenFont(font->filename, font->size);
 #endif
@@ -855,6 +870,9 @@ void r_quitFont(void)
 
 int r_loadImage2D(lua_State *L)
 {
+#ifdef IMAGE_PHYSFS
+	SDL_RWops *rw;
+#endif
 	const char *filename;
 	SDL_Surface *img, *converted;
 	SDL_PixelFormat fmt;
@@ -863,9 +881,17 @@ int r_loadImage2D(lua_State *L)
 
 	filename = luaL_checkstring(L, 1);
 
-
 #ifdef IMAGE_PHYSFS
-	img = IMG_Load(fs_createTemporaryFile(L, filename, "tnk"));
+	rw = PHYSFSRWOPS_openRead(filename);
+	if(!rw)
+	{
+		/* We could comment out this block and load the default texture instead, but we want to make sure there's no missing textures */
+		fs_errorNL(L, NULL, filename);
+
+		return 0;
+	}
+
+	img = IMG_Load_RW(rw, true);
 #else
 	img = IMG_Load(filename);
 #endif
@@ -875,6 +901,16 @@ int r_loadImage2D(lua_State *L)
 
 #ifdef IMAGE_PHYSFS
 		img = IMG_Load(fs_createTemporaryFile(L, filename, "tnk"));
+
+		rw = PHYSFSRWOPS_openRead(filename);
+		if(!rw)
+		{
+			fs_errorNL(L, NULL, filename);
+
+			return 0;
+		}
+
+		img = IMG_Load_RW(rw, true);
 #else
 		img = IMG_Load(filename);
 #endif

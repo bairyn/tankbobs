@@ -26,10 +26,10 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include <SDL/SDL.h>
-#include <SDL/SDL_image.h>
-#include <SDL/SDL_mixer.h>
-#include <SDL/SDL_endian.h>
+#include <SDL.h>
+#include <SDL_image.h>
+#include <SDL_mixer.h>
+#include <SDL_endian.h>
 #include <lua.h>
 #include <lauxlib.h>
 #include <lualib.h>
@@ -1705,6 +1705,7 @@ int fs_permitSymbolicLinks(lua_State *L)
 	return 0;
 }
 
+/* Remember to free the temporary file with remove(filename) afterwards! */
 const char *fs_createTemporaryFile(lua_State *L, const char *filename, const char *ext)
 {
 	FILE *fout;

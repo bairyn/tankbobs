@@ -24,8 +24,8 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include <SDL/SDL.h>
-#include <SDL/SDL_image.h>
+#include <SDL.h>
+#include <SDL_image.h>
 #include <lua.h>
 #include <lauxlib.h>
 #include <lualib.h>
@@ -33,7 +33,7 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <math.h>
-#include <SDL/SDL_endian.h>
+#include <SDL_endian.h>
 #include <signal.h>
 
 #include "common.h"

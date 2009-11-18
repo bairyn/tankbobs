@@ -20,10 +20,10 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include <SDL/SDL.h>
-#include <SDL/SDL_image.h>
-#include <SDL/SDL_endian.h>
-#include <SDL/SDL_net.h>
+#include <SDL.h>
+#include <SDL_image.h>
+#include <SDL_endian.h>
+#include <SDL_net.h>
 #include <lua.h>
 #include <lauxlib.h>
 #include <lualib.h>

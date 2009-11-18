@@ -26,7 +26,7 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdio.h>
 #include <math.h>
 
-#include <SDL/SDL_endian.h>
+#include <SDL_endian.h>
 
 #define VERSION 3
 #define MAGIC 0xDEADBEEF
