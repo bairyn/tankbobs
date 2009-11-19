@@ -799,9 +799,8 @@ function c_tcm_read_map(filename)
 				if not v.detail and v.static then  -- ignore dynamic walls when testing for intersections
 					--hull = v.m.pos
 					hull = v.p
-					local t = v
-					for _, v in pairs(hull) do
-						currentPoint = v
+					for _, vs in pairs(hull) do
+						currentPoint = vs
 						if not lastPoint then
 							lastPoint = hull[#hull]
 						end
@@ -831,9 +830,8 @@ function c_tcm_read_map(filename)
 				if not v.detail and v.static then  -- ignore dynamic walls when testing for intersections
 					--hull = v.m.pos
 					hull = v.p
-					local t = v
-					for _, v in pairs(hull) do
-						currentPoint = v
+					for _, vs in pairs(hull) do
+						currentPoint = vs
 						if not lastPoint then
 							lastPoint = hull[#hull]
 						end
@@ -867,8 +865,7 @@ function c_tcm_read_map(filename)
 				if not v.detail and v.static then  -- ignore dynamic walls when testing for intersections
 					--hull = v.m.pos
 					hull = v.p
-					local t = v
-					for _, v in pairs(hull) do
+					for _, vs in pairs(hull) do
 						currentPoint = v
 						if not lastPoint then
 							lastPoint = hull[#hull]
@@ -900,9 +897,8 @@ function c_tcm_read_map(filename)
 				if not v.detail and v.static then  -- ignore dynamic walls when testing for intersections
 					--hull = v.m.pos
 					hull = v.p
-					local t = v
-					for _, v in pairs(hull) do
-						currentPoint = v
+					for _, vs in pairs(hull) do
+						currentPoint = vs
 						if not lastPoint then
 							lastPoint = hull[#hull]
 						end
@@ -938,7 +934,6 @@ function c_tcm_read_map(filename)
 				if not vss.detail and vss.static then  -- ignore dynamic walls when testing for intersections
 					--hull = vss.m.pos
 					hull = vss.p
-						local t = v
 						for _, vsss in pairs(hull) do
 							currentPoint = vsss
 							if not lastPoint then
@@ -964,7 +959,7 @@ function c_tcm_read_map(filename)
 			table.sort(w, function (a, b) return (r.wayPoints[a].p - v.p).R < (r.wayPoints[b].p - v.p).R end)
 
 			if w[1] then
-				v.waypoint = w[1]
+				v.wayPoint = w[1]
 			else
 				v.wayPoint = 0
 			end

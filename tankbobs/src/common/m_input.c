@@ -831,10 +831,10 @@ int in_grabMouse(lua_State *L)
 {
 	CHECKINIT(init, L);
 
-	if(luaL_checkinteger(L, -1) > 0 && luaL_checkinteger(L, -2) > 0)
+	if(luaL_checkinteger(L, 1) > 0 && luaL_checkinteger(L, 2) > 0)
 	{
 		SDL_EventState(SDL_MOUSEMOTION, SDL_IGNORE);
-		SDL_WarpMouse(luaL_checkinteger(L, -2) / 2, luaL_checkinteger(L, -1) / 1);
+		SDL_WarpMouse(luaL_checkinteger(L, 1), luaL_checkinteger(L, 2));
 		SDL_EventState(SDL_MOUSEMOTION, SDL_ENABLE);
 	}
 

@@ -543,24 +543,10 @@ function c_ai_findClosestWayPoint(pos)
 		local weight = (vs.p - pos).R
 
 		for _, vss in pairs(c_tcm_current_map.walls) do
-			if not vss.detail and vss.static then  -- ignore dynamic walls when testing for intersections
-				--hull = vss.m.pos
-				hull = vss.p
-				local t = v
-				for _, vsss in ipairs(hull) do
-					currentPoint = vsss
-					if not lastPoint then
-						lastPoint = hull[#hull]
-					end
-
-					if tankbobs.m_edge(lastPoint, currentPoint, tankbobs.m_vec2(pos), tankbobs.m_vec2(vs.p)) then
-						intersection = true
-						break
-					end
-
-					lastPoint = currentPoint
+			if not vss.detail and vss.static then  -- ignore dynamic walls when testing for intersection
+				if c_world_lineIntersectsHull(tankbobs.m_vec2(pos), tankbobs.m_vec2(vs.p), vss.p) then  -- we use the wall's initial position; since we are ignoring dynamic walls, the end result is essentially the same.
+					intersection = true
 				end
-				lastPoint = nil
 			end
 		end
 
@@ -569,29 +555,26 @@ function c_ai_findClosestWayPoint(pos)
 		end
 	end
 
+	table.sort(w, function (a, b) return a[2] < b[2] end)
+
+	return w[1]
+end
+
+function c_ai_findClosestTeleporter(pos)
+	-- returns the closest way point to and the weight of traveling from a position
+	local lastPoint, currentPoint = nil
+	local hull
+	local w = {}
+
 	for ks, vs in pairs(c_tcm_current_map.teleporters) do
 		local intersection = false
 		local weight = (vs.p - pos).R
 
 		for _, vss in pairs(c_tcm_current_map.walls) do
-			if not vss.detail and vss.static then  -- ignore dynamic walls when testing for intersections
-				--hull = vss.m.pos
-				hull = vss.p
-				local t = v
-				for _, vsss in ipairs(hull) do
-					currentPoint = vsss
-					if not lastPoint then
-						lastPoint = hull[#hull]
-					end
-
-					if tankbobs.m_edge(lastPoint, currentPoint, tankbobs.m_vec2(pos), tankbobs.m_vec2(vs.p)) then
-						intersection = true
-						break
-					end
-
-					lastPoint = currentPoint
+			if not vss.detail and vss.static then  -- ignore dynamic walls when testing for intersection
+				if c_world_lineIntersectsHull(tankbobs.m_vec2(pos), tankbobs.m_vec2(vs.p), vss.p) then  -- we use the wall's initial position; since we are ignoring dynamic walls, the end result is essentially the same.
+					intersection = true
 				end
-				lastPoint = nil
 			end
 		end
 
@@ -603,6 +586,25 @@ function c_ai_findClosestWayPoint(pos)
 	table.sort(w, function (a, b) return a[2] < b[2] end)
 
 	return w[1]
+end
+
+function c_ai_findClosestNavigationPoint(pos)
+	local w = c_ai_findClosestWayPoint(pos)
+	local t = c_ai_findClosestTeleporter(pos)
+
+	if w and t then
+		if t[2] < w[2] then
+			return t
+		else
+			return w
+		end
+	elseif w then
+		return t
+	elseif t then
+		return w
+	else
+		return nil
+	end
 end
 
 function c_ai_weightOfPosToWayPoint(pos, wayPoint)
@@ -813,8 +815,8 @@ function c_ai_followObjective(tank, objective)
 				objective.nextPathUpdateTime = tankbobs.t_getTicks() + c_world_timeMultiplier(c_const_get("ai_pathUpdateTime"))
 			end
 
-			local start = c_ai_findClosestWayPoint(tank.p)
-			local goal = c_ai_findClosestWayPoint(objective.p)
+			local start = c_ai_findClosestNavigationPoint(tank.p)
+			local goal = c_ai_findClosestNavigationPoint(objective.p)
 			if start then
 				start = start[1]
 			end
@@ -876,7 +878,7 @@ function c_ai_followObjective(tank, objective)
 				objective.nextPathUpdateTime = tankbobs.t_getTicks() + c_world_timeMultiplier(c_const_get("ai_pathUpdateTime"))
 			end
 
-			local start = c_ai_findClosestWayPoint(tank.p)
+			local start = c_ai_findNavigationPoint(tank.p)
 			if start then
 				start = start[1]
 			end
@@ -887,7 +889,7 @@ function c_ai_followObjective(tank, objective)
 			p2(tank.p)
 			p2:add(1 * (p2 - objective.p))
 
-			goal = c_ai_findClosestWayPoint(p2)
+			goal = c_ai_findNavigationPoint(p2)
 
 			if not goal then
 				-- look for a way point not visible by target
@@ -896,7 +898,7 @@ function c_ai_followObjective(tank, objective)
 
 					local s, _, t, _ = c_world_findClosestIntersection(p1, p2)
 					if not s--[[ or t ~= "wall"--]] then
-						goal = c_ai_findClosestWayPoint(p2)
+						goal = c_ai_findNavigationPoint(p2)
 
 						break
 					end

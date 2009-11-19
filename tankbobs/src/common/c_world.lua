@@ -899,6 +899,7 @@ local p2a = {nil, nil, nil}
 function c_world_intersection(d, p1, p2, v1, v2)
 	-- test if two polygons can collide
 
+	d  = d  or 0
 	v1 = v1 or tankbobs.m_vec2(0, 0)
 	v2 = v2 or tankbobs.m_vec2(0, 0)
 
@@ -942,6 +943,7 @@ function c_world_intersection(d, p1, p2, v1, v2)
 
 	return false
 end
+c_world_hullIntersectsHull = c_world_intersection
 
 function c_world_pointInsideHull(p, hull)
 	local c = false
@@ -1224,12 +1226,40 @@ function c_world_tank_canSpawn(d, tank)
 	return true
 end
 
+function c_world_lineIntersectsHull(start, endP, hull)
+	local b, intersection
+	local lastPoint, currentPoint = nil
+
+	start = tankbobs.m_vec2(start)
+	endP  = tankbobs.m_vec2(endP)
+
+	for _, v in ipairs(hull) do
+		currentPoint = tankbobs.m_vec2(v)
+		if not lastPoint then
+			lastPoint = tankbobs.m_vec2(hull[#hull])
+		end
+
+		local b, intersection = tankbobs.m_edge(lastPoint, currentPoint, start, endP)
+		if b and intersection then  -- FIXME: figure out why b can be true while intersection is nil
+			return b, intersection
+		end
+
+		lastPoint = currentPoint
+	end
+
+	-- test if the line lies completely inside of the hull
+	if c_world_pointInsideHull(start, hull) then
+		-- return the closest intersection from the start point
+		return true, tankbobs.m_vec2(start)
+	end
+
+	return false
+end
+
 function c_world_findClosestIntersection(start, endP, ignoreTypes)
 	-- test against the world and find the closest intersection point
 	-- returns false; or true, intersectionPoint, typeOfTarget, target
-	local lastPoint, currentPoint = nil
 	local minDistance, minIntersection, typeOfTarget, target
-	local hull
 	local b, intersection
 
 	ignoreTypes = ignoreTypes or ""
@@ -1238,31 +1268,19 @@ function c_world_findClosestIntersection(start, endP, ignoreTypes)
 	if not ignoreTypes:find("wall") then
 		for _, v in ipairs(c_tcm_current_map.walls) do
 			if not v.detail then
-				hull = v.m.pos
-				local t = v
-				lastPoint = nil
-				for _, v in ipairs(hull) do
-					currentPoint = v
-					if not lastPoint then
-						lastPoint = hull[#hull]
+				b, intersection = c_world_lineIntersectsHull(start, endP, v.m.pos)
+				if b and intersection then  -- FIXME: figure out why b can be true while intersection is nil
+					if not minDistance then
+						minIntersection = intersection
+						minDistance = math.abs((intersection - start).R)
+						typeOfTarget = "wall"
+						target = t
+					elseif math.abs((intersection - start).R) < minDistance then
+						minIntersection = intersection
+						minDistance = math.abs((intersection - start).R)
+						typeOfTarget = "wall"
+						target = t
 					end
-
-					b, intersection = tankbobs.m_edge(lastPoint, currentPoint, start, endP)
-					if b and intersection then  -- FIXME: figure out why b can be true while intersection is nil
-						if not minDistance then
-							minIntersection = intersection
-							minDistance = math.abs((intersection - start).R)
-							typeOfTarget = "wall"
-							target = t
-						elseif math.abs((intersection - start).R) < minDistance then
-							minIntersection = intersection
-							minDistance = math.abs((intersection - start).R)
-							typeOfTarget = "wall"
-							target = t
-						end
-					end
-
-					lastPoint = currentPoint
 				end
 			end
 		end
@@ -1272,33 +1290,20 @@ function c_world_findClosestIntersection(start, endP, ignoreTypes)
 	if not ignoreTypes:find("tank") then
 		for _, v in ipairs(c_world_tanks) do
 			if v.exists then
-				hull = t_t_clone(c_world_tankHull(v))
-				local t = v
-				lastPoint = nil
-				for _, v in ipairs(hull) do
-					currentPoint = v
-					if not lastPoint then
-						lastPoint = hull[#hull]
+				b, intersection = c_world_lineIntersectsHull(start, endP, c_world_tankHull(v))
+				if b then
+					if not minDistance then
+						minIntersection = intersection
+						minDistance = math.abs((intersection - start).R)
+						typeOfTarget = "tank"
+						target = t
+					elseif math.abs((intersection - start).R) < minDistance then
+						minIntersection = intersection
+						minDistance = math.abs((intersection - start).R)
+						typeOfTarget = "tank"
+						target = t
 					end
-
-					b, intersection = tankbobs.m_edge(lastPoint, currentPoint, start, endP)
-					if b then
-						if not minDistance then
-							minIntersection = intersection
-							minDistance = math.abs((intersection - start).R)
-							typeOfTarget = "tank"
-							target = t
-						elseif math.abs((intersection - start).R) < minDistance then
-							minIntersection = intersection
-							minDistance = math.abs((intersection - start).R)
-							typeOfTarget = "tank"
-							target = t
-						end
-					end
-
-					lastPoint = currentPoint
 				end
-				lastPoint = nil
 			end
 		end
 	end
@@ -1307,31 +1312,19 @@ function c_world_findClosestIntersection(start, endP, ignoreTypes)
 	if not ignoreTypes:find("projectile") then
 		for _, v in ipairs(c_weapon_getProjectiles()) do
 			if not v.collided then
-				hull = c_world_projectileHull(v)
-				local t = v
-				lastPoint = nil
-				for _, v in ipairs(hull) do
-					currentPoint = v
-					if not lastPoint then
-						lastPoint = hull[#hull]
+				b, intersection = c_world_lineIntersectsHull(start, endP, c_world_projectileHull(v))
+				if b then
+					if not minDistance then
+						minIntersection = intersection
+						minDistance = math.abs((intersection - start).R)
+						typeOfTarget = "projectile"
+						target = t
+					elseif math.abs((intersection - start).R) < minDistance then
+						minIntersection = intersection
+						minDistance = math.abs((intersection - start).R)
+						typeOfTarget = "projectile"
+						target = t
 					end
-
-					b, intersection = tankbobs.m_edge(lastPoint, currentPoint, start, endP)
-					if b then
-						if not minDistance then
-							minIntersection = intersection
-							minDistance = math.abs((intersection - start).R)
-							typeOfTarget = "projectile"
-							target = t
-						elseif math.abs((intersection - start).R) < minDistance then
-							minIntersection = intersection
-							minDistance = math.abs((intersection - start).R)
-							typeOfTarget = "projectile"
-							target = t
-						end
-					end
-
-					lastPoint = currentPoint
 				end
 			end
 		end
@@ -1341,31 +1334,19 @@ function c_world_findClosestIntersection(start, endP, ignoreTypes)
 	if not ignoreTypes:find("powerup") then
 		for _, v in ipairs(c_world_powerups) do
 			if v.exists then
-				hull = t_t_clone(c_world_powerupHull(v))
-				local t = v
-				lastPoint = nil
-				for _, v in ipairs(hull) do
-					currentPoint = v
-					if not lastPoint then
-						lastPoint = hull[#hull]
+				b, intersection = c_world_lineIntersectsHull(start, endP, c_world_powerupHull(v))
+				if b then
+					if not minDistance then
+						minIntersection = intersection
+						minDistance = math.abs((intersection - start).R)
+						typeOfTarget = "powerup"
+						target = t
+					elseif math.abs((intersection - start).R) < minDistance then
+						minIntersection = intersection
+						minDistance = math.abs((intersection - start).R)
+						typeOfTarget = "powerup"
+						target = t
 					end
-
-					b, intersection = tankbobs.m_edge(lastPoint, currentPoint, start, endP)
-					if b then
-						if not minDistance then
-							minIntersection = intersection
-							minDistance = math.abs((intersection - start).R)
-							typeOfTarget = "tank"
-							target = t
-						elseif math.abs((intersection - start).R) < minDistance then
-							minIntersection = intersection
-							minDistance = math.abs((intersection - start).R)
-							typeOfTarget = "tank"
-							target = t
-						end
-					end
-
-					lastPoint = currentPoint
 				end
 			end
 		end
@@ -1375,31 +1356,19 @@ function c_world_findClosestIntersection(start, endP, ignoreTypes)
 	if not ignoreTypes:find("corpse") then
 		for _, v in ipairs(c_world_corpses) do
 			if v.exists then
-				hull = t_t_clone(c_world_corpseHull(v))
-				local t = v
-				lastPoint = nil
-				for _, v in ipairs(hull) do
-					currentPoint = v
-					if not lastPoint then
-						lastPoint = hull[#hull]
+				b, intersection = c_world_lineIntersectsHull(start, endP, c_world_corpseHull(v))
+				if b then
+					if not minDistance then
+						minIntersection = intersection
+						minDistance = math.abs((intersection - start).R)
+						typeOfTarget = "corpse"
+						target = t
+					elseif math.abs((intersection - start).R) < minDistance then
+						minIntersection = intersection
+						minDistance = math.abs((intersection - start).R)
+						typeOfTarget = "corpse"
+						target = t
 					end
-
-					b, intersection = tankbobs.m_edge(lastPoint, currentPoint, start, endP)
-					if b then
-						if not minDistance then
-							minIntersection = intersection
-							minDistance = math.abs((intersection - start).R)
-							typeOfTarget = "tank"
-							target = t
-						elseif math.abs((intersection - start).R) < minDistance then
-							minIntersection = intersection
-							minDistance = math.abs((intersection - start).R)
-							typeOfTarget = "tank"
-							target = t
-						end
-					end
-
-					lastPoint = currentPoint
 				end
 			end
 		end
