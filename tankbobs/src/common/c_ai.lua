@@ -544,8 +544,10 @@ function c_ai_findClosestWayPoint(pos)
 
 		for _, vss in pairs(c_tcm_current_map.walls) do
 			if not vss.detail and vss.static then  -- ignore dynamic walls when testing for intersection
-				if c_world_lineIntersectsHull(tankbobs.m_vec2(pos), tankbobs.m_vec2(vs.p), vss.p) then  -- we use the wall's initial position; since we are ignoring dynamic walls, the end result is essentially the same.
+				if c_world_lineIntersectsHull(pos, vs.p, vss.p) then  -- we use the wall's initial position; since we are ignoring dynamic walls, the end result is essentially the same.
 					intersection = true
+
+					break
 				end
 			end
 		end
@@ -572,7 +574,7 @@ function c_ai_findClosestTeleporter(pos)
 
 		for _, vss in pairs(c_tcm_current_map.walls) do
 			if not vss.detail and vss.static then  -- ignore dynamic walls when testing for intersection
-				if c_world_lineIntersectsHull(tankbobs.m_vec2(pos), tankbobs.m_vec2(vs.p), vss.p) then  -- we use the wall's initial position; since we are ignoring dynamic walls, the end result is essentially the same.
+				if c_world_lineIntersectsHull(pos, vs.p, vss.p) then  -- we use the wall's initial position; since we are ignoring dynamic walls, the end result is essentially the same.
 					intersection = true
 				end
 			end
@@ -599,9 +601,9 @@ function c_ai_findClosestNavigationPoint(pos)
 			return w
 		end
 	elseif w then
-		return t
-	elseif t then
 		return w
+	elseif t then
+		return t
 	else
 		return nil
 	end
@@ -808,7 +810,7 @@ function c_ai_followObjective(tank, objective)
 			return
 		end
 
-		if not objective.path or not objective.path[objective.nextNode] or not objective.nextPathUpdateTime or tankbobs.t_getTicks() >= objective.nextPathUpdateTime then
+		if not objective.nextPathUpdateTime or tankbobs.t_getTicks() >= objective.nextPathUpdateTime or (objective.path and not objective.path[objective.nextNode]) then  -- we don't always attempt to find a new path even if it doesn't already have a path, since because path finding can be expensive, continuously trying to find one in a spot where one should exist but doesn't can turn the game into a slide show.
 			if objective.static then
 				objective.nextPathUpdateTime = tankbobs.t_getTicks() + c_world_timeMultiplier(c_const_get("ai_staticPathUpdateTime"))
 			else
@@ -843,11 +845,9 @@ function c_ai_followObjective(tank, objective)
 
 			local minSpeed = c_world_getInstagib() and c_const_get("ai_minWayPointSpeedInstagib") or c_const_get("ai_minWayPointSpeed")
 			if vel.R < minSpeed then
---print("accelerating", math.random(1, 9))
 				c_ai_setTankStateForward(tank, 1)
 				c_ai_setTankStateSpecial(tank, false)
 			else
---print("decelerating", math.random(1, 9))
 				c_ai_setTankStateForward(tank, 0)
 				c_ai_setTankStateSpecial(tank, true)
 			end
@@ -871,7 +871,7 @@ function c_ai_followObjective(tank, objective)
 		end
 	elseif objective.followType <= AVOIDINSIGHT and inSight then
 		-- go away from objective
-		if not objective.path or not objective.path[objective.nextNode] or not objective.nextPathUpdateTime or tankbobs.t_getTicks() >= objective.nextPathUpdateTime then
+		if not objective.nextPathUpdateTime or tankbobs.t_getTicks() >= objective.nextPathUpdateTime or (objective.path and not objective.path[objective.nextNode]) then  -- we don't always attempt to find a new path even if it doesn't already have a path, since because path finding can be expensive, continuously trying to find one in a spot where one should exist but doesn't can turn the game into a slide show.
 			if objective.static then
 				objective.nextPathUpdateTime = tankbobs.t_getTicks() + c_world_timeMultiplier(c_const_get("ai_staticPathUpdateTime"))
 			else
@@ -1438,6 +1438,8 @@ function c_ai_tank_step(tank, d)
 		c_ai_avoid(tank)
 
 		-- look for closest control point
+		local oldcc = tank.ai.cc
+
 		if not tank.ai.cc or (tank.ai.cc.m.team == "red") == (tank.red == true) then
 			local smallestDistance
 			for _, v in pairs(c_tcm_current_map.controlPoints) do
@@ -1452,7 +1454,7 @@ function c_ai_tank_step(tank, d)
 
 			if not smallestDistance then
 				tank.ai.cc = nil
-			else
+			elseif tank.ai.cc ~= oldcc then
 				c_ai_resetObjectivePathTimer(tank, GENERICINDEX)
 			end
 		end

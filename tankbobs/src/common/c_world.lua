@@ -958,7 +958,6 @@ function c_world_pointInsideHull(p, hull)
 		i = i + 1
 	end
 
-
 	return c
 end
 

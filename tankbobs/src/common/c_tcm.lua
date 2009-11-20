@@ -784,8 +784,6 @@ function c_tcm_read_map(filename)
 	tankbobs.fs_close(i)
 
 	-- build way point network.  Positive id's are way points; negative id's are teleporters
-	local lastPoint, currentPoint = nil
-	local hull
 	local a, b
 	for i = 1, r.wayPoints_n do
 		a = r.wayPoints[i]
@@ -797,22 +795,11 @@ function c_tcm_read_map(filename)
 
 			for _, v in pairs(r.walls) do
 				if not v.detail and v.static then  -- ignore dynamic walls when testing for intersections
-					--hull = v.m.pos
-					hull = v.p
-					for _, vs in pairs(hull) do
-						currentPoint = vs
-						if not lastPoint then
-							lastPoint = hull[#hull]
-						end
+					if c_world_lineIntersectsHull(a.p, b.p, v.p) then
+						intersection = true
 
-						if tankbobs.m_edge(lastPoint, currentPoint, a.p, b.p) then
-							intersection = true
-							break
-						end
-
-						lastPoint = currentPoint
+						break
 					end
-					lastPoint = nil
 				end
 			end
 
@@ -828,22 +815,11 @@ function c_tcm_read_map(filename)
 
 			for _, v in pairs(r.walls) do
 				if not v.detail and v.static then  -- ignore dynamic walls when testing for intersections
-					--hull = v.m.pos
-					hull = v.p
-					for _, vs in pairs(hull) do
-						currentPoint = vs
-						if not lastPoint then
-							lastPoint = hull[#hull]
-						end
+					if c_world_lineIntersectsHull(a.p, b.p, v.p) then
+						intersection = true
 
-						if tankbobs.m_edge(lastPoint, currentPoint, a.p, b.p) then
-							intersection = true
-							break
-						end
-
-						lastPoint = currentPoint
+						break
 					end
-					lastPoint = nil
 				end
 			end
 
@@ -863,22 +839,11 @@ function c_tcm_read_map(filename)
 
 			for _, v in pairs(r.walls) do
 				if not v.detail and v.static then  -- ignore dynamic walls when testing for intersections
-					--hull = v.m.pos
-					hull = v.p
-					for _, vs in pairs(hull) do
-						currentPoint = v
-						if not lastPoint then
-							lastPoint = hull[#hull]
-						end
+					if c_world_lineIntersectsHull(a.p, b.p, v.p) then
+						intersection = true
 
-						if tankbobs.m_edge(lastPoint, currentPoint, a.p, b.p) then
-							intersection = true
-							break
-						end
-
-						lastPoint = currentPoint
+						break
 					end
-					lastPoint = nil
 				end
 			end
 
@@ -895,22 +860,11 @@ function c_tcm_read_map(filename)
 
 			for _, v in pairs(r.walls) do
 				if not v.detail and v.static then  -- ignore dynamic walls when testing for intersections
-					--hull = v.m.pos
-					hull = v.p
-					for _, vs in pairs(hull) do
-						currentPoint = vs
-						if not lastPoint then
-							lastPoint = hull[#hull]
-						end
+					if c_world_lineIntersectsHull(a.p, b.p, v.p) then
+						intersection = true
 
-						if tankbobs.m_edge(lastPoint, currentPoint, a.p, b.p) then
-							intersection = true
-							break
-						end
-
-						lastPoint = currentPoint
+						break
 					end
-					lastPoint = nil
 				end
 			end
 
