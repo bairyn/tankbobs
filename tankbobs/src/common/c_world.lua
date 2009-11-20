@@ -1226,11 +1226,18 @@ function c_world_tank_canSpawn(d, tank)
 end
 
 function c_world_lineIntersectsHull(start, endP, hull)
-	local b, intersection
+	local rb, rintersection
 	local lastPoint, currentPoint = nil
+	local distance, minDistance
 
 	start = tankbobs.m_vec2(start)
 	endP  = tankbobs.m_vec2(endP)
+
+	-- test if the start lies completely inside of the hull
+	if c_world_pointInsideHull(start, hull) then
+		-- return the closest intersection from the start point
+		return true, start
+	end
 
 	for _, v in ipairs(hull) do
 		currentPoint = tankbobs.m_vec2(v)
@@ -1240,19 +1247,19 @@ function c_world_lineIntersectsHull(start, endP, hull)
 
 		local b, intersection = tankbobs.m_edge(lastPoint, currentPoint, start, endP)
 		if b and intersection then  -- FIXME: figure out why b can be true while intersection is nil
-			return b, intersection
+			distance = math.abs((intersection - start).R)
+
+			if not minDistance or distance < minDistance then
+				minDistance = distance
+
+				br, rintersection = b, tankbobs.m_vec2(intersection)
+			end
 		end
 
 		lastPoint = currentPoint
 	end
 
-	-- test if the line lies completely inside of the hull
-	if c_world_pointInsideHull(start, hull) then
-		-- return the closest intersection from the start point
-		return true, tankbobs.m_vec2(start)
-	end
-
-	return false
+	return rb, rintersection
 end
 
 function c_world_findClosestIntersection(start, endP, ignoreTypes)
