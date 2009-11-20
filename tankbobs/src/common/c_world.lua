@@ -1273,12 +1273,12 @@ function c_world_findClosestIntersection(start, endP, ignoreTypes)
 						minIntersection = intersection
 						minDistance = math.abs((intersection - start).R)
 						typeOfTarget = "wall"
-						target = t
+						target = v
 					elseif math.abs((intersection - start).R) < minDistance then
 						minIntersection = intersection
 						minDistance = math.abs((intersection - start).R)
 						typeOfTarget = "wall"
-						target = t
+						target = v
 					end
 				end
 			end
@@ -1295,12 +1295,12 @@ function c_world_findClosestIntersection(start, endP, ignoreTypes)
 						minIntersection = intersection
 						minDistance = math.abs((intersection - start).R)
 						typeOfTarget = "tank"
-						target = t
+						target = v
 					elseif math.abs((intersection - start).R) < minDistance then
 						minIntersection = intersection
 						minDistance = math.abs((intersection - start).R)
 						typeOfTarget = "tank"
-						target = t
+						target = v
 					end
 				end
 			end
@@ -1317,12 +1317,12 @@ function c_world_findClosestIntersection(start, endP, ignoreTypes)
 						minIntersection = intersection
 						minDistance = math.abs((intersection - start).R)
 						typeOfTarget = "projectile"
-						target = t
+						target = v
 					elseif math.abs((intersection - start).R) < minDistance then
 						minIntersection = intersection
 						minDistance = math.abs((intersection - start).R)
 						typeOfTarget = "projectile"
-						target = t
+						target = v
 					end
 				end
 			end
@@ -1339,12 +1339,12 @@ function c_world_findClosestIntersection(start, endP, ignoreTypes)
 						minIntersection = intersection
 						minDistance = math.abs((intersection - start).R)
 						typeOfTarget = "powerup"
-						target = t
+						target = v
 					elseif math.abs((intersection - start).R) < minDistance then
 						minIntersection = intersection
 						minDistance = math.abs((intersection - start).R)
 						typeOfTarget = "powerup"
-						target = t
+						target = v
 					end
 				end
 			end
@@ -1361,12 +1361,12 @@ function c_world_findClosestIntersection(start, endP, ignoreTypes)
 						minIntersection = intersection
 						minDistance = math.abs((intersection - start).R)
 						typeOfTarget = "corpse"
-						target = t
+						target = v
 					elseif math.abs((intersection - start).R) < minDistance then
 						minIntersection = intersection
 						minDistance = math.abs((intersection - start).R)
 						typeOfTarget = "corpse"
-						target = t
+						target = v
 					end
 				end
 			end
