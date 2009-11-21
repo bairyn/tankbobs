@@ -445,7 +445,7 @@ function c_tcm_read_map(filename)
 
 	r.name = c_tcm_private_get(tankbobs.fs_read, i, false, 64)
 	r.title = c_tcm_private_get(tankbobs.fs_read, i, false, 64)
-	r.description = c_tcm_private_get(tankbobs.fs_read, i, false, 64)
+	r.description = c_tcm_private_get(tankbobs.fs_read, i, false, 1024)
 	r.song = c_tcm_private_get(tankbobs.fs_read, i, false, 512)
 	r.authors = c_tcm_private_get(tankbobs.fs_read, i, false, 512)
 	r.version_string = c_tcm_private_get(tankbobs.fs_read, i, false, 64)

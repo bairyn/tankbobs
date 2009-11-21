@@ -547,7 +547,7 @@ static struct map_s
 {
 	char name[64];
 	char title[64];
-	char description[64];
+	char description[1024];
 	char song[512];
 	char authors[512];
 	char version_s[64];
@@ -1208,7 +1208,7 @@ static int compile(const char *filename)
 
 	put_str(fout, maps[0].name, 64);
 	put_str(fout, maps[0].title, 64);
-	put_str(fout, maps[0].description, 64);
+	put_str(fout, maps[0].description, 1024);
 	put_str(fout, maps[0].song, 512);
 	put_str(fout, maps[0].authors, 512);
 	put_str(fout, maps[0].version_s, 64);
