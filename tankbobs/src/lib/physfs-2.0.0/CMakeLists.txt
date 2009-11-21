@@ -11,6 +11,10 @@ SET(PHYSFS_VERSION 2.0.0)
 # Increment this if/when we break backwards compatibility.
 SET(PHYSFS_SOVERSION 1)
 
+# Link nicely on 64-bit platforms (added with Tankbobs)
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+
 # I hate that they define "WIN32" ... we're about to move to Win64...I hope!
 IF(WIN32 AND NOT WINDOWS)
     SET(WINDOWS TRUE)
