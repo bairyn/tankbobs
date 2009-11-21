@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 2.6)
 project(tankbobs)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror -pedantic-errors -pthread -std=c99")
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -pedantic-errors -ansi")  # Box2D
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")  # Box2D
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror -fPIC -pedantic-errors -pthread -std=c99")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -Wall -Werror -pedantic-errors -ansi")  # Box2D
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -fPIC")  # Box2D
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -DTDEBUG")
