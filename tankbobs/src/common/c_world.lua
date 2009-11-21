@@ -340,7 +340,7 @@ function c_world_init()
 	powerupType.index = 10
 	powerupType.name = "shield"
 	powerupType.c.r, powerupType.c.g, powerupType.c.b, powerupType.c.a = 0.25, 0.5, 0.05, 0.755
-	powerupType.instagib = false
+	powerupType.instagib = "no-semi"
 
 	-- rocket-launcher
 	local powerupType = c_world_powerupType:new()
@@ -1871,10 +1871,14 @@ function c_world_powerupSpawnPoint_step(d, powerupSpawnPoint)
 			for k, v in pairs(powerupSpawnPoint.enabledPowerups) do
 				if v then
 					if found then
-						if c_world_getPowerupTypeByName(k) and (not c_world_getInstagib() or c_world_getPowerupTypeByName(k).instagib) then
-							powerupSpawnPoint.m.lastPowerup = k
-							powerup.powerupType = c_world_getPowerupTypeByName(k).index
-							break
+						if c_world_getPowerupTypeByName(k) then
+							if c_world_getPowerupTypeByName(k).instagib == false and c_world_getInstagib() == false or
+								c_world_getPowerupTypeByName(k).instagib == true                                    or
+								c_world_getPowerupTypeByName(k).instagib == "no-semi" and c_world_getInstagib() ~= "semi" then
+								powerupSpawnPoint.m.lastPowerup = k
+								powerup.powerupType = c_world_getPowerupTypeByName(k).index
+								break
+							end
 						end
 					end
 	
