@@ -1252,7 +1252,7 @@ function c_world_lineIntersectsHull(start, endP, hull)
 			if not minDistance or distance < minDistance then
 				minDistance = distance
 
-				br, rintersection = b, tankbobs.m_vec2(intersection)
+				rb, rintersection = b, tankbobs.m_vec2(intersection)
 			end
 		end
 
