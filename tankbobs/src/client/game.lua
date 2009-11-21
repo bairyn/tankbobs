@@ -198,6 +198,8 @@ function game_new()
 	if c_config_get("client.ambience") then
 		local a = c_const_get("ambience_sounds")[math.random(1, c_const_get("ambience_chanceDenom"))]
 		if a then
+			ambience = a
+
 			tankbobs.a_playSound(a)
 		end
 	end
@@ -220,6 +222,12 @@ function game_end()
 
 	c_tcm_unload_extra_data(false)
 	c_weapon_clear(false)
+
+	-- stop playing ambience
+	if ambience then
+		tankbobs.a_freeSound(ambience)
+		ambience = nil
+	end
 
 	-- free melee sounds
 	for _, v in pairs(c_weapon_getWeapons()) do
