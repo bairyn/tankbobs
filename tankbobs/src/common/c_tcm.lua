@@ -572,7 +572,7 @@ function c_tcm_read_map(filename)
 			wall.static = false
 		end
 
-		wall.misc = c_tcm_private_get(tankbobs.fs_read, i, false, 64)
+		wall.misc = c_tcm_private_get(tankbobs.fs_read, i, false, 512)
 		wall.misc = wall.misc:gsub("%z*$", "") 
 
 		table.insert(r.walls, wall)
@@ -595,7 +595,7 @@ function c_tcm_read_map(filename)
 			teleporter.enabled = false
 		end
 
-		teleporter.misc = c_tcm_private_get(tankbobs.fs_read, i, false, 64)
+		teleporter.misc = c_tcm_private_get(tankbobs.fs_read, i, false, 512)
 		teleporter.misc = teleporter.misc:gsub("%z*$", "") 
 
 		r.wayPointNetwork[-it] = {}
@@ -610,7 +610,7 @@ function c_tcm_read_map(filename)
 		playerSpawnPoint.p.x = c_tcm_private_get(tankbobs.fs_getDouble, i)
 		playerSpawnPoint.p.y = c_tcm_private_get(tankbobs.fs_getDouble, i)
 
-		playerSpawnPoint.misc = c_tcm_private_get(tankbobs.fs_read, i, false, 64)
+		playerSpawnPoint.misc = c_tcm_private_get(tankbobs.fs_read, i, false, 512)
 		playerSpawnPoint.misc = playerSpawnPoint.misc:gsub("%z*$", "") 
 
 		table.insert(r.playerSpawnPoints, playerSpawnPoint)
@@ -707,7 +707,7 @@ function c_tcm_read_map(filename)
 			powerupSpawnPoint.focus = false
 		end
 
-		powerupSpawnPoint.misc = c_tcm_private_get(tankbobs.fs_read, i, false, 64)
+		powerupSpawnPoint.misc = c_tcm_private_get(tankbobs.fs_read, i, false, 512)
 		powerupSpawnPoint.misc = powerupSpawnPoint.misc:gsub("%z*$", "") 
 
 		table.insert(r.powerupSpawnPoints, powerupSpawnPoint)
@@ -727,7 +727,7 @@ function c_tcm_read_map(filename)
 		path.time = c_tcm_private_get(tankbobs.fs_getDouble, i)
 		path.t = c_tcm_private_get(tankbobs.fs_getInt, i)
 
-		path.misc = c_tcm_private_get(tankbobs.fs_read, i, false, 64)
+		path.misc = c_tcm_private_get(tankbobs.fs_read, i, false, 512)
 		path.misc = path.misc:gsub("%z*$", "") 
 
 		table.insert(r.paths, path)
@@ -745,7 +745,7 @@ function c_tcm_read_map(filename)
 			controlPoint.red = false
 		end
 
-		controlPoint.misc = c_tcm_private_get(tankbobs.fs_read, i, false, 64)
+		controlPoint.misc = c_tcm_private_get(tankbobs.fs_read, i, false, 512)
 		controlPoint.misc = controlPoint.misc:gsub("%z*$", "") 
 
 		table.insert(r.controlPoints, controlPoint)
@@ -763,7 +763,7 @@ function c_tcm_read_map(filename)
 			flag.red = false
 		end
 
-		flag.misc = c_tcm_private_get(tankbobs.fs_read, i, false, 64)
+		flag.misc = c_tcm_private_get(tankbobs.fs_read, i, false, 512)
 		flag.misc = flag.misc:gsub("%z*$", "") 
 
 		table.insert(r.flags, flag)
@@ -778,7 +778,7 @@ function c_tcm_read_map(filename)
 
 		r.wayPointNetwork[it] = {}
 
-		wayPoint.misc = c_tcm_private_get(tankbobs.fs_read, i, false, 64)
+		wayPoint.misc = c_tcm_private_get(tankbobs.fs_read, i, false, 512)
 		wayPoint.misc = wayPoint.misc:gsub("%z*$", "") 
 
 		table.insert(r.wayPoints, wayPoint)

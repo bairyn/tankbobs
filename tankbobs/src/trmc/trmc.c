@@ -575,7 +575,7 @@ static struct wall_s
 	int path;
 	int detail;
 	int staticW;
-	char misc[64];
+	char misc[512];
 } walls[MAX_WALLS];
 
 typedef struct teleporter_s teleporter_t;
@@ -585,14 +585,14 @@ static struct teleporter_s
 	char target[MAX_STRING_STRUCT_CHARS];
 	double x1; double y1;
 	int enabled;
-	char misc[64];
+	char misc[512];
 } teleporters[MAX_TELEPORTERS];
 
 typedef struct playerSpawnPoint_s playerSpawnPoint_t;
 static struct playerSpawnPoint_s
 {
 	double x1; double y1;
-	char misc[64];
+	char misc[512];
 } playerSpawnPoints[MAX_PLAYERSPAWNPOINTS];
 
 typedef struct powerupSpawnPoint_s powerupSpawnPoint_t;
@@ -604,7 +604,7 @@ static struct powerupSpawnPoint_s
 	double repeat;
 	double initial;
 	int focus;
-	char misc[64];
+	char misc[512];
 } powerupSpawnPoints[MAX_POWERUPSPAWNPOINTS];
 
 typedef struct path_s path_t;
@@ -615,7 +615,7 @@ static struct path_s
 	double x1; double y1;
 	int enabled;
 	double time;
-	char misc[64];
+	char misc[512];
 } paths[MAX_PATHS];
 
 typedef struct controlPoint_s controlPoint_t;
@@ -623,7 +623,7 @@ static struct controlPoint_s
 {
 	double x1; double y1;
 	int red;
-	char misc[64];
+	char misc[512];
 } controlPoints[MAX_CONTROLPOINTS];
 
 typedef struct flag_s flag_t;
@@ -631,14 +631,14 @@ static struct flag_s
 {
 	double x1; double y1;
 	int red;
-	char misc[64];
+	char misc[512];
 } flags[MAX_FLAGS];
 
 typedef struct wayPoint_s wayPoint_t;
 static struct wayPoint_s
 {
 	double x1; double y1;
-	char misc[64];
+	char misc[512];
 } wayPoints[MAX_WAYPOINTS];
 
 
@@ -1268,7 +1268,7 @@ static int compile(const char *filename)
 		put_cchar(fout, ((wall->path) ? (1) : (0)));
 		put_cchar(fout, ((wall->detail) ? (1) : (0)));
 		put_cchar(fout, ((wall->staticW) ? (1) : (0)));
-		put_str(fout, wall->misc, 64);
+		put_str(fout, wall->misc, 512);
 	}
 
 	for(i = 0; i < tc; i++)
@@ -1293,7 +1293,7 @@ static int compile(const char *filename)
 		put_cdouble(fout, teleporter->x1);
 		put_cdouble(fout, teleporter->y1);
 		put_cchar(fout, ((teleporter->enabled) ? (1) : (0)));
-		put_str(fout, teleporter->misc, 64);
+		put_str(fout, teleporter->misc, 512);
 	}
 
 	for(i = 0; i < lc; i++)
@@ -1303,7 +1303,7 @@ static int compile(const char *filename)
 		put_cint(fout, i);
 		put_cdouble(fout, playerSpawnPoint->x1);
 		put_cdouble(fout, playerSpawnPoint->y1);
-		put_str(fout, playerSpawnPoint->misc, 64);
+		put_str(fout, playerSpawnPoint->misc, 512);
 	}
 
 	for(i = 0; i < oc; i++)
@@ -1375,7 +1375,7 @@ static int compile(const char *filename)
 		put_cdouble(fout, powerupSpawnPoint->repeat);
 		put_cdouble(fout, powerupSpawnPoint->initial);
 		put_cchar(fout, powerupSpawnPoint->focus);
-		put_str(fout, powerupSpawnPoint->misc, 64);
+		put_str(fout, powerupSpawnPoint->misc, 512);
 	}
 
 	for(i = 0; i < pc; i++)
@@ -1401,7 +1401,7 @@ static int compile(const char *filename)
 		put_cchar(fout, ((path->enabled) ? (1) : (0)));
 		put_cdouble(fout, path->time);
 		put_cint(fout, id);
-		put_str(fout, path->misc, 64);
+		put_str(fout, path->misc, 512);
 	}
 
 	for(i = 0; i < cc; i++)
@@ -1412,7 +1412,7 @@ static int compile(const char *filename)
 		put_cdouble(fout, controlPoint->x1);
 		put_cdouble(fout, controlPoint->y1);
 		put_cchar(fout, ((controlPoint->red) ? (1) : (0)));
-		put_str(fout, controlPoint->misc, 64);
+		put_str(fout, controlPoint->misc, 512);
 	}
 
 	for(i = 0; i < fc; i++)
@@ -1423,7 +1423,7 @@ static int compile(const char *filename)
 		put_cdouble(fout, flag->x1);
 		put_cdouble(fout, flag->y1);
 		put_cchar(fout, ((flag->red) ? (1) : (0)));
-		put_str(fout, flag->misc, 64);
+		put_str(fout, flag->misc, 512);
 	}
 
 	for(i = 0; i < ac; i++)
@@ -1433,7 +1433,7 @@ static int compile(const char *filename)
 		put_cint(fout, i);
 		put_cdouble(fout, wayPoint->x1);
 		put_cdouble(fout, wayPoint->y1);
-		put_str(fout, wayPoint->misc, 64);
+		put_str(fout, wayPoint->misc, 512);
 	}
 
 	fclose(fout);
