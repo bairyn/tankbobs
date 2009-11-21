@@ -1705,7 +1705,74 @@ int fs_permitSymbolicLinks(lua_State *L)
 	return 0;
 }
 
-/* Remember to free the temporary file with remove(filename) afterwards! */
+typedef struct tmpFile_s tmpFile_t;
+static struct tmpFile_s
+{
+	char filename[BUFSIZE];
+
+	tmpFile_t *next;
+} *tmpFiles = NULL;
+
+#define FREETMPSIZE 16  /* free temporary files after 32 files are created */
+
+void fs_freeTemporaryFilesNL(void)
+{
+	void *n;
+	tmpFile_t *t;
+
+	if(tmpFiles)
+	{
+		for(t = tmpFiles; t; t = n)
+		{
+			n = t->next;
+
+			/* remove actual temporary file */
+			remove(t->filename);
+
+			free(t);
+		}
+
+		tmpFiles = NULL;
+	}
+}
+
+static size_t numTmpFiles()
+{
+	size_t i;
+	tmpFile_t *t;
+
+	for(i = 0, t = tmpFiles; t; ++i, (t = t->next));
+
+	return i;
+}
+
+static void addTmpFile(const char *filename)
+{
+	tmpFile_t *t;
+
+	if(!tmpFiles)
+	{
+		t = tmpFiles = malloc(sizeof(tmpFile_t));
+	}
+	else
+	{
+		for(t = tmpFiles; ; t = t->next)
+		{
+			if(!t->next)
+			{
+				t->next = malloc(sizeof(tmpFile_t));
+				t = t->next;
+
+				break;
+			}
+		}
+	}
+
+	t->next = NULL;
+
+	strncpy(t->filename, filename, sizeof(t->filename));
+}
+
 const char *fs_createTemporaryFile(lua_State *L, const char *filename, const char *ext)
 {
 	FILE *fout;
@@ -1713,6 +1780,11 @@ const char *fs_createTemporaryFile(lua_State *L, const char *filename, const cha
 	PHYSFS_File *fin;
 	static char buf[FBUFSIZE];
 	const char *tmpfilename;
+
+	if(numTmpFiles() >= FREETMPSIZE)
+	{
+		fs_freeTemporaryFilesNL();
+	}
 
 	/* Copy file to a temporary file */
 	fin = PHYSFS_openRead(filename);
@@ -1792,6 +1864,8 @@ const char *fs_createTemporaryFile(lua_State *L, const char *filename, const cha
 	fclose(fout);
 
 	/*free(tmpfilename);*/
+
+	addTmpFile(tmpfilename);
 
 	return tmpfilename;
 }

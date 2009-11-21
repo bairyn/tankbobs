@@ -48,12 +48,13 @@ namespace entities
 			string name;
 			string title;
 			string description;
+			string song;
 			string authors;
 			string version_s;
 			int version;
 			bool staticCamera;
 			string script;
-			Map() {name = "default"; title = "default"; description = ""; authors = ""; version_s = ""; version = 0; staticCamera = false; script = "";}
+			Map() {name = "default"; title = "default"; description = ""; song = ""; authors = ""; version_s = ""; version = 0; staticCamera = false; script = "";}
 	};
 
 	class Entity

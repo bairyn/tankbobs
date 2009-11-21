@@ -203,6 +203,11 @@ function game_new()
 			tankbobs.a_playSound(a)
 		end
 	end
+
+	-- play music
+	if #c_tcm_current_map.song > 0 then
+		tankbobs.a_startMusic(c_const_get("song_dir") .. c_tcm_current_map.song)
+	end
 end
 
 function game_end()
@@ -222,6 +227,9 @@ function game_end()
 
 	c_tcm_unload_extra_data(false)
 	c_weapon_clear(false)
+
+	-- stop music
+	tankbobs.a_stopMusic()
 
 	-- stop playing ambience
 	if ambience then

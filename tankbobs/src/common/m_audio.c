@@ -128,8 +128,10 @@ int a_quit(lua_State *L)
 	audioInitialized = FALSE;
 
 	if(music)
+	{
 		Mix_FreeMusic(music);
-	music = NULL;
+		music = NULL;
+	}
 	musicFilename[0] = 0;
 
 	for(i = &sounds[0]; i - sounds < CACHEDSOUNDS; i++)
@@ -324,36 +326,9 @@ int a_startMusic(lua_State *L)
 		return 0;
 	}
 
-	if(!strcmp(musicFilename, filename))
+	if(!strcmp(musicFilename, filename) && music)
 	{
-		if(!music)
-		{
-#ifdef AUDIO_PHYSFS
-			/*
-			rw = PHYSFSRWOPS_openRead(filename);
-			if(!rw)
-			{
-				fs_errorNL(L, NULL, filename);
-
-				return 0;
-			}
-
-			music = Mix_LoadMUS_RW(rw, true);
-			*/
-
-			/* Mix_LoadMUS_RW isn't well supported */
-
-			const char *tmpfilename = fs_createTemporaryFile(L, filename, "tnk");
-
-			music = Mix_LoadMUS(tmpfilename);
-
-			remove(tmpfilename);
-#else
-			music = Mix_LoadMUS(filename);
-#endif
-		}
-
-		else if(Mix_PausedMusic())
+		if     (Mix_PausedMusic())
 		{
 			Mix_ResumeMusic();
 		}
@@ -366,10 +341,33 @@ int a_startMusic(lua_State *L)
 	}
 
 	if(music)
+	{
 		Mix_FreeMusic(music);
+		music = NULL;
+	}
 
 	strncpy(musicFilename, filename, sizeof(musicFilename));
+#ifdef AUDIO_PHYSFS
+	/*
+	rw = PHYSFSRWOPS_openRead(filename);
+	if(!rw)
+	{
+		fs_errorNL(L, NULL, filename);
+
+		return 0;
+	}
+
+	music = Mix_LoadMUS_RW(rw, true);
+	*/
+
+	/* Mix_LoadMUS_RW isn't well supported */
+
+	const char *tmpfilename = fs_createTemporaryFile(L, filename, "tnk");
+
+	music = Mix_LoadMUS(tmpfilename);
+#else
 	music = Mix_LoadMUS(filename);
+#endif
 	Mix_FadeInMusic(music, -1, FADE_MS);
 
 	return 0;

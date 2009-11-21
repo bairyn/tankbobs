@@ -1,4 +1,4 @@
-map, medium_1, Forth, , Byron Johnson, 1.0, 1, 0, official.lua
+map, medium_1, Forth, , null.ogg, Byron Johnson, 1.0, 1, 0, official.lua
 wall, 1, 0, 100, 0, 97, 200, 97, 200, 100, 0, 0, 1, 1, 0, global/brownish.png, 6, , 0, 0, 1, 
 wall, 1, 0, 100, 0, 0, 200, 0, 200, 100, 0, 0, 1, 1, 0, global/abstract.png, 2, , 0, 1, 1, 
 wall, 1, 0, 100, 0, 0, 3, 0, 3, 100, 0, 0, 1, 1, 0, global/brownish.png, 6, , 0, 0, 1, 

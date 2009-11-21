@@ -457,6 +457,7 @@ bool trm_open(const char *filename, bool import)  // Will not confirm unsaved pr
 					char name[1024];
 					char title[1024];
 					char description[1024];
+					char song[1024];
 					char authors[1024];
 					char version_s[1024];
 					int version;
@@ -466,6 +467,7 @@ bool trm_open(const char *filename, bool import)  // Will not confirm unsaved pr
 					read_string(name);
 					read_string(title);
 					read_string(description);
+					read_string(song);
 					read_string(authors);
 					read_string(version_s);
 					version = read_int();
@@ -475,6 +477,7 @@ bool trm_open(const char *filename, bool import)  // Will not confirm unsaved pr
 					tmap.name = string(name);
 					tmap.title = string(title);
 					tmap.description = string(description);
+					tmap.song = string(song);
 					tmap.authors = string(authors);
 					tmap.version_s = string(version_s);
 					tmap.version = version;
@@ -678,6 +681,8 @@ bool trm_save(const char *filename)
 		<< tmap.title
 		<< ", "
 		<< tmap.description
+		<< ", "
+		<< tmap.song
 		<< ", "
 		<< tmap.authors
 		<< ", "

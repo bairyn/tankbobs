@@ -548,6 +548,7 @@ static struct map_s
 	char name[64];
 	char title[64];
 	char description[64];
+	char song[512];
 	char authors[512];
 	char version_s[64];
 	int version;
@@ -713,7 +714,7 @@ static int cc;
 static int fc;
 static int ac;
 
-static void add_map(const char *name, const char *title, const char *description, const char *authors, const char *version_s, int version, int staticCamera, const char *script)
+static void add_map(const char *name, const char *title, const char *description, const char *song, const char *authors, const char *version_s, int version, int staticCamera, const char *script)
 {
 	map_t *map = &maps[mc++];
 
@@ -726,6 +727,7 @@ static void add_map(const char *name, const char *title, const char *description
 	strncpy(map->name, name, sizeof(map->name));
 	strncpy(map->title, title, sizeof(map->title));
 	strncpy(map->description, description, sizeof(map->description));
+	strncpy(map->song, song, sizeof(map->song));
 	strncpy(map->authors, description, sizeof(map->authors));
 	strncpy(map->version_s, version_s, sizeof(map->version_s));
 	map->version = version;
@@ -991,6 +993,7 @@ static int compile(const char *filename)
 					char name[MAX_STRING_SIZE];
 					char title[MAX_STRING_SIZE];
 					char description[MAX_STRING_SIZE];
+					char song[MAX_STRING_SIZE];
 					char authors[MAX_STRING_SIZE];
 					char version_s[MAX_STRING_SIZE];
 					int version;
@@ -1000,13 +1003,14 @@ static int compile(const char *filename)
 					read_string(name);
 					read_string(title);
 					read_string(description);
+					read_string(song);
 					read_string(authors);
 					read_string(version_s);
 					version = read_int();
 					staticCamera = read_int();
 					read_string(script);
 
-					add_map(name, title, description, authors, version_s, version, staticCamera, script);
+					add_map(name, title, description, song, authors, version_s, version, staticCamera, script);
 				}
 				else if(strncmp(entity, "wall", sizeof(entity)) == 0)
 				{
@@ -1205,6 +1209,7 @@ static int compile(const char *filename)
 	put_str(fout, maps[0].name, 64);
 	put_str(fout, maps[0].title, 64);
 	put_str(fout, maps[0].description, 64);
+	put_str(fout, maps[0].song, 512);
 	put_str(fout, maps[0].authors, 512);
 	put_str(fout, maps[0].version_s, 64);
 	put_cint(fout, maps[0].version);

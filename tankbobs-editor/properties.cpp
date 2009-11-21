@@ -210,6 +210,7 @@ Properties::Properties(QWidget *parent)
 		mapname->setText(QString(tmap.name.c_str()));
 		maptitle->setText(QString(tmap.title.c_str()));
 		mapdescription->setText(QString(tmap.description.c_str()));
+		mapsong->setText(QString(tmap.song.c_str()));
 		mapauthors->setText(QString(tmap.authors.c_str()));
 		mapversions->setText(QString(tmap.version_s.c_str()));
 		mapversion->setText(QString::number(tmap.version));
@@ -222,6 +223,8 @@ Properties::Properties(QWidget *parent)
 		maptitleLabel->setEnabled(true);
 		mapdescription->setEnabled(true);
 		mapdescriptionLabel->setEnabled(true);
+		mapsong->setEnabled(true);
+		mapsongLabel->setEnabled(true);
 		mapauthors->setEnabled(true);
 		mapauthorsLabel->setEnabled(true);
 		mapversions->setEnabled(true);
@@ -236,6 +239,7 @@ Properties::Properties(QWidget *parent)
 	connect(mapname, SIGNAL(textChanged(const QString &)), this, SLOT(mapnameChanged(const QString &)));
 	connect(maptitle, SIGNAL(textChanged(const QString &)), this, SLOT(maptitleChanged(const QString &)));
 	connect(mapdescription, SIGNAL(textChanged(const QString &)), this, SLOT(mapdescriptionChanged(const QString &)));
+	connect(mapsong, SIGNAL(textChanged(const QString &)), this, SLOT(mapsongChanged(const QString &)));
 	connect(mapauthors, SIGNAL(textChanged(const QString &)), this, SLOT(mapauthorsChanged(const QString &)));
 	connect(mapversions, SIGNAL(textChanged(const QString &)), this, SLOT(mapversionsChanged(const QString &)));
 	connect(mapversion, SIGNAL(textChanged(const QString &)), this, SLOT(mapversionChanged(const QString &)));
@@ -577,6 +581,11 @@ void Properties::maptitleChanged(const QString &text)
 void Properties::mapdescriptionChanged(const QString &text)
 {
 	tmap.description = util_qtcp(text);
+}
+
+void Properties::mapsongChanged(const QString &text)
+{
+	tmap.song = util_qtcp(text);
 }
 
 void Properties::mapauthorsChanged(const QString &text)

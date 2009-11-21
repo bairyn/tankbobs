@@ -39,6 +39,7 @@ class Properties : public QDialog, private Ui::PropertiesDialog
 		void mapnameChanged(const QString &text);
 		void maptitleChanged(const QString &text);
 		void mapdescriptionChanged(const QString &text);
+		void mapsongChanged(const QString &text);
 		void mapauthorsChanged(const QString &text);
 		void mapversionsChanged(const QString &text);
 		void mapversionChanged(const QString &text);

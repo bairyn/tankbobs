@@ -1,4 +1,4 @@
-map, arena, Arena, The Arena (AI and multiple gametypes unsupported), Byron Johnson, 1.0, 1, 0, official.lua
+map, arena, Arena, The Arena (AI and multiple gametypes unsupported), null.ogg, Byron Johnson, 1.0, 1, 0, official.lua
 wall, 1, 0, 0, 0, 201, -10, 200, -10, 0, 0, 0, 1, 1, 0, global/metal.png, 6, , 0, 0, 1, 
 wall, 1, -10, 200, -10, 210, 400, 210, 400, 200, 0, 0, 1, 1, 0, global/metal.png, 6, , 0, 0, 1, 
 wall, 1, 200, 200, 200, 100, 210, 100, 210, 200, 0, 0, 1, 1, 0, global/metal.png, 6, , 0, 0, 1, 

@@ -193,6 +193,7 @@ c_tcm_map =
 	name = "",  -- unique name
 	title = "",  -- the name the player will see
 	description = "",  -- the description
+	song = "",
 	authors = "",
 	version_string = "",
 	staticCamera = false,
@@ -445,6 +446,7 @@ function c_tcm_read_map(filename)
 	r.name = c_tcm_private_get(tankbobs.fs_read, i, false, 64)
 	r.title = c_tcm_private_get(tankbobs.fs_read, i, false, 64)
 	r.description = c_tcm_private_get(tankbobs.fs_read, i, false, 64)
+	r.song = c_tcm_private_get(tankbobs.fs_read, i, false, 512)
 	r.authors = c_tcm_private_get(tankbobs.fs_read, i, false, 512)
 	r.version_string = c_tcm_private_get(tankbobs.fs_read, i, false, 64)
 	r.version = c_tcm_private_get(tankbobs.fs_getInt, i)
@@ -459,6 +461,7 @@ function c_tcm_read_map(filename)
 	r.name = r.name:gsub("%z*$", "")
 	r.title = r.title:gsub("%z*$", "")
 	r.description = r.description:gsub("%z*$", "")
+	r.song = r.song:gsub("%z*$", "")
 	r.authors = r.authors:gsub("%z*$", "")
 	r.version_string = r.version_string:gsub("%z*$", "")
 	r.script = r.script:gsub("%z*$", "")

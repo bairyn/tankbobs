@@ -118,6 +118,9 @@ int t_quit(lua_State *L)
 
 	r_quitFont();
 
+	/* free temporary files */
+	fs_freeTemporaryFilesNL();
+
 	return 0;
 }
 
