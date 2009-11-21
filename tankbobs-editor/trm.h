@@ -49,7 +49,8 @@ bool trm_isWayPoint(void *e);
 //#define TEMAXBUF 1024
 #define TEMAXBUF 100000
 #define GRIDSIZE 100.0
-#define GRIDLINES 4  // approximate number of grid lines drawn on each side
+//#define GRIDLINES 4  // approximate number of grid lines drawn on each side
+#define GRIDLINES 16  // approximate number of grid lines drawn on each side
 #define ZOOMFACTOR 0.02  // 2% per pixel
 #define ZOOMQUADFACTOR 0.75
 #define MINZOOM 0.125
