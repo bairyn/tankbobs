@@ -376,6 +376,7 @@ function c_tcm_read_set(filename, t)
 		error("c_tcm_read_set: unexpected EOF while reading '" .. filename .. "'")
 	end
 	s.description = line
+	s.description = s.description:gsub("|", "\n")
 
 	-- read the set's filenames and read their headers
 	line = tankbobs.fs_getStr(set_f, '\n')
