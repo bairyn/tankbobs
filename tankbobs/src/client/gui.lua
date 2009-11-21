@@ -47,6 +47,9 @@ function gui_init()
 	c_const_set("widget_length", 1.5, 1)
 	c_const_set("gui_vspacing", 0.5, 1)
 
+	c_const_set("gui_scalex", 4, 1)
+	c_const_set("gui_scaley", 4, 1)
+
 	c_const_set("label_prefix", "", 1)
 	c_const_set("label_suffix", "", 1)
 	c_const_set("label_r", 0.8, 1)
@@ -536,25 +539,28 @@ function gui_paint(d)
 			local scalex, scaley = 1, 1
 			local prefix, suffix = "", ""
 
+			scalex = scalex * c_const_get("gui_scalex")
+			scaley = scaley * c_const_get("gui_scaley")
+
 			-- type specific stuff
 			local switch = v.type
 			if switch == nil then
 			elseif switch == LABEL then
-				scalex = c_const_get("label_scalex") scaley = c_const_get("label_scaley")
+				scalex = scalex * c_const_get("label_scalex") scaley = scaley * c_const_get("label_scaley")
 				prefix = c_const_get("label_prefix") suffix = c_const_get("label_suffix")
 			elseif switch == ACTION then
-				scalex = c_const_get("action_scalex") scaley = c_const_get("action_scaley")
+				scalex = scalex * c_const_get("action_scalex") scaley = scaley * c_const_get("action_scaley")
 				prefix = c_const_get("action_prefix") suffix = c_const_get("action_suffix")
 			elseif switch == CYCLE then
-				scalex = c_const_get("cycle_scalex") scaley = c_const_get("cycle_scaley")
+				scalex = scalex * c_const_get("cycle_scalex") scaley = scaley * c_const_get("cycle_scaley")
 				prefix = c_const_get("cycle_prefix") suffix = c_const_get("cycle_suffix")
 				v.text = v.cycleList[v.cyclePos]
 			elseif switch == INPUT then
-				scalex = c_const_get("input_scalex") scaley = c_const_get("input_scaley")
+				scalex = scalex * c_const_get("input_scalex") scaley = scaley * c_const_get("input_scaley")
 				prefix = c_const_get("input_prefix") suffix = c_const_get("input_suffix")
 				v.text = v.inputText:sub(1, v.textPos) .. c_const_get("input_posCharacter") .. v.inputText:sub(v.textPos + 1)
 			elseif switch == KEY then
-				scalex = c_const_get("key_scalex") scaley = c_const_get("key_scaley")
+				scalex = scalex * c_const_get("key_scalex") scaley = scaley * c_const_get("key_scaley")
 				prefix = c_const_get("key_prefix") suffix = c_const_get("key_suffix")
 				if v.keyActive then
 					v.text = gui_char(v.button) .. c_const_get("key_activeSuffix")
@@ -571,7 +577,7 @@ function gui_paint(d)
 					end
 				end
 
-				scalex = c_const_get("scale_scalex") scaley = c_const_get("scale_scaley")
+				scalex = scalex * c_const_get("scale_scalex") scaley = scaley * c_const_get("scale_scaley")
 				scalex = scalex * v.scale
 				scaley = scaley * v.scale
 				if v.bump then

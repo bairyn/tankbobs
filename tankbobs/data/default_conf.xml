@@ -68,11 +68,11 @@
 
 			<fonts>
 				<sans>
-					<size>72</size>
+					<size>18</size>
 					<ttf>DejaVuSans-Bold.ttf</ttf>
 				</sans>
 				<bd>
-					<size>72</size>
+					<size>18</size>
 					<ttf>VeraBd.ttf</ttf>
 				</bd>
 			</fonts>
