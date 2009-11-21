@@ -702,7 +702,7 @@ function c_ai_findClosestPath(start, goal, closed)
 		na, wa = c_ai_findClosestPath(a[1], goal, tankbobs.t_clone(closed))
 		nb, wb = c_ai_findClosestPath(b[1], goal, tankbobs.t_clone(closed))
 
-		-- we only place a waypoint first if it's the goal itself, not if it's a waypoint directly linked to the goal
+		-- we only place a waypoint first if it's the goal itself, and not if it's a waypoint directly linked to the goal
 		--[[
 		if na and na[1] == goal then
 			return true
