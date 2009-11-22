@@ -1,0 +1,26 @@
+map, tutorial, Tutorial, Learn how to move and fire , null.ogg, Byron Johnson, 1.0, 1, 0, official.lua
+wall, 1, -37, 56, -37, 22, -23, 22, -23, 56, 0, 0, 1, 1, 0, global/brownish.png, 6, , 0, 0, 1, 
+wall, 1, -23, -21, -23, -33, 46, -33, 46, -21, 0, 0, 1, 1, 0, global/brownish.png, 6, , 0, 0, 1, 
+wall, 1, 46, -33, 46, 56, 64, 56, 64, -33, 0, 0, 1, 1, 0, global/brownish.png, 6, , 0, 0, 1, 
+wall, 1, -37, 22, -37, 15, 46, 15, 46, 22, 0, 0, 1, 1, 0, global/metal.png, 6, path_1, 1, 0, 1, 
+wall, 1, -23, 15, -23, -33, -37, -33, -37, 15, 0, 0, 1, 1, 0, global/brownish.png, 6, , 0, 0, 1, 
+wall, 1, -5, 5, -5, -6, 5, -6, 5, 5, 0, 0, 1, 1, 0, global/null.png, 0, , 0, 1, 1, wayPoint 1
+wall, 1, -23, 56, -23, 147, -37, 147, -37, 56, 0, 0, 1, 1, 0, global/brownish.png, 6, , 0, 0, 1, 
+wall, 1, -37, 147, -37, 156, 64, 156, 64, 147, 0, 0, 1, 1, 0, global/brownish.png, 6, , 0, 0, 1, 
+wall, 1, 64, 147, 64, 84, 46, 84, 46, 147, 0, 0, 1, 1, 0, global/brownish.png, 6, , 0, 0, 1, 
+wall, 1, -6, 126, -6, 121, 35, 121, 35, 126, 0, 0, 1, 1, 0, global/dynamic.png, 8, , 0, 0, 0, shootWall
+wall, 1, -11, 147, -11, 140, 39, 140, 39, 147, 0, 0, 1, 1, 0, global/metal.png, 5, path_2, 1, 0, 1, shootTriggerWall
+wall, 1, 46, 84, 46, 56, 64, 56, 64, 84, 0, 0, 1, 1, 0, global/metal.png, 5, path_3, 1, 0, 1, 2
+wall, 1, 64, 156, 64, 147, 123, 147, 123, 156, 0, 0, 1, 1, 0, global/brownish.png, 6, , 0, 0, 1, 
+wall, 1, 64, -21, 64, -33, 123, -33, 123, -21, 0, 0, 1, 1, 0, global/brownish.png, 6, , 0, 0, 1, 
+wall, 1, 123, 156, 123, -33, 149, -33, 149, 156, 0, 0, 1, 1, 0, global/brownish.png, 6, , 0, 0, 1, 
+wall, 1, -200, 400, -200, -200, 300, -200, 300, 400, 0, 0, 1, 1, 0, global/abstract.png, 2, , 0, 1, 1, 
+wall, 1, 46, 78, 46, 64, 64, 64, 64, 78, -46, -64, 5.55556, 7.14286, 90, global/arrow.png, 4, , 0, 1, 1, 
+playerSpawnPoint, 0, 0, 
+path, path_1, path_1_2, -23, 22, 0, 3, 1
+path, path_1_2, , -92, 22, 0, 0, 
+path, path_2, path_2_2, -9, 142, 0, 0.5, 2
+path, path_2_2, , -9, 148, 0, 0, 
+path, path_3, path_3_2, 64, 54, 0, 5, 2
+path, path_3_2, , 64, 86, 0, 0, 
+wayPoint, 0, 0, 1

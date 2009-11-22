@@ -159,7 +159,7 @@ function c_world_init()
 	c_const_set("powerup_linearDamping", 0, 1)
 	c_const_set("powerup_angularDamping", 0, 1)
 	c_const_set("powerup_pushStrength", 16, 1)
-	c_const_set("powerup_pushAngle", math.pi / 4, 1)
+	c_const_set("powerup_pushAngle", (math.pi * 2) / 8, 1)
 	c_const_set("powerup_static", false, 1)
 
 	c_const_set("game_chasePointTime", 10, 1)
@@ -1694,38 +1694,35 @@ function c_world_wall_step(d, wall)
 		-- test if the wall is linked to a path
 		if wall.path then
 			if not wall.m.pid then
-				wall.m.pid = wall.pid
+				wall.m.ppid = wall.pid + 1
+				wall.m.pid = paths[wall.pid + 1]
+				if wall.m.pid then
+					wall.m.pid = wall.m.pid.t + 1
+				end
 				wall.m.ppos = 0
 				wall.m.startpos = t_m_vec2(c_world_wallShape(wall.m.pos)[1])
 			else
-				local path = paths[wall.m.pid + 1]
+				local path = paths[wall.m.pid]
+				local prevPath = paths[wall.m.ppid]
 
-				if path and (path.enabled or path.m.enabled) then
-					local prevPath = paths[wall.m.ppid]
-
-					if prevPath then
-						if prevPath.time == 0 then
-							wall.m.ppos = 1
-						else
-							wall.m.ppos = math.min(1, wall.m.ppos + (d / prevPath.time))
-						end
+				if path and (prevPath.enabled or prevPath.m.enabled) then
+					if prevPath.time == 0 then
+						wall.m.ppos = 1
+					else
+						wall.m.ppos = math.min(1, wall.m.ppos + (d / prevPath.time))
 					end
 
-					if wall.m.ppos < 1 and prevPath then
+					if wall.m.ppos < 1 then
 						tankbobs.w_setPosition(wall.m.body, common_lerp(wall.m.startpos, wall.m.startpos + path.p - prevPath.p, wall.m.ppos))
 					else
-						wall.m.ppid = wall.m.pid + 1
+						wall.m.ppid = wall.m.pid
 						prevPath = paths[wall.m.ppid]
 						wall.m.startpos(c_world_wallShape(wall.m.pos)[1])
 						wall.m.pid = path.t
-						path = paths[wall.m.pid + 1]
+						path = paths[wall.m.pid]
 						wall.m.ppos = 0
 
-						if path.enabled then
-							tankbobs.w_setPosition(wall.m.body, wall.m.startpos)
-						else
-							tankbobs.w_setPosition(wall.m.body, wall.m.startpos + path.p - prevPath.p)
-						end
+						tankbobs.w_setPosition(wall.m.body, wall.m.startpos)
 					end
 				end
 			end
@@ -2424,7 +2421,7 @@ function c_world_contactListener(shape1, shape2, body1, body2, position, separat
 	end
 end
 
-local function c_world_private_resetWorldTimers(t)
+function c_world_resetWorldTimers(t)
 	t = t or t_t_getTicks()
 
 	worldTime = t_t_getTicks()
@@ -2483,7 +2480,7 @@ local function c_world_private_resetWorldTimers(t)
 	nextPowerupSpawnPoint = nil
 end
 
-local function c_world_private_offsetWorldTimers(d)
+function c_world_offsetWorldTimers(d)
 	worldTime = t_t_getTicks()
 
 	for _, v in pairs(c_world_tanks) do
@@ -2543,7 +2540,7 @@ end
 
 function c_world_timeWrapped()
 	-- this is called whenever the time wraps
-	return c_world_private_resetWorldTimers()
+	return c_world_resetWorldTimers()
 end
 
 local paused = false
@@ -2583,7 +2580,7 @@ function c_world_step(d)
 
 	if worldInitialized then
 		if paused then
-			c_world_private_offsetWorldTimers(d * 1000)
+			c_world_offsetWorldTimers(d * 1000)
 		else
 			while worldTime < t do
 				if c_world_isBehind() then

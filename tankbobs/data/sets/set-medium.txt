@@ -1,5 +1,5 @@
 medium
 Medium Levels
--9.8
+-9.7
 Medium-sized levels
 medium_1.tcm

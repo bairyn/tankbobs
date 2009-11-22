@@ -119,6 +119,10 @@ elseif c_tcm_current_map.name == "race-track" then
 	-- when the world exits, call resetAI
 	c_mods_exitWorldFunction(resetAI)
 
+	-- prevent AI in preview; all functions that me modify using c_mods_* will be restored on exit so that other levels or even the same level can function properly
+	c_mods_replaceFunction("c_ai_initTank", common_nil)
+
+
 	-- zoom out
 	c_world_setZoom(0.66)
 
@@ -273,4 +277,244 @@ elseif c_tcm_current_map.name == "race-track" then
 	end
 
 	c_mods_prependFunction("c_world_step", frame)
+elseif c_tcm_current_map.name == "tutorial" then
+	-- disable AI
+	local backupComputers = c_config_get("game.computers")
+	c_config_set("game.computers", 0)
+
+	local function resetAI()
+		c_config_set("game.computers", backupComputers)
+	end
+
+	c_mods_exitWorldFunction(resetAI)
+
+	-- prevent AI in preview
+	c_mods_replaceFunction("c_ai_initTank", common_nil)
+
+	-- one player and one player only
+	local backupPlayers = c_config_get("game.players")
+	c_config_set("game.players", 1)
+
+	local function resetPlayers()
+		c_config_set("game.players", backupPlayers)
+	end
+
+	c_mods_exitWorldFunction(resetPlayers)
+
+	-- disable instagib
+	c_world_setInstagib(false)
+
+
+	-- when a tank dies, set the respawn position to its waypoint, which is set by wall triggers
+	local function die(tank, t)
+		tank.m.respawnPos = tankbobs.m_vec2(c_tcm_current_map.wayPoints[tank.m.wayPoint and tank.m.wayPoint or 1].p)  -- never rely on the first waypoint
+		tank.m.respawnRot = tank.r
+	end
+
+	-- when a tank respawns, spawn at its respawn position
+	local function setPosition(tank)
+		if tank.exists and tank.m.respawnPos then
+			tank.p(tank.m.respawnPos)
+			tankbobs.w_setPosition(tank.body, tank.p)
+			tank.r = tank.m.respawnRot
+		end
+	end
+
+	-- helper label
+	local updateHelperText
+	local setFutureHelperText
+	do
+		local future = {}
+
+		local ALPHADROP = 1 / 3  -- loses a third of its alpha value every second
+		local ALPHAFULLTIME = 2  -- will be completely opaque for 2 seconds before fading
+		local ALPHAMIN = 2 / 3   -- alpha is always at least this
+		local ALPHASCALE = 1 / 2  -- scale of label
+		local function update(widget, d)
+			local t = tankbobs.t_getTicks()
+
+			if not widget.m.alphaTime then
+				widget.m.alphaTime = ALPHADROP * (ALPHAFULLTIME + 1)
+			else
+				widget.m.alphaTime = widget.m.alphaTime - d * ALPHADROP
+			end
+			if widget.m.alphaTime < ALPHAMIN then
+				widget.m.alphaTime = ALPHAMIN
+			end
+
+			widget.color.a = math.min(1, widget.m.alphaTime)
+
+			for k, v in pairs(future) do
+				if t >= v[1] then
+					if updateHelperText then
+						if v[2] then
+							updateHelperText(v[2])
+						end
+
+						if v[3] then
+							v[3](v[2])
+						end
+
+						future[k] = nil
+					end
+				end
+			end
+		end
+
+		local helper = gui_addLabel(tankbobs.m_vec2(15, 25), "", update, ALPHASCALE)
+		function updateHelperText(text)
+			if helper then
+				helper.m.alphaTime = nil
+				helper:setText(text)
+			end
+		end
+
+		function setFutureHelperText(relativeTime, text, callback)
+			table.insert(future, {tankbobs.t_getTicks() + c_world_timeMultiplier(relativeTime), text, callback})
+		end
+
+		local function offsetHelperText(d)
+			for _, v in pairs(future) do
+				v[1] = v[1] + d
+			end
+		end
+		local function resetHelperText(d)
+			t = t or t_t_getTicks()
+
+			for _, v in pairs(future) do
+				v[1] = t
+			end
+		end
+		c_mods_prependFunction("c_world_offsetWorldTimers", offsetHelperText)
+		c_mods_prependFunction("c_world_resetWorldTimers", resetHelperText)
+	end
+
+	-- everything else
+	c_const_set("powerup_lifeTime", 0, -1)
+
+	local f
+	local function setf(f_)
+		f = f_
+
+		return f
+	end
+
+	local function frame(d)
+		local tank = c_world_getTanks()[1]
+
+		assert(tank)
+
+		for _, v in pairs(c_tcm_current_map.walls) do
+			local wayPoint = v.misc:match("^[\n\t ]*[Ww][Aa][Yy][Pp][Oo][Ii][Nn][Tt][\n\t ]*([%d]+)[\n\t ]*$")
+			if wayPoint and tonumber(wayPoint) then
+				wayPoint = tonumber(wayPoint)
+
+				if c_world_intersection(nil, c_world_tankHull(tank), v.p) then
+					tank.m.wayPoint = wayPoint
+				end
+			else
+			end
+		end
+
+		if f and tank and tank.exists then
+			f(d, tank)
+		end
+	end
+
+	c_mods_prependFunction("c_world_step", frame)
+
+	local function e(id, disable)
+		id = tonumber(id)
+
+		-- enable all path limited by an id, which is specified by the path's misc field.
+		for _, v in pairs(c_tcm_current_map.paths) do
+			if tonumber(v.misc) == id then
+				v.m.enabled = not disable
+			end
+		end
+	end
+
+	local function key(name)
+		return gui_char(c_config_keyLayoutGet(c_config_get("client.key.player1." .. name)))
+	end
+
+	-- initially disable tank movement
+	f = function (d, tank)
+		-- prevent acceleration or deceleration
+		if not tank.m.respawnPos then
+			tank.m.respawnPos = tankbobs.m_vec2()
+		end
+		tank.m.respawnPos(c_tcm_current_map.playerSpawnPoints[1].p)
+		tank.p(tank.m.respawnPos)
+		tankbobs.w_setPosition(tank.body, tank.p)
+		tankbobs.w_setLinearVelocity(tank.body, tankbobs.m_vec2(0, 0))
+
+		-- disable rotation
+		tank.r = c_const_get("tank_defaultRotation")
+	end
+
+	local function updateForwardStep()
+		f = function()
+		end
+	end
+
+	local function updateShootWallStep()
+		f = function(d, tank)
+			-- prevent acceleration or deceleration
+			if not tank.m.respawnPos then
+				tank.m.respawnPos = tankbobs.m_vec2()
+			end
+			tank.m.respawnPos(c_tcm_current_map.playerSpawnPoints[1].p)
+			tank.p(tank.m.respawnPos)
+			tankbobs.w_setPosition(tank.body, tank.p)
+			tankbobs.w_setLinearVelocity(tank.body, tankbobs.m_vec2(0, 0))
+
+			-- listen for a collision of the wall and the giant switch.  Once a collision happens, enable the switch path (push the switch), and continue to the next step
+			local oldc_world_contactListener = c_world_contactListener
+
+			local function switchListener(shape1, shape2, body1, body2, position, separation, normal)
+				local wall1, wall2 = c_world_isWall(body1), c_world_isWall(body2)
+
+				if wall1 and wall2 then
+					if wall2.misc == "shootWall" then
+						wall1, wall2 = wall2, wall1
+					end
+
+					if wall1.misc == "shootWall" and wall2.misc == "shootTriggerWall" then
+						c_world_contactListener = oldc_world_contactListener
+						tankbobs.w_setContactListener(c_world_contactListener)
+
+						updateHelperText("Good job!")
+						e(2)
+						setFutureHelperText(3, "Now we're going to try moving.\nYour tank can be difficult to control initially.\nThis is the end as of yet; more to come!", function () c_world_setZoom(1) updateForwardStep() end)
+					end
+				end
+			end
+
+			c_mods_prependFunction("c_world_contactListener", switchListener)
+			tankbobs.w_setContactListener(c_world_contactListener)
+		end
+	end
+
+	local function updateRotateStep()
+		f = function(d, tank)
+			-- prevent acceleration or deceleration
+			if not tank.m.respawnPos then
+				tank.m.respawnPos = tankbobs.m_vec2()
+			end
+			tank.m.respawnPos(c_tcm_current_map.playerSpawnPoints[1].p)
+			tank.p(tank.m.respawnPos)
+			tankbobs.w_setPosition(tank.body, tank.p)
+			tankbobs.w_setLinearVelocity(tank.body, tankbobs.m_vec2(0, 0))
+
+			-- continue to next step of tutorial once tank has rotated > 90 degrees
+			if math.abs(c_const_get("tank_defaultRotation") - tank.r) > (math.pi * 2) / 4 then
+				updateHelperText("Now, you'll want to try firing your default weapon.")
+				setFutureHelperText(3, "Press '" .. key("fire") .. "' to shoot the wall back into the switch.\nRotate the tank to aim.", function () c_world_setZoom(0.33) e(1) updateShootWallStep() end)
+			end
+		end
+	end
+
+	updateHelperText("Welcome to Tankbobs's tutorial!\nThis tutorial is not yet finished.")
+	setFutureHelperText(6, "Press '" .. key("left") .. "' to rotate left, and \n'" .. key("right") .. "' to rotate right.\n\nTry rotating your tank.", updateRotateStep)
 end
