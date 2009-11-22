@@ -1712,17 +1712,14 @@ function c_world_wall_step(d, wall)
 						wall.m.ppos = math.min(1, wall.m.ppos + (d / prevPath.time))
 					end
 
-					if wall.m.ppos < 1 then
-						tankbobs.w_setPosition(wall.m.body, common_lerp(wall.m.startpos, wall.m.startpos + path.p - prevPath.p, wall.m.ppos))
-					else
+					tankbobs.w_setPosition(wall.m.body, common_lerp(wall.m.startpos, wall.m.startpos + path.p - prevPath.p, wall.m.ppos))
+					if wall.m.ppos >= 1 then
 						wall.m.ppid = wall.m.pid
 						prevPath = paths[wall.m.ppid]
 						wall.m.startpos(c_world_wallShape(wall.m.pos)[1])
-						wall.m.pid = path.t
+						wall.m.pid = path.t + 1
 						path = paths[wall.m.pid]
 						wall.m.ppos = 0
-
-						tankbobs.w_setPosition(wall.m.body, wall.m.startpos)
 					end
 				end
 			end
