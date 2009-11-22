@@ -278,6 +278,13 @@ elseif c_tcm_current_map.name == "race-track" then
 
 	c_mods_prependFunction("c_world_step", frame)
 elseif c_tcm_current_map.name == "tutorial" then
+	-- don't do anything if running on server
+	if server or not client then
+		error "Cannot run tutorial level on server"
+
+		return
+	end
+
 	-- disable AI
 	local backupComputers = c_config_get("game.computers")
 	c_config_set("game.computers", 0)
@@ -392,6 +399,7 @@ elseif c_tcm_current_map.name == "tutorial" then
 	end
 
 	-- everything else
+	c_const_set("tutStep_sound", c_const_get("flagCapture_sound"), -1)
 	c_const_set("powerup_lifeTime", 0, -1)
 
 	local f
@@ -458,10 +466,26 @@ elseif c_tcm_current_map.name == "tutorial" then
 		tank.r = c_const_get("tank_defaultRotation")
 	end
 
+	-- TODO: teleporters
+
+	-- TODO: make sure player understands how to reload shotgun completely
+
 	-- TODO: railgun boost when showing weapons
 
 	local function updateFirstWeaponStep()
 		f = function (d, tank)
+		end
+	end
+
+	local function switchArrows()
+		-- change texture coordinates
+		for _, v in pairs(c_tcm_current_map.walls) do
+			if v.misc == "arrow" then
+				for i = 1, v.p[4] and 4 or 3 do
+					v.t[i].x = -v.t[i].x
+					v.t[i].y = -v.t[i].y
+				end
+			end
 		end
 	end
 
@@ -476,10 +500,10 @@ elseif c_tcm_current_map.name == "tutorial" then
 
 						if v.pid >= 1 and path and tonumber(path.misc) == 5 then
 							if not v.m.set5 then
-								if v.m.ppid == v.pid + 1 then
+								if v.m.ppid ~= v.pid + 1 then
 									v.m.set5 = true
 								end
-							elseif v.m.ppid ~= v.pid + 1 then
+							elseif v.m.ppid == v.pid + 1 then
 								v.m.set5 = false
 
 								path.m.enabled = false
@@ -490,8 +514,9 @@ elseif c_tcm_current_map.name == "tutorial" then
 					if v.misc == "downSwitch" then
 						if c_world_intersection(0, c_world_tankHull(tank), v.p) then
 							up = false
+							switchArrows()
 							e(4)
-							updateHelperText("The switch was activited!  Follow the arrows downward!")
+							updateHelperText("The switch was activited!\nFollow the arrows downward!")
 							setFutureHelperText(3, "Try practicing using special by\npressing the switch above and\ndriving down before the wall closes.\nIf you fail, push the switch again.\nIt is important to learn when to use special\nin a real game and to avoid crashing into walls.")
 						end
 					end
@@ -502,16 +527,17 @@ elseif c_tcm_current_map.name == "tutorial" then
 
 					if v.pid >= 1 and path and tonumber(path.misc) == 4 then
 						if not v.m.set4 then
-							if v.m.ppid == v.pid + 1 then
+							if v.m.ppid ~= v.pid + 1 then
 								v.m.set4 = true
 							end
-						elseif v.m.ppid ~= v.pid + 1 then
+						elseif v.m.ppid == v.pid + 1 then
 							v.m.set4 = false
 
 							up = true
+							switchArrows()
 							path.m.enabled = false
 							e(5)
-							updateHelperText("The wall has closed.  Follow the arrows up and try again!")
+							updateHelperText("The wall has closed.  Follow the arrows up and try again.")
 							setFutureHelperText(3, "Try practicing using special by\npressing the switch above and\ndriving down before the wall closes.\nIf you fail, push the switch again.\nIt is important to learn when to use special\nin a real game and to avoid crashing into walls.")
 						end
 					end
@@ -520,8 +546,13 @@ elseif c_tcm_current_map.name == "tutorial" then
 				for _, v in pairs(c_tcm_current_map.walls) do
 					if v.misc == "down" then
 						if c_world_intersection(0, c_world_tankHull(tank), v.p) then
+							if client and not server and step ~= 4 then
+								step = 4
+								tankbobs.a_playSound(c_const_get("tutStep_sound"))
+							end
+
 							e(6)
-							updateHelperText("Well done!\nThose movement skills will come in handy")
+							updateHelperText("Well done!\nThose movement skills will come in handy.")
 							setFutureHelperText(3, "This is it for now; more is still to come!", function() updateFirstWeaponStep() end)
 						end
 					end
@@ -535,6 +566,11 @@ elseif c_tcm_current_map.name == "tutorial" then
 			for _, v in pairs(c_tcm_current_map.walls) do
 				if v.misc == "goDown" then
 					if c_world_intersection(0, c_world_tankHull(tank), v.p) then
+						if client and not server and step ~= 3 then
+							step = 3
+							tankbobs.a_playSound(c_const_get("tutStep_sound"))
+						end
+
 						e(3)
 						updateHelperText("Nice one!\nTry practicing using special by\npressing the switch above and\ndriving down before the wall closes.\nIf you fail, push the switch again.\nIt is important to learn when to use special\nin a real game and to avoid crashing into walls.")
 						updateDownStep()
@@ -572,6 +608,11 @@ elseif c_tcm_current_map.name == "tutorial" then
 						c_world_contactListener = oldc_world_contactListener
 						tankbobs.w_setContactListener(c_world_contactListener)
 
+						if client and not server and step ~= 2 then
+							step = 2
+							tankbobs.a_playSound(c_const_get("tutStep_sound"))
+						end
+
 						updateHelperText("Good job!")
 						e(2)
 						setFutureHelperText(3, "Now we're going to try moving.\nYour tank may be difficult to control initially.", function () c_world_setZoom(1) updateForwardStep() end)
@@ -597,6 +638,11 @@ elseif c_tcm_current_map.name == "tutorial" then
 
 			-- continue to next step of tutorial once tank has rotated > 90 degrees
 			if math.abs(c_const_get("tank_defaultRotation") - tank.r) > (math.pi * 2) / 4 then
+				if client and not server and step ~= 1 then
+					step = 1
+					tankbobs.a_playSound(c_const_get("tutStep_sound"))
+				end
+
 				updateHelperText("Now, you'll want to try firing your default weapon.")
 				setFutureHelperText(3, "Press '" .. key("fire") .. "' to shoot the wall back to the switch.\nRotate the tank to aim.", function () c_world_setZoom(0.33) e(1) updateShootWallStep() end)
 			end
