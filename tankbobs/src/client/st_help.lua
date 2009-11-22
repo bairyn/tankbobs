@@ -33,7 +33,7 @@ local st_help_step
 function st_help_init()
 	gui_addAction(tankbobs.m_vec2(25, 75), "Back", nil, c_state_advance)
 
-	gui_addAction(tankbobs.m_vec2(50, 65), "Manual", nil, st_help_manual)
+	gui_addLabel(tankbobs.m_vec2(50, 50), "Play \"Tutorial\" for help")
 end
 
 function st_help_done()
