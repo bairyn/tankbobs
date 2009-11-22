@@ -310,6 +310,7 @@ elseif c_tcm_current_map.name == "tutorial" then
 		tank.m.respawnPos = tankbobs.m_vec2(c_tcm_current_map.wayPoints[tank.m.wayPoint and tank.m.wayPoint or 1].p)  -- never rely on the first waypoint
 		tank.m.respawnRot = tank.r
 	end
+	c_mods_prependFunction("c_world_tank_die", die)
 
 	-- when a tank respawns, spawn at its respawn position
 	local function setPosition(tank)
@@ -319,6 +320,7 @@ elseif c_tcm_current_map.name == "tutorial" then
 			tank.r = tank.m.respawnRot
 		end
 	end
+	c_mods_appendFunction("c_world_spawnTank", setPosition)
 
 	-- helper label
 	local updateHelperText
@@ -409,10 +411,13 @@ elseif c_tcm_current_map.name == "tutorial" then
 			if wayPoint and tonumber(wayPoint) then
 				wayPoint = tonumber(wayPoint)
 
-				if c_world_intersection(nil, c_world_tankHull(tank), v.p) then
-					tank.m.wayPoint = wayPoint
+				if tank.m.wayPoint ~= wayPoint and c_world_intersection(nil, c_world_tankHull(tank), v.p) then
+					for ks, vs in pairs(c_tcm_current_map.wayPoints) do
+						if tonumber(vs.misc) == wayPoint then
+							tank.m.wayPoint = ks
+						end
+					end
 				end
-			else
 			end
 		end
 
@@ -453,9 +458,92 @@ elseif c_tcm_current_map.name == "tutorial" then
 		tank.r = c_const_get("tank_defaultRotation")
 	end
 
-	local function updateForwardStep()
-		f = function()
+	-- TODO: railgun boost when showing weapons
+
+	local function updateFirstWeaponStep()
+		f = function (d, tank)
 		end
+	end
+
+	local function updateDownStep()
+		local up = true
+
+		f = function(d, tank)
+			if up then
+				for _, v in pairs(c_tcm_current_map.walls) do
+					for _, v in pairs(c_tcm_current_map.walls) do
+						local path = c_tcm_current_map.paths[v.pid + 1]
+
+						if v.pid >= 1 and path and tonumber(path.misc) == 5 then
+							if not v.m.set5 then
+								if v.m.ppid == v.pid + 1 then
+									v.m.set5 = true
+								end
+							elseif v.m.ppid ~= v.pid + 1 then
+								v.m.set5 = false
+
+								path.m.enabled = false
+							end
+						end
+					end
+
+					if v.misc == "downSwitch" then
+						if c_world_intersection(0, c_world_tankHull(tank), v.p) then
+							up = false
+							e(4)
+							updateHelperText("The switch was activited!  Follow the arrows downward!")
+							setFutureHelperText(3, "Try practicing using special by\npressing the switch above and\ndriving down before the wall closes.\nIf you fail, push the switch again.\nIt is important to learn when to use special\nin a real game and to avoid crashing into walls.")
+						end
+					end
+				end
+			else
+				for _, v in pairs(c_tcm_current_map.walls) do
+					local path = c_tcm_current_map.paths[v.pid + 1]
+
+					if v.pid >= 1 and path and tonumber(path.misc) == 4 then
+						if not v.m.set4 then
+							if v.m.ppid == v.pid + 1 then
+								v.m.set4 = true
+							end
+						elseif v.m.ppid ~= v.pid + 1 then
+							v.m.set4 = false
+
+							up = true
+							path.m.enabled = false
+							e(5)
+							updateHelperText("The wall has closed.  Follow the arrows up and try again!")
+							setFutureHelperText(3, "Try practicing using special by\npressing the switch above and\ndriving down before the wall closes.\nIf you fail, push the switch again.\nIt is important to learn when to use special\nin a real game and to avoid crashing into walls.")
+						end
+					end
+				end
+
+				for _, v in pairs(c_tcm_current_map.walls) do
+					if v.misc == "down" then
+						if c_world_intersection(0, c_world_tankHull(tank), v.p) then
+							e(6)
+							updateHelperText("Well done!\nThose movement skills will come in handy")
+							setFutureHelperText(3, "This is it for now; more is still to come!", function() updateFirstWeaponStep() end)
+						end
+					end
+				end
+			end
+		end
+	end
+
+	local function updateForwardStep()
+		f = function(d, tank)
+			for _, v in pairs(c_tcm_current_map.walls) do
+				if v.misc == "goDown" then
+					if c_world_intersection(0, c_world_tankHull(tank), v.p) then
+						e(3)
+						updateHelperText("Nice one!\nTry practicing using special by\npressing the switch above and\ndriving down before the wall closes.\nIf you fail, push the switch again.\nIt is important to learn when to use special\nin a real game and to avoid crashing into walls.")
+						updateDownStep()
+					end
+				end
+			end
+		end
+
+		setFutureHelperText(3, "Follow the arrows.\nNotice how the ground feels slick.\nPressing special, '" .. key("special") .. "', will remove the slick effect.\nYou need at least some velocity\nwhile using special, or you can't turn.\nAlso notice that you can't accelerate while\nusing special.")
 	end
 
 	local function updateShootWallStep()
@@ -486,7 +574,7 @@ elseif c_tcm_current_map.name == "tutorial" then
 
 						updateHelperText("Good job!")
 						e(2)
-						setFutureHelperText(3, "Now we're going to try moving.\nYour tank can be difficult to control initially.\nThis is the end as of yet; more to come!", function () c_world_setZoom(1) updateForwardStep() end)
+						setFutureHelperText(3, "Now we're going to try moving.\nYour tank may be difficult to control initially.", function () c_world_setZoom(1) updateForwardStep() end)
 					end
 				end
 			end
@@ -510,7 +598,7 @@ elseif c_tcm_current_map.name == "tutorial" then
 			-- continue to next step of tutorial once tank has rotated > 90 degrees
 			if math.abs(c_const_get("tank_defaultRotation") - tank.r) > (math.pi * 2) / 4 then
 				updateHelperText("Now, you'll want to try firing your default weapon.")
-				setFutureHelperText(3, "Press '" .. key("fire") .. "' to shoot the wall back into the switch.\nRotate the tank to aim.", function () c_world_setZoom(0.33) e(1) updateShootWallStep() end)
+				setFutureHelperText(3, "Press '" .. key("fire") .. "' to shoot the wall back to the switch.\nRotate the tank to aim.", function () c_world_setZoom(0.33) e(1) updateShootWallStep() end)
 			end
 		end
 	end
