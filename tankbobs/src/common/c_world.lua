@@ -1700,7 +1700,7 @@ function c_world_wall_step(d, wall)
 			else
 				local path = paths[wall.m.pid + 1]
 
-				if path and path.enabled then
+				if path and (path.enabled or path.m.enabled) then
 					local prevPath = paths[wall.m.ppid]
 
 					if prevPath then
