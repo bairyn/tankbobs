@@ -3,7 +3,7 @@
 		<ambience>true</ambience>
 		<audioChunkSize>3072</audioChunkSize>
 		<cameraExtraFOV>25</cameraExtraFOV>
-		<cameraRotate>false</cameraRotate>
+		<cameraRotate>true</cameraRotate>
 		<cameraSpeed>5</cameraSpeed>
 		<cameraZoom>1</cameraZoom>
 		<fps>128</fps>
