@@ -34,6 +34,7 @@ function c_files_init()
 	local d = tankbobs.fs_getRawDirectorySeparator()
 
 	c_const_set("data_absoluteDir", tankbobs.fs_getBaseDirectory() .. d .. "data")
+	c_const_set("base_absoluteDir", tankbobs.fs_getBaseDirectory())
 	c_const_set("user_absoluteDir", tankbobs.fs_getUserDirectory() .. d .. ".tankbobs", 1)
 
 	c_const_set("module_absoluteDir", c_const_get("data_absoluteDir") .. c_const_get("module_dir"), 1)
@@ -61,6 +62,7 @@ function c_files_init()
 	end
 
 	local us = common_listFiles(c_const_get("user_absoluteDir"))
+	local bs = common_listFiles(c_const_get("base_absoluteDir"))
 	local ds = common_listFiles(c_const_get("data_absoluteDir"))
 
 
@@ -79,6 +81,9 @@ function c_files_init()
 	tankbobs.fs_mount(c_const_get("data_absoluteDir"), "", true)
 	for _, v in pairs(ds) do
 		tankbobs.fs_mount(c_const_get("data_absoluteDir") .. d .. v, "", true)
+	end
+	for _, v in pairs(bs) do
+		tankbobs.fs_mount(c_const_get("base_absoluteDir") .. d .. v, "", true)
 	end
 
 	loadfile = tankbobs.fs_loadfile
