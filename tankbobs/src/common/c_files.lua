@@ -33,7 +33,7 @@ function c_files_init()
 	-- set some constants and list files now that fs is initialized
 	local d = tankbobs.fs_getRawDirectorySeparator()
 
-	c_const_set("data_absoluteDir", tankbobs.fs_getBaseDirectory())
+	c_const_set("data_absoluteDir", tankbobs.fs_getBaseDirectory() .. d .. "data")
 	c_const_set("user_absoluteDir", tankbobs.fs_getUserDirectory() .. d .. ".tankbobs", 1)
 
 	c_const_set("module_absoluteDir", c_const_get("data_absoluteDir") .. c_const_get("module_dir"), 1)
