@@ -29,7 +29,6 @@ local c_const_get             = c_const_get
 local c_weapon_getProjectiles = c_weapon_getProjectiles
 local common_FTM              = common_FTM
 local common_lerp             = common_lerp
-local c_weapon_fire           = c_weapon_fire
 local tankbobs                = tankbobs
 local t_w_setAngle            = nil
 local t_w_getAngle            = nil
@@ -84,7 +83,6 @@ function c_world_init()
 	c_weapon_getProjectiles = _G.c_weapon_getProjectiles
 	common_FTM              = _G.common_FTM
 	common_lerp             = _G.common_lerp
-	c_weapon_fire           = _G.c_weapon_fire
 	tankbobs                = _G.tankbobs
 	t_w_setAngle            = _G.tankbobs.w_setAngle
 	t_w_getAngle            = _G.tankbobs.w_getAngle
