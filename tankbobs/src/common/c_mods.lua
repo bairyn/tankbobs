@@ -147,6 +147,16 @@ function c_mods_replaceFunction(name, f)
 	_G[name] = f
 end
 
+-- restore a single function
+function c_mods_restoreFunction(name)
+	for _, v in pairs(functions) do
+		if v[1] == name then
+			_G[v[1]] = v[2]
+		end
+	end
+end
+
+-- restore all functions
 function c_mods_restoreFunctions()
 	for _, v in pairs(functions) do
 		_G[v[1]] = v[2]
