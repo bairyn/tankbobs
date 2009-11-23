@@ -334,6 +334,8 @@ elseif c_tcm_current_map.name == "tutorial" then
 	end
 	c_mods_appendFunction("c_world_spawnTank", setPosition)
 
+	c_const_set("helperAudio_dir", c_const_get("gameAudio_dir") .. "tutorial_", -1)
+
 	-- helper label
 	local updateHelperText
 	local setFutureHelperText
@@ -358,6 +360,8 @@ elseif c_tcm_current_map.name == "tutorial" then
 
 			widget.color.a = math.min(1, widget.m.alphaTime)
 
+			local audioFile = nil
+
 			for k, v in pairs(future) do
 				if t >= v[1] then
 					if updateHelperText then
@@ -365,8 +369,22 @@ elseif c_tcm_current_map.name == "tutorial" then
 							updateHelperText(v[2])
 						end
 
-						if v[3] then
-							v[3](v[2])
+						if client and not server and v[3] then
+							local filename = c_const_get("helperAudio_dir") .. v[3][math.random(1, #v[3])]
+							if audioFile ~= filename and tankbobs.fs_fileExists(filename) then
+								if audioFile then
+									tankbobs.a_setVolumeChunk(audioFile, 0)
+									audioFile = nil
+								end
+
+								audioFile = filename
+								tankbobs.a_playSound(audioFile)
+								tankbobs.a_setVolumeChunk(audioFile, 1)
+							end
+						end
+
+						if v[4] then
+							v[4](v[2])
 						end
 
 						future[k] = nil
@@ -376,15 +394,31 @@ elseif c_tcm_current_map.name == "tutorial" then
 		end
 
 		local helper = gui_addLabel(tankbobs.m_vec2(15, 25), "", update, ALPHASCALE)
-		function updateHelperText(text)
+		function updateHelperText(text, audio)
 			if helper then
-				helper.m.alphaTime = nil
-				helper:setText(text)
+				if text then
+					helper.m.alphaTime = nil
+					helper:setText(text)
+				end
+
+				if client and not server and audio then
+					local filename = c_const_get("helperAudio_dir") .. audio[math.random(1, #audio)]
+					if audioFile ~= filename and tankbobs.fs_fileExists(filename) then
+						if audioFile then
+							tankbobs.a_freeSound(audioFile)
+							audioFile = nil
+						end
+
+						audioFile = filename
+						tankbobs.a_playSound(audioFile)
+						tankbobs.a_setVolumeChunk(audioFile, 1)
+					end
+				end
 			end
 		end
 
-		function setFutureHelperText(relativeTime, text, callback)
-			table.insert(future, {tankbobs.t_getTicks() + c_world_timeMultiplier(relativeTime), text, callback})
+		function setFutureHelperText(relativeTime, text, audio, callback)
+			table.insert(future, {tankbobs.t_getTicks() + c_world_timeMultiplier(relativeTime), text, audio, callback})
 		end
 
 		local function offsetHelperText(d)
@@ -498,7 +532,7 @@ elseif c_tcm_current_map.name == "tutorial" then
 		end
 
 		tank.shield = tank.shield + c_const_get("tank_boostShield")
-		updateHelperText("You have been given a shield.  You would\nnormally earn them by picking up a special\ntype of a green powerup.  A shield protects\nyou from three quarters of damage,\nand protects you completely from damage\nfrom colliding against walls.\nFollow the arrows to finish this tutorial.")
+		updateHelperText("You have been given a shield.  You would\nnormally earn them by picking up a special\ntype of a green powerup.  A shield protects\nyou from three quarters of damage,\nand protects you completely from damage\nfrom colliding against walls.\nFollow the arrows to finish this tutorial.", nil)
 		e(9)
 	end
 
@@ -520,7 +554,7 @@ elseif c_tcm_current_map.name == "tutorial" then
 
 		e(8)
 
-		updateHelperText("You will now be introduced to teleporters.\nGo left and into the teleporter.")
+		updateHelperText("You will now be introduced to teleporters.\nGo left and into the teleporter.", nil)
 	end
 
 	local function updateFirstWeaponStep()
@@ -572,8 +606,8 @@ elseif c_tcm_current_map.name == "tutorial" then
 				if state == STATENOTHING then
 					-- disable both firing and shooting
 					noFireOrReload()
-					updateHelperText("The shotgun is much more powerful than the\nweak machinegun.  Observe that there are\nnow two bars below your health bar.  The bar\nimmediately below your health bar (the one with a border) shows\nyou how much ammo of your current clip you\nhave remaining.  The bars you see below represent\nthe number of clips or extra you have.")
-					setFutureHelperText(12, "Go ahead and try firing your shotgun by pressing\nand holding '" .. key("fire") .. "'.\nWhen you finish firing your loaded ammo,\npress and hold your reload key, '" .. key("reload") .. "'\nto reload completely until it's full.", function () state = STATECOMPLETERELOADFIRE noReload() end)
+					updateHelperText("The shotgun is much more powerful than the\nweak machinegun.  Observe that there are\nnow two bars below your health bar.  The bar\nimmediately below your health bar (the one with a border) shows\nyou how much ammo of your current clip you\nhave remaining.  The bars you see below represent\nthe number of clips or extra you have.", nil)
+					setFutureHelperText(12, "Go ahead and try firing your shotgun by pressing\nand holding '" .. key("fire") .. "'.\nWhen you finish firing your loaded ammo,\npress and hold your reload key, '" .. key("reload") .. "'\nto reload completely until it's full.", nil, function () state = STATECOMPLETERELOADFIRE noReload() end)
 
 					state = STATEBEGIN
 				elseif state == STATEBEGIN then
@@ -581,7 +615,7 @@ elseif c_tcm_current_map.name == "tutorial" then
 					if tank.ammo <= 0 then
 						if not tank.reloading then
 							noFire()
-							updateHelperText("Now reload your shotgun completely.")
+							updateHelperText("Now reload your shotgun completely.", nil)
 						else
 							state = STATECOMPLETERELOAD
 						end
@@ -591,7 +625,7 @@ elseif c_tcm_current_map.name == "tutorial" then
 						if tank.ammo < weapon.capacity then
 							noReload()
 							state = STATECOMPLETERELOADFIRE
-							updateHelperText("You didn't press and hold\nyour reload key, '" .. key("reload") .. "' until the end.\nFire the rest of your ammo, and then press and\nHOLD your reload key until you completely\nreload your weapon this time.")
+							updateHelperText("You didn't press and hold\nyour reload key, '" .. key("reload") .. "' until the end.\nFire the rest of your ammo, and then press and\nHOLD your reload key until you completely\nreload your weapon this time.", nil)
 						else
 							if client and not server and step ~= 6 then
 								step = 6
@@ -601,14 +635,14 @@ elseif c_tcm_current_map.name == "tutorial" then
 							state = STATEPARTIALRELOADFIRE
 
 							noReload()
-							updateHelperText("Now, you'll want to try reloading your\nshotgun partially.  Try pressing and\nholding your reload key and letting go\nbefore you reload completely.")
+							updateHelperText("Now, you'll want to try reloading your\nshotgun partially.  Try pressing and\nholding your reload key and letting go\nbefore you reload completely.", nil)
 						end
 					end
 				elseif state == STATEPARTIALRELOADFIRE then
 					if tank.ammo <= 0 then
 						if not tank.reloading then
 							noFire()
-							updateHelperText("Now try partially reload your shotgun.")
+							updateHelperText("Now try partially reload your shotgun.", nil)
 						else
 							state = STATEPARTIALRELOAD
 						end
@@ -625,12 +659,12 @@ elseif c_tcm_current_map.name == "tutorial" then
 
 							state = STATEPARTIALRELOADFIRE
 
-							updateHelperText("Good job.\nOutside of this tutorial, you can fire\nand reload shotguns at any time.")
-							setFutureHelperText(3, nil, function () restore() updateTeleporterStep() end)
+							updateHelperText("Good job.\nOutside of this tutorial, you can fire\nand reload shotguns at any time.", nil)
+							setFutureHelperText(3, nil, nil, function () restore() updateTeleporterStep() end)
 						else
 							noReload()
 							state = STATEPARTIALRELOADFIRE
-							updateHelperText("You didn't press and hold\nyour reload key, '" .. key("reload") .. "' before the end.\nFire the rest of your ammo, and then hold and\nRELEASE your reload key BEFORE you completely\nreload your weapon this time.")
+							updateHelperText("You didn't press and hold\nyour reload key, '" .. key("reload") .. "' before the end.\nFire the rest of your ammo, and then hold and\nRELEASE your reload key BEFORE you completely\nreload your weapon this time.", nil)
 						end
 					end
 				end
@@ -639,7 +673,7 @@ elseif c_tcm_current_map.name == "tutorial" then
 				state = STATENOTHING
 				p(7)
 
-				updateHelperText("Oops!  You either ran out of ammo or died.\nHere, grab another shotgun and try again.")
+				updateHelperText("Oops!  You either ran out of ammo or died.\nHere, grab another shotgun and try again.", nil)
 			end
 		end
 
@@ -687,8 +721,8 @@ elseif c_tcm_current_map.name == "tutorial" then
 								up = false
 								switchArrows()
 								e(4)
-								updateHelperText("The switch was activited!\nFollow the arrows downward!")
-								setFutureHelperText(3, "Try practicing using special by\npressing the switch above and\ndriving down before the wall closes.\nIf you fail, push the switch again.\nIt is important to learn when to use special\nin a real game and to avoid crashing into walls.")
+								updateHelperText("The switch was activited!\nFollow the arrows downward!", nil)
+								setFutureHelperText(3, "Try practicing using special by\npressing the switch above and\ndriving down before the wall closes.\nIf you fail, push the switch again.\nIt is important to learn when to use special\nin a real game and to avoid crashing into walls.", nil)
 							end
 						end
 					end
@@ -710,8 +744,8 @@ elseif c_tcm_current_map.name == "tutorial" then
 									e(5)
 								end
 								path.m.enabled = false
-								updateHelperText("The wall has closed.\nFollow the arrows up and try again.")
-								setFutureHelperText(3, "Try practicing using special by\npressing the switch above and\ndriving down before the wall closes.\nIf you fail, push the switch again.\nIt is important to learn when to use special\nin a real game and to avoid crashing into walls.")
+								updateHelperText("The wall has closed.\nFollow the arrows up and try again.", nil)
+								setFutureHelperText(3, "Try practicing using special by\npressing the switch above and\ndriving down before the wall closes.\nIf you fail, push the switch again.\nIt is important to learn when to use special\nin a real game and to avoid crashing into walls.", nil)
 							end
 						end
 					end
@@ -726,8 +760,8 @@ elseif c_tcm_current_map.name == "tutorial" then
 
 								up = "done"
 								e(6)
-								updateHelperText("Well done!\nThose movement skills will come in handy.")
-								setFutureHelperText(3, "To use a different weapon,\nyou need to drive over a blue powerup.\nTry picking up that shotgun over there.\nPowerups normally disappear after a\ncertain amount of time, but in this tutorial,\npowerups won't disappear.", function() updateFirstWeaponStep() end)
+								updateHelperText("Well done!\nThose movement skills will come in handy.", nil)
+								setFutureHelperText(3, "To use a different weapon,\nyou need to drive over a blue powerup.\nTry picking up that shotgun over there.\nPowerups normally disappear after a\ncertain amount of time, but in this tutorial,\npowerups won't disappear.", nil, function() updateFirstWeaponStep() end)
 							end
 						end
 					end
@@ -747,14 +781,14 @@ elseif c_tcm_current_map.name == "tutorial" then
 						end
 
 						e(3)
-						updateHelperText("Nice one!\nTry practicing using special by\npressing the switch above and\ndriving down before the wall closes.\nIf you fail, push the switch again.\nIt is important to learn when to use special\nin a real game and to avoid crashing into walls.")
+						updateHelperText("Nice one!\nTry practicing using special by\npressing the switch above and\ndriving down before the wall closes.\nIf you fail, push the switch again.\nIt is important to learn when to use special\nin a real game and to avoid crashing into walls.", nil)
 						updateDownStep()
 					end
 				end
 			end
 		end
 
-		setFutureHelperText(3, "Follow the arrows.\nNotice how the ground feels slick.\nPressing special, '" .. key("special") .. "', will remove the slick effect.\nYou need at least some velocity\nwhile using special, or you can't turn.\nAlso notice that you can't accelerate while\nusing special.")
+		setFutureHelperText(4, "Follow the arrows.\nNotice how the ground feels slick.\nPressing special, '" .. key("special") .. "', will remove the slick effect.\nYou need at least some velocity\nwhile using special, or you can't turn.\nAlso notice that you can't accelerate while\nusing special.", {"7_1.wav"})
 	end
 
 	local function updateShootWallStep()
@@ -786,11 +820,11 @@ elseif c_tcm_current_map.name == "tutorial" then
 						if client and not server and step ~= 2 then
 							step = 2
 							tankbobs.a_playSound(c_const_get("tutStep_sound"))
-						end
 
-						updateHelperText("Good job!")
-						e(2)
-						setFutureHelperText(3, "Now we're going to try moving.\nYour tank may be difficult to control initially.", function () c_world_setZoom(1) updateForwardStep() end)
+							updateHelperText("Good job!", {"3_1.wav", "3_2.wav", "3_3.wav", "3_4.wav"})
+							e(2)
+							setFutureHelperText(3, "Now we're going to try moving.\nYour tank may be difficult to control initially.", {"6_1.wav"}, function () c_world_setZoom(1) updateForwardStep() end)
+						end
 					end
 				end
 			end
@@ -816,14 +850,30 @@ elseif c_tcm_current_map.name == "tutorial" then
 				if client and not server and step ~= 1 then
 					step = 1
 					tankbobs.a_playSound(c_const_get("tutStep_sound"))
-				end
 
-				updateHelperText("Now, you'll want to try firing your default weapon.")
-				setFutureHelperText(3, "Press '" .. key("fire") .. "' to shoot the wall back to the switch.\nRotate the tank to aim.", function () c_world_setZoom(0.33) e(1) updateShootWallStep() end)
+					updateHelperText("Now, you'll want to try firing your default weapon.", {"4_1.wav", "4_2.wav"})
+					setFutureHelperText(3, "Press '" .. key("fire") .. "' to shoot the wall back to the switch.\nRotate your tank to aim.", {"5_1.wav", "5_2.wav"}, function () c_world_setZoom(0.33) e(1) updateShootWallStep() end)
+				end
 			end
 		end
 	end
 
-	updateHelperText("Welcome to Tankbobs's tutorial!")
-	setFutureHelperText(6, "Press '" .. key("left") .. "' to rotate left, and \n'" .. key("right") .. "' to rotate right.\n\nTry rotating your tank.", updateRotateStep)
+	updateHelperText("Welcome to Tankbobs's tutorial!", {"1_1.wav", "1_2.wav", "1_3.wav", "1_4.wav"})
+	setFutureHelperText(6, "Press '" .. key("left") .. "' to rotate left, and \n'" .. key("right") .. "' to rotate right.\n\nTry rotating your tank.", {"2_1.wav", "2_2.wav", "2_3.wav", "2_4.wav"}, updateRotateStep)
+
+	-- pre-load helper sounds
+	local function i(s)
+		local filename = c_const_get("helperAudio_dir") .. s
+		if tankbobs.fs_fileExists(filename) then
+			tankbobs.a_initSound(filename)
+		end
+	end
+
+	--i("1_1.wav") i("1_2.wav") i("1_3.wav") i("1_4.wav")  -- Don't re-initialise the first sound, which has already started playing
+	i("2_1.wav") i("2_2.wav") i("2_3.wav") i("2_4.wav")
+	i("3_1.wav") i("3_2.wav") i("3_3.wav") i("3_4.wav")
+	i("4_1.wav") i("4_2.wav")
+	i("5_1.wav") i("5_2.wav")
+	i("6_1.wav")
+	i("7_1.wav")
 end

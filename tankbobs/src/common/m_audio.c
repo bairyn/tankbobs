@@ -40,7 +40,7 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 #define CHANNELS 2
 #define MIXCHANNELS 16
 #define CHUNKSIZE 3 * 1024
-#define CACHEDSOUNDS 64
+#define CACHEDSOUNDS 256
 #define FADE_MS 1000
 #define AUDIO_PHYSFS
 
