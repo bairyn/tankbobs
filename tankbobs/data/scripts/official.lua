@@ -824,6 +824,6 @@ elseif c_tcm_current_map.name == "tutorial" then
 		end
 	end
 
-	updateHelperText("Welcome to Tankbobs's tutorial!\nThis tutorial is not yet finished.")
+	updateHelperText("Welcome to Tankbobs's tutorial!")
 	setFutureHelperText(6, "Press '" .. key("left") .. "' to rotate left, and \n'" .. key("right") .. "' to rotate right.\n\nTry rotating your tank.", updateRotateStep)
 end
