@@ -285,6 +285,11 @@ elseif c_tcm_current_map.name == "tutorial" then
 		return
 	end
 
+	c_world_setGameType(DEATHMATCH)
+	if c_config_get("game.fragLimit") < 1 then
+		c_config_set("game.fragLimit", 1)
+	end
+
 	-- disable AI
 	local backupComputers = c_config_get("game.computers")
 	c_config_set("game.computers", 0)
@@ -419,7 +424,7 @@ elseif c_tcm_current_map.name == "tutorial" then
 			if wayPoint and tonumber(wayPoint) then
 				wayPoint = tonumber(wayPoint)
 
-				if tank.m.wayPoint ~= wayPoint and c_world_intersection(nil, c_world_tankHull(tank), v.p) then
+				if c_world_intersection(nil, c_world_tankHull(tank), v.p) then
 					for ks, vs in pairs(c_tcm_current_map.wayPoints) do
 						if tonumber(vs.misc) == wayPoint then
 							tank.m.wayPoint = ks
@@ -447,6 +452,17 @@ elseif c_tcm_current_map.name == "tutorial" then
 		end
 	end
 
+	local function p(id)
+		id = tonumber(id)
+
+		-- spawn powerups from powerup spawn points by an id
+		for _, v in pairs(c_tcm_current_map.powerupSpawnPoints) do
+			if tonumber(v.misc) == id then
+				v.m.nextPowerupTime = tankbobs.t_getTicks()
+			end
+		end
+	end
+
 	local function key(name)
 		return gui_char(c_config_keyLayoutGet(c_config_get("client.key.player1." .. name)))
 	end
@@ -466,15 +482,169 @@ elseif c_tcm_current_map.name == "tutorial" then
 		tank.r = c_const_get("tank_defaultRotation")
 	end
 
-	-- TODO: teleporters
+	-- in the future, it might be good to explain the gametypes by spawning an unskilled bot and fighting against each of them.  It might also be good to explain the railgun-against-wall boost trick.
 
-	-- TODO: make sure player understands how to reload shotgun completely
+	local function updateWinStep()
+		local tank = c_world_getTanks()[1]
 
-	-- TODO: railgun boost when showing weapons
+		f = function (d, tank)
+			for _, v in pairs(c_tcm_current_map.walls) do
+				if v.misc == "win" then
+					if c_world_intersection(0, c_world_tankHull(tank), v.p) then
+						tank.score = c_config_get("game.fragLimit")
+					end
+				end
+			end
+		end
+
+		tank.shield = tank.shield + c_const_get("tank_boostShield")
+		updateHelperText("You have been given a shield.  You would\nnormally earn them by picking up a special\ntype of a green powerup.  A shield protects\nyou from three quarters of damage,\nand protects you completely from damage\nfrom colliding against walls.\nFollow the arrows to finish this tutorial.")
+		e(9)
+	end
+
+	local function updateTeleporterStep()
+		f = function (d, tank)
+			for _, v in pairs(c_tcm_current_map.walls) do
+				if v.misc == "shield" then
+					if c_world_intersection(0, c_world_tankHull(tank), v.p) then
+						if client and not server and step ~= 8 then
+							step = 8
+							tankbobs.a_playSound(c_const_get("tutStep_sound"))
+						end
+
+						updateWinStep()
+					end
+				end
+			end
+		end
+
+		e(8)
+
+		updateHelperText("You will now be introduced to teleporters.\nGo left and into the teleporter.")
+	end
 
 	local function updateFirstWeaponStep()
-		f = function (d, tank)
+		local function restore()
+			c_mods_restoreFunction("c_weapon_fire")
 		end
+
+		local function noFire()
+			c_mods_restoreFunction("c_weapon_fire")
+			c_mods_prependFunction("c_weapon_fire", function (tank, d) if tank.clips > 0 or tank.ammo > 0 then tank.state = bit.band(tank.state, bit.bnot(FIRING)) end end)
+			c_mods_appendFunction ("c_weapon_fire", function (tank, d) if tank.clips > 0 or tank.ammo > 0 then tank.m.lastFireTime = tank.lastFireTime end end)
+		end
+
+		local function noReload()
+			c_mods_restoreFunction("c_weapon_fire")
+			c_mods_prependFunction("c_weapon_fire", function (tank, d) if tank.clips > 0 or tank.ammo > 0 then tank.state = bit.band(tank.state, bit.bnot(RELOAD)) end end)
+		end
+
+		local function noFireOrReload()
+			c_mods_restoreFunction("c_weapon_fire")
+			c_mods_prependFunction("c_weapon_fire", function (tank, d) if tank.clips > 0 or tank.ammo > 0 then tank.state = bit.band(tank.state, bit.bnot(FIRING))  tank.state = bit.band(tank.state, bit.bnot(RELOAD)) end end)
+			c_mods_appendFunction ("c_weapon_fire", function (tank, d) if tank.clips > 0 or tank.ammo > 0 then tank.m.lastFireTime = tank.lastFireTime end end)
+		end
+
+		local lostShotgun = false
+
+		local STATENOTHING = 0
+		local STATEBEGIN = 1
+		local STATECOMPLETERELOADFIRE = 2
+		local STATECOMPLETERELOAD = 3
+		local STATEPARTIALRELOADFIRE = 4
+		local STATEPARTIALRELOAD = 5
+		local state = STATENOTHING
+
+		f = function (d, tank)
+			if tank.weapon == c_weapon_getByName("shotgun").index then
+				local weapon = c_weapon_getWeapons()[tank.weapon]
+
+				if not lostShotgun then
+					-- first time picking up shotgun
+
+					if client and not server and step ~= 5 then
+						step = 5
+						tankbobs.a_playSound(c_const_get("tutStep_sound"))
+					end
+				end
+				lostShotgun = true
+
+				if state == STATENOTHING then
+					-- disable both firing and shooting
+					noFireOrReload()
+					updateHelperText("The shotgun is much more powerful than the\nweak machinegun.  Observe that there are\nnow two bars below your health bar.  The bar\nimmediately below your health bar (the one with a border) shows\nyou how much ammo of your current clip you\nhave remaining.  The bars you see below represent\nthe number of clips or extra you have.")
+					setFutureHelperText(12, "Go ahead and try firing your shotgun by pressing\nand holding '" .. key("fire") .. "'.\nWhen you finish firing your loaded ammo,\npress and hold your reload key, '" .. key("reload") .. "'\nto reload completely until it's full.", function () state = STATECOMPLETERELOADFIRE noReload() end)
+
+					state = STATEBEGIN
+				elseif state == STATEBEGIN then
+				elseif state == STATECOMPLETERELOADFIRE then
+					if tank.ammo <= 0 then
+						if not tank.reloading then
+							noFire()
+							updateHelperText("Now reload your shotgun completely.")
+						else
+							state = STATECOMPLETERELOAD
+						end
+					end
+				elseif state == STATECOMPLETERELOAD then
+					if not tank.reloading then
+						if tank.ammo < weapon.capacity then
+							noReload()
+							state = STATECOMPLETERELOADFIRE
+							updateHelperText("You didn't press and hold\nyour reload key, '" .. key("reload") .. "' until the end.\nFire the rest of your ammo, and then press and\nHOLD your reload key until you completely\nreload your weapon this time.")
+						else
+							if client and not server and step ~= 6 then
+								step = 6
+								tankbobs.a_playSound(c_const_get("tutStep_sound"))
+							end
+
+							state = STATEPARTIALRELOADFIRE
+
+							noReload()
+							updateHelperText("Now, you'll want to try reloading your\nshotgun partially.  Try pressing and\nholding your reload key and letting go\nbefore you reload completely.")
+						end
+					end
+				elseif state == STATEPARTIALRELOADFIRE then
+					if tank.ammo <= 0 then
+						if not tank.reloading then
+							noFire()
+							updateHelperText("Now try partially reload your shotgun.")
+						else
+							state = STATEPARTIALRELOAD
+						end
+					end
+				elseif state == STATEPARTIALRELOAD then
+					if not tank.reloading then
+						if tank.ammo < weapon.capacity then
+							if client and not server and step ~= 7 then
+								step = 7
+								tankbobs.a_playSound(c_const_get("tutStep_sound"))
+							end
+
+							noFireOrReload()
+
+							state = STATEPARTIALRELOADFIRE
+
+							updateHelperText("Good job.\nOutside of this tutorial, you can fire\nand reload shotguns at any time.")
+							setFutureHelperText(3, nil, function () restore() updateTeleporterStep() end)
+						else
+							noReload()
+							state = STATEPARTIALRELOADFIRE
+							updateHelperText("You didn't press and hold\nyour reload key, '" .. key("reload") .. "' before the end.\nFire the rest of your ammo, and then hold and\nRELEASE your reload key BEFORE you completely\nreload your weapon this time.")
+						end
+					end
+				end
+			elseif lostShotgun and state ~= STATENOTHING then
+				-- re-spawn powerup and helper
+				state = STATENOTHING
+				p(7)
+
+				updateHelperText("Oops!  You either ran out of ammo or died.\nHere, grab another shotgun and try again.")
+			end
+		end
+
+		e(7)
+		p(7)
 	end
 
 	local function switchArrows()
@@ -493,67 +663,72 @@ elseif c_tcm_current_map.name == "tutorial" then
 		local up = true
 
 		f = function(d, tank)
-			if up then
-				for _, v in pairs(c_tcm_current_map.walls) do
+			if up ~= "done" then
+				if up then
+					for _, v in pairs(c_tcm_current_map.walls) do
+						for _, v in pairs(c_tcm_current_map.walls) do
+							local path = c_tcm_current_map.paths[v.pid + 1]
+
+							if v.pid >= 1 and path and tonumber(path.misc) == 5 then
+								if not v.m.set5 then
+									if v.m.ppid ~= v.pid + 1 then
+										v.m.set5 = true
+									end
+								elseif v.m.ppid == v.pid + 1 then
+									v.m.set5 = false
+
+									path.m.enabled = false
+								end
+							end
+						end
+
+						if v.misc == "downSwitch" then
+							if c_world_intersection(0, c_world_tankHull(tank), v.p) then
+								up = false
+								switchArrows()
+								e(4)
+								updateHelperText("The switch was activited!\nFollow the arrows downward!")
+								setFutureHelperText(3, "Try practicing using special by\npressing the switch above and\ndriving down before the wall closes.\nIf you fail, push the switch again.\nIt is important to learn when to use special\nin a real game and to avoid crashing into walls.")
+							end
+						end
+					end
+				else
 					for _, v in pairs(c_tcm_current_map.walls) do
 						local path = c_tcm_current_map.paths[v.pid + 1]
 
-						if v.pid >= 1 and path and tonumber(path.misc) == 5 then
-							if not v.m.set5 then
+						if v.pid >= 1 and path and tonumber(path.misc) == 4 then
+							if not v.m.set4 then
 								if v.m.ppid ~= v.pid + 1 then
-									v.m.set5 = true
+									v.m.set4 = true
 								end
 							elseif v.m.ppid == v.pid + 1 then
-								v.m.set5 = false
+								v.m.set4 = false
 
+								if not up then
+									up = true
+									switchArrows()
+									e(5)
+								end
 								path.m.enabled = false
+								updateHelperText("The wall has closed.\nFollow the arrows up and try again.")
+								setFutureHelperText(3, "Try practicing using special by\npressing the switch above and\ndriving down before the wall closes.\nIf you fail, push the switch again.\nIt is important to learn when to use special\nin a real game and to avoid crashing into walls.")
 							end
 						end
 					end
 
-					if v.misc == "downSwitch" then
-						if c_world_intersection(0, c_world_tankHull(tank), v.p) then
-							up = false
-							switchArrows()
-							e(4)
-							updateHelperText("The switch was activited!\nFollow the arrows downward!")
-							setFutureHelperText(3, "Try practicing using special by\npressing the switch above and\ndriving down before the wall closes.\nIf you fail, push the switch again.\nIt is important to learn when to use special\nin a real game and to avoid crashing into walls.")
-						end
-					end
-				end
-			else
-				for _, v in pairs(c_tcm_current_map.walls) do
-					local path = c_tcm_current_map.paths[v.pid + 1]
+					for _, v in pairs(c_tcm_current_map.walls) do
+						if v.misc == "down" then
+							if c_world_intersection(0, c_world_tankHull(tank), v.p) then
+								if client and not server and step ~= 4 then
+									step = 4
+									tankbobs.a_playSound(c_const_get("tutStep_sound"))
+								end
 
-					if v.pid >= 1 and path and tonumber(path.misc) == 4 then
-						if not v.m.set4 then
-							if v.m.ppid ~= v.pid + 1 then
-								v.m.set4 = true
+								up = "done"
+								e(6)
+								updateHelperText("Well done!\nThose movement skills will come in handy.")
+								setFutureHelperText(3, "To use a different weapon,\nyou need to drive over a blue powerup.\nTry picking up that shotgun over there.\nPowerups normally disappear after a\ncertain amount of time, but in this tutorial,\npowerups won't disappear.", function() updateFirstWeaponStep() end)
 							end
-						elseif v.m.ppid == v.pid + 1 then
-							v.m.set4 = false
-
-							up = true
-							switchArrows()
-							path.m.enabled = false
-							e(5)
-							updateHelperText("The wall has closed.  Follow the arrows up and try again.")
-							setFutureHelperText(3, "Try practicing using special by\npressing the switch above and\ndriving down before the wall closes.\nIf you fail, push the switch again.\nIt is important to learn when to use special\nin a real game and to avoid crashing into walls.")
-						end
-					end
-				end
-
-				for _, v in pairs(c_tcm_current_map.walls) do
-					if v.misc == "down" then
-						if c_world_intersection(0, c_world_tankHull(tank), v.p) then
-							if client and not server and step ~= 4 then
-								step = 4
-								tankbobs.a_playSound(c_const_get("tutStep_sound"))
-							end
-
-							e(6)
-							updateHelperText("Well done!\nThose movement skills will come in handy.")
-							setFutureHelperText(3, "This is it for now; more is still to come!", function() updateFirstWeaponStep() end)
 						end
 					end
 				end
