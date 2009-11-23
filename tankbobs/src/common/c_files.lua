@@ -63,7 +63,6 @@ function c_files_init()
 
 	local us = common_listFiles(c_const_get("user_absoluteDir"))
 	local bs = common_listFiles(c_const_get("base_absoluteDir"))
-	local ds = common_listFiles(c_const_get("data_absoluteDir"))
 
 
 	tankbobs.fs_setWriteDirectory(c_const_get("user_absoluteDir"))
@@ -79,9 +78,6 @@ function c_files_init()
 		tankbobs.fs_mount(c_const_get("user_absoluteDir") .. d .. v, "", true)
 	end
 	tankbobs.fs_mount(c_const_get("data_absoluteDir"), "", true)
-	for _, v in pairs(ds) do
-		tankbobs.fs_mount(c_const_get("data_absoluteDir") .. d .. v, "", true)
-	end
 	for _, v in pairs(bs) do
 		tankbobs.fs_mount(c_const_get("base_absoluteDir") .. d .. v, "", true)
 	end
