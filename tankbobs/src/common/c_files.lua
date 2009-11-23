@@ -77,7 +77,9 @@ function c_files_init()
 	for _, v in pairs(us) do
 		tankbobs.fs_mount(c_const_get("user_absoluteDir") .. d .. v, "", true)
 	end
-	tankbobs.fs_mount(c_const_get("data_absoluteDir"), "", true)
+	if tankbobs.fs_directoryExists(c_const_get("data_absoluteDir")) then
+		tankbobs.fs_mount(c_const_get("data_absoluteDir"), "", true)
+	end
 	for _, v in pairs(bs) do
 		tankbobs.fs_mount(c_const_get("base_absoluteDir") .. d .. v, "", true)
 	end
