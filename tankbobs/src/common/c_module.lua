@@ -54,9 +54,9 @@ function c_module_done()
 end
 
 function c_module_initAbsoluteDirs()
-	--package.cpath = c_const_get("data_absoluteDir") .. "?.lua" .. ";" .. package.path
+	--package.cpath = c_const_get("base_absoluteDir") .. "?.lua" .. ";" .. package.path
 	--package.cpath = c_const_get("jit_absoluteDir") .. "?.lua" .. ";" .. package.path
-	package.path = c_const_get("data_absoluteDir") .. "?.lua" .. ";" .. package.path
+	package.path = c_const_get("base_absoluteDir") .. "?.lua" .. ";" .. package.path
 	package.path = c_const_get("jit_absoluteDir") .. "?.lua" .. ";" .. package.path
 
 	if tankbobs.t_isWindows() then
