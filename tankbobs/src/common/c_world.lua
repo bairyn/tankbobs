@@ -1864,8 +1864,8 @@ function c_world_powerupSpawnPoint_step(d, powerupSpawnPoint)
 				if v then
 					if found then
 						if c_world_getPowerupTypeByName(k) then
-							if c_world_getPowerupTypeByName(k).instagib == false and c_world_getInstagib() == false or
-								c_world_getPowerupTypeByName(k).instagib == true                                    or
+							if (c_world_getPowerupTypeByName(k).instagib == false and c_world_getInstagib() == false) or
+								c_world_getPowerupTypeByName(k).instagib == true                                      or
 								c_world_getPowerupTypeByName(k).instagib == "no-semi" and c_world_getInstagib() ~= "semi" then
 								powerupSpawnPoint.m.lastPowerup = k
 								powerup.powerupType = c_world_getPowerupTypeByName(k).index
