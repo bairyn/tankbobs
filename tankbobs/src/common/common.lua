@@ -181,6 +181,18 @@ function common_listFiles(dir, extension)
 	return files
 end
 
+function common_isDirectory(filename)
+	if tankbobs.t_isWindows() then
+		-- TODO: windows method
+	else
+		require "posix"
+
+		local p = posix.stat(filename)
+
+		return p and p.type == "directory"
+	end
+end
+
 function common_deepClone(object)
 	-- http://lua-users.org/wiki/CopyTable
 
