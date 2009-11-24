@@ -334,7 +334,7 @@ elseif c_tcm_current_map.name == "tutorial" then
 	end
 	c_mods_appendFunction("c_world_spawnTank", setPosition)
 
-	c_const_set("helperAudio_dir", c_const_get("gameAudio_dir") .. "tutorial_", -1)
+	c_const_set("helperAudio_dir", c_const_get("globalAudio_dir") .. "tutorial_", -1)
 
 	-- helper label
 	local updateHelperText
@@ -371,7 +371,7 @@ elseif c_tcm_current_map.name == "tutorial" then
 
 						if client and not server and v[3] then
 							local filename = c_const_get("helperAudio_dir") .. v[3][math.random(1, #v[3])]
-							if audioFile ~= filename and tankbobs.fs_fileExists(filename) then
+							if tankbobs.fs_fileExists(filename) then
 								if audioFile then
 									tankbobs.a_setVolumeChunk(audioFile, 0)
 									audioFile = nil
@@ -403,9 +403,9 @@ elseif c_tcm_current_map.name == "tutorial" then
 
 				if client and not server and audio then
 					local filename = c_const_get("helperAudio_dir") .. audio[math.random(1, #audio)]
-					if audioFile ~= filename and tankbobs.fs_fileExists(filename) then
+					if tankbobs.fs_fileExists(filename) then
 						if audioFile then
-							tankbobs.a_freeSound(audioFile)
+							tankbobs.a_setVolumeChunk(audioFile, 0)
 							audioFile = nil
 						end
 
@@ -532,7 +532,7 @@ elseif c_tcm_current_map.name == "tutorial" then
 		end
 
 		tank.shield = tank.shield + c_const_get("tank_boostShield")
-		updateHelperText("You have been given a shield.  You would\nnormally earn them by picking up a special\ntype of a green powerup.  A shield protects\nyou from three quarters of damage,\nand protects you completely from damage\nfrom colliding against walls.\nFollow the arrows to finish this tutorial.", nil)
+		updateHelperText("You have been given a shield.  You would\nnormally earn them by picking up a special\ntype of a green powerup.  A shield protects\nyou from three quarters of damage,\nand protects you completely from damage\nfrom colliding against walls.\nFollow the arrows to finish this tutorial.", {"21_1.wav"})
 		e(9)
 	end
 
@@ -554,7 +554,7 @@ elseif c_tcm_current_map.name == "tutorial" then
 
 		e(8)
 
-		updateHelperText("You will now be introduced to teleporters.\nGo left and into the teleporter.", nil)
+		updateHelperText("You will now be introduced to teleporters.\nGo left and into the teleporter.", {"20_1.wav"})
 	end
 
 	local function updateFirstWeaponStep()
@@ -606,16 +606,19 @@ elseif c_tcm_current_map.name == "tutorial" then
 				if state == STATENOTHING then
 					-- disable both firing and shooting
 					noFireOrReload()
-					updateHelperText("The shotgun is much more powerful than the\nweak machinegun.  Observe that there are\nnow two bars below your health bar.  The bar\nimmediately below your health bar (the one with a border) shows\nyou how much ammo of your current clip you\nhave remaining.  The bars you see below represent\nthe number of clips or extra you have.", nil)
-					setFutureHelperText(12, "Go ahead and try firing your shotgun by pressing\nand holding '" .. key("fire") .. "'.\nWhen you finish firing your loaded ammo,\npress and hold your reload key, '" .. key("reload") .. "'\nto reload completely until it's full.", nil, function () state = STATECOMPLETERELOADFIRE noReload() end)
+					updateHelperText("The shotgun is much more powerful than the\nweak machinegun.  Observe that there are\nnow two bars below your health bar.  The bar\nimmediately below your health bar (the one with a border) shows\nyou how much ammo of your current clip you\nhave remaining.  The bars you see below represent\nthe number of clips or extra you have.", {"17_1.wav"})
+					setFutureHelperText(12, "Go ahead and try firing your shotgun by pressing\nand holding '" .. key("fire") .. "'.\nWhen you finish firing your loaded ammo,\npress and hold your reload key, '" .. key("reload") .. "'\nto reload completely until it's full.", {"22_1.wav"}, function () state = STATECOMPLETERELOADFIRE noReload() end)
 
 					state = STATEBEGIN
 				elseif state == STATEBEGIN then
 				elseif state == STATECOMPLETERELOADFIRE then
 					if tank.ammo <= 0 then
 						if not tank.reloading then
-							noFire()
-							updateHelperText("Now reload your shotgun completely.", nil)
+							if client and not server and step ~= 99 then
+								step = 99
+								noFire()
+								updateHelperText("Now reload your shotgun completely.", {"18_1.wav"})
+							end
 						else
 							state = STATECOMPLETERELOAD
 						end
@@ -625,24 +628,24 @@ elseif c_tcm_current_map.name == "tutorial" then
 						if tank.ammo < weapon.capacity then
 							noReload()
 							state = STATECOMPLETERELOADFIRE
-							updateHelperText("You didn't press and hold\nyour reload key, '" .. key("reload") .. "' until the end.\nFire the rest of your ammo, and then press and\nHOLD your reload key until you completely\nreload your weapon this time.", nil)
+							updateHelperText("You didn't press and hold\nyour reload key, '" .. key("reload") .. "' until the end.\nFire the rest of your ammo, and then press and\nHOLD your reload key until you completely\nreload your weapon this time.", {"16_1.wav"})
 						else
 							if client and not server and step ~= 6 then
 								step = 6
 								tankbobs.a_playSound(c_const_get("tutStep_sound"))
+
+								noReload()
+								updateHelperText("Now, you'll want to try reloading your\nshotgun partially.  Try pressing and\nholding your reload key and letting go\nbefore you reload completely.", {"15_1.wav"})
 							end
 
 							state = STATEPARTIALRELOADFIRE
-
-							noReload()
-							updateHelperText("Now, you'll want to try reloading your\nshotgun partially.  Try pressing and\nholding your reload key and letting go\nbefore you reload completely.", nil)
 						end
 					end
 				elseif state == STATEPARTIALRELOADFIRE then
 					if tank.ammo <= 0 then
 						if not tank.reloading then
 							noFire()
-							updateHelperText("Now try partially reload your shotgun.", nil)
+							updateHelperText("Now try partially reloading your shotgun.", {"19_1.wav"})
 						else
 							state = STATEPARTIALRELOAD
 						end
@@ -664,7 +667,7 @@ elseif c_tcm_current_map.name == "tutorial" then
 						else
 							noReload()
 							state = STATEPARTIALRELOADFIRE
-							updateHelperText("You didn't press and hold\nyour reload key, '" .. key("reload") .. "' before the end.\nFire the rest of your ammo, and then hold and\nRELEASE your reload key BEFORE you completely\nreload your weapon this time.", nil)
+							updateHelperText("You didn't press and hold\nyour reload key, '" .. key("reload") .. "' before the end.\nFire the rest of your ammo, and then hold and\nRELEASE your reload key BEFORE you completely\nreload your weapon this time.", {"14_1.wav"})
 						end
 					end
 				end
@@ -673,7 +676,7 @@ elseif c_tcm_current_map.name == "tutorial" then
 				state = STATENOTHING
 				p(7)
 
-				updateHelperText("Oops!  You either ran out of ammo or died.\nHere, grab another shotgun and try again.", nil)
+				updateHelperText("Oops!  You either ran out of ammo or died.\nHere, grab another shotgun and try again.", {"13_1.wav"})
 			end
 		end
 
@@ -721,8 +724,8 @@ elseif c_tcm_current_map.name == "tutorial" then
 								up = false
 								switchArrows()
 								e(4)
-								updateHelperText("The switch was activited!\nFollow the arrows downward!", nil)
-								setFutureHelperText(3, "Try practicing using special by\npressing the switch above and\ndriving down before the wall closes.\nIf you fail, push the switch again.\nIt is important to learn when to use special\nin a real game and to avoid crashing into walls.", nil)
+								updateHelperText("The switch was activited!\nFollow the arrows downward!", {"9_1.wav", "9_2.wav"})
+								setFutureHelperText(3, "Try practicing using special by\npressing the switch above and\ndriving down before the wall closes.\nIf you fail, push the switch again.\nIt is important to learn when to use special\nin a real game and to avoid crashing into walls.", {"10_1.wav"})
 							end
 						end
 					end
@@ -744,8 +747,8 @@ elseif c_tcm_current_map.name == "tutorial" then
 									e(5)
 								end
 								path.m.enabled = false
-								updateHelperText("The wall has closed.\nFollow the arrows up and try again.", nil)
-								setFutureHelperText(3, "Try practicing using special by\npressing the switch above and\ndriving down before the wall closes.\nIf you fail, push the switch again.\nIt is important to learn when to use special\nin a real game and to avoid crashing into walls.", nil)
+								updateHelperText("The wall has closed.\nFollow the arrows up and try again.", {"11_1.wav", "11_2.wav"})
+								setFutureHelperText(3, "Try practicing using special by\npressing the switch above and\ndriving down before the wall closes.\nIf you fail, push the switch again.\nIt is important to learn when to use special\nin a real game and to avoid crashing into walls.", {"10_1.wav"})
 							end
 						end
 					end
@@ -760,7 +763,7 @@ elseif c_tcm_current_map.name == "tutorial" then
 
 								up = "done"
 								e(6)
-								updateHelperText("Well done!\nThose movement skills will come in handy.", nil)
+								updateHelperText("Well done!\nThose movement skills will come in handy.", {"12_1.wav", "12_2.wav"})
 								setFutureHelperText(3, "To use a different weapon,\nyou need to drive over a blue powerup.\nTry picking up that shotgun over there.\nPowerups normally disappear after a\ncertain amount of time, but in this tutorial,\npowerups won't disappear.", nil, function() updateFirstWeaponStep() end)
 							end
 						end
@@ -781,7 +784,7 @@ elseif c_tcm_current_map.name == "tutorial" then
 						end
 
 						e(3)
-						updateHelperText("Nice one!\nTry practicing using special by\npressing the switch above and\ndriving down before the wall closes.\nIf you fail, push the switch again.\nIt is important to learn when to use special\nin a real game and to avoid crashing into walls.", nil)
+						updateHelperText("Nice one!\nTry practicing using special by\npressing the switch above and\ndriving down before the wall closes.\nIf you fail, push the switch again.\nIt is important to learn when to use special\nin a real game and to avoid crashing into walls.", {"8_1.wav", "8_2.wav"})
 						updateDownStep()
 					end
 				end
@@ -876,4 +879,19 @@ elseif c_tcm_current_map.name == "tutorial" then
 	i("5_1.wav") i("5_2.wav")
 	i("6_1.wav")
 	i("7_1.wav")
+	i("8_1.wav") i("8_2.wav")
+	i("9_1.wav") i("9_2.wav")
+	i("10_1.wav")
+	i("11_1.wav") i("11_2.wav")
+	i("12_1.wav") i("12_2.wav")
+	i("13_1.wav")
+	i("14_1.wav")
+	i("15_1.wav")
+	i("16_1.wav")
+	i("17_1.wav")
+	i("18_1.wav")
+	i("19_1.wav")
+	i("20_1.wav")
+	i("21_1.wav") i("21_2.wav")
+	i("22_1.wav")
 end
