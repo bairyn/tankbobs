@@ -616,9 +616,10 @@ elseif c_tcm_current_map.name == "tutorial" then
 						if not tank.reloading then
 							if client and not server and step ~= 99 then
 								step = 99
-								noFire()
 								updateHelperText("Now reload your shotgun completely.", {"18_1.wav"})
 							end
+
+							noFire()
 						else
 							state = STATECOMPLETERELOAD
 						end
@@ -644,8 +645,12 @@ elseif c_tcm_current_map.name == "tutorial" then
 				elseif state == STATEPARTIALRELOADFIRE then
 					if tank.ammo <= 0 then
 						if not tank.reloading then
+							if client and not server and step ~= 97 then
+								step = 97
+								updateHelperText("Now try partially reloading your shotgun.", {"19_1.wav"})
+							end
+
 							noFire()
-							updateHelperText("Now try partially reloading your shotgun.", {"19_1.wav"})
 						else
 							state = STATEPARTIALRELOAD
 						end
@@ -762,6 +767,7 @@ elseif c_tcm_current_map.name == "tutorial" then
 								end
 
 								up = "done"
+								switchArrows()
 								e(6)
 								updateHelperText("Well done!\nThose movement skills will come in handy.", {"12_1.wav", "12_2.wav"})
 								setFutureHelperText(3, "To use a different weapon,\nyou need to drive over a blue powerup.\nTry picking up that shotgun over there.\nPowerups normally disappear after a\ncertain amount of time, but in this tutorial,\npowerups won't disappear.", nil, function() updateFirstWeaponStep() end)
