@@ -35,14 +35,14 @@
 				<reload>108</reload> 'l'
 			</player1>
 			<player2>
-				<fire>279</fire> 'END'
+				<fire>281</fire> 'PGDOWN'
 				<forward>273</forward> 'UP'
 				<back>274</back> 'DOWN'
 				<left>276</left> 'LEFT
 				<mod></mod>
 				<reverse></reverse>
 				<right>275</right> 'RIGHT'
-				<special>281</special> 'PGDOWN'
+				<special>279</special> 'END'
 				<reload>127</reload> 'DEL'
 			</player2>
 			<quit>98</quit> 'b'
