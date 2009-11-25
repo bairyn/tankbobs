@@ -867,7 +867,7 @@ elseif c_tcm_current_map.name == "tutorial" then
 		end
 	end
 
-	updateHelperText("Welcome to Tankbobs's tutorial!", {"1_1.wav", "1_2.wav", "1_3.wav", "1_4.wav"})
+	updateHelperText("Welcome to Tankbobs's tutorial!", {"1_1.wav", "1_2.wav", "1_3.wav"})
 	setFutureHelperText(6, "Press '" .. key("left") .. "' to rotate left, and \n'" .. key("right") .. "' to rotate right.\n\nTry rotating your tank.", {"2_1.wav", "2_2.wav", "2_3.wav", "2_4.wav"}, updateRotateStep)
 
 	-- pre-load helper sounds
@@ -878,7 +878,7 @@ elseif c_tcm_current_map.name == "tutorial" then
 		end
 	end
 
-	--i("1_1.wav") i("1_2.wav") i("1_3.wav") i("1_4.wav")  -- Don't re-initialise the first sound, which has already started playing
+	--i("1_1.wav") i("1_2.wav") i("1_3.wav")  -- Don't re-initialise the first sound, which has already started playing
 	i("2_1.wav") i("2_2.wav") i("2_3.wav") i("2_4.wav")
 	i("3_1.wav") i("3_2.wav") i("3_3.wav") i("3_4.wav")
 	i("4_1.wav") i("4_2.wav")
