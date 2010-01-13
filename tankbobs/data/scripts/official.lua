@@ -900,4 +900,8 @@ elseif c_tcm_current_map.name == "tutorial" then
 	i("20_1.wav")
 	i("21_1.wav") i("21_2.wav")
 	i("22_1.wav")
+
+	-- set last map and last set to default
+	c_config_set("game.lastMap", "small_1")
+	c_config_set("game.lastSet", "small")
 end
