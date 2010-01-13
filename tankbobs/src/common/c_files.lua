@@ -52,6 +52,12 @@ function c_files_init()
 
 		extension = extension or ".tpk"
 
+		-- try to create the directory if it doesn't exist
+		local s, err = lfs.mkdir(dir)
+		if not s then
+			-- do nothing (dir could already exist)
+		end
+
 		for filename in lfs.dir(dir) do
 			if not filename:find("^%.") and common_endsIn(filename, extension) then
 				table.insert(files, filename)
