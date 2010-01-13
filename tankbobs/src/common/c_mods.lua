@@ -40,7 +40,7 @@ function c_mods_load(dir)
 
 	for _, v in pairs(mods) do
 		if c_const_get("debug") then
-			common_print("Running mod: " .. v[1])
+			common_print(-1, "Running mod: " .. v[1] .. "\n")
 		end
 
 		local status, err = pcall(v[2])
