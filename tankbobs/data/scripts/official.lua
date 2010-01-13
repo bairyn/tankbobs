@@ -393,7 +393,7 @@ elseif c_tcm_current_map.name == "tutorial" then
 			end
 		end
 
-		local helper = gui_addLabel(tankbobs.m_vec2(15, 25), "", update, ALPHASCALE)
+		local helper = gui_addLabel(tankbobs.m_vec2(15, 25), "", update, ALPHASCALE, 0, 0, 0, 1)
 		function updateHelperText(text, audio)
 			if helper then
 				if text then
