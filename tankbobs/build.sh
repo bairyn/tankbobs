@@ -9,7 +9,7 @@ VERSION="0.1.0"
 
 cd `dirname $0`
 
-REVISION=$(git rev-list --all | wc -l)
+REVISION=$(git rev-list master | wc -l)
 PAKNAME="data-tankbobs-v${VERSION}-R${REVISION}.tpk"
 BUILDNAME="tankbobs-build-v${VERSION}-R${REVISION}.tar.gz"
 CMAKEFLAGS="-D PEDANTIC=TRUE"
