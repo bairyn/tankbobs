@@ -878,7 +878,7 @@ function c_ai_followObjective(tank, objective)
 				objective.nextPathUpdateTime = tankbobs.t_getTicks() + c_world_timeMultiplier(c_const_get("ai_pathUpdateTime"))
 			end
 
-			local start = c_ai_findNavigationPoint(tank.p)
+			local start = c_ai_findClosestNavigationPoint(tank.p)
 			if start then
 				start = start[1]
 			end
@@ -889,7 +889,7 @@ function c_ai_followObjective(tank, objective)
 			p2(tank.p)
 			p2:add(1 * (p2 - objective.p))
 
-			goal = c_ai_findNavigationPoint(p2)
+			goal = c_ai_findClosestNavigationPoint(p2)
 
 			if not goal then
 				-- look for a way point not visible by target
@@ -898,7 +898,7 @@ function c_ai_followObjective(tank, objective)
 
 					local s, _, t, _ = c_world_findClosestIntersection(p1, p2)
 					if not s--[[ or t ~= "wall"--]] then
-						goal = c_ai_findNavigationPoint(p2)
+						goal = c_ai_findClosestNavigationPoint(p2)
 
 						break
 					end
