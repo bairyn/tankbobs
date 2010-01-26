@@ -1,5 +1,5 @@
 --[[
-Copyright (C) 2008-2009 Byron James Johnson
+Copyright (C) 2008-2010 Byron James Johnson
 
 This file is part of Tankbobs.
 
@@ -50,6 +50,8 @@ function st_title_init()
 	gui_addAction(tankbobs.m_vec2(50, 53), "Options", nil, st_title_options)
 	gui_addAction(tankbobs.m_vec2(50, 47), "Help",    nil, st_title_help)
 	gui_addAction(tankbobs.m_vec2(50, 41), "Exit",    nil, c_state_advance)
+
+	gui_addLabel (tankbobs.m_vec2(15, 15), "Copyright (C) 2008-2010 Byron James Johnson", nil, 0.2)
 end
 
 function st_title_done()

@@ -1,5 +1,5 @@
 --[[
-Copyright (C) 2008-2009 Byron James Johnson
+Copyright (C) 2008-2010 Byron James Johnson
 
 This file is part of Tankbobs.
 
