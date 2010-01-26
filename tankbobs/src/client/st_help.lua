@@ -34,6 +34,11 @@ function st_help_init()
 	gui_addAction(tankbobs.m_vec2(25, 75), "Back", nil, c_state_advance)
 
 	gui_addLabel(tankbobs.m_vec2(50, 50), "Play \"Tutorial\" for help")
+
+	gui_addLabel(tankbobs.m_vec2(20, 25), "The git repository can be cloned from", nil, 0.5)
+	gui_addLabel(tankbobs.m_vec2(20, 20), "git://git.mercenariesguild.net/tankbobs.git", nil, 0.5)
+	gui_addLabel(tankbobs.m_vec2(20, 15), "(The URL may have been changed since this build)", nil, 0.4)
+	gui_addLabel(tankbobs.m_vec2(20, 10), "I can be contacted at KrabbyKrap@gmail.com", nil, 0.5)
 end
 
 function st_help_done()
