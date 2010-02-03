@@ -50,11 +50,11 @@ function renderer_init()
 
 		tankbobs.r_initialize()
 
-		if tankbobs.t_isWindows() then
-			c_module_load "luagl"
-		else
+		--if tankbobs.t_isWindows() then
+			--c_module_load "luagl"
+		--else
 			c_module_load "opengl"
-		end
+		--end
 
 		gl = _G.gl
 	end

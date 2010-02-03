@@ -1,8 +1,20 @@
+Index: build-cross.sh
+===================================================================
+--- build-cross.sh	(revision 0)
++++ build-cross.sh	(revision 0)
+@@ -0,0 +1 @@
++i586-mingw32msvc-gcc -I../include/ -I/usr/include/GL/ -I/usr/lib/gcc/i586-mingw32msvc/4.2.1-sjlj/include -I/usr/lib/gcc/i586-mingw32msvc/4.2.1-sjlj/include/lua5.1 -L/usr/lib/gcc/i586-mingw32msvc/4.2.1-sjlj -O3 -funroll-loops -shared -o opengl.dll LuaGL.c LuaGLAux.c -llua5.1 -lopengl32 -lglu32 -lm -O3 -funroll-loops 
+
+Property changes on: build-cross.sh
+___________________________________________________________________
+Added: svn:executable
+   + *
+
 Index: LuaGL.c
 ===================================================================
 --- LuaGL.c	(revision 43)
 +++ LuaGL.c	(working copy)
-@@ -276,14 +276,14 @@
+@@ -276,16 +276,20 @@
  
     // test arguments
     if(!lua_isstring(L, 1))
@@ -17,9 +29,15 @@ Index: LuaGL.c
 -      script_error(L, "incorrect string argument to function 'gl.BlendFunc'");
 +      luaL_error(L, "incorrect string argument to function 'gl.BlendFunc'");
  
++#ifdef WIN32
++   fprintf(stderr, "glBlendEquation is unsupported on WIN32 systems!\n");
++#else
     glBlendEquation(mode);
++#endif
  
-@@ -2020,8 +2020,8 @@
+    return 0;
+ }
+@@ -2020,8 +2024,8 @@
        case GL_RED:  case GL_GREEN:  case GL_BLUE:
        case GL_ALPHA: case GL_LUMINANCE: n = 1; break;
        case GL_LUMINANCE_ALPHA:          n = 2; break;
@@ -30,7 +48,7 @@ Index: LuaGL.c
        default:
           ShowError("incorrect string argument to function 'gl.GetTexImage'");
     }
-@@ -3625,12 +3625,12 @@
+@@ -3625,12 +3629,12 @@
           break;
  
        case GL_RGB:
@@ -45,7 +63,7 @@ Index: LuaGL.c
           size = 4;
           break;
     }
-@@ -3956,7 +3956,7 @@
+@@ -3956,7 +3960,7 @@
    {NULL, NULL}
  };
  
@@ -60,4 +78,4 @@ Index: build.sh
 +++ build.sh	(revision 0)
 @@ -0,0 +1,2 @@
 +#!/bin/sh
-+gcc -I../include/ -I/usr/include/lua5.1/ -llua -lGL -lm -O3 -funroll-loops -fPIC -shared -o opengl.so LuaGL.c LuaGLAux.c
++gcc -I../include/ -I/usr/include/lua5.1/ -fPIC -llua -lGL -lm -O3 -funroll-loops -shared -o opengl.so LuaGL.c LuaGLAux.c
