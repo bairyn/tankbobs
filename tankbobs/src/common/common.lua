@@ -47,6 +47,8 @@ function common_init()
 	-- remove debug if debugging isn't enabled for security reasons
 	if not c_const_get("debug") then
 		debug = nil
+	else
+		debug = require "debug"
 	end
 
 	if c_const_get("debug") then
