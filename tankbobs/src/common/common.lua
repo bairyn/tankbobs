@@ -182,6 +182,15 @@ function common_listFiles(dir, extension)
 end
 
 function common_isDirectory(filename)
+	local attributes = lfs.attributes(filename, "mode")
+
+	if attributes and attributes[mode] then
+		return attributes[mode] == "directory"
+	end
+
+	return false
+
+	--[[
 	if tankbobs.t_isWindows() then
 		-- TODO: windows method
 	else
@@ -191,6 +200,7 @@ function common_isDirectory(filename)
 
 		return p and p.type == "directory"
 	end
+	--]]
 end
 
 function common_deepClone(object)
