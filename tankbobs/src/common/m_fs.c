@@ -23,6 +23,8 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
  * Values are stored as little-endian.
  */
 
+#include "common.h"
+
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -39,7 +41,6 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "physfs.h"
 
-#include "common.h"
 #include "m_tankbobs.h"
 #include "tstr.h"
 #include "crossdll.h"

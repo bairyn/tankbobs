@@ -17,6 +17,8 @@ This file is part of Tankbobs.
 along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "common.h"
+
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -29,7 +31,6 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 #include <luaconf.h>
 #include <math.h>
 
-#include "common.h"
 #include "m_tankbobs.h"
 #include "tstr.h"
 #include "crossdll.h"

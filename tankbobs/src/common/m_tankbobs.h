@@ -32,10 +32,6 @@ extern "C"
 #include <luaconf.h>
 #include <stdio.h>
 
-#if defined(__WINDOWS__) || defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__TOS_WIN__)
-#include <windows.h>
-#endif
-
 #include "common.h"
 
 #if defined(__FILE) && defined(__LINE) && defined(TDEBUG)
