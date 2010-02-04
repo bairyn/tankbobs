@@ -258,6 +258,7 @@ int r_loadImage2D(lua_State *L);
 
 #if defined(__WINDOWS__) || defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__TOS_WIN__)
 #define isnan(x) ((x) != (x))
+#define isinf(x) (isnan((x) - (x)))
 #endif
 
 #define ISVEC(L, i) (lua_touserdata(L, i) && (lua_getmetatable(L, i) ? (lua_getfield(L, LUA_REGISTRYINDEX, MATH_METATABLE), (lua_rawequal(L, -1, -2) ? (lua_pop(L, 2), true) : (lua_pop(L, 2), false))) : (lua_pop(L, 1), false)))
