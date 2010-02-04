@@ -256,6 +256,10 @@ int r_loadImage2D(lua_State *L);
 #define CHECKVEC(L, i) (vec2_t *) luaL_checkudata(L, i, MATH_METATABLE)
 #endif
 
+#if defined(__WINDOWS__) || defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__TOS_WIN__)
+#define isnan(x) ((a) != (a))
+#endif
+
 #define ISVEC(L, i) (lua_touserdata(L, i) && (lua_getmetatable(L, i) ? (lua_getfield(L, LUA_REGISTRYINDEX, MATH_METATABLE), (lua_rawequal(L, -1, -2) ? (lua_pop(L, 2), true) : (lua_pop(L, 2), false))) : (lua_pop(L, 1), false)))
 
 #define MATH_POLAR(v) \
