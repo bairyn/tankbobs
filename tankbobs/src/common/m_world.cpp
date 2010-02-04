@@ -344,7 +344,7 @@ int w_addBody(lua_State *L)
 	}
 
 	int numVertices = lua_objlen(L, 7);
-	const vec2_t *vertices[numVertices];
+	const vec2_t **vertices = new vec2_t[numVertices];
 	int i = 0;
 	lua_pushnil(L);
 	while(lua_next(L, 7))
