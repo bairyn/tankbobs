@@ -15,7 +15,7 @@ externally.  Example uses are extended usage functions, stdlib's mem* operations
 #ifndef TSTR_H
 #define TSTR_H
 
-#include <SDL/SDL.h> /* tstr requires SDL's size typing */
+#include <SDL.h> /* tstr requires SDL's size typing */
 
 typedef struct
 {
