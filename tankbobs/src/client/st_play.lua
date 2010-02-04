@@ -171,6 +171,9 @@ function st_play_init()
 
 	game_new()
 
+	-- initialize the world
+	c_world_newWorld()
+
 	-- pause label
 
 	-- pause
@@ -192,9 +195,6 @@ function st_play_init()
 	end
 
 	gui_addLabel(tankbobs.m_vec2(37.5, 50), "", updatePause, nil, c_config_get("client.renderer.pauseRed"), c_config_get("client.renderer.pauseGreen"), c_config_get("client.renderer.pauseBlue"), c_config_get("client.renderer.pauseAlpha"), c_config_get("client.renderer.pauseRed"), c_config_get("client.renderer.pauseGreen"), c_config_get("client.renderer.pauseBlue"), c_config_get("client.renderer.pauseAlpha"))
-
-	-- initialize the world
-	c_world_newWorld()
 
 	-- set instagib state
 	c_world_setInstagib(c_config_get("game.instagib"))

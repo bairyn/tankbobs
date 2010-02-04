@@ -670,7 +670,7 @@ function c_world_setInstagib(state)
 	c_world_instagib = state
 end
 
-function c_world_getInstagib(state)
+function c_world_getInstagib()
 	return c_world_instagib
 end
 

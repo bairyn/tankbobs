@@ -344,7 +344,7 @@ int w_addBody(lua_State *L)
 	}
 
 	int numVertices = lua_objlen(L, 7);
-	const vec2_t **vertices = new vec2_t[numVertices];
+	const vec2_t **vertices = reinterpret_cast<const vec2_t **>(calloc(numVertices, sizeof(vec2_t *)));
 	int i = 0;
 	lua_pushnil(L);
 	while(lua_next(L, 7))
@@ -362,6 +362,8 @@ int w_addBody(lua_State *L)
 	{
 		shapeDefinition.vertices[i].Set(vertices[i]->x, vertices[i]->y);
 	}
+
+	free(vertices);
 
 	shapeDefinition.density = luaL_checknumber(L, 8);
 	shapeDefinition.friction = luaL_checknumber(L, 9);
