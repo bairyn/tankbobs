@@ -712,7 +712,7 @@ int fs_init(lua_State *L)
 		LPWSTR *s;
 		static char buf[BUFSIZE];
 
-		s = CommandLineToArgvW(GetCommandline(), &num);
+		s = CommandLineToArgvW(GetCommandLineW(), &num);
 
 		if(num > 0)
 		{
@@ -930,10 +930,12 @@ int fs_getSearchPath(lua_State *L)
 
 int fs_mkdir(lua_State *L)
 {
+	int status;
+
 	CHECKINIT(init, L);
 	CHECKFSINIT(init, L);
 
-	int status = PHYSFS_mkdir(luaL_checkstring(L, 1));
+	status = PHYSFS_mkdir(luaL_checkstring(L, 1));
 
 	if(!status)
 	{
@@ -947,10 +949,12 @@ int fs_mkdir(lua_State *L)
 
 int fs_remove(lua_State *L)
 {
+	int status;
+
 	CHECKINIT(init, L);
 	CHECKFSINIT(init, L);
 
-	int status = PHYSFS_delete(luaL_checkstring(L, 1));
+	status = PHYSFS_delete(luaL_checkstring(L, 1));
 
 	if(!status)
 	{
@@ -993,7 +997,7 @@ int fs_listFiles(lua_State *L)
 
 	for(i = files; *i != NULL; ++i)
 	{
-		lua_pushinteger(L, files - i + 1);
+		lua_pushinteger(L, i - files + 1);
 		lua_pushstring(L, *i);
 		lua_settable(L, -3);
 	}
