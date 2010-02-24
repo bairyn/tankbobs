@@ -22,9 +22,6 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include <SDL.h>
-#include <SDL_image.h>
-#include <SDL_endian.h>
 #include <lua.h>
 #include <lauxlib.h>
 #include <lualib.h>

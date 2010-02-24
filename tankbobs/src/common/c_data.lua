@@ -45,13 +45,10 @@ function c_data_init()
 	c_const_set("textures_default", c_const_get("textures_default_dir") .. "null.png", 1)
 	c_const_set("game_dir", c_const_get("textures_dir") .. "game/", 1)
 	c_const_set("weaponTextures_dir", c_const_get("game_dir") .. "weapons/", 1)
-	if tankbobs.io_getHomeDirectory() == nil then
-		error(select(2, tankbobs.io_getHomeDirectory()))
-	end
 	c_const_set("healthbar_texture", c_const_get("game_dir") .. "healthbar.png", 1)
 	c_const_set("healthbarBorder_texture", c_const_get("game_dir") .. "healthbarBorder.png", 1)
 	c_const_set("ammobarBorder_texture", c_const_get("game_dir") .. "healthbarBorder.png", 1)
-	--c_const_set("user_dir", tankbobs.io_getHomeDirectory() .. "/.tankbobs/", 1)
+	--c_const_set("user_dir", tankbobs.fs_getUserDirectory() .. "/.tankbobs/", 1)
 	c_const_set("user_dir", "", 1)
 	--c_const_set("module_dir", "./modules/", 1)
 	--c_const_set("module64_dir", "./modules64/", 1)
@@ -215,7 +212,10 @@ function c_data_init()
 	c_const_set("defaultName", "UnnamedPlayer", 1)
 	c_const_set("max_nameLength", 32, 1)
 
-	tankbobs.c_setHistoryFile(c_const_get("history_file"))
+	if tankbobs.t_c() then
+	    -- console is not implemented on all platforms
+		tankbobs.c_setHistoryFile(c_const_get("history_file"))
+	end
 end
 
 function c_data_done()

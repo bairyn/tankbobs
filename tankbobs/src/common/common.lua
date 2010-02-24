@@ -151,7 +151,9 @@ function common_done()
 end
 
 function common_misc_start()
-	tankbobs.n_setQueueTime(c_config_get("common.online.packetDelay"))
+	if tankbobs.t_n() then
+		tankbobs.n_setQueueTime(c_config_get("common.online.packetDelay"))
+	end
 end
 
 function common_misc_finish()

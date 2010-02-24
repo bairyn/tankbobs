@@ -32,6 +32,15 @@ function init()
 		assert(jit.compilesub(true, true) == nil)
 	end
 
+	-- check submodules
+	assert(tankbobs.t_t())
+	assert(tankbobs.t_io())
+	assert(tankbobs.t_m())
+	assert(tankbobs.t_w())
+	assert(tankbobs.t_c())
+	assert(tankbobs.t_n())
+	assert(tankbobs.t_fs())
+
 	common_init()
 
 	client_init()

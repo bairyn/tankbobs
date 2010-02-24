@@ -17,14 +17,15 @@ This file is part of Tankbobs.
 along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#if defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__TOS_WINDOWS__) || defined(__WINDOWS__)
+/* Hide the entire console implementation on Win32 systems for now */
+#else
+
 #include "common.h"
 
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include <SDL.h>
-#include <SDL_image.h>
-#include <SDL_endian.h>
 #include <lua.h>
 #include <lauxlib.h>
 #include <lualib.h>
@@ -802,3 +803,4 @@ int c_saveHistory(lua_State *L)
 
 	return 0;
 }
+#endif

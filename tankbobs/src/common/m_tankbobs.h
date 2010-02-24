@@ -32,6 +32,8 @@ extern "C"
 #include <luaconf.h>
 #include <stdio.h>
 
+#include <SDL.h>
+
 #include "common.h"
 
 #if defined(__FILE) && defined(__LINE) && defined(TDEBUG)
@@ -79,6 +81,16 @@ extern int init;
 extern Uint32 sdlFlags;
 
 /* m_tankbobs.c */
+int t_t(lua_State *L);
+int t_in(lua_State *L);
+int t_io(lua_State *L);
+int t_r(lua_State *L);
+int t_m(lua_State *L);
+int t_w(lua_State *L);
+int t_c(lua_State *L);
+int t_a(lua_State *L);
+int t_n(lua_State *L);
+int t_fs(lua_State *L);
 void t_init(lua_State *L);
 int t_initialize(lua_State *L);
 int t_quit(lua_State *L);
@@ -367,6 +379,8 @@ int w_luaStep(lua_State *L);
 int w_setContactListener(lua_State *L);
 
 /* m_console.c */
+#if defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__TOS_WINDOWS__) || defined(__WINDOWS__)
+#else
 void c_initNL(lua_State *L);
 int c_init(lua_State *L);
 int c_quit(lua_State *L);
@@ -383,6 +397,7 @@ int c_print(lua_State *L);
 int c_setHistoryFile(lua_State *L);
 int c_loadHistory(lua_State *L);
 int c_saveHistory(lua_State *L);
+#endif
 
 /* m_audio.c */
 void a_initNL(lua_State *L);

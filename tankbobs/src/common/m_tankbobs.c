@@ -27,7 +27,6 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 #include <string.h>
 #include <stdio.h>
 #include <SDL.h>
-#include <SDL_image.h>
 #include <lua.h>
 #include <lauxlib.h>
 #include <lualib.h>
@@ -44,6 +43,100 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 
 int init = false;
 Uint32 sdlFlags;
+
+int t_t(lua_State *L)
+{
+	CHECKINIT(init, L);
+
+	lua_pushboolean(L, true);
+
+	return 1;
+}
+
+int t_in(lua_State *L)
+{
+	CHECKINIT(init, L);
+
+	lua_pushboolean(L, true);
+
+	return 1;
+}
+
+int t_io(lua_State *L)
+{
+	CHECKINIT(init, L);
+
+	lua_pushboolean(L, true);
+
+	return 1;
+}
+
+int t_r(lua_State *L)
+{
+	CHECKINIT(init, L);
+
+	lua_pushboolean(L, true);
+
+	return 1;
+}
+
+int t_m(lua_State *L)
+{
+	CHECKINIT(init, L);
+
+	lua_pushboolean(L, true);
+
+	return 1;
+}
+
+int t_w(lua_State *L)
+{
+	CHECKINIT(init, L);
+
+	lua_pushboolean(L, true);
+
+	return 1;
+}
+
+int t_c(lua_State *L)
+{
+	CHECKINIT(init, L);
+
+#if defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__TOS_WINDOWS__) || defined(__WINDOWS__)
+	lua_pushboolean(L, false);
+#else
+	lua_pushboolean(L, true);
+#endif
+
+	return 1;
+}
+
+int t_a(lua_State *L)
+{
+	CHECKINIT(init, L);
+
+	lua_pushboolean(L, true);
+
+	return 1;
+}
+
+int t_n(lua_State *L)
+{
+	CHECKINIT(init, L);
+
+	lua_pushboolean(L, true);
+
+	return 1;
+}
+
+int t_fs(lua_State *L)
+{
+	CHECKINIT(init, L);
+
+	lua_pushboolean(L, true);
+
+	return 1;
+}
 
 void t_init(lua_State *L)
 {
@@ -594,6 +687,17 @@ int t_emptyTable(lua_State *L)
 static const struct luaL_Reg tankbobs[] =
 {
 	/* m_tankbobs.c */
+	/* export functions to test which submodules have been implemented on various platforms */
+	{"t_t", t_t},
+	{"t_in", t_in},
+	{"t_io", t_io},
+	{"t_r", t_r},
+	{"t_m", t_m},
+	{"t_w", t_w},
+	{"t_c", t_c},
+	{"t_a", t_a},
+	{"t_n", t_n},
+	{"t_fs", t_fs},
 	{"t_initialize", t_initialize}, /* initialize the module */
 		/* Nothing is returned.  If the first argument is a string,
 			the string is the number of the function to be called when
@@ -969,6 +1073,8 @@ static const struct luaL_Reg tankbobs[] =
 		/* Set contact listener function to argument passed.  Nothing is returned. */
 
 	/* m_console.c */
+#if defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__TOS_WINDOWS__) || defined(__WINDOWS__)
+#else
 	{"c_init", c_init}, /* initialize an ncurses console */
 		/* Nothing is returned; nothing is passed. */
 	{"c_quit", c_quit}, /* close the ncurses console */
@@ -989,6 +1095,7 @@ static const struct luaL_Reg tankbobs[] =
 		/* Nothing is returned; nothing is passed. */
 	{"c_saveHistory", c_saveHistory}, /* save the history file */
 		/* Nothing is returned; nothing is passed. */
+#endif
 
 	/* m_audio.c */
 	{"a_init", a_init}, /* initialize the audio */
@@ -1144,7 +1251,10 @@ int luaopen_libmtankbobs(lua_State *L)
 	r_init(L);
 	m_init(L);
 	w_init(L);
+#if defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__TOS_WINDOWS__) || defined(__WINDOWS__)
+#else
 	c_initNL(L);
+#endif
 	a_initNL(L);
 	n_initNL(L);
 	fs_initNL(L);
