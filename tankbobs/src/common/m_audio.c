@@ -306,6 +306,8 @@ int a_startMusic(lua_State *L)
 	/*
 	SDL_RWops *rw;
 	*/
+
+	const char *tmpfilename;
 #endif
 	const char *filename = NULL;
 
@@ -363,7 +365,7 @@ int a_startMusic(lua_State *L)
 
 	/* Mix_LoadMUS_RW isn't well supported */
 
-	const char *tmpfilename = fs_createTemporaryFile(L, filename, "tnk");
+	tmpfilename = fs_createTemporaryFile(L, filename, "tnk");
 
 	music = Mix_LoadMUS(tmpfilename);
 #else
