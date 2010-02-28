@@ -800,9 +800,14 @@ function c_world_tank_die(tank, t)
 	tank.cd = {}
 end
 
-function c_world_tank_remove(tank)
+function c_world_removeTank(tank)
 	for k, v in pairs(c_world_tanks) do
 		if v == tank then
+			if v.exists and v.body then
+				tankbobs.w_removeBody(v.body)
+				v.body = nil
+			end
+
 			c_world_tanks[k] = nil
 		end
 	end
@@ -870,7 +875,7 @@ function c_world_tank_checkSpawn(d, tank)
 
 			if not playerSpawnPoint then
 				-- no spawn points
-				error "No spawn points for map"
+				error "No working spawn points in map"
 			end
 		end
 
@@ -1751,7 +1756,7 @@ function c_world_projectile_step(d, projectile)
 			tankbobs.w_removeBody(projectile.m.body)
 			projectile.m.body = nil
 		end
-		c_weapon_projectileRemove(projectile)
+		c_weapon_removeProjectile(projectile)
 		return
 	end
 
@@ -1770,12 +1775,12 @@ function c_world_projectile_step(d, projectile)
 			if t > projectile.m.collideTime then
 				-- remove projectile
 
-				c_weapon_projectileRemove(projectile)
+				c_weapon_removeProjectile(projectile)
 
 				return
 			end
 		else
-			c_weapon_projectileRemove(projectile)
+			c_weapon_removeProjectile(projectile)
 
 			return
 		end
@@ -2028,7 +2033,7 @@ function c_world_removeCorpse(corpse)
 				v.body = nil
 			end
 
-			corpse[k] = nil
+			c_world_corpses[k] = nil
 		end
 	end
 end

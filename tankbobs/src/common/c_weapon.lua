@@ -1179,9 +1179,14 @@ function c_weapon_meleeHit(tank, attacker)
 	end
 end
 
-function c_weapon_projectileRemove(projectile)
+function c_weapon_removeProjectile(projectile)
 	for k, v in pairs(c_world_projectiles) do
 		if v == projectile then
+			if not v.collided and v.m.body then
+				tankbobs.w_removeBody(v.m.body)
+				v.m.body = nil
+			end
+
 			c_world_projectiles[k] = nil
 		end
 	end
