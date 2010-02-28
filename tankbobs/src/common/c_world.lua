@@ -1979,7 +1979,7 @@ function c_world_powerup_pickUp(tank, powerup)
 	end
 	if powerupType.name == "shield" then
 		tank.shield = tank.shield + c_const_get("tank_boostShield")
-		tank.shield = max(tank.shield, c_const_get("tank_maxShield"))
+		tank.shield = math.min(tank.shield, c_const_get("tank_maxShield"))
 	end
 	if powerupType.name == "rocket-launcher" then
 		c_weapon_pickUp(tank, powerupType.name)
