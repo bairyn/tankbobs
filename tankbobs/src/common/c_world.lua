@@ -224,6 +224,7 @@ function c_world_init()
 	c_const_set("tank_defaultRotation", c_math_radians(90), 1)  -- up
 	c_const_set("tank_boostHealth", 60, 1)
 	c_const_set("tank_boostShield", 25, 1)
+	c_const_set("tank_maxShield", 50, 1)
 	c_const_set("tank_shieldedDamage", 1 / 4, 1)
 	c_const_set("tank_shieldDamage", 1 / 16, 1)
 	c_const_set("tank_accelerationModifier", 3, 1)
@@ -1978,6 +1979,7 @@ function c_world_powerup_pickUp(tank, powerup)
 	end
 	if powerupType.name == "shield" then
 		tank.shield = tank.shield + c_const_get("tank_boostShield")
+		tank.shield = max(tank.shield, c_const_get("tank_maxShield"))
 	end
 	if powerupType.name == "rocket-launcher" then
 		c_weapon_pickUp(tank, powerupType.name)
