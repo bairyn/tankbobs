@@ -1278,18 +1278,20 @@ function c_world_findClosestIntersection(start, endP, ignoreTypes)
 	if not ignoreTypes:find("wall") then
 		for _, v in ipairs(c_tcm_current_map.walls) do
 			if not v.detail then
-				b, intersection = c_world_lineIntersectsHull(start, endP, v.m.pos)
-				if b and intersection then  -- FIXME: figure out why b can be true while intersection is nil
-					if not minDistance then
-						minIntersection = intersection
-						minDistance = math.abs((intersection - start).R)
-						typeOfTarget = "wall"
-						target = v
-					elseif math.abs((intersection - start).R) < minDistance then
-						minIntersection = intersection
-						minDistance = math.abs((intersection - start).R)
-						typeOfTarget = "wall"
-						target = v
+				if (not v.static or not ignoreTypes:find("static")) and (v.static or not ignoreTypes:find("dynamic")) then
+					b, intersection = c_world_lineIntersectsHull(start, endP, v.m.pos)
+					if b and intersection then  -- FIXME: figure out why b can be true while intersection is nil
+						if not minDistance then
+							minIntersection = intersection
+							minDistance = math.abs((intersection - start).R)
+							typeOfTarget = "wall"
+							target = v
+						elseif math.abs((intersection - start).R) < minDistance then
+							minIntersection = intersection
+							minDistance = math.abs((intersection - start).R)
+							typeOfTarget = "wall"
+							target = v
+						end
 					end
 				end
 			end
@@ -2040,7 +2042,7 @@ function c_world_removeCorpse(corpse)
 	end
 end
 
-function c_world_explosion(pos, damage, knockback, radius, log, attacker)
+function c_world_explosion(pos, damage, force, radius, log, attacker)
 	if radius <= 0.001 then
 		return
 	end
@@ -2051,15 +2053,15 @@ function c_world_explosion(pos, damage, knockback, radius, log, attacker)
 	for _, v in pairs(c_world_tanks) do
 		if v.exists and v.body then
 			if (pos - v.p).R <= radius then
-				local s, _, t, _ = c_world_findClosestIntersection(pos, v.p, "tank, projectile, powerup, corpse")
+				local s, _, t, _ = c_world_findClosestIntersection(pos, v.p, "tank, projectile, powerup, corpse, dynamic")
 
 				if not s then
 					local d = (1 - (pos - v.p).R / radius) ^ log
 
-					-- knockback
+					-- force
 					local vel = t_w_getLinearVelocity(v.body)
 					local offset = t_m_vec2()
-					offset.R = d * knockback
+					offset.R = d * force
 					offset.t = (v.p - pos).t
 					vel:add(offset)
 					t_w_setLinearVelocity(v.body, vel)
@@ -2070,6 +2072,33 @@ function c_world_explosion(pos, damage, knockback, radius, log, attacker)
 					if v.health <= 0 then
 						v.killer = attacker
 					end
+				end
+			end
+		end
+	end
+
+	-- iterate over walls
+	for _, v in pairs(c_tcm_current_map.walls) do
+		if not v.static and v.m.body then
+			local p = c_world_wallShape(v.m.pos)[1]
+			if (pos - p).R <= radius then
+				local s, _, _, _ = c_world_findClosestIntersection(pos, p, "tank, projectile, powerup, corpse, dynamic")
+
+				if not s then
+					local d = (1 - (pos - p).R / radius) ^ log
+
+					-- force
+					local vel = t_w_getLinearVelocity(v.m.body)
+					local offset = t_m_vec2()
+					offset.R = d * force
+					offset.t = (p - pos).t
+					vel:add(offset)
+					t_w_setLinearVelocity(v.m.body, vel)
+
+					-- angular velocity
+                    local angle = tankbobs.w_getAngularVelocity(v.m.body)
+	                angle = angle - d * (p - pos).t
+					t_w_setAngularVelocity(v.m.body, angle)
 				end
 			end
 		end
