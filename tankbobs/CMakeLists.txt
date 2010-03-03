@@ -1,16 +1,20 @@
 cmake_minimum_required(VERSION 2.6)
 project(tankbobs)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror -fPIC -pedantic-errors -pthread -std=c99")
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -Wall -Werror -pedantic-errors -ansi")  # Box2D
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -fPIC")  # Box2D
+if(UNIX)
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror -fPIC -pedantic-errors -pthread -std=c99")
+	#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -Wall -Werror -pedantic-errors -ansi")  # Box2D
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -fPIC")  # Box2D
+endif(UNIX)
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -DTDEBUG")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -DTDEBUG")
 else(CMAKE_BUILD_TYPE MATCHES Debug)
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
+	if(UNIX)
+		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
+	endif(UNIX)
 endif(CMAKE_BUILD_TYPE MATCHES Debug)
 
 if(NOJIT MATCHES True)
@@ -30,12 +34,14 @@ endif(NOJIT MATCHES True)
 include_directories(${include_dirs})
 
 set(trmc_srcs src/trmc/trmc.c)
-set(trmc_libs m)
+if(UNIX)
+	set(trmc_libs m)
+endif(UNIX)
 
 set(tankbobs_srcs src/common/m_input.c src/common/m_fs.c src/common/m_io.c src/common/m_math.c src/common/m_console.c src/common/m_renderer.c src/common/m_net.c src/common/m_audio.c src/common/m_tankbobs.c src/lib/crossdll.c src/lib/physfs-2.0.0/extras/physfsrwops.c)
 set(tankbobs_Box2D_srcs src/common/m_world.cpp)
 if(WIN32)
-	set(tankbobs_libs lua.a SDL SDL_mixer.a SDL_image.a SDL_ttf.a SDL_net.a GL GLU box2d.a physfs.a png.a freetype m z dl pdcurses)
+	set(tankbobs_libs lua51.lib SDL SDL_mixer.a SDL_image.a SDL_ttf.a SDL_net.a GL GLU box2d.a physfs.lib png.a freetype zlib.lib)
 else(WIN32)
 	set(tankbobs_libs lua.a SDL SDL_mixer.a SDL_image.a SDL_ttf.a SDL_net.a GL GLU box2d.a physfs.a png.a freetype m z dl ncurses)
 endif(WIN32)
@@ -61,9 +67,14 @@ else(NOJIT MATCHES True)
 	set(server_libdirs ../src/lib/LuaJIT/src)
 endif(NOJIT MATCHES True)
 
-set(client_libs lua.a m z dl physfs.a)
-set(server_libs lua.a m z dl physfs.a)
-
+if(UNIX)
+	set(client_libs lua.a m z dl physfs.a)
+	set(server_libs lua.a m z dl physfs.a)
+else(UNIX)
+	set(client_libs lua51.lib zlib.lib physfs.lib)
+	set(server_libs lua51.lib zlib.lib physfs.lib)
+endif(UNIX)
+	
 set(tstr_srcs src/lib/tstr/tstr.c)
 
 add_executable(trmc ${trmc_srcs})
