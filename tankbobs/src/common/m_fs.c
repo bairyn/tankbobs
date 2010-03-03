@@ -414,6 +414,7 @@ static void *fs_ll_load(lua_State *L, const char *path)
 	FILE *fout;
 	PHYSFS_File *fin;
 	char *filename = buf;
+	char c = 0;
 
 	/* Copy file to a temporary file */
 	fin = PHYSFS_openRead(path);
