@@ -221,9 +221,31 @@ void(*cdll_function(const char *l, const char *f))(void)
         if(!(d->handle = (void *)LoadLibrary(l)))
         {
             void (*e)(const char *) = d->errorFunction;
+			LPVOID lpMsgBuf;
+			LPVOID lpDisplayBuf;
+			DWORD  dw;
+
             cdll_cleanup(d->name);
-            e(dlerror());
-            return NULL;
+
+			dw = GetLastError();
+
+			FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+					NULL,
+					dw,
+					MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+					(LPTSTR) &lpMsgBuf,
+					0,
+					NULL);
+
+			lpDisplayBuf = (LPVOID)LocalAlloc(LMEM_ZEROINIT, (lstrlen((LPCTSTR)lpMsgBuf) + lstrlen((LPCSTR)d->name) + 128) * sizeof(TCHAR));
+			StringCchPrintf((LPTSTR)lpDisplayBuf, LocalSize(lpDisplayBuf) / sizeof(TCHAR), TEXT("'%s' failed with error %d: %s"), TEXT(d->name), dw, lpMsgBuf);
+
+			e(T2A(lpDisplayBuf));
+
+			LocalFree(lpMsgBuf);
+			LocalFree(lpDisplayBuf);
+
+			return NULL;
         }
 
         if(!(res = (void (*)(void))GetProcAddress((HINSTANCE)d->handle, f)))
@@ -288,14 +310,43 @@ void(*cdll_function(const char *l, const char *f))(void)
         }
 
 #if defined(__WINDOWS__) || defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__TOS_WIN__)
-        /* We need a hack to make sure that the vars are used */
-        err = NULL;  tmp = (void * )NULL;
+		(void)err;
+		(void)tmp;
         if(!(d->handle = (void *)LoadLibrary(l)))
         {
+			/*
             void (*e)(const char *) = d->errorFunction;
             cdll_cleanup(d->name);
             e(dlerror());
             return NULL;
+			*/
+
+            void (*e)(const char *) = d->errorFunction;
+			LPVOID lpMsgBuf;
+			LPVOID lpDisplayBuf;
+			DWORD  dw;
+
+            cdll_cleanup(d->name);
+
+			dw = GetLastError();
+
+			FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+					NULL,
+					dw,
+					MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+					(LPTSTR) &lpMsgBuf,
+					0,
+					NULL);
+
+			lpDisplayBuf = (LPVOID)LocalAlloc(LMEM_ZEROINIT, (lstrlen((LPCTSTR)lpMsgBuf) + lstrlen((LPCSTR)d->name) + 128) * sizeof(TCHAR));
+			StringCchPrintf((LPTSTR)lpDisplayBuf, LocalSize(lpDisplayBuf) / sizeof(TCHAR), TEXT("'%s' failed with error %d: %s"), TEXT(d->name), dw, lpMsgBuf);
+
+			e(T2A(lpDisplayBuf));
+
+			LocalFree(lpMsgBuf);
+			LocalFree(lpDisplayBuf);
+
+			return NULL;
         }
 
         if(!(res = (void (*)(void))GetProcAddress((HINSTANCE)d->handle, f)))
