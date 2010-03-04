@@ -46,7 +46,7 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 #define CDLL_END } BOOL WINAPI DllMain (HINSTANCE u0, DWORD u1, LPVOID u2){(void)u0; (void)u1; (void)u2; return 1;}
 #else
 #define CDLL_BEGIN
-#define CDLL_END BOOL WINAPI DllMain (HINSTANCE, DWORD, LPVOID){return 1;}
+#define CDLL_END BOOL WINAPI DllMain (HINSTANCE u0, DWORD u1, LPVOID u2){(void)u0; (void)u1; (void)u2; return 1;}
 #endif
 #define CDLL_PREFIX __declspec(dllexport)
 #else
