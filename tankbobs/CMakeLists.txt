@@ -74,6 +74,10 @@ else(UNIX)
 	set(client_libs lua51.lib zlib.lib physfs.lib)
 	set(server_libs lua51.lib zlib.lib physfs.lib)
 endif(UNIX)
+
+if(WIN32)
+	set(tstr_libs strsafe.lib)
+endif(WIN32)
 	
 set(tstr_srcs src/lib/tstr/tstr.c)
 
@@ -93,3 +97,4 @@ add_executable(tankbobs-server ${server_srcs})
 target_link_libraries(tankbobs-server ${server_libs})
 
 add_library(tstr SHARED ${tstr_srcs})
+target_link_libraries(tstr ${tstr_libs})
