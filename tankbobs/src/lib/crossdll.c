@@ -33,8 +33,6 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 #if defined(__WINDOWS__) || defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__TOS_WIN__)
 #include <windows.h>
 #include <strsafe.h>
-#include <AtlBase.h>
-#include <AtlConv.h>
 static const char *extension = ".dll";
 #else
 #include <dlfcn.h>
@@ -224,9 +222,11 @@ void(*cdll_function(const char *l, const char *f))(void)
         if(!(d->handle = (void *)LoadLibrary(l)))
         {
             void (*e)(const char *) = d->errorFunction;
+			static char buf[CDLL_MAX_BUF_CHARS];
 			LPVOID lpMsgBuf;
 			LPVOID lpDisplayBuf;
 			DWORD  dw;
+			int i;
 
             cdll_cleanup(d->name);
 
@@ -243,10 +243,14 @@ void(*cdll_function(const char *l, const char *f))(void)
 			lpDisplayBuf = (LPVOID)LocalAlloc(LMEM_ZEROINIT, (lstrlen((LPCTSTR)lpMsgBuf) + lstrlen((LPCSTR)d->name) + 128) * sizeof(TCHAR));
 			StringCchPrintf((LPTSTR)lpDisplayBuf, LocalSize(lpDisplayBuf) / sizeof(TCHAR), TEXT("'%s' failed with error %d: %s"), TEXT(d->name), dw, lpMsgBuf);
 
-			e(T2A(lpDisplayBuf));
-
 			LocalFree(lpMsgBuf);
 			LocalFree(lpDisplayBuf);
+
+			for(i = 0; i < sizeof(buf) - 1 && ((LPCTSTR)lpDisplayBuf)[i]; i++)
+				buf[i] = ((LPCTSTR)lpDisplayBuf)[i];
+			buf[i] = 0;
+
+			e(buf);
 
 			return NULL;
         }
@@ -325,9 +329,11 @@ void(*cdll_function(const char *l, const char *f))(void)
 			*/
 
             void (*e)(const char *) = d->errorFunction;
+			static char buf[CDLL_MAX_BUF_CHARS];
 			LPVOID lpMsgBuf;
 			LPVOID lpDisplayBuf;
 			DWORD  dw;
+			int i;
 
             cdll_cleanup(d->name);
 
@@ -344,10 +350,14 @@ void(*cdll_function(const char *l, const char *f))(void)
 			lpDisplayBuf = (LPVOID)LocalAlloc(LMEM_ZEROINIT, (lstrlen((LPCTSTR)lpMsgBuf) + lstrlen((LPCSTR)d->name) + 128) * sizeof(TCHAR));
 			StringCchPrintf((LPTSTR)lpDisplayBuf, LocalSize(lpDisplayBuf) / sizeof(TCHAR), TEXT("'%s' failed with error %d: %s"), TEXT(d->name), dw, lpMsgBuf);
 
-			e(T2A(lpDisplayBuf));
-
 			LocalFree(lpMsgBuf);
 			LocalFree(lpDisplayBuf);
+
+			for(i = 0; i < sizeof(buf) - 1 && ((LPCTSTR)lpDisplayBuf)[i]; i++)
+				buf[i] = ((LPCTSTR)lpDisplayBuf)[i];
+			buf[i] = 0;
+
+			e(buf);
 
 			return NULL;
         }

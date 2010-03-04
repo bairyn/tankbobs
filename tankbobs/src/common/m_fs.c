@@ -713,11 +713,10 @@ int fs_init(lua_State *L)
 
 		if(num > 0)
 		{
-			int i = 0;
+			int i;
 
-			while(i < sizeof(buf) - 1 && s[0][i])
+			for(i = 0; i < sizeof(buf) - 1 && s[0][i]; i++)
 				buf[i] = s[0][i];
-
 			buf[i] = 0;
 
 			a = buf;
@@ -734,8 +733,7 @@ int fs_init(lua_State *L)
 			static char buf[BUFSIZE];
 
 			while(i < sizeof(buf) - 1 && (c = fgetc(fin)) != EOF)
-				buf[i] = c;
-
+				buf[i++] = c;
 			buf[i] = 0;
 
 			fclose(fin);
