@@ -15,7 +15,9 @@ externally.  Example uses are extended usage functions, stdlib's mem* operations
 #ifndef TSTR_H
 #define TSTR_H
 
-#include <SDL.h> /* tstr requires SDL's size typing */
+#include <SDL.h> /* tstr requires SDL's types */
+
+#include "crossdll.h"
 
 typedef struct
 {
@@ -26,23 +28,23 @@ typedef struct
 
 #ifdef TSTR_C /* only define prototypes if called from tstr.c */
 #undef TSTR_C
-tstr *tstr_new(void);
-void tstr_free(tstr *s);
-void tstr_set(tstr *s, const char *t);
-void tstr_lset(tstr *s, const char *t, Uint32 len);
-void tstr_cat(tstr *s, const char *t);
-void tstr_lcat(tstr *s, const char *t, Uint32 len);
-void tstr_set_tstr(tstr *s, tstr *t);
-void tstr_cat_tstr(tstr *s, tstr *t);
-void tstr_base_set(tstr *s, const char *t);
-void tstr_base_lset(tstr *s, const char *t, Uint32 len);
-void tstr_base_cat(tstr *s, const char *t);
-void tstr_base_lcat(tstr *s, const char *t, Uint32 len);
-void tstr_base_set_tstr(tstr *s, tstr *t);
-void tstr_base_cat_tstr(tstr *s, tstr *t);
-const char *tstr_cstr(tstr *s);
-void tstr_shrink(tstr *s);
-void tstr_find(tstr *s, const char *t, Sint8 order, Sint32 start, Sint32 *firstOccuranceRelBegin, Sint32 *firstOccuranceRelEnd);  /* index + 1 - will NOT set values if not found */
+CDLL_PREFIX tstr *tstr_new(void);
+CDLL_PREFIX void tstr_free(tstr *s);
+CDLL_PREFIX void tstr_set(tstr *s, const char *t);
+CDLL_PREFIX void tstr_lset(tstr *s, const char *t, Uint32 len);
+CDLL_PREFIX void tstr_cat(tstr *s, const char *t);
+CDLL_PREFIX void tstr_lcat(tstr *s, const char *t, Uint32 len);
+CDLL_PREFIX void tstr_set_tstr(tstr *s, tstr *t);
+CDLL_PREFIX void tstr_cat_tstr(tstr *s, tstr *t);
+CDLL_PREFIX void tstr_base_set(tstr *s, const char *t);
+CDLL_PREFIX void tstr_base_lset(tstr *s, const char *t, Uint32 len);
+CDLL_PREFIX void tstr_base_cat(tstr *s, const char *t);
+CDLL_PREFIX void tstr_base_lcat(tstr *s, const char *t, Uint32 len);
+CDLL_PREFIX void tstr_base_set_tstr(tstr *s, tstr *t);
+CDLL_PREFIX void tstr_base_cat_tstr(tstr *s, tstr *t);
+CDLL_PREFIX const char *tstr_cstr(tstr *s);
+CDLL_PREFIX void tstr_shrink(tstr *s);
+CDLL_PREFIX void tstr_find(tstr *s, const char *t, Sint8 order, Sint32 start, Sint32 *firstOccuranceRelBegin, Sint32 *firstOccuranceRelEnd);  /* index + 1 - will NOT set values if not found */
 #endif
 
 #endif

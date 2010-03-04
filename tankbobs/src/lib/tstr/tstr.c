@@ -31,20 +31,20 @@ static void tstr_private_init(tstr *s)
 	s->data = NULL;
 }
 
-tstr *CDLL_PREFIX tstr_new()
+CDLL_PREFIX tstr *tstr_new()
 {
 	tstr *res = malloc(sizeof(tstr));
 	tstr_private_init(res);
 	return res;
 }
 
-void CDLL_PREFIX tstr_free(tstr *s)
+CDLL_PREFIX void tstr_free(tstr *s)
 {
 	free(s->data);
 	free(s);
 }
 
-void CDLL_PREFIX tstr_set(tstr *s, const char *t)
+CDLL_PREFIX void tstr_set(tstr *s, const char *t)
 {
 	Uint32 len = s->len = strlen(t);
 
@@ -60,7 +60,7 @@ void CDLL_PREFIX tstr_set(tstr *s, const char *t)
 	memmove(s->data, t, len);
 }
 
-void CDLL_PREFIX tstr_lset(tstr *s, const char *t, Uint32 len)
+CDLL_PREFIX void tstr_lset(tstr *s, const char *t, Uint32 len)
 {
 	s->len = len;
 
@@ -76,7 +76,7 @@ void CDLL_PREFIX tstr_lset(tstr *s, const char *t, Uint32 len)
 	memmove(s->data, t, len);
 }
 
-void CDLL_PREFIX tstr_cat(tstr *s, const char *t)
+CDLL_PREFIX void tstr_cat(tstr *s, const char *t)
 {
 	Uint32 len = s->len = strlen(t) + s->len;
 
@@ -94,7 +94,7 @@ void CDLL_PREFIX tstr_cat(tstr *s, const char *t)
 	memmove(&s->data[len - strlen(t)], t, strlen(t));
 }
 
-void CDLL_PREFIX tstr_lcat(tstr *s, const char *t, Uint32 len)
+CDLL_PREFIX void tstr_lcat(tstr *s, const char *t, Uint32 len)
 {
 	if(!len)
 		return;
@@ -111,7 +111,7 @@ void CDLL_PREFIX tstr_lcat(tstr *s, const char *t, Uint32 len)
 	s->len += len;
 }
 
-void CDLL_PREFIX tstr_set_tstr(tstr *s, tstr *t)
+CDLL_PREFIX void tstr_set_tstr(tstr *s, tstr *t)
 {
 	if(!t->len || !t->data || !t->mem)
 		return;
@@ -125,7 +125,7 @@ void CDLL_PREFIX tstr_set_tstr(tstr *s, tstr *t)
 	memmove(s->data, t->data, s->len);
 }
 
-void CDLL_PREFIX tstr_cat_tstr(tstr *s, tstr *t)
+CDLL_PREFIX void tstr_cat_tstr(tstr *s, tstr *t)
 {
 	if(!t->len || !t->data || !t->mem)
 		return;
@@ -142,7 +142,7 @@ void CDLL_PREFIX tstr_cat_tstr(tstr *s, tstr *t)
 	s->len += t->len;
 }
 
-void CDLL_PREFIX tstr_base_set(tstr *s, const char *t)
+CDLL_PREFIX void tstr_base_set(tstr *s, const char *t)
 {
 	Uint32 len = s->len = strlen(t);
 
@@ -155,7 +155,7 @@ void CDLL_PREFIX tstr_base_set(tstr *s, const char *t)
 	memcpy(s->data, t, len);
 }
 
-void CDLL_PREFIX tstr_base_lset(tstr *s, const char *t, Uint32 len)
+CDLL_PREFIX void tstr_base_lset(tstr *s, const char *t, Uint32 len)
 {
 	s->len = len;
 
@@ -168,7 +168,7 @@ void CDLL_PREFIX tstr_base_lset(tstr *s, const char *t, Uint32 len)
 	memcpy(s->data, t, len);
 }
 
-void CDLL_PREFIX tstr_base_cat(tstr *s, const char *t)
+CDLL_PREFIX void tstr_base_cat(tstr *s, const char *t)
 {
 	Uint32 len = s->len = strlen(t) + s->len;
 
@@ -183,7 +183,7 @@ void CDLL_PREFIX tstr_base_cat(tstr *s, const char *t)
 	memcpy(&s->data[len - strlen(t)], t, strlen(t));
 }
 
-void CDLL_PREFIX tstr_base_lcat(tstr *s, const char *t, Uint32 len)
+CDLL_PREFIX void tstr_base_lcat(tstr *s, const char *t, Uint32 len)
 {
 	if(s->len + len > s->mem)
 	{
@@ -197,7 +197,7 @@ void CDLL_PREFIX tstr_base_lcat(tstr *s, const char *t, Uint32 len)
 	s->len += len;
 }
 
-void CDLL_PREFIX tstr_base_set_tstr(tstr *s, tstr *t)
+CDLL_PREFIX void tstr_base_set_tstr(tstr *s, tstr *t)
 {
 	if((s->len = t->len) > s->mem)
 	{
@@ -208,7 +208,7 @@ void CDLL_PREFIX tstr_base_set_tstr(tstr *s, tstr *t)
 	memcpy(s->data, t->data, s->len);
 }
 
-void CDLL_PREFIX tstr_base_cat_tstr(tstr *s, tstr *t)
+CDLL_PREFIX void tstr_base_cat_tstr(tstr *s, tstr *t)
 {
 	if(s->len + t->len > s->mem)
 	{
@@ -222,7 +222,7 @@ void CDLL_PREFIX tstr_base_cat_tstr(tstr *s, tstr *t)
 	s->len += t->len;
 }
 
-const char *CDLL_PREFIX tstr_cstr(tstr *s)
+CDLL_PREFIX const char *tstr_cstr(tstr *s)
 {
 	if(s->len >= s->mem)
 	{
@@ -236,7 +236,7 @@ const char *CDLL_PREFIX tstr_cstr(tstr *s)
 	return s->data;
 }
 
-void CDLL_PREFIX tstr_shrink(tstr *s)
+CDLL_PREFIX void tstr_shrink(tstr *s)
 {
 	char *olddata = s->data;
 
@@ -261,7 +261,7 @@ static Uint8 tstr_private_find(const char *pos, const char *end, const char *fin
 	return 1;
 }
 
-void CDLL_PREFIX tstr_find(tstr *s, const char *t, Sint8 order, Sint32 start, Sint32 *firstOccuranceRelBegin, Sint32 *firstOccuranceRelEnd)
+CDLL_PREFIX void tstr_find(tstr *s, const char *t, Sint8 order, Sint32 start, Sint32 *firstOccuranceRelBegin, Sint32 *firstOccuranceRelEnd)
 {
 	const char *pos = s->data;
 
