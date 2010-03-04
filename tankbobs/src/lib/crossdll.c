@@ -20,7 +20,7 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 /*
  * crossdll.c
  *
- * crossdll.c enables a cross-platform interface to DLL's.  All handling is done
+ * crossdll.c implements a cross-platform interface to DLL's.  All handling is done
  * in this file.  Note that this source file uses the following string
  * constants: ".dll", ".so", "Error code: %d\n", "\n" and ""; the following
  * string constants might be used: "LD_LIBRARY_PATH" and "PWD"
@@ -33,6 +33,8 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 #if defined(__WINDOWS__) || defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__TOS_WIN__)
 #include <windows.h>
 #include <strsafe.h>
+#include <AltBase.h>
+#include <AltConv.h>
 static const char *extension = ".dll";
 #else
 #include <dlfcn.h>

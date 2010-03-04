@@ -20,13 +20,12 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 /*
  * crossdll.h
  *
- * crossdll.h enables a cross-platform interface to DLL's.  All handling is done
- * in crossdll.c.  When writing a crossdll dll, be sure to #include this file.
- * Then put CDLL_BEGIN at the beginning of the file and CDLL_END at the end.
- * For each function definition (prototypes excluded, and only the DLL
- * functions), place CDLL_PREFIX _immediately before_ the function name.  Also
- * remember that a main function is not allowed in crossdll because it is not
- * cross-platform.
+ * crossdll is a cross-platform interface to DLL's.  All handling is done
+ * in crossdll.c.  When writing a crossdll dll, be sure to #include this file,
+ * put CDLL_BEGIN at the beginning of the file, and CDLL_END at the end;
+ * for each function definition, including prototypes, place CDLL_FUNCTION at the
+ * beginning.  Also * remember that a main function is not allowed with crossdll
+ * because it is not cross-platform.
  */
 
 #ifndef CROSSDLL_H
