@@ -5,6 +5,13 @@ if(UNIX)
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror -fPIC -pedantic-errors -pthread -std=c99")
 	#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -Wall -Werror -pedantic-errors -ansi")  # Box2D
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -fPIC")  # Box2D
+else(UNIX)
+	if(MSVC)
+		set(CMAKE_C_FLAGS_DEBUG_INIT "/D TDEBUG /MTd /Zi /Ob0 /Od /RTC1")
+		set(CMAKE_C_FLAGS_MINSIZEREL_INIT "/MT /O1 /Ob1")
+		set(CMAKE_C_FLAGS_RELEASE_INIT "/MT /O2 /Ob2")
+		set(CMAKE_C_FLAGS_RELWITHDEBINFO_INIT "/MT /Zi /O2 /Ob1")
+	endif(MSVC)
 endif(UNIX)
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
