@@ -44,11 +44,11 @@ function c_module_init()
 		end
 	end
 
-	common_print(-1, "Tankbobs v" .. c_const_get("version") .. " startup\n")
+	common_print(-1, "Tankbobs v" .. common_versionString(c_const_get("version")) .. " with libmtankbobs v" .. common_versionString(c_const_get("libmtankbobsversion")) .. " startup\n")
 end
 
 function c_module_done()
-	common_print(-1, "Tankbobs v" .. c_const_get("version") .. " shutdown\n")
+	common_print(-1, "Tankbobs v" .. common_versionString(c_const_get("version")) .. " with libmtankbobs v" .. common_versionString(c_const_get("libmtankbobsversion")) .. " shutdown\n")
 
 	c_module_done = nil
 end

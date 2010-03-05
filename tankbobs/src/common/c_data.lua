@@ -26,7 +26,8 @@ Constants
 function c_data_init()
 	c_data_init = nil
 
-	c_const_set("version", "0.1.0-dev")
+	c_const_set("version", version)
+	c_const_set("libmtankbobsversion", tankbobs.t_getVersion())
 	c_const_set("debug", select(1, tankbobs.t_isDebug()))
 	--c_const_set("data_dir", "./data/")
 	c_const_set("data_dir", "")

@@ -23,6 +23,8 @@ common.lua
 Common functions
 --]]
 
+version = {0,1,0, "-dev"}
+
 -- All code should use the PhysicsFS interface
 path = package.path
 cpath = package.cpath
@@ -161,6 +163,45 @@ end
 
 function common_nil(...)
 	return ...
+end
+
+function common_cmpVersions(a, b)
+	-- returns a positive number when 'a' > 'b', a negative number when 'a' < 'b', and zero when 'a' = 'b'
+	for i = 1, math.max(#a, #b) do
+		local na = a[i]
+		local nb = b[i]
+
+		if type(na) ~= nb or type(na) ~= "number" then
+			return 0
+		elseif na > nb then
+			return 1
+		elseif na < nb then
+			return -1
+		end
+	end
+
+	return 0
+end
+
+function common_versionString(v)
+	local string = ""
+
+	for i = 1, #v do
+		local n = v[i]
+
+		if type(n) ~= "number" then
+			string = string .. tostring(n)
+
+			break
+		end
+
+		if #string > 0 then
+			string = string .. "."
+		end
+		string = string .. tostring(n)
+	end
+
+	return string
 end
 
 function common_interrupt()

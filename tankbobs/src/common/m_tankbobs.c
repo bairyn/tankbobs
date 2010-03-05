@@ -41,6 +41,9 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 #include "tstr.h"
 #include "crossdll.h"
 
+#define VERSION "0.1.0"
+#define VERSIONSUFFIX "-dev"
+
 int init = false;
 Uint32 sdlFlags;
 
@@ -225,6 +228,61 @@ int t_quitSDL(lua_State *L)
 	SDL_Quit();
 
 	return 0;
+}
+
+int t_getVersion(lua_State *L)
+{
+	const char *v = VERSION;
+	const char *s = VERSIONSUFFIX;
+	char buf[BUFSIZE] = {""};
+	int i = 0, j = 0;
+
+	lua_newtable(L);
+
+	while(*v && i < sizeof(buf) - 1)
+	{
+		char c = *v++;
+
+		if(c == '.' || i >= sizeof(buf) - 1)
+		{
+			int n;
+
+			sscanf(buf, "%d", &n);
+
+			lua_pushinteger(L, ++j);
+			lua_pushinteger(L, n);
+			lua_settable(L, -3);
+
+			i = buf[0] = 0;
+		}
+		else
+		{
+			buf[i++] = c;
+			buf[i]   = 0;
+		}
+	}
+
+	if(buf[0])
+	{
+		int n;
+
+		sscanf(buf, "%d", &n);
+
+		lua_pushinteger(L, ++j);
+		lua_pushinteger(L, n);
+		lua_settable(L, -3);
+
+		i = buf[0] = 0;
+	}
+
+	if(*s)
+	{
+		lua_pushinteger(L, ++j);
+		lua_pushstring(L, s);
+		lua_settable(L, -3);
+	}
+
+	return 1;
 }
 
 int t_getTicks(lua_State *L)
@@ -706,6 +764,8 @@ static const struct luaL_Reg tankbobs[] =
 	{"t_quit", t_quit}, /* clean up */
 		/* no args, no returns, quits Tankbobs module */
 	{"t_quitSDL", t_quitSDL}, /* quit SDL */
+	{"t_getVersion", t_getVersion}, /* get libmtankbobs's version */
+	    /* Nothing is passed to this function.  A version table is returned. */
 	{"t_getTicks", t_getTicks}, /* SDL_GetTicks() */
 		/* no args, 1st and only return value is number of milliseconds since
 			app start */
