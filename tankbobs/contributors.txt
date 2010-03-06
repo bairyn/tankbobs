@@ -1,0 +1,3 @@
+Byron James Johnson: Programming, game design, sound, level design, textures, UI, level editor
+Ben Millwood: More accurate speed of approach on tank collisions
+(A) sar3th: Win32 builds
