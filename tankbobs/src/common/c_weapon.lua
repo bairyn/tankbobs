@@ -124,7 +124,7 @@ function c_weapon_init()
 	weapon.index = 2
 	weapon.name = "machinegun"
 	weapon.altName = "machinegun"
-	weapon.damage = 4
+	weapon.damage = 8
 	weapon.pellets = 1
 	weapon.speed = 200
 	weapon.spread = tankbobs.m_radians(0)
