@@ -66,20 +66,22 @@ function st_selected_init()
 	local skillPos = 0
 	local skill = c_config_get("game.allBotLevels")
 	if type(skill) ~= "number" or skill <= 0 then
-		skillPos = 0
-	elseif skill == 1 then
 		skillPos = 1
-	elseif skill == 2 then
+	elseif skill == 1 then
 		skillPos = 2
-	elseif skill == 4 then
+	elseif skill == 2 then
 		skillPos = 3
-	elseif skill == 8 then
+	elseif skill == 4 then
 		skillPos = 4
-	elseif skill == 16 then
+	elseif skill == 8 then
 		skillPos = 5
+	elseif skill == 16 then
+		skillPos = 6
+	else
+		skillPos = 0
 	end
-	local skillLevels = {"Decent", "Medium", "Easy", "Very easy", "Ridiculously easy"}
-	skillLevels[0] = "Automatic"
+	local skillLevels = {"Automatic", "Decent", "Medium", "Easy", "Very easy", "Ridiculously easy"}
+	skillLevels[0] = "Custom"
 	gui_addLabel(tankbobs.m_vec2(50, 75), "Game type", nil, 1 / 3) gui_addCycle(tankbobs.m_vec2(75, 75), "Game type", nil, st_selected_gameType, {"Deathmatch", "Chase", "Domination", "Capture the Flag"}, pos, 0.5)
 	limit = gui_addLabel(tankbobs.m_vec2(50, 69), "Frag limit", nil, 1 / 3) limitInput = gui_addInput(tankbobs.m_vec2(75, 69), tostring(c_config_get(limitConfig)), nil, st_selected_limit, true, 4, 0.5)
 	gui_addLabel(tankbobs.m_vec2(50, 63), "Instagib", nil, 1 / 3) gui_addCycle(tankbobs.m_vec2(75, 63), "Instagib", nil, st_selected_instagib, {"No", "Semi", "Yes"}, instagibPos, 0.5)
@@ -162,17 +164,17 @@ function st_selected_gameType(widget, string, index)
 end
 
 function st_selected_skill(widget, string, index)
-	if     index == 0 then
+	if     index == 1 then
 		c_config_set("game.allBotLevels", "automatic")
-	elseif index == 1 then
-		c_config_set("game.allBotLevels", 1)
 	elseif index == 2 then
-		c_config_set("game.allBotLevels", 2)
+		c_config_set("game.allBotLevels", 1)
 	elseif index == 3 then
-		c_config_set("game.allBotLevels", 4)
+		c_config_set("game.allBotLevels", 2)
 	elseif index == 4 then
-		c_config_set("game.allBotLevels", 8)
+		c_config_set("game.allBotLevels", 4)
 	elseif index == 5 then
+		c_config_set("game.allBotLevels", 8)
+	elseif index == 6 then
 		c_config_set("game.allBotLevels", 16)
 	end
 end
