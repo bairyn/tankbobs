@@ -98,7 +98,7 @@ function st_selected_step(d)
 end
 
 function st_selected_limit(widget)
-	c_config_set(limitConfig, tonumber(widget.inputText))
+	c_config_set(limitConfig, tonumber(widget.inputText) or 0)
 end
 
 function st_selected_instagib(widget, string, index)
