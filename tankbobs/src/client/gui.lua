@@ -1166,7 +1166,7 @@ function gui_button(button, pressed)
 			elseif switch == ACTION then
 			elseif switch == CYCLE then
 				if pressed then
-					if selected.cycleList[selected.cyclePos - 1] then
+					if selected.cyclePos - 1 >= 1 and selected.cycleList[selected.cyclePos - 1] then
 						selected.cyclePos = selected.cyclePos - 1
 
 						if selected.cycleCallBack then
