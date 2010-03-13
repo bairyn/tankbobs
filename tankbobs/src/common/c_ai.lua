@@ -56,13 +56,13 @@ function c_ai_init()
 	c_const_set("ai_reloadEmptyWeaponFrequency", 24)  -- lower is more likely; chance of 1 / x for bots with skill level of 1
 	c_const_set("ai_shotgunMinAmmo", 2)
 	c_const_set("ai_enemySightedTime", 3)
-	c_const_set("ai_meleeFireRange", 5.5)
+	c_const_set("ai_meleeRangePlasmaGun", 21)
 	c_const_set("ai_meleeRangeSkill", 0.5)
 	c_const_set("ai_enemyMeleeFireRange", 16)
 	c_const_set("ai_enemyMeleeRangeSkill", -0.6)
 	c_const_set("ai_meleeChaseTargetMinDistance", 5)
-	c_const_set("ai_meleeChaseTargetMinSpecialSpeed", 32)
-	c_const_set("ai_meleeChaseTargetMinSpecialSpeedInstagib", 44)
+	c_const_set("ai_meleeChaseTargetMinSpecialSpeed", 16)
+	c_const_set("ai_meleeChaseTargetMinSpecialSpeedInstagib", 24)
 	c_const_set("ai_minHealth", 20)
 	c_const_set("ai_minHealthInstagib", -1)
 	c_const_set("ai_taggedAvoidMaxDistance", 50)
@@ -406,7 +406,7 @@ end
 function c_ai_isMeleeWeapon(tank)
 	-- this should work on all tanks
 
-	if c_ai_isWeapon(tank, "saw") then
+	if c_weapon_getWeapons()[tank.weapon].meleeRange ~= 0 then
 		return true
 	end
 
@@ -476,7 +476,11 @@ function c_ai_shootEnemies(tank, enemy, angle, pos, time)
 	if math.random(1000 * c_ai_relativeTankSkill(tank), 1000 * (1 + c_const_get("ai_skipUpdateRandomReduce"))) / 1000 < c_const_get("ai_skipUpdateRandom") then
 		c_ai_setTankStateRotation(tank, tank.r - angle)
 		if c_ai_isMeleeWeapon(tank) then
-			if (enemy.p - tank.p).R < c_const_get("ai_meleeFireRange") + tank.ai.skill * c_const_get("ai_meleeRangeSkill") then
+			local range = c_weapon_getWeapons()[tank.weapon].meleeRange
+			if range < 0 then
+				range = c_const_get("ai_meleeRangePlasmaGun") + tank.radiusFireTime
+			end
+			if (enemy.p - tank.p).R < range + math.max(0, tank.ai.skill - 1) * c_const_get("ai_meleeRangeSkill") then
 				c_ai_setTankStateFire(tank, 1)
 			else
 				c_ai_setTankStateFire(tank, 0)
