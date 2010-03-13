@@ -154,7 +154,11 @@ function c_ai_initTank(tank, ai)
 	tank.ai = {}
 
 	local maxSkillRandom = c_world_getInstagib() and c_const_get("ai_maxSkillInstagib") or c_const_get("ai_maxSkill")
-	tank.ai.skill = math.random(c_const_get("ai_minSkill"), maxSkillRandom)
+	local skill = c_config_get("game.allBotLevels")
+	if type(skill) ~= "number" or skill <= 0 then
+		skill = math.random(c_const_get("ai_minSkill"), maxSkillRandom)
+	end
+	tank.ai.skill = skill
 
 	tank.color.r = c_config_get("game.bot.color.r")
 	tank.color.g = c_config_get("game.bot.color.g")

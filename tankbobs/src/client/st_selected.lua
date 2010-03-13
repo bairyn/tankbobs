@@ -40,17 +40,17 @@ function st_selected_init()
 	gui_addAction(tankbobs.m_vec2(25, 92.5), "Back", nil, c_state_advance)
 
 	local pos = 0
-	local type = c_config_get("game.gameType")
-		if type == "deathmatch" then
+	local gameType = c_config_get("game.gameType")
+		if gameType == "deathmatch" then
 		pos = 1
 		limitConfig = "game.fragLimit"
-	elseif type == "chase" then
+	elseif gameType == "chase" then
 		pos = 2
 		limitConfig = "game.chaseLimit"
-	elseif type == "domination" then
+	elseif gameType == "domination" then
 		pos = 3
 		limitConfig = "game.pointLimit"
-	elseif type == "capturetheflag" then
+	elseif gameType == "capturetheflag" then
 		pos = 4
 		limitConfig = "game.captureLimit"
 	end
@@ -63,10 +63,30 @@ function st_selected_init()
 	else
 		instagibPos = 3
 	end
-	gui_addLabel(tankbobs.m_vec2(50, 75), "Game type", nil, 1 / 3) gui_addCycle(tankbobs.m_vec2(75, 75), "Instagib", nil, st_selected_gameType, {"Deathmatch", "Chase", "Domination", "Capture the Flag"}, pos, 0.5)
+	local skillPos = 0
+	local skill = c_config_get("game.allBotLevels")
+	if type(skill) ~= "number" or skill <= 0 then
+		skillPos = 0
+	elseif skill == 1 then
+		skillPos = 1
+	elseif skill == 2 then
+		skillPos = 2
+	elseif skill == 4 then
+		skillPos = 3
+	elseif skill == 8 then
+		skillPos = 4
+	elseif skill == 16 then
+		skillPos = 5
+	end
+	local skillLevels = {"Decent", "Medium", "Easy", "Very easy", "Ridiculously easy"}
+	skillLevels[0] = "Automatic"
+	gui_addLabel(tankbobs.m_vec2(50, 75), "Game type", nil, 1 / 3) gui_addCycle(tankbobs.m_vec2(75, 75), "Game type", nil, st_selected_gameType, {"Deathmatch", "Chase", "Domination", "Capture the Flag"}, pos, 0.5)
 	limit = gui_addLabel(tankbobs.m_vec2(50, 69), "Frag limit", nil, 1 / 3) limitInput = gui_addInput(tankbobs.m_vec2(75, 69), tostring(c_config_get(limitConfig)), nil, st_selected_limit, true, 4, 0.5)
 	gui_addLabel(tankbobs.m_vec2(50, 63), "Instagib", nil, 1 / 3) gui_addCycle(tankbobs.m_vec2(75, 63), "Instagib", nil, st_selected_instagib, {"No", "Semi", "Yes"}, instagibPos, 0.5)
-	gui_addAction(tankbobs.m_vec2(75, 54), "Start", nil, st_selected_start)
+	if type(c_config_get("game.computers")) == "number" and c_config_get("game.computers") > 0 then
+		gui_addLabel(tankbobs.m_vec2(50, 57), "Difficulty against bots", nil, 1 / 5) gui_addCycle(tankbobs.m_vec2(75, 57), "Difficulty against bots", nil, st_selected_skill, skillLevels, skillPos, 0.5)
+	end
+	gui_addAction(tankbobs.m_vec2(75, 48), "Start", nil, st_selected_start)
 end
 
 function st_selected_done()
@@ -139,6 +159,22 @@ function st_selected_gameType(widget, string, index)
 	end
 
 	c_world_setGameType(c_config_get("game.gameType"))
+end
+
+function st_selected_skill(widget, string, index)
+	if     index == 0 then
+		c_config_set("game.allBotLevels", "automatic")
+	elseif index == 1 then
+		c_config_set("game.allBotLevels", 1)
+	elseif index == 2 then
+		c_config_set("game.allBotLevels", 2)
+	elseif index == 3 then
+		c_config_set("game.allBotLevels", 4)
+	elseif index == 4 then
+		c_config_set("game.allBotLevels", 8)
+	elseif index == 5 then
+		c_config_set("game.allBotLevels", 16)
+	end
 end
 
 function st_selected_start(widget)

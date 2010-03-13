@@ -132,6 +132,7 @@
 	</debug>
 
 	<game>
+		<allBotLevels>automatic</allBotLevels>
 		<bot>
 			<color>
 				<r> 0.875 </r>  Orange
