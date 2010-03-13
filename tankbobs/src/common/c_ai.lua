@@ -480,7 +480,7 @@ function c_ai_shootEnemies(tank, enemy, angle, pos, time)
 			if range < 0 then
 				range = c_const_get("ai_meleeRangePlasmaGun") + tank.radiusFireTime
 			end
-			if (enemy.p - tank.p).R < range + math.max(0, tank.ai.skill - 1) * c_const_get("ai_meleeRangeSkill") then
+			if (enemy.p - tank.p).R < range + 2 + math.max(0, tank.ai.skill - 1) * c_const_get("ai_meleeRangeSkill") then
 				c_ai_setTankStateFire(tank, 1)
 			else
 				c_ai_setTankStateFire(tank, 0)
