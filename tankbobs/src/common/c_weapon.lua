@@ -124,7 +124,7 @@ function c_weapon_init()
 	weapon.index = 2
 	weapon.name = "machinegun"
 	weapon.altName = "machinegun"
-	weapon.damage = 8
+	weapon.damage = 12
 	weapon.pellets = 1
 	weapon.speed = 200
 	weapon.spread = tankbobs.m_radians(0)
@@ -156,8 +156,8 @@ function c_weapon_init()
 	weapon.render[4](1, 1)
 
 	weapon.projectileTexture = "machinegun-projectile.png"
-	weapon.projectileDensity = 1.25
-	weapon.projectileRestitution = 1
+	weapon.projectileDensity = 0.5
+	weapon.projectileRestitution = 0.3
 	weapon.projectileMaxCollisions = 1
 	weapon.projectileEndOnBody = true
 
@@ -194,7 +194,7 @@ function c_weapon_init()
 	weapon.damage = 25
 	weapon.pellets = 5
 	weapon.speed = 200
-	weapon.spread = tankbobs.m_radians(12)  -- the angle between each pellet
+	weapon.spread = tankbobs.m_radians(11)  -- the angle between each pellet
 	weapon.repeatRate = 1
 	weapon.sa = false
 
@@ -204,8 +204,8 @@ function c_weapon_init()
 	weapon.reloadSound = {clip = "shotgun-reload.wav", initial = "shotgun-open.wav", final = "shotgun-close.wav"}
 	weapon.launchDistance = 6  -- 3 extra units to prevent the bullets from colliding before they spread
 	weapon.aimAid = false
-	weapon.capacity = 4
-	weapon.clips = 8
+	weapon.capacity = 8
+	weapon.clips = 10
 	weapon.reloadTime = {clip = 0.5, initial = 1, final = 1}
 	weapon.shotgunClips = true
 	weapon.meleeRange = 0
@@ -271,8 +271,8 @@ function c_weapon_init()
 	weapon.reloadSound = "railgun-reload.wav"
 	weapon.launchDistance = 3.5  -- half unit to keep tank from shooting itself
 	weapon.aimAid = false
-	weapon.capacity = 2
-	weapon.clips = 4
+	weapon.capacity = 3
+	weapon.clips = 2
 	weapon.reloadTime = 2
 	weapon.shotgunClips = false
 	weapon.meleeRange = 0
@@ -290,8 +290,8 @@ function c_weapon_init()
 	weapon.render[4](1, 1)
 
 	weapon.projectileTexture = "railgun-projectile.png"
-	weapon.projectileDensity = 1
-	weapon.projectileRestitution = 0.1
+	weapon.projectileDensity = 0.3
+	weapon.projectileRestitution = 0.03
 	weapon.projectileMaxCollisions = 0
 	weapon.projectileEndOnBody = true
 
@@ -459,7 +459,7 @@ function c_weapon_init()
 	weapon.index = 7
 	weapon.name = "coilgun"
 	weapon.altName = "coilgun"
-	weapon.damage = 20
+	weapon.damage = 34
 	weapon.pellets = 1
 	weapon.speed = 2000
 	weapon.spread = tankbobs.m_radians(0)
@@ -491,8 +491,8 @@ function c_weapon_init()
 	weapon.render[4](1, 1)
 
 	weapon.projectileTexture = "railgun-projectile.png"
-	weapon.projectileDensity = 0.25
-	weapon.projectileRestitution = 0.1
+	weapon.projectileDensity = 0.05
+	weapon.projectileRestitution = 0.03
 	weapon.projectileMaxCollisions = 0
 	weapon.projectileEndOnBody = true
 
