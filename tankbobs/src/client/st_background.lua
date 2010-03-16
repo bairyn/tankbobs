@@ -250,7 +250,7 @@ local function background_testEnd()
 	end
 
 	if endOfGame then
-		c_state_backgroundAdvance(c_state_getCurrentState())
+		c_state_backgroundAdvance(backgroundState)
 	end
 end
 

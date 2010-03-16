@@ -106,7 +106,7 @@ function c_state_done()
 	end
 end
 
-function c_state_validate(state)  -- "private" function
+function c_state_validate(state)  -- local function
 	if not state then
 		return false
 	elseif type(state) ~= "table" then
@@ -375,6 +375,10 @@ end
 
 function c_state_backgroundGoto(state, newState)
 	newState = newState or states[state].cur.next
+
+	while type(newState) == "function" do
+		newState = newState()
+	end
 
 	if not c_state_validate(newState) then
 		error("c_state_backgroundGoto: invalid new state")
