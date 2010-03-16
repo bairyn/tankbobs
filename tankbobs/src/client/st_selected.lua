@@ -124,13 +124,16 @@ function st_selected_limit(widget)
 end
 
 function st_selected_instagib(widget, string, index)
+	local setting = false
 	if string == "Yes" then
-		c_config_set("game.instagib", true)
+		setting = true
 	elseif string == "Semi" then
-		c_config_set("game.instagib", "semi")
+		setting = "semi"
 	elseif string == "No" then
-		c_config_set("game.instagib", false)
+		setting = false
 	end
+	c_config_set("game.instagib", setting)
+	c_world_setInstagib(setting)
 end
 
 function st_selected_gameType(widget, string, index)
