@@ -345,7 +345,7 @@ local function client_disconnect(client, reason)
 		if v == client then
 			-- remove tank from world
 			c_world_tank_die(v.tank)
-			c_world_tank_remove(v.tank)
+			c_world_removeTank(v.tank)
 
 			-- remove client
 			clients[k] = nil

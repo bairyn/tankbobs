@@ -46,6 +46,8 @@ local REQUESTING    = REQUESTING
 local RESPONDED     = RESPONDED
 local CONNECTED     = CONNECTED
 
+local server_timeout = 6
+
 function st_internet_init()
 	connection = {state = UNCONNECTED, proceeding = false, lastRequestTime, challenge = 0, address = c_config_get("client.serverIP"), ip = "", port = nil, ui = "", ping = nil, offset = nil, gameType = nil, t = nil, banMessage = ""}
 
@@ -56,8 +58,6 @@ function st_internet_init()
 		connection.port = nil
 		connection.ip = connection.address
 	end
-
-	c_const_set("server_timeout", 6000, -1)
 
 	gui_addAction(tankbobs.m_vec2(25, 85), "Back", nil, c_state_advance)
 
@@ -184,6 +184,12 @@ function st_internet_step(d)
 					local map = data:sub(1, data:find(tankbobs.io_fromChar(0x00)) - 1) data = data:sub(data:find(tankbobs.io_fromChar(0x00)) + 1)
 					local gameType = data:sub(1, data:find(tankbobs.io_fromChar(0x00)) - 1) data = data:sub(data:find(tankbobs.io_fromChar(0x00)) + 1)
 
+					-- stop background state
+					if backgroundState then
+						c_state_backgroundStop(backgroundState)
+						backgroundState = nil
+					end
+
 					c_tcm_select_set(set)
 					c_tcm_select_map(map)
 
@@ -207,22 +213,22 @@ function st_internet_step(d)
 				end
 			end
 		until not status
+	end
 
-		if tankbobs.t_getTicks() >= connection.lastRequestTime + c_const_get("server_timeout") then
-			if connection.state > UNCONNECTED then
-				-- abort the connection
-				tankbobs.n_newPacket(33)
-				tankbobs.n_writeToPacket(tankbobs.io_fromChar(0x04))
-				tankbobs.n_writeToPacket(connection.ui)
-				tankbobs.n_sendPacket()
-				tankbobs.n_sendPacket()
-				tankbobs.n_sendPacket()
-				tankbobs.n_sendPacket()
-				tankbobs.n_sendPacket()
-				tankbobs.n_quit()
+	if connection.lastRequestTime and tankbobs.t_getTicks() >= connection.lastRequestTime + c_world_timeMultiplier(server_timeout) then
+		if connection.state > UNCONNECTED then
+			-- abort the connection
+			tankbobs.n_newPacket(33)
+			tankbobs.n_writeToPacket(tankbobs.io_fromChar(0x04))
+			tankbobs.n_writeToPacket(connection.ui)
+			tankbobs.n_sendPacket()
+			tankbobs.n_sendPacket()
+			tankbobs.n_sendPacket()
+			tankbobs.n_sendPacket()
+			tankbobs.n_sendPacket()
+			tankbobs.n_quit()
 
-				connection.state = UNCONNECTED
-			end
+			connection.state = UNCONNECTED
 		end
 	end
 end
