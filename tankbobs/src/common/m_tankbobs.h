@@ -20,10 +20,8 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef TANKBOBS_H
 #define TANKBOBS_H
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
+#include "crossdll.h"
+CDLL_BEGIN
 
 #include <stdlib.h>
 #include <lua.h>
@@ -471,8 +469,6 @@ int fs_permitSymbolicLinks(lua_State *L);
 const char *fs_createTemporaryFile(lua_State *L, const char *filename, const char *ext);
 void fs_freeTemporaryFilesNL(void);
 
-#ifdef __cplusplus
-}
-#endif
+CDLL_END
 
 #endif

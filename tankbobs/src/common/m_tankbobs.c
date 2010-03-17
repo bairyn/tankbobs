@@ -1303,7 +1303,7 @@ static const struct luaL_Reg tankbobs[] =
 	{NULL, NULL}
 };
 
-int luaopen_libmtankbobs(lua_State *L)
+CDLL_PREFIX int luaopen_libmtankbobs(lua_State *L)
 {
 	t_init(L);
 	in_init(L);

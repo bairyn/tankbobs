@@ -21,11 +21,12 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
  * crossdll.h
  *
  * crossdll is a cross-platform interface to DLL's.  All handling is done
- * in crossdll.c.  When writing a crossdll dll, be sure to #include this file,
- * put CDLL_BEGIN at the beginning of each file, and CDLL_END or CDLL_MAIN_END at the end (but not both);
+ * in crossdll.c.  When writing a crossdll dll, #include this file, put CDLL_BEGIN
+ * at the beginning of each header or the main source file, and CDLL_END or CDLL_MAIN_END at the end (but not both);
  * for each function definition, including prototypes, place CDLL_FUNCTION at the
- * beginning.  Also * remember that a main function is not allowed with crossdll
- * because it is not cross-platform.
+ * beginning.  Also remember that a main function is not allowed with crossdll
+ * because it is not cross-platform.  When writing a lua module, don't put CDLL_BEGIN or
+ * CDLL_MAIN_END in the main source file and only prefix luaopen_*
  */
 
 #ifndef CROSSDLL_H
@@ -34,8 +35,8 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 /*
  * CDLL_FUNCTION
  *
- * CDLL_FUNCTION is an easier way to call cdll_function().  For example, do
- * CDLL_FUNCTION("mylib", "myFunction", void(*)(const char *))("Hello World!")
+ * CDLL_FUNCTION is an easier way to call cdll_function().  For example, write
+ * CDLL_FUNCTION("mylib", "myFunction", void(*)(const char *))("Hello, world!")
  */
 #define CDLL_FUNCTION(l, f, t) (*((t)(cdll_function((l), (f)))))
 
