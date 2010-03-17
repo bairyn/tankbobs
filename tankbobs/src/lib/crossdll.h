@@ -22,7 +22,7 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
  *
  * crossdll is a cross-platform interface to DLL's.  All handling is done
  * in crossdll.c.  When writing a crossdll dll, be sure to #include this file,
- * put CDLL_BEGIN at the beginning of the file, and CDLL_END at the end;
+ * put CDLL_BEGIN at the beginning of each file, and CDLL_END or CDLL_MAIN_END at the end (but not both);
  * for each function definition, including prototypes, place CDLL_FUNCTION at the
  * beginning.  Also * remember that a main function is not allowed with crossdll
  * because it is not cross-platform.
@@ -44,9 +44,11 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 #ifdef __cplusplus
 #define CDLL_BEGIN extern "C" {
 #define CDLL_END } BOOL WINAPI DllMain (HINSTANCE u0, DWORD u1, LPVOID u2){(void)u0; (void)u1; (void)u2; return 1;}
+#define CDLL_MAIN_END } BOOL WINAPI DllMain (HINSTANCE u0, DWORD u1, LPVOID u2){(void)u0; (void)u1; (void)u2; return 1;}
 #else
 #define CDLL_BEGIN
-#define CDLL_END BOOL WINAPI DllMain (HINSTANCE u0, DWORD u1, LPVOID u2){(void)u0; (void)u1; (void)u2; return 1;}
+#define CDLL_END
+#define CDLL_MAIN_END BOOL WINAPI DllMain (HINSTANCE u0, DWORD u1, LPVOID u2){(void)u0; (void)u1; (void)u2; return 1;}
 #endif
 #define CDLL_PREFIX __declspec(dllexport)
 #else
@@ -59,6 +61,7 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 #define CDLL_END
 #endif
 #define CDLL_PREFIX
+#define CDLL_MAIN_END
 #endif
 
 #define CDLL_MAX_BUF_CHARS 2048
