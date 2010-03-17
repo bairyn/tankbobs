@@ -296,4 +296,4 @@ CDLL_PREFIX void tstr_find(tstr *s, const char *t, Sint8 order, Sint32 start, Si
 	}
 }
 
-CDLL_END
+CDLL_MAIN_END
