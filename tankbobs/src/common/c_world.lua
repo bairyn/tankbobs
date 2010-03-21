@@ -2356,7 +2356,15 @@ local function c_world_collide(tank, normal)
 	end
 end
 
+function c_world_preContactListener(shape1, shape2, body1, body2, position, separation, normal)
+	return false
+end
+
 function c_world_contactListener(shape1, shape2, body1, body2, position, separation, normal)
+	if c_world_preContactListener(shape1, shape2, body1, body2, position, separation, normal) then
+		return
+	end
+
 	local b, p
 	local powerup = false
 
@@ -2449,6 +2457,14 @@ function c_world_contactListener(shape1, shape2, body1, body2, position, separat
 			end
 		end
 	end
+
+	if c_world_postContactListener(shape1, shape2, body1, body2, position, separation, normal) then
+		return
+	end
+end
+
+function c_world_postContactListener(shape1, shape2, body1, body2, position, separation, normal)
+	return false
 end
 
 function c_world_resetWorldTimers(t)
