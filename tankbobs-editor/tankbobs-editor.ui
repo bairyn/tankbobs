@@ -261,54 +261,6 @@
      <string>Copyright © 2008-2009 Byron James Johnson</string>
     </property>
    </widget>
-   <widget class="QComboBox" name="texture">
-    <property name="geometry">
-     <rect>
-      <x>270</x>
-      <y>440</y>
-      <width>501</width>
-      <height>22</height>
-     </rect>
-    </property>
-    <property name="cursor">
-     <cursorShape>UpArrowCursor</cursorShape>
-    </property>
-    <property name="currentIndex">
-     <number>0</number>
-    </property>
-    <property name="duplicatesEnabled">
-     <bool>false</bool>
-    </property>
-    <property name="frame">
-     <bool>true</bool>
-    </property>
-    <property name="modelColumn">
-     <number>0</number>
-    </property>
-    <item>
-     <property name="text">
-      <string>NoEffect</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>EmptyNull</string>
-     </property>
-    </item>
-   </widget>
-   <widget class="Texture" name="textureDisplay" native="true">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>300</y>
-      <width>256</width>
-      <height>256</height>
-     </rect>
-    </property>
-    <property name="cursor">
-     <cursorShape>SizeAllCursor</cursorShape>
-    </property>
-   </widget>
    <widget class="QTextBrowser" name="textStatus">
     <property name="geometry">
      <rect>
@@ -326,7 +278,7 @@
      <x>0</x>
      <y>0</y>
      <width>1020</width>
-     <height>25</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -426,12 +378,6 @@
    <class>Editor</class>
    <extends>QWidget</extends>
    <header>editor.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>Texture</class>
-   <extends>QWidget</extends>
-   <header>texture.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

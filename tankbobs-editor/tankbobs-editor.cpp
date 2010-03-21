@@ -289,11 +289,13 @@ Editor::Editor(QWidget *parent) : QGLWidget(parent)
 	QTa.start();
 }
 
+/*
 Texture::Texture(QWidget *parent) : QGLWidget(parent)
 {
 	connect(&QTa, SIGNAL(timeout()), this, SLOT(updateGL()));
 	QTa.start(500);
 }
+*/
 
 void Editor::exit()
 {
@@ -1510,13 +1512,16 @@ void Editor::paintGL()
 	TE_GLE;
 }
 
+/*
 void Texture::initializeGL()
 {
 	glCullFace(GL_BACK);
 	glClearColor(0.0, 0.0, 0.1, 0.0);
 	resizeGL(width(), height());
 }
+*/
 
+/*
 void Texture::resizeGL(int w, int h)
 {
 	glViewport(0.0, 0.0, (GLint)w, (GLint)h);
@@ -1526,7 +1531,9 @@ void Texture::resizeGL(int w, int h)
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 }
+*/
 
+/*
 void Texture::paintGL()
 {
 	TE_GLB;
@@ -1537,3 +1544,4 @@ void Texture::paintGL()
 	glEnd();
 	TE_GLE;
 }
+*/

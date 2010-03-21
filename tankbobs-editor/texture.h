@@ -29,6 +29,7 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtCore/qtimer.h>
 #include <Qt/qtimer.h>
 
+/*
 class Texture : public QGLWidget
 {
 	Q_OBJECT
@@ -44,5 +45,6 @@ class Texture : public QGLWidget
 	private:
 		QTimer QTa;
 };
+*/
 
 #endif
