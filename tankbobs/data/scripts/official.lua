@@ -475,6 +475,22 @@ elseif c_tcm_current_map.name == "tutorial" then
 
 	c_mods_prependFunction("c_world_step", frame)
 
+	local function preContactListener(shape1, shape2, body1, body2, position, separation, normal)
+		local wall, tank = c_world_isWall(body1), c_world_isTank(body2)
+
+		if not wall or not tank then
+			wall, tank = c_world_isWall(body2), c_world_isTank(body1)
+		end
+
+		if wall and tank then
+			if wall.misc:match("nodamage") then
+				return true
+			end
+		end
+	end
+
+	c_mods_appendFunction("c_world_preContactListener", preContactListener)
+
 	local function e(id, disable)
 		id = tonumber(id)
 
