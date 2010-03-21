@@ -1796,13 +1796,19 @@ const char *fs_createTemporaryFile(lua_State *L, const char *filename, const cha
 	}
 
 	/*tmpfilename = tempnam(NULL, "ext");*/
+#if defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__TOS_WINDOWS__) || defined(__WINDOWS__)
+	tmpfilename = _tempnam(NULL, NULL);
+#else
 	tmpfilename = tmpnam(NULL);
+#endif
 	if(!tmpfilename)
 	{
 		lua_pushstring(L, "could not create temporary file for file");
 		lua_error(L);
 
-		/*free(tmpfilename);*/
+#if defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__TOS_WINDOWS__) || defined(__WINDOWS__)
+		free(tmpfilename); tmpfilename = NULL;
+#endif
 		return NULL;
 	}
 
@@ -1812,7 +1818,10 @@ const char *fs_createTemporaryFile(lua_State *L, const char *filename, const cha
 		lua_pushstring(L, "could not open temporary file for file");
 		lua_error(L);
 
-		/*free(tmpfilename);*/
+#if defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__TOS_WINDOWS__) || defined(__WINDOWS__)
+		free(tmpfilename); tmpfilename = NULL;
+#endif
+
 		return NULL;
 	}
 
@@ -1827,7 +1836,9 @@ const char *fs_createTemporaryFile(lua_State *L, const char *filename, const cha
 			lua_pushstring(L, "could not write temporary file for file");
 			lua_error(L);
 
-			/*free(tmpfilename);*/
+#if defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__TOS_WINDOWS__) || defined(__WINDOWS__)
+			free(tmpfilename); tmpfilename = NULL;
+#endif
 			return NULL;
 		}
 	}
@@ -1835,7 +1846,9 @@ const char *fs_createTemporaryFile(lua_State *L, const char *filename, const cha
 	{
 		fs_errorNL(L, fin, filename);
 
-		/*free(tmpfilename);*/
+#if defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__TOS_WINDOWS__) || defined(__WINDOWS__)
+		free(tmpfilename); tmpfilename = NULL;
+#endif
 		return NULL;
 	}
 	else if(status < sizeof(buf))
@@ -1849,7 +1862,9 @@ const char *fs_createTemporaryFile(lua_State *L, const char *filename, const cha
 			lua_pushstring(L, "could not write temporary file for file");
 			lua_error(L);
 
-			/*free(tmpfilename);*/
+#if defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__TOS_WINDOWS__) || defined(__WINDOWS__)
+			free(tmpfilename); tmpfilename = NULL;
+#endif
 			return NULL;
 		}
 	}
@@ -1863,7 +1878,9 @@ const char *fs_createTemporaryFile(lua_State *L, const char *filename, const cha
 	}
 	fclose(fout);
 
-	/*free(tmpfilename);*/
+#if defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__TOS_WINDOWS__) || defined(__WINDOWS__)
+	free(tmpfilename); tmpfilename = NULL;
+#endif
 
 	addTmpFile(tmpfilename);
 
