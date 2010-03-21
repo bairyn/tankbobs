@@ -725,11 +725,11 @@ function renderer_setupNewWindow() -- this should be called once after new windo
 
 		tankbobs.r_initialize()
 
-		if tankbobs.t_isWindows() then
-			c_module_load "luagl"
-		else
+		--if tankbobs.t_isWindows() then
+			--c_module_load "luagl"
+		--else
 			c_module_load "opengl"
-		end
+		--end
 
 		gl = _G.gl
 	end
@@ -748,11 +748,11 @@ function renderer_updateWindow() -- this should to be called after resize, focus
 
 		tankbobs.r_initialize()
 
-		if tankbobs.t_isWindows() then
-			c_module_load "luagl"
-		else
+		--if tankbobs.t_isWindows() then
+			--c_module_load "luagl"
+		--else
 			c_module_load "opengl"
-		end
+		--end
 
 		gl = _G.gl
 	end
