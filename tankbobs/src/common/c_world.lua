@@ -1721,8 +1721,8 @@ function c_world_wall_step(d, wall)
 					tankbobs.w_setPosition(wall.m.body, common_lerp(wall.m.startpos, wall.m.startpos + path.p - prevPath.p, wall.m.ppos))
 					if wall.m.ppos >= 1 then
 						wall.m.ppid = wall.m.pid
+						wall.m.startpos:add(path.p - prevPath.p)
 						prevPath = paths[wall.m.ppid]
-						wall.m.startpos(c_world_wallShape(wall.m.pos)[1])
 						wall.m.pid = path.t + 1
 						path = paths[wall.m.pid]
 						wall.m.ppos = 0
