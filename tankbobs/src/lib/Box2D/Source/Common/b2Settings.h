@@ -110,10 +110,10 @@ const float32 b2_maxAngularCorrection = 8.0f / 180.0f * b2_pi;			// 8 degrees
 /// to prevent numerical problems. You shouldn't need to adjust this.
 #ifdef TARGET_FLOAT32_IS_FIXED
 //const float32 b2_maxLinearVelocity = 100.0f;
-const float32 b2_maxLinearVelocity = 100000.0f;
+const float32 b2_maxLinearVelocity = 1000000.0f;
 #else
 //const float32 b2_maxLinearVelocity = 200.0f;
-const float32 b2_maxLinearVelocity = 100000.0f;
+const float32 b2_maxLinearVelocity = 1000000.0f;
 const float32 b2_maxLinearVelocitySquared = b2_maxLinearVelocity * b2_maxLinearVelocity;
 #endif
 
