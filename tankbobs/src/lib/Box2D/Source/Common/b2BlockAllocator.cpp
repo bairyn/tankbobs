@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2006-2007 Erin Catto http://www.gphysics.com
+* Copyright (c) 2006-2009 Erin Catto http://www.gphysics.com
 *
 * This software is provided 'as-is', without any express or implied
 * warranty.  In no event will the authors be held liable for any damages
@@ -21,7 +21,7 @@
 #include <memory>
 #include <climits>
 
-#include <cstring>  // this line is not part of the original Box2D source package
+#include <cstring>
 
 int32 b2BlockAllocator::s_blockSizes[b2_blockSizes] = 
 {
