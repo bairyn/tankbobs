@@ -1031,13 +1031,17 @@ static const struct luaL_Reg tankbobs[] =
 		/* returns a boolean only. */
 
 	/* m_world.c */
+	{"w_setUnitScale", w_setUnitScale}, /* Set the unit scale */
+		/* Sets the unit scale, the first argument passed, from the game to the physics engine.
+			A value of 2 will make one game unit to equal to one two units in the physics engine.
+			The scaling is transparent and will be handled in the module before the game code processes it. */
 	{"w_step", w_step}, /* world step */
 		/* Nothing is returned or passed */
 	{"w_newWorld", w_newWorld}, /* initialize a new world */
 		/* nothing is returned; the first argument is a vector of the lower bounds.  The second
 			argument is of the upper bounds.  The third argument is the gravity vector (should always
 			be a zero-factor.  The fourth argument is a boolean of whether bodies can sleep.
-			The fifth argument is the function to call on contact (f(shape1, shape2, body1, body2, position, separation, normal)).  The sixth, seventh, eighth, ninth, tenth, eleventh, twelfth, and the thirteenth arguments are step functions of the tanks, walls, projectiles, powerupSpawnPoints, powerups, controlPoints, flags, and teleporters.  Arguments fourteen-twenty-one are the tables of them. */
+			The fifth, sixth, seventh, eighth, ninth, tenth, eleventh, and twelfth, thirteenth arguments are step functions of the tanks, walls, projectiles, powerupSpawnPoints, powerups, controlPoints, flags, teleporters, and corpses.  Arguments fourteen through twenty-two are the tables of them. */
 	{"w_freeWorld", w_freeWorld}, /* free the current world */
 		/* no arguments are passed and nothing is returned.  The current world is freed. */
 	{"w_getTimeStep", w_getTimeStep}, /* get time step */
@@ -1048,20 +1052,48 @@ static const struct luaL_Reg tankbobs[] =
 		/* returns the iterations */
 	{"w_setIterations", w_getIterations}, /* set iterations */
 		/* sets the iterations to the first argument */
+	/* A body is a container of fixtures.  A fixture is an individual "body" or shape.
+	 * A fixture definition describes everything about a fixture; they can optionally be reused
+	 * for multiple fixtures.
+	 */
 	{"w_addBody", w_addBody}, /* add a body to the world */
 		/* The first argument is the position of the body represented by a vector.
 			The second argument is the body's rotation in radians
 			The third argument is whether the body can sleep.  The fourth argument is
 			whether the body is a bullet.  The fifth and sixth arguments are the body's
-			linear and angular damping.
-			The seventh argument is a table of the vertices *relative to the position
-			of the body.  The eighth argument is the shape's density.  The ninth is the friction.
-			The tenth is the restitution.  The eleventh argument is whether the body to be added is static.
-			A pointer to the body to use for other functions is the only value returned.
-			The returned value can be safely ignored.  The twelfth and thirteenth arguments
-			are the contents and clipmask of the body.  The fourteenth argument a boolean of whether the body
-			is a sensor.  The fifteenth argument is the initial index of the body passed as an integer. */
-	{"w_removeBody", w_removeBody}, /* remove a body from the world */
+			linear and angular damping.  The seventh argument is the initial index of the
+			body passed as an integer.  The body is returned.  If it is never freed manually
+			beforehand, it will be when the world is freed. */
+	{"w_getBody", w_getBody}, /* get the body to which a fixture is attached */
+		/* The body to which the passed fixture is attached is returned. */
+	{"w_addFixture", w_addFixture}, /* Add and attach a fixture to an existing body */
+		/* The first argument passed is the body to which to attach the new fixture.
+			The second argument passed is the definition of the fixture.  The third passed is
+			a boolean determining whether the fixture is dynamic or not: true is dynamic; false is static.
+			The state of the body depends on the state of the last fixture that was attached to it:
+			if it was dynamic, the body will be dynamic. */
+	{"w_addFixtureFinal", w_addFixtureFinal}, /* Add and attach a fixture to an existing body and free the definition */
+		/* The first argument passed is the body to which to attach the new fixture.
+			The second argument passed is the definition of the fixture.  The third is whether it is dynamic.  This function also frees the fixture definition. */
+	{"w_addPolygonalFixture", w_addPolygonalFixture}, /* Add a predefined polygonal fixture to a body */
+		/* Functionally, this function behaves as calling w_addPolygonDefinition, calling w_addFixture with the returned
+			value, and calling w_addFixtureFinal with the returned value; but in a more efficient manner, namely, without
+			dynamically allocating memory. */
+	{"w_removeDefinition", w_removeDefinition}, /* Free a fixture definition from memory */
+		/* The definition is passed and nothing is returned.  The programmer should remember to nullify the
+			variable that originally contained the fixture definition. */
+	{"w_addPolygonDefinition", w_addPolygonDefinition}, /* Dynamically allocate a polygonal fixture definition */
+		/* The fixture definition is returned.  This needs to be freed, whether w_addFixtureFinal or w_removeDefinition is called!
+			The first argument should be the vertices of the polygon.  The second and third are the polygon's density
+			and friction.  The fourth argument specifies the restitution.  The fifth argument is whether the body is a sensor or not.
+			The sixth and seventh arguments are the contents and clipmask of the fixture. */
+	{"w_addCircularDefinition", w_addCircularDefinition}, /* Dynamically allocate a circular fixture definition */
+		/* The fixture definition is returned.  This needs to be freed, whether w_addFixtureFinal or w_removeDefinition is called!
+			The first and second arguments are the local position and the radius of the circle respectively.
+		   	The remaining arguments are what would be passed to w_addPolygonalFixture after the first argument. */
+	{"w_fixtures"}, /* Get a table of fixtures attached to a body */
+		/* The table of fixtures attached to the passed body is returned as a table. */
+	{"w_removeBody", w_removeBody}, /* remove a body and all its attached fixtures from the world */
 		/* Nothing is returned.  The first argument is the pointer to the body returned from w_addBody. */
 	{"w_bodies", w_bodies}, /* generate a table of pointers to bodies */
 		/* nothing is passed.  A table of bodies is generated. */
@@ -1117,20 +1149,33 @@ static const struct luaL_Reg tankbobs[] =
 			the walls.  The fifth and sixth arguments are the control points and flags */
 	{"w_unpersistWorld", w_unpersistWorld}, /* unpersist the world */
 		/* Nothing is returned.  The first argument passed is the data of the persisted world.  The rest of the arguments are the same arguments that would passed to w_persistWorld.  After these arguments, the function to be called for new projectiles is passed, the function for tanks, the function for powerups, the projectile class, and then the tank class, and the powerup class.  Next, all but the first and second arguments which would be passed to w_addBody for projectiles is passed *in a table*.  Then, the function which will be called when a tank is spawned is passed, and then the same for a powerup. */
-	{"w_getVertices", w_getVertices}, /* Get the vertices of a table */
-		/* The body is the first argument passed.  The table of vertices to be set is also passed.  A table of
-			vertices is returned. */
-	{"w_getContents", w_getContents}, /* Get the contents of a body */
-		/* Return the passed body's contents, or nil if no shapes are attached */
-	{"w_getClipmask", w_getClipmask}, /* Get the clipmask of a body */
-		/* Return the passed body's clipmask, or nil if no shapes are attached */
+	{"w_getNumVertices", w_getNumVertices}, /* get the number of vertices of a fixture */
+		/* The number of vertices of the passed fixture is returned */
+	{"w_getVertices", w_getVertices}, /* Get the vertices of a fixture */
+		/* The fixture is the first argument passed.  The table of vertices to be set is also passed.  For non-polygonal fixtures,
+			the table is left unchanged.  Nothing is returned.
+			The passed table must already contain the position vectors;
+		   	they will be updated directly. */
+	{"w_getContents", w_getContents}, /* Get the contents of a fixture */
+		/* Return the passed fixture's contents, or nil if no fixtures are attached */
+	{"w_getClipmask", w_getClipmask}, /* Get the clipmask of a fixture */
+		/* Return the passed fixture's clipmask, or nil if no fixtures are attached */
+	{"w_getBodyNumVertices", w_getBodyNumVertices}, /* get the number of vertices of a fixture */
+		/* The number of vertices of the passed fixture is returned */
+	{"w_getBodyVertices", w_getBodyVertices}, /* Get the vertices of a body */
+		/* A table of the vertices of all the attaches fixtures is modified, but nothing is returned.  This behaves similar to w_getVertices and needs to be passed a table. */
+	{"w_getBodyContents", w_getBodyContents}, /* Get the contents of a body */
+		/* The contents of the first fixture of the passed body is returned, or nil if no fixtures are attached to the body */
+	{"w_getBodyClipmask", w_getBodyClipmask}, /* Get the clipmask of a body */
+		/* The clipmask of the first fixture of the passed body is returned, or nil if no fixtures are attached to the body */
 	{"w_getIndex", w_getIndex}, /* Get the body's index */
 		/* Return the passed body's index */
 	{"w_setIndex", w_setIndex}, /* Set the body's index */
 		/* Set the passed body's index to the second argument, which is passed as an integer */
 	{"w_luaStep", w_luaStep}, /* the only argument passed is the delta value */
 	{"w_setContactListener", w_setContactListener}, /* Set contact listener function */
-		/* Set contact listener function to argument passed.  Nothing is returned. */
+		/* Set contact listener function to argument passed.  Nothing is returned.
+			This function is passed (begin, fixtureA, fixtureB, bodyA, bodyB, position, normal). */
 
 	/* m_console.c */
 #if defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__TOS_WINDOWS__) || defined(__WINDOWS__)
@@ -1141,7 +1186,7 @@ static const struct luaL_Reg tankbobs[] =
 		/* Nothing is returned; nothing is passed. */
 	{"c_input", c_input}, /* test for input from the console */
 		/* nil is returned when no input has been applied.
-			If there is input (the user pressed enter), the input is retutrned as a string. */
+			If there is input (the user pressed enter), the input is returned as a string. */
 	{"c_setTabFunction", c_setTabFunction}, /* set the auto-complete function name to be called when the user presses tab */
 		/* Nothing is returned.  The name of the function is passed as a string.
 			When the user presses tab, this function is called with the current input text passed as

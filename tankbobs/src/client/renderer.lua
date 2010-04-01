@@ -478,7 +478,7 @@ function renderer_init()
 
 			gl.Begin("POLYGON")
 				for i = 1, #v.render do
-					gl.TexCoord(v.texturer[i].x, v.texturer[i].y)
+					gl.TexCoord(v.textureR[i].x, v.textureR[i].y)
 					gl.Vertex(v.render[i].x, v.render[i].y)
 				end
 			gl.End()
@@ -492,7 +492,7 @@ function renderer_init()
 
 			gl.Begin("POLYGON")
 				for i = 1, #v.projectileRender do
-					gl.TexCoord(v.projectileTexturer[i].x, v.projectileTexturer[i].y)
+					gl.TexCoord(v.projectiletextureR[i].x, v.projectiletextureR[i].y)
 					gl.Vertex(v.projectileRender[i].x, v.projectileRender[i].y)
 				end
 			gl.End()
@@ -628,8 +628,6 @@ function renderer_done()
 	gl.DeleteTextures(healthbar_texture)
 	gl.DeleteTextures(healthbarBorder_texture)
 	gl.DeleteTextures(ammobarBorder_texture)
-
-	c_weapon_clear(true)
 end
 
 function renderer_getMatrix()

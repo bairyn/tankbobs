@@ -57,17 +57,17 @@ if c_tcm_current_map.name == "arena" then
 
 	c_mods_exitWorldFunction(resetWalls)
 
-	local function toggleWallPath(shape1, shape2, body1, body2, position, separation, normal)
-		local projectile = c_world_isProjectile(body1)
+	local function toggleWallPath(begin, fixtureA, fixtureB, bodyA, bodyB, position, normal)
+		local projectile = c_world_isProjectile(bodyA)
 
 		if not projectile then
-			projectile = c_world_isProjectile(body2)
+			projectile = c_world_isProjectile(bodyB)
 		end
 
 		if projectile and not projectile.collided then
-			local wall = c_world_isWall(body1)
+			local wall = c_world_isWall(bodyA)
 			if not wall then
-				wall = c_world_isWall(body2)
+				wall = c_world_isWall(bodyB)
 			end
 
 			if wall and (wall.path or wall.m.script_path) then
@@ -84,9 +84,9 @@ if c_tcm_current_map.name == "arena" then
 			end
 
 			if not wall then
-				local tank = c_world_isTank(body1)
+				local tank = c_world_isTank(bodyA)
 				if not tank then
-					tank = c_world_isTank(body2)
+					tank = c_world_isTank(bodyB)
 				end
 
 				if tank and projectile.weapon ~= c_weapon_getDefaultWeapon() then
@@ -475,11 +475,11 @@ elseif c_tcm_current_map.name == "tutorial" then
 
 	c_mods_prependFunction("c_world_step", frame)
 
-	local function preContactListener(shape1, shape2, body1, body2, position, separation, normal)
-		local wall, tank = c_world_isWall(body1), c_world_isTank(body2)
+	local function preContactListener(begin, fixtureA, fixtureB, bodyA, bodyB, position, normal)
+		local wall, tank = c_world_isWall(bodyA), c_world_isTank(bodyB)
 
 		if not wall or not tank then
-			wall, tank = c_world_isWall(body2), c_world_isTank(body1)
+			wall, tank = c_world_isWall(bodyB), c_world_isTank(bodyA)
 		end
 
 		if wall and tank then
@@ -830,8 +830,8 @@ elseif c_tcm_current_map.name == "tutorial" then
 			-- listen for a collision of the wall and the giant switch.  Once a collision happens, enable the switch path (push the switch), and continue to the next step
 			local oldc_world_contactListener = c_world_contactListener
 
-			local function switchListener(shape1, shape2, body1, body2, position, separation, normal)
-				local wall1, wall2 = c_world_isWall(body1), c_world_isWall(body2)
+			local function switchListener(begin, fixtureA, fixtureB, bodyA, bodyB, position, normal)
+				local wall1, wall2 = c_world_isWall(bodyA), c_world_isWall(bodyB)
 
 				if wall1 and wall2 then
 					if wall2.misc == "shootWall" then

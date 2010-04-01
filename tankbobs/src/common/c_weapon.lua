@@ -26,7 +26,7 @@ local c_world_tankDamage = c_world_tankDamage
 local c_const_get = c_const_get
 local tankbobs = tankbobs
 
-local c_world_projectiles
+local c_world_projectiles = {}
 local c_weapons
 
 local bit
@@ -43,18 +43,18 @@ function c_weapon_init()
 	c_const_set("projectile_linearDamping", 0, 1)
 	c_const_set("projectile_angularDamping", 0, 1)
 	c_const_set("projectile_friction", 0, 1)
-
-	c_world_projectiles = {}
+	c_const_set("projectile_max", 16384, 1)
 
 	local weapon
 
 	c_weapons = {}
 
+	local kn = 64
+
 	-- weak machinegun
 	weapon = c_weapon:new()
 	table.insert(c_weapons, weapon)
 
-	weapon.index = 1
 	weapon.name = "weak-machinegun"
 	weapon.altName = "default"
 	weapon.damage = 4
@@ -64,7 +64,7 @@ function c_weapon_init()
 	weapon.repeatRate = 0.2
 	weapon.sa = false
 
-	weapon.knockback = 256
+	weapon.knockback = 256 / kn
 	weapon.texture = "weak-machinegun.png"
 	weapon.fireSound = "weak-machinegun.wav"
 	weapon.reloadSound = "reload.wav"
@@ -79,10 +79,10 @@ function c_weapon_init()
 	weapon.trail = 0
 	weapon.trailWidth = 0
 
-	weapon.texturer[2](0, 1)
-	weapon.texturer[3](0, 0)
-	weapon.texturer[4](1, 0)
-	weapon.texturer[1](1, 1)
+	weapon.textureR[2](0, 1)
+	weapon.textureR[3](0, 0)
+	weapon.textureR[4](1, 0)
+	weapon.textureR[1](1, 1)
 	weapon.render[1](-1, 1)
 	weapon.render[2](-1, -1)
 	weapon.render[3](1, -1)
@@ -98,10 +98,11 @@ function c_weapon_init()
 	weapon.projectileHull[2](-0.5, -0.5)
 	weapon.projectileHull[3](0.5,  -0.5)
 	weapon.projectileHull[4](0.5,   0.5)
-	weapon.projectileTexturer[1](0, 1)
-	weapon.projectileTexturer[2](0, 0)
-	weapon.projectileTexturer[3](1, 0)
-	weapon.projectileTexturer[4](1, 1)
+	weapon.projectileRadius = false
+	weapon.projectiletextureR[1](0, 1)
+	weapon.projectiletextureR[2](0, 0)
+	weapon.projectiletextureR[3](1, 0)
+	weapon.projectiletextureR[4](1, 1)
 	weapon.projectileRender[4](-0.5, 0.5)
 	weapon.projectileRender[1](-0.5, -0.5)
 	weapon.projectileRender[2](0.5, -0.5)
@@ -121,7 +122,6 @@ function c_weapon_init()
 	weapon = c_weapon:new()
 	table.insert(c_weapons, weapon)
 
-	weapon.index = 2
 	weapon.name = "machinegun"
 	weapon.altName = "machinegun"
 	weapon.damage = 12
@@ -131,7 +131,7 @@ function c_weapon_init()
 	weapon.repeatRate = 0.2
 	weapon.sa = false
 
-	weapon.knockback = 384
+	weapon.knockback = 384 / kn
 	weapon.texture = "machinegun.png"
 	weapon.fireSound = {"machinegun.wav", "machinegun2.wav"}
 	weapon.reloadSound = "reload.wav"
@@ -146,10 +146,10 @@ function c_weapon_init()
 	weapon.trail = 0
 	weapon.trailWidth = 0
 
-	weapon.texturer[2](0, 1)
-	weapon.texturer[3](0, 0)
-	weapon.texturer[4](1, 0)
-	weapon.texturer[1](1, 1)
+	weapon.textureR[2](0, 1)
+	weapon.textureR[3](0, 0)
+	weapon.textureR[4](1, 0)
+	weapon.textureR[1](1, 1)
 	weapon.render[1](-1, 1)
 	weapon.render[2](-1, -1)
 	weapon.render[3](1, -1)
@@ -157,7 +157,7 @@ function c_weapon_init()
 
 	weapon.projectileTexture = "machinegun-projectile.png"
 	weapon.projectileDensity = 0.5
-	weapon.projectileRestitution = 0.3
+	weapon.projectileRestitution = 1
 	weapon.projectileMaxCollisions = 1
 	weapon.projectileEndOnBody = true
 
@@ -165,10 +165,11 @@ function c_weapon_init()
 	weapon.projectileHull[2](-0.5, -0.5)
 	weapon.projectileHull[3](0.5,  -0.5)
 	weapon.projectileHull[4](0.5,   0.5)
-	weapon.projectileTexturer[1](0, 1)
-	weapon.projectileTexturer[2](0, 0)
-	weapon.projectileTexturer[3](1, 0)
-	weapon.projectileTexturer[4](1, 1)
+	weapon.projectileRadius = 0.5
+	weapon.projectiletextureR[1](0, 1)
+	weapon.projectiletextureR[2](0, 0)
+	weapon.projectiletextureR[3](1, 0)
+	weapon.projectiletextureR[4](1, 1)
 	weapon.projectileRender[4](-0.75, 0.75)
 	weapon.projectileRender[1](-0.75, -0.75)
 	weapon.projectileRender[2](0.75, -0.75)
@@ -188,7 +189,6 @@ function c_weapon_init()
 	weapon = c_weapon:new()
 	table.insert(c_weapons, weapon)
 
-	weapon.index = 3
 	weapon.name = "shotgun"
 	weapon.altName = "shotgun"
 	weapon.damage = 25
@@ -198,7 +198,7 @@ function c_weapon_init()
 	weapon.repeatRate = 1
 	weapon.sa = false
 
-	weapon.knockback = 512  -- (per pellet)
+	weapon.knockback = 512 / kn  -- (per pellet)
 	weapon.texture = "shotgun.png"
 	weapon.fireSound = "shotgun2.wav"
 	weapon.reloadSound = {clip = "shotgun-reload.wav", initial = "shotgun-open.wav", final = "shotgun-close.wav"}
@@ -213,10 +213,10 @@ function c_weapon_init()
 	weapon.trail = 0
 	weapon.trailWidth = 0
 
-	weapon.texturer[2](0, 1)
-	weapon.texturer[3](0, 0)
-	weapon.texturer[4](1, 0)
-	weapon.texturer[1](1, 1)
+	weapon.textureR[2](0, 1)
+	weapon.textureR[3](0, 0)
+	weapon.textureR[4](1, 0)
+	weapon.textureR[1](1, 1)
 	weapon.render[1](-1, 1)
 	weapon.render[2](-1, -1)
 	weapon.render[3](1, -1)
@@ -232,10 +232,11 @@ function c_weapon_init()
 	weapon.projectileHull[2](-0.5, -0.5)
 	weapon.projectileHull[3](0.5,  -0.5)
 	weapon.projectileHull[4](0.5,   0.5)
-	weapon.projectileTexturer[1](0, 1)
-	weapon.projectileTexturer[2](0, 0)
-	weapon.projectileTexturer[3](1, 0)
-	weapon.projectileTexturer[4](1, 1)
+	weapon.projectileRadius = false
+	weapon.projectiletextureR[1](0, 1)
+	weapon.projectiletextureR[2](0, 0)
+	weapon.projectiletextureR[3](1, 0)
+	weapon.projectiletextureR[4](1, 1)
 	weapon.projectileRender[4](-0.66, 0.66)
 	weapon.projectileRender[1](-0.66, -0.66)
 	weapon.projectileRender[2](0.66, -0.66)
@@ -255,7 +256,6 @@ function c_weapon_init()
 	weapon = c_weapon:new()
 	table.insert(c_weapons, weapon)
 
-	weapon.index = 4
 	weapon.name = "railgun"
 	weapon.altName = "railgun"
 	weapon.damage = 100
@@ -265,7 +265,7 @@ function c_weapon_init()
 	weapon.repeatRate = 2
 	weapon.sa = false
 
-	weapon.knockback = 1024
+	weapon.knockback = 1024 / kn
 	weapon.texture = "railgun.png"
 	weapon.fireSound = {"railgun.wav", "railgun2.wav"}
 	weapon.reloadSound = "railgun-reload.wav"
@@ -280,10 +280,10 @@ function c_weapon_init()
 	weapon.trail = 1
 	weapon.trailWidth = 2
 
-	weapon.texturer[2](0, 1)
-	weapon.texturer[3](0, 0)
-	weapon.texturer[4](1, 0)
-	weapon.texturer[1](1, 1)
+	weapon.textureR[2](0, 1)
+	weapon.textureR[3](0, 0)
+	weapon.textureR[4](1, 0)
+	weapon.textureR[1](1, 1)
 	weapon.render[1](-1, 1)
 	weapon.render[2](-1, -1)
 	weapon.render[3](1, -1)
@@ -299,10 +299,11 @@ function c_weapon_init()
 	weapon.projectileHull[2](-1, -1)
 	weapon.projectileHull[3](1,  -1)
 	weapon.projectileHull[4](1,   1)
-	weapon.projectileTexturer[1](0, 0)
-	weapon.projectileTexturer[2](1, 0)
-	weapon.projectileTexturer[3](0.5, 0.2)
-	weapon.projectileTexturer[4](0, 0)
+	weapon.projectileRadius = false
+	weapon.projectiletextureR[1](0, 0)
+	weapon.projectiletextureR[2](1, 0)
+	weapon.projectiletextureR[3](0.5, 0.2)
+	weapon.projectiletextureR[4](0, 0)
 	weapon.projectileRender[4](0, 0)
 	weapon.projectileRender[1](0, 0)
 	weapon.projectileRender[2](0, 0)
@@ -322,7 +323,6 @@ function c_weapon_init()
 	weapon = c_weapon:new()
 	table.insert(c_weapons, weapon)
 
-	weapon.index = 5
 	weapon.name = "semi-instagun"
 	weapon.altName = "semi-instagun"
 	weapon.damage = 100
@@ -332,7 +332,7 @@ function c_weapon_init()
 	weapon.repeatRate = 2
 	weapon.sa = false
 
-	weapon.knockback = 1024
+	weapon.knockback = 1024 / kn
 	weapon.texture = "railgun.png"
 	weapon.fireSound = {"railgun.wav", "railgun2.wav"}
 	weapon.reloadSound = "railgun-reload.wav"
@@ -347,10 +347,10 @@ function c_weapon_init()
 	weapon.trail = 1
 	weapon.trailWidth = 2
 
-	weapon.texturer[2](0, 1)
-	weapon.texturer[3](0, 0)
-	weapon.texturer[4](1, 0)
-	weapon.texturer[1](1, 1)
+	weapon.textureR[2](0, 1)
+	weapon.textureR[3](0, 0)
+	weapon.textureR[4](1, 0)
+	weapon.textureR[1](1, 1)
 	weapon.render[1](-1, 1)
 	weapon.render[2](-1, -1)
 	weapon.render[3](1, -1)
@@ -366,10 +366,11 @@ function c_weapon_init()
 	weapon.projectileHull[2](-1, -1)
 	weapon.projectileHull[3](1,  -1)
 	weapon.projectileHull[4](1,   1)
-	weapon.projectileTexturer[1](0, 0)
-	weapon.projectileTexturer[2](1, 0)
-	weapon.projectileTexturer[3](0.5, 0.2)
-	weapon.projectileTexturer[4](0, 0)
+	weapon.projectileRadius = false
+	weapon.projectiletextureR[1](0, 0)
+	weapon.projectiletextureR[2](1, 0)
+	weapon.projectiletextureR[3](0.5, 0.2)
+	weapon.projectiletextureR[4](0, 0)
 	weapon.projectileRender[4](0, 0)
 	weapon.projectileRender[1](0, 0)
 	weapon.projectileRender[2](0, 0)
@@ -389,7 +390,6 @@ function c_weapon_init()
 	weapon = c_weapon:new()
 	table.insert(c_weapons, weapon)
 
-	weapon.index = 6
 	weapon.name = "instagun"
 	weapon.altName = "instagun"
 	weapon.damage = 1000000
@@ -399,7 +399,7 @@ function c_weapon_init()
 	weapon.repeatRate = 2
 	weapon.sa = false
 
-	weapon.knockback = 1024
+	weapon.knockback = 1024 / kn
 	weapon.texture = "railgun.png"
 	weapon.fireSound = {"railgun.wav", "railgun2.wav"}
 	weapon.reloadSound = "railgun-reload.wav"
@@ -414,10 +414,10 @@ function c_weapon_init()
 	weapon.trail = 1
 	weapon.trailWidth = 2
 
-	weapon.texturer[2](0, 1)
-	weapon.texturer[3](0, 0)
-	weapon.texturer[4](1, 0)
-	weapon.texturer[1](1, 1)
+	weapon.textureR[2](0, 1)
+	weapon.textureR[3](0, 0)
+	weapon.textureR[4](1, 0)
+	weapon.textureR[1](1, 1)
 	weapon.render[1](-1, 1)
 	weapon.render[2](-1, -1)
 	weapon.render[3](1, -1)
@@ -433,10 +433,11 @@ function c_weapon_init()
 	weapon.projectileHull[2](-1, -1)
 	weapon.projectileHull[3](1,  -1)
 	weapon.projectileHull[4](1,   1)
-	weapon.projectileTexturer[1](0, 0)
-	weapon.projectileTexturer[2](1, 0)
-	weapon.projectileTexturer[3](0.5, 0.2)
-	weapon.projectileTexturer[4](0, 0)
+	weapon.projectileRadius = false
+	weapon.projectiletextureR[1](0, 0)
+	weapon.projectiletextureR[2](1, 0)
+	weapon.projectiletextureR[3](0.5, 0.2)
+	weapon.projectiletextureR[4](0, 0)
 	weapon.projectileRender[4](0, 0)
 	weapon.projectileRender[1](0, 0)
 	weapon.projectileRender[2](0, 0)
@@ -456,7 +457,6 @@ function c_weapon_init()
 	weapon = c_weapon:new()
 	table.insert(c_weapons, weapon)
 
-	weapon.index = 7
 	weapon.name = "coilgun"
 	weapon.altName = "coilgun"
 	weapon.damage = 34
@@ -466,7 +466,7 @@ function c_weapon_init()
 	weapon.repeatRate = 0.25
 	weapon.sa = true
 
-	weapon.knockback = 2048
+	weapon.knockback = 2048 / kn
 	weapon.texture = "coilgun.png"
 	weapon.fireSound = {"coilgun.wav", "coilgun2.wav", "coilgun2.wav"}
 	weapon.reloadSound = "coilgun-reload.wav"
@@ -481,10 +481,10 @@ function c_weapon_init()
 	weapon.trail = 0.25
 	weapon.trailWidth = 1.5
 
-	weapon.texturer[2](0, 1)
-	weapon.texturer[3](0, 0)
-	weapon.texturer[4](1, 0)
-	weapon.texturer[1](1, 1)
+	weapon.textureR[2](0, 1)
+	weapon.textureR[3](0, 0)
+	weapon.textureR[4](1, 0)
+	weapon.textureR[1](1, 1)
 	weapon.render[1](-1, 1)
 	weapon.render[2](-1, -1)
 	weapon.render[3](1, -1)
@@ -500,10 +500,11 @@ function c_weapon_init()
 	weapon.projectileHull[2](-1, -1)
 	weapon.projectileHull[3](1,  -1)
 	weapon.projectileHull[4](1,   1)
-	weapon.projectileTexturer[1](0, 0)
-	weapon.projectileTexturer[2](1, 0)
-	weapon.projectileTexturer[3](0.5, 0.2)
-	weapon.projectileTexturer[4](0, 0)
+	weapon.projectileRadius = false
+	weapon.projectiletextureR[1](0, 0)
+	weapon.projectiletextureR[2](1, 0)
+	weapon.projectiletextureR[3](0.5, 0.2)
+	weapon.projectiletextureR[4](0, 0)
 	weapon.projectileRender[4](0, 0)
 	weapon.projectileRender[1](0, 0)
 	weapon.projectileRender[2](0, 0)
@@ -523,7 +524,6 @@ function c_weapon_init()
 	weapon = c_weapon:new()
 	table.insert(c_weapons, weapon)
 
-	weapon.index = 8
 	weapon.name = "saw"
 	weapon.altName = "saw"
 	weapon.damage = 150 / 8  -- 150 per second
@@ -533,7 +533,7 @@ function c_weapon_init()
 	weapon.repeatRate = 0.125  -- 1 / 8
 	weapon.sa = false
 
-	weapon.knockback = 0
+	weapon.knockback = 0 / kn
 	weapon.texture = "saw.png"
 	weapon.fireSound = "saw.wav"
 	weapon.reloadSound = "railgun-reload.wav"
@@ -548,10 +548,10 @@ function c_weapon_init()
 	weapon.trail = 0
 	weapon.trailWidth = 0
 
-	weapon.texturer[2](0, 1)
-	weapon.texturer[3](0, 0)
-	weapon.texturer[4](1, 0)
-	weapon.texturer[1](1, 1)
+	weapon.textureR[2](0, 1)
+	weapon.textureR[3](0, 0)
+	weapon.textureR[4](1, 0)
+	weapon.textureR[1](1, 1)
 	weapon.render[1](-1, 1)
 	weapon.render[2](-1, -1)
 	weapon.render[3](1, -1)
@@ -567,10 +567,11 @@ function c_weapon_init()
 	weapon.projectileHull[2](-0.5, -0.5)
 	weapon.projectileHull[3](0.5,  -0.5)
 	weapon.projectileHull[4](0.5,   0.5)
-	weapon.projectileTexturer[1](0, 1)
-	weapon.projectileTexturer[2](0, 0)
-	weapon.projectileTexturer[3](1, 0)
-	weapon.projectileTexturer[4](1, 1)
+	weapon.projectileRadius = false
+	weapon.projectiletextureR[1](0, 1)
+	weapon.projectiletextureR[2](0, 0)
+	weapon.projectiletextureR[3](1, 0)
+	weapon.projectiletextureR[4](1, 1)
 	weapon.projectileRender[4](-0.2, 6)
 	weapon.projectileRender[1](-0.2, 2)
 	weapon.projectileRender[2](0.2, 2)
@@ -590,7 +591,6 @@ function c_weapon_init()
 	weapon = c_weapon:new()
 	table.insert(c_weapons, weapon)
 
-	weapon.index = 9
 	weapon.name = "rocket-launcher"
 	weapon.altName = "rocket-launcher"
 	weapon.damage = 20  -- 20 damage in addition to splash
@@ -600,7 +600,7 @@ function c_weapon_init()
 	weapon.repeatRate = 1
 	weapon.sa = false
 
-	weapon.knockback = 4096  -- splash will take care of this
+	weapon.knockback = 4096 / kn  -- splash will take care of this
 	weapon.texture = "rocket-launcher.png"
 	weapon.fireSound = "rocket-launcher.wav"
 	weapon.reloadSound = "railgun-reload.wav"
@@ -615,10 +615,10 @@ function c_weapon_init()
 	weapon.trail = 0
 	weapon.trailWidth = 0
 
-	weapon.texturer[2](0, 1)
-	weapon.texturer[3](0, 0)
-	weapon.texturer[4](1, 0)
-	weapon.texturer[1](1, 1)
+	weapon.textureR[2](0, 1)
+	weapon.textureR[3](0, 0)
+	weapon.textureR[4](1, 0)
+	weapon.textureR[1](1, 1)
 	weapon.render[1](-1, 1)
 	weapon.render[2](-1, -1)
 	weapon.render[3](1, -1)
@@ -634,10 +634,11 @@ function c_weapon_init()
 	weapon.projectileHull[2](-0.5, -1)
 	weapon.projectileHull[3](0.5,  -1)
 	weapon.projectileHull[4](0.5,   1)
-	weapon.projectileTexturer[1](0, 1)
-	weapon.projectileTexturer[2](0, 0)
-	weapon.projectileTexturer[3](1, 0)
-	weapon.projectileTexturer[4](1, 1)
+	weapon.projectileRadius = false
+	weapon.projectiletextureR[1](0, 1)
+	weapon.projectiletextureR[2](0, 0)
+	weapon.projectiletextureR[3](1, 0)
+	weapon.projectiletextureR[4](1, 1)
 	weapon.projectileRender[4](-1, 1)
 	weapon.projectileRender[1](-1, -1)
 	weapon.projectileRender[2](1, -1)
@@ -657,7 +658,6 @@ function c_weapon_init()
 	weapon = c_weapon:new()
 	table.insert(c_weapons, weapon)
 
-	weapon.index = 10
 	weapon.name = "laser-gun"
 	weapon.altName = "laser-gun"
 	weapon.damage = 60 / 8
@@ -667,7 +667,7 @@ function c_weapon_init()
 	weapon.repeatRate = 0.125  -- 1 / 8
 	weapon.sa = false
 
-	weapon.knockback = 0
+	weapon.knockback = 0 / kn
 	weapon.texture = "laser-gun.png"
 	weapon.fireSound = "laser-gun.wav"
 	weapon.reloadSound = "railgun-reload.wav"
@@ -682,10 +682,10 @@ function c_weapon_init()
 	weapon.trail = 0
 	weapon.trailWidth = 0
 
-	weapon.texturer[2](0, 1)
-	weapon.texturer[3](0, 0)
-	weapon.texturer[4](1, 0)
-	weapon.texturer[1](1, 1)
+	weapon.textureR[2](0, 1)
+	weapon.textureR[3](0, 0)
+	weapon.textureR[4](1, 0)
+	weapon.textureR[1](1, 1)
 	weapon.render[1](-1, 1)
 	weapon.render[2](-1, -1)
 	weapon.render[3](1, -1)
@@ -701,10 +701,11 @@ function c_weapon_init()
 	weapon.projectileHull[2](-0.5, -0.5)
 	weapon.projectileHull[3](0.5,  -0.5)
 	weapon.projectileHull[4](0.5,   0.5)
-	weapon.projectileTexturer[1](0, 1)
-	weapon.projectileTexturer[2](0, 0)
-	weapon.projectileTexturer[3](1, 0)
-	weapon.projectileTexturer[4](1, 1)
+	weapon.projectileRadius = false
+	weapon.projectiletextureR[1](0, 1)
+	weapon.projectiletextureR[2](0, 0)
+	weapon.projectiletextureR[3](1, 0)
+	weapon.projectiletextureR[4](1, 1)
 	weapon.projectileRender[4](-0.75, 50)
 	weapon.projectileRender[1](-0.75, 2)
 	weapon.projectileRender[2](0.75, 2)
@@ -724,7 +725,6 @@ function c_weapon_init()
 	weapon = c_weapon:new()
 	table.insert(c_weapons, weapon)
 
-	weapon.index = 11
 	weapon.name = "plasma-gun"
 	weapon.altName = "plasma-gun"
 	weapon.damage = 60 / 8
@@ -734,7 +734,7 @@ function c_weapon_init()
 	weapon.repeatRate = 0.125  -- 1 / 8
 	weapon.sa = false
 
-	weapon.knockback = 0
+	weapon.knockback = 0 / kn
 	weapon.texture = "plasma-gun.png"
 	weapon.fireSound = "plasma-gun.wav"
 	weapon.reloadSound = "plasma-gun-reload.wav"
@@ -749,10 +749,10 @@ function c_weapon_init()
 	weapon.trail = 0
 	weapon.trailWidth = 0
 
-	weapon.texturer[2](0, 1)
-	weapon.texturer[3](0, 0)
-	weapon.texturer[4](1, 0)
-	weapon.texturer[1](1, 1)
+	weapon.textureR[2](0, 1)
+	weapon.textureR[3](0, 0)
+	weapon.textureR[4](1, 0)
+	weapon.textureR[1](1, 1)
 	weapon.render[1](-0.5, 0.5)
 	weapon.render[2](-0.5, -0.5)
 	weapon.render[3](0.5, -0.5)
@@ -768,10 +768,11 @@ function c_weapon_init()
 	weapon.projectileHull[2](-0.5, -0.5)
 	weapon.projectileHull[3](0.5,  -0.5)
 	weapon.projectileHull[4](0.5,   0.5)
-	weapon.projectileTexturer[1](0, 1)
-	weapon.projectileTexturer[2](0, 0)
-	weapon.projectileTexturer[3](1, 0)
-	weapon.projectileTexturer[4](1, 1)
+	weapon.projectileRadius = false
+	weapon.projectiletextureR[1](0, 1)
+	weapon.projectiletextureR[2](0, 0)
+	weapon.projectiletextureR[3](1, 0)
+	weapon.projectiletextureR[4](1, 1)
 	weapon.projectileRender[4](-0.5, 0.5)
 	weapon.projectileRender[1](-0.5, -0.5)
 	weapon.projectileRender[2](0.5, -0.5)
@@ -786,9 +787,34 @@ function c_weapon_init()
 	weapon.projectileExplodeRadius = 0
 	weapon.projectileExplodeSound = ""
 	weapon.projectileExplodeTime = 0
+
+	for k, v in pairs(c_weapons) do
+		v.index = k
+
+		if c_weapon_doesShootProjectiles(k) then
+			if v.projectileRadius then
+				if not v.projectileHull then
+					common_printError(0, "Warning: c_weapon_init: weapon '" .. v.name .. "' ('" .. v.altName .. "') of index " .. k .. " has a circular radius, '" .. v.projectileRadius .. "' but no approximate hull.\n")
+				end
+
+				v.m.p.fixtureDefinition = tankbobs.w_addCircularDefinition(tankbobs.m_vec2(0, 0), v.projectileRadius, v.projectileDensity, c_const_get("projectile_friction"), v.projectileRestitution, true, c_const_get("projectile_contentsMask"), c_const_get("projectile_clipmask"), c_const_get("projectile_isSensor"))
+			elseif v.projectileHull then
+				v.m.p.fixtureDefinition = tankbobs.w_addPolygonDefinition(v.projectileHull, v.projectileDensity, c_const_get("projectile_friction"), v.projectileRestitution, c_const_get("projectile_isSensor"), c_const_get("projectile_contentsMask"), c_const_get("projectile_clipmask"))
+			else
+				error("c_weapon_init: weapon '" .. v.name .. "' ('" .. v.altName .. "') of index " .. k .. " has neither a hull nor a radius!")
+			end
+		end
+	end
 end
 
 function c_weapon_done()
+	for _, v in pairs(c_weapons) do
+		if v.m.p.fixtureDefinition then
+			tankbobs.w_removeDefinition(v.m.p.fixtureDefinition) v.m.p.fixtureDefinition = nil
+		end
+	end
+
+	c_weapon_clear(true)
 end
 
 c_weapon =
@@ -820,7 +846,7 @@ c_weapon =
 	fireSound = "",
 	reloadSound = "",
 
-	texturer = {tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2()},
+	textureR = {tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2()},
 	render = {tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2()},
 
 	-- projectiles
@@ -834,7 +860,9 @@ c_weapon =
 	projectileTexture = "",
 
 	projectileHull = {tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2()},
-	projectileTexturer = {tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2()},
+	projectileRadius = 0,
+
+	projectiletextureR = {tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2()},
 	projectileRender = {tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2()},
 
 	projectileExplode = false,
@@ -1100,6 +1128,22 @@ function c_weapon_fire(tank, d)
 			for i = 1, weapon.pellets do
 				local projectile = c_weapon_projectile:new()
 				local vec = tankbobs.m_vec2()
+				local projectileIndex = #c_world_projectiles + 1
+				--[[
+				-- This is redundant, as "the length of a table t is defined to be any integer index n such that t[n] is not nil and t[n+1] is nil; moreover, if t[1] is nil, n can be zero."
+				local reset = false
+				while c_world_projectiles[index] do
+					if index == #c_world_projectiles or #c_world_projectiles > c_const_get("projectile_max") then
+						reset = true
+					end
+
+					index = index + 1
+
+					if not reset and index > c_const_get("projectile_max") / 2 then
+						index = -c_const_get("projectile_max") / 2
+					end
+				end
+				--]]
 
 				projectile.weapon = weapon.index
 
@@ -1118,20 +1162,21 @@ function c_weapon_fire(tank, d)
 
 				projectile.r = vec.t
 
-				projectile.m.body = tankbobs.w_addBody(projectile.p, projectile.r, c_const_get("projectile_canSleep"), c_const_get("projectile_isBullet"), c_const_get("projectile_linearDamping"), c_const_get("projectile_angularDamping"), weapon.projectileHull, weapon.projectileDensity, c_const_get("projectile_friction"), weapon.projectileRestitution, true, c_const_get("projectile_contentsMask"), c_const_get("projectile_clipmask"), c_const_get("projectile_isSensor"), #c_world_projectiles + 1)
+				projectile.m.body = tankbobs.w_addBody(projectile.p, projectile.r, c_const_get("projectile_canSleep"), c_const_get("projectile_isBullet"), c_const_get("projectile_linearDamping"), c_const_get("projectile_angularDamping"), projectileIndex)
+				projectile.m.fixture = tankbobs.w_addFixture(projectile.m.body, weapon.m.p.fixtureDefinition, true)
 				vec.R = weapon.speed
 				tankbobs.w_setLinearVelocity(projectile.m.body, vec)
 
-				table.insert(c_world_projectiles, projectile)
+				c_world_projectiles[projectileIndex] = projectile
 
 				angle = angle - weapon.spread
 
-				-- apply knockback to the tank
+				-- apply knockback impulse to the tank
 				local point = tankbobs.w_getCenterOfMass(tank.body)
 				local force = tankbobs.m_vec2()
 				force.R = -weapon.knockback * c_const_get("tank_speedK")
 				force.t = tankbobs.w_getAngle(tank.body)
-				tankbobs.w_applyForce(tank.body, force, point)
+				tankbobs.w_applyImpulse(tank.body, force, point)
 			end
 		end
 
@@ -1144,6 +1189,7 @@ function c_weapon_fire(tank, d)
 end
 
 function c_weapon_clear(clearPersistant)
+	-- don't call this function when world exists, since projectiles is set to a new table
 	c_world_projectiles = {}
 
 	for _, v in pairs(c_weapons) do
@@ -1182,22 +1228,18 @@ end
 function c_weapon_removeProjectile(projectile)
 	for k, v in pairs(c_world_projectiles) do
 		if v == projectile then
-			if not v.collided and v.m.body then
-				tankbobs.w_removeBody(v.m.body)
-				v.m.body = nil
+			--if not v.collided and v.m.body then
+			if v.m.body then
+				tankbobs.w_removeBody(v.m.body) v.m.body = nil v.m.fixture = nil
 			end
 
 			c_world_projectiles[k] = nil
+
+			return
 		end
 	end
-end
 
-local function c_world_isTank(body)
-	if tankbobs.w_getContents(body) == TANK then
-		return c_world_getTanks()[tankbobs.w_getIndex(body)]
-	end
-
-	return nil
+	common_printError(0, "Warning: c_weapon_removeProjectile: projectile from weapon '" .. c_weapons[projectile.weapon].name .. "' ('" .. c_weapons[projectile.weapon].altName .. "') couldn't be found in projectile table!\n")
 end
 
 function c_weapon_projectileCollided(projectile, body)
@@ -1208,7 +1250,7 @@ function c_weapon_projectileCollided(projectile, body)
 
 		projectile.collisions = projectile.collisions + 1
 
-		local tank = c_world_isTank(body)
+		local tank = c_world_isBodyTank(body)
 		if tank then
 			tank.m.lastDamageTime = tankbobs.t_getTicks()
 		end
@@ -1222,11 +1264,23 @@ function c_weapon_projectileCollided(projectile, body)
 			return
 		end
 
-		if c_world_isTank(body) and weapon.projectileEndOnBody then
+		if c_world_isBodyTank(body) and weapon.projectileEndOnBody then
 			projectile.collided = true
 			return
 		end
 	end
+end
+
+function c_weapon_doesShootProjectiles(weapon)
+	return not c_weapon_isMeleeWeapon(weapon)
+end
+
+function c_weapon_isMeleeWeapon(weapon)
+	if c_weapons[weapon].meleeRange ~= 0 then
+		return true
+	end
+
+	return false
 end
 
 function c_weapon_getProjectiles()
@@ -1237,8 +1291,7 @@ function c_weapon_resetProjectiles()
 	if not common_empty(c_world_projectiles) then
 		for k, v in pairs(c_world_projectiles) do
 			if not v.collided and v.m.body then
-				tankbobs.w_removeBody(v.m.body)
-				v.m.body = nil
+				tankbobs.w_removeBody(v.m.body) v.m.body = nil v.m.fixture = nil
 			end
 		end
 

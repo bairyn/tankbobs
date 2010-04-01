@@ -105,11 +105,11 @@ function common_init()
 
 	c_state_init()
 
-	c_weapon_init()
-
 	c_tcm_init()
 
 	c_world_init()
+
+	c_weapon_init()
 
 	c_ai_init()
 

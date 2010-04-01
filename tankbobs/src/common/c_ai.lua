@@ -403,16 +403,6 @@ function c_ai_isWeapon(tank, weaponString)
 	return tank.weapon == weapon.index
 end
 
-function c_ai_isMeleeWeapon(tank)
-	-- this should work on all tanks
-
-	if c_weapon_getWeapons()[tank.weapon].meleeRange ~= 0 then
-		return true
-	end
-
-	return false
-end
-
 function c_ai_tankWeaponStep(tank, enemyInSight)
 	local t = tankbobs.t_getTicks()
 
@@ -457,7 +447,7 @@ function c_ai_shootEnemies(tank, enemy, angle, pos, time)
 			c_ai_setTankStateForward(tank, 0)
 		end
 
-		if c_ai_isMeleeWeapon(tank) then
+		if c_weapon_isMeleeWeapon(tank.weapon) then
 			c_ai_setTankStateForward(tank, 1)
 		elseif c_ai_isWeapon(tank, "shotgun") then
 			local chaseEnemyChance = c_world_getInstagib() and c_const_get("ai_chaseEnemyChanceInstagib") or c_const_get("ai_chaseEnemyChance")
@@ -475,7 +465,7 @@ function c_ai_shootEnemies(tank, enemy, angle, pos, time)
 
 	if math.random(1000 * c_ai_relativeTankSkill(tank), 1000 * (1 + c_const_get("ai_skipUpdateRandomReduce"))) / 1000 < c_const_get("ai_skipUpdateRandom") then
 		c_ai_setTankStateRotation(tank, tank.r - angle)
-		if c_ai_isMeleeWeapon(tank) then
+		if c_weapon_isMeleeWeapon(tank.weapon) then
 			local range = c_weapon_getWeapons()[tank.weapon].meleeRange
 			if range < 0 then
 				range = c_const_get("ai_meleeRangePlasmaGun") + tank.radiusFireTime
@@ -495,7 +485,7 @@ function c_ai_shootEnemies(tank, enemy, angle, pos, time)
 	end
 
 	-- randomly accelerate or reverse
-	if c_ai_isMeleeWeapon(tank) then
+	if c_weapon_isMeleeWeapon(tank.weapon) then
 		if (enemy.p - tank.p).R >= c_const_get("ai_meleeChaseTargetMinDistance") then
 			tank.ai.chasingWithMeleeWeapon = true
 
@@ -1086,7 +1076,7 @@ function c_ai_avoidIfAlmostDead(tank)
 		return
 	end
 
-	if c_ai_isMeleeWeapon(tank) then
+	if c_weapon_isMeleeWeapon(tank.weapon) then
 		c_ai_setObjective(tank, AVOIDENEMYINDEX, nil)
 
 		return
@@ -1112,7 +1102,7 @@ function c_ai_avoidMeleeEnemies(tank, filter)
 		return
 	end
 
-	if c_ai_isMeleeWeapon(tank) then
+	if c_weapon_isMeleeWeapon(tank.weapon) then
 		c_ai_setObjective(tank, AVOIDENEMYMEELEINDEX, nil)
 
 		return
@@ -1123,7 +1113,7 @@ function c_ai_avoidMeleeEnemies(tank, filter)
 	local t = {}
 	for _, v in pairs(c_world_getTanks()) do
 		if v.exists and tank ~= v and (not c_world_isTeamGameType() or tank.red ~= v.red) and (not filter or filter(v)) then
-			if c_ai_isMeleeWeapon(v) then
+			if c_weapon_isMeleeWeapon(v.weapon) then
 				local distance = (v.p - tank.p).R
 
 				if distance <= range then
@@ -1324,7 +1314,7 @@ function c_ai_tank_step(tank, d)
 
 		c_ai_avoid(tank)
 
-		if not enemy or not c_ai_isMeleeWeapon(tank) then
+		if not enemy or not c_weapon_isMeleeWeapon(tank.weapon) then
 			c_ai_followObjectives(tank, true)
 		end
 

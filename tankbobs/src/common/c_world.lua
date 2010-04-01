@@ -34,6 +34,9 @@ local t_w_setAngle            = nil
 local t_w_getAngle            = nil
 local t_w_getPosition         = nil
 local t_w_getVertices         = nil
+local t_w_getContents         = nil
+local t_w_getBodyVertices     = nil
+local t_w_getBodyContents     = nil
 local t_t_getTicks            = nil
 local t_t_clone               = nil
 local t_m_vec2                = nil
@@ -88,6 +91,9 @@ function c_world_init()
 	t_w_getAngle            = _G.tankbobs.w_getAngle
 	t_w_getPosition         = _G.tankbobs.w_getPosition
 	t_w_getVertices         = _G.tankbobs.w_getVertices
+	t_w_getContents         = _G.tankbobs.w_getContents
+	t_w_getBodyVertices     = _G.tankbobs.w_getBodyVertices
+	t_w_getBodyContents     = _G.tankbobs.w_getBodyContents
 	t_t_getTicks            = _G.tankbobs.t_getTicks
 	t_t_clone               = _G.tankbobs.t_clone
 	t_m_vec2                = _G.tankbobs.m_vec2
@@ -100,6 +106,7 @@ function c_world_init()
 	c_config_cheat_protect("game.timescale")
 
 	c_const_set("world_time", 1000)  -- relative to change in seconds
+	c_const_set("world_unitScale", 1)
 
 	c_const_set("world_fps", 256)  -- TODO: make single changes to world_fps not affect game speeds
 	--c_const_set("world_fps", c_config_get("game.worldFPS"))  -- physics FPS needs to be constant
@@ -372,6 +379,7 @@ function c_world_init()
 	powerupType.instagib = false
 
 
+	tankbobs.w_setUnitScale(c_const_get("world_unitScale"))
 	tankbobs.w_setTimeStep(c_const_get("world_timeStep"))
 	tankbobs.w_setIterations(c_const_get("world_iterations"))
 end
@@ -431,6 +439,7 @@ c_world_tank =
 	weapon = nil,
 	lastFireTime = nil,
 	body = nil,  -- physical body
+	fixture = nil,  -- physical fixture
 	health = 0,
 	nextSpawnTime = 0,
 	killer = 0,
@@ -507,7 +516,9 @@ function c_world_newWorld()
 	if not c_tcm_current_map then
 		return false
 	end
-	tankbobs.w_newWorld(c_const_get("world_lowerbound") + t_m_vec2(m.leftmost, m.lowermost), c_const_get("world_upperbound") + t_m_vec2(m.rightmost, m.uppermost), t_m_vec2(c_const_get("world_gravityx"), c_const_get("world_gravityy")), c_const_get("world_allowSleep"), c_world_contactListener, c_world_tank_step, c_world_wall_step, c_world_projectile_step, c_world_powerupSpawnPoint_step, c_world_powerup_step, c_world_controlPoint_step, c_world_flag_step, c_world_teleporter_step, c_world_corpse_step, c_world_tanks, c_tcm_current_map.walls, c_weapon_getProjectiles(), c_tcm_current_map.powerupSpawnPoints, c_world_powerups, c_tcm_current_map.controlPoints, c_tcm_current_map.flags, c_tcm_current_map.teleporters, c_world_corpses)
+
+	tankbobs.w_newWorld(c_const_get("world_lowerbound") + t_m_vec2(m.leftmost, m.lowermost), c_const_get("world_upperbound") + t_m_vec2(m.rightmost, m.uppermost), t_m_vec2(c_const_get("world_gravityx"), c_const_get("world_gravityy")), c_const_get("world_allowSleep"), c_world_tank_step, c_world_wall_step, c_world_projectile_step, c_world_powerupSpawnPoint_step, c_world_powerup_step, c_world_controlPoint_step, c_world_flag_step, c_world_teleporter_step, c_world_corpse_step, c_world_tanks, c_tcm_current_map.walls, c_weapon_getProjectiles(), c_tcm_current_map.powerupSpawnPoints, c_world_powerups, c_tcm_current_map.controlPoints, c_tcm_current_map.flags, c_tcm_current_map.teleporters, c_world_corpses)
+	tankbobs.w_setContactListener(c_world_contactListener)
 
 	-- set game type
 	local switch = c_config_get("game.gameType")
@@ -551,7 +562,8 @@ function c_world_newWorld()
 
 			-- add wall to world
 			local b = c_world_wallShape(v.p)
-			v.m.body = tankbobs.w_addBody(b[1], 0, c_const_get("wall_canSleep"), c_const_get("wall_isBullet"), c_const_get("wall_linearDamping"), c_const_get("wall_angularDamping"), b[2], c_const_get("wall_density"), c_const_get("wall_friction"), c_const_get("wall_restitution"), not v.static, c_const_get("wall_contentsMask"), c_const_get("wall_clipmask"), c_const_get("wall_isSensor"), k)
+			v.m.body = tankbobs.w_addBody(b[1], 0, c_const_get("wall_canSleep"), c_const_get("wall_isBullet"), c_const_get("wall_linearDamping"), c_const_get("wall_angularDamping"), k)
+			v.m.fixture = tankbobs.w_addPolygonalFixture(b[2], c_const_get("wall_density"), c_const_get("wall_friction"), c_const_get("wall_restitution"), c_const_get("wall_isSensor"), c_const_get("wall_contentsMask"), c_const_get("wall_clipmask"), v.m.body, not v.static)
 			if not v.m.body then
 				error "c_world_newWorld: could not add a wall to the physical world"
 			end
@@ -728,7 +740,8 @@ function c_world_addCorpse(tank, vel, index)
 	tank.lastAttackers = FIXMETODOtmpLastAttackers
 
 	corpse.explodeTime = t_t_getTicks() + c_world_timeMultiplier(c_const_get("world_corpseTime"))
-	corpse.body = tankbobs.w_addBody(corpse.p, corpse.r, c_const_get("corpse_canSleep"), c_const_get("corpse_isBullet"), c_const_get("corpse_linearDamping"), c_const_get("corpse_angularDamping"), corpse.h, c_const_get("corpse_density"), c_const_get("corpse_friction"), c_const_get("corpse_restitution"), not c_const_get("corpse_static"), c_const_get("corpse_contentsMask"), c_const_get("corpse_clipmask"), c_const_get("corpse_isSensor"), index)
+	corpse.body = tankbobs.w_addBody(corpse.p, corpse.r, c_const_get("corpse_canSleep"), c_const_get("corpse_isBullet"), c_const_get("corpse_linearDamping"), c_const_get("corpse_angularDamping"), index)
+	tankbobs.w_addPolygonalFixture(corpse.h, c_const_get("corpse_density"), c_const_get("corpse_friction"), c_const_get("corpse_restitution"), c_const_get("corpse_isSensor"), c_const_get("corpse_contentsMask"), c_const_get("corpse_clipmask"), corpse.body, not c_const_get("corpse_static"))
 	t_w_setLinearVelocity(corpse.body, vel)
 
 	corpse.exists = true
@@ -744,8 +757,7 @@ function c_world_tank_die(tank, t)
 		local vel = t_w_getLinearVelocity(tank.body)
 		local index = tankbobs.w_getIndex(tank.body)
 
-		tankbobs.w_removeBody(tank.body)
-		tank.body = nil
+		tankbobs.w_removeBody(tank.body) tank.body = nil tank.fixture = nil
 
 		c_world_addCorpse(tank, vel, index)
 	end
@@ -806,7 +818,7 @@ function c_world_removeTank(tank)
 		if v == tank then
 			if v.exists and v.body then
 				tankbobs.w_removeBody(v.body)
-				v.body = nil
+				v.body = nil v.fixture = nil
 			end
 
 			c_world_tanks[k] = nil
@@ -834,7 +846,7 @@ function c_world_spawnTank(tank)
 
 	if tank.body then
 		tankbobs.w_removeBody(tank.body)
-		tank.body = nil
+		tank.body = nil v.fixture = nil
 	end
 
 	local weapon = c_weapon_getWeapons()[tank.weapon]
@@ -846,7 +858,8 @@ function c_world_spawnTank(tank)
 	end
 
 	-- add a physical body
-	tank.body = tankbobs.w_addBody(tank.p, tank.r, c_const_get("tank_canSleep"), c_const_get("tank_isBullet"), c_const_get("tank_linearDamping"), c_const_get("tank_angularDamping"), tank.h, c_const_get("tank_density"), c_const_get("tank_friction"), c_const_get("tank_restitution"), not c_const_get("tank_static"), c_const_get("tank_contentsMask"), c_const_get("tank_clipmask"), c_const_get("tank_isSensor"), index)
+	tank.body = tankbobs.w_addBody(tank.p, tank.r, c_const_get("tank_canSleep"), c_const_get("tank_isBullet"), c_const_get("tank_linearDamping"), c_const_get("tank_angularDamping"), index)
+	tankbobs.w_addPolygonalFixture(tank.h, c_const_get("tank_density"), c_const_get("tank_friction"), c_const_get("tank_restitution"), c_const_get("tank_isSensor"), c_const_get("tank_contentsMask"), c_const_get("tank_clipmask"), tank.body, not c_const_get("tank_static"))
 
 	c_ai_tankSpawn(tank)
 
@@ -1092,11 +1105,14 @@ function c_world_projectileHull(projectile)
 
 	local p = projectile.p
 
-	for k, v in pairs(c_weapon_getWeapons()[projectile.weapon].projectileHull) do
-		local h = t_m_vec2(v)
-		h.t = h.t + projectile.r
-		h:add(p)
-		c[k](h)
+	local hull = c_weapon_getWeapons()[projectile.weapon].projectileHull
+	if hull then
+		for k, v in pairs(hull) do
+			local h = t_m_vec2(v)
+			h.t = h.t + projectile.r
+			h:add(p)
+			c[k](h)
+		end
 	end
 
 	return c
@@ -1730,7 +1746,7 @@ function c_world_wall_step(d, wall)
 				end
 			end
 
-			t_w_getVertices(wall.m.body, wall.m.pos)
+			t_w_getVertices(wall.m.fixture, wall.m.pos)
 			local offset = t_w_getPosition(wall.m.body)
 			local angle = t_w_getAngle(wall.m.body)
 			for _, v in pairs(wall.m.pos) do
@@ -1739,7 +1755,7 @@ function c_world_wall_step(d, wall)
 			end
 		end
 	else
-		t_w_getVertices(wall.m.body, wall.m.pos)
+		t_w_getVertices(wall.m.fixture, wall.m.pos)
 		local offset = t_w_getPosition(wall.m.body)
 		local angle = t_w_getAngle(wall.m.body)
 		for _, v in pairs(wall.m.pos) do
@@ -1756,8 +1772,7 @@ function c_world_projectile_step(d, projectile)
 
 	if not weapon then
 		if projectile.m.body then
-			tankbobs.w_removeBody(projectile.m.body)
-			projectile.m.body = nil
+			tankbobs.w_removeBody(projectile.m.body) projectile.m.body = nil projectile.m.fixture = nil
 		end
 		c_weapon_removeProjectile(projectile)
 		return
@@ -1765,8 +1780,7 @@ function c_world_projectile_step(d, projectile)
 
 	if projectile.collided then
 		if projectile.m.body then
-			tankbobs.w_removeBody(projectile.m.body)
-			projectile.m.body = nil
+			tankbobs.w_removeBody(projectile.m.body) projectile.m.body = nil projectile.m.fixture = nil
 		end
 
 		-- if explosive projectile, don't remove immediately
@@ -1790,13 +1804,17 @@ function c_world_projectile_step(d, projectile)
 	else
 		c_world_testBody(projectile)
 
+		-- Projectiles can look quite silly when they don't point in the direction in which they're traveling
+		t_w_setAngle(projectile.m.body, t_w_getLinearVelocity(projectile.m.body).t)
+
 		projectile.p(t_w_getPosition(projectile.m.body))
 		projectile.r = t_w_getAngle(projectile.m.body)
 	end
 end
 
 function c_world_spawnPowerup(powerup, index)
-	powerup.m.body = tankbobs.w_addBody(powerup.p, 0, c_const_get("powerup_canSleep"), c_const_get("powerup_isBullet"), c_const_get("powerup_linearDamping"), c_const_get("powerup_angularDamping"), c_world_powerupHull(powerup), c_const_get("powerup_density"), c_const_get("powerup_friction"), c_const_get("powerup_restitution"), not c_const_get("powerup_static"), c_const_get("powerup_contentsMask"), c_const_get("powerup_clipmask"), c_const_get("powerup_isSensor"), index)
+	powerup.m.body = tankbobs.w_addBody(powerup.p, 0, c_const_get("powerup_canSleep"), c_const_get("powerup_isBullet"), c_const_get("powerup_linearDamping"), c_const_get("powerup_angularDamping"), index)
+	tankbobs.w_addPolygonalFixture(c_world_powerupHull(powerup), c_const_get("powerup_density"), c_const_get("powerup_friction"), c_const_get("powerup_restitution"), c_const_get("powerup_isSensor"), c_const_get("powerup_contentsMask"), c_const_get("powerup_clipmask"), powerup.m.body, not c_const_get("powerup_static"))
 end
 
 function c_world_powerupSpawnPoint_step(d, powerupSpawnPoint)
@@ -2032,8 +2050,7 @@ function c_world_removeCorpse(corpse)
 	for k, v in pairs(c_world_corpses) do
 		if v == corpse then
 			if v.body then
-				tankbobs.w_removeBody(v.body)
-				v.body = nil
+				tankbobs.w_removeBody(v.body) v.body = nil v.fixture = nil
 			end
 
 			c_world_corpses[k] = nil
@@ -2132,8 +2149,7 @@ function c_world_corpse_step(d, corpse)
 		end
 
 		if corpse.body then
-			tankbobs.w_removeBody(corpse.body)
-			corpse.body = nil
+			tankbobs.w_removeBody(corpse.body) corpse.body = nil corpse.fixture = nil
 		end
 
 		corpse.explode = corpse.explode - d
@@ -2292,32 +2308,64 @@ function c_world_teleporter_step(d, teleporter)
 	-- Don't handle powerups and projectiles
 end
 
-function c_world_isWall(body)
-	if tankbobs.w_getContents(body) == WALL then
+function c_world_isWall(fixture)
+	if t_w_getContents(fixture) == WALL then
+		return c_tcm_current_map.walls[tankbobs.w_getIndex(tankbobs.w_getBody(fixture))]
+	end
+
+	return nil
+end
+
+function c_world_isTank(fixture)
+	if t_w_getContents(fixture) == TANK then
+		return c_world_tanks[tankbobs.w_getIndex(tankbobs.w_getBody(fixture))]
+	end
+
+	return nil
+end
+
+function c_world_isProjectile(fixture)
+	if t_w_getContents(fixture) == PROJECTILE then
+		return c_weapon_getProjectiles()[tankbobs.w_getIndex(tankbobs.w_getBody(fixture))]
+	end
+
+	return nil
+end
+
+function c_world_isPowerup(fixture)
+	if t_w_getContents(fixture) == POWERUP then
+		return c_world_powerups[tankbobs.w_getIndex(tankbobs.w_getBody(fixture))]
+	end
+
+	return nil
+end
+
+function c_world_isBodyWall(body)
+	if t_w_getBodyContents(body) == WALL then
 		return c_tcm_current_map.walls[tankbobs.w_getIndex(body)]
 	end
 
 	return nil
 end
 
-function c_world_isTank(body)
-	if tankbobs.w_getContents(body) == TANK then
+function c_world_isBodyTank(body)
+	if t_w_getBodyContents(body) == TANK then
 		return c_world_tanks[tankbobs.w_getIndex(body)]
 	end
 
 	return nil
 end
 
-function c_world_isProjectile(body)
-	if tankbobs.w_getContents(body) == PROJECTILE then
+function c_world_isBodyProjectile(body)
+	if t_w_getBodyContents(body) == PROJECTILE then
 		return c_weapon_getProjectiles()[tankbobs.w_getIndex(body)]
 	end
 
 	return nil
 end
 
-function c_world_isPowerup(body)
-	if tankbobs.w_getContents(body) == POWERUP then
+function c_world_isBodyPowerup(body)
+	if t_w_getBodyContents(body) == POWERUP then
 		return c_world_powerups[tankbobs.w_getIndex(body)]
 	end
 
@@ -2356,114 +2404,116 @@ local function c_world_collide(tank, normal)
 	end
 end
 
-function c_world_preContactListener(shape1, shape2, body1, body2, position, separation, normal)
+function c_world_preContactListener(begin, fixtureA, fixtureB, bodyA, bodyB, position, normal)
 	return false
 end
 
-function c_world_contactListener(shape1, shape2, body1, body2, position, separation, normal)
-	if c_world_preContactListener(shape1, shape2, body1, body2, position, separation, normal) then
+function c_world_contactListener(begin, fixtureA, fixtureB, bodyA, bodyB, position, normal)
+	if c_world_preContactListener(begin, fixtureA, fixtureB, bodyA, bodyB, position, normal) then
 		return
 	end
 
-	local b, p
-	local powerup = false
+	if begin then
+		local b, p
+		local powerup = false
 
-	if c_world_isPowerup(body1) or c_world_isPowerup(body2) then
-		local tank = c_world_isTank(body1)
-		local tank2 = c_world_isTank(body2)
+		if c_world_isBodyPowerup(bodyA) or c_world_isBodyPowerup(bodyB) then
+			local tank = c_world_isBodyTank(bodyA)
+			local tank2 = c_world_isBodyTank(bodyB)
 
-		if tank then
-			c_world_powerup_pickUp(tank, c_world_isPowerup(body2))
-		elseif tank2 then
-			c_world_powerup_pickUp(tank2, c_world_isPowerup(body1))
-		end
-
-		powerup = true
-	end
-
-	if c_world_isProjectile(body1) or c_world_isProjectile(body2) then
-		-- remove the projectile
-		local projectile, projectile2
-
-		projectile = c_world_isProjectile(body1)
-		projectile2 = c_world_isProjectile(body2)
-
-		-- test if the projectile hit a tank
-		local tank, tank2
-
-		tank = c_world_isTank(body1)
-		tank2 = c_world_isTank(body2)
-
-		-- only one of them can be a tank (and if one of them is, only one them can be a projectile)
-		if tank then
-			if projectile then
-				c_weapon_hit(tank, projectile)
-			else
-				c_weapon_hit(tank, projectile2)
-			end
-		elseif tank2 then
-			if projectile then
-				c_weapon_hit(tank2, projectile)
-			else
-				c_weapon_hit(tank2, projectile2)
-			end
-		end
-
-		-- this must be after the weapon hits the tank
-		if projectile then
-			c_weapon_projectileCollided(projectile, body2)
-		end
-
-		if projectile2 then
-			c_weapon_projectileCollided(projectile2, body1)
-		end
-	elseif c_world_isTank(body1) or c_world_isTank(body2) then
-		local tank, tank2
-
-		tank = c_world_isTank(body1)
-		tank2 = c_world_isTank(body2)
-
-		if not powerup then
 			if tank then
-				c_world_collide(tank, normal)
+				c_world_powerup_pickUp(tank, c_world_isBodyPowerup(bodyB))
+			elseif tank2 then
+				c_world_powerup_pickUp(tank2, c_world_isBodyPowerup(bodyA))
 			end
 
-			if tank2 then
-				c_world_collide(tank2, normal)
+			powerup = true
+		end
+
+		if c_world_isProjectile(fixtureA) or c_world_isProjectile(fixtureB) then
+			-- remove the projectile
+			local projectile, projectile2
+
+			projectile = c_world_isProjectile(fixtureA)
+			projectile2 = c_world_isProjectile(fixtureB)
+
+			-- test if the projectile hit a tank
+			local tank, tank2
+
+			tank = c_world_isBodyTank(bodyA)
+			tank2 = c_world_isBodyTank(bodyB)
+
+			-- only one of them can be a tank (and if one of them is, only one them can be a projectile)
+			if tank then
+				if projectile then
+					c_weapon_hit(tank, projectile)
+				else
+					c_weapon_hit(tank, projectile2)
+				end
+			elseif tank2 then
+				if projectile then
+					c_weapon_hit(tank2, projectile)
+				else
+					c_weapon_hit(tank2, projectile2)
+				end
+			end
+
+			-- this must be after the weapon hits the tank
+			if projectile then
+				c_weapon_projectileCollided(projectile, bodyB)
+			end
+
+			if projectile2 then
+				c_weapon_projectileCollided(projectile2, bodyA)
+			end
+		elseif c_world_isBodyTank(bodyA) or c_world_isBodyTank(bodyB) then
+			local tank, tank2
+
+			tank = c_world_isBodyTank(bodyA)
+			tank2 = c_world_isBodyTank(bodyB)
+
+			if not powerup then
+				if tank then
+					c_world_collide(tank, normal)
+				end
+
+				if tank2 then
+					c_world_collide(tank2, normal)
+				end
 			end
 		end
-	end
 
-	if c_world_gameType == CHASE then
-		-- tag another player
-		if c_world_isTank(body1) and c_world_isTank(body2) then
-			local tank, tank2 = c_world_isTank(body1), c_world_isTank(body2)
+		if c_world_gameType == CHASE then
+			-- tag another player
+			if c_world_isBodyTank(bodyA) and c_world_isBodyTank(bodyB) then
+				local tank, tank2 = c_world_isBodyTank(bodyA), c_world_isBodyTank(bodyB)
 
-			local taggedTank, otherTank = nil, nil
+				local taggedTank, otherTank = nil, nil
 
-			if tank.tagged then
-				taggedTank, otherTank = tank, tank2
-			elseif tank2.tagged then
-				taggedTank, otherTank = tank2, tank
-			end
+				if tank.tagged then
+					taggedTank, otherTank = tank, tank2
+				elseif tank2.tagged then
+					taggedTank, otherTank = tank2, tank
+				end
 
-			if taggedTank and otherTank then
-				if not taggedTank.m.tagProtection or taggedTank.m.tagProtection < t_t_getTicks() then
-					taggedTank.cd.lastChasePoint = t_t_getTicks()
-					taggedTank.tagged = false
-					otherTank.tagged = true
-					otherTank.m.tagProtection = t_t_getTicks() + c_world_timeMultiplier(c_const_get("game_tagProtection"))
+				if taggedTank and otherTank then
+					if not taggedTank.m.tagProtection or taggedTank.m.tagProtection < t_t_getTicks() then
+						taggedTank.cd.lastChasePoint = t_t_getTicks()
+						taggedTank.tagged = false
+						otherTank.tagged = true
+						otherTank.m.tagProtection = t_t_getTicks() + c_world_timeMultiplier(c_const_get("game_tagProtection"))
+					end
 				end
 			end
 		end
 	end
 
-	if c_world_postContactListener(shape1, shape2, body1, body2, position, separation, normal) then
+	if c_world_postContactListener(begin, fixtureA, fixtureB, bodyA, bodyB, position, normal) then
 		return
 	end
 end
 
-function c_world_postContactListener(shape1, shape2, body1, body2, position, separation, normal)
+function c_world_postContactListener(begin, fixtureA, fixtureB, bodyA, bodyB, position, normal)
 	return false
 end
 

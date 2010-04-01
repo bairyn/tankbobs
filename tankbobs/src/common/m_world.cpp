@@ -62,6 +62,8 @@ do \
 
 #define WORLDBUFSIZE BUFSIZE - 6
 
+static double unitScale = 1.0;  // The unit scale from game to physics
+
 static b2World *world = NULL;
 static b2AABB worldAABB;
 static b2Vec2 worldGravity;
@@ -92,60 +94,101 @@ static int flagTable;
 static int teleporterTable;
 static int corpseTable;
 
+static const b2MassData staticMassData = { 0
+                                         , b2Vec2(0, 0)
+                                         , 0
+                                         };
+
 class w_private_worldListener : public b2ContactListener
 {
 	public:
-	void Add(const b2ContactPoint *point)
+	void BeginContact(b2Contact *contact)
 	{
 		if(clState)
 		{
-			if(point->shape1->GetBody() && point->shape2->GetBody())
+			b2Fixture *fixtureA = contact->GetFixtureA();
+			b2Fixture *fixtureB = contact->GetFixtureB();
+
+			if(fixtureA && fixtureB && fixtureA->GetBody() && fixtureB->GetBody())
 			{
-				lua_rawgeti(clState, LUA_REGISTRYINDEX, clFunction);
-				lua_pushlightuserdata(clState, point->shape1);
-				lua_pushlightuserdata(clState, point->shape2);
-				lua_pushlightuserdata(clState, point->shape1->GetBody());
-				lua_pushlightuserdata(clState, point->shape2->GetBody());
-				vec2_t *v = reinterpret_cast<vec2_t *> (lua_newuserdata(clState, sizeof(vec2_t)));
+				b2Body *bodyA = fixtureA->GetBody();
+				b2Body *bodyB = fixtureB->GetBody();
+				b2WorldManifold man;
+				contact->GetWorldManifold(&man);
+				b2Vec2 normal = man.m_normal;
 
-				luaL_getmetatable(clState, MATH_METATABLE);
-				lua_setmetatable(clState, -2);
-				v->x = point->position.x;
-				v->y = point->position.y;
-				MATH_POLAR(*v);
-				lua_pushnumber(clState, point->separation);
+				b2Vec2 *point = &man.m_points[0];
+				for(int i = 0; i < contact->GetManifold()->m_pointCount; point = &man.m_points[++i])
+				{
+					lua_rawgeti(clState, LUA_REGISTRYINDEX, clFunction);
+					lua_pushboolean(clState, true);
+					lua_pushlightuserdata(clState, fixtureA);
+					lua_pushlightuserdata(clState, fixtureB);
+					lua_pushlightuserdata(clState, bodyA);
+					lua_pushlightuserdata(clState, bodyB);
 
-				v = reinterpret_cast<vec2_t *> (lua_newuserdata(clState, sizeof(vec2_t)));
+					vec2_t *v = reinterpret_cast<vec2_t *> (lua_newuserdata(clState, sizeof(vec2_t)));
+					luaL_getmetatable(clState, MATH_METATABLE);
+					lua_setmetatable(clState, -2);
+					v->x = point->x * unitScale;
+					v->y = point->y * unitScale;
+					MATH_POLAR(*v);
 
-				luaL_getmetatable(clState, MATH_METATABLE);
-				lua_setmetatable(clState, -2);
-				v->x = point->normal.x;
-				v->y = point->normal.y;
-				MATH_POLAR(*v);
+					v = reinterpret_cast<vec2_t *> (lua_newuserdata(clState, sizeof(vec2_t)));
+					luaL_getmetatable(clState, MATH_METATABLE);
+					lua_setmetatable(clState, -2);
+					v->x = normal.x;
+					v->y = normal.y;
+					MATH_POLAR(*v);
 
-				lua_call(clState, 7, 0);
+					lua_call(clState, 7, 0);
+				}
 			}
 		}
 	}
 
-	void Persist(const b2ContactPoint *point)
+	void EndContact(b2Contact *contact)
 	{
 		if(clState)
 		{
-		}
-	}
+			b2Fixture *fixtureA = contact->GetFixtureA();
+			b2Fixture *fixtureB = contact->GetFixtureB();
 
-	void Remove(const b2ContactPoint *point)
-	{
-		if(clState)
-		{
-		}
-	}
+			if(fixtureA && fixtureB && fixtureA->GetBody() && fixtureB->GetBody())
+			{
+				b2Body *bodyA = fixtureA->GetBody();
+				b2Body *bodyB = fixtureB->GetBody();
+				b2WorldManifold man;
+				contact->GetWorldManifold(&man);
+				b2Vec2 normal = man.m_normal;
 
-	void Result(const b2ContactPoint *point)
-	{
-		if(clState)
-		{
+				b2Vec2 *point = &man.m_points[0];
+				for(int i = 0; i < contact->GetManifold()->m_pointCount; point = &man.m_points[++i])
+				{
+					lua_rawgeti(clState, LUA_REGISTRYINDEX, clFunction);
+					lua_pushboolean(clState, false);
+					lua_pushlightuserdata(clState, fixtureA);
+					lua_pushlightuserdata(clState, fixtureB);
+					lua_pushlightuserdata(clState, bodyA);
+					lua_pushlightuserdata(clState, bodyB);
+
+					vec2_t *v = reinterpret_cast<vec2_t *> (lua_newuserdata(clState, sizeof(vec2_t)));
+					luaL_getmetatable(clState, MATH_METATABLE);
+					lua_setmetatable(clState, -2);
+					v->x = point->x * unitScale;
+					v->y = point->y * unitScale;
+					MATH_POLAR(*v);
+
+					v = reinterpret_cast<vec2_t *> (lua_newuserdata(clState, sizeof(vec2_t)));
+					luaL_getmetatable(clState, MATH_METATABLE);
+					lua_setmetatable(clState, -2);
+					v->x = normal.x * unitScale;
+					v->y = normal.y * unitScale;
+					MATH_POLAR(*v);
+
+					lua_call(clState, 7, 0);
+				}
+			}
 		}
 	}
 };
@@ -154,6 +197,15 @@ static w_private_worldListener w_private_contactListener;
 
 void w_init(lua_State *L)
 {
+}
+
+int w_setUnitScale(lua_State *L)
+{
+	CHECKINIT(init, L);
+
+	unitScale = luaL_checknumber(L, 1);
+
+	return 0;
 }
 
 int w_newWorld(lua_State *L)
@@ -165,10 +217,10 @@ int w_newWorld(lua_State *L)
 	const vec2_t *gravity = CHECKVEC(L, 3);
 	allowSleep = lua_toboolean(L, 4);
 
-	worldAABB.lowerBound.Set(lower->x, lower->y);
-	worldAABB.upperBound.Set(upper->x, upper->y);
+	worldAABB.lowerBound.Set(lower->x * unitScale, lower->y * unitScale);
+	worldAABB.upperBound.Set(upper->x * unitScale, upper->y * unitScale);
 
-	worldGravity = b2Vec2(gravity->x, gravity->y);
+	worldGravity = b2Vec2(gravity->x * unitScale, gravity->y * unitScale);
 
 	if(world)
 	{
@@ -191,7 +243,7 @@ int w_newWorld(lua_State *L)
 	clFunction = luaL_ref(L, LUA_REGISTRYINDEX);
 	clState = L;
 
-	if(!(lua_isfunction(L, 6) && lua_isfunction(L, 7) && lua_isfunction(L, 8) && lua_isfunction(L, 9), lua_isfunction(L, 10) && lua_isfunction(L, 11) && lua_isfunction(L, 12) && lua_isfunction(L, 13) && lua_isfunction(L, 14) && lua_istable(L, 15) && lua_istable(L, 16) && lua_istable(L, 17) && lua_istable(L, 18) && lua_istable(L, 19) && lua_istable(L, 20) && lua_istable(L, 21) && lua_istable(L, 22) && lua_istable(L, 23)))
+	if(!(lua_isfunction(L, 5) && lua_isfunction(L, 6) && lua_isfunction(L, 7) && lua_isfunction(L, 8) && lua_isfunction(L, 9) && lua_isfunction(L, 10) && lua_isfunction(L, 11) && lua_isfunction(L, 12) && lua_isfunction(L, 13) && lua_istable(L, 14) && lua_istable(L, 15) && lua_istable(L, 16) && lua_istable(L, 17) && lua_istable(L, 18) && lua_istable(L, 19) && lua_istable(L, 20) && lua_istable(L, 21) && lua_istable(L, 22)))
 	{
 		lua_pushliteral(L, "w_newWorld: invalid arguments passed for step\n");
 		lua_error(L);
@@ -306,7 +358,7 @@ int w_step(lua_State *L)
 {
 	CHECKINIT(init, L);
 
-	world->Step(timeStep, iterations);
+	world->Step(timeStep, iterations, iterations);
 
 	return 0;
 }
@@ -321,7 +373,7 @@ int w_addBody(lua_State *L)
 
 	b2BodyDef bodyDefinition;
 	v = CHECKVEC(L, 1);
-	bodyDefinition.position.Set(v->x, v->y);
+	bodyDefinition.position.Set(v->x * unitScale, v->y * unitScale);
 	bodyDefinition.angle = luaL_checknumber(L, 2);
 	bodyDefinition.allowSleep = lua_toboolean(L, 3);
 	bodyDefinition.isBullet = lua_toboolean(L, 4);
@@ -330,12 +382,28 @@ int w_addBody(lua_State *L)
 
 	b2Body *body = world->CreateBody(&bodyDefinition);
 
-	if((!lua_istable(L, 7)) || !(lua_objlen(L, 7) > 0))
+	body->SetUserData(reinterpret_cast<void *> (luaL_checkinteger(L, 7)));
+
+	lua_pop(L, 7);  /* balance stack */
+
+	lua_pushlightuserdata(L, body);
+
+	return 1;
+}
+
+int w_getBody(lua_State *L)
+{
+	CHECKINIT(init, L);
+
+	CHECKWORLD(world, L);
+
+	b2Fixture *fixture = reinterpret_cast<b2Fixture *> (lua_touserdata(L, 1));
+	if(!fixture)
 	{
 		tstr *message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
 			();
 		CDLL_FUNCTION("libtstr", "tstr_base_set", void(*)(tstr *, const char *))
-			(message, "w_addBody: invalid polygon table\n");
+			(message, "w_getBody: invalid fixture passed (has it been freed and reset?)\n");
 		lua_pushstring(L, CDLL_FUNCTION("libtstr", "tstr_cstr", const char *(*)(tstr *))
 							(message));
 		CDLL_FUNCTION("libtstr", "tstr_free", void(*)(tstr *))
@@ -343,11 +411,163 @@ int w_addBody(lua_State *L)
 		lua_error(L);
 	}
 
-	int numVertices = lua_objlen(L, 7);
+	b2Body *body = fixture->GetBody();
+
+	lua_pushlightuserdata(L, body);
+
+	return 1;
+}
+
+int w_addFixture(lua_State *L)
+{
+	b2Body       *body;
+	b2Fixture    *fixture;
+	b2FixtureDef *fixtureDefinition;
+
+	CHECKINIT(init, L);
+
+	CHECKWORLD(world, L);
+
+	body = reinterpret_cast<b2Body *> (lua_touserdata(L, 1));
+	fixtureDefinition = reinterpret_cast<b2FixtureDef *> (lua_touserdata(L, 2));
+
+	if(!body)
+	{
+		tstr *message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
+			();
+		CDLL_FUNCTION("libtstr", "tstr_base_set", void(*)(tstr *, const char *))
+			(message, "w_addFixture: invalid body passed\n");
+		lua_pushstring(L, CDLL_FUNCTION("libtstr", "tstr_cstr", const char *(*)(tstr *))
+							(message));
+		CDLL_FUNCTION("libtstr", "tstr_free", void(*)(tstr *))
+			(message);
+		lua_error(L);
+	}
+	if(!fixtureDefinition)
+	{
+		tstr *message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
+			();
+		CDLL_FUNCTION("libtstr", "tstr_base_set", void(*)(tstr *, const char *))
+			(message, "w_addFixture: invalid fixture definition passed\n");
+		lua_pushstring(L, CDLL_FUNCTION("libtstr", "tstr_cstr", const char *(*)(tstr *))
+							(message));
+		CDLL_FUNCTION("libtstr", "tstr_free", void(*)(tstr *))
+			(message);
+		lua_error(L);
+	}
+
+	fixture = body->CreateFixture(fixtureDefinition);
+	if(!fixture)
+	{
+		tstr *message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
+			();
+		CDLL_FUNCTION("libtstr", "tstr_base_set", void(*)(tstr *, const char *))
+			(message, "w_addFixture: could not add fixture\n");
+		lua_pushstring(L, CDLL_FUNCTION("libtstr", "tstr_cstr", const char *(*)(tstr *))
+							(message));
+		CDLL_FUNCTION("libtstr", "tstr_free", void(*)(tstr *))
+			(message);
+		lua_error(L);
+	}
+
+	if(lua_toboolean(L, 3))
+		body->SetMassFromShapes();  /* Dynamic */
+	else
+		body->SetMassData(&staticMassData);  /* Static */
+
+	lua_pushlightuserdata(L, fixture);
+
+	return 1;
+}
+
+int w_addFixtureFinal(lua_State *L)
+{
+	b2Body       *body;
+	b2Fixture    *fixture;
+	b2FixtureDef *fixtureDefinition;
+
+	CHECKINIT(init, L);
+
+	CHECKWORLD(world, L);
+
+	body = reinterpret_cast<b2Body *> (lua_touserdata(L, 1));
+	fixtureDefinition = reinterpret_cast<b2FixtureDef *> (lua_touserdata(L, 2));
+
+	if(!body)
+	{
+		tstr *message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
+			();
+		CDLL_FUNCTION("libtstr", "tstr_base_set", void(*)(tstr *, const char *))
+			(message, "w_addFixtureFinal: invalid body passed\n");
+		lua_pushstring(L, CDLL_FUNCTION("libtstr", "tstr_cstr", const char *(*)(tstr *))
+							(message));
+		CDLL_FUNCTION("libtstr", "tstr_free", void(*)(tstr *))
+			(message);
+		lua_error(L);
+	}
+	if(!fixtureDefinition)
+	{
+		tstr *message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
+			();
+		CDLL_FUNCTION("libtstr", "tstr_base_set", void(*)(tstr *, const char *))
+			(message, "w_addFixtureFinal: invalid fixture definition passed\n");
+		lua_pushstring(L, CDLL_FUNCTION("libtstr", "tstr_cstr", const char *(*)(tstr *))
+							(message));
+		CDLL_FUNCTION("libtstr", "tstr_free", void(*)(tstr *))
+			(message);
+		lua_error(L);
+	}
+
+	fixture = body->CreateFixture(fixtureDefinition);
+	if(!fixture)
+	{
+		tstr *message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
+			();
+		CDLL_FUNCTION("libtstr", "tstr_base_set", void(*)(tstr *, const char *))
+			(message, "w_addFixtureFinal: could not add fixture\n");
+		lua_pushstring(L, CDLL_FUNCTION("libtstr", "tstr_cstr", const char *(*)(tstr *))
+							(message));
+		CDLL_FUNCTION("libtstr", "tstr_free", void(*)(tstr *))
+			(message);
+		lua_error(L);
+	}
+
+	delete fixtureDefinition;
+
+	if(lua_toboolean(L, 3))
+		body->SetMassFromShapes();  /* Dynamic */
+	else
+		body->SetMassData(&staticMassData);  /* Static */
+
+	lua_pushlightuserdata(L, fixture);
+
+	return 1;
+}
+
+int w_addPolygonalFixture(lua_State *L)
+{
+	CHECKINIT(init, L);
+
+	CHECKWORLD(world, L);
+
+	if((!lua_istable(L, 1)) || !(lua_objlen(L, 1) > 0))
+	{
+		tstr *message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
+			();
+		CDLL_FUNCTION("libtstr", "tstr_base_set", void(*)(tstr *, const char *))
+			(message, "w_addPolygonalFixture: invalid polygon table\n");
+		lua_pushstring(L, CDLL_FUNCTION("libtstr", "tstr_cstr", const char *(*)(tstr *))
+							(message));
+		CDLL_FUNCTION("libtstr", "tstr_free", void(*)(tstr *))
+			(message);
+		lua_error(L);
+	}
+
+	int numVertices = lua_objlen(L, 1);
 	const vec2_t **vertices = reinterpret_cast<const vec2_t **>(calloc(numVertices, sizeof(vec2_t *)));
 	int i = 0;
 	lua_pushnil(L);
-	while(lua_next(L, 7))
+	while(lua_next(L, 1))
 	{
 		vertices[i++] = CHECKVEC(L, -1);
 
@@ -356,33 +576,210 @@ int w_addBody(lua_State *L)
 
 	m_orderVertices(vertices, numVertices, COUNTERCLOCKWISE);
 
-	b2PolygonDef shapeDefinition;
-	shapeDefinition.vertexCount = numVertices;
+	b2PolygonDef fixtureDefinition;
+	fixtureDefinition.vertexCount = numVertices;
 	for(int i = 0; i < numVertices; i++)
 	{
-		shapeDefinition.vertices[i].Set(vertices[i]->x, vertices[i]->y);
+		fixtureDefinition.vertices[i].Set(vertices[i]->x * unitScale, vertices[i]->y * unitScale);
 	}
 
 	free(vertices);
 
-	shapeDefinition.density = luaL_checknumber(L, 8);
-	shapeDefinition.friction = luaL_checknumber(L, 9);
-	shapeDefinition.restitution = luaL_checknumber(L, 10);
+	fixtureDefinition.density = luaL_checknumber(L, 2);
+	fixtureDefinition.friction = luaL_checknumber(L, 3);
+	fixtureDefinition.restitution = luaL_checknumber(L, 4);
 
-	shapeDefinition.filter.categoryBits = luaL_checkinteger(L, 12);
-	shapeDefinition.filter.maskBits = luaL_checkinteger(L, 13);
+	fixtureDefinition.isSensor = lua_toboolean(L, 5);
 
-	shapeDefinition.isSensor = lua_toboolean(L, 14);
+	fixtureDefinition.filter.categoryBits = luaL_checkinteger(L, 6);
+	fixtureDefinition.filter.maskBits = luaL_checkinteger(L, 7);
 
-	body->CreateShape(&shapeDefinition);
-	if(lua_toboolean(L, 11))
-		body->SetMassFromShapes();
+	b2FixtureDef *def = dynamic_cast<b2FixtureDef *>(&fixtureDefinition);
 
-	body->SetUserData(reinterpret_cast<void *> (luaL_checkinteger(L, 15)));
+	if(!def)
+	{
+		tstr *message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
+			();
+		CDLL_FUNCTION("libtstr", "tstr_base_set", void(*)(tstr *, const char *))
+			(message, "w_addPolygonalFixture: could not dynamically cast fixtureDefinition from type b2PolygonDef * to b2FixtureDef *\n");
+		lua_pushstring(L, CDLL_FUNCTION("libtstr", "tstr_cstr", const char *(*)(tstr *))
+							(message));
+		CDLL_FUNCTION("libtstr", "tstr_free", void(*)(tstr *))
+			(message);
+		lua_error(L);
+	}
 
-	lua_pop(L, 15);  /* "balance" stack */
+	b2Body *body = reinterpret_cast<b2Body *> (lua_touserdata(L, 8));
+	if(!body)
+	{
+		tstr *message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
+			();
+		CDLL_FUNCTION("libtstr", "tstr_base_set", void(*)(tstr *, const char *))
+			(message, "w_addPolygonalFixture: invalid body passed\n");
+		lua_pushstring(L, CDLL_FUNCTION("libtstr", "tstr_cstr", const char *(*)(tstr *))
+							(message));
+		CDLL_FUNCTION("libtstr", "tstr_free", void(*)(tstr *))
+			(message);
+		lua_error(L);
+	}
 
-	lua_pushlightuserdata(L, body);
+	b2Fixture *fixture = body->CreateFixture(def);
+	if(!fixture)
+	{
+		tstr *message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
+			();
+		CDLL_FUNCTION("libtstr", "tstr_base_set", void(*)(tstr *, const char *))
+			(message, "w_addPolygonalFixture: could not add fixture to body\n");
+		lua_pushstring(L, CDLL_FUNCTION("libtstr", "tstr_cstr", const char *(*)(tstr *))
+							(message));
+		CDLL_FUNCTION("libtstr", "tstr_free", void(*)(tstr *))
+			(message);
+		lua_error(L);
+	}
+
+	if(lua_toboolean(L, 9))
+		body->SetMassFromShapes();  /* Dynamic */
+	else
+		body->SetMassData(&staticMassData);  /* Static */
+
+	lua_pushlightuserdata(L, fixture);
+
+	return 1;
+}
+
+int w_removeDefinition(lua_State *L)
+{
+	CHECKINIT(init, L);
+
+	b2FixtureDef *fixtureDefinition = reinterpret_cast<b2FixtureDef *> (lua_touserdata(L, 1));
+	if(!fixtureDefinition)
+	{
+		tstr *message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
+			();
+		CDLL_FUNCTION("libtstr", "tstr_base_set", void(*)(tstr *, const char *))
+			(message, "w_removeDefinition: invalid fixture definition passed (was it already freed?)\n");
+		lua_pushstring(L, CDLL_FUNCTION("libtstr", "tstr_cstr", const char *(*)(tstr *))
+							(message));
+		CDLL_FUNCTION("libtstr", "tstr_free", void(*)(tstr *))
+			(message);
+		lua_error(L);
+	}
+
+	delete fixtureDefinition;
+
+	return 0;
+}
+
+int w_addPolygonDefinition(lua_State *L)
+{
+	CHECKINIT(init, L);
+
+	if((!lua_istable(L, 1)) || !(lua_objlen(L, 1) > 0))
+	{
+		tstr *message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
+			();
+		CDLL_FUNCTION("libtstr", "tstr_base_set", void(*)(tstr *, const char *))
+			(message, "w_addPolygonDefinition: invalid polygon table\n");
+		lua_pushstring(L, CDLL_FUNCTION("libtstr", "tstr_cstr", const char *(*)(tstr *))
+							(message));
+		CDLL_FUNCTION("libtstr", "tstr_free", void(*)(tstr *))
+			(message);
+		lua_error(L);
+	}
+
+	int numVertices = lua_objlen(L, 1);
+	const vec2_t **vertices = reinterpret_cast<const vec2_t **>(calloc(numVertices, sizeof(vec2_t *)));
+	int i = 0;
+	lua_pushnil(L);
+	while(lua_next(L, 1))
+	{
+		vertices[i++] = CHECKVEC(L, -1);
+
+		lua_pop(L, 1);
+	}
+
+	m_orderVertices(vertices, numVertices, COUNTERCLOCKWISE);
+
+	b2PolygonDef fixtureDefinition;
+	fixtureDefinition.vertexCount = numVertices;
+	for(int i = 0; i < numVertices; i++)
+	{
+		fixtureDefinition.vertices[i].Set(vertices[i]->x * unitScale, vertices[i]->y * unitScale);
+	}
+
+	free(vertices);
+
+	fixtureDefinition.density = luaL_checknumber(L, 2);
+	fixtureDefinition.friction = luaL_checknumber(L, 3);
+	fixtureDefinition.restitution = luaL_checknumber(L, 4);
+
+	fixtureDefinition.isSensor = lua_toboolean(L, 5);
+
+	fixtureDefinition.filter.categoryBits = luaL_checkinteger(L, 6);
+	fixtureDefinition.filter.maskBits = luaL_checkinteger(L, 7);
+
+	b2FixtureDef *def = dynamic_cast<b2FixtureDef *>(new b2PolygonDef(fixtureDefinition));
+
+	lua_pushlightuserdata(L, def);
+
+	return 1;
+}
+
+int w_addCircularDefinition(lua_State *L)
+{
+	CHECKINIT(init, L);
+
+	b2CircleDef fixtureDefinition;
+
+	const vec2_t *v = CHECKVEC(L, 1);
+	fixtureDefinition.localPosition = b2Vec2(v->x * unitScale, v->y * unitScale);
+	fixtureDefinition.radius = luaL_checknumber(L, 2);
+
+	fixtureDefinition.density = luaL_checknumber(L, 3);
+	fixtureDefinition.friction = luaL_checknumber(L, 4);
+	fixtureDefinition.restitution = luaL_checknumber(L, 5);
+
+	fixtureDefinition.filter.categoryBits = luaL_checkinteger(L, 7);
+	fixtureDefinition.filter.maskBits = luaL_checkinteger(L, 8);
+
+	fixtureDefinition.isSensor = lua_toboolean(L, 9);
+
+	b2FixtureDef *def = dynamic_cast<b2FixtureDef *>(new b2CircleDef(fixtureDefinition));
+
+	lua_pushlightuserdata(L, def);
+
+	return 1;
+}
+
+int w_fixtures(lua_State *L)
+{
+	CHECKINIT(init, L);
+
+	CHECKWORLD(world, L);
+
+	b2Body *body = reinterpret_cast<b2Body *> (lua_touserdata(L, 1));
+	lua_pop(L, 1);
+	if(!body)
+	{
+		tstr *message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
+			();
+		CDLL_FUNCTION("libtstr", "tstr_base_set", void(*)(tstr *, const char *))
+			(message, "w_fixtures: invalid body passed\n");
+		lua_pushstring(L, CDLL_FUNCTION("libtstr", "tstr_cstr", const char *(*)(tstr *))
+							(message));
+		CDLL_FUNCTION("libtstr", "tstr_free", void(*)(tstr *))
+			(message);
+		lua_error(L);
+	}
+
+	lua_newtable(L);
+	b2Fixture *fixture = body->GetFixtureList();
+	for(int i = 0; fixture; ++i, fixture = fixture->GetNext())
+	{
+		lua_pushinteger(L, i + 1);
+		lua_pushlightuserdata(L, fixture);
+		lua_settable(L, -3);
+	}
 
 	return 1;
 }
@@ -526,8 +923,8 @@ int w_getPosition(lua_State *L)
 	luaL_getmetatable(L, MATH_METATABLE);
 	lua_setmetatable(L, -2);
 
-	v->x = pos.x;
-	v->y = pos.y;
+	v->x = pos.x / unitScale;
+	v->y = pos.y / unitScale;
 	MATH_POLAR(*v);
 
 	return 1;
@@ -558,7 +955,7 @@ int w_setLinearVelocity(lua_State *L)
 
 	const vec2_t *v = CHECKVEC(L, 2);
 
-	body->SetLinearVelocity(b2Vec2(v->x, v->y));
+	body->SetLinearVelocity(b2Vec2(v->x * unitScale, v->y * unitScale));
 
 	return 0;
 }
@@ -578,8 +975,8 @@ int w_getLinearVelocity(lua_State *L)
 	luaL_getmetatable(L, MATH_METATABLE);
 	lua_setmetatable(L, -2);
 
-	v->x = vel.x;
-	v->y = vel.y;
+	v->x = vel.x / unitScale;
+	v->y = vel.y / unitScale;
 	MATH_POLAR(*v);
 
 	if(isnan(v->x) || isnan(v->y) || isnan(v->R) || isnan(v->t) || isinf(v->x) || isinf(v->y) || isinf(v->R) || isinf(v->t) || isinf(-v->x) || isinf(-v->y) || isinf(-v->R) || isinf(-v->t))
@@ -628,7 +1025,7 @@ int w_setPosition(lua_State *L)
 
 	const vec2_t *v = CHECKVEC(L, 2);
 
-	body->SetXForm(b2Vec2(v->x, v->y), body->GetAngle());
+	body->SetXForm(b2Vec2(v->x * unitScale, v->y * unitScale), body->GetAngle());
 
 	return 0;
 }
@@ -657,7 +1054,7 @@ int w_applyForce(lua_State *L)
 	const vec2_t *force = CHECKVEC(L, 2);
 	const vec2_t *point = CHECKVEC(L, 3);
 
-	body->ApplyForce(b2Vec2(force->x, force->y), b2Vec2(point->x, point->y));
+	body->ApplyForce(b2Vec2(force->x * unitScale, force->y * unitScale), b2Vec2(point->x * unitScale, point->y * unitScale));
 
 	return 0;
 }
@@ -688,7 +1085,7 @@ int w_applyImpulse(lua_State *L)
 	const vec2_t *impulse = CHECKVEC(L, 2);
 	const vec2_t *point = CHECKVEC(L, 3);
 
-	body->ApplyImpulse(b2Vec2(impulse->x, impulse->y), b2Vec2(point->x, point->y));
+	body->ApplyImpulse(b2Vec2(impulse->x * unitScale, impulse->y * unitScale), b2Vec2(point->x * unitScale, point->y * unitScale));
 
 	return 0;
 }
@@ -708,7 +1105,7 @@ int w_getCenterOfMass(lua_State *L)
 	luaL_getmetatable(L, MATH_METATABLE);
 	lua_setmetatable(L, -2);
 
-	v->x = vec.x; v->y = vec.y;
+	v->x = vec.x / unitScale; v->y = vec.y / unitScale;
 	MATH_POLAR(*v);
 
 	return 1;
@@ -1715,14 +2112,17 @@ int w_unpersistWorld(lua_State *L)
 				case 0x00:
 					lua_pushnil(L);
 					lua_setfield(L, -2, "team");
+					break;
 
 				case 0x01:
 					lua_pushliteral(L, "red");
 					lua_setfield(L, -2, "team");
+					break;
 
 				case 0x02:
 					lua_pushliteral(L, "blue");
 					lua_setfield(L, -2, "team");
+					break;
 			}
 
 			/* pop m and control point */
@@ -1819,37 +2219,97 @@ int w_unpersistWorld(lua_State *L)
 	return 0;
 }
 
+int w_getNumVertices(lua_State *L)
+{
+	CHECKINIT(init, L);
+
+	CHECKWORLD(world, L);
+
+	b2Fixture *fixture = reinterpret_cast<b2Fixture *> (lua_touserdata(L, 1));
+	lua_pop(L, 1);
+	if(!fixture)
+	{
+		tstr *message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
+			();
+		CDLL_FUNCTION("libtstr", "tstr_base_set", void(*)(tstr *, const char *))
+			(message, "w_getNumVertices: invalid fixture passed (has it been freed and reset?)\n");
+		lua_pushstring(L, CDLL_FUNCTION("libtstr", "tstr_cstr", const char *(*)(tstr *))
+							(message));
+		CDLL_FUNCTION("libtstr", "tstr_free", void(*)(tstr *))
+			(message);
+		lua_error(L);
+	}
+
+	int num = 0;
+	switch(fixture->GetType())
+	{
+		case b2_polygonShape:
+		{
+			const b2PolygonShape *shape = dynamic_cast<const b2PolygonShape *>(fixture->GetShape());
+			num = shape->GetVertexCount();
+			break;
+		}
+
+		default:
+			num = 0;
+			break;
+	}
+
+	lua_pushinteger(L, num);
+
+	return 1;
+}
+
 int w_getVertices(lua_State *L)
 {
 	CHECKINIT(init, L);
 
 	CHECKWORLD(world, L);
 
-	b2Body *body = reinterpret_cast<b2Body *> (lua_touserdata(L, 1));
+	b2Fixture *fixture = reinterpret_cast<b2Fixture *> (lua_touserdata(L, 1));
 	lua_remove(L, 1);
-
-	if(!lua_istable(L, -1))
+	if(!fixture)
 	{
-		lua_pushliteral(L, "no table passed to w_getVertices\n");
+		tstr *message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
+			();
+		CDLL_FUNCTION("libtstr", "tstr_base_set", void(*)(tstr *, const char *))
+			(message, "w_getVertices: invalid fixture passed (has it been freed and reset?)\n");
+		lua_pushstring(L, CDLL_FUNCTION("libtstr", "tstr_cstr", const char *(*)(tstr *))
+							(message));
+		CDLL_FUNCTION("libtstr", "tstr_free", void(*)(tstr *))
+			(message);
 		lua_error(L);
 	}
 
-	for(b2Shape *bshape = body->GetShapeList(); bshape; bshape = bshape->GetNext())
+	if(!lua_istable(L, -1))
 	{
-		b2PolygonShape *shape = static_cast<b2PolygonShape *> (bshape);
+		lua_pushliteral(L, "w_getVertices: no vertex table passed\n");
+		lua_error(L);
+	}
 
-		const b2Vec2 *vertices = shape->GetVertices();
-		for(int i = 0; i < shape->GetVertexCount(); i++)
+	int i = 0;
+	switch(fixture->GetType())
+	{
+		case b2_polygonShape:
 		{
-			lua_pushinteger(L, i + 1);
-			lua_gettable(L, -2);
-			vec2_t *v = CHECKVEC(L, -1);
-			lua_pop(L, 1);
+			const b2PolygonShape *shape = dynamic_cast<const b2PolygonShape *>(fixture->GetShape());
+			const b2Vec2 *vertices = shape->m_vertices;
+			for(int j = 0; j < shape->GetVertexCount(); j++)
+			{
+				lua_pushinteger(L, ++i);
+				lua_gettable(L, -2);
+				vec2_t *v = CHECKVEC(L, -1);
+				lua_pop(L, 1);
 
-			v->x = vertices[i].x;
-			v->y = vertices[i].y;
-			MATH_POLAR(*v);
+				v->x = vertices[j].x / unitScale;
+				v->y = vertices[j].y / unitScale;
+				MATH_POLAR(*v);
+			}
+			break;
 		}
+
+		default:
+			break;
 	}
 
 	lua_pop(L, 1);
@@ -1863,17 +2323,22 @@ int w_getContents(lua_State *L)
 
 	CHECKWORLD(world, L);
 
-	b2Body *body = reinterpret_cast<b2Body *> (lua_touserdata(L, 1));
-	lua_remove(L, 1);
-
-	for(b2Shape *bshape = body->GetShapeList(); bshape; bshape = bshape->GetNext())
+	b2Fixture *fixture = reinterpret_cast<b2Fixture *> (lua_touserdata(L, 1));
+	lua_pop(L, 1);
+	if(!fixture)
 	{
-		lua_pushinteger(L, bshape->GetFilterData().categoryBits);
-
-		return 1;
+		tstr *message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
+			();
+		CDLL_FUNCTION("libtstr", "tstr_base_set", void(*)(tstr *, const char *))
+			(message, "w_getContents: invalid fixture passed (has it been freed and reset?)\n");
+		lua_pushstring(L, CDLL_FUNCTION("libtstr", "tstr_cstr", const char *(*)(tstr *))
+							(message));
+		CDLL_FUNCTION("libtstr", "tstr_free", void(*)(tstr *))
+			(message);
+		lua_error(L);
 	}
 
-	lua_pushnil(L);
+	lua_pushinteger(L, fixture->GetFilterData().categoryBits);
 
 	return 1;
 }
@@ -1884,12 +2349,138 @@ int w_getClipmask(lua_State *L)
 
 	CHECKWORLD(world, L);
 
+	b2Fixture *fixture = reinterpret_cast<b2Fixture *> (lua_touserdata(L, 1));
+	lua_pop(L, 1);
+	if(!fixture)
+	{
+		tstr *message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
+			();
+		CDLL_FUNCTION("libtstr", "tstr_base_set", void(*)(tstr *, const char *))
+			(message, "w_getClipmask: invalid fixture passed (has it been freed and reset?)\n");
+		lua_pushstring(L, CDLL_FUNCTION("libtstr", "tstr_cstr", const char *(*)(tstr *))
+							(message));
+		CDLL_FUNCTION("libtstr", "tstr_free", void(*)(tstr *))
+			(message);
+		lua_error(L);
+	}
+
+	lua_pushinteger(L, fixture->GetFilterData().maskBits);
+
+	return 1;
+}
+
+int w_getBodyNumVertices(lua_State *L)
+{
+	CHECKINIT(init, L);
+
+	CHECKWORLD(world, L);
+
+	b2Body *body = reinterpret_cast<b2Body *> (lua_touserdata(L, 1));
+	lua_pop(L, 1);
+
+	int num = 0;
+	for(b2Fixture *fixture = body->GetFixtureList(); fixture; fixture = fixture->GetNext())
+	{
+		switch(fixture->GetType())
+		{
+			case b2_polygonShape:
+			{
+				const b2PolygonShape *shape = dynamic_cast<const b2PolygonShape *>(fixture->GetShape());
+				num += shape->GetVertexCount();
+				break;
+			}
+
+			default:
+				break;
+		}
+	}
+
+	lua_pushinteger(L, num);
+
+	return 1;
+}
+
+int w_getBodyVertices(lua_State *L)
+{
+	CHECKINIT(init, L);
+
+	CHECKWORLD(world, L);
+
 	b2Body *body = reinterpret_cast<b2Body *> (lua_touserdata(L, 1));
 	lua_remove(L, 1);
 
-	for(b2Shape *bshape = body->GetShapeList(); bshape; bshape = bshape->GetNext())
+	if(!lua_istable(L, -1))
 	{
-		lua_pushinteger(L, bshape->GetFilterData().maskBits);
+		lua_pushliteral(L, "w_getBodyVertices: no vertex table passed\n");
+		lua_error(L);
+	}
+
+	int i = 0;
+	for(b2Fixture *fixture = body->GetFixtureList(); fixture; fixture = fixture->GetNext())
+	{
+		switch(fixture->GetType())
+		{
+			case b2_polygonShape:
+			{
+				const b2PolygonShape *shape = dynamic_cast<const b2PolygonShape *>(fixture->GetShape());
+				const b2Vec2 *vertices = shape->m_vertices;
+				for(int j = 0; j < shape->GetVertexCount(); j++)
+				{
+					lua_pushinteger(L, ++i);
+					lua_gettable(L, -2);
+					vec2_t *v = CHECKVEC(L, -1);
+					lua_pop(L, 1);
+
+					v->x = vertices[j].x / unitScale;
+					v->y = vertices[j].y / unitScale;
+					MATH_POLAR(*v);
+				}
+				break;
+			}
+
+			default:
+				break;
+		}
+	}
+
+	lua_pop(L, 1);
+
+	return 0;
+}
+
+int w_getBodyContents(lua_State *L)
+{
+	CHECKINIT(init, L);
+
+	CHECKWORLD(world, L);
+
+	b2Body *body = reinterpret_cast<b2Body *> (lua_touserdata(L, 1));
+	lua_remove(L, 1);
+
+	for(b2Fixture *fixture = body->GetFixtureList(); fixture; fixture = fixture->GetNext())
+	{
+		lua_pushinteger(L, fixture->GetFilterData().categoryBits);
+
+		return 1;
+	}
+
+	lua_pushnil(L);
+
+	return 1;
+}
+
+int w_getBodyClipmask(lua_State *L)
+{
+	CHECKINIT(init, L);
+
+	CHECKWORLD(world, L);
+
+	b2Body *body = reinterpret_cast<b2Body *> (lua_touserdata(L, 1));
+	lua_remove(L, 1);
+
+	for(b2Fixture *fixture = body->GetFixtureList(); fixture; fixture = fixture->GetNext())
+	{
+		lua_pushinteger(L, fixture->GetFilterData().maskBits);
 
 		return 1;
 	}

@@ -1092,17 +1092,17 @@ function game_step(d)
 								gl.Begin("TRIANGLES")
 									local length = (endP - start).R
 
-									tmp(c_weapon_getWeapons()[v.weapon].projectileTexturer[1])
+									tmp(c_weapon_getWeapons()[v.weapon].projectiletextureR[1])
 									gl.TexCoord(tmp.x, tmp.y)
 									tmp = start - offset
 									gl.Vertex(tmp.x, tmp.y)
 
-									tmp(c_weapon_getWeapons()[v.weapon].projectileTexturer[2])
+									tmp(c_weapon_getWeapons()[v.weapon].projectiletextureR[2])
 									gl.TexCoord(tmp.x, tmp.y)
 									tmp = start + offset
 									gl.Vertex(tmp.x, tmp.y)
 
-									tmp(c_weapon_getWeapons()[v.weapon].projectileTexturer[3])
+									tmp(c_weapon_getWeapons()[v.weapon].projectiletextureR[3])
 									gl.TexCoord(tmp.x, tmp.y * length)
 									tmp(endP)
 									gl.Vertex(tmp.x, tmp.y)

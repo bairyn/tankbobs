@@ -11,6 +11,7 @@ SOURCES = \
 	./Dynamics/b2Island.cpp \
 	./Dynamics/b2World.cpp \
 	./Dynamics/b2ContactManager.cpp \
+	./Dynamics/b2Fixture.cpp \
 	./Dynamics/Contacts/b2Contact.cpp \
 	./Dynamics/Contacts/b2PolyContact.cpp \
 	./Dynamics/Contacts/b2CircleContact.cpp \
@@ -27,6 +28,7 @@ SOURCES = \
 	./Dynamics/Joints/b2DistanceJoint.cpp \
 	./Dynamics/Joints/b2GearJoint.cpp \
 	./Dynamics/Joints/b2LineJoint.cpp \
+	./Dynamics/Joints/b2FixedJoint.cpp \
 	./Dynamics/Controllers/b2Controller.cpp \
 	./Dynamics/Controllers/b2BuoyancyController.cpp \
 	./Dynamics/Controllers/b2GravityController.cpp \
@@ -39,6 +41,9 @@ SOURCES = \
 	./Common/b2Settings.cpp \
 	./Collision/b2Collision.cpp \
 	./Collision/b2Distance.cpp \
+	./Collision/b2CollideCircle.cpp \
+	./Collision/b2CollideEdge.cpp \
+	./Collision/b2CollidePoly.cpp \
 	./Collision/Shapes/b2Shape.cpp \
 	./Collision/Shapes/b2CircleShape.cpp \
 	./Collision/Shapes/b2PolygonShape.cpp \
