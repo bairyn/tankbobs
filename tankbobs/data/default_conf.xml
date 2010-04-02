@@ -177,6 +177,7 @@
 			<team>red</team>
 		</player2>
 		<players>2</players>
+		<punish>true</punish>
 		<teamFragLimit>15</teamFragLimit>
 		<timescale>1</timescale>
 		<worldFPS>256</worldFPS>

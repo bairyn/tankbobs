@@ -886,7 +886,9 @@ function c_world_tank_die(tank, t)
 		if killer and killer ~= tank then
 			killer.score = killer.score + 1
 		else
-			tank.score = tank.score - 1
+			if c_config_get("game.punish") then
+				tank.score = tank.score - 1
+			end
 		end
 	elseif switch == TEAMDEATHMATCH then
 		if killer and killer ~= tank and tank.red ~= killer.red then
@@ -896,14 +898,13 @@ function c_world_tank_die(tank, t)
 				c_world_blueTeam.score = c_world_blueTeam.score + 1
 			end
 		else
-			-- don't punish the team by subtracting points; this makes the game less fun and can be annoying
-			--[[
-			if tank.red then
-				c_world_redTeam.score = c_world_redTeam.score - 1
-			else
-				c_world_blueTeam.score = c_world_blueTeam.score - 1
+			if c_config_get("game.punish") then
+				if tank.red then
+					c_world_redTeam.score = c_world_redTeam.score - 1
+				else
+					c_world_blueTeam.score = c_world_blueTeam.score - 1
+				end
 			end
-			--]]
 		end
 	end
 	tank.shield = 0
