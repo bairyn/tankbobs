@@ -144,6 +144,7 @@
 		<captureLimit>10</captureLimit>
 		<chaseLimit>30</chaseLimit>
 		<computers>0</computers>
+		<controlLimit>200</controlLimit>
 		<defaultTankRed>   0.875 </defaultTankRed>  Orange
 		<defaultTankGreen> 0.750 </defaultTankGreen>
 		<defaultTankBlue>  0.010 </defaultTankBlue>
@@ -176,7 +177,7 @@
 			<team>red</team>
 		</player2>
 		<players>2</players>
-		<controlLimit>200</controlLimit>
+		<teamFragLimit>15</teamFragLimit>
 		<timescale>1</timescale>
 		<worldFPS>256</worldFPS>
 	</game>

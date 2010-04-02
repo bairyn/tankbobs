@@ -646,7 +646,7 @@ end
 -- Game types
 -- A table of {constant, string, human string, team, pointLimitKey, pointLimitLabel}'s
 do
-local gameTypes = {{DEATHMATCH, "deathmatch", "Deathmatch", false, "game.fragLimit", "Frag limit"}, {CHASE, "chase", "Chase", false, "game.chaseLimit", "Point limit"}, {DOMINATION, "domination", "Domination", true, "game.controlLimit", "Point limit"}, {CAPTURETHEFLAG, "capturetheflag", "Capture the Flag", true, "game.captureLimit", "Capture limit"}}
+local gameTypes = {{DEATHMATCH, "deathmatch", "Deathmatch", false, "game.fragLimit", "Frag limit"}, {TEAMDEATHMATCH, "teamdeathmatch", "Team Deathmatch", true, "game.teamFragLimit", "Frag limit"}, {CHASE, "chase", "Chase", false, "game.chaseLimit", "Point limit"}, {DOMINATION, "domination", "Domination", true, "game.controlLimit", "Point limit"}, {CAPTURETHEFLAG, "capturetheflag", "Capture the Flag", true, "game.captureLimit", "Capture limit"}}
 local c_world_gameType = DEATHMATCH
 
 function c_world_getGameType(gameType)
@@ -837,11 +837,29 @@ function c_world_tank_die(tank, t)
 	end
 
 	tank.nextSpawnTime = t + c_world_timeMultiplier(c_const_get("tank_spawnTime"))
-	if c_world_getGameType() == DEATHMATCH then
+	local switch = c_world_getGameType()
+	if switch == DEATHMATCH then
 		if killer and killer ~= tank then
 			killer.score = killer.score + 1
 		else
 			tank.score = tank.score - 1
+		end
+	elseif switch == TEAMDEATHMATCH then
+		if killer and killer ~= tank and tank.red ~= killer.red then
+			if killer.red then
+				c_world_redTeam.score = c_world_redTeam.score + 1
+			else
+				c_world_blueTeam.score = c_world_blueTeam.score + 1
+			end
+		else
+			-- don't punish the team by subtracting points; this makes the game less fun and can be annoying
+			--[[
+			if tank.red then
+				c_world_redTeam.score = c_world_redTeam.score - 1
+			else
+				c_world_blueTeam.score = c_world_blueTeam.score - 1
+			end
+			--]]
 		end
 	end
 	tank.shield = 0

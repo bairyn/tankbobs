@@ -1324,6 +1324,40 @@ function c_ai_tank_step(tank, d)
 			p = p.p
 		end
 		c_ai_setObjective(tank, AVOIDENEMYINDEX, p, ALWAYSANDDESTROY, "enemy", false)
+	elseif switch == TEAMDEATHMATCH then
+		-- shoot any nearby enemies
+		local enemy, angle, pos, time = c_ai_findClosestEnemyInSight(tank)
+		if enemy and not c_ai_isFollowingObjective(tank, POWERUPINDEX) then
+			c_ai_shootEnemies(tank, enemy, angle, pos, time)
+
+			c_ai_tankWeaponStep(tank, true)
+		else
+			if tank.ai.shootingEnemies then
+				tank.ai.shootingEnemies = false
+
+				-- tank has stopped shooting enemies
+				c_ai_setTankStateFire(tank, 0)
+				c_ai_setTankStateRotation(tank, 0)
+				c_ai_setTankStateForward(tank, 0)
+				tank.ai.turning = nil
+			end
+
+			c_ai_cruise(tank)
+
+			c_ai_tankWeaponStep(tank, false)
+		end
+
+		c_ai_avoid(tank)
+
+		if not enemy or not c_weapon_isMeleeWeapon(tank.weapon) then
+			c_ai_followObjectives(tank, true)
+		end
+
+		local p = c_ai_findClosestEnemy(tank)
+		if p then
+			p = p.p
+		end
+		c_ai_setObjective(tank, AVOIDENEMYINDEX, p, ALWAYSANDDESTROY, "enemy", false)
 	elseif switch == CHASE then
 		local function filter(x)
 			if c_ai_beginningOfChaseGame() then
