@@ -63,40 +63,29 @@ local function testEnd()
 		return
 	end
 
-	if not c_world_redTeam then
+	if not c_world_redTeam or c_world_blueTeam then
 		return  -- world probably not initialized
 	end
 
-	local limit = c_config_get(c_world_gameTypePointLimit())
-	if c_world_gameTypeTeam() then
-		-- team game-type
-		if limit > 0 then
-			if     c_world_redTeam. score >= limit then
-				endOfGame = true
-				c_world_setPaused(true)
+	local win, isTeam, key = c_world_hasWon()
+	if win then
+		endOfGame = true
+		c_world_setPaused(true)
 
+		if isTeam then
+			if win.red then
 				client_sendEvent(nil, tankbobs.io_fromChar(0x00) .. tankbobs.io_fromInt(0x00000001))
 
 				s_printnl("(", c_world_gameTypeHumanString(), ") Red Team Wins!")
-			elseif c_world_blueTeam.score >= limit then
-				endOfGame = true
-				c_world_setPaused(true)
-
+			else
 				client_sendEvent(nil, tankbobs.io_fromChar(0x00) .. tankbobs.io_fromInt(0x00000000))
 
 				s_printnl("(", c_world_gameTypeHumanString(), ") Blue Team Wins!")
 			end
-		end
-	else
-		for k, v in pairs(c_world_getTanks()) do
-			if v.score >= limit then
-				endOfGame = true
-				c_world_setPaused(true)
+		else
+			client_sendEvent(client_getByTank(win), tankbobs.io_fromChar(0x00) .. tankbobs.io_fromInt(key))
 
-				client_sendEvent(client_getByTank(v), tankbobs.io_fromChar(0x00) .. tankbobs.io_fromInt(k))
-
-				s_printnl("(", c_world_gameTypeHumanString(), ") '", v.name, "' Wins!")
-			end
+			s_printnl("(", c_world_gameTypeHumanString(), ") '", win.name, "' Wins!")
 		end
 	end
 end

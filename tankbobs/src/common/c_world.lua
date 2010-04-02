@@ -763,6 +763,50 @@ end
 end
 
 
+function c_world_hasWon()
+	-- returns either the winning tank or the winning team, a bool that is true when the game-type is a team game-type, and a value that is nil when the game-type is a team game-type but otherwise is the index of the winning individual player
+
+	local limit = c_config_get(c_world_gameTypePointLimit())
+	if limit > 0 and #c_world_tanks > 0 then
+		if c_world_gameTypeTeam() then
+			-- team game-type
+			if c_world_redTeam.score ~= c_world_blueTeam.score then
+				if     c_world_redTeam. score >= limit then
+					return c_world_redTeam, true, nil
+				elseif c_world_blueTeam.score >= limit then
+					return c_world_blueTeam, true, nil
+				end
+			end
+		else
+			local maxScore = nil
+			for _, v in pairs(c_world_tanks) do
+				if not maxScore or v.score > maxScore then
+					maxScore = v.score
+				end
+			end
+
+			if maxScore >= limit then
+				local numMax   = 0
+				local lastMaxK = nil
+				local lastMaxV = nil
+				for k, v in pairs(c_world_tanks) do
+					if v.score == maxScore then
+						numMax   = numMax + 1
+						lastMaxK = K
+						lastMaxV = v
+					end
+				end
+
+				if numMax == 1 then
+					return lastMaxV, false, lastMaxK
+				end
+			end
+		end
+	end
+
+	return nil, nil, nil
+end
+
 function c_world_testBody(ent)
 	local p = ent.p
 

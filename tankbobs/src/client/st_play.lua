@@ -399,41 +399,30 @@ local function play_testEnd()
 		return
 	end
 
-	local limit = c_config_get(c_world_gameTypePointLimit())
-	if c_world_gameTypeTeam() then
-		-- team game-type
-		if limit > 0 then
-			if     c_world_redTeam. score >= limit then
-				endOfGame = true
-				c_world_setPaused(true)
+	local win, isTeam, key = c_world_hasWon()
+	if win then
+		endOfGame = true
+		c_world_setPaused(true)
 
+		if isTeam then
+			if win.red then
 				local name = "Red"
 				local color = c_const_get("color_red")
 				gui_addLabel(tankbobs.m_vec2(25, 50), name .. " wins!", nil, 1.1, color[1], color[2], color[3], 0.75, color[1], color[2], color[3], 0.8)
 
 				tankbobs.a_playSound(c_const_get("win_sound"))
-			elseif c_world_blueTeam.score >= limit then
-				endOfGame = true
-				c_world_setPaused(true)
-
+			else
 				local name = "Blue"
 				local color = c_const_get("color_blue")
 				gui_addLabel(tankbobs.m_vec2(25, 50), name .. " wins!", nil, 1.1, color[1], color[2], color[3], 0.75, color[1], color[2], color[3], 0.8)
 
 				tankbobs.a_playSound(c_const_get("win_sound"))
 			end
-		end
-	else
-		for k, v in pairs(c_world_getTanks()) do
-			if v.score >= limit then
-				endOfGame = true
-				c_world_setPaused(true)
+		else
+			local name = tostring(win.name)
+			gui_addLabel(tankbobs.m_vec2(25, 50), name .. " wins!", nil, 1.1, win.color.r, win.color.g, win.color.b, 0.75, win.color.r, win.color.g, win.color.b, 0.8)
 
-				local name = tostring(v.name)
-				gui_addLabel(tankbobs.m_vec2(25, 50), name .. " wins!", nil, 1.1, v.color.r, v.color.g, v.color.b, 0.75, v.color.r, v.color.g, v.color.b, 0.8)
-
-				tankbobs.a_playSound(c_const_get("win_sound"))
-			end
+			tankbobs.a_playSound(c_const_get("win_sound"))
 		end
 	end
 end
