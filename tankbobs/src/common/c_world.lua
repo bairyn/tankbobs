@@ -244,9 +244,11 @@ function c_world_init()
 	c_const_set("powerup_hullx4",  1, 1) c_const_set("powerup_hully4",  1, 1)
 
 	c_const_set("world_megaTankSuicideTimePenalty", 8, 1)  -- tank won't be given any shield or health for this many seconds, in addition to world_megaTankBonusAttackTime
-	c_const_set("world_megaTankBonusAttackTime", 2, 1)
+	c_const_set("world_megaTankBonusAttackTime", 8, 1)
 	c_const_set("world_megaTankHealthRegenerate", 60, 1)
 	c_const_set("world_megaTankBonusHealthGain", 20, 1)
+	c_const_set("world_megaTankBeyondCapBonusHealthGain", 5, 1)
+	c_const_set("world_megaTankHealthGainCap", 200, 1)
 	c_const_set("world_megaTankShieldRegenerate", 1, 1)
 	c_const_set("world_megaTankBonusShieldGain", 0, 1)
 	c_const_set("world_megaTankKillBonus", 2, 1)
@@ -1910,8 +1912,10 @@ function c_world_tank_step(d, tank)
 				if t >= tank.lastAttackedTime + c_const_get("world_megaTankBonusAttackTime") then
 					if tank.health <= c_const_get("tank_health") then
 						tank.health = tank.health + d * c_const_get("world_megaTankHealthRegenerate")
-					else
+					elseif tank.health <= c_const_get("world_megaTankHealthGainCap") then
 						tank.health = tank.health + d * c_const_get("world_megaTankBonusHealthGain")
+					else
+						tank.health = tank.health + d * c_const_get("world_megaTankBeyondCapBonusHealthGain")
 					end
 					if tank.shield <= c_const_get("tank_boostShield") then
 						tank.shield = tank.shield + d * c_const_get("world_megaTankShieldRegenerate")
