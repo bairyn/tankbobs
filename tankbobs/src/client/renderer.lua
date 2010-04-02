@@ -30,6 +30,7 @@ local tank_textures
 local tankBorder_textures
 local tankShield_textures
 local tankTagged_textures
+local tankMega_textures
 local corpse_textures
 local corpseBorder_textures
 local powerup_textures
@@ -115,6 +116,15 @@ function renderer_init()
 	c_const_set("tankTagged_texturex3", 0.0, 1) c_const_set("tankTagged_texturey3", 0.1, 1)  -- eliminate fuzzy top
 	c_const_set("tankTagged_texturex4", 1.0, 1) c_const_set("tankTagged_texturey4", 0.1, 1)  -- eliminate fuzzy top
 
+	c_const_set("tankMega_renderx1", -2.33, 1) c_const_set("tankMega_rendery1",  2.33, 1)
+	c_const_set("tankMega_renderx2", -2.33, 1) c_const_set("tankMega_rendery2", -2.33, 1)
+	c_const_set("tankMega_renderx3",  2.33, 1) c_const_set("tankMega_rendery3", -2.33, 1)
+	c_const_set("tankMega_renderx4",  2.33, 1) c_const_set("tankMega_rendery4",  2.33, 1)
+	c_const_set("tankMega_texturex1", 1.0, 1) c_const_set("tankMega_texturey1", 1.0, 1)
+	c_const_set("tankMega_texturex2", 0.0, 1) c_const_set("tankMega_texturey2", 1.0, 1)
+	c_const_set("tankMega_texturex3", 0.0, 1) c_const_set("tankMega_texturey3", 0.1, 1)  -- eliminate fuzzy top
+	c_const_set("tankMega_texturex4", 1.0, 1) c_const_set("tankMega_texturey4", 0.1, 1)  -- eliminate fuzzy top
+
 	c_const_set("corpse_renderx1", -2.0, 1) c_const_set("corpse_rendery1",  2.0, 1)
 	c_const_set("corpse_renderx2", -2.0, 1) c_const_set("corpse_rendery2", -2.0, 1)
 	c_const_set("corpse_renderx3",  2.0, 1) c_const_set("corpse_rendery3", -2.0, 1)
@@ -145,6 +155,8 @@ function renderer_init()
 	tankShield_textures = gl.GenTextures(1)
 	tankTagged_listBase = gl.GenLists(1)
 	tankTagged_textures = gl.GenTextures(1)
+	tankMega_listBase = gl.GenLists(1)
+	tankMega_textures = gl.GenTextures(1)
 	corpse_listBase = gl.GenLists(1)
 	corpse_textures = gl.GenTextures(1)
 	corpseBorder_listBase = gl.GenLists(1)
@@ -173,6 +185,7 @@ function renderer_init()
 		gl.End()
 	gl.EndList()
 
+
 	gl.BindTexture("TEXTURE_2D", tankBorder_textures[1])
 	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_S", "REPEAT")
 	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_T", "REPEAT")
@@ -191,6 +204,7 @@ function renderer_init()
 			gl.TexCoord(c_const_get("tankBorder_texturex4"), c_const_get("tankBorder_texturey4")) gl.Vertex(c_const_get("tankBorder_renderx4"), c_const_get("tankBorder_rendery4"))
 		gl.End()
 	gl.EndList()
+
 
 	gl.BindTexture("TEXTURE_2D", corpse_textures[1])
 	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_S", "REPEAT")
@@ -211,6 +225,7 @@ function renderer_init()
 		gl.End()
 	gl.EndList()
 
+
 	gl.BindTexture("TEXTURE_2D", corpseBorder_textures[1])
 	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_S", "REPEAT")
 	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_T", "REPEAT")
@@ -229,6 +244,7 @@ function renderer_init()
 			gl.TexCoord(c_const_get("corpseBorder_texturex4"), c_const_get("corpseBorder_texturey4")) gl.Vertex(c_const_get("corpseBorder_renderx4"), c_const_get("corpseBorder_rendery4"))
 		gl.End()
 	gl.EndList()
+
 
 	gl.BindTexture("TEXTURE_2D", tankShield_textures[1])
 	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_S", "REPEAT")
@@ -249,6 +265,7 @@ function renderer_init()
 		gl.End()
 	gl.EndList()
 
+
 	gl.BindTexture("TEXTURE_2D", tankTagged_textures[1])
 	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_S", "REPEAT")
 	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_T", "REPEAT")
@@ -267,6 +284,27 @@ function renderer_init()
 			gl.TexCoord(c_const_get("tankTagged_texturex4"), c_const_get("tankTagged_texturey4")) gl.Vertex(c_const_get("tankTagged_renderx4"), c_const_get("tankTagged_rendery4"))
 		gl.End()
 	gl.EndList()
+
+
+	gl.BindTexture("TEXTURE_2D", tankMega_textures[1])
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_S", "REPEAT")
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_WRAP_T", "REPEAT")
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_MIN_FILTER", "LINEAR")
+	gl.TexParameter("TEXTURE_2D", "TEXTURE_MAG_FILTER", "LINEAR")
+	tankbobs.r_loadImage2D(c_const_get("tankMega"), c_const_get("textures_default"))
+
+	gl.NewList(tankMega_listBase, "COMPILE")
+		-- blend tank with color
+		gl.TexEnv("TEXTURE_ENV_MODE", "MODULATE")
+		gl.BindTexture("TEXTURE_2D", tankMega_textures[1])
+		gl.Begin("QUADS")
+			gl.TexCoord(c_const_get("tankMega_texturex1"), c_const_get("tankMega_texturey1")) gl.Vertex(c_const_get("tankMega_renderx1"), c_const_get("tankMega_rendery1"))
+			gl.TexCoord(c_const_get("tankMega_texturex2"), c_const_get("tankMega_texturey2")) gl.Vertex(c_const_get("tankMega_renderx2"), c_const_get("tankMega_rendery2"))
+			gl.TexCoord(c_const_get("tankMega_texturex3"), c_const_get("tankMega_texturey3")) gl.Vertex(c_const_get("tankMega_renderx3"), c_const_get("tankMega_rendery3"))
+			gl.TexCoord(c_const_get("tankMega_texturex4"), c_const_get("tankMega_texturey4")) gl.Vertex(c_const_get("tankMega_renderx4"), c_const_get("tankMega_rendery4"))
+		gl.End()
+	gl.EndList()
+
 
 	powerup_listBase = gl.GenLists(1)
 	powerup_textures = gl.GenTextures(1)
@@ -595,6 +633,7 @@ function renderer_done()
 	gl.DeleteLists(tankBorder_listBase, 1)
 	gl.DeleteLists(tankShield_listBase, 1)
 	gl.DeleteLists(tankTagged_listBase, 1)
+	gl.DeleteLists(tankMega_listBase, 1)
 	gl.DeleteLists(powerup_listBase, 1)
 	gl.DeleteLists(controlPoint_listBase, 1)
 	gl.DeleteLists(flag_listBase, 1)
@@ -607,6 +646,7 @@ function renderer_done()
 	gl.DeleteTextures(tankBorder_textures)
 	gl.DeleteTextures(tankShield_textures)
 	gl.DeleteTextures(tankTagged_textures)
+	gl.DeleteTextures(tankMega_textures)
 	gl.DeleteTextures(powerup_textures)
 	gl.DeleteTextures(controlPoint_textures)
 	gl.DeleteTextures(flag_textures)

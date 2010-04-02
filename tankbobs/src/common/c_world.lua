@@ -243,6 +243,14 @@ function c_world_init()
 	c_const_set("powerup_hullx3",  1, 1) c_const_set("powerup_hully3",  0, 1)
 	c_const_set("powerup_hullx4",  1, 1) c_const_set("powerup_hully4",  1, 1)
 
+	c_const_set("world_megaTankSuicideTimePenalty", 8, 1)  -- tank won't be given any shield or health for this many seconds, in addition to world_megaTankBonusAttackTime
+	c_const_set("world_megaTankBonusAttackTime", 2, 1)
+	c_const_set("world_megaTankHealthRegenerate", 60, 1)
+	c_const_set("world_megaTankBonusHealthGain", 20, 1)
+	c_const_set("world_megaTankShieldRegenerate", 1, 1)
+	c_const_set("world_megaTankBonusShieldGain", 0, 1)
+	c_const_set("world_megaTankKillBonus", 2, 1)
+
 	-- powerups
 	c_powerupTypes = {}
 
@@ -454,6 +462,8 @@ c_world_tank =
 	lastAttackers = {},
 	notFireReset = false,
 	radiusFireTime = 0,
+	megaTank = nil,
+	lastAttackedTime = 0,
 
 	cd = {},  -- data cleared on death
 
@@ -646,7 +656,7 @@ end
 -- Game types
 -- A table of {constant, string, human string, team, pointLimitKey, pointLimitLabel}'s
 do
-local gameTypes = {{DEATHMATCH, "deathmatch", "Deathmatch", false, "game.fragLimit", "Frag limit"}, {TEAMDEATHMATCH, "teamdeathmatch", "Team Deathmatch", true, "game.teamFragLimit", "Frag limit"}, {CHASE, "chase", "Chase", false, "game.chaseLimit", "Point limit"}, {DOMINATION, "domination", "Domination", true, "game.controlLimit", "Point limit"}, {CAPTURETHEFLAG, "capturetheflag", "Capture the Flag", true, "game.captureLimit", "Capture limit"}}
+local gameTypes = {{DEATHMATCH, "deathmatch", "Deathmatch", false, "game.fragLimit", "Frag limit"}, {TEAMDEATHMATCH, "teamdeathmatch", "Team Deathmatch", true, "game.teamFragLimit", "Frag limit"}, {MEGATANK, "megatank", "Megatank", false, "game.megaPointLimit", "Point limit"}, {CHASE, "chase", "Chase", false, "game.chaseLimit", "Point limit"}, {DOMINATION, "domination", "Domination", true, "game.controlLimit", "Point limit"}, {CAPTURETHEFLAG, "capturetheflag", "Capture the Flag", true, "game.captureLimit", "Capture limit"}}
 local c_world_gameType = DEATHMATCH
 
 function c_world_getGameType(gameType)
@@ -879,8 +889,15 @@ function c_world_tank_die(tank, t)
 	if tank.killer then
 		killer = c_world_tanks[tank.killer]
 	end
+	tank.killer = nil
+
+	tank.shield = 0
+	tank.exists = false
+	tank.m.lastDieTime = t
 
 	tank.nextSpawnTime = t + c_world_timeMultiplier(c_const_get("tank_spawnTime"))
+
+	-- game type things
 	local switch = c_world_getGameType()
 	if switch == DEATHMATCH then
 		if killer and killer ~= tank then
@@ -906,28 +923,68 @@ function c_world_tank_die(tank, t)
 				end
 			end
 		end
-	end
-	tank.shield = 0
-	tank.killer = nil
-	tank.exists = false
-	tank.m.lastDieTime = t
+	elseif switch == MEGATANK then
+		if #c_world_tanks > 0 then
+			if killer and killer ~= tank then
+				killer.score = killer.score + 1
 
-	local tagged = false
-	for _, v in pairs(c_world_tanks) do
-		if v.tagged then
-			tagged = true
-			break
+				if c_world_tanks[tank.megaTank] == tank then
+					-- new megatank
+					killer.score = kille.score + c_const_get("world_megaTankKillBonus")
+
+					for _, v in pairs(c_world_tanks) do
+						v.megaTank = c_world_tankIndex(killer)
+					end
+
+					-- don't give the killer temporary protection
+				end
+			else
+				if c_config_get("game.punish") then
+					tank.score = tank.score - 1
+				end
+			end
+
+			if tank.tagged then
+				tank.tagged = false
+
+				local num = 0
+				local lastTagged = c_world_tanks[#c_world_tanks]
+				for k, v in pairs(c_world_tanks) do
+					if v.tagged then
+						num = num + 1
+						lastTagged = k
+					end
+				end
+
+				if num <= 1 then
+					local last = c_world_tanks[lastTagged]
+
+					last.tagged = false
+
+					for _, v in pairs(c_world_tanks) do
+						v.megaTank = lastTagged
+					end
+				end
+			end
 		end
-	end
-
-	if not tagged then
-		-- reset timer
+	elseif switch == CHASE then
+		local tagged = false
 		for _, v in pairs(c_world_tanks) do
-			tank.cd.lastChasePoint = t
+			if v.tagged then
+				tagged = true
+				break
+			end
 		end
 
-		-- tag the first person to die
-		tank.tagged = true
+		if not tagged then
+			-- reset timer
+			for _, v in pairs(c_world_tanks) do
+				tank.cd.lastChasePoint = t
+			end
+
+			-- tag the first person to die
+			tank.tagged = true
+		end
 	end
 
 	c_world_tank_spawn(tank)
@@ -950,12 +1007,14 @@ end
 
 -- this is only called when a tank spawns immediately; this should not normally be called outside of this file!
 function c_world_spawnTank(tank)
+	local t = t_t_getTicks()
 	tank.spawning = false
 	tank.r = c_const_get("tank_defaultRotation")
 	tank.health = c_const_get("tank_health")
 	tank.shield = 0
 	tank.weapon = c_weapon_getDefaultWeapon()
 	tank.cd = {}
+	tank.lastAttackedTime = t
 
 	-- find index
 	local index = 1
@@ -971,12 +1030,18 @@ function c_world_spawnTank(tank)
 		tank.body = nil v.fixture = nil
 	end
 
-	local weapon = c_weapon_getWeapons()[tank.weapon]
+	local weapon = tank.weapon and c_weapon_getWeapons()[tank.weapon]
 
 	if weapon then
 		tank.lastFireTime = tankbobs.t_getTicks() - c_world_timeMultiplier(weapon.repeatRate)
 	else
 		tank.lastFireTime = tankbobs.t_getTicks()
+	end
+
+	-- game type stuff
+	local switch = c_world_getGameType()
+	if switch == MEGATANK then
+		tank.lastAttackedTime = t + c_world_timeMultiplier(c_const_get("world_megaTankSuicideTimePenalty"))
 	end
 
 	-- add a physical body
@@ -1824,6 +1889,39 @@ function c_world_tank_step(d, tank)
 	if tank.bot then
 		c_ai_tank_step(tank, d)
 	end
+
+	-- game type stuff
+	local switch = c_world_getGameType()
+	if switch == MEGATANK then
+		--if #c_world_tanks > 1 then  -- this is redundant, since this function couldn't be called with an empty table.  If it could, this check would be necessary.
+			-- set all tanks as tagged if the last tank hasn't been initialised (the length operator will always point to an existing tank if the table isn't empty)
+			if not tank.m.megaTankInitialised then
+				for _, v in pairs(c_world_tanks) do
+					tank.m.megaTankInitialised = true
+
+					tank.tagged = true
+					tank.megaTank = nil
+				end
+			end
+
+			if tank.megaTank and c_world_tanks[tank.megaTank] == tank then
+				tank.clips = 1
+
+				if t >= tank.lastAttackedTime + c_const_get("world_megaTankBonusAttackTime") then
+					if tank.health <= c_const_get("tank_health") then
+						tank.health = tank.health + d * c_const_get("world_megaTankHealthRegenerate")
+					else
+						tank.health = tank.health + d * c_const_get("world_megaTankBonusHealthGain")
+					end
+					if tank.shield <= c_const_get("tank_boostShield") then
+						tank.shield = tank.shield + d * c_const_get("world_megaTankShieldRegenerate")
+					else
+						tank.shield = tank.shield + d * c_const_get("world_megaTankBonusShieldGain")
+					end
+				end
+			end
+		--end
+	end
 end
 
 function c_world_wall_step(d, wall)
@@ -2205,7 +2303,7 @@ function c_world_explosion(pos, damage, force, radius, log, attacker)
 					t_w_setLinearVelocity(v.body, vel)
 
 					-- damage
-					c_world_tankDamage(v, d * damage)
+					c_world_tankDamage(v, d * damage, attacker)
 
 					if v.health <= 0 then
 						v.killer = attacker
@@ -2494,17 +2592,59 @@ function c_world_isBodyPowerup(body)
 	return nil
 end
 
-function c_world_tankDamage(tank, damage)
-	if tank.shield > 0 then
-		tank.health = tank.health - c_const_get("tank_shieldedDamage") * damage
-		tank.shield = tank.shield - c_const_get("tank_shieldDamage") * damage
+function c_world_tankDamage(tank, damage, attacker)
+	local t = t_t_getTicks()
+
+	tank.lastAttackedTime = math.max(tank.lastAttackedTime, t)  -- last attacked may have been set ahead
+
+	local switch = c_world_getGameType()
+	if switch == MEGATANK then
+		if c_world_tanks[tank.megaTank] == tank and tank == attacker then
+			-- megatank can't damage himself.  If he could, who would become megatank when he killed himself?  Would he unfairly remain megatank?  (Another way would be to respawn the megatank with an arbitrary amount of low health such that one single shot of any weapon would kill him, but being protected from self damage is funner, I think)
+			-- Actually, they can.  When the respawn, they won't have any shield or bonus (for x seconds) and will only have default weapon.
+			if tank.shield > 0 then
+				tank.health = tank.health - c_const_get("tank_shieldedDamage") * damage
+				tank.shield = tank.shield - c_const_get("tank_shieldDamage") * damage
+			else
+				tank.health = tank.health - damage
+			end
+		else
+			if tank.shield > 0 then
+				tank.health = tank.health - c_const_get("tank_shieldedDamage") * damage
+				tank.shield = tank.shield - c_const_get("tank_shieldDamage") * damage
+			else
+				tank.health = tank.health - damage
+			end
+		end
+
+		if tank.health <= 0 and attacker then
+			tank.killer = attacker
+		end
 	else
-		tank.health = tank.health - damage
+		if tank.shield > 0 then
+			tank.health = tank.health - c_const_get("tank_shieldedDamage") * damage
+			tank.shield = tank.shield - c_const_get("tank_shieldDamage") * damage
+		else
+			tank.health = tank.health - damage
+		end
+
+		if tank.health <= 0 and attacker then
+			tank.killer = attacker
+		end
 	end
 end
 
-local c_world_tankDamage = c_world_tankDamage
-local function c_world_collide(tank, normal)
+function c_world_tankIndex(tank)
+	for k, v in pairs(c_world_tanks) do
+		if tank == v then
+			return k
+		end
+	end
+
+	return nil
+end
+
+local function c_world_collide(tank, normal, attacker)
 	local vel = t_w_getLinearVelocity(tank.body)
 	local component = vel * -normal
 
@@ -2514,7 +2654,7 @@ local function c_world_collide(tank, normal)
 			local damage = c_const_get("tank_damageK") * (component - c_const_get("tank_damageMinSpeed"))
 
 			if damage >= c_const_get("tank_collideMinDamage") then
-				c_world_tankDamage(tank, damage)
+				c_world_tankDamage(tank, damage, c_world_tankIndex(attacker))
 			end
 		end
 	end
@@ -2553,7 +2693,6 @@ function c_world_contactListener(begin, fixtureA, fixtureB, bodyA, bodyB, positi
 		end
 
 		if c_world_isProjectile(fixtureA) or c_world_isProjectile(fixtureB) then
-			-- remove the projectile
 			local projectile, projectile2
 
 			projectile = c_world_isProjectile(fixtureA)
@@ -2596,11 +2735,11 @@ function c_world_contactListener(begin, fixtureA, fixtureB, bodyA, bodyB, positi
 
 			if not powerup then
 				if tank then
-					c_world_collide(tank, normal)
+					c_world_collide(tank, normal, tank2)
 				end
 
 				if tank2 then
-					c_world_collide(tank2, normal)
+					c_world_collide(tank2, normal, tank)
 				end
 			end
 		end
@@ -2656,6 +2795,8 @@ function c_world_resetWorldTimers(t)
 		if v.cd.lastChasePoint then
 			v.cd.lastChasePoint = t
 		end
+
+		v.lastAttackedTime = t
 
 		if v.bot then
 			for _, v in pairs(v.ai.objectives) do
@@ -2713,6 +2854,8 @@ function c_world_offsetWorldTimers(d)
 		if v.cd.lastChasePoint then
 			v.cd.lastChasePoint = v.cd.lastChasePoint + d
 		end
+
+		v.lastAttackedTime = v.lastAttackedTime + d
 
 		if v.bot then
 			for _, v in pairs(v.ai.objectives) do
@@ -2798,7 +2941,7 @@ function c_world_step(d)
 
 	if worldInitialized then
 		if paused then
-			c_world_offsetWorldTimers(d * 1000)
+			c_world_offsetWorldTimers(d * c_const_get("world_time"))
 		else
 			while worldTime < t do
 				if c_world_isBehind() then

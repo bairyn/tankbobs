@@ -155,6 +155,7 @@
 		<instagib>false</instagib>
 		<lastMap>small_1</lastMap>
 		<lastSet>small</lastSet>
+		<megaPointLimit>25</megaPointLimit>
 		<overview>1</overview>
 		<player1>
 			<name>Player1</name>

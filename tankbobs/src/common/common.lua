@@ -601,6 +601,7 @@ SPECIAL        = {}
 -- gametypes
 DEATHMATCH     = {}
 TEAMDEATHMATCH = {}
+MEGATANK       = {}
 CHASE          = {}
 DOMINATION     = {}
 CAPTURETHEFLAG = {}

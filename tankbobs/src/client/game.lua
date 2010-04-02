@@ -441,10 +441,19 @@ function game_drawWorld(d, M, rotM)
 									gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, v.shield / c_const_get("tank_boostShield"))
 									gl.CallList(tankShield_listBase)
 									-- tag
-									if c_world_getGameType() == CHASE and v.tagged then
-										gl.Color(1, 1, 1, 1)
-										gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, 1)
-										gl.CallList(tankTagged_listBase)
+									local switch = c_world_getGameType()
+									if switch == MEGATANK then
+										if v.tagged or (v.megaTank and c_world_getTanks()[v.megaTank] == v) then
+											gl.Color(1 - r, 1 - g, 1 - b, 0.4)
+											gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, 0.4)
+											gl.CallList(tankMega_listBase)
+										end
+									elseif switch == CHASE then
+										if v.tagged then
+											gl.Color(1 - r, 1 - g, 1 - b, 0.6)
+											gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, 0.4)
+											gl.CallList(tankTagged_listBase)
+										end
 									end
 
 									if v.weapon and not v.reloading and c_weapon_getWeapons()[v.weapon] then
@@ -1208,7 +1217,24 @@ function game_step(d)
 
 	-- game-type audio
 	local switch = c_world_getGameType()
-	if switch == DOMINATION then
+	if switch == MEGATANK then
+		local changed = false
+		for _, v in pairs(c_world_getTanks()) do
+			if not changed then
+				if v.megaTank ~= v.megaTankB then
+					changed = v.megaTank
+
+					tankbobs.a_playSound(c_const_get("newMegaTank_sound"))
+				else
+					break  -- megaTank should be set consistently across all tanks, so it shouldn't differ between two tanks, so break after the first test fails
+				end
+			end
+
+			if changed then
+				v.megaTankB = changed
+			end
+		end
+	elseif switch == DOMINATION then
 		for _, v in pairs(c_tcm_current_map.controlPoints) do
 			if v.m.teamB ~= v.m.team then
 				v.m.teamB = v.m.team

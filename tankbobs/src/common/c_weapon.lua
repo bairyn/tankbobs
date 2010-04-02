@@ -1203,26 +1203,14 @@ end
 
 function c_weapon_hit(tank, projectile)
 	if not projectile.collided then
-		c_world_tankDamage(tank, c_weapons[projectile.weapon].damage)
-
-		if tank.health <= 0 then
-			tank.killer = projectile.owner
-		end
+		c_world_tankDamage(tank, c_weapons[projectile.weapon].damage, projectile.owner)
 
 		c_ai_tankAttacked(tank, c_world_getTanks()[projectile.owner], c_weapons[projectile.weapon].damage)
 	end
 end
 
 function c_weapon_meleeHit(tank, attacker)
-	c_world_tankDamage(tank, c_weapons[attacker.weapon].damage)
-
-	if tank.health <= 0 then
-		for k, v in pairs(c_world_getTanks()) do
-			if v == attacker then
-				tank.killer = k
-			end
-		end
-	end
+	c_world_tankDamage(tank, c_weapons[attacker.weapon].damage, c_world_tankIndex(attacker))
 end
 
 function c_weapon_removeProjectile(projectile)
