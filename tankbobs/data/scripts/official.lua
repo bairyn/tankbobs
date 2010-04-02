@@ -127,18 +127,7 @@ elseif c_tcm_current_map.name == "race-track" then
 	c_world_setZoom(0.66)
 
 	-- first look for number of laps by score limit
-	local laps
-
-	local switch = c_world_getGameType()
-	if switch == DEATHMATCH then
-		laps = c_config_get("game.fragLimit")
-	elseif switch == CHASE then
-		laps = c_config_get("game.chaseLimit")
-	elseif switch == DOMINATION then
-		laps = c_config_get("game.pointLimit")
-	elseif switch == CAPTURETHEFLAG then
-		laps = c_config_get("game.captureLimit")
-	end
+	local laps = c_config_get(c_world_gameTypePointLimit())
 
 	-- set internal gametype to deathmatch, fragLimit to laps, and restore fragLimit on exit
 	c_world_setGameType(DEATHMATCH)
@@ -532,7 +521,7 @@ elseif c_tcm_current_map.name == "tutorial" then
 		tank.r = c_const_get("tank_defaultRotation")
 	end
 
-	-- in the future, it might be good to explain the gametypes by spawning an unskilled bot and fighting against each of them.  It might also be good to explain the railgun-against-wall boost trick.
+	-- in the future, it might be good to explain the gametypes by spawning an unskilled bot and having the player try fighting against each of them.  It might also be good to explain the railgun-against-wall boost trick (nah; it's a "trickmove" / jump).
 
 	local function updateWinStep()
 		local tank = c_world_getTanks()[1]
