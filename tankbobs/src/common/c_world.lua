@@ -247,9 +247,9 @@ function c_world_init()
 	c_const_set("world_megaTankBonusAttackTime", 8, 1)
 	c_const_set("world_megaTankHealthRegenerate", 60, 1)
 	c_const_set("world_megaTankBonusHealthGain", 20, 1)
-	c_const_set("world_megaTankBeyondCapBonusHealthGain", 5, 1)
+	c_const_set("world_megaTankBeyondCapBonusHealthGain", 1, 1)
 	c_const_set("world_megaTankHealthGainCap", 200, 1)
-	c_const_set("world_megaTankShieldRegenerate", 1, 1)
+	c_const_set("world_megaTankShieldRegenerate", 0.25, 1)
 	c_const_set("world_megaTankBonusShieldGain", 0, 1)
 	c_const_set("world_megaTankKillBonus", 2, 1)
 
@@ -932,7 +932,7 @@ function c_world_tank_die(tank, t)
 
 				if c_world_tanks[tank.megaTank] == tank then
 					-- new megatank
-					killer.score = kille.score + c_const_get("world_megaTankKillBonus")
+					killer.score = killer.score + c_const_get("world_megaTankKillBonus")
 
 					for _, v in pairs(c_world_tanks) do
 						v.megaTank = c_world_tankIndex(killer)
