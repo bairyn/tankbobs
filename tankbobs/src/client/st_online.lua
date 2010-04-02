@@ -337,7 +337,7 @@ function online_readPackets(d)  -- local
 
 							c_world_setPaused(true)
 
-							if c_world_isTeamGameType(c_world_gameType) then
+							if c_world_gameTypeTeam() then
 								if id ~= 0 then
 									local name = "Red"
 									local color = c_const_get("color_red")

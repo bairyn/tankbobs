@@ -176,7 +176,7 @@
 			<team>red</team>
 		</player2>
 		<players>2</players>
-		<pointLimit>200</pointLimit>
+		<controlLimit>200</controlLimit>
 		<timescale>1</timescale>
 		<worldFPS>256</worldFPS>
 	</game>

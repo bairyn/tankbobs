@@ -67,81 +67,35 @@ local function testEnd()
 		return  -- world probably not initialized
 	end
 
-	local switch = c_world_gameType
-	if switch == DEATHMATCH then
-		local fragLimit = c_config_get("game.fragLimit")
+	local limit = c_config_get(c_world_gameTypePointLimit())
+	if c_world_gameTypeTeam() then
+		-- team game-type
+		if limit > 0 then
+			if     c_world_redTeam. score >= limit then
+				endOfGame = true
+				c_world_setPaused(true)
 
-		if fragLimit > 0 then
-			for k, v in pairs(c_world_getTanks()) do
-				if v.score >= fragLimit then
-					c_world_setPaused(true)
+				client_sendEvent(nil, tankbobs.io_fromChar(0x00) .. tankbobs.io_fromInt(0x00000001))
 
-					client_sendEvent(client_getByTank(v), tankbobs.io_fromChar(0x00) .. tankbobs.io_fromInt(k))
+				s_printnl("(", c_world_gameTypeHumanString(), ") Red Team Wins!")
+			elseif c_world_blueTeam.score >= limit then
+				endOfGame = true
+				c_world_setPaused(true)
 
-					endOfGame = true
+				client_sendEvent(nil, tankbobs.io_fromChar(0x00) .. tankbobs.io_fromInt(0x00000000))
 
-					s_printnl("(Deathmatch) '", v.name, "' Wins!")
-				end
+				s_printnl("(", c_world_gameTypeHumanString(), ") Blue Team Wins!")
 			end
 		end
-	elseif switch == CHASE then
-		local chaseLimit = c_config_get("game.chaseLimit")
-
-		if chaseLimit > 0 then
-			for k, v in pairs(c_world_getTanks()) do
-				if v.score >= chaseLimit then
-					c_world_setPaused(true)
-
-					client_sendEvent(client_getByTank(v), tankbobs.io_fromChar(0x00) .. tankbobs.io_fromInt(k))
-
-					endOfGame = true
-
-					s_printnl("(Chase) '", v.name, "' Wins!")
-				end
-			end
-		end
-	elseif switch == DOMINATION then
-		local pointLimit = c_config_get("game.pointLimit")
-
-		if pointLimit > 0 then
-			if c_world_redTeam.score >= pointLimit then
+	else
+		for k, v in pairs(c_world_getTanks()) do
+			if v.score >= limit then
+				endOfGame = true
 				c_world_setPaused(true)
 
-				client_sendEvent(client_getByTank(v), tankbobs.io_fromChar(0x00) .. tankbobs.io_fromInt(0x00000001))
+				client_sendEvent(client_getByTank(v), tankbobs.io_fromChar(0x00) .. tankbobs.io_fromInt(k))
 
-				endOfGame = true
-
-				s_printnl("(Domination) Red Team Wins!")
-			elseif c_world_blueTeam.score >= pointLimit then
-				c_world_setPaused(true)
-
-				client_sendEvent(client_getByTank(v), tankbobs.io_fromChar(0x00) .. tankbobs.io_fromInt(0x00000000))
-
-				endOfGame = true
-
-				s_printnl("(Domination) Blue Team Wins!")
-			end
-		end
-	elseif switch == CAPTURETHEFLAG then
-		local captureLimit = c_config_get("game.captureLimit")
-
-		if captureLimit > 0 then
-			if c_world_redTeam.score >= captureLimit then
-				c_world_setPaused(true)
-
-				client_sendEvent(client_getByTank(v), tankbobs.io_fromChar(0x00) .. tankbobs.io_fromInt(0x00000001))
-
-				endOfGame = true
-
-				s_printnl("(Capture The Flag) Red Team Wins!")
-			elseif c_world_blueTeam.score >= captureLimit then
-				c_world_setPaused(true)
-
-				client_sendEvent(client_getByTank(v), tankbobs.io_fromChar(0x00) .. tankbobs.io_fromInt(0x00000000))
-
-				endOfGame = true
-
-				s_printnl("(Capture The Flag) Blue Team Wins!")
+				s_printnl("(", c_world_gameTypeHumanString(), ") '", v.name, "' Wins!")
 			end
 		end
 	end

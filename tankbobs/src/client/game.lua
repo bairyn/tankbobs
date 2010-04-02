@@ -130,7 +130,7 @@ function game_new()
 
 	-- scores
 	local function updateScores(widget)
-		if not c_world_isTeamGameType(c_world_gameType) then
+		if not c_world_gameTypeTeam(c_world_getGameType()) then
 			-- non-team scores
 
 			local length = 0
@@ -371,7 +371,7 @@ function game_drawWorld(d, M, rotM)
 										gl.Translate(v.p.x, v.p.y, 0)
 										gl.Rotate(tankbobs.m_degrees(v.r), 0, 0, 1)
 										local r, g, b, a = v.color.r, v.color.g, v.color.b, 1
-										if c_world_isTeamGameType(c_world_gameType) then
+										if c_world_gameTypeTeam(c_world_getGameType()) then
 											-- team colors
 											local color = c_const_get(v.red and "color_red" or "color_blue")
 											r, g, b, a = color[1], color[2], color[3], color[4]
@@ -412,7 +412,7 @@ function game_drawWorld(d, M, rotM)
 									gl.Translate(v.p.x, v.p.y, 0)
 									gl.Rotate(tankbobs.m_degrees(v.r), 0, 0, 1)
 									local r, g, b, a = v.color.r, v.color.g, v.color.b, 1
-									if c_world_isTeamGameType(c_world_gameType) then
+									if c_world_gameTypeTeam(c_world_getGameType()) then
 										-- team colors
 										local color = c_const_get(v.red and "color_red" or "color_blue")
 										r, g, b, a = color[1], color[2], color[3], color[4]
@@ -441,7 +441,7 @@ function game_drawWorld(d, M, rotM)
 									gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, v.shield / c_const_get("tank_boostShield"))
 									gl.CallList(tankShield_listBase)
 									-- tag
-									if c_world_gameType == CHASE and v.tagged then
+									if c_world_getGameType() == CHASE and v.tagged then
 										gl.Color(1, 1, 1, 1)
 										gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, 1)
 										gl.CallList(tankTagged_listBase)
@@ -677,7 +677,9 @@ function game_drawWorld(d, M, rotM)
 			end
 		end
 
-		if c_world_gameType == DOMINATION then
+		-- render game-type dependant stuff
+		local switch = c_world_getGameType()
+		if switch == DOMINATION then
 			-- draw control points
 			for _, v in pairs(c_tcm_current_map.controlPoints) do
 				local color
@@ -704,7 +706,7 @@ function game_drawWorld(d, M, rotM)
 					gl.CallList(controlPoint_listBase)
 				gl.PopMatrix()
 			end
-		elseif c_world_gameType == CAPTURETHEFLAG then
+		elseif switch == CAPTURETHEFLAG then
 			for _, v in pairs(c_tcm_current_map.flags) do
 				local color
 
@@ -1204,7 +1206,9 @@ function game_step(d)
 		end
 	end
 
-	if c_world_gameType == DOMINATION then
+	-- game-type audio
+	local switch = c_world_getGameType()
+	if switch == DOMINATION then
 		for _, v in pairs(c_tcm_current_map.controlPoints) do
 			if v.m.teamB ~= v.m.team then
 				v.m.teamB = v.m.team
@@ -1212,7 +1216,7 @@ function game_step(d)
 				tankbobs.a_playSound(c_const_get("control_sound"))
 			end
 		end
-	elseif c_world_gameType == CAPTURETHEFLAG then
+	elseif switch == CAPTURETHEFLAG then
 		for _, v in pairs(c_tcm_current_map.flags) do
 			if v.m.lastCaptureTime and v.m.lastCaptureTimeB ~= v.m.lastCaptureTime then
 				v.m.lastCaptureTimeB = v.m.lastCaptureTime

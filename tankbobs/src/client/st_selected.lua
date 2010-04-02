@@ -40,20 +40,17 @@ function st_selected_init()
 	gui_addAction(tankbobs.m_vec2(25, 92.5), "Back", nil, c_state_advance)
 
 	local pos = 0
-	local gameType = c_config_get("game.gameType")
-		if gameType == "deathmatch" then
-		pos = 1
-		limitConfig = "game.fragLimit"
-	elseif gameType == "chase" then
-		pos = 2
-		limitConfig = "game.chaseLimit"
-	elseif gameType == "domination" then
-		pos = 3
-		limitConfig = "game.pointLimit"
-	elseif gameType == "capturetheflag" then
-		pos = 4
-		limitConfig = "game.captureLimit"
+	local gameType = c_world_gameTypeConstant(c_config_get("game.gameType"))
+	for k, v in pairs(c_world_getGameTypes()) do
+		if gameType == v[1] then
+			pos = k
+
+			break
+		end
 	end
+
+	limitConfig = c_world_gameTypePointLimit(gameType)
+
 	local instagibPos = 0
 	local switch = c_config_get("game.instagib")
 	if switch == false then
@@ -63,6 +60,8 @@ function st_selected_init()
 	else
 		instagibPos = 3
 	end
+
+	local skillLevels = {"Automatic", "Decent", "Medium", "Easy", "Very easy", "Ridiculously easy"}
 	local skillPos = 0
 	local skill = c_config_get("game.allBotLevels")
 	if type(skill) ~= "number" or skill <= 0 then
@@ -80,10 +79,15 @@ function st_selected_init()
 	else
 		skillPos = 0
 	end
-	local skillLevels = {"Automatic", "Decent", "Medium", "Easy", "Very easy", "Ridiculously easy"}
+
+	local strings = {}
+	for k, v in pairs(c_world_getGameTypes()) do
+		strings[k] = c_world_gameTypeHumanString(v[1])
+	end
+
 	skillLevels[0] = "Custom"
-	gui_addLabel(tankbobs.m_vec2(50, 75), "Game type", nil, 1 / 3) gui_addCycle(tankbobs.m_vec2(75, 75), "Game type", nil, st_selected_gameType, {"Deathmatch", "Chase", "Domination", "Capture the Flag"}, pos, 0.5)
-	limit = gui_addLabel(tankbobs.m_vec2(50, 69), "Frag limit", nil, 1 / 3) limitInput = gui_addInput(tankbobs.m_vec2(75, 69), tostring(c_config_get(limitConfig)), nil, st_selected_limit, true, 4, 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 75), "Game type", nil, 1 / 3) gui_addCycle(tankbobs.m_vec2(75, 75), "Game type", nil, st_selected_gameType, strings, pos, 0.5)
+	limit = gui_addLabel(tankbobs.m_vec2(50, 69), c_world_gameTypePointLimitLabel(gameType), nil, 1 / 3) limitInput = gui_addInput(tankbobs.m_vec2(75, 69), tostring(c_config_get(limitConfig)), nil, st_selected_limit, true, 4, 0.5)
 	gui_addLabel(tankbobs.m_vec2(50, 63), "Instagib", nil, 1 / 3) gui_addCycle(tankbobs.m_vec2(75, 63), "Instagib", nil, st_selected_instagib, {"No", "Semi", "Yes"}, instagibPos, 0.5)
 	if type(c_config_get("game.computers")) == "number" and c_config_get("game.computers") > 0 then
 		gui_addLabel(tankbobs.m_vec2(50, 57), "Difficulty against bots", nil, 1 / 5) gui_addCycle(tankbobs.m_vec2(75, 57), "Difficulty against bots", nil, st_selected_skill, skillLevels, skillPos, 0.5)
@@ -137,32 +141,11 @@ function st_selected_instagib(widget, string, index)
 end
 
 function st_selected_gameType(widget, string, index)
-	if index == 1 then
-		limitConfig = "game.fragLimit"
-		limitInput:setText(c_config_get(limitConfig))
-		limit:setText "Frag Limit"
-
-		c_config_set("game.gameType", "deathmatch")
-	elseif index == 2 then
-		limitConfig = "game.chaseLimit"
-		limitInput:setText(c_config_get(limitConfig))
-		limit:setText "Point Limit"
-
-		c_config_set("game.gameType", "chase")
-	elseif index == 3 then
-		limitConfig = "game.pointLimit"
-		limitInput:setText(c_config_get(limitConfig))
-		limit:setText "Point Limit"
-
-		c_config_set("game.gameType", "domination")
-	elseif index == 4 then
-		limitConfig = "game.captureLimit"
-		limitInput:setText(c_config_get(limitConfig))
-		limit:setText "Capture Limit"
-
-		c_config_set("game.gameType", "capturetheflag")
-	end
-
+	local gameType = c_world_gameTypeConstant(string)
+	limitConfig = c_world_gameTypePointLimit(string)
+	limitInput:setText(c_config_get(limitConfig))
+	limit:setText(c_world_gameTypePointLimitLabel(gameType))
+	c_config_set("game.gameType", c_world_gameTypeString(gameType))
 	c_world_setGameType(c_config_get("game.gameType"))
 end
 

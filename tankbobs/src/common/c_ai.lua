@@ -164,7 +164,7 @@ function c_ai_initTank(tank, ai)
 	tank.color.g = c_config_get("game.bot.color.g")
 	tank.color.b = c_config_get("game.bot.color.b")
 
-	if c_world_isTeamGameType() then
+	if c_world_gameTypeTeam() then
 		-- place bot randomly on the team with fewest players
 		local balance = 0  -- -: blue; +: red
 
@@ -292,7 +292,7 @@ function c_ai_findClosestEnemy(tank, filter)
 	local enemies = {}
 
 	for _, v in pairs(c_world_getTanks()) do
-		if v.exists and tank ~= v and (not c_world_isTeamGameType() or tank.red ~= v.red) and (not filter or filter(v)) then
+		if v.exists and tank ~= v and (not c_world_gameTypeTeam() or tank.red ~= v.red) and (not filter or filter(v)) then
 			table.insert(enemies, {v, (v.p - tank.p).R})
 		end
 	end
@@ -320,7 +320,7 @@ function c_ai_findClosestEnemyInSight(tank, filter)
 	end
 
 	for _, v in pairs(c_world_getTanks()) do
-		if v.exists and tank ~= v and (not c_world_isTeamGameType() or tank.red ~= v.red) and (not filter or filter(v)) then
+		if v.exists and tank ~= v and (not c_world_gameTypeTeam() or tank.red ~= v.red) and (not filter or filter(v)) then
 			-- set first point to initial position of projectile
 			p1.R = weapon.launchDistance
 			p1.t = tank.r
@@ -1112,7 +1112,7 @@ function c_ai_avoidMeleeEnemies(tank, filter)
 
 	local t = {}
 	for _, v in pairs(c_world_getTanks()) do
-		if v.exists and tank ~= v and (not c_world_isTeamGameType() or tank.red ~= v.red) and (not filter or filter(v)) then
+		if v.exists and tank ~= v and (not c_world_gameTypeTeam() or tank.red ~= v.red) and (not filter or filter(v)) then
 			if c_weapon_isMeleeWeapon(v.weapon) then
 				local distance = (v.p - tank.p).R
 
@@ -1289,7 +1289,8 @@ function c_ai_tank_step(tank, d)
 
 	tank.ai.chasingWithMeleeWeapon = false
 
-	if c_world_getGameType() == DEATHMATCH then
+	local switch = c_world_getGameType()
+	if switch == DEATHMATCH then
 		-- shoot any nearby enemies
 		local enemy, angle, pos, time = c_ai_findClosestEnemyInSight(tank)
 		if enemy and not c_ai_isFollowingObjective(tank, POWERUPINDEX) then
@@ -1323,7 +1324,7 @@ function c_ai_tank_step(tank, d)
 			p = p.p
 		end
 		c_ai_setObjective(tank, AVOIDENEMYINDEX, p, ALWAYSANDDESTROY, "enemy", false)
-	elseif c_world_getGameType() == CHASE then
+	elseif switch == CHASE then
 		local function filter(x)
 			if c_ai_beginningOfChaseGame() then
 				return true
@@ -1388,7 +1389,7 @@ function c_ai_tank_step(tank, d)
 		end
 
 		c_ai_followObjectives(tank, true)
-	elseif c_world_getGameType() == DOMINATION then
+	elseif switch == DOMINATION then
 		local function closeToControlPoint(ttank)
 			if not tank.ai.cc then
 				return true
@@ -1464,7 +1465,7 @@ function c_ai_tank_step(tank, d)
 		end
 
 		-- don't set enemies as objectives in domination since it doesn't always benefit the tank
-	elseif c_world_getGameType() == CAPTURETHEFLAG then
+	elseif switch == CAPTURETHEFLAG then
 		local function filter(x)
 			if c_ai_yourTeamOffensive(tank) and not tank.m.flag then
 				return true

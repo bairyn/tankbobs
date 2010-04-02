@@ -881,12 +881,15 @@ function gameType(line)
 
 		s_printnl("gameType: new game type '", tostring(gameType), "' will be used on next restart")
 	else
-		s_printnl("gameType: current game type is '", c_world_getGameTypeString(), "'")
+		s_printnl("gameType: current game type is '", c_world_gameTypeString(), "' (" .. c_world_gameTypeHumanString() .. ")")
 	end
 end
 
 do
-local gameTypes = {"deathmatch", "chase", "domination", "capturetheflag"}
+local gameTypes = {}
+for k, v in pairs(c_world_getGameTypes()) do
+	gameTypes[k] = c_world_gameTypeString(v[1])
+end
 function gameTypeT(line)
 	local args = commands_args(line)
 	local gameType = commands_concatArgs(line, 2)

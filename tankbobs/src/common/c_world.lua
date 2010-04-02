@@ -521,18 +521,7 @@ function c_world_newWorld()
 	tankbobs.w_setContactListener(c_world_contactListener)
 
 	-- set game type
-	local switch = c_config_get("game.gameType")
-	if switch == "deathmatch" then
-		c_world_gameType = DEATHMATCH
-	elseif switch == "chase" then
-		c_world_gameType = CHASE
-	elseif switch == "domination" then
-		c_world_gameType = DOMINATION
-	elseif switch == "capturetheflag" then
-		c_world_gameType = CAPTURETHEFLAG
-	else
-		c_world_gameType = DEATHMATCH
-	end
+	c_world_setGameType(c_config_get("game.gameType"))
 
 	-- teams
 	local team
@@ -634,49 +623,12 @@ function c_world_freeWorld()
 	c_world_corpses = {}
 end
 
-function c_world_setGameType(gameType)
-	if type(gameType) ~= "string" then
-		c_world_gameType = gameType
-	else
-		local switch = gameType
-		if switch == "deathmatch" then
-			c_world_gameType = DEATHMATCH
-		elseif switch == "domination" then
-			c_world_gameType = DOMINATION
-		elseif switch == "capturetheflag" then
-			c_world_gameType = CAPTURETHEFLAG
-		else
-			c_world_gameType = DEATHMATCH
-		end
-	end
-end
-
 function c_world_getZoom()
 	return zoom
 end
 
 function c_world_setZoom(x)
 	zoom = x
-end
-
-function c_world_getGameType()
-	return c_world_gameType
-end
-
-function c_world_isTeamGameType(gameType)
-	gameType = gameType or c_world_gameType
-
-	if gameType == DEATHMATCH then
-		return false
-	elseif gameType == CHASE then
-		return false
-	elseif gameType == DOMINATION then
-		return true
-	elseif gameType == CAPTURETHEFLAG then
-		return true
-	else
-		return false
-	end
 end
 
 function c_world_setInstagib(state)
@@ -687,22 +639,129 @@ function c_world_getInstagib()
 	return c_world_instagib
 end
 
-function c_world_getGameTypeString(gameType)
-	local gameType = "deathmatch"
+function c_world_getGameType()
+	return c_world_gameType
+end
 
-	local switch = c_world_getGameType()
-	if switch == DEATHMATCH then
-		gameType = "deathmatch"
-	elseif switch == CHASE then
-		gameType = "chase"
-	elseif switch == DOMINATION then
-		gameType = "domination"
-	elseif switch == CAPTURETHEFLAG then
-		gameType = "capturetheflag"
-	end
+-- Game types
+-- A table of {constant, string, human string, team, pointLimitKey, pointLimitLabel}'s
+do
+local gameTypes = {{DEATHMATCH, "deathmatch", "Deathmatch", false, "game.fragLimit", "Frag limit"}, {CHASE, "chase", "Chase", false, "game.chaseLimit", "Point limit"}, {DOMINATION, "domination", "Domination", true, "game.controlLimit", "Point limit"}, {CAPTURETHEFLAG, "capturetheflag", "Capture the Flag", true, "game.captureLimit", "Capture limit"}}
+local c_world_gameType = DEATHMATCH
+
+function c_world_getGameType(gameType)
+	gameType = gameType or c_world_gameType
+	gameType = c_world_gameTypeConstant(gameType) or gameType
 
 	return gameType
 end
+
+function c_world_setGameType(gameType)
+	gameType = gameType or c_world_gameType
+	gameType = c_world_gameTypeConstant(gameType) or gameType
+
+	c_world_gameType = gameType
+end
+
+function c_world_getGameTypes()
+	return gameTypes
+end
+
+function c_world_gameTypeConstant(gameType)
+	gameType = gameType or c_world_gameType
+	--gameType = c_world_gameTypeConstant(gameType) or gameType
+
+	if type(gameType) == "string" then
+		gameType = gameType:lower()
+	end
+
+	for _, v in pairs(gameTypes) do
+		if v[1] == gameType or v[2]:lower() == gameType or v[3]:lower() == gameType then
+			return v[1]
+		end
+	end
+
+	common_printError(0, "Warning: c_world_gameTypeConstant: gameType '" .. gameType .. "' not found\n")
+
+	return nil
+end
+
+function c_world_gameTypeString(gameType)
+	gameType = gameType or c_world_gameType
+	gameType = c_world_gameTypeConstant(gameType) or gameType
+
+	for _, v in pairs(gameTypes) do
+		if v[1] == gameType then
+			return v[2]
+		end
+	end
+
+	common_printError(0, "Warning: c_world_gameTypeString: gameType '" .. gameType .. "' not found\n")
+
+	return nil
+end
+
+function c_world_gameTypeHumanString(gameType)
+	gameType = gameType or c_world_gameType
+	gameType = c_world_gameTypeConstant(gameType) or gameType
+
+	for _, v in pairs(gameTypes) do
+		if v[1] == gameType then
+			return v[3]
+		end
+	end
+
+	common_printError(0, "Warning: c_world_gameTypeHumanString: gameType '" .. gameType .. "' not found\n")
+
+	return nil
+end
+
+function c_world_gameTypeTeam(gameType)
+	gameType = gameType or c_world_gameType
+	gameType = c_world_gameTypeConstant(gameType) or gameType
+
+	for _, v in pairs(gameTypes) do
+		if v[1] == gameType then
+			return v[4]
+		end
+	end
+
+	common_printError(0, "Warning: c_world_gameTypeTeam: gameType '" .. gameType .. "' not found\n")
+
+	return nil
+end
+
+function c_world_gameTypePointLimit(gameType)
+	gameType = gameType or c_world_gameType
+	gameType = c_world_gameTypeConstant(gameType) or gameType
+
+	for _, v in pairs(gameTypes) do
+		if v[1] == gameType then
+			return v[5]
+		end
+	end
+
+	common_printError(0, "Warning: c_world_gameTypePointLimit: gameType '" .. gameType .. "' not found\n")
+
+	return nil
+end
+
+function c_world_gameTypePointLimitLabel(gameType)
+	gameType = gameType or c_world_gameType
+	gameType = c_world_gameTypeConstant(gameType) or gameType
+
+	for _, v in pairs(gameTypes) do
+		if v[1] == gameType then
+			return v[6]
+		end
+	end
+
+	common_printError(0, "Warning: c_world_gameTypePointLimitLabel: gameType '" .. gameType .. "' not found\n")
+
+	return nil
+end
+end
+
 
 function c_world_testBody(ent)
 	local p = ent.p
@@ -778,7 +837,7 @@ function c_world_tank_die(tank, t)
 	end
 
 	tank.nextSpawnTime = t + c_world_timeMultiplier(c_const_get("tank_spawnTime"))
-	if c_world_gameType == DEATHMATCH then
+	if c_world_getGameType() == DEATHMATCH then
 		if killer and killer ~= tank then
 			killer.score = killer.score + 1
 		else
@@ -1552,7 +1611,7 @@ function c_world_tank_step(d, tank)
 
 	tank.p(t_w_getPosition(tank.body))
 
-	if c_world_gameType == CHASE then
+	if c_world_getGameType() == CHASE then
 		-- search for another tagged player
 		local tagged = false
 		for _, v in pairs(c_world_tanks) do
@@ -2157,7 +2216,7 @@ function c_world_corpse_step(d, corpse)
 end
 
 function c_world_controlPoint_step(d, controlPoint)
-	if c_world_gameType ~= DOMINATION then
+	if c_world_getGameType() ~= DOMINATION then
 		return
 	end
 
@@ -2206,7 +2265,7 @@ function c_world_controlPoint_step(d, controlPoint)
 end
 
 function c_world_flag_step(d, flag)
-	if c_world_gameType ~= CAPTURETHEFLAG then
+	if c_world_getGameType() ~= CAPTURETHEFLAG then
 		return
 	end
 
@@ -2483,7 +2542,7 @@ function c_world_contactListener(begin, fixtureA, fixtureB, bodyA, bodyB, positi
 			end
 		end
 
-		if c_world_gameType == CHASE then
+		if c_world_getGameType() == CHASE then
 			-- tag another player
 			if c_world_isBodyTank(bodyA) and c_world_isBodyTank(bodyB) then
 				local tank, tank2 = c_world_isBodyTank(bodyA), c_world_isBodyTank(bodyB)
