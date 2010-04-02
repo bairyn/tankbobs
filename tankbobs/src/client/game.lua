@@ -444,14 +444,14 @@ function game_drawWorld(d, M, rotM)
 									local switch = c_world_getGameType()
 									if switch == MEGATANK then
 										if v.tagged or (v.megaTank and c_world_getTanks()[v.megaTank] == v) then
-											gl.Color(1 - r, 1 - g, 1 - b, 0.4)
-											gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, 0.4)
+											gl.Color(1 - r, 1 - g, 1 - b, 0.7)
+											gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, 0.7)
 											gl.CallList(tankMega_listBase)
 										end
 									elseif switch == CHASE then
 										if v.tagged then
 											gl.Color(1 - r, 1 - g, 1 - b, 0.6)
-											gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, 0.4)
+											gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, 0.7)
 											gl.CallList(tankTagged_listBase)
 										end
 									end
