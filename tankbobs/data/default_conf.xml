@@ -157,6 +157,7 @@
 		<lastSet>small</lastSet>
 		<megaPointLimit>25</megaPointLimit>
 		<overview>1</overview>
+		<plaguePointLimit>300</plaguePointLimit>
 		<player1>
 			<name>Player1</name>
 			<color>  blue

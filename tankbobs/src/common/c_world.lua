@@ -254,10 +254,17 @@ function c_world_init()
 	c_const_set("world_megaTankBonusShieldGain", 0, 1)
 	c_const_set("world_megaTankKillBonus", 2, 1)
 
+	c_const_set("world_plagueDecayRate", 3.875, 1)
+	c_const_set("world_plagueSpawnTime", 3, 1)  -- this is *not* in addition to anything
+	c_const_set("world_plagueNoFireTime", 4.5, 1)  -- relative to the start time of fire
+	c_const_set("world_plagueSurvivePlayerFactor", 10, 1)
+	c_const_set("world_plagueSurviveBonusReward", 5, 1)  -- number of points rewarded to survives in plague mode in addition to the number of players
+	c_const_set("world_plagueInfectReward", 5, 1)
+
 	-- powerups
 	c_powerupTypes = {}
 
-	-- weapons are bluish, weapon enhancements are yellowish, tank enhancements are greenish, extreme powerups are reddish
+	-- weapons are bluish; weapon enhancements are yellowish; tank enhancements are greenish; unique or different powerups are reddish (TODO FIXME XXX unique powerups)
 
 	-- machinegun
 	local powerupType = c_world_powerupType:new()
@@ -659,7 +666,7 @@ end
 -- Game types
 -- A table of {constant, string, human string, team, pointLimitKey, pointLimitLabel}'s
 do
-local gameTypes = {{DEATHMATCH, "deathmatch", "Deathmatch", false, "game.fragLimit", "Frag limit"}, {TEAMDEATHMATCH, "teamdeathmatch", "Team Deathmatch", true, "game.teamFragLimit", "Frag limit"}, {MEGATANK, "megatank", "Megatank", false, "game.megaPointLimit", "Point limit"}, {CHASE, "chase", "Chase", false, "game.chaseLimit", "Point limit"}, {DOMINATION, "domination", "Domination", true, "game.controlLimit", "Point limit"}, {CAPTURETHEFLAG, "capturetheflag", "Capture the Flag", true, "game.captureLimit", "Capture limit"}}
+local gameTypes = {{DEATHMATCH, "deathmatch", "Deathmatch", false, "game.fragLimit", "Frag limit"}, {TEAMDEATHMATCH, "teamdeathmatch", "Team Deathmatch", true, "game.teamFragLimit", "Frag limit"}, {MEGATANK, "megatank", "Megatank", false, "game.megaPointLimit", "Point limit"}, {CHASE, "chase", "Chase", false, "game.chaseLimit", "Point limit"}, {PLAGUE, "plague", "Plague", false, "game.plaguePointLimit", "Point limit"}, {DOMINATION, "domination", "Domination", true, "game.controlLimit", "Point limit"}, {CAPTURETHEFLAG, "capturetheflag", "Capture the Flag", true, "game.captureLimit", "Capture limit"}}
 local c_world_gameType = DEATHMATCH
 
 function c_world_getGameType(gameType)
@@ -875,7 +882,14 @@ function c_world_tank_die(tank, t)
 
 		tankbobs.w_removeBody(tank.body) tank.body = nil tank.fixture = nil
 
-		c_world_addCorpse(tank, vel, index)
+		local switch = c_world_getGameType()
+		if switch == PLAGUE then
+			if not plague_roundEnd and not plague_endingRound then
+				c_world_addCorpse(tank, vel, index)
+			end
+		else
+			c_world_addCorpse(tank, vel, index)
+		end
 	end
 
 	c_ai_tankDie(tank)
@@ -910,6 +924,8 @@ function c_world_tank_die(tank, t)
 				tank.score = tank.score - 1
 			end
 		end
+
+		c_world_tank_spawn(tank)
 	elseif switch == TEAMDEATHMATCH then
 		if killer and killer ~= tank and tank.red ~= killer.red then
 			if killer.red then
@@ -926,6 +942,8 @@ function c_world_tank_die(tank, t)
 				end
 			end
 		end
+
+		c_world_tank_spawn(tank)
 	elseif switch == MEGATANK then
 		if #c_world_tanks > 0 then
 			if killer and killer ~= tank then
@@ -970,6 +988,8 @@ function c_world_tank_die(tank, t)
 				end
 			end
 		end
+
+		c_world_tank_spawn(tank)
 	elseif switch == CHASE then
 		local tagged = false
 		for _, v in pairs(c_world_tanks) do
@@ -988,9 +1008,68 @@ function c_world_tank_die(tank, t)
 			-- tag the first person to die
 			tank.tagged = true
 		end
-	end
 
-	c_world_tank_spawn(tank)
+		c_world_tank_spawn(tank)
+	elseif switch == PLAGUE then
+		if not plague_endingRound then  -- don't handle anything game type related if the round is ending; we'd fall into an infinite call loop
+			if killer and killer ~= tank then
+				killer.score = killer.score + 1
+			else
+				if c_config_get("game.punish") then
+					tank.score = tank.score - 1
+				end
+			end
+
+			local tagged   = false
+			local untagged = false
+			for _, v in pairs(c_world_tanks) do
+				if v.tagged then
+					tagged   = true
+				else
+					untagged = true
+				end
+			end
+
+			local exists = false
+			for _, v in pairs(c_world_tanks) do
+				if v.tagged and v.exists then
+					exists = true
+
+					break
+				end
+			end
+
+			if not tagged then
+				-- start the next round and with this tank tagged
+				tank.tagged = true
+
+				c_world_plague_endRound()
+			end
+
+			if not exists then
+				if untagged then
+					if tagged then
+						-- reward all surviving tanks if this isn't the first round (or the round after tanks were reset)
+						for _, v in pairs(c_world_tanks) do
+							if not v.tagged and v.exists then
+								v.score = v.score + c_const_get("world_plagueSurvivePlayerFactor") * #c_world_tanks + c_const_get("world_plagueSurviveBonusReward")
+							end
+						end
+					end
+				else
+					-- all tanks have been infected; untag all tanks
+					for _, v in pairs(c_world_tanks) do
+						v.tagged = false
+					end
+				end
+
+				-- end the round
+				c_world_plague_endRound()
+			end
+		end
+	else
+		c_world_tank_spawn(tank)
+	end
 
 	tank.cd = {}
 end
@@ -1099,6 +1178,30 @@ function c_world_tank_checkSpawn(d, tank)
 end
 
 function c_world_spawnTank_misc(tank)
+end
+
+function c_world_plague_endRound()
+	-- end the round without rewarding any points
+
+	local t = t_t_getTicks()
+
+	plague_roundEnd = true
+	plague_roundStartTime = t
+
+	-- we do this by killing all of the tanks
+	plague_endingRound = true
+	for _, v in pairs(c_world_tanks) do
+		c_world_tank_die(v)
+
+		if v.tagged then
+			v.nextSpawnTime = t + c_world_timeMultiplier(c_const_get("world_plagueSpawnTime"))
+		else
+			v.nextSpawnTime = t + c_world_timeMultiplier(c_const_get("tank_spawnTime"))
+		end
+
+		v.spawning = true
+	end
+	plague_endingRound = false
 end
 
 local p1a = {nil, nil, nil}
@@ -1926,6 +2029,12 @@ function c_world_tank_step(d, tank)
 				end
 			end
 		--end
+	elseif switch == PLAGUE then
+		if tank.tagged then
+			-- tank is plagued
+
+			c_world_tankDamage(tank, d * c_const_get("world_plagueDecayRate"), tank)
+		end
 	end
 end
 
@@ -2749,7 +2858,9 @@ function c_world_contactListener(begin, fixtureA, fixtureB, bodyA, bodyB, positi
 			end
 		end
 
-		if c_world_getGameType() == CHASE then
+		-- game type stuff
+		local switch = c_world_getGameType()
+		if switch == CHASE then
 			-- tag another player
 			if c_world_isBodyTank(bodyA) and c_world_isBodyTank(bodyB) then
 				local tank, tank2 = c_world_isBodyTank(bodyA), c_world_isBodyTank(bodyB)
@@ -2769,6 +2880,24 @@ function c_world_contactListener(begin, fixtureA, fixtureB, bodyA, bodyB, positi
 						otherTank.tagged = true
 						otherTank.m.tagProtection = t_t_getTicks() + c_world_timeMultiplier(c_const_get("game_tagProtection"))
 					end
+				end
+			end
+		elseif switch == PLAGUE then
+			-- infect another player
+			if c_world_isBodyTank(bodyA) and c_world_isBodyTank(bodyB) then
+				local tank, tank2 = c_world_isBodyTank(bodyA), c_world_isBodyTank(bodyB)
+
+				local taggedTank, otherTank = nil, nil
+
+				if tank.tagged and not tank2.tagged then
+					taggedTank, otherTank = tank, tank2
+				elseif tank2.tagged and not tank.tagged then
+					taggedTank, otherTank = tank2, tank
+				end
+
+				if taggedTank and otherTank then
+					otherTank.tagged = true
+					taggedTank.score = taggedTank.score + c_const_get("world_plagueInfectReward")
 				end
 			end
 		end

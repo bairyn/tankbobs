@@ -450,9 +450,15 @@ function game_drawWorld(d, M, rotM)
 										end
 									elseif switch == CHASE then
 										if v.tagged then
-											gl.Color(1 - r, 1 - g, 1 - b, 0.6)
+											gl.Color(1 - r, 1 - g, 1 - b, 0.7)
 											gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, 0.7)
 											gl.CallList(tankTagged_listBase)
+										end
+									elseif switch == PLAGUE then
+										if v.tagged then
+											gl.Color(1 - r, 1 - g, 1 - b, 0.7)
+											gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, 0.7)
+											gl.CallList(tankPlagued_listBase)
 										end
 									end
 
@@ -1165,7 +1171,14 @@ function game_step(d)
 		if v.spawning and v.m.lastDieTimeB ~= v.m.lastDieTime then
 			v.m.lastDieTimeB = v.m.lastDieTime
 
-			tankbobs.a_playSound(c_const_get("die_sound"))
+			local switch = c_world_getGameType()
+			if switch == PLAGUE then
+				if not plague_roundEnd or v.tagged then
+					tankbobs.a_playSound(c_const_get("die_sound"))
+				end
+			else
+				tankbobs.a_playSound(c_const_get("die_sound"))
+			end
 		end
 
 		if v.m.lastPickupTime and v.m.lastPickupTimeB ~= v.m.lastPickupTime then
@@ -1261,6 +1274,12 @@ function game_step(d)
 
 				tankbobs.a_playSound(c_const_get("flagReturn_sound"))
 			end
+		end
+	elseif switch == PLAGUE then
+		if plague_roundEnd then
+			plague_roundEnd = false
+
+			tankbobs.a_playSound(c_const_get("endOfRound_sound"))
 		end
 	end
 end

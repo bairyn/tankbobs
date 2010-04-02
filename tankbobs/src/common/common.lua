@@ -603,6 +603,7 @@ DEATHMATCH     = {}
 TEAMDEATHMATCH = {}
 MEGATANK       = {}
 CHASE          = {}
+PLAGUE         = {}
 DOMINATION     = {}
 CAPTURETHEFLAG = {}
 

@@ -979,6 +979,13 @@ function c_weapon_fire(tank, d)
 		return
 	end
 
+	local switch = c_world_getGameType()
+	if switch == PLAGUE then
+		if plague_roundStartTime and t < plague_roundStartTime + c_world_timeMultiplier(c_const_get("world_plagueNoFireTime")) then
+			return
+		end
+	end
+
 	local weapon = c_weapons[tank.weapon]
 
 	if not weapon then
