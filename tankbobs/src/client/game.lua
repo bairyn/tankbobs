@@ -44,9 +44,9 @@ local common_lerp
 
 local bit
 
+local zoom   = {}
 local trails = {}
 local camera = {}
-local zoom = {}
 
 local wall_textures
 
@@ -72,6 +72,9 @@ function game_init()
 	common_lerp = _G.common_lerp
 
 	bit = c_module_load "bit"
+
+	c_const_set("game_roundWinLabelTime", 1, 1)
+	c_const_set("game_roundWinLabelMaxOpacityTime", 0.75, 1)
 end
 
 function game_done()
@@ -128,49 +131,49 @@ function game_new()
 		v.m.texture = wall_textures[v.m.texture][2]
 	end
 
-	-- scores
-	local function updateScores(widget)
-		if not c_world_gameTypeTeam(c_world_getGameType()) then
-			-- non-team scores
-
-			local length = 0
-
-			widget.text = ""
-
-			for _, v in pairs(c_world_getTanks()) do
-				local name = v.name
-
-				if #name > length then
-					length = #name
-				end
-			end
-
-			if length < 1 then
-				length = 1
-			end
-
-			for _, v in pairs(c_world_getTanks()) do
-				local name, between, score
-
-				if widget.text:len() ~= 0 then
-					widget.text = widget.text .. "\n"
-				end
-
-				name = tostring(v.name)
-				between = string.rep("  ", length - #name + 1)
-				score = tostring(v.score)
-
-				widget.text = widget.text .. name .. between .. score
-			end
-		else
-			-- team scores
-
-			widget.text = "Red  " .. c_world_redTeam.score .. "\nBlue " .. c_world_blueTeam.score
-		end
-	end
-
 	-- GUI if in foreground
 	if c_state_getCurrentState() == 1 then
+		-- scores
+		local function updateScores(widget)
+			if not c_world_gameTypeTeam(c_world_getGameType()) then
+				-- non-team scores
+
+				local length = 0
+
+				widget.text = ""
+
+				for _, v in pairs(c_world_getTanks()) do
+					local name = v.name
+
+					if #name > length then
+						length = #name
+					end
+				end
+
+				if length < 1 then
+					length = 1
+				end
+
+				for _, v in pairs(c_world_getTanks()) do
+					local name, between, score
+
+					if widget.text:len() ~= 0 then
+						widget.text = widget.text .. "\n"
+					end
+
+					name = tostring(v.name)
+					between = string.rep("  ", length - #name + 1)
+					score = tostring(v.score)
+
+					widget.text = widget.text .. name .. between .. score
+				end
+			else
+				-- team scores
+
+				widget.text = "Red  " .. c_world_redTeam.score .. "\nBlue " .. c_world_blueTeam.score
+			end
+		end
+
 		gui_addLabel(tankbobs.m_vec2(7.5, 92.5), "", updateScores, 0.5, c_config_get("client.renderer.scoresRed"), c_config_get("client.renderer.scoresGreen"), c_config_get("client.renderer.scoresBlue"), c_config_get("client.renderer.scoresAlpha"), c_config_get("client.renderer.scoresRed"), c_config_get("client.renderer.scoresGreen"), c_config_get("client.renderer.scoresGreen"), c_config_get("client.renderer.scoresAlpha"))
 
 		-- fps counter
@@ -183,6 +186,34 @@ function game_new()
 		if c_config_get("client.renderer.fpsCounter") then
 			gui_addLabel(tankbobs.m_vec2(92.5, 92.5), "", updateFPS, 0.5, c_config_get("client.renderer.fpsRed"), c_config_get("client.renderer.fpsGreen"), c_config_get("client.renderer.fpsBlue"), c_config_get("client.renderer.fpsAlpha"), c_config_get("client.renderer.fpsRed"), c_config_get("client.renderer.fpsGreen"), c_config_get("client.renderer.fpsGreen"), c_config_get("client.renderer.fpsAlpha"))
 		end
+
+		-- end of round label
+		local timeRemaining = 0
+		local bwin = {"", {r = 0, g = 0, b = 0, a = 0}}
+		local function updateRound(widget, d)
+			if win then
+				bwin = win
+				win = nil
+
+				if not bwin.a then
+					bwin.a = 1.0
+				end
+
+				timeRemaining = c_const_get("game_roundWinLabelTime")
+			end
+
+			timeRemaining = math.max(0, timeRemaining - d)
+
+			if timeRemaining > 0 then
+				widget.text = bwin[1]
+				widget.color.r = bwin[2].r
+				widget.color.g = bwin[2].g
+				widget.color.b = bwin[2].b
+			end
+			widget.color.a = math.min(1, timeRemaining / c_const_get("game_roundWinLabelMaxOpacityTime"))
+		end
+
+		gui_addLabel(tankbobs.m_vec2(25, 50), "", updateRound, 1.1, c_config_get("client.renderer.scoresRed"), c_config_get("client.renderer.scoresGreen"), c_config_get("client.renderer.scoresBlue"), c_config_get("client.renderer.scoresAlpha"), c_config_get("client.renderer.scoresRed"), c_config_get("client.renderer.scoresGreen"), c_config_get("client.renderer.scoresGreen"), c_config_get("client.renderer.scoresAlpha"))
 	end
 
 	-- initialize melee sounds

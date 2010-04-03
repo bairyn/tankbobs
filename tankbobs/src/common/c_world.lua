@@ -1024,6 +1024,60 @@ function c_world_tank_die(tank, t)
 		end
 
 		c_world_tank_spawn(tank)
+	elseif switch == SURVIVOR then
+		if not endingRound then
+			local numExists = 0
+			local lastExists = nil
+			for _, v in pairs(c_world_tanks) do
+				if v.exists then
+					numExists = numExists + 1
+					lastExists = v
+				end
+			end
+
+			if numExists == 0 then
+				c_world_survivor_endRound()
+			elseif numExists == 1 then
+				lastExists.score = lastExists.score + 1
+
+				win = {lastExists.name, lastExists.color}
+
+				c_world_survivor_endRound()
+			end
+		end
+	elseif switch == TEAMSURVIVOR then
+		if not endingRound then
+			local redExists = false
+			local blueExists = false
+			for _, v in pairs(c_world_tanks) do
+				if v.exists then
+					if v.red then
+						redExists = true
+					else
+						blueExists = true
+					end
+				end
+			end
+
+			if not redExists or not blueExists then
+				if not blueExists then
+					c_world_redTeam.score = c_world_redTeam.score + 1
+
+					local c = c_const_get("color_red")
+					local color = {r = c[1], g = c[2], b = c[3], a = c[4]}
+					win = {"Red", color}
+				end
+				if not redExists then
+					c_world_blueTeam.score = c_world_blueTeam.score + 1
+
+					local c = c_const_get("color_blue")
+					local color = {r = c[1], g = c[2], b = c[3], a = c[4]}
+					win = {"Blue", color}
+				end
+
+				c_world_survivor_endRound()
+			end
+		end
 	elseif switch == PLAGUE then
 		if not endingRound then  -- don't handle anything game type related if the round is ending; we'd fall into an infinite call loop
 			if killer and killer ~= tank then
@@ -1084,50 +1138,6 @@ function c_world_tank_die(tank, t)
 			if not untagged then
 				-- only infected players remain; end the round
 				c_world_plague_endRound()
-			end
-		end
-	elseif switch == SURVIVOR then
-		if not endingRound then
-			local numExists = 0
-			local lastExists = nil
-			for _, v in pairs(c_world_tanks) do
-				if v.exists then
-					numExists = numExists + 1
-					lastExists = v
-				end
-			end
-
-			if numExists == 0 then
-				c_world_survivor_endRound()
-			elseif numExists == 1 then
-				lastExists.score = lastExists.score + 1
-
-				c_world_survivor_endRound()
-			end
-		end
-	elseif switch == TEAMSURVIVOR then
-		if not endingRound then
-			local redExists = false
-			local blueExists = false
-			for _, v in pairs(c_world_tanks) do
-				if v.exists then
-					if v.red then
-						redExists = true
-					else
-						blueExists = true
-					end
-				end
-			end
-
-			if not redExists or not blueExists then
-				if not blueExists then
-					c_world_redTeam.score = c_world_redTeam.score + 1
-				end
-				if not redExists then
-					c_world_blueTeam.score = c_world_blueTeam.score + 1
-				end
-
-				c_world_survivor_endRound()
 			end
 		end
 	else
