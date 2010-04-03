@@ -33,15 +33,15 @@ function c_ai_init()
 
 	c_const_set("ai_botRange", 2000)
 	c_const_set("ai_botAccuracy", 0.08)  -- accuracy of most skilled bot; lower is better (can be up to x secs off)
-	c_const_set("ai_shootAngle", (math.pi * 2) / 64)  -- (Tankbobs uses radians)
-	c_const_set("ai_maxSpeed", 12)  -- brake if above this speed, even if attacking
-	c_const_set("ai_maxSpeedInstagib", 56)  -- brake if above this speed, even if attacking
-	c_const_set("ai_minSpecialSpeed", 8)
-	c_const_set("ai_minSpecialSpeedInstagib", 32)
-	c_const_set("ai_minWayPointSpeed", 12)
-	c_const_set("ai_minWayPointSpeedInstagib", 16)
-	c_const_set("ai_minObjectiveSpeed", 24)
-	c_const_set("ai_minObjectiveSpeedInstagib", 24)
+	c_const_set("ai_shootAngle", CIRCLE / 64)  -- (Tankbobs uses radians)
+	c_const_set("ai_maxSpeed", 24)  -- brake if above this speed, even if attacking
+	c_const_set("ai_maxSpeedInstagib", 112)  -- brake if above this speed, even if attacking
+	c_const_set("ai_minSpecialSpeed", 16)
+	c_const_set("ai_minSpecialSpeedInstagib", 64)
+	c_const_set("ai_minWayPointSpeed", 24)
+	c_const_set("ai_minWayPointSpeedInstagib", 32)
+	c_const_set("ai_minObjectiveSpeed", 48)
+	c_const_set("ai_minObjectiveSpeedInstagib", 48)
 	c_const_set("ai_objectiveDistance", 25)
 	c_const_set("ai_accelerateNearEnemyFrequency", 32)  -- lower is more
 	c_const_set("ai_skipUpdateRandomReduce", 0.5)
@@ -61,15 +61,15 @@ function c_ai_init()
 	c_const_set("ai_enemyMeleeFireRange", 16)
 	c_const_set("ai_enemyMeleeRangeSkill", -0.6)
 	c_const_set("ai_meleeChaseTargetMinDistance", 5)
-	c_const_set("ai_meleeChaseTargetMinSpecialSpeed", 28)
-	c_const_set("ai_meleeChaseTargetMinSpecialSpeedInstagib", 40)
+	c_const_set("ai_meleeChaseTargetMinSpecialSpeed", 56)
+	c_const_set("ai_meleeChaseTargetMinSpecialSpeedInstagib", 80)
 	c_const_set("ai_minHealth", 20)
 	c_const_set("ai_minHealthInstagib", -1)
 	c_const_set("ai_taggedAvoidMaxDistance", 50)
 	c_const_set("ai_captureFlagMinHealth", 25)
 	c_const_set("ai_flagRange", 50)
 
-	c_const_set("ai_followRandom", (math.pi * 2) / 64)  -- +- x radians when least skilled bot is following an objective
+	c_const_set("ai_followRandom", CIRCLE / 64)  -- +- x radians when least skilled bot is following an objective
 	c_const_set("ai_stopCloseSpeed", 2)
 	c_const_set("ai_coastMinSpeed", 8)
 	c_const_set("ai_reverseChance", 3)
@@ -130,18 +130,18 @@ local AVOIDENEMYINDEX      = 2
 local AVOIDENEMYMEELEINDEX = 1
 
 function c_ai_angleRange(a, b)
-	while math.abs(a - b) > math.pi + 0.001 do
+	while math.abs(a - b) > CIRCLE / 2 + 0.001 do
 		if a > b then
 			if a > 0 then
-				a = a - 2 * math.pi
+				a = a - CIRCLE
 			else
-				b = b + 2 * math.pi
+				b = b + CIRCLE
 			end
 		else
 			if a < 0 then
-				a = a + 2 * math.pi
+				a = a + CIRCLE
 			else
-				b = b - 2 * math.pi
+				b = b - CIRCLE
 			end
 		end
 	end

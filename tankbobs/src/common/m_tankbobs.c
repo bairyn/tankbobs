@@ -1046,7 +1046,7 @@ static const struct luaL_Reg tankbobs[] =
 		/* no arguments are passed and nothing is returned.  The current world is freed. */
 	{"w_getTimeStep", w_getTimeStep}, /* get time step */
 		/* returns the time step */
-	{"w_setTimeStep", w_getTimeStep}, /* set time step */
+	{"w_setTimeStep", w_setTimeStep}, /* set time step */
 		/* sets the time step to the first argument */
 	{"w_getIterations", w_getIterations}, /* get iterations */
 		/* returns the iterations */

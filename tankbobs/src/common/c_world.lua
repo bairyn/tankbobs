@@ -61,8 +61,7 @@ local c_world_powerups
 local c_world_corpses
 local tank_acceleration
 local tank_rotationSpeed
-local tank_rotationSpecialSpeed
-local tank_speedK
+local tank_rotationSpecialFactor
 local tank_rotationChange
 local tank_rotationChangeMinSpeed
 local tank_worldFriction
@@ -70,6 +69,7 @@ local c_world_testBody
 local behind
 
 local worldTime = 0
+local lastWorldTime = 0
 local c_world_instagib = false
 local lastPowerupSpawnTime
 local nextPowerupSpawnPoint
@@ -107,11 +107,10 @@ function c_world_init()
 
 	c_const_set("world_time", 1000)  -- relative to change in seconds
 	c_const_set("world_unitScale", 1)
+	c_const_set("world_speed", 1)
 
-	c_const_set("world_fps", 256)  -- TODO: make single changes to world_fps not affect game speeds
-	--c_const_set("world_fps", c_config_get("game.worldFPS"))  -- physics FPS needs to be constant
-	--c_const_set("world_timeStep", common_FTM(c_const_get("world_fps")))
-	c_const_set("world_timeStep", 1 / 500)
+	c_const_set("world_fps", c_config_get("game.worldFPS"))  -- physics FPS needs to be constant
+	c_const_set("world_timeStep", 1 / c_const_get("world_fps"))
 	c_const_set("world_iterations", 16)
 
 	c_const_set("wall_contentsMask", WALL, 1)
@@ -164,7 +163,7 @@ function c_world_init()
 	c_const_set("powerup_linearDamping", 0, 1)
 	c_const_set("powerup_angularDamping", 0, 1)
 	c_const_set("powerup_pushStrength", 16, 1)
-	c_const_set("powerup_pushAngle", (math.pi * 2) / 8, 1)
+	c_const_set("powerup_pushAngle", CIRCLE / 8, 1)
 	c_const_set("powerup_static", false, 1)
 
 	c_const_set("game_chasePointTime", 10, 1)
@@ -176,25 +175,26 @@ function c_world_init()
 	c_const_set("tank_hullx3",  2.0, 1) c_const_set("tank_hully3", -1.0, 1)
 	c_const_set("tank_hullx4",  2.0, 1) c_const_set("tank_hully4",  1.0, 1)
 	c_const_set("tank_health", 100, 1)
-	c_const_set("tank_damageK", 4, 1)  -- damage relative to speed before a collision: 2 hp / 1 ups
-	c_const_set("tank_damageMinSpeed", 6, 1)
+	c_const_set("tank_damageK", 2, 1)  -- damage relative to speed before a collision: 2 hp / 1 ups after 
+	c_const_set("tank_damageMinSpeed", 12, 1)
 	c_const_set("tank_intensityMaxSpeed", 6, 1)
 	c_const_set("tank_collideMinDamage", 5, 1)
-	c_const_set("tank_deceleration", 64 / 1000, 1)
-	c_const_set("tank_decelerationMaxSpeed", 16, 1)
+	c_const_set("tank_reverse", 16, 1)
+	c_const_set("tank_deceleration", 64, 1)
+	c_const_set("tank_decelerationMaxSpeed", 48, 1)
 	c_const_set("tank_highHealth", 66, 1)
 	c_const_set("tank_lowHealth", 33, 1)
 	c_const_set("tank_acceleration",
 	{
-		{16 / 1000},
-		{12 / 1000, 4},
+		{48},
+		{16, 32},
+		{12, 48},
 	}, 1)
 	tank_acceleration = c_const_get("tank_acceleration")
-	c_const_set("tank_speedK", 5, 1)
 	tank_speedK = c_const_get("tank_speedK")
 	c_const_set("tank_density", 2, 1)
 	c_const_set("tank_friction", 0.25, 1)
-	c_const_set("tank_worldFriction", 2 / 1000, 1)  -- damping
+	c_const_set("tank_worldFriction", 0.5, 1)  -- damping
 	tank_worldFriction = c_const_get("tank_worldFriction")
 	c_const_set("tank_restitution", 0.4, 1)
 	c_const_set("tank_canSleep", false, 1)
@@ -203,7 +203,7 @@ function c_world_init()
 	c_const_set("tank_angularDamping", 0, 1)
 	c_const_set("tank_spawnTime", 0.75, 1)
 	c_const_set("tank_static", false, 1)
-	c_const_set("corpse_restitution", 0.4, 1)
+	c_const_set("corpse_restitution", 0.6, 1)
 	c_const_set("corpse_canSleep", false, 1)
 	c_const_set("corpse_isBullet", true, 1)
 	c_const_set("corpse_linearDamping", 0, 1)
@@ -212,7 +212,7 @@ function c_world_init()
 	c_const_set("corpse_static", false, 1)
 	c_const_set("corpse_density", 2, 1)
 	c_const_set("corpse_friction", 0.25, 1)
-	c_const_set("corpse_worldFriction", 2 / 1000, 1)  -- damping
+	c_const_set("corpse_worldFriction", 2, 1)  -- damping
 	c_const_set("wall_density", 1, 1)
 	c_const_set("wall_friction", 0.25, 1)  -- deceleration caused by friction (~speed *= 1 - friction)
 	c_const_set("wall_restitution", 0.2, 1)
@@ -220,14 +220,14 @@ function c_world_init()
 	c_const_set("wall_isBullet", false, 1)
 	c_const_set("wall_linearDamping", 0.75, 1)
 	c_const_set("wall_angularDamping", 0.75, 1)
-	c_const_set("tank_rotationChange", 0.005, 1)
+	c_const_set("tank_rotationChange", 1, 1)
 	tank_rotationChange = c_const_get("tank_rotationChange")
-	c_const_set("tank_rotationChangeMinSpeed", 0.5, 1)  -- if at least 24 ups
+	c_const_set("tank_rotationChangeMinSpeed", 4, 1)  -- if at least 4 ups
 	tank_rotationChangeMinSpeed = c_const_get("tank_rotationChangeMinSpeed")
-	c_const_set("tank_rotationSpeed", c_math_radians(510) / 1000, 1)
+	c_const_set("tank_rotationSpeed", 2 * CIRCLE / 5, 1)  -- two fifths of a circle each second
 	tank_rotationSpeed = c_const_get("tank_rotationSpeed")
-	c_const_set("tank_rotationSpecialSpeed", c_math_degrees(1) / 3.5, 1)
-	tank_rotationSpecialSpeed = c_const_get("tank_rotationSpecialSpeed")
+	c_const_set("tank_rotationSpecialFactor", (CIRCLE / 2) / 30, 1)  -- extent of rotation per second per unit per second; one half circle per 30 units per second
+	tank_rotationSpecialFactor = c_const_get("tank_rotationSpecialFactor")
 	c_const_set("tank_defaultRotation", c_math_radians(90), 1)  -- up
 	c_const_set("tank_boostHealth", 60, 1)
 	c_const_set("tank_boostShield", 25, 1)
@@ -255,7 +255,7 @@ function c_world_init()
 	c_const_set("world_megaTankKillBonus", 2, 1)
 
 	c_const_set("world_plagueDecayRate", 3.875, 1)
-	c_const_set("world_plagueSpawnTime", 3, 1)  -- this is *not* in addition to anything
+	c_const_set("world_plagueSpawnTime", 2.9, 1)  -- this is *not* in addition to anything  -- spawning right after corpses explode make the game funner by adding more strategy to it
 	c_const_set("world_plagueSurvivePlayerFactor", 10, 1)
 	c_const_set("world_plagueSurviveBonusReward", 5, 1)  -- number of points rewarded to survives in plague mode in addition to the number of players
 	c_const_set("world_plagueInfectReward", 5, 1)
@@ -600,6 +600,7 @@ function c_world_newWorld()
 	c_world_setPaused(false)  -- clear pause
 
 	worldTime = t_t_getTicks()
+	lastWorldTime = t_t_getTicks()
 
 	worldInitialized = true
 
@@ -1969,17 +1970,17 @@ function c_world_tank_step(d, tank)
 		if bit.band(tank.state, SPECIAL) ~= 0 then
 			if bit.band(tank.state, LEFT) ~= 0 then
 				if vel.R < 0 then  -- inverse rotation
-					tank.r = tank.r - tank_rotationSpeed * vel.R / tank_rotationSpecialSpeed
+					tank.r = tank.r - d * tank_rotationSpecialFactor * vel.R
 				else
-					tank.r = tank.r + tank_rotationSpeed * vel.R / tank_rotationSpecialSpeed
+					tank.r = tank.r + d * tank_rotationSpecialFactor * vel.R
 				end
 			end
 
 			if bit.band(tank.state, RIGHT) ~= 0 then
 				if vel.R < 0 then  -- inverse rotation
-					tank.r = tank.r + tank_rotationSpeed * vel.R / tank_rotationSpecialSpeed
+					tank.r = tank.r + d * tank_rotationSpecialFactor * vel.R
 				else
-					tank.r = tank.r - tank_rotationSpeed * vel.R / tank_rotationSpecialSpeed
+					tank.r = tank.r - d * tank_rotationSpecialFactor * vel.R
 				end
 			end
 
@@ -1997,15 +1998,12 @@ function c_world_tank_step(d, tank)
 				if bit.band(tank.state, FORWARD) ~= 0 then
 					-- determine the acceleration
 					local acceleration
-					local speedK = tank_speedK
 
 					for _, v in pairs(tank_acceleration) do  -- local copy of table for optimization
-						if v[2] then
-							if vel.R >= v[2] * speedK then
-								acceleration = v[1]
-							end
-						elseif not acceleration then
-							acceleration = v[1] * speedK
+						if not acceleration then
+							acceleration = v[1]
+						elseif vel.R >= v[2] then
+							acceleration = math.min(v[1], acceleration)
 						end
 					end
 
@@ -2014,18 +2012,18 @@ function c_world_tank_step(d, tank)
 					end
 
 					local newVel = t_m_vec2(vel)
-					newVel.R = newVel.R + acceleration
+					newVel.R = newVel.R + d * acceleration
 					newVel.t = tank.r
-					if vel.R >= tank_rotationChangeMinSpeed * speedK then
+					if vel.R >= tank_rotationChangeMinSpeed then
 						-- interpolate in the correct direction
-						vel.t    = math.fmod(vel.t, 2 * math.pi)
-						newVel.t = math.fmod(newVel.t, 2 * math.pi)
-						if        vel.t - newVel.t > math.pi then
-							vel.t    =    vel.t - 2 * math.pi
-						elseif newVel.t -    vel.t > math.pi then
-							newVel.t = newVel.t - 2 * math.pi
+						vel.t    = math.fmod(vel.t, CIRCLE)
+						newVel.t = math.fmod(newVel.t, CIRCLE)
+						if     vel.t    - newVel.t > CIRCLE / 2 then
+							vel.t    = vel.t    - CIRCLE
+						elseif newVel.t - vel.t    > CIRCLE / 2 then
+							newVel.t = newVel.t - CIRCLE
 						end
-						newVel.t = common_lerp(vel.t, newVel.t, tank_rotationChange)
+						newVel.t = common_lerp(vel.t, newVel.t, d * tank_rotationChange)
 					end
 
 					t_w_setLinearVelocity(tank.body, newVel)
@@ -2035,19 +2033,17 @@ function c_world_tank_step(d, tank)
 					if bit.band(tank.state, REVERSE) ~= 0 and vel.R <= c_const_get("tank_decelerationMaxSpeed") then
 						-- reverse
 
-						local addVel = t_m_vec2()
-						addVel.R = c_const_get("tank_deceleration")
-						addVel.t = tank.r + math.pi
-						vel:add(addVel)
+						local subVel = t_m_vec2()
+						subVel.R = d * c_const_get("tank_reverse")
+						subVel.t = tank.r
+						vel:sub(subVel)
 						t_w_setLinearVelocity(tank.body, vel)
 					else
 						-- break
 
 						local newVel = t_m_vec2(vel)
 
-						if newVel.R > 0 then
-							newVel.R = newVel.R - c_const_get("tank_deceleration")
-						end
+						newVel.R = math.max(0, newVel.R - d * c_const_get("tank_deceleration"))
 
 						t_w_setLinearVelocity(tank.body, newVel)
 						vel(newVel)
@@ -2058,18 +2054,18 @@ function c_world_tank_step(d, tank)
 			else
 				local v = t_w_getLinearVelocity(tank.body)
 
-				v.R = v.R / (1 + tank_worldFriction)
+				v.R = v.R / (1 + d * tank_worldFriction)
 				t_w_setLinearVelocity(tank.body, v)
 
 				tank.state = bit.band(tank.state, bit.bnot(REVERSE))
 			end
 
 			if bit.band(tank.state, LEFT) ~= 0 then
-				tank.r = tank.r + tank_rotationSpeed
+				tank.r = tank.r + d * tank_rotationSpeed
 			end
 
 			if bit.band(tank.state, RIGHT) ~= 0 then
-				tank.r = tank.r - tank_rotationSpeed
+				tank.r = tank.r - d * tank_rotationSpeed
 			end
 		end
 	end
@@ -3005,6 +3001,7 @@ function c_world_resetWorldTimers(t)
 	t = t or t_t_getTicks()
 
 	worldTime = t_t_getTicks()
+	lastWorldTime = t_t_getTicks()
 
 	for _, v in pairs(c_world_tanks) do
 		if v.lastFireTime then
@@ -3064,6 +3061,7 @@ end
 
 function c_world_offsetWorldTimers(d)
 	worldTime = t_t_getTicks()
+	lastWorldTime = t_t_getTicks()
 
 	for _, v in pairs(c_world_tanks) do
 		if v.lastFireTime then
@@ -3142,7 +3140,7 @@ function c_world_setTimeStep(x)
 end
 
 function c_world_setTimeStep()
-	return tankbobs.w_getTimeStep()
+	return tankbobs.w_setTimeStep()
 end
 
 function c_world_setIterations(x)
@@ -3154,10 +3152,13 @@ function c_world_setIterations()
 end
 
 local timeStep = 0
+local f
 function c_world_step(d)
 	local t = t_t_getTicks()
-	local f = 1 / (c_world_timeMultiplier())
-	local wd = common_FTM(c_const_get("world_fps")) * f
+	if not f then
+		f = c_const_get("world_time") * c_const_get("world_speed") / (c_world_timeMultiplier())
+	end
+	local wd = f * c_const_get("world_timeStep")
 
 	worldTime = worldTime - timeStep
 	timeStep = 0
@@ -3172,6 +3173,8 @@ function c_world_step(d)
 
 					break
 				end
+
+				--wd = worldTime - lastWorldTime / c_world_timeMultiplier()
 
 				tankbobs.w_luaStep(wd)
 
@@ -3215,7 +3218,8 @@ function c_world_step(d)
 
 				tankbobs.w_step()
 
-				worldTime = worldTime + common_FTM(c_const_get("world_fps"))
+				lastWorldTime = worldTime
+				worldTime = worldTime + c_world_timeMultiplier(c_const_get("world_timeStep"))
 			end
 		end
 	end
@@ -3232,6 +3236,9 @@ end
 
 function c_world_resetBehind()
 	worldTime = t_t_getTicks()
+	local f = c_const_get("world_speed") / (c_world_timeMultiplier())
+	local wd = f * common_FTM(c_const_get("world_fps"))
+	lastWorldTime = t_t_getTicks() - wd
 end
 
 function c_world_stepTime(t)

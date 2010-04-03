@@ -87,8 +87,8 @@ function st_optionsGame_init()
 		pos = 8
 	end
 	-- World FPS needs to be constant
-	--gui_addLabel(tankbobs.m_vec2(50, 75), "World Simulation", nil, 1 / 3) gui_addCycle(tankbobs.m_vec2(75, 75), "World Simulation", nil, st_optionsGame_worldFPS, {"Slide Show", "Roughest", "Rougher", "Rough", "Medium", "Smooth", "Smoother", "Smoothest"}, pos, 1 / 3)
-	--gui_addLabel(tankbobs.m_vec2(50, 72), "(Restart to take effect to world simulation smoothness)", nil, 1 / 3)
+	gui_addLabel(tankbobs.m_vec2(50, 75), "World Simulation", nil, 1 / 3) gui_addCycle(tankbobs.m_vec2(75, 75), "World Simulation", nil, st_optionsGame_worldFPS, {"Slide Show", "Roughest", "Rougher", "Rough", "Medium", "Smooth", "Smoother", "Smoothest"}, pos, 1 / 3)
+	gui_addLabel(tankbobs.m_vec2(50, 72), "(Restart to take effect to world simulation smoothness)", nil, 1 / 3)
 end
 
 function st_optionsGame_done()

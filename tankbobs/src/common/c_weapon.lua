@@ -49,7 +49,7 @@ function c_weapon_init()
 
 	c_weapons = {}
 
-	local kn = 64
+	local kn = 12
 
 	-- weak machinegun
 	weapon = c_weapon:new()
@@ -1203,7 +1203,7 @@ function c_weapon_fire(tank, d)
 				-- apply knockback impulse to the tank
 				local point = tankbobs.w_getCenterOfMass(tank.body)
 				local force = tankbobs.m_vec2()
-				force.R = -weapon.knockback * c_const_get("tank_speedK")
+				force.R = -weapon.knockback
 				force.t = tankbobs.w_getAngle(tank.body)
 				tankbobs.w_applyImpulse(tank.body, force, point)
 			end
