@@ -362,6 +362,7 @@ local st_optionsPlayers_colorR
 local st_optionsPlayers_colorG
 local st_optionsPlayers_colorB
 
+local optionsPlayers_tankRotation
 local currentPlayer = 1
 local player
 
@@ -369,14 +370,12 @@ function st_optionsPlayers_init()
 	currentPlayer = 1
 	player = {}
 
-	c_const_set("optionsPlayers_tankRotation", -math.pi / 2, -1)
+	c_const_set("optionsPlayers_tankRotation", -CIRCLE / 4, -1)
+	optionsPlayers_tankRotation = c_const_get("optionsPlayers_tankRotation")
 
 	gui_addAction(tankbobs.m_vec2(25, 85), "Back", nil, c_state_advance)
 
-	gui_addLabel(tankbobs.m_vec2(50, 75), "Computers", nil, 1 / 3) gui_addInput(tankbobs.m_vec2(75, 75), tostring(tonumber(c_config_get("game.computers"))), nil, st_optionsPlayers_computers, true, 1, 0.5)
-	gui_addLabel(tankbobs.m_vec2(50, 72), "Players", nil, 1 / 3) gui_addInput(tankbobs.m_vec2(75, 72), tostring(tonumber(c_config_get("game.players"))), nil, st_optionsPlayers_players, true, 1, 0.5)
-
-	gui_addLabel(tankbobs.m_vec2(50, 66), "Set up player", nil, 1 / 3) gui_addInput(tankbobs.m_vec2(75, 66), "1", nil, st_optionsPlayers_configurePlayer, true, 1, 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 75), "Set up player", nil, 1 / 3) gui_addInput(tankbobs.m_vec2(75, 75), "1", nil, st_optionsPlayers_configurePlayer, true, 1, 0.5)
 	if not (c_config_get("game.player1.name", true)) then
 		c_config_set("game.player1.name", "Player1")
 	end
@@ -420,27 +419,27 @@ function st_optionsPlayers_init()
 		c_config_set("game.player1.team", false)
 	end
 
-	gui_addLabel(tankbobs.m_vec2(50, 63), "Name", nil, 1 / 3) player.name = gui_addInput(tankbobs.m_vec2(75, 63), c_config_get("game.player1.name"), nil, st_optionsPlayers_name, false, c_const_get("max_nameLength"), 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 72), "Name", nil, 1 / 3) player.name = gui_addInput(tankbobs.m_vec2(75, 72), c_config_get("game.player1.name"), nil, st_optionsPlayers_name, false, c_const_get("max_nameLength"), 0.5)
 
-	gui_addLabel(tankbobs.m_vec2(50, 57), "Fire", nil, 1 / 3) player.fire = gui_addKey(tankbobs.m_vec2(75, 57), c_config_get("client.key.player1.fire"), nil, st_optionsPlayers_fire, c_config_get("client.key.player1.fire"), 0.5)
-	gui_addLabel(tankbobs.m_vec2(50, 54), "Forward", nil, 1 / 3) player.forward = gui_addKey(tankbobs.m_vec2(75, 54), c_config_get("client.key.player1.forward"), nil, st_optionsPlayers_forward, c_config_get("client.key.player1.forward"), 0.5)
-	gui_addLabel(tankbobs.m_vec2(50, 51), "Back", nil, 1 / 3) player.back = gui_addKey(tankbobs.m_vec2(75, 51), c_config_get("client.key.player1.back"), nil, st_optionsPlayers_back, c_config_get("client.key.player1.back"), 0.5)
-	gui_addLabel(tankbobs.m_vec2(50, 48), "Left", nil, 1 / 3) player.left = gui_addKey(tankbobs.m_vec2(75, 48), c_config_get("client.key.player1.left"), nil, st_optionsPlayers_left, c_config_get("client.key.player1.left"), 0.5)
-	gui_addLabel(tankbobs.m_vec2(50, 45), "Right", nil, 1 / 3) player.right = gui_addKey(tankbobs.m_vec2(75, 45), c_config_get("client.key.player1.right"), nil, st_optionsPlayers_right, c_config_get("client.key.player1.right"), 0.5)
-	gui_addLabel(tankbobs.m_vec2(50, 42), "Special", nil, 1 / 3) player.special = gui_addKey(tankbobs.m_vec2(75, 42), c_config_get("client.key.player1.special"), nil, st_optionsPlayers_special, c_config_get("client.key.player1.special"), 0.5)
-	gui_addLabel(tankbobs.m_vec2(50, 39), "Reload", nil, 1 / 3) player.reload = gui_addKey(tankbobs.m_vec2(75, 39), c_config_get("client.key.player1.reload"), nil, st_optionsPlayers_reload, c_config_get("client.key.player1.reload"), 0.5)
-	--gui_addLabel(tankbobs.m_vec2(50, 36), "Reverse", nil, 1 / 3) player.reverse = gui_addKey(tankbobs.m_vec2(75, 36), c_config_get("client.key.player1.reverse"), nil, st_optionsPlayers_reverse, c_config_get("client.key.player1.reverse"), 0.5)
-	gui_addLabel(tankbobs.m_vec2(50, 36), "Mod Key", nil, 1 / 3) player.mod = gui_addKey(tankbobs.m_vec2(75, 36), c_config_get("client.key.player1.mod"), nil, st_optionsPlayers_mod, c_config_get("client.key.player1.mod"), 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 66), "Fire", nil, 1 / 3) player.fire = gui_addKey(tankbobs.m_vec2(75, 66), c_config_get("client.key.player1.fire"), nil, st_optionsPlayers_fire, c_config_get("client.key.player1.fire"), 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 63), "Forward", nil, 1 / 3) player.forward = gui_addKey(tankbobs.m_vec2(75, 63), c_config_get("client.key.player1.forward"), nil, st_optionsPlayers_forward, c_config_get("client.key.player1.forward"), 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 60), "Back", nil, 1 / 3) player.back = gui_addKey(tankbobs.m_vec2(75, 60), c_config_get("client.key.player1.back"), nil, st_optionsPlayers_back, c_config_get("client.key.player1.back"), 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 57), "Left", nil, 1 / 3) player.left = gui_addKey(tankbobs.m_vec2(75, 57), c_config_get("client.key.player1.left"), nil, st_optionsPlayers_left, c_config_get("client.key.player1.left"), 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 54), "Right", nil, 1 / 3) player.right = gui_addKey(tankbobs.m_vec2(75, 54), c_config_get("client.key.player1.right"), nil, st_optionsPlayers_right, c_config_get("client.key.player1.right"), 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 51), "Special", nil, 1 / 3) player.special = gui_addKey(tankbobs.m_vec2(75, 51), c_config_get("client.key.player1.special"), nil, st_optionsPlayers_special, c_config_get("client.key.player1.special"), 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 48), "Reload", nil, 1 / 3) player.reload = gui_addKey(tankbobs.m_vec2(75, 48), c_config_get("client.key.player1.reload"), nil, st_optionsPlayers_reload, c_config_get("client.key.player1.reload"), 0.5)
+	--gui_addLabel(tankbobs.m_vec2(50, 45), "Reverse", nil, 1 / 3) player.reverse = gui_addKey(tankbobs.m_vec2(75, 45), c_config_get("client.key.player1.reverse"), nil, st_optionsPlayers_reverse, c_config_get("client.key.player1.reverse"), 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 45), "Mod Key", nil, 1 / 3) player.mod = gui_addKey(tankbobs.m_vec2(75, 45), c_config_get("client.key.player1.mod"), nil, st_optionsPlayers_mod, c_config_get("client.key.player1.mod"), 0.5)
 
-	gui_addLabel(tankbobs.m_vec2(50, 30), "Adjust color", nil, 1 / 3)
+	gui_addLabel(tankbobs.m_vec2(50, 39), "Adjust color", nil, 1 / 3)
 
-	player.colorR = gui_addScale(tankbobs.m_vec2(75, 27), c_config_get("game.player1.color.r"), nil, st_optionsPlayers_colorR, c_config_get("game.player1.color.r"), nil, 0.5, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0)
-	player.colorG = gui_addScale(tankbobs.m_vec2(75, 24), c_config_get("game.player1.color.g"), nil, st_optionsPlayers_colorG, c_config_get("game.player1.color.g"), nil, 0.5, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0)
-	player.colorB = gui_addScale(tankbobs.m_vec2(75, 21), c_config_get("game.player1.color.b"), nil, st_optionsPlayers_colorB, c_config_get("game.player1.color.b"), nil, 0.5, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0)
+	player.colorR = gui_addScale(tankbobs.m_vec2(75, 36), c_config_get("game.player1.color.r"), nil, st_optionsPlayers_colorR, c_config_get("game.player1.color.r"), nil, 0.5, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0)
+	player.colorG = gui_addScale(tankbobs.m_vec2(75, 33), c_config_get("game.player1.color.g"), nil, st_optionsPlayers_colorG, c_config_get("game.player1.color.g"), nil, 0.5, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0)
+	player.colorB = gui_addScale(tankbobs.m_vec2(75, 30), c_config_get("game.player1.color.b"), nil, st_optionsPlayers_colorB, c_config_get("game.player1.color.b"), nil, 0.5, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0)
 
-	-- image of tank is drawn (takes 15 and 18)
+	-- image of tank is drawn (takes 24 and 36)
 
-	gui_addLabel(tankbobs.m_vec2(50, 9), "Team", nil, 2 / 3) player.team = gui_addCycle(tankbobs.m_vec2(75, 9), "Team", nil, st_optionsPlayers_team, {"Blue", "Red"}, c_config_get("game.player1.team") == "red" and 2 or 1, 2 / 3)
+	gui_addLabel(tankbobs.m_vec2(50, 18), "Team", nil, 2 / 3) player.team = gui_addCycle(tankbobs.m_vec2(75, 18), "Team", nil, st_optionsPlayers_team, {"Blue", "Red"}, c_config_get("game.player1.team") == "red" and 2 or 1, 2 / 3)
 end
 
 function st_optionsPlayers_done()
@@ -460,9 +459,9 @@ function st_optionsPlayers_step(d)
 		gl.PushMatrix()
 			gl.Color(c_config_get("game.player" .. tostring(currentPlayer) .. ".color.r"), c_config_get("game.player" .. tostring(currentPlayer) .. ".color.g"), c_config_get("game.player" .. tostring(currentPlayer) .. ".color.b"), 1)
 			gl.TexEnv("TEXTURE_ENV_COLOR", c_config_get("game.player" .. tostring(currentPlayer) .. ".color.r"), c_config_get("game.player" .. tostring(currentPlayer) .. ".color.g"), c_config_get("game.player" .. tostring(currentPlayer) .. ".color.b"), 1)
-			gl.Translate(85, 16.5, 0)
+			gl.Translate(85, 25.5, 0)
 			gl.Rotate(tankbobs.m_degrees(tankRotation), 0, 0, 1)
-			tankRotation = tankRotation + d * c_const_get("optionsPlayers_tankRotation")
+			tankRotation = tankRotation + d * (c_const_get("optionsPlayers_tankRotation") or optionsPlayers_tankRotation)
 			gl.CallList(tank_listBase)
 			gl.Color(1, 1, 1, 1)
 			gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, 1)
@@ -560,14 +559,6 @@ function st_optionsPlayers_configurePlayer(widget)
 	end
 	local team = c_config_get("game.player" .. tonumber(currentPlayer) .. ".team") == "red" and 2 or 1
 	player.team:setCyclePos(team)
-end
-
-function st_optionsPlayers_computers(widget)
-	c_config_set("game.computers", tonumber(widget.inputText))
-end
-
-function st_optionsPlayers_players(widget)
-	c_config_set("game.players", tonumber(widget.inputText))
 end
 
 function st_optionsPlayers_name(widget)
