@@ -1218,7 +1218,9 @@ function c_world_spawnTank(tank)
 end
 
 function c_world_tank_checkSpawn(d, tank)
-	if not tank.spawning then
+	local t = t_t_getTicks()
+
+	if tank.exists or not tank.spawning or t < tank.nextSpawnTime then
 		return
 	end
 
@@ -1310,6 +1312,30 @@ function c_world_tank_checkSpawn(d, tank)
 end
 
 function c_world_spawnTank_misc(tank)
+end
+
+function c_world_tank_canSpawn(d, tank)
+	-- test if a tank can spawn from a specific spawn point
+	local t = t_t_getTicks()
+
+	-- see if the spawn point exists
+	if not c_tcm_current_map.playerSpawnPoints[tank.lastSpawnPoint] then
+		return false
+	end
+
+	-- set the tank's position for proper testing (this won't interfere with anything else since the exists flag isn't set)
+	tank.p(c_tcm_current_map.playerSpawnPoints[tank.lastSpawnPoint].p)
+
+	-- test if spawning interferes with another tank
+	for _, v in pairs(c_world_tanks) do
+		if v.exists then
+			if c_world_intersection(d, t_t_clone(true, c_world_tankHull(tank)), t_t_clone(c_world_tankHull(v)), t_m_vec2(0, 0), t_w_getLinearVelocity(v.body)) then
+				return false
+			end
+		end
+	end
+
+	return true
 end
 
 function c_world_plague_endRound()
@@ -1646,38 +1672,6 @@ function c_world_canPowerupSpawn(d, powerupSpawnPoint)
 	for _, v in pairs(c_world_powerups) do
 		if not v.collided then
 			if c_world_intersection(d, c_world_powerupSpawnPointHull(powerupSpawnPoint), c_world_powerupHull(v), t_m_vec2(0, 0), not v.m.body and t_m_vec2(0, 0) or t_w_getLinearVelocity(v.m.body)) then
-				return false
-			end
-		end
-	end
-
-	return true
-end
-
-function c_world_tank_canSpawn(d, tank)
-	local t = t_t_getTicks()
-
-	-- make sure the tank hasn't already spawned
-	if tank.exists then
-		return false
-	end
-
-	if tank.nextSpawnTime > t then
-		return false
-	end
-
-	-- see if the spawn point exists
-	if not c_tcm_current_map.playerSpawnPoints[tank.lastSpawnPoint] then
-		return false
-	end
-
-	-- set the tank's position for proper testing (this won't interfere with anything else since the exists flag isn't set)
-	tank.p(c_tcm_current_map.playerSpawnPoints[tank.lastSpawnPoint].p)
-
-	-- test if spawning interferes with another tank
-	for _, v in pairs(c_world_tanks) do
-		if v.exists then
-			if c_world_intersection(d, t_t_clone(true, c_world_tankHull(tank)), t_t_clone(c_world_tankHull(v)), t_m_vec2(0, 0), t_w_getLinearVelocity(v.body)) then
 				return false
 			end
 		end
