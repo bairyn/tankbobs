@@ -1223,9 +1223,31 @@ function c_world_tank_checkSpawn(d, tank)
 	local sp = tank.lastSpawnPoint
 	local playerSpawnPoint = c_tcm_current_map.playerSpawnPoints[tank.lastSpawnPoint]
 
-	while not c_world_tank_canSpawn(d, tank) do
-		tank.lastSpawnPoint = tank.lastSpawnPoint + 1
+	if c_config_get("game.allSpawnsBlockable") then
+		while not c_world_tank_canSpawn(d, tank) do
+			tank.lastSpawnPoint = tank.lastSpawnPoint + 1
+			playerSpawnPoint = c_tcm_current_map.playerSpawnPoints[tank.lastSpawnPoint]
 
+			if not playerSpawnPoint then
+				tank.lastSpawnPoint = 1
+				playerSpawnPoint = c_tcm_current_map.playerSpawnPoints[tank.lastSpawnPoint]
+
+				if not playerSpawnPoint then
+					error "No working spawn points in map"
+				end
+			end
+
+			if tank.lastSpawnPoint == sp then
+				-- no spawn points can be used
+				return false
+			end
+		end
+	else
+		if #c_tcm_current_map.playerSpawnPoints <= 0 then
+			error "No spawn points in map"
+		end
+
+		tank.lastSpawnPoint = tank.lastSpawnPoint + 1
 		playerSpawnPoint = c_tcm_current_map.playerSpawnPoints[tank.lastSpawnPoint]
 
 		if not playerSpawnPoint then
@@ -1233,18 +1255,46 @@ function c_world_tank_checkSpawn(d, tank)
 			playerSpawnPoint = c_tcm_current_map.playerSpawnPoints[tank.lastSpawnPoint]
 
 			if not playerSpawnPoint then
-				-- no spawn points
 				error "No working spawn points in map"
 			end
 		end
 
-		if tank.lastSpawnPoint == sp then
-			-- no spawn points can be used
-			return false
+		-- see if next spawn point can be spawned from
+		local numIntersections = 0
+		tank.p(playerSpawnPoint.p)
+		for _, v in pairs(c_world_tanks) do
+			if v.exists then
+				if c_world_intersection(d, t_t_clone(true, c_world_tankHull(tank)), t_t_clone(c_world_tankHull(v)), t_m_vec2(0, 0), t_w_getLinearVelocity(v.body)) then
+					numIntersections = numIntersections + 1
+				end
+			end
+		end
+
+		if numIntersections >= 1 then
+			local intersections = {}
+			for k, v in pairs(c_tcm_current_map.playerSpawnPoints) do
+				local thisIntersections = 0
+
+				tank.p(v.p)
+
+				for _, vs in pairs(c_world_tanks) do
+					if vs.exists then
+						if c_world_intersection(d, t_t_clone(true, c_world_tankHull(tank)), t_t_clone(c_world_tankHull(vs)), t_m_vec2(0, 0), t_w_getLinearVelocity(vs.body)) then
+							thisIntersections = thisIntersections + 1
+						end
+					end
+				end
+
+				table.insert(intersections, {k, thisIntersections})
+			end
+
+			-- first spawn point with least intersection
+			table.sort(intersections, function (a, b) return a[2] < b[2] end)
+
+			tank.lastSpawnPoint = intersections[1][1]
+			playerSpawnPoint = c_tcm_current_map.playerSpawnPoints[tank.lastSpawnPoint]
 		end
 	end
-
-	-- TODO: method of preventing spawn blocking by killing blockers
 
 	-- spawn
 	tank.p(playerSpawnPoint.p)
