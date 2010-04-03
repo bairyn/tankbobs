@@ -970,6 +970,31 @@ function c_weapon_fireMeleeWeapon(tank, weapon)
 	end
 end
 
+function c_weapon_canFireInMode()
+	local t = tankbobs.t_getTicks()
+
+	if not roundStartTime then
+		return true
+	end
+
+	local switch = c_world_getGameType()
+	if switch == PLAGUE then
+		if t < roundStartTime + c_world_timeMultiplier(c_const_get("world_plagueRoundNoFireTime")) then
+			return false
+		end
+	elseif switch == SURVIVOR then
+		if t < roundStartTime + c_world_timeMultiplier(c_const_get("world_survivorRoundNoFireTime")) then
+			return false
+		end
+	elseif switch == TEAMSURVIVOR then
+		if t < roundStartTime + c_world_timeMultiplier(c_const_get("world_teamSurvivorRoundNoFireTime")) then
+			return false
+		end
+	end
+
+	return true
+end
+
 function c_weapon_fire(tank, d)
 	local t = tankbobs.t_getTicks()
 
@@ -979,13 +1004,8 @@ function c_weapon_fire(tank, d)
 		return
 	end
 
-	local switch = c_world_getGameType()
-	if switch == PLAGUE or
-   	   switch == SURVIVOR or
-	   switch == TEAMSURVIVOR then
-		if roundStartTime and t < roundStartTime + c_world_timeMultiplier(c_const_get("world_roundNoFireTime")) then
-			return
-		end
+	if not c_weapon_canFireInMode() then
+		return
 	end
 
 	local weapon = c_weapons[tank.weapon]

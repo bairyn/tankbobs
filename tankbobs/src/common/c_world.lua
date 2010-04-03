@@ -256,10 +256,13 @@ function c_world_init()
 
 	c_const_set("world_plagueDecayRate", 3.875, 1)
 	c_const_set("world_plagueSpawnTime", 3, 1)  -- this is *not* in addition to anything
-	c_const_set("world_roundNoFireTime", 4.5, 1)  -- relative to the start time of fire
 	c_const_set("world_plagueSurvivePlayerFactor", 10, 1)
 	c_const_set("world_plagueSurviveBonusReward", 5, 1)  -- number of points rewarded to survives in plague mode in addition to the number of players
 	c_const_set("world_plagueInfectReward", 5, 1)
+
+	c_const_set("world_plagueRoundNoFireTime", 4.5, 1)  -- relative to the start time of fire
+	c_const_set("world_survivorRoundNoFireTime", 1.75, 1)  -- relative to the start time of fire
+	c_const_set("world_teamSurvivorRoundNoFireTime", 1.75, 1)  -- relative to the start time of fire
 
 	-- powerups
 	c_powerupTypes = {}

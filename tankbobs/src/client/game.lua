@@ -1060,7 +1060,7 @@ function game_step(d)
 				end
 			end
 
-			if v.weapon and bit.band(v.state, FIRING) ~= 0 and (not roundStartTime or t >= roundStartTime + c_world_timeMultiplier(c_const_get("world_roundNoFireTime"))) then
+			if v.weapon and bit.band(v.state, FIRING) ~= 0 and c_weapon_canFireInMode() then
 				if v.m.lastFireTime ~= v.lastFireTime then
 					v.m.lastFireTime = v.lastFireTime
 
