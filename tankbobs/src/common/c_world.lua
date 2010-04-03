@@ -1066,6 +1066,11 @@ function c_world_tank_die(tank, t)
 				-- end the round
 				c_world_plague_endRound()
 			end
+
+			if not untagged then
+				-- only infected players remain; end the round
+				c_world_plague_endRound()
+			end
 		end
 	else
 		c_world_tank_spawn(tank)
