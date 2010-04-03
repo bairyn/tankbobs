@@ -256,7 +256,7 @@ function c_world_init()
 
 	c_const_set("world_plagueDecayRate", 3.875, 1)
 	c_const_set("world_plagueSpawnTime", 3, 1)  -- this is *not* in addition to anything
-	c_const_set("world_plagueNoFireTime", 4.5, 1)  -- relative to the start time of fire
+	c_const_set("world_roundNoFireTime", 4.5, 1)  -- relative to the start time of fire
 	c_const_set("world_plagueSurvivePlayerFactor", 10, 1)
 	c_const_set("world_plagueSurviveBonusReward", 5, 1)  -- number of points rewarded to survives in plague mode in addition to the number of players
 	c_const_set("world_plagueInfectReward", 5, 1)
@@ -666,7 +666,16 @@ end
 -- Game types
 -- A table of {constant, string, human string, team, pointLimitKey, pointLimitLabel}'s
 do
-local gameTypes = {{DEATHMATCH, "deathmatch", "Deathmatch", false, "game.fragLimit", "Frag limit"}, {TEAMDEATHMATCH, "teamdeathmatch", "Team Deathmatch", true, "game.teamFragLimit", "Frag limit"}, {MEGATANK, "megatank", "Megatank", false, "game.megaPointLimit", "Point limit"}, {CHASE, "chase", "Chase", false, "game.chaseLimit", "Point limit"}, {PLAGUE, "plague", "Plague", false, "game.plaguePointLimit", "Point limit"}, {DOMINATION, "domination", "Domination", true, "game.controlLimit", "Point limit"}, {CAPTURETHEFLAG, "capturetheflag", "Capture the Flag", true, "game.captureLimit", "Capture limit"}}
+local gameTypes = { {DEATHMATCH,     "deathmatch",     "Deathmatch",       false, "game.fragLimit",              "Frag limit"}
+                  , {TEAMDEATHMATCH, "teamdeathmatch", "Team Deathmatch",  true,  "game.teamFragLimit",          "Frag limit"}
+                  , {SURVIVOR,       "survivor",       "Survivor",         false, "game.survivorPointLimit",     "Point limit"}
+                  , {TEAMSURVIVOR,   "teamsurvivor",   "Team Survivor",    true,  "game.teamSurvivorPointLimit", "Point limit"}
+                  , {MEGATANK,       "megatank",       "Megatank",         false, "game.megaPointLimit",         "Point limit"}
+                  , {CHASE,          "chase",          "Chase",            false, "game.chaseLimit",             "Point limit"}
+                  , {PLAGUE,         "plague",         "Plague",           false, "game.plaguePointLimit",       "Point limit"}
+                  , {DOMINATION,     "domination",     "Domination",       true,  "game.controlLimit",           "Point limit"}
+                  , {CAPTURETHEFLAG, "capturetheflag", "Capture the Flag", true,  "game.captureLimit",           "Capture limit"}
+                  }
 local c_world_gameType = DEATHMATCH
 
 function c_world_getGameType(gameType)
@@ -883,8 +892,10 @@ function c_world_tank_die(tank, t)
 		tankbobs.w_removeBody(tank.body) tank.body = nil tank.fixture = nil
 
 		local switch = c_world_getGameType()
-		if switch == PLAGUE then
-			if not plague_roundEnd and not plague_endingRound then
+		if switch == PLAGUE or
+	   	   switch == SURVIVOR or
+	   	   switch == TEAMSURVIVOR then
+			if not roundEnd and not endingRound then
 				c_world_addCorpse(tank, vel, index)
 			end
 		else
@@ -1011,7 +1022,7 @@ function c_world_tank_die(tank, t)
 
 		c_world_tank_spawn(tank)
 	elseif switch == PLAGUE then
-		if not plague_endingRound then  -- don't handle anything game type related if the round is ending; we'd fall into an infinite call loop
+		if not endingRound then  -- don't handle anything game type related if the round is ending; we'd fall into an infinite call loop
 			if killer and killer ~= tank then
 				killer.score = killer.score + 1
 			else
@@ -1070,6 +1081,50 @@ function c_world_tank_die(tank, t)
 			if not untagged then
 				-- only infected players remain; end the round
 				c_world_plague_endRound()
+			end
+		end
+	elseif switch == SURVIVOR then
+		if not endingRound then
+			local numExists = 0
+			local lastExists = nil
+			for _, v in pairs(c_world_tanks) do
+				if v.exists then
+					numExists = numExists + 1
+					lastExists = v
+				end
+			end
+
+			if numExists == 0 then
+				c_world_survivor_endRound()
+			elseif numExists == 1 then
+				lastExists.score = lastExists.score + 1
+
+				c_world_survivor_endRound()
+			end
+		end
+	elseif switch == TEAMSURVIVOR then
+		if not endingRound then
+			local redExists = false
+			local blueExists = false
+			for _, v in pairs(c_world_tanks) do
+				if v.exists then
+					if v.red then
+						redExists = true
+					else
+						blueExists = true
+					end
+				end
+			end
+
+			if not redExists or not blueExists then
+				if not blueExists then
+					c_world_redTeam.score = c_world_redTeam.score + 1
+				end
+				if not redExists then
+					c_world_blueTeam.score = c_world_blueTeam.score + 1
+				end
+
+				c_world_survivor_endRound()
 			end
 		end
 	else
@@ -1190,11 +1245,11 @@ function c_world_plague_endRound()
 
 	local t = t_t_getTicks()
 
-	plague_roundEnd = true
-	plague_roundStartTime = t
+	roundEnd = true
+	roundStartTime = t
 
 	-- we do this by killing all of the tanks
-	plague_endingRound = true
+	endingRound = true
 	for _, v in pairs(c_world_tanks) do
 		c_world_tank_die(v)
 
@@ -1206,7 +1261,23 @@ function c_world_plague_endRound()
 
 		v.spawning = true
 	end
-	plague_endingRound = false
+	endingRound = false
+end
+
+function c_world_survivor_endRound()
+	local t = t_t_getTicks()
+
+	roundEnd = true
+	roundStartTime = t
+
+	-- we do this by killing all of the tanks
+	endingRound = true
+	for _, v in pairs(c_world_tanks) do
+		c_world_tank_die(v)
+
+		v.spawning = true
+	end
+	endingRound = false
 end
 
 local p1a = {nil, nil, nil}

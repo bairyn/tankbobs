@@ -1060,7 +1060,7 @@ function game_step(d)
 				end
 			end
 
-			if v.weapon and bit.band(v.state, FIRING) ~= 0 then
+			if v.weapon and bit.band(v.state, FIRING) ~= 0 and (not roundStartTime or t < roundStartTime + c_world_timeMultiplier(c_const_get("world_roundNoFireTime"))) then
 				if v.m.lastFireTime ~= v.lastFireTime then
 					v.m.lastFireTime = v.lastFireTime
 
@@ -1173,7 +1173,7 @@ function game_step(d)
 
 			local switch = c_world_getGameType()
 			if switch == PLAGUE then
-				if not plague_roundEnd or v.tagged then
+				if not roundEnd or v.tagged then
 					tankbobs.a_playSound(c_const_get("die_sound"))
 				end
 			else
@@ -1275,9 +1275,11 @@ function game_step(d)
 				tankbobs.a_playSound(c_const_get("flagReturn_sound"))
 			end
 		end
-	elseif switch == PLAGUE then
-		if plague_roundEnd then
-			plague_roundEnd = false
+	elseif switch == PLAGUE or
+	       switch == SURVIVOR or
+	       switch == TEAMSURVIVOR then
+		if roundEnd then
+			roundEnd = false
 
 			tankbobs.a_playSound(c_const_get("endOfRound_sound"))
 		end

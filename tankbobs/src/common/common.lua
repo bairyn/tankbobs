@@ -601,6 +601,8 @@ SPECIAL        = {}
 -- gametypes
 DEATHMATCH     = {}
 TEAMDEATHMATCH = {}
+SURVIVOR       = {}
+TEAMSURVIVOR   = {}
 MEGATANK       = {}
 CHASE          = {}
 PLAGUE         = {}

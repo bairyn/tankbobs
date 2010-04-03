@@ -180,7 +180,9 @@
 		</player2>
 		<players>2</players>
 		<punish>true</punish>
+		<survivorPointLimit>10</survivorPointLimit>
 		<teamFragLimit>15</teamFragLimit>
+		<teamSurvivorPointLimit>10</teamSurvivorPointLimit>
 		<timescale>1</timescale>
 		<worldFPS>256</worldFPS>
 	</game>

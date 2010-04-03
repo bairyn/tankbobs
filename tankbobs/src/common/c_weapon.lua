@@ -980,8 +980,10 @@ function c_weapon_fire(tank, d)
 	end
 
 	local switch = c_world_getGameType()
-	if switch == PLAGUE then
-		if plague_roundStartTime and t < plague_roundStartTime + c_world_timeMultiplier(c_const_get("world_plagueNoFireTime")) then
+	if switch == PLAGUE or
+   	   switch == SURVIVOR or
+	   switch == TEAMSURVIVOR then
+		if roundStartTime and t < roundStartTime + c_world_timeMultiplier(c_const_get("world_roundNoFireTime")) then
 			return
 		end
 	end
