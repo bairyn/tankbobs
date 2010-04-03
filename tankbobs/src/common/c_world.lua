@@ -213,6 +213,8 @@ function c_world_init()
 	c_const_set("corpse_density", 2, 1)
 	c_const_set("corpse_friction", 0.25, 1)
 	c_const_set("corpse_worldFriction", 2, 1)  -- damping
+	c_const_set("corpse_speedIncrease", 0.9, 1)
+	c_const_set("corpse_rotationIncrease", 1, 1)
 	c_const_set("wall_density", 1, 1)
 	c_const_set("wall_friction", 0.25, 1)  -- deceleration caused by friction (~speed *= 1 - friction)
 	c_const_set("wall_restitution", 0.2, 1)
@@ -222,7 +224,7 @@ function c_world_init()
 	c_const_set("wall_angularDamping", 0.75, 1)
 	c_const_set("tank_rotationChange", 1, 1)
 	tank_rotationChange = c_const_get("tank_rotationChange")
-	c_const_set("tank_rotationChangeMinSpeed", 4, 1)  -- if at least 4 ups
+	c_const_set("tank_rotationChangeMinSpeed", 4, 1)
 	tank_rotationChangeMinSpeed = c_const_get("tank_rotationChangeMinSpeed")
 	c_const_set("tank_rotationSpeed", 2 * CIRCLE / 5, 1)  -- two fifths of a circle each second
 	tank_rotationSpeed = c_const_get("tank_rotationSpeed")
@@ -2550,6 +2552,15 @@ function c_world_corpse_step(d, corpse)
 	end
 
 	if corpse.body then
+		local vel = t_w_getLinearVelocity(corpse.body)
+		local ang = tankbobs.w_getAngularVelocity(corpse.body)
+
+		ang = ang + (d * c_const_get("corpse_rotationIncrease") * ang)
+		vel.R = vel.R + (d * c_const_get("corpse_speedIncrease") * vel.R)
+
+		t_w_setLinearVelocity(corpse.body, vel)
+		t_w_setAngularVelocity(corpse.body, ang)
+
 		corpse.p(t_w_getPosition(corpse.body))
 		corpse.r = t_w_getAngle(corpse.body)
 	end
