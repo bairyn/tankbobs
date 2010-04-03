@@ -94,6 +94,7 @@ function common_init()
 	SPECIAL        = bit.tobit(SPECIAL)
 	RELOAD         = bit.tobit(RELOAD)
 	REVERSE        = bit.tobit(REVERSE)
+	SLOW           = bit.tobit(SLOW)
 	MOD            = bit.tobit(MOD)
 
 	c_mods_init()
@@ -630,4 +631,5 @@ RIGHT          = 0x0010
 SPECIAL        = 0x0020
 RELOAD         = 0x0040
 REVERSE        = 0x0080
-MOD            = 0x0100
+SLOW           = 0x0100
+MOD            = 0x0200

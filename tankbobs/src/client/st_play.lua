@@ -97,6 +97,9 @@ local refreshKeys = function ()
 			--if not (c_config_get("client.key.player" .. tostring(i) .. ".reverse", true)) then
 				--c_config_set("client.key.player" .. tostring(i) .. ".reverse", false)
 			--end
+			if not (c_config_get("client.key.player" .. tostring(i) .. ".slow", true)) then
+				c_config_set("client.key.player" .. tostring(i) .. ".slow", false)
+			end
 			if not (c_config_get("client.key.player" .. tostring(i) .. ".mod", true)) then
 				c_config_set("client.key.player" .. tostring(i) .. ".mod", false)
 			end
@@ -126,6 +129,7 @@ local refreshKeys = function ()
 			key("special", SPECIAL)
 			key("reload", RELOAD)
 			--key("reverse", REVERSE)
+			key("slow", SLOW)
 			key("mod", MOD)
 		until true if breaking then break end
 	end

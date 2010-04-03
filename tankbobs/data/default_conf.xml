@@ -31,6 +31,7 @@
 				<mod></mod>
 				<reverse></reverse>
 				<right>100</right> 'd'
+				<slow>111</slow> 'o'
 				<special>106</special> 'j'
 				<reload>108</reload> 'l'
 			</player1>
@@ -42,6 +43,7 @@
 				<mod></mod>
 				<reverse></reverse>
 				<right>275</right> 'RIGHT'
+				<slow>277</slow> 'INSERT'
 				<special>279</special> 'END'
 				<reload>127</reload> 'DEL'
 			</player2>

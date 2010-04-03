@@ -61,7 +61,9 @@ local c_world_powerups
 local c_world_corpses
 local tank_acceleration
 local tank_rotationSpeed
+local tank_slowRotationSpeed
 local tank_rotationSpecialFactor
+local tank_slowRotationSpecialFactor
 local tank_rotationChange
 local tank_rotationChangeMinSpeed
 local tank_worldFriction
@@ -227,9 +229,13 @@ function c_world_init()
 	c_const_set("tank_rotationChangeMinSpeed", 4, 1)
 	tank_rotationChangeMinSpeed = c_const_get("tank_rotationChangeMinSpeed")
 	c_const_set("tank_rotationSpeed", 2 * CIRCLE / 5, 1)  -- two fifths of a circle each second
+	c_const_set("tank_slowRotationSpeed", 1 * CIRCLE / 10, 1)  -- one tenth of a circle each second
 	tank_rotationSpeed = c_const_get("tank_rotationSpeed")
+	tank_slowRotationSpeed = c_const_get("tank_slowRotationSpeed")
 	c_const_set("tank_rotationSpecialFactor", (CIRCLE / 2) / 30, 1)  -- extent of rotation per second per unit per second; one half circle per 30 units per second
+	c_const_set("tank_slowRotationSpecialFactor", (CIRCLE / 2) / 120, 1)  -- extent of rotation per second per unit per second; one half circle per 120 units per second
 	tank_rotationSpecialFactor = c_const_get("tank_rotationSpecialFactor")
+	tank_slowRotationSpecialFactor = c_const_get("tank_slowRotationSpecialFactor")
 	c_const_set("tank_defaultRotation", c_math_radians(90), 1)  -- up
 	c_const_set("tank_boostHealth", 60, 1)
 	c_const_set("tank_boostShield", 25, 1)
@@ -2020,21 +2026,44 @@ function c_world_tank_step(d, tank)
 
 	if not skip then
 		if bit.band(tank.state, SPECIAL) ~= 0 then
-			if bit.band(tank.state, LEFT) ~= 0 then
-				if vel.R < 0 then  -- inverse rotation
-					tank.r = tank.r - d * tank_rotationSpecialFactor * vel.R
-				else
-					tank.r = tank.r + d * tank_rotationSpecialFactor * vel.R
+			local add = 0
+
+			if bit.band(tank.state, SLOW) ~= 0 then
+				if bit.band(tank.state, LEFT) ~= 0 then
+					if vel.R < 0 then
+						-- inverse rotation
+						add = -tank_slowRotationSpecialFactor * vel.R
+					else
+						add =  tank_slowRotationSpecialFactor * vel.R
+					end
+				end
+
+				if bit.band(tank.state, RIGHT) ~= 0 then
+					if vel.R < 0 then  -- inverse rotation
+						add =  tank_slowRotationSpecialFactor * vel.R
+					else
+						add = -tank_slowRotationSpecialFactor * vel.R
+					end
+				end
+			else
+				if bit.band(tank.state, LEFT) ~= 0 then
+					if vel.R < 0 then  -- inverse rotation
+						add = -tank_rotationSpecialFactor * vel.R
+					else
+						add =  tank_rotationSpecialFactor * vel.R
+					end
+				end
+
+				if bit.band(tank.state, RIGHT) ~= 0 then
+					if vel.R < 0 then  -- inverse rotation
+						add =  tank_rotationSpecialFactor * vel.R
+					else
+						add = -tank_rotationSpecialFactor * vel.R
+					end
 				end
 			end
 
-			if bit.band(tank.state, RIGHT) ~= 0 then
-				if vel.R < 0 then  -- inverse rotation
-					tank.r = tank.r + d * tank_rotationSpecialFactor * vel.R
-				else
-					tank.r = tank.r - d * tank_rotationSpecialFactor * vel.R
-				end
-			end
+			tank.r = tank.r + d * add
 
 			vel.t = tank.r
 
@@ -2112,12 +2141,22 @@ function c_world_tank_step(d, tank)
 				tank.state = bit.band(tank.state, bit.bnot(REVERSE))
 			end
 
-			if bit.band(tank.state, LEFT) ~= 0 then
-				tank.r = tank.r + d * tank_rotationSpeed
-			end
+			if bit.band(tank.state, SLOW) ~= 0 then
+				if bit.band(tank.state, LEFT) ~= 0 then
+					tank.r = tank.r + d * tank_slowRotationSpeed
+				end
 
-			if bit.band(tank.state, RIGHT) ~= 0 then
-				tank.r = tank.r - d * tank_rotationSpeed
+				if bit.band(tank.state, RIGHT) ~= 0 then
+					tank.r = tank.r - d * tank_slowRotationSpeed
+				end
+			else
+				if bit.band(tank.state, LEFT) ~= 0 then
+					tank.r = tank.r + d * tank_rotationSpeed
+				end
+
+				if bit.band(tank.state, RIGHT) ~= 0 then
+					tank.r = tank.r - d * tank_rotationSpeed
+				end
 			end
 		end
 	end

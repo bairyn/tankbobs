@@ -356,6 +356,7 @@ local st_optionsPlayers_left
 local st_optionsPlayers_right
 local st_optionsPlayers_special
 local st_optionsPlayers_reverse
+local st_optionsPlayers_slow
 local st_optionsPlayers_mod
 local st_optionsPlayers_reload
 local st_optionsPlayers_colorR
@@ -403,6 +404,9 @@ function st_optionsPlayers_init()
 	if not (c_config_get("client.key.player1.reverse", true)) then
 		c_config_set("client.key.player1.reverse", false)
 	end
+	if not (c_config_get("client.key.player1.slow", true)) then
+		c_config_set("client.key.player1.slow", false)
+	end
 	if not (c_config_get("client.key.player1.mod", true)) then
 		c_config_set("client.key.player1.mod", false)
 	end
@@ -429,17 +433,18 @@ function st_optionsPlayers_init()
 	gui_addLabel(tankbobs.m_vec2(50, 51), "Special", nil, 1 / 3) player.special = gui_addKey(tankbobs.m_vec2(75, 51), c_config_get("client.key.player1.special"), nil, st_optionsPlayers_special, c_config_get("client.key.player1.special"), 0.5)
 	gui_addLabel(tankbobs.m_vec2(50, 48), "Reload", nil, 1 / 3) player.reload = gui_addKey(tankbobs.m_vec2(75, 48), c_config_get("client.key.player1.reload"), nil, st_optionsPlayers_reload, c_config_get("client.key.player1.reload"), 0.5)
 	--gui_addLabel(tankbobs.m_vec2(50, 45), "Reverse", nil, 1 / 3) player.reverse = gui_addKey(tankbobs.m_vec2(75, 45), c_config_get("client.key.player1.reverse"), nil, st_optionsPlayers_reverse, c_config_get("client.key.player1.reverse"), 0.5)
-	gui_addLabel(tankbobs.m_vec2(50, 45), "Mod Key", nil, 1 / 3) player.mod = gui_addKey(tankbobs.m_vec2(75, 45), c_config_get("client.key.player1.mod"), nil, st_optionsPlayers_mod, c_config_get("client.key.player1.mod"), 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 45), "Slow Rotation", nil, 1 / 3) player.slow = gui_addKey(tankbobs.m_vec2(75, 45), c_config_get("client.key.player1.slow"), nil, st_optionsPlayers_slow, c_config_get("client.key.player1.slow"), 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 42), "Mod Key", nil, 1 / 3) player.mod = gui_addKey(tankbobs.m_vec2(75, 42), c_config_get("client.key.player1.mod"), nil, st_optionsPlayers_mod, c_config_get("client.key.player1.mod"), 0.5)
 
-	gui_addLabel(tankbobs.m_vec2(50, 39), "Adjust color", nil, 1 / 3)
+	gui_addLabel(tankbobs.m_vec2(50, 36), "Adjust color", nil, 1 / 3)
 
-	player.colorR = gui_addScale(tankbobs.m_vec2(75, 36), c_config_get("game.player1.color.r"), nil, st_optionsPlayers_colorR, c_config_get("game.player1.color.r"), nil, 0.5, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0)
-	player.colorG = gui_addScale(tankbobs.m_vec2(75, 33), c_config_get("game.player1.color.g"), nil, st_optionsPlayers_colorG, c_config_get("game.player1.color.g"), nil, 0.5, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0)
-	player.colorB = gui_addScale(tankbobs.m_vec2(75, 30), c_config_get("game.player1.color.b"), nil, st_optionsPlayers_colorB, c_config_get("game.player1.color.b"), nil, 0.5, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0)
+	player.colorR = gui_addScale(tankbobs.m_vec2(75, 33), c_config_get("game.player1.color.r"), nil, st_optionsPlayers_colorR, c_config_get("game.player1.color.r"), nil, 0.5, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0)
+	player.colorG = gui_addScale(tankbobs.m_vec2(75, 30), c_config_get("game.player1.color.g"), nil, st_optionsPlayers_colorG, c_config_get("game.player1.color.g"), nil, 0.5, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0)
+	player.colorB = gui_addScale(tankbobs.m_vec2(75, 27), c_config_get("game.player1.color.b"), nil, st_optionsPlayers_colorB, c_config_get("game.player1.color.b"), nil, 0.5, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0)
 
-	-- image of tank is drawn (takes 24 and 36)
+	-- image of tank is drawn (takes 21 and 33)
 
-	gui_addLabel(tankbobs.m_vec2(50, 18), "Team", nil, 2 / 3) player.team = gui_addCycle(tankbobs.m_vec2(75, 18), "Team", nil, st_optionsPlayers_team, {"Blue", "Red"}, c_config_get("game.player1.team") == "red" and 2 or 1, 2 / 3)
+	gui_addLabel(tankbobs.m_vec2(50, 15), "Team", nil, 2 / 3) player.team = gui_addCycle(tankbobs.m_vec2(75, 15), "Team", nil, st_optionsPlayers_team, {"Blue", "Red"}, c_config_get("game.player1.team") == "red" and 2 or 1, 2 / 3)
 end
 
 function st_optionsPlayers_done()
@@ -459,7 +464,7 @@ function st_optionsPlayers_step(d)
 		gl.PushMatrix()
 			gl.Color(c_config_get("game.player" .. tostring(currentPlayer) .. ".color.r"), c_config_get("game.player" .. tostring(currentPlayer) .. ".color.g"), c_config_get("game.player" .. tostring(currentPlayer) .. ".color.b"), 1)
 			gl.TexEnv("TEXTURE_ENV_COLOR", c_config_get("game.player" .. tostring(currentPlayer) .. ".color.r"), c_config_get("game.player" .. tostring(currentPlayer) .. ".color.g"), c_config_get("game.player" .. tostring(currentPlayer) .. ".color.b"), 1)
-			gl.Translate(85, 25.5, 0)
+			gl.Translate(85, 22.5, 0)
 			gl.Rotate(tankbobs.m_degrees(tankRotation), 0, 0, 1)
 			tankRotation = tankRotation + d * (c_const_get("optionsPlayers_tankRotation") or optionsPlayers_tankRotation)
 			gl.CallList(tank_listBase)
@@ -529,6 +534,12 @@ function st_optionsPlayers_configurePlayer(widget)
 	--end
 	--local reverse = c_config_get("client.key.player" .. tonumber(currentPlayer) .. ".reverse")
 	--player.reverse:setKey(reverse)
+
+	if not (c_config_get("client.key.player" .. tonumber(currentPlayer) .. ".slow", true)) then
+		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".slow", false)
+	end
+	local slow = c_config_get("client.key.player" .. tonumber(currentPlayer) .. ".slow")
+	player.slow:setKey(slow)
 
 	if not (c_config_get("client.key.player" .. tonumber(currentPlayer) .. ".mod", true)) then
 		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".mod", false)
@@ -662,6 +673,18 @@ function st_optionsPlayers_reverse(widget, button)
 		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".reverse", c_config_keyLayoutSet(button))
 	else
 		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".reverse", false)
+	end
+end
+
+function st_optionsPlayers_slow(widget, button)
+	if not (c_config_get("client.key.player" .. tonumber(currentPlayer) .. ".slow", true)) then
+		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".slow", false)
+	end
+
+	if button then
+		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".slow", c_config_keyLayoutSet(button))
+	else
+		c_config_set("client.key.player" .. tonumber(currentPlayer) .. ".slow", false)
 	end
 end
 
