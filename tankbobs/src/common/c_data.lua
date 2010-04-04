@@ -210,7 +210,7 @@ function c_data_init()
 	c_const_set("keyLayout_dvorak", layout_dvorak, 1)
 	c_const_set("keyLayout_dvorakTo", layout_dvorakTo, 1)
 	c_const_set("keyLayout_dvorakFrom", layout_dvorakFrom, 1)
-	c_const_set("keyLayouts", {"qwerty", "dvorak"}, 1)
+	c_const_set("keyLayouts", {"qwerty", "dvorak"}, -1)
 
 	c_const_set("default_connectPort", 43210, 1)
 
