@@ -1097,8 +1097,8 @@ function c_world_tank_die(tank, t)
 				end
 			end
 
-			local tagged   = false
-			local untagged = false
+			local tagged     = false
+			local untagged   = false
 			for _, v in pairs(c_world_tanks) do
 				if v.tagged then
 					tagged   = true
@@ -1107,10 +1107,19 @@ function c_world_tank_die(tank, t)
 				end
 			end
 
-			local exists = false
+			local tagggedExists = false
+			for _, v in pairs(c_world_tanks) do
+				if not v.tagged and v.exists then
+					tagggedExists = true
+
+					break
+				end
+			end
+
+			local untagggedExists = false
 			for _, v in pairs(c_world_tanks) do
 				if v.tagged and v.exists then
-					exists = true
+					untagggedExists = true
 
 					break
 				end
@@ -1123,7 +1132,7 @@ function c_world_tank_die(tank, t)
 				c_world_plague_endRound()
 			end
 
-			if not exists then
+			if not taggedExists then
 				if untagged then
 					if tagged then
 						-- reward all surviving tanks if this isn't the first round (or the round after tanks were reset)
@@ -1133,7 +1142,14 @@ function c_world_tank_die(tank, t)
 							end
 						end
 					end
-				else
+				end
+
+				-- end the round
+				c_world_plague_endRound()
+			end
+
+			if not untagggedExists then
+				if not untagged then
 					-- all tanks have been infected; untag all tanks
 					for _, v in pairs(c_world_tanks) do
 						v.tagged = false
@@ -1141,11 +1157,6 @@ function c_world_tank_die(tank, t)
 				end
 
 				-- end the round
-				c_world_plague_endRound()
-			end
-
-			if not untagged then
-				-- only infected players remain; end the round
 				c_world_plague_endRound()
 			end
 		end
