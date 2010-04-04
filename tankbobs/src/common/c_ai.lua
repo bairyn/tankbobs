@@ -1359,8 +1359,16 @@ function c_ai_tank_step(tank, d)
 		end
 		c_ai_setObjective(tank, AVOIDENEMYINDEX, p, ALWAYSANDDESTROY, "enemy", false)
 	elseif switch == TEAMDEATHMATCH then
+		local function filter(x)
+			if x.red == tank.red then
+				return false
+			end
+
+			return true
+		end
+
 		-- shoot any nearby enemies
-		local enemy, angle, pos, time = c_ai_findClosestEnemyInSight(tank)
+		local enemy, angle, pos, time = c_ai_findClosestEnemyInSight(tank, filter)
 		if enemy and not c_ai_isFollowingObjective(tank, POWERUPINDEX) then
 			c_ai_shootEnemies(tank, enemy, angle, pos, time)
 
@@ -1427,8 +1435,16 @@ function c_ai_tank_step(tank, d)
 		end
 		c_ai_setObjective(tank, AVOIDENEMYINDEX, p, ALWAYSANDDESTROY, "enemy", false)
 	elseif switch == TEAMSURVIVOR then
+		local function filter(x)
+			if x.red == tank.red then
+				return false
+			end
+
+			return true
+		end
+
 		-- shoot any nearby enemies
-		local enemy, angle, pos, time = c_ai_findClosestEnemyInSight(tank)
+		local enemy, angle, pos, time = c_ai_findClosestEnemyInSight(tank, filter)
 		if enemy and not c_ai_isFollowingObjective(tank, POWERUPINDEX) then
 			c_ai_shootEnemies(tank, enemy, angle, pos, time)
 
