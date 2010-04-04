@@ -81,6 +81,8 @@ function c_ai_init()
 	c_const_set("ai_nextNodeDistance", 3)
 
 	c_const_set("ai_enemyControlPointRange", 15)
+
+	c_const_set("ai_plagueMinKillHealth", 8)
 end
 
 function c_ai_done()
@@ -1034,13 +1036,31 @@ function c_ai_hasRecentlyAttacked(tank, attacker)
 	return false
 end
 
-function c_ai_findTaggedTank()
-	for _, v in pairs(c_world_getTanks()) do
-		if v.exists then
-			if v.tagged then
-				return v
+function c_ai_findTaggedTank(tank)
+	local switch = c_world_getGameType()
+	if switch == CHASE then
+		for _, v in pairs(c_world_getTanks()) do
+			if v.exists then
+				if v.tagged then
+					return v
+				end
 			end
 		end
+
+		return nil
+	elseif switch == PLAGUE then
+		-- closest tank
+
+		local tagged = {}
+		for _, v in pairs(c_world_getTanks()) do
+			if v.tagged then
+				table.insert(tagged, {v, (v.p - tank.p).R})
+			end
+		end
+
+		table.sort(tagged, function (a, b) return a[2] < b[2] end)
+
+		return tagged[1][1]
 	end
 
 	return nil
@@ -1058,6 +1078,20 @@ end
 
 function c_ai_beginningOfChaseGame()
 	if c_world_getGameType() ~= CHASE then
+		return false
+	end
+
+	for _, v in pairs(c_world_getTanks()) do
+		if v.tagged then
+			return false
+		end
+	end
+
+	return true
+end
+
+function c_ai_beginningOfPlagueGame()
+	if c_world_getGameType() ~= PLAGUE then
 		return false
 	end
 
@@ -1526,7 +1560,78 @@ function c_ai_tank_step(tank, d)
 
 		c_ai_followObjectives(tank, true)
 	elseif switch == PLAGUE then
-		-- TODO FIXME XXX
+		local function filter(x)
+			if c_ai_beginningOfPlagueGame() then
+				return true
+			end
+
+			if tank.tagged and tank.health >= c_const_get("ai_plagueMinKillHealth") then
+				return false  -- shooting enemy tanks normally doesn't help tagged tanks much if health isn't low
+			end
+
+			if not x.tagged and not c_ai_hasRecentlyAttacked(tank, x) then
+				return false
+			end
+
+			if x.tagged and (x.p - tank.p).R <= c_const_get("ai_taggedAvoidMaxDistance") then
+				return false
+			end
+
+			return true
+		end
+
+		local enemy, angle, pos, time = c_ai_findClosestEnemyInSight(tank, filter)
+		if enemy and not c_ai_isFollowingObjective(tank, POWERUPINDEX) then
+			c_ai_shootEnemies(tank, enemy, angle, pos, time)
+
+			c_ai_tankWeaponStep(tank, true)
+		else
+			if tank.ai.shootingEnemies then
+				tank.ai.shootingEnemies = false
+
+				-- tank has stopped shooting enemies
+				c_ai_setTankStateFire(tank, 0)
+				c_ai_setTankStateRotation(tank, 0)
+				c_ai_setTankStateForward(tank, 0)
+				tank.ai.turning = nil
+			end
+
+			if not tank.ai.followingObjective then
+				c_ai_cruise(tank)
+			end
+
+			c_ai_tankWeaponStep(tank, false)
+		end
+
+		c_ai_avoid(tank)
+
+		local function chaseFilter(x)
+			if not x.tagged then
+				return true
+			end
+
+			return false
+		end
+
+		if c_ai_beginningOfPlagueGame() or tank.tagged then
+			local p = c_ai_findClosestEnemy(tank, chaseFilter)
+			if p then
+				p = p.p
+			end
+
+			if tank.tagged then
+				c_ai_setObjective(tank, GENERICINDEX, p, ALWAYS, "chaseTarget", false)
+			else
+				c_ai_setObjective(tank, GENERICINDEX, p, ALWAYSANDDESTROY, "shootFistTank", false)
+			end
+		else
+			local x = c_ai_findTaggedTank(tank)
+			if x and (x.p - tank.p).R <= c_const_get("ai_taggedAvoidMaxDistance") then
+				c_ai_setObjective(tank, GENERICINDEX, x.p, AVOID, "tagged", false)
+			end
+		end
+
+		c_ai_followObjectives(tank, true)
 	elseif switch == DOMINATION then
 		local function closeToControlPoint(ttank)
 			if not tank.ai.cc then
