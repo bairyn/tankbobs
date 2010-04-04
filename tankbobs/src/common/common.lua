@@ -612,6 +612,12 @@ PLAGUE         = {}
 DOMINATION     = {}
 CAPTURETHEFLAG = {}
 
+-- enumerations
+
+-- spawn modes
+BLOCKABLE      = 0x0000
+ALTERNATING    = 0x0001
+
 -- bitmasks --
 
 -- contents

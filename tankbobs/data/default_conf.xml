@@ -135,7 +135,7 @@
 
 	<game>
 		<allBotLevels>automatic</allBotLevels>
-		<allSpawnsBlockable>false</allSpawnsBlockable>
+		<spawnStyle>0</spawnStyle>
 		<bot>
 			<color>
 				<r> 0.875 </r>  Orange

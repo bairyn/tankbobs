@@ -34,6 +34,7 @@ local st_selected_limit
 local st_selected_start
 local st_selected_gameType
 local st_selected_instagib
+local st_selected_spawn
 local st_selected_punish
 local st_selected_skill
 local st_selected_players
@@ -65,6 +66,14 @@ function st_selected_init()
 		instagibPos = 2
 	else
 		instagibPos = 3
+	end
+
+	local spawnPos = 0
+	local switch = c_config_get("game.spawnStyle")
+	if switch == BLOCKABLE then
+		spawnPos = 1
+	elseif switch == ALTERNATING then
+		spawnPos = 2
 	end
 
 	local punishPos = 0
@@ -103,16 +112,17 @@ function st_selected_init()
 	gui_addLabel(tankbobs.m_vec2(50, 75), "Game mode", nil, 1 / 3) gui_addCycle(tankbobs.m_vec2(75, 75), "Game mode", nil, st_selected_gameType, strings, pos, 0.5)
 	limit = gui_addLabel(tankbobs.m_vec2(50, 69), c_world_gameTypePointLimitLabel(gameType), nil, 1 / 3) limitInput = gui_addInput(tankbobs.m_vec2(75, 69), tostring(c_config_get(limitConfig)), nil, st_selected_limit, true, 4, 0.5)
 	gui_addLabel(tankbobs.m_vec2(50, 63), "Instagib", nil, 1 / 3) gui_addCycle(tankbobs.m_vec2(75, 63), "Instagib", nil, st_selected_instagib, {"No", "Semi", "Yes"}, instagibPos, 0.5)
-	gui_addLabel(tankbobs.m_vec2(50, 57), "Punish teamkills and suicides", nil, 1 / 5) gui_addCycle(tankbobs.m_vec2(75, 57), "Punish teamkills and suicides", nil, st_selected_punish, {"Yes", "No"}, punishPos, 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 57), "Spawn mode", nil, 1 / 3) gui_addCycle(tankbobs.m_vec2(75, 57), "Spawn style", nil, st_selected_spawn, {"Alternating", "Blockable"}, spawnPos, 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 51), "Punish teamkills and suicides", nil, 1 / 5) gui_addCycle(tankbobs.m_vec2(75, 51), "Punish teamkills and suicides", nil, st_selected_punish, {"Yes", "No"}, punishPos, 0.5)
 
-	gui_addLabel(tankbobs.m_vec2(50, 51), "Players", nil, 1 / 3) gui_addInput(tankbobs.m_vec2(75, 51), tostring(tonumber(c_config_get("game.players"))), nil, st_selected_players, true, 1, 0.5)
-	gui_addLabel(tankbobs.m_vec2(50, 45), "Computers", nil, 1 / 3) gui_addInput(tankbobs.m_vec2(75, 45), tostring(tonumber(c_config_get("game.computers"))), nil, st_selected_computers, true, 1, 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 45), "Players", nil, 1 / 3) gui_addInput(tankbobs.m_vec2(75, 45), tostring(tonumber(c_config_get("game.players"))), nil, st_selected_players, true, 1, 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 39), "Computers", nil, 1 / 3) gui_addInput(tankbobs.m_vec2(75, 39), tostring(tonumber(c_config_get("game.computers"))), nil, st_selected_computers, true, 1, 0.5)
 
 	--if type(c_config_get("game.computers")) == "number" and c_config_get("game.computers") > 0 then
-	gui_addLabel(tankbobs.m_vec2(50, 39), "Computer skill", nil, 1 / 5) gui_addCycle(tankbobs.m_vec2(75, 39), "Difficulty against bots", nil, st_selected_skill, skillLevels, skillPos, 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 33), "Computer skill", nil, 1 / 5) gui_addCycle(tankbobs.m_vec2(75, 33), "Difficulty against bots", nil, st_selected_skill, skillLevels, skillPos, 0.5)
 	--end
 
-	gui_addAction(tankbobs.m_vec2(75, 30), "Start", nil, st_selected_start)
+	gui_addAction(tankbobs.m_vec2(75, 24), "Start", nil, st_selected_start)
 end
 
 function st_selected_done()
@@ -158,6 +168,16 @@ function st_selected_instagib(widget, string, index)
 	end
 	c_config_set("game.instagib", setting)
 	c_world_setInstagib(setting)
+end
+
+function st_selected_spawn(widget, string, index)
+	local setting = false
+	if string == "Blockable" then
+		setting = BLOCKABLE
+	elseif string == "Alternating" then
+		setting = ALTERNATING
+	end
+	c_config_set("game.spawnStyle", setting)
 end
 
 function st_selected_punish(widget, string, index)
