@@ -252,6 +252,7 @@ function c_world_init()
 	c_const_set("powerup_hullx3",  1, 1) c_const_set("powerup_hully3",  0, 1)
 	c_const_set("powerup_hullx4",  1, 1) c_const_set("powerup_hully4",  1, 1)
 
+	c_const_set("world_megaTankRespawnHealth", 10, 1)
 	c_const_set("world_megaTankSuicideTimePenalty", 8, 1)  -- tank won't be given any shield or health for this many seconds, in addition to world_megaTankBonusAttackTime
 	c_const_set("world_megaTankBonusAttackTime", 8, 1)
 	c_const_set("world_megaTankHealthRegenerate", 60, 1)
@@ -1226,7 +1227,10 @@ function c_world_spawnTank(tank)
 	-- game type stuff
 	local switch = c_world_getGameType()
 	if switch == MEGATANK then
-		tank.lastAttackedTime = t + c_world_timeMultiplier(c_const_get("world_megaTankSuicideTimePenalty"))
+		if tank.megaTank then
+			tank.lastAttackedTime = t + c_world_timeMultiplier(c_const_get("world_megaTankSuicideTimePenalty"))
+			tank.health = c_const_get("world_megaTankRespawnHealth")
+		end
 	end
 
 	-- add a physical body
