@@ -1227,7 +1227,7 @@ function c_world_spawnTank(tank)
 	-- game type stuff
 	local switch = c_world_getGameType()
 	if switch == MEGATANK then
-		if tank.megaTank then
+		if tank.megaTank and c_world_tanks[tank.megaTank] == tank then
 			tank.lastAttackedTime = t + c_world_timeMultiplier(c_const_get("world_megaTankSuicideTimePenalty"))
 			tank.health = c_const_get("world_megaTankRespawnHealth")
 		end
