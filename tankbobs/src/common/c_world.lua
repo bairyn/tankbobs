@@ -532,6 +532,8 @@ function c_world_getPowerupTypeByIndex(index)
 end
 
 function c_world_newWorld()
+	local t = t_t_getTicks()
+
 	if worldInitialized then
 		return
 	end
@@ -611,6 +613,14 @@ function c_world_newWorld()
 	lastWorldTime = t_t_getTicks()
 
 	worldInitialized = true
+
+	-- game type specific stuff
+	local switch = c_world_getGameType()
+	if switch == PLAGUE or
+	   switch == SURVIVOR or
+	   switch == TEAMSURVIVOR then
+		roundStartTime = t
+	end
 
 	c_const_backup(key)
 
