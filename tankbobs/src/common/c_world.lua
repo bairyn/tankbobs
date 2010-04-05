@@ -1107,19 +1107,19 @@ function c_world_tank_die(tank, t)
 				end
 			end
 
-			local tagggedExists = false
+			local taggedExists = false
 			for _, v in pairs(c_world_tanks) do
 				if v.tagged and v.exists then
-					tagggedExists = true
+					taggedExists = true
 
 					break
 				end
 			end
 
-			local untagggedExists = false
+			local untaggedExists = false
 			for _, v in pairs(c_world_tanks) do
 				if not v.tagged and v.exists then
-					untagggedExists = true
+					untaggedExists = true
 
 					break
 				end
@@ -1148,7 +1148,7 @@ function c_world_tank_die(tank, t)
 				c_world_plague_endRound()
 			end
 
-			if not untagggedExists then
+			if not untaggedExists then
 				if not untagged then
 					-- all tanks have been infected; untag all tanks
 					for _, v in pairs(c_world_tanks) do
