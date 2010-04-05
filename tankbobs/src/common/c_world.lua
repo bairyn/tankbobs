@@ -1109,7 +1109,7 @@ function c_world_tank_die(tank, t)
 
 			local taggedExists = false
 			for _, v in pairs(c_world_tanks) do
-				if v.tagged and v.exists then
+				if v.tagged and v.exists and not v.spawning then
 					taggedExists = true
 
 					break
@@ -1118,7 +1118,7 @@ function c_world_tank_die(tank, t)
 
 			local untaggedExists = false
 			for _, v in pairs(c_world_tanks) do
-				if not v.tagged and v.exists then
+				if not v.tagged and v.exists and not v.spawning then
 					untaggedExists = true
 
 					break
