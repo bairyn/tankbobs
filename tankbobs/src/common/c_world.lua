@@ -164,7 +164,7 @@ function c_world_init()
 	c_const_set("powerup_isBullet", false, 1)
 	c_const_set("powerup_linearDamping", 0, 1)
 	c_const_set("powerup_angularDamping", 0, 1)
-	c_const_set("powerup_pushStrength", 16, 1)
+	c_const_set("powerup_pushStrength", 32, 1)
 	c_const_set("powerup_pushAngle", CIRCLE / 8, 1)
 	c_const_set("powerup_static", false, 1)
 
