@@ -1257,7 +1257,7 @@ function c_world_tank_checkSpawn(d, tank)
 	local playerSpawnPoint = c_tcm_current_map.playerSpawnPoints[tank.lastSpawnPoint]
 
 	local switch = c_config_get("game.spawnStyle")
-	if switch == ALTERNATING then
+	if switch == BLOCKABLE then
 		while not c_world_tank_canSpawn(d, tank) do
 			tank.lastSpawnPoint = tank.lastSpawnPoint + 1
 			playerSpawnPoint = c_tcm_current_map.playerSpawnPoints[tank.lastSpawnPoint]
@@ -1276,7 +1276,7 @@ function c_world_tank_checkSpawn(d, tank)
 				return false
 			end
 		end
-	elseif switch == BLOCKABLE then
+	elseif switch == ALTERNATING then
 		if #c_tcm_current_map.playerSpawnPoints <= 0 then
 			error "No spawn points in map"
 		end
