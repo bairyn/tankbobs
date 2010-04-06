@@ -2,6 +2,10 @@ These were used and modified for the sounds of Tankbobs
 
 Samples used from Freesound
 
+    April 6, 2010
+        By adcbicycle (http://www.freesound.org/usersViewSingle.php?id=33634)
+            19.wav (http://www.freesound.org/samplesViewSingle.php?id=13947)
+   ---------------------------------------
     November 16, 2009
         By Martin Lightning (http://www.freesound.org/usersViewSingle.php?id=51282)
             Severe Thunderstorm.mp3 (http://www.freesound.org/samplesViewSingle.php?id=16480)
