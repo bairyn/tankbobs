@@ -1,0 +1,7 @@
+Run "./build.sh -h" to see how to build.
+
+In the level editor, to make a texture fit a wall, set the horizontal translation value to the inverse of the lowest x-coordinate of the wall, the vertical translation value to the inverse of the lowest y-coordinate of the wall, the horizontal texture scale to 100 / the height of the wall (greatest y-coordinate - lowest y-coordinate), and the vertical texture scale to 100 / the width of the wall (greatest x-coordinate - lowest x-coordinate).
+
+Questions?  Comments?  Feedback?  Join #Tankbobs on chat.freenode.net !
+
+TODO: Organize this file and add stuff to it.
