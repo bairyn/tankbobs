@@ -533,7 +533,7 @@ static int read_reset(const char *line)
 }
 
 #define MAX_MAPS 1
-#define MAX_WALLS 1024
+#define MAX_WALLS 4096
 #define MAX_TELEPORTERS 528
 #define MAX_PLAYERSPAWNPOINTS 256
 #define MAX_POWERUPSPAWNPOINTS 528
