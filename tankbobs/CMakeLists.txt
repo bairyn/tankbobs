@@ -33,7 +33,7 @@ else(NOJIT MATCHES True)
 endif(NOJIT MATCHES True)
 
 if(NOJIT MATCHES True)
-	set(include_dirs /usr/include/SDL ./src/lib ./src/lib/tstr ./src/common ./src/lib/Box2D/Include src/lib/physfs-2.0.0 src/lib/physfs-2.0.0/extras /usr/include/lua)
+	set(include_dirs /usr/include/SDL ./src/lib ./src/lib/tstr ./src/common ./src/lib/Box2D/Include src/lib/physfs-2.0.0 src/lib/physfs-2.0.0/extras /usr/include/lua /usr/include/lua5.1)
 else(NOJIT MATCHES True)
 	set(include_dirs /usr/include/SDL ./src/lib ./src/lib/tstr ./src/common ./src/lib/Box2D/Include src/lib/physfs-2.0.0 src/lib/physfs-2.0.0/extras ./src/lib/LuaJIT/src)
 endif(NOJIT MATCHES True)
