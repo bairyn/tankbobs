@@ -58,16 +58,16 @@ if c_tcm_current_map.name == "arena" then
 	c_mods_exitWorldFunction(resetWalls)
 
 	local function toggleWallPath(begin, fixtureA, fixtureB, bodyA, bodyB, position, normal)
-		local projectile = c_world_isProjectile(bodyA)
+		local projectile = c_world_isProjectile(fixtureA)
 
 		if not projectile then
-			projectile = c_world_isProjectile(bodyB)
+			projectile = c_world_isProjectile(fixtureB)
 		end
 
 		if projectile and not projectile.collided then
-			local wall = c_world_isWall(bodyA)
+			local wall = c_world_isWall(fixtureA)
 			if not wall then
-				wall = c_world_isWall(bodyB)
+				wall = c_world_isWall(fixtureB)
 			end
 
 			if wall and (wall.path or wall.m.script_path) then
@@ -84,9 +84,9 @@ if c_tcm_current_map.name == "arena" then
 			end
 
 			if not wall then
-				local tank = c_world_isTank(bodyA)
+				local tank = c_world_isTank(fixtureA)
 				if not tank then
-					tank = c_world_isTank(bodyB)
+					tank = c_world_isTank(fixtureB)
 				end
 
 				if tank and projectile.weapon ~= c_weapon_getDefaultWeapon() then
@@ -465,10 +465,10 @@ elseif c_tcm_current_map.name == "tutorial" then
 	c_mods_prependFunction("c_world_step", frame)
 
 	local function preContactListener(begin, fixtureA, fixtureB, bodyA, bodyB, position, normal)
-		local wall, tank = c_world_isWall(bodyA), c_world_isTank(bodyB)
+		local wall, tank = c_world_isWall(fixtureA), c_world_isTank(fixtureB)
 
 		if not wall or not tank then
-			wall, tank = c_world_isWall(bodyB), c_world_isTank(bodyA)
+			wall, tank = c_world_isWall(fixtureB), c_world_isTank(fixtureA)
 		end
 
 		if wall and tank then
@@ -820,7 +820,7 @@ elseif c_tcm_current_map.name == "tutorial" then
 			local oldc_world_contactListener = c_world_contactListener
 
 			local function switchListener(begin, fixtureA, fixtureB, bodyA, bodyB, position, normal)
-				local wall1, wall2 = c_world_isWall(bodyA), c_world_isWall(bodyB)
+				local wall1, wall2 = c_world_isWall(fixtureA), c_world_isWall(fixtureB)
 
 				if wall1 and wall2 then
 					if wall2.misc == "shootWall" then
