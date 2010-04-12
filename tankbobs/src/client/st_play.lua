@@ -173,6 +173,9 @@ function st_play_init()
 
 	c_tcm_select_map(c_config_get("game.lastMap"))
 
+	-- set instagib state
+	c_world_setInstagib(c_config_get("game.instagib"))
+
 	game_new()
 
 	-- initialize the world
@@ -199,9 +202,6 @@ function st_play_init()
 	end
 
 	gui_addLabel(tankbobs.m_vec2(37.5, 50), "", updatePause, nil, c_config_get("client.renderer.pauseRed"), c_config_get("client.renderer.pauseGreen"), c_config_get("client.renderer.pauseBlue"), c_config_get("client.renderer.pauseAlpha"), c_config_get("client.renderer.pauseRed"), c_config_get("client.renderer.pauseGreen"), c_config_get("client.renderer.pauseBlue"), c_config_get("client.renderer.pauseAlpha"))
-
-	-- set instagib state
-	c_world_setInstagib(c_config_get("game.instagib"))
 
 	for i = 1, c_config_get("game.players") + c_config_get("game.computers") do
 		local tank = c_world_tank:new()
