@@ -233,71 +233,22 @@ function online_readPackets(d)  -- local
 			if switch == nil then
 			elseif switch == 0xA2 then
 				if connection.ping then
+					local t = tankbobs.t_getTicks()
 					connection.timestamp = tankbobs.io_toInt(data:sub(1, 4)) data = data:sub(5)
 					connection.t = tankbobs.io_toInt(data:sub(1, 4)) data = data:sub(5)
-					c_protocol_unpersist(data)
-				end
-				--[=[
-				if #data >= 5 then
-					if connection.ping then
-						local timestamp = tankbobs.io_toInt(data:sub(1, 4)) data = data:sub(5)
-						connection.t = tankbobs.io_toChar(data:sub(1, 1)) data = data:sub(2)
-						local tank = c_world_getTanks()[connection.t]
-						c_weapon_resetProjectiles()
-						local state
-						if tank then
-							state = tank.state
-						end
-						--tankbobs.w_unpersistWorld(data, connection.t, function (score) c_world_redTeam.score = score end, function (score) c_world_blueTeam.score = score end, unpack(unpersistArgs))
-						c_protocol_unpersist(data)
-						if tank then
-							tank.state = state
-						end
-						if not tank then
-							tank = c_world_getTanks()[connection.t]
-						end
-						if not tank or not tank.exists or not tank.body then
-							return
-						end
-
-						local backupP = tankbobs.m_vec2(tank.p)
-						local backupV = tankbobs.w_getLinearVelocity(tank.body)
-						local backupR = tank.r
+					local tank = c_world_getTanks()[connection.t]
+					if tank then
 						if c_config_get("client.online.stepAhead") then
-							c_world_tank_setStepAhead(tank)
-						else
-							c_world_tank_setIgnore(tank)
+							c_world_record(tank)
 						end
-						local stepOffset = 0
-						if c_config_get("client.online.unlagged") then
-							--[[
-							-- step ahead twice for everything but current tank,
-							-- so that the client sees what the server will probably see
-							-- when the server receives information about the client;
-							-- otherwise, (if unlagged is disabled), only step ahead once,
-							-- so that the client sees what the server probably sees now
-							--]]
-							if tank.exists then
-								stepOffset = connection.ping * 2
-							end
-						end
-
-						c_world_stepTime(stepOffset)
-						c_world_step(0)
-
-						tank.p = backupP
-						tank.r = backupR
-
-						if tank.exists and tank.body then
-							tankbobs.w_setPosition(tank.body, tank.p)
-							tankbobs.w_setLinearVelocity(tank.body, backupV)
-							tankbobs.w_setAngle(tank.body, tank.r)
-						end
-
-						c_world_tank_stepAhead(timestamp, tankbobs.t_getTicks())
+						local state = tank.state
+						c_protocol_unpersist(data)
+						tank.state = state
+						c_world_stepAhead(connection.timestamp, t)
+					else
+						c_protocol_unpersist(data)
 					end
 				end
-				--]=]
 			elseif switch == 0xA3 then
 				if #data >= 0 then
 					-- server wants our tick

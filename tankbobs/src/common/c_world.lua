@@ -1881,109 +1881,108 @@ function c_world_findClosestIntersection(start, endP, ignoreTypes)
 	return minDistance, minIntersection, typeOfTarget, target
 end
 
--- note: client-side prediction probably doesn't belong here by itself, but this code is going to be shared in a server-side unlagged implementation in the future.
+local nextHistory
+local maxHistory
+local stepAhead = false
+local history = {}
+local record = nil
 
-local tankStepAhead = nil
-local record = true
-local history = nil
-local lastHistoryIndex = 0
-function c_world_tank_setStepAhead(tank)
-	tankStepAhead = tank
+local function incrementHistoryIndex()
+	nextHistory = nextHistory + 1
 
-	if not history then
-		history = {}  -- {time, state}
-
-		for i = 1, c_config_get("client.histSize") do
-			table.insert(history, {0, 0})
-		end
+	if nextHistory > maxHistory then
+		nextHistory = 1
 	end
 end
 
-local ignoreTank = nil
-function c_world_tank_setIgnore(tank)
-	ignoreTank = tank
+function c_world_record(tank)
+	if not tank or tank == record then
+		return
+	end
+
+	local t = tankbobs.t_getTicks()
+
+	history = {}
+
+	nextHistory = 1
+	maxHistory = c_config_get("client.histSize")
+
+	for i = nextHistory, maxHistory do
+		history[i] = {t, bit.tobit(0x0000)}
+	end
+
+	record = tank
 end
 
--- step ahead (ahead / forward only)
-function c_world_tank_stepAhead(fromTime, toTime)
-	local tank = tankStepAhead
-
-	if not tank then
+function c_world_stepAhead(from, to)
+	if not record then
 		return
 	end
 
-	if lastHistoryIndex < 1 then
-		return
+	local last = nextHistory - 1
+	if last < 1 then
+		last = maxHistory
 	end
 
-	record = false
+	local fromIndex = nil
+	local started = false
+	local i = last
+	while i ~= last and started do
+		started = true
 
-	local state = tank.state
+		fromIndex = i
 
-	local from, to
-	local i = lastHistoryIndex
-	local test = lastHistoryIndex + 1
-
-	if lastHistoryIndex == c_config_get("client.histSize") then
-		test = i
-		i = i - 1
-	end
-
-	while i ~= test do
-		local h = history[i]
-
-		if not to and h[1] <= toTime then
-			to = i
-		end
-
-		if h[1] <= fromTime then
-			from = i
-		end
-
-		if to and from then
+		if history[i][1] < from then
 			break
 		end
 
 		i = i - 1
-
 		if i < 1 then
-			i = c_config_get("client.histSize")
+			i = maxHistory
 		end
 	end
 
-	if from and to then
-		-- step tank from "from" to "to"
-		i = from
-		if i >= c_config_get("client.histSize") then
+	if not fromIndex then
+		return
+	end
+
+	local toIndex = nextHistory
+	local started = false
+	local i = last
+	while i ~= last and started do
+		started = true
+
+		if history[i][1] < to then
+			break
+		end
+
+		toIndex = i
+
+		i = i - 1
+		if i < 1 then
+			i = maxHistory
+		end
+	end
+
+	stepAhead = true
+
+	local i = fromIndex
+	while i < toIndex do
+		local cur = history[i]
+		local next_ = i == maxHistory and history[1] or history[i + 1]
+		local state = record.state
+
+		record.state = cur[2]
+		c_world_tank_step((next_[1] - cur[1]) / c_world_timeMultiplier(), record)
+		record.state = state
+
+		i = i + 1
+		if i > maxHistory then
 			i = 1
 		end
-		to = to - 1
-		if to < 1 then
-			to = c_config_get("client.histSize")
-		end
-		while(i ~= to) do
-			local breaking = false repeat
-				tank.state = history[i][2]
-				local length = (history[i + 1][1] - history[i][1]) / (c_world_timeMultiplier())
-				if length <= 0 then
-					length = 1.0E-6  -- inaccurate guess
-				end
-				c_world_tank_step(length, tank)
-
-				i = i + 1
-				if i >= c_config_get("client.histSize") then
-					if to ~= i then
-						i = 1
-					end
-				end
-			until true if breaking then break end
-		end
 	end
 
-
-	tank.state = state
-
-	record = true
+	stepAhead = false
 end
 
 function c_world_tank_step(d, tank)
@@ -2009,21 +2008,10 @@ function c_world_tank_step(d, tank)
 		return c_world_tank_die(tank, t)
 	end
 
-	if record and tank == tankStepAhead and history then
-		-- don't record input multiple times in the same frame
-		if lastHistoryIndex == 0 or t ~= history[lastHistoryIndex][1] then
-			local h
-
-			lastHistoryIndex = lastHistoryIndex + 1
-			if lastHistoryIndex > c_config_get("client.histSize") then
-				lastHistoryIndex = 1
-			end
-
-			h = history[lastHistoryIndex]
-
-			h[1] = t
-			h[2] = tank.state
-		end
+	if not stepAhead and tank == record then
+		history[nextHistory][1] = t
+		history[nextHistory][2] = tank.state
+		incrementHistoryIndex()
 	end
 
 	tank.p(t_w_getPosition(tank.m.body))
