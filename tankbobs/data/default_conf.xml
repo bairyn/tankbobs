@@ -195,6 +195,7 @@
 		<logFile>games.log</logFile>  Make empty (or false) to not record to logs
 		<maxPersistSize>1000</maxPersistSize>
 		<pfps>32</pfps>
+		<startupCommandFile>server.cmd</startupCommandFile>
 		<writeFileOnBan>false</writeFileOnBan>  if false, bans are written on restart
 	</server>
 </config>

@@ -56,6 +56,8 @@ function main_init()
 
 	args = nil
 
+	main_runCommands(c_config_get("server.startupCommandFile"))
+
 	while not done do
 		main_loop()
 	end
@@ -194,4 +196,21 @@ function main_parseArgs(args)
 	end
 
 	return commands_command(line)
+end
+
+function main_runCommands(filename)
+	if #filename <= 0 or not tankbobs.fs_fileExists(filename) then
+		return
+	end
+
+	local fin = tankbobs.fs_openRead(filename)
+
+	line = tankbobs.fs_getStr(fin, '\n')
+	while line do
+		commands_command(line)
+
+		line = tankbobs.fs_getStr(fin, '\n')
+	end
+
+	tankbobs.fs_close(fin)
 end
