@@ -272,8 +272,8 @@ command =
 	matched = false
 }
 
-local help, exec, eval, exit, set, map, listSets, listMaps, echo, pause, restart, port, gameType, clientList, kick, ban, kickban, banList, unban, saveBans, loadBans, instagib, c_set, c_get
-local helpT, execT, evalT, exitT, setT, mapT, listSetsT, listMapsT, echoT, pauseT, restartT, portT, gameTypeT, clientListT, kickT, banT, kickbanT, banListT, unbanT, saveBansT, loadBansT, instagibT, c_setT, c_getT
+local help, exec, eval, exit, set, map, listSets, listMaps, echo, pause, restart, port, gameType, clientList, kick, ban, kickban, banList, unban, saveBans, loadBans, instagib, spawnStyle, c_set, c_get
+local helpT, execT, evalT, exitT, setT, mapT, listSetsT, listMapsT, echoT, pauseT, restartT, portT, gameTypeT, clientListT, kickT, banT, kickbanT, banListT, unbanT, saveBansT, loadBansT, instagibT, spawnStyleT, c_setT, c_getT
 
 function help(line)
 	local args = commands_args(line)
@@ -327,6 +327,7 @@ function help(line)
 			" -listSets\n" ..
 			" -gameType\n" ..
 			" -instagib\n" ..
+			" -spawnStyle\n" ..
 			" -exec\n" ..
 			" -eval\n" ..
 			" -clientList\n" ..
@@ -873,13 +874,18 @@ function gameType(line)
 	if #args >= 2 then
 		local gameType = tostring(args[2])
 
-		if not gameType then
+		local oldGameType = c_world_getGameType()
+		local newGameType = c_world_getGameType(gameType)
+
+		if not gameType or not newGameType then
 			return help("help gameType")
 		end
 
-		c_config_set("game.gameType", gameType)
+		if newGameType ~= oldGameType then
+			c_config_set("game.gameType", gameType)
 
-		s_printnl("gameType: new game type '", tostring(gameType), "' will be used on next restart")
+			s_printnl("gameType: new game type '", tostring(gameType), "' will be used on next restart")
+		end
 	else
 		s_printnl("gameType: current game type is '", c_world_gameTypeString(), "' (" .. c_world_gameTypeHumanString() .. ")")
 	end
@@ -1180,6 +1186,41 @@ end
 
 -- no auto completion for instagib
 
+function spawnStyle(line)
+	local args = commands_args(line)
+
+	if #args >= 2 then
+		local setting = nil
+
+		local input = tostring(args[2]):lower():sub(1, 1)
+
+		if input == 'b' or input == BLOCKABLE then
+			setting = BLOCKABLE
+		elseif input == 'a' or input == ALTERNATING then
+			setting = ALTERNATING
+		end
+
+		if not setting then
+			return help("help spawnStyle")
+		end
+
+		c_config_set("game.spawnStyle", setting)
+	else
+		local setting = "an unrecognized value"
+
+		local switch = c_world_getSpawnStyle()
+		if switch == BLOCKABLE then
+			setting = "'blockable'"
+		elseif switch == ALTERNATING then
+			setting = "'alternating'"
+		end
+
+		s_printnl("spawnStyle: spawnStyle is currently set to ", setting)
+	end
+end
+
+-- no auto completion for spawnStyle
+
 function c_set(line)
 	local args = commands_args(line)
 	local force = args[2] == "-f"
@@ -1477,6 +1518,17 @@ commands =
 		"\n"  ..
 		" Sets instagib mode.  When called without arguments, will print the\n" ..
 		" current mode to console."
+	},
+
+	{
+		"spawnStyle",
+		spawnStyle,
+		spawnStyleT,
+		"Usage:\n" ..
+		" spawnStyle (blockable|alternating)\n" ..
+		"\n"  ..
+		" Sets spawn style setting.  When called without any arguments, the\n" ..
+		" current setting is printed to console."
 	},
 
 	{
