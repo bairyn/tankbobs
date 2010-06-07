@@ -1156,9 +1156,11 @@ function instagib(line)
 			return help("help instagib")
 		end
 
-		c_config_set("game.instagib", enabled)
+		if c_config_get("game.instagib") ~= enabled then
+			c_config_set("game.instagib", enabled)
 
-		s_printnl("instagib: instagib will be set to '", tostring(enabled),"' at next restart")
+			s_printnl("instagib: instagib will be set to '", tostring(enabled),"' at next restart")
+		end
 	else
 		local instagib
 		local nextInstagib
