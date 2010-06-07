@@ -855,7 +855,7 @@ function st_optionsInternet_init()
 	gui_addAction(tankbobs.m_vec2(25, 85), "Back", nil, c_state_advance)
 
 	gui_addLabel(tankbobs.m_vec2(50, 75), "Step Ahead", nil, 1 / 3) gui_addCycle(tankbobs.m_vec2(75, 75), "Step Ahead", nil, st_optionsInternet_stepAhead, {"No", "Yes"}, c_config_get("client.online.stepAhead") and 2 or 1, 1.5 / 3)
-	gui_addLabel(tankbobs.m_vec2(50, 72), "Predict other tanks", nil, 1 / 3) gui_addCycle(tankbobs.m_vec2(75, 72), "Predict other tanks", nil, st_optionsInternet_unlagged, {"No", "Yes"}, c_config_get("client.online.unlagged") and 2 or 1, 1.5 / 3)
+	gui_addLabel(tankbobs.m_vec2(50, 72), "Predict other tanks (not yet supported)", nil, 1 / 3) gui_addCycle(tankbobs.m_vec2(75, 72), "Predict other tanks", nil, st_optionsInternet_unlagged, {"No", "Yes"}, c_config_get("client.online.unlagged") and 2 or 1, 1.5 / 3)
 end
 
 function st_optionsInternet_done()
