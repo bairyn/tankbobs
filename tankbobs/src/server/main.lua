@@ -190,10 +190,8 @@ function main_parseArgs(args)
 	end
 
 	if not line then
-		line = ""
-
 		return
 	end
 
-	return commands_command(table.concat())
+	return commands_command(line)
 end
