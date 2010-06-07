@@ -1142,13 +1142,6 @@ static const struct luaL_Reg tankbobs[] =
 			center of mass is returned */
 	{"w_scaleVelocity", w_scaleVelocity}, /* scale the velocities of all bodies in the world */
 		/* The scalar is passed as a number.  Nothing is returned. */
-	{"w_persistWorld", w_persistWorld}, /* generate a string of the world */
-		/* A string containing the data of the world is returned.  The first argument passed
-			is the projectiles of the world.  The second argument passed are the tanks of the world.
-			The third argument is a table of the powerups.  The fourth argument passed is a table of
-			the walls.  The fifth and sixth arguments are the control points and flags */
-	{"w_unpersistWorld", w_unpersistWorld}, /* unpersist the world */
-		/* Nothing is returned.  The first argument passed is the data of the persisted world.  The rest of the arguments are the same arguments that would passed to w_persistWorld.  After these arguments, the function to be called for new projectiles is passed, the function for tanks, the function for powerups, the projectile class, and then the tank class, and the powerup class.  Next, all but the first and second arguments which would be passed to w_addBody for projectiles is passed *in a table*.  Then, the function which will be called when a tank is spawned is passed, and then the same for a powerup. */
 	{"w_getNumVertices", w_getNumVertices}, /* get the number of vertices of a fixture */
 		/* The number of vertices of the passed fixture is returned */
 	{"w_getVertices", w_getVertices}, /* Get the vertices of a fixture */

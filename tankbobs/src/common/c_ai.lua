@@ -330,7 +330,7 @@ function c_ai_findClosestEnemyInSight(tank, filter)
 
 			-- find the angle at which the tank will need to be to shoot the enemy
 			local time = 0
-			local vel = tankbobs.w_getLinearVelocity(v.body)
+			local vel = tankbobs.w_getLinearVelocity(v.m.body)
 			if weapon.meleeRange == 0 then
 				--local low, high = 0, (range * weapon.speed + range * vel.R) / (range * range)
 				local low, high = 0, range
@@ -493,7 +493,7 @@ function c_ai_shootEnemies(tank, enemy, angle, pos, time)
 
 			c_ai_setTankStateForward(tank, 1)
 
-			local vel = tankbobs.w_getLinearVelocity(tank.body)
+			local vel = tankbobs.w_getLinearVelocity(tank.m.body)
 			local minSpeed = c_world_getInstagib() and c_const_get("ai_meleeChaseTargetMinSpecialSpeedInstagib") or c_const_get("ai_meleeChaseTargetMinSpecialSpeed")
 			if vel.R < minSpeed then
 				c_ai_setTankStateSpecial(tank, 0)
@@ -779,7 +779,7 @@ function c_ai_followObjective(tank, objective)
 	if objective.followType >= INSIGHT and inSight then
 		-- the objective is in sight, so chase it
 
-		local vel = tankbobs.w_getLinearVelocity(tank.body)
+		local vel = tankbobs.w_getLinearVelocity(tank.m.body)
 
 		local minSpeed = c_world_getInstagib() and c_const_get("ai_minObjectiveSpeedInstagib") or c_const_get("ai_minObjectiveSpeed")
 		if vel.R < minSpeed then
@@ -833,7 +833,7 @@ function c_ai_followObjective(tank, objective)
 
 		if objective.path and objective.path[objective.nextNode] then
 			-- go to the next node
-			local vel = tankbobs.w_getLinearVelocity(tank.body)
+			local vel = tankbobs.w_getLinearVelocity(tank.m.body)
 
 			local n = objective.path[objective.nextNode]
 
@@ -930,7 +930,7 @@ function c_ai_followObjective(tank, objective)
 
 		if objective.path and objective.path[objective.nextNode] then
 			-- go to the next node
-			local vel = tankbobs.w_getLinearVelocity(tank.body)
+			local vel = tankbobs.w_getLinearVelocity(tank.m.body)
 
 			local n = objective.path[objective.nextNode]
 
@@ -1179,7 +1179,7 @@ end
 
 local p1, p2 = tankbobs.m_vec2(), tankbobs.m_vec2()
 function c_ai_cruise(tank)
-	local vel = tankbobs.w_getLinearVelocity(tank.body)
+	local vel = tankbobs.w_getLinearVelocity(tank.m.body)
 
 	if tank.ai.turning and not tank.ai.close then
 		local minSpecialSpeed = c_world_getInstagib() and c_const_get("ai_minSpecialSpeedInstagib") or c_const_get("ai_minSpecialSpeed")
@@ -1319,7 +1319,7 @@ function c_ai_tank_step(tank, d)
 	end
 	tank.ai.nextStepTime = t + common_FTM(c_const_get("ai_fps")) + (1 - c_ai_relativeTankSkill(tank)) * common_FTM(c_const_get("ai_fpsRelativeToSkill"))
 
-	local vel = tankbobs.w_getLinearVelocity(tank.body)
+	local vel = tankbobs.w_getLinearVelocity(tank.m.body)
 
 	tank.ai.chasingWithMeleeWeapon = false
 
@@ -1726,7 +1726,7 @@ function c_ai_tank_step(tank, d)
 		-- don't set enemies as objectives in domination since it doesn't always benefit the tank
 	elseif switch == CAPTURETHEFLAG then
 		local function filter(x)
-			if c_ai_yourTeamOffensive(tank) and not tank.m.flag then
+			if c_ai_yourTeamOffensive(tank) and not tank.flag then
 				return true
 			end
 
@@ -1735,7 +1735,7 @@ function c_ai_tank_step(tank, d)
 			end
 
 			if c_ai_hasRecentlyAttacked(tank, x) then
-				if not tank.m.flag or tank.health >= c_const_get("ai_captureFlagMinHealth") then
+				if not tank.flag or tank.health >= c_const_get("ai_captureFlagMinHealth") then
 					return true
 				end
 			end
@@ -1795,7 +1795,7 @@ function c_ai_tank_step(tank, d)
 			-- hunt down flag carrier
 			c_ai_setObjective(tank, GENERICINDEX, yourFlagStolen, ALWAYSANDDESTROY, "enemyFlagCarrier", false)
 		else
-			if tank.m.flag then
+			if tank.flag then
 				for _, v in pairs(c_tcm_current_map.flags) do
 					if v.red == tank.red then
 						c_ai_setObjective(tank, GENERICINDEX, tankbobs.m_vec2(v.p), ALWAYSANDDESTROY, "flagBase", true)

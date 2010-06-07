@@ -504,23 +504,14 @@ function common_fileMustExist(filename)
 	end
 end
 
-do
-local hex = "0123456789ABCEF"
 function common_tohex(number)
-	local result = ""
+	local result = string.upper(string.format("%x", number))
 
-	while number > 0 do
-		local mod = math.fmod(number, #hex)
-		result = hex:sub(mod + 1, mod + 1) .. result
-		number = math.floor(number / #hex)
+	if #result % 2 == 0 then
+		return result
+	else
+		return "0" .. result
 	end
-
-	if result == "" then
-		result = "0"
-	end
-
-	return result
-end
 end
 local common_tohex = common_tohex
 
@@ -599,7 +590,11 @@ end
 
 SPECIAL        = {}
 
+MAGIC          = -1414677826
+
 CIRCLE         = 2 * math.pi
+
+ZERO           = tankbobs.m_vec2(0, 0)
 
 -- gametypes
 DEATHMATCH     = {}

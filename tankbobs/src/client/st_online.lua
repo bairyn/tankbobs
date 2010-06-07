@@ -58,7 +58,6 @@ local st_online_serverIP
 local st_online_start
 local online_readPackets
 
-local unpersistArgs = {}
 local won
 local newScreens
 
@@ -198,7 +197,7 @@ function st_online_init()
 	-- create local world
 	c_world_newWorld()
 
-	unpersistArgs = {c_weapon_getProjectiles(), c_world_getTanks(), c_world_getPowerups(), c_tcm_current_map.walls, c_tcm_current_map.controlPoints, c_tcm_current_map.flags, c_weapon_projectile.new, c_world_tank.new, c_world_powerup.new, c_weapon_projectile, c_world_tank, c_world_powerup, {c_const_get("projectile_canSleep"), c_const_get("projectile_isBullet"), c_const_get("projectile_linearDamping"), c_const_get("projectile_angularDamping"), c_weapon_getWeapons()[1].projectileHull  --[[ most common hull --]], c_weapon_getWeapons()[1].projectileDensity  --[[ most common density --]], c_const_get("projectile_friction"), c_weapon_getWeapons()[1].projectileRestitution  --[[ most common restitution --]], true, c_const_get("projectile_contentsMask"), c_const_get("projectile_clipmask"), c_const_get("projectile_isSensor"), #c_weapon_getProjectiles() + 1}, c_world_tank_spawn, c_world_spawnPowerup, c_world_tank_die}
+	c_protocol_setUnpersistProtocol(protocol_unpersist)
 end
 
 function st_online_done()
@@ -233,6 +232,12 @@ function online_readPackets(d)  -- local
 			local switch = string.byte(data, 1) data = data:sub(2)
 			if switch == nil then
 			elseif switch == 0xA2 then
+				if connection.ping then
+					connection.timestamp = tankbobs.io_toInt(data:sub(1, 4)) data = data:sub(5)
+					connection.t = tankbobs.io_toInt(data:sub(1, 4)) data = data:sub(5)
+					c_protocol_unpersist(data)
+				end
+				--[=[
 				if #data >= 5 then
 					if connection.ping then
 						local timestamp = tankbobs.io_toInt(data:sub(1, 4)) data = data:sub(5)
@@ -243,7 +248,8 @@ function online_readPackets(d)  -- local
 						if tank then
 							state = tank.state
 						end
-						tankbobs.w_unpersistWorld(data, connection.t, function (score) c_world_redTeam.score = score end, function (score) c_world_blueTeam.score = score end, unpack(unpersistArgs))
+						--tankbobs.w_unpersistWorld(data, connection.t, function (score) c_world_redTeam.score = score end, function (score) c_world_blueTeam.score = score end, unpack(unpersistArgs))
+						c_protocol_unpersist(data)
 						if tank then
 							tank.state = state
 						end
@@ -291,6 +297,7 @@ function online_readPackets(d)  -- local
 						c_world_tank_stepAhead(timestamp, tankbobs.t_getTicks())
 					end
 				end
+				--]=]
 			elseif switch == 0xA3 then
 				if #data >= 0 then
 					-- server wants our tick

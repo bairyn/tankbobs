@@ -29,10 +29,6 @@ The first byte of a packet indicates its type.
 Packets beginning with 0x00 are connection request packets
 0x01 are packets signaling that the client has finished loading data (the client is connected and will receive data from the server)
 
-0x10 are input packets
-
-0x20 is the head of a tick offset response packet
-
 The server receives packets beginning with 0x00-0x0F
 	- 0x00 is a connection request packet
 	- 0x01 is the second connection packet
@@ -433,16 +429,28 @@ function client_step(d)
 								sendToClient(client)
 								sendToClient(client)
 							else
+								local instagib = 0
+
+								local switch = c_world_getInstagib()
+								if     switch == true then
+									instagib = 0x02
+								elseif switch == "semi" then
+									instagib = 0x01
+								elseif switch == false then
+									instagib = 0x00
+								end
+
 								client.banned = false
 
 								s_printnl("'", client.tank.name, "' connected from ", ip, ":", port)
 
-								-- send the challenge number, instagib, set, map and game type
+								-- send the challenge number, instagib, spawnType, set, map and game type
 								tankbobs.n_newPacket(256)
 								tankbobs.n_writeToPacket(tankbobs.io_fromChar(0xA0))
 								client.challenge = math.random(0x00000000, 0x7FFFFFFF)
 								tankbobs.n_writeToPacket(tankbobs.io_fromInt(client.challenge))
-								tankbobs.n_writeToPacket(tankbobs.io_fromChar(c_world_getInstagib() and 0x01 or 0x00))
+								tankbobs.n_writeToPacket(instagib)
+								tankbobs.n_writeToPacket(tankbobs.io_fromChar(c_world_getSpawnStyle()))
 								-- set and map as a NULL-terminated string
 								tankbobs.n_writeToPacket(c_tcm_current_set.name .. string.char(0x00))
 								tankbobs.n_writeToPacket(c_tcm_current_map.name .. string.char(0x00))
@@ -594,12 +602,14 @@ function client_step(d)
 					if v.lastPTime ~= lastPTime then
 						v.lastPTime = lastPTime
 						-- send the client a snapshot of the world
-						tankbobs.n_newPacket(#p + 6)
-						tankbobs.n_writeToPacket(tankbobs.io_fromChar(0xA2))
-						tankbobs.n_writeToPacket(tankbobs.io_fromInt(tankbobs.t_getTicks() + v.ticksOffset))
-						tankbobs.n_writeToPacket(tankbobs.io_fromChar(k))
-						tankbobs.n_writeToPacket(p)
-						sendToClient(v)
+						for _, vs in pairs(p) do
+							tankbobs.n_newPacket(#vs + 9)
+							tankbobs.n_writeToPacket(tankbobs.io_fromChar(0xA2))
+							tankbobs.n_writeToPacket(tankbobs.io_fromInt(tankbobs.t_getTicks() + v.ticksOffset))
+							tankbobs.n_writeToPacket(tankbobs.io_fromInt(k))
+							tankbobs.n_writeToPacket(vs)
+							sendToClient(v)
+						end
 					end
 
 					if t <= v.lastTickRequestTime + c_const_get("client_ticksCheck") then

@@ -178,6 +178,7 @@ function st_selected_spawn(widget, string, index)
 		setting = ALTERNATING
 	end
 	c_config_set("game.spawnStyle", setting)
+	c_world_setSpawnStyle(setting)
 end
 
 function st_selected_punish(widget, string, index)

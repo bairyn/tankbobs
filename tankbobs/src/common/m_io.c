@@ -686,7 +686,7 @@ int io_fromFloat(lua_State *L)
 
 	CHECKINIT(init, L);
 
-	number.value = (io32tv) luaL_checknumber(L, 1);
+	number.value = (io32ft) luaL_checknumber(L, 1);
 
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
 	CHARSWAP(number.bytes[0], number.bytes[3]);
@@ -704,7 +704,7 @@ int io_fromDouble(lua_State *L)
 
 	CHECKINIT(init, L);
 
-	number.value = (io64tv) luaL_checknumber(L, 1);
+	number.value = (io64ft) luaL_checknumber(L, 1);
 
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
 	CHARSWAP(number.bytes[0], number.bytes[7]);

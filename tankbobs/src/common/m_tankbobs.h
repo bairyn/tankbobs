@@ -374,8 +374,6 @@ int w_applyTorque(lua_State *L);
 int w_applyImpulse(lua_State *L);
 int w_getCenterOfMass(lua_State *L);
 int w_scaleVelocity(lua_State *L);
-int w_persistWorld(lua_State *L);
-int w_unpersistWorld(lua_State *L);
 int w_getNumVertices(lua_State *L);
 int w_getVertices(lua_State *L);
 int w_getContents(lua_State *L);

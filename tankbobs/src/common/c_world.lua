@@ -73,6 +73,7 @@ local behind
 local worldTime = 0
 local lastWorldTime = 0
 local c_world_instagib = false
+local c_world_spawnStyle = false
 local lastPowerupSpawnTime
 local nextPowerupSpawnPoint
 local worldInitialized = false
@@ -435,6 +436,7 @@ c_world_powerup =
 	spawner = 0,  -- index of psp
 	collided = false,  -- whether it needs to be removed
 	powerupType = nil,  -- index of type of powerup
+
 	spawnTime = 0,  -- the time the powerup spawned
 
 	m = {}
@@ -467,12 +469,9 @@ c_world_tank =
 	lastSpawnPoint = 0,
 	state = 0,
 	weapon = nil,
-	lastFireTime = nil,
-	body = nil,  -- physical body
-	fixture = nil,  -- physical fixture
 	health = 0,
-	nextSpawnTime = 0,
-	killer = 0,
+	shield = 0,
+	killer = nil,
 	score = 0,
 	ammo = 0,
 	clips = 0,
@@ -481,13 +480,21 @@ c_world_tank =
 	red = false,
 	color = {r = 0, g = 0, b = 0},
 	tagged = false,
-	lastAttackers = {},
-	notFireReset = false,
 	radiusFireTime = 0,
 	megaTank = nil,
-	lastAttackedTime = 0,
+	target = nil,
+	flag = nil,
 
-	cd = {},  -- data cleared on death
+	lastFireTime = nil,
+	lastAttackedTime = 0,
+	lastAttackers = {},
+	notFireReset = false,
+
+	cd =
+	{ acceleration = false
+	, aimAid = false
+	},  -- data cleared on death
+	nextSpawnTime = 0,
 
 	ai = {},
 	bot = false,
@@ -680,6 +687,14 @@ end
 
 function c_world_getInstagib()
 	return c_world_instagib
+end
+
+function c_world_setSpawnStyle(state)
+	c_world_spawnStyle = state
+end
+
+function c_world_getSpawnStyle()
+	return c_world_spawnStyle
 end
 
 function c_world_getGameType()
@@ -895,9 +910,9 @@ function c_world_addCorpse(tank, vel, index)
 	tank.lastAttackers = FIXMETODOtmpLastAttackers
 
 	corpse.explodeTime = t_t_getTicks() + c_world_timeMultiplier(c_const_get("world_corpseTime"))
-	corpse.body = tankbobs.w_addBody(corpse.p, corpse.r, c_const_get("corpse_canSleep"), c_const_get("corpse_isBullet"), c_const_get("corpse_linearDamping"), c_const_get("corpse_angularDamping"), index)
-	tankbobs.w_addPolygonalFixture(corpse.h, c_const_get("corpse_density"), c_const_get("corpse_friction"), c_const_get("corpse_restitution"), c_const_get("corpse_isSensor"), c_const_get("corpse_contentsMask"), c_const_get("corpse_clipmask"), corpse.body, not c_const_get("corpse_static"))
-	t_w_setLinearVelocity(corpse.body, vel)
+	corpse.m.body = tankbobs.w_addBody(corpse.p, corpse.r, c_const_get("corpse_canSleep"), c_const_get("corpse_isBullet"), c_const_get("corpse_linearDamping"), c_const_get("corpse_angularDamping"), index)
+	corpse.m.fixture = tankbobs.w_addPolygonalFixture(corpse.h, c_const_get("corpse_density"), c_const_get("corpse_friction"), c_const_get("corpse_restitution"), c_const_get("corpse_isSensor"), c_const_get("corpse_contentsMask"), c_const_get("corpse_clipmask"), corpse.m.body, not c_const_get("corpse_static"))
+	t_w_setLinearVelocity(corpse.m.body, vel)
 
 	corpse.exists = true
 
@@ -907,12 +922,12 @@ end
 function c_world_tank_die(tank, t)
 	t = t or t_t_getTicks()
 
-	if tank.exists and tank.body then
+	if tank.exists and tank.m.body then
 		-- things that can't be done more than once
-		local vel = t_w_getLinearVelocity(tank.body)
-		local index = tankbobs.w_getIndex(tank.body)
+		local vel = t_w_getLinearVelocity(tank.m.body)
+		local index = tankbobs.w_getIndex(tank.m.body)
 
-		tankbobs.w_removeBody(tank.body) tank.body = nil tank.fixture = nil
+		tankbobs.w_removeBody(tank.m.body) tank.m.body = nil tank.m.fixture = nil
 
 		local switch = c_world_getGameType()
 		if switch == PLAGUE or
@@ -928,12 +943,12 @@ function c_world_tank_die(tank, t)
 
 	c_ai_tankDie(tank)
 
-	if tank.m.flag then
+	if tank.flag then
 		-- drop flag
-		tank.m.flag.m.pos = tankbobs.m_vec2(tank.p)
-		tank.m.flag.m.dropped = true
-		tank.m.flag.m.stolen = nil
-		tank.m.flag = nil
+		tank.flag.m.pos = tankbobs.m_vec2(tank.p)
+		tank.flag.m.dropped = true
+		tank.flag.m.stolen = nil
+		tank.flag = nil
 	end
 
 	local killer = nil
@@ -1181,9 +1196,9 @@ end
 function c_world_removeTank(tank)
 	for k, v in pairs(c_world_tanks) do
 		if v == tank then
-			if v.exists and v.body then
-				tankbobs.w_removeBody(v.body)
-				v.body = nil v.fixture = nil
+			if v.exists and v.m.body then
+				tankbobs.w_removeBody(v.m.body)
+				v.m.body = nil v.m.fixture = nil
 			end
 
 			c_world_tanks[k] = nil
@@ -1191,7 +1206,7 @@ function c_world_removeTank(tank)
 	end
 end
 
--- this is only called when a tank spawns immediately; this should not normally be called outside of this file!
+-- Immediately spawn a tank
 function c_world_spawnTank(tank)
 	local t = t_t_getTicks()
 	tank.spawning = false
@@ -1211,9 +1226,9 @@ function c_world_spawnTank(tank)
 		end
 	end
 
-	if tank.body then
-		tankbobs.w_removeBody(tank.body)
-		tank.body = nil v.fixture = nil
+	if tank.m.body then
+		tankbobs.w_removeBody(tank.m.body)
+		tank.m.body = nil v.m.fixture = nil
 	end
 
 	local weapon = tank.weapon and c_weapon_getWeapons()[tank.weapon]
@@ -1234,8 +1249,8 @@ function c_world_spawnTank(tank)
 	end
 
 	-- add a physical body
-	tank.body = tankbobs.w_addBody(tank.p, tank.r, c_const_get("tank_canSleep"), c_const_get("tank_isBullet"), c_const_get("tank_linearDamping"), c_const_get("tank_angularDamping"), index)
-	tankbobs.w_addPolygonalFixture(tank.h, c_const_get("tank_density"), c_const_get("tank_friction"), c_const_get("tank_restitution"), c_const_get("tank_isSensor"), c_const_get("tank_contentsMask"), c_const_get("tank_clipmask"), tank.body, not c_const_get("tank_static"))
+	tank.m.body = tankbobs.w_addBody(tank.p, tank.r, c_const_get("tank_canSleep"), c_const_get("tank_isBullet"), c_const_get("tank_linearDamping"), c_const_get("tank_angularDamping"), index)
+	tank.m.fixture = tankbobs.w_addPolygonalFixture(tank.h, c_const_get("tank_density"), c_const_get("tank_friction"), c_const_get("tank_restitution"), c_const_get("tank_isSensor"), c_const_get("tank_contentsMask"), c_const_get("tank_clipmask"), tank.m.body, not c_const_get("tank_static"))
 
 	c_ai_tankSpawn(tank)
 
@@ -1256,7 +1271,7 @@ function c_world_tank_checkSpawn(d, tank)
 	local sp = tank.lastSpawnPoint
 	local playerSpawnPoint = c_tcm_current_map.playerSpawnPoints[tank.lastSpawnPoint]
 
-	local switch = c_config_get("game.spawnStyle")
+	local switch = c_world_getSpawnStyle()
 	if switch == BLOCKABLE then
 		while not c_world_tank_canSpawn(d, tank) do
 			tank.lastSpawnPoint = tank.lastSpawnPoint + 1
@@ -1298,7 +1313,7 @@ function c_world_tank_checkSpawn(d, tank)
 		tank.p(playerSpawnPoint.p)
 		for _, v in pairs(c_world_tanks) do
 			if v.exists then
-				if c_world_intersection(d, t_t_clone(true, c_world_tankHull(tank)), t_t_clone(c_world_tankHull(v)), t_m_vec2(0, 0), t_w_getLinearVelocity(v.body)) then
+				if c_world_intersection(d, t_t_clone(true, c_world_tankHull(tank)), t_t_clone(c_world_tankHull(v)), t_m_vec2(0, 0), t_w_getLinearVelocity(v.m.body)) then
 					numIntersections = numIntersections + 1
 				end
 			end
@@ -1313,7 +1328,7 @@ function c_world_tank_checkSpawn(d, tank)
 
 				for _, vs in pairs(c_world_tanks) do
 					if vs.exists then
-						if c_world_intersection(d, t_t_clone(true, c_world_tankHull(tank)), t_t_clone(c_world_tankHull(vs)), t_m_vec2(0, 0), t_w_getLinearVelocity(vs.body)) then
+						if c_world_intersection(d, t_t_clone(true, c_world_tankHull(tank)), t_t_clone(c_world_tankHull(vs)), t_m_vec2(0, 0), t_w_getLinearVelocity(vs.m.body)) then
 							thisIntersections = thisIntersections + 1
 						end
 					end
@@ -1355,7 +1370,7 @@ function c_world_tank_canSpawn(d, tank)
 	-- test if spawning interferes with another tank
 	for _, v in pairs(c_world_tanks) do
 		if v.exists then
-			if c_world_intersection(d, t_t_clone(true, c_world_tankHull(tank)), t_t_clone(c_world_tankHull(v)), t_m_vec2(0, 0), t_w_getLinearVelocity(v.body)) then
+			if c_world_intersection(d, t_t_clone(true, c_world_tankHull(tank)), t_t_clone(c_world_tankHull(v)), t_m_vec2(0, 0), t_w_getLinearVelocity(v.m.body)) then
 				return false
 			end
 		end
@@ -2011,7 +2026,7 @@ function c_world_tank_step(d, tank)
 		end
 	end
 
-	tank.p(t_w_getPosition(tank.body))
+	tank.p(t_w_getPosition(tank.m.body))
 
 	if c_world_getGameType() == CHASE then
 		-- search for another tagged player
@@ -2032,7 +2047,7 @@ function c_world_tank_step(d, tank)
 		end
 	end
 
-	local vel = t_w_getLinearVelocity(tank.body)
+	local vel = t_w_getLinearVelocity(tank.m.body)
 
 	-- ignore movement for designated tanks
 	local skip = false
@@ -2087,7 +2102,7 @@ function c_world_tank_step(d, tank)
 
 			vel.t = tank.r
 
-			t_w_setLinearVelocity(tank.body, vel)
+			t_w_setLinearVelocity(tank.m.body, vel)
 
 			if bit.band(tank.state, BACK) ~= 0 then
 				tank.state = bit.bor(tank.state, REVERSE)
@@ -2127,7 +2142,7 @@ function c_world_tank_step(d, tank)
 						newVel.t = common_lerp(vel.t, newVel.t, d * tank_rotationChange)
 					end
 
-					t_w_setLinearVelocity(tank.body, newVel)
+					t_w_setLinearVelocity(tank.m.body, newVel)
 					vel(newVel)
 				end
 				if bit.band(tank.state, BACK) ~= 0 then
@@ -2138,7 +2153,7 @@ function c_world_tank_step(d, tank)
 						subVel.R = d * c_const_get("tank_reverse")
 						subVel.t = tank.r
 						vel:sub(subVel)
-						t_w_setLinearVelocity(tank.body, vel)
+						t_w_setLinearVelocity(tank.m.body, vel)
 					else
 						-- break
 
@@ -2146,17 +2161,17 @@ function c_world_tank_step(d, tank)
 
 						newVel.R = math.max(0, newVel.R - d * c_const_get("tank_deceleration"))
 
-						t_w_setLinearVelocity(tank.body, newVel)
+						t_w_setLinearVelocity(tank.m.body, newVel)
 						vel(newVel)
 					end
 				else
 					tank.state = bit.band(tank.state, bit.bnot(REVERSE))
 				end
 			else
-				local v = t_w_getLinearVelocity(tank.body)
+				local v = t_w_getLinearVelocity(tank.m.body)
 
 				v.R = v.R / (1 + d * tank_worldFriction)
-				t_w_setLinearVelocity(tank.body, v)
+				t_w_setLinearVelocity(tank.m.body, v)
 
 				tank.state = bit.band(tank.state, bit.bnot(REVERSE))
 			end
@@ -2181,9 +2196,9 @@ function c_world_tank_step(d, tank)
 		end
 	end
 
-	t_w_setAngle(tank.body, tank.r)
+	t_w_setAngle(tank.m.body, tank.r)
 
-	t_w_setAngularVelocity(tank.body, 0)  -- reset the tank's angular velocity
+	t_w_setAngularVelocity(tank.m.body, 0)  -- reset the tank's angular velocity
 
 	-- weapons
 	c_weapon_fire(tank, d)
@@ -2344,7 +2359,7 @@ end
 
 function c_world_spawnPowerup(powerup, index)
 	powerup.m.body = tankbobs.w_addBody(powerup.p, 0, c_const_get("powerup_canSleep"), c_const_get("powerup_isBullet"), c_const_get("powerup_linearDamping"), c_const_get("powerup_angularDamping"), index)
-	tankbobs.w_addPolygonalFixture(c_world_powerupHull(powerup), c_const_get("powerup_density"), c_const_get("powerup_friction"), c_const_get("powerup_restitution"), c_const_get("powerup_isSensor"), c_const_get("powerup_contentsMask"), c_const_get("powerup_clipmask"), powerup.m.body, not c_const_get("powerup_static"))
+	powerup.m.fixture = tankbobs.w_addPolygonalFixture(c_world_powerupHull(powerup), c_const_get("powerup_density"), c_const_get("powerup_friction"), c_const_get("powerup_restitution"), c_const_get("powerup_isSensor"), c_const_get("powerup_contentsMask"), c_const_get("powerup_clipmask"), powerup.m.body, not c_const_get("powerup_static"))
 end
 
 function c_world_powerupSpawnPoint_step(d, powerupSpawnPoint)
@@ -2568,7 +2583,7 @@ function c_world_powerup_step(d, powerup)
 	if c_config_get("game.ept") then
 		for _, v in pairs(c_world_tanks) do
 			if v.exists then
-				if c_world_intersection(d, c_world_powerupHull(powerup), c_world_tankHull(v), t_m_vec2(0, 0), t_w_getLinearVelocity(v.body)) then
+				if c_world_intersection(d, c_world_powerupHull(powerup), c_world_tankHull(v), t_m_vec2(0, 0), t_w_getLinearVelocity(v.m.body)) then
 					c_world_powerup_pickUp(v, powerup)
 				end
 			end
@@ -2579,8 +2594,8 @@ end
 function c_world_removeCorpse(corpse)
 	for k, v in pairs(c_world_corpses) do
 		if v == corpse then
-			if v.body then
-				tankbobs.w_removeBody(v.body) v.body = nil v.fixture = nil
+			if v.m.body then
+				tankbobs.w_removeBody(v.m.body) v.m.body = nil v.m.fixture = nil
 			end
 
 			c_world_corpses[k] = nil
@@ -2597,7 +2612,7 @@ function c_world_explosion(pos, damage, force, radius, log, attacker)
 
 	-- iterate over tanks
 	for _, v in pairs(c_world_tanks) do
-		if v.exists and v.body then
+		if v.exists and v.m.body then
 			if (pos - v.p).R <= radius then
 				local s, _, t, _ = c_world_findClosestIntersection(pos, v.p, "tank, projectile, powerup, corpse, dynamic")
 
@@ -2605,12 +2620,12 @@ function c_world_explosion(pos, damage, force, radius, log, attacker)
 					local d = (1 - (pos - v.p).R / radius) ^ log
 
 					-- force
-					local vel = t_w_getLinearVelocity(v.body)
+					local vel = t_w_getLinearVelocity(v.m.body)
 					local offset = t_m_vec2()
 					offset.R = d * force
 					offset.t = (v.p - pos).t
 					vel:add(offset)
-					t_w_setLinearVelocity(v.body, vel)
+					t_w_setLinearVelocity(v.m.body, vel)
 
 					-- damage
 					c_world_tankDamage(v, d * damage, attacker)
@@ -2660,18 +2675,18 @@ function c_world_corpse_step(d, corpse)
 		return
 	end
 
-	if corpse.body then
-		local vel = t_w_getLinearVelocity(corpse.body)
-		local ang = tankbobs.w_getAngularVelocity(corpse.body)
+	if corpse.m.body then
+		local vel = t_w_getLinearVelocity(corpse.m.body)
+		local ang = tankbobs.w_getAngularVelocity(corpse.m.body)
 
 		ang = ang + (d * c_const_get("corpse_rotationIncrease") * ang)
 		vel.R = vel.R + (d * c_const_get("corpse_speedIncrease") * vel.R)
 
-		t_w_setLinearVelocity(corpse.body, vel)
-		t_w_setAngularVelocity(corpse.body, ang)
+		t_w_setLinearVelocity(corpse.m.body, vel)
+		t_w_setAngularVelocity(corpse.m.body, ang)
 
-		corpse.p(t_w_getPosition(corpse.body))
-		corpse.r = t_w_getAngle(corpse.body)
+		corpse.p(t_w_getPosition(corpse.m.body))
+		corpse.r = t_w_getAngle(corpse.m.body)
 	end
 
 	if t >= corpse.explodeTime + c_world_timeMultiplier(c_const_get("world_corpsePostTime")) then
@@ -2684,11 +2699,11 @@ function c_world_corpse_step(d, corpse)
 		if not corpse.explode then
 			corpse.explode = c_const_get("world_corpsePostTime")
 
-			c_world_explosion(corpse.p, c_const_get("world_corpseExplodeDamage"), c_const_get("world_corpseExplodeKnockback"), c_const_get("world_corpseExplodeRadius"), c_const_get("world_corpseExplodeRadiusReduce"), tankbobs.w_getIndex(corpse.body))
+			c_world_explosion(corpse.p, c_const_get("world_corpseExplodeDamage"), c_const_get("world_corpseExplodeKnockback"), c_const_get("world_corpseExplodeRadius"), c_const_get("world_corpseExplodeRadiusReduce"), tankbobs.w_getIndex(corpse.m.body))
 		end
 
-		if corpse.body then
-			tankbobs.w_removeBody(corpse.body) corpse.body = nil corpse.fixture = nil
+		if corpse.m.body then
+			tankbobs.w_removeBody(corpse.m.body) corpse.m.body = nil corpse.m.fixture = nil
 		end
 
 		corpse.explode = corpse.explode - d
@@ -2761,13 +2776,13 @@ function c_world_flag_step(d, flag)
 						if v.red ~= flag.red then
 							-- flag was stolen
 
-							v.m.flag = flag
+							v.flag = flag
 
 							flag.m.stolen = k
 							flag.m.dropped = false  -- redundant, but just in case
 
 							flag.m.lastPickupTime = t
-						elseif v.m.flag and v.red == flag.red then
+						elseif v.flag and v.red == flag.red then
 							-- flag was captured
 
 							if flag.red then
@@ -2779,8 +2794,8 @@ function c_world_flag_step(d, flag)
 							flag.m.lastCaptureTime = t
 
 							-- silently return flag
-							v.m.flag.m.stolen = nil
-							v.m.flag = nil
+							v.flag.m.stolen = nil
+							v.flag = nil
 						end
 					end
 				else
@@ -2794,7 +2809,7 @@ function c_world_flag_step(d, flag)
 					else
 						-- other player picked up flag
 
-						v.m.flag = flag
+						v.flag = flag
 
 						flag.m.dropped = false
 						flag.m.stolen = k
@@ -2818,7 +2833,7 @@ function c_world_teleporter_step(d, teleporter)
 			if math.abs((v.p - teleporter.p).R) <= c_const_get("teleporter_touchDistance") then
 				local target = teleporters[teleporter.t + 1]
 
-				if teleporter.enabled and target and v.m.target ~= teleporter.id then
+				if teleporter.enabled and target and v.target ~= teleporter.id then
 					for _, v in pairs(c_world_tanks) do
 						if v.exists then
 							if math.abs((v.p - target.p).R) <= c_const_get("teleporter_touchDistance") then
@@ -2831,15 +2846,15 @@ function c_world_teleporter_step(d, teleporter)
 						return
 					end
 
-					v.m.target = target.id
+					v.target = target.id
 					v.m.lastTeleportTime = t_t_getTicks()
-					tankbobs.w_setPosition(v.body, target.p)
-					v.p(tankbobs.w_getPosition(v.body))
+					tankbobs.w_setPosition(v.m.body, target.p)
+					v.p(tankbobs.w_getPosition(v.m.body))
 				end
 
 				return
-			elseif v.m.target == teleporter.id then
-				v.m.target = nil
+			elseif v.target == teleporter.id then
+				v.target = nil
 			end
 		end
 	end
@@ -2964,7 +2979,7 @@ function c_world_tankIndex(tank)
 end
 
 local function c_world_collide(tank, normal, attacker)
-	local vel = t_w_getLinearVelocity(tank.body)
+	local vel = t_w_getLinearVelocity(tank.m.body)
 	local component = vel * -normal
 
 	if c_world_getInstagib() ~= "semi" and tank.shield < c_const_get("tank_shieldMinCollide") then

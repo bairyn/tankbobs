@@ -257,6 +257,12 @@ c_tcm_wall =
 
 	pid = 0,
 	path = false,
+
+	m = {pid = nil,
+		 ppid = nil,
+		 ppos = 0,
+		 startpos = tankbobs.m_vec2(),
+		 p = {}}
 }
 
 c_tcm_teleporter =
@@ -304,6 +310,9 @@ c_tcm_controlPoint =
 	red = false,
 
 	wayPoint = 0,
+
+	m = {team = nil,
+		 p = {}}
 }
 
 c_tcm_flag =
@@ -314,6 +323,11 @@ c_tcm_flag =
 	red = false,
 
 	wayPoint = 0,
+
+	m = {stolen = nil,
+	     dropped = false,
+	     pos = tankbobs.m_vec2(),
+		 p = {}}
 }
 
 c_tcm_wayPoint =

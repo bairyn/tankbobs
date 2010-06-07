@@ -49,7 +49,7 @@ local CONNECTED     = CONNECTED
 local server_timeout = 6
 
 function st_internet_init()
-	connection = {state = UNCONNECTED, proceeding = false, lastRequestTime, challenge = 0, address = c_config_get("client.serverIP"), ip = "", port = nil, ui = "", ping = nil, offset = nil, gameType = nil, t = nil, banMessage = ""}
+	connection = {state = UNCONNECTED, proceeding = false, lastRequestTime, challenge = 0, address = c_config_get("client.serverIP"), ip = "", port = nil, ui = "", ping = nil, offset = nil, gameType = nil, timestamp, t = nil, banMessage = ""}
 
 	if connection.address:find(":") then
 		connection.port = tonumber(connection.address:sub(connection.address:find(":") + 1))
@@ -180,6 +180,7 @@ function st_internet_step(d)
 				elseif switch == 0xA0 then
 					local challenge = tankbobs.io_toInt(data:sub(1, 4)) data = data:sub(5)
 					local instagib = tankbobs.io_toChar(data:sub(1, 1)) data = data:sub(2)
+					local spawnStyle = tankbobs.io_toChar(data:sub(1, 1)) data = data:sub(2)
 					local set = data:sub(1, data:find(tankbobs.io_fromChar(0x00)) - 1) data = data:sub(data:find(tankbobs.io_fromChar(0x00)) + 1)
 					local map = data:sub(1, data:find(tankbobs.io_fromChar(0x00)) - 1) data = data:sub(data:find(tankbobs.io_fromChar(0x00)) + 1)
 					local gameType = data:sub(1, data:find(tankbobs.io_fromChar(0x00)) - 1) data = data:sub(data:find(tankbobs.io_fromChar(0x00)) + 1)
@@ -195,7 +196,16 @@ function st_internet_step(d)
 
 					c_world_setGameType(gameType)
 
-					c_world_setInstagib(instagib ~= 0x00 and true or false)
+					local switch = instagib
+					if switch == 0x00 then
+						c_world_setInstagib(false)
+					elseif switch == 0x01 then
+						c_world_setInstagib("semi")
+					elseif switch == 0x02 then
+						c_world_setInstagib(true)
+					end
+
+					c_world_setSpawnStyle(spawnStyle)
 
 					-- send the server the challenge response
 					tankbobs.n_newPacket(37)

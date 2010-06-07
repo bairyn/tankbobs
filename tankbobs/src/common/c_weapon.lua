@@ -882,9 +882,9 @@ c_weapon_projectile =
 	p = tankbobs.m_vec2(),
 	weapon = nil,  -- type of the weapon which created the bolt
 	r = 0,  -- rotation
-	collided = false,  -- whether it needs to be removed
 	collisions = 0,
 	owner = nil,  -- tank which fired it
+	collided = false,  -- whether it needs to be removed
 
 	m = {p = {}}
 }
@@ -1201,11 +1201,11 @@ function c_weapon_fire(tank, d)
 				angle = angle - weapon.spread
 
 				-- apply knockback impulse to the tank
-				local point = tankbobs.w_getCenterOfMass(tank.body)
+				local point = tankbobs.w_getCenterOfMass(tank.m.body)
 				local force = tankbobs.m_vec2()
 				force.R = -weapon.knockback
-				force.t = tankbobs.w_getAngle(tank.body)
-				tankbobs.w_applyImpulse(tank.body, force, point)
+				force.t = tankbobs.w_getAngle(tank.m.body)
+				tankbobs.w_applyImpulse(tank.m.body, force, point)
 			end
 		end
 
