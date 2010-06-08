@@ -673,7 +673,7 @@ protocol_persist =
 		{ identifier(increment())
 		, nil
 		, VT_FUNCTION
-		, function(parse)
+		, function()
 			local res = {}
 
 			newPut(res)
@@ -708,7 +708,7 @@ protocol_persist =
 		{ identifier(increment())
 		, nil
 		, VT_FUNCTION
-		, function(parse)
+		, function()
 			local res = {}
 
 			newPut(res)
@@ -803,7 +803,7 @@ protocol_persist =
 		{ identifier(increment())
 		, nil
 		, VT_FUNCTION
-		, function(parse)
+		, function()
 			local res = {}
 
 			newPut(res)
@@ -840,7 +840,7 @@ protocol_persist =
 		{ identifier(increment())
 		, nil
 		, VT_FUNCTION
-		, function(parse)
+		, function()
 			local res = {}
 
 			newPut(res)
@@ -923,7 +923,7 @@ protocol_persist =
 		{ identifier(increment())
 		, function() return c_world_getGameType() == DOMINATION end
 		, VT_FUNCTION
-		, function(parse)
+		, function()
 			local res = {}
 
 			newPut(res)
@@ -944,7 +944,7 @@ protocol_persist =
 		{ identifier(increment())
 		, function() return c_world_getGameType() == CAPTURETHEFLAG end
 		, VT_FUNCTION
-		, function(parse)
+		, function()
 			local res = {}
 
 			newPut(res)
@@ -1276,9 +1276,9 @@ function c_protocol_setPersistProtocol(protocol)
 			for i = parseIndex or 1, max do
 				if i % #grammar == 1 then
 					if size > maxSize then
-						parseIndex = math.max(1, i - 1)
+						parseIndex = math.max(1, i - #grammar)
 
-						return res
+						return res, true
 					else
 						new = res
 					end
@@ -1300,7 +1300,9 @@ function c_protocol_setPersistProtocol(protocol)
 
 			parseIndex = nil
 
-			return res, size, math.floor(max / #grammar)
+			res = new or res
+
+			return res, false
 		else
 			return identifier .. parseValue(grammar, data)
 		end
@@ -1326,8 +1328,6 @@ function c_protocol_setPersistProtocol(protocol)
 			local identifier = tankbobs.io_fromChar(v[1])
 
 			if not v[2] or v[2]() then
-				local new
-
 				if v[3] == VT_STRING then
 					local function getValue(key, t)
 						t = t or _G
@@ -1340,18 +1340,18 @@ function c_protocol_setPersistProtocol(protocol)
 						end
 					end
 
-					new = data .. parseSegment(v[5], getValue(v[4]), identifier, max - #data)
+					local res, end_ = parseSegment(v[5], getValue(v[4]), identifier, max - #data)
+					data = data .. res
 				elseif v[3] == VT_FUNCTION then
-					new = data .. parseSegment(v[5], v[4](), identifier, max - #data)
+					local res, end_ = parseSegment(v[5], v[4](), identifier, max - #data)
+					data = data .. res
 				else
 					error("Unrecognized value type ('" .. v[3] .. "') in protocol segment with identifier '" .. common_stringToHex("", "0x", identifier) .. "'.")
 				end
 
-				if #new > max then
+				if end_ then
 					break
 				end
-
-				data = new
 			end
 
 			if nextSegment == #segments then
