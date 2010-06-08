@@ -928,7 +928,7 @@ protocol_persist =
 
 			newPut(res)
 
-			for k, v in pairs(c_tcm_current_set.controlPoints) do
+			for k, v in pairs(c_tcm_current_map.controlPoints) do
 				nextPut(k)
 				nextPut(v.m.team)
 			end
@@ -949,7 +949,7 @@ protocol_persist =
 
 			newPut(res)
 
-			for k, v in pairs(c_tcm_current_set.flags) do
+			for k, v in pairs(c_tcm_current_map.flags) do
 				nextPut(k)
 				nextPut(v.m.stolen)
 				nextPut(v.m.dropped)
