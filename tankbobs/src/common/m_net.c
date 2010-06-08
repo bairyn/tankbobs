@@ -65,6 +65,10 @@ static int lastSentPacket = -1;
 static int lastReceivedPacket = -1;
 static int queueTime;
 
+static IPaddress lastUsedAddress;
+static char lastUsedHostName[BUFSIZE] = {""};
+static Uint16 lastUsedPort = 0;
+
 void n_initNL(lua_State *L)
 {
 }
@@ -325,7 +329,18 @@ int n_sendPacket(lua_State *L)
 		hostName = lastHostName;
 	}
 
-	SDLNet_ResolveHost(&currentPacket->address, hostName, currentPort);
+	if(strcmp(lastUsedHostName, hostName) != 0 || lastUsedPort != currentPort)
+	{
+		strncpy(lastUsedHostName, hostName, sizeof(lastUsedHostName));
+		lastUsedPort = currentPort;
+
+		SDLNet_ResolveHost(&currentPacket->address, hostName, currentPort);
+		lastUsedAddress = currentPacket->address;
+	}
+	else
+	{
+		currentPacket->address = lastUsedAddress;
+	}
 
 	if(queueTime)
 	{
