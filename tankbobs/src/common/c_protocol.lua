@@ -1285,6 +1285,11 @@ function c_protocol_setPersistProtocol(protocol)
 
 					new = new .. identifier
 					size = size + 1
+				elseif parseIndex then
+					-- We screwed up somewhere.  FIXME: Why does this happen?
+					parseIndex = 1
+
+					return "", true
 				end
 
 				local value, bytes = parseValue(grammar[(i - 1) % #grammar + 1], data[i])
