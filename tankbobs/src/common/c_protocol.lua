@@ -904,23 +904,25 @@ protocol_persist =
 			newPut(res)
 
 			for k, v in pairs(c_world_getCorpses()) do
-				nextPut(k)
-				nextPut(v.timeTilExplode)
-				nextPut(v.color.r)
-				nextPut(v.color.g)
-				nextPut(v.color.b)
-				nextPut(v.red)
-				nextPut(v.p)
-				nextPut(v.r)
-				nextPut(v.h[1])
-				nextPut(v.h[2])
-				nextPut(v.h[3])
-				nextPut(v.h[4])
-				nextPut(v.m.body and tankbobs.w_getPosition(v.m.body) or ZERO)
-				nextPut(v.m.body and tankbobs.w_getAngle(v.m.body) or 0)
-				nextPut(v.m.body and tankbobs.w_getLinearVelocity(v.m.body) or ZERO)
-				nextPut(v.m.body and tankbobs.w_getAngularVelocity(v.m.body) or 0)
-				nextPut(v.name)
+				if v.exists then
+					nextPut(k)
+					nextPut(v.timeTilExplode)
+					nextPut(v.color.r)
+					nextPut(v.color.g)
+					nextPut(v.color.b)
+					nextPut(v.red)
+					nextPut(v.p)
+					nextPut(v.r)
+					nextPut(v.h[1])
+					nextPut(v.h[2])
+					nextPut(v.h[3])
+					nextPut(v.h[4])
+					nextPut(v.m.body and tankbobs.w_getPosition(v.m.body) or ZERO)
+					nextPut(v.m.body and tankbobs.w_getAngle(v.m.body) or 0)
+					nextPut(v.m.body and tankbobs.w_getLinearVelocity(v.m.body) or ZERO)
+					nextPut(v.m.body and tankbobs.w_getAngularVelocity(v.m.body) or 0)
+					nextPut(v.name)
+				end
 			end
 
 			return res
