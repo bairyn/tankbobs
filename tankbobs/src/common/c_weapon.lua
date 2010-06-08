@@ -937,7 +937,7 @@ function c_weapon_pickUp(tank, weaponName)
 	tank.weapon = weapon.index
 	tank.ammo = weapon.capacity
 	tank.clips = weapon.clips
-	tank.reloading = false
+	tank.reloading = 0
 	tank.shotgunReloadState = nil
 end
 
@@ -1008,6 +1008,13 @@ function c_weapon_fire(tank, d)
 		return
 	end
 
+	local reloading = false
+	if tank.reloading > 0.0 then
+		reloading = true
+	end
+
+	tank.reloading = math.max(0, tank.reloading - d)
+
 	local weapon = c_weapons[tank.weapon]
 
 	if not weapon then
@@ -1039,18 +1046,18 @@ function c_weapon_fire(tank, d)
 		return
 	end
 
-	if tank.reloading then
+	if reloading then
 		if weapon.shotgunClips then
 			if not tank.shotgunReloadState then
-				tank.reloading = t
+				tank.reloading = weapon.reloadTime.initial
 
 				tank.shotgunReloadState = 0
 			else
 				if tank.shotgunReloadState == 0 then
 					-- initial
 
-					if t >= tank.reloading + (c_world_timeMultiplier(weapon.reloadTime.initial)) then
-						tank.reloading = t
+					if tank.reloading <= 0 then
+						tank.reloading = weapon.reloadTime.clip
 
 						tank.shotgunReloadState = 1
 
@@ -1060,14 +1067,14 @@ function c_weapon_fire(tank, d)
 				elseif tank.shotgunReloadState == 1 then
 					-- clip
 
-					if t >= tank.reloading + (c_world_timeMultiplier(weapon.reloadTime.clip)) then
+					if tank.reloading <= 0 then
 						if tank.ammo < weapon.capacity and tank.clips > 0 and bit.band(tank.state, RELOAD) ~= 0 then
-							tank.reloading = t
+							tank.reloading = weapon.reloadTime.clip
 
 							tank.clips = tank.clips - 1
 							tank.ammo = tank.ammo + 1
 						else
-							tank.reloading = t
+							tank.reloading = weapon.reloadTime.final
 
 							tank.shotgunReloadState = 2
 						end
@@ -1075,7 +1082,7 @@ function c_weapon_fire(tank, d)
 				elseif tank.shotgunReloadState == 2 then
 					-- final
 
-					if t >= tank.reloading + (c_world_timeMultiplier(weapon.reloadTime.initial)) then
+					if tank.reloading <= 0 then
 						tank.reloading = false
 
 						tank.shotgunReloadState = nil
@@ -1083,9 +1090,7 @@ function c_weapon_fire(tank, d)
 				end
 			end
 		else
-			if t >= tank.reloading + (c_world_timeMultiplier(weapon.reloadTime)) then
-				tank.reloading = false
-
+			if tank.reloading <= 0.0 then
 				tank.clips = tank.clips - 1
 				tank.ammo = weapon.capacity
 			end
@@ -1102,7 +1107,11 @@ function c_weapon_fire(tank, d)
 		tank.lastFireTime = t - (c_world_timeMultiplier(weapon.repeatRate))
 
 		if bit.band(tank.state, RELOAD) ~= 0 and not tank.reloading and tank.clips > 0 and tank.ammo < weapon.capacity then
-			tank.reloading = t
+			if weapon.shotgunClips then
+				tank.reloading = weapon.reloadTime.initial
+			else
+				tank.reloading = weapon.reloadTime
+			end
 
 			ret()
 
@@ -1136,7 +1145,7 @@ function c_weapon_fire(tank, d)
 		tank.m.fired = false
 
 		if tank.ammo <= 0 and weapon.capacity ~= 0 then
-			--if not tank.reloading then  -- redundant
+			--if tank.reloading < 0.0 then  -- redundant
 				if tank.clips <= 0 then
 					tank.m.empty = true
 

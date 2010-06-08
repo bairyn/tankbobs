@@ -475,7 +475,7 @@ c_world_tank =
 	score = 0,
 	ammo = 0,
 	clips = 0,
-	reloading = false,
+	reloading = 0,
 	shotgunReloadState = nil,
 	red = false,
 	color = {r = 0, g = 0, b = 0},

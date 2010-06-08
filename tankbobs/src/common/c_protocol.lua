@@ -336,7 +336,7 @@ protocol_unpersist =
 			tank.clips = nextParse(parse)
 			tank.cd.acceleration = nextParse(parse)
 			tank.cd.aimAid = nextParse(parse)
-			tank.reloading = nextParse(parse) and tankbobs.t_getTicks()
+			tank.reloading = nextParse(parse)
 			tank.shotgunReloadState = nextParse(parse)
 			tank.red = nextParse(parse)
 			tank.color.r = nextParse(parse)
@@ -390,7 +390,7 @@ protocol_unpersist =
 		  , INT
 		  , BOOL
 		  , BOOL
-		  , BOOL
+		  , DOUBLE
 		  , NILINT
 		  , BOOL
 		  , DOUBLE
@@ -794,7 +794,7 @@ protocol_persist =
 		  , INT
 		  , BOOL
 		  , BOOL
-		  , BOOL
+		  , DOUBLE
 		  , NILINT
 		  , BOOL
 		  , DOUBLE
