@@ -321,6 +321,7 @@ protocol_unpersist =
 			tank.h[2](nextParse(parse))
 			tank.h[3](nextParse(parse))
 			tank.h[4](nextParse(parse))
+			tank.r = nextParse(parse)
 			tank.name = nextParse(parse)
 			tank.exists = nextParse(parse)
 			tank.spawning = nextParse(parse)
@@ -361,6 +362,7 @@ protocol_unpersist =
 
 			if tank.exists and tank.m.body and tank.m.fixture then
 				tankbobs.w_setPosition(tank.m.body, tank.p)
+				tankbobs.w_setAngle(tank.m.body, tank.r)
 				tankbobs.w_setLinearVelocity(tank.m.body, velocity)
 				tankbobs.w_setAngularVelocity(tank.m.body, angularVelocity)
 			end
@@ -373,6 +375,7 @@ protocol_unpersist =
 		  , VEC2
 		  , VEC2
 		  , VEC2
+		  , DOUBLE
 		  , STRING
 		  , BOOL
 		  , BOOL
@@ -727,6 +730,7 @@ protocol_persist =
 					nextPut(v.h[2])
 					nextPut(v.h[3])
 					nextPut(v.h[4])
+					nextPut(v.r)
 					nextPut(v.name)
 					nextPut(v.exists)
 					nextPut(v.spawning)
@@ -775,6 +779,7 @@ protocol_persist =
 		  , VEC2
 		  , VEC2
 		  , VEC2
+		  , DOUBLE
 		  , STRING
 		  , BOOL
 		  , BOOL
