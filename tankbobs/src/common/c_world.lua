@@ -942,6 +942,8 @@ function c_world_tank_die(tank, t)
 		local vel = t_w_getLinearVelocity(tank.m.body)
 		local index = tankbobs.w_getIndex(tank.m.body)
 
+		tank.m.lastDieTime = t
+
 		tankbobs.w_removeBody(tank.m.body) tank.m.body = nil tank.m.fixture = nil
 
 		local switch = c_world_getGameType()
@@ -974,7 +976,6 @@ function c_world_tank_die(tank, t)
 
 	tank.shield = 0
 	tank.exists = false
-	tank.m.lastDieTime = t
 
 	tank.nextSpawnTime = t + c_world_timeMultiplier(c_const_get("tank_spawnTime"))
 
