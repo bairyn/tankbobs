@@ -2346,6 +2346,14 @@ function c_world_projectile_step(d, projectile)
 end
 
 function c_world_spawnPowerup(powerup, index)
+	if not index then
+		for k, v in pairs(c_world_powerups) do
+			if v == powerup then
+				index = k
+			end
+		end
+	end
+
 	powerup.m.body = tankbobs.w_addBody(powerup.p, 0, c_const_get("powerup_canSleep"), c_const_get("powerup_isBullet"), c_const_get("powerup_linearDamping"), c_const_get("powerup_angularDamping"), index)
 	powerup.m.fixture = tankbobs.w_addPolygonalFixture(c_world_powerupHull(powerup), c_const_get("powerup_density"), c_const_get("powerup_friction"), c_const_get("powerup_restitution"), c_const_get("powerup_isSensor"), c_const_get("powerup_contentsMask"), c_const_get("powerup_clipmask"), powerup.m.body, not c_const_get("powerup_static"))
 end
