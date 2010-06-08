@@ -154,9 +154,10 @@ local function setNumPowerups(num)
 	for i = oldNum + 1, num do
 		-- add powerup
 		local powerup = c_world_powerup:new()
+		table.insert(c_world_getPowerups(), powerup)
 		powerup.spawnTime = tankbobs.t_getTicks()
 
-		c_world_spawnPowerup(powerup, index)
+		c_world_spawnPowerup(powerup)
 
 		-- add some initial push to the powerup
 		local push = t_m_vec2()
