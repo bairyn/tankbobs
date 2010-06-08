@@ -507,8 +507,9 @@ c_world_corpse =
 	new = c_class_new,
 	base = c_world_tank,
 
-	explodeTime = 0,
-	explode = nil,
+	timeTilExplode = 0,
+
+	explode = false,
 }
 
 c_world_team =
@@ -892,31 +893,45 @@ function c_world_tank_spawn(tank)
 	tank.spawning = true
 end
 
-function c_world_addCorpse(tank, vel, index)
-	local corpse = c_world_corpse:new()  -- FIXME: t_clone() segfaults when overwriting a value?
+-- pass index in a table to overwrite previous corpse
+function c_world_addCorpse(index, vel, tank)
+	index = index or 1
+	if type(index) == "table" then
+		index = index[1]
 
-	local corpseIndex = 1
-	for k, v in pairs(c_world_corpses) do
-		if v == corpse then
-			corpseIndex = k
+		local corpse = c_world_corpses[index]
+		if corpse then
+			c_world_removeCorpse(corpse)
+		end
+	else
+		while c_world_corpses[index] do
+			index = index + 1
 		end
 	end
 
-	local FIXMETODOtmpLastAttackers = tank.lastAttackers  -- HACK: work around segfault
-	tank.lastAttackers = {}  -- FIXME TODO: t_clone() segfaults when this isn't set?
+	local corpse = c_world_corpse:new()  -- FIXME: t_clone() segfaults when overwriting a value?
 
-	t_t_clone(true, tank, corpse)
+	if tank then
+		local FIXMETODOtmpLastAttackers = tank.lastAttackers  -- HACK: work around segfault
+		tank.lastAttackers = {}  -- FIXME TODO: t_clone() segfaults when this isn't set?
 
-	tank.lastAttackers = FIXMETODOtmpLastAttackers
+		t_t_clone(true, tank, corpse)
 
-	corpse.explodeTime = t_t_getTicks() + c_world_timeMultiplier(c_const_get("world_corpseTime"))
+		tank.lastAttackers = FIXMETODOtmpLastAttackers
+	end
+
+	corpse.timeTilExplode = c_const_get("world_corpseTime")
 	corpse.m.body = tankbobs.w_addBody(corpse.p, corpse.r, c_const_get("corpse_canSleep"), c_const_get("corpse_isBullet"), c_const_get("corpse_linearDamping"), c_const_get("corpse_angularDamping"), index)
 	corpse.m.fixture = tankbobs.w_addPolygonalFixture(corpse.h, c_const_get("corpse_density"), c_const_get("corpse_friction"), c_const_get("corpse_restitution"), c_const_get("corpse_isSensor"), c_const_get("corpse_contentsMask"), c_const_get("corpse_clipmask"), corpse.m.body, not c_const_get("corpse_static"))
-	t_w_setLinearVelocity(corpse.m.body, vel)
+	if vel then
+		t_w_setLinearVelocity(corpse.m.body, vel)
+	end
 
 	corpse.exists = true
 
-	table.insert(c_world_corpses, corpse)
+	c_world_corpses[index] = corpse
+
+	return corpse, index
 end
 
 function c_world_tank_die(tank, t)
@@ -934,10 +949,10 @@ function c_world_tank_die(tank, t)
 	   	   switch == SURVIVOR or
 	   	   switch == TEAMSURVIVOR then
 			if not roundEnd and not endingRound then
-				c_world_addCorpse(tank, vel, index)
+				c_world_addCorpse(index, vel, tank)
 			end
 		else
-			c_world_addCorpse(tank, vel, index)
+			c_world_addCorpse(index, vel, tank)
 		end
 	end
 
@@ -2663,8 +2678,6 @@ function c_world_explosion(pos, damage, force, radius, log, attacker)
 end
 
 function c_world_corpse_step(d, corpse)
-	local t = t_t_getTicks()
-
 	if not corpse.exists then
 		c_world_removeCorpse(corpse)
 
@@ -2685,15 +2698,17 @@ function c_world_corpse_step(d, corpse)
 		corpse.r = t_w_getAngle(corpse.m.body)
 	end
 
-	if t >= corpse.explodeTime + c_world_timeMultiplier(c_const_get("world_corpsePostTime")) then
+	corpse.timeTilExplode = corpse.timeTilExplode - d  -- can be negative
+
+	if corpse.timeTilExplode <= -c_const_get("world_corpsePostTime") then
 		-- remove corpse
 		corpse.exists = false
 
 		c_world_removeCorpse(corpse)
-	elseif t >= corpse.explodeTime then
+	elseif corpse.timeTilExplode <= 0 then
 		-- explode corpse
 		if not corpse.explode then
-			corpse.explode = c_const_get("world_corpsePostTime")
+			corpse.explode = true
 
 			c_world_explosion(corpse.p, c_const_get("world_corpseExplodeDamage"), c_const_get("world_corpseExplodeKnockback"), c_const_get("world_corpseExplodeRadius"), c_const_get("world_corpseExplodeRadiusReduce"), tankbobs.w_getIndex(corpse.m.body))
 		end
@@ -2701,8 +2716,6 @@ function c_world_corpse_step(d, corpse)
 		if corpse.m.body then
 			tankbobs.w_removeBody(corpse.m.body) corpse.m.body = nil corpse.m.fixture = nil
 		end
-
-		corpse.explode = corpse.explode - d
 	end
 end
 
@@ -3170,10 +3183,6 @@ function c_world_resetWorldTimers(t)
 		v.spawnTime = t
 	end
 
-	for _, v in pairs(c_world_corpses) do
-		v.explodeTime = t + c_world_timeMultiplier(c_const_get("world_corpseTime"))
-	end
-
 	for _, v in pairs(c_weapon_getProjectiles()) do
 		if v.m.collideTime then
 			v.m.collideTime = t + c_world_timeMultiplier(c_const_get("world_corpsePostTime"))
@@ -3228,10 +3237,6 @@ function c_world_offsetWorldTimers(d)
 
 	for _, v in pairs(c_world_powerups) do
 		v.spawnTime = v.spawnTime + d
-	end
-
-	for _, v in pairs(c_world_corpses) do
-		v.explodeTime = v.explodeTime + d
 	end
 
 	for _, v in pairs(c_weapon_getProjectiles()) do

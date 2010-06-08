@@ -430,7 +430,7 @@ function game_drawWorld(d, M, rotM)
 										gl.Translate(v.p.x, v.p.y, 0)
 										gl.Color(1, 1, 1, 1)
 										gl.TexEnv("TEXTURE_ENV_COLOR", 1, 1, 1, 1)
-										local scale = 1 - v.explode / c_const_get("world_corpsePostTime")
+										local scale = -v.timeTilExplode / c_const_get("world_corpsePostTime")
 										gl.Scale(scale, scale, 1)
 										gl.CallList(explosion_listBase)
 									gl.PopMatrix()
@@ -497,7 +497,7 @@ function game_drawWorld(d, M, rotM)
 										end
 									end
 
-									if v.weapon and not v.reloading and c_weapon_getWeapons()[v.weapon] then
+									if v.weapon and v.reloading <= 0.0 and c_weapon_getWeapons()[v.weapon] then
 										gl.CallList(c_weapon_getWeapons()[v.weapon].m.p.list)
 									end
 								gl.PopMatrix()
@@ -505,7 +505,7 @@ function game_drawWorld(d, M, rotM)
 
 							-- aiming aids
 							gl.EnableClientState("VERTEX_ARRAY")
-							if (v.weapon and c_weapon_getWeapons()[v.weapon] and c_weapon_getWeapons()[v.weapon].aimAid and not v.reloading) or (v.cd.aimAid) then
+							if (v.weapon and c_weapon_getWeapons()[v.weapon] and c_weapon_getWeapons()[v.weapon].aimAid and v.reloading <= 0) or (v.cd.aimAid) then
 								gl.PushAttrib("ENABLE_BIT")
 									local b
 									local vec = tankbobs.m_vec2()
@@ -809,7 +809,7 @@ function game_drawWorld(d, M, rotM)
 		for _, v in pairs(c_world_getTanks()) do
 			if v.exists and v.weapon then
 				local weapon = c_weapon_getWeapons()[v.weapon]
-				if weapon and ((bit.band(v.state, FIRING) ~= 0 and not v.reloading) or weapon.meleeRange < 0) and weapon.meleeRange ~= 0 then
+				if weapon and ((bit.band(v.state, FIRING) ~= 0 and v.reloading <= 0) or weapon.meleeRange < 0) and weapon.meleeRange ~= 0 then
 					gl.PushMatrix()
 						gl.Translate(v.p.x, v.p.y, 0)
 						gl.Rotate(tankbobs.m_degrees(v.r - c_const_get("tank_defaultRotation")), 0, 0, 1)
@@ -1089,7 +1089,7 @@ function game_step(d)
 	for _, v in pairs(c_world_getTanks()) do
 		if v.exists then
 			-- handle melee sounds specially
-			if v.weapon and c_weapon_getWeapons()[v.weapon] and c_weapon_getWeapons()[v.weapon].meleeRange ~= 0 and not v.reloading then
+			if v.weapon and c_weapon_getWeapons()[v.weapon] and c_weapon_getWeapons()[v.weapon].meleeRange ~= 0 and v.reloading <= 0 then
 				if bit.band(v.state, FIRING) ~= 0 then
 					c_weapon_getWeapons()[v.weapon].m.used = true
 				end
@@ -1167,8 +1167,8 @@ function game_step(d)
 				end
 			end
 
-			if v.weapon and v.reloading and v.m.lastReloadTime ~= v.reloading then
-				v.m.lastReloadTime = v.reloading
+			if v.weapon and v.reloading > 0 and v.m.lastReloadState ~= v.reloading > 0 then
+				v.m.lastReloadState = v.reloading > 0
 
 				if c_weapon_getWeapons()[v.weapon] and c_weapon_getWeapons()[v.weapon].shotgunClips then
 					if v.shotgunReloadState == 0 then

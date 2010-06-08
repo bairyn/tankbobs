@@ -150,6 +150,23 @@ local function setNumTanks(num)
 	end
 end
 
+local function setNumCorpses(num)
+	local oldNum = #c_world_getCorpses()
+
+	for i = oldNum + 1, num do
+		-- add corpse
+		local corpse = c_world_addCorpse({i})
+	end
+
+	for i = oldNum, num + 1, -1 do
+		-- remove corpse
+		local corpse = c_world_getTanks()[i]
+		if corpse then
+			c_world_removeCorpse(corpse)
+		end
+	end
+end
+
 local function setNumPowerups(num)
 	local oldNum = #c_world_getPowerups()
 
@@ -236,6 +253,12 @@ protocol_unpersist =
 		, nil
 		, VT_FUNCTION
 		, setNumTanks
+		, INT
+		},
+		{ identifier(increment())
+		, nil
+		, VT_FUNCTION
+		, setNumCorpses
 		, INT
 		},
 		{ identifier(increment())
@@ -401,6 +424,61 @@ protocol_unpersist =
 		  , NILINT
 		  , NILINT
 		  , INT
+		  }
+		},
+
+		-- corpses
+		{ identifier(increment())
+		, nil
+		, VT_FUNCTION
+		, function(parse)
+			local corpse = c_world_getCorpses()[newParse(parse)]
+
+			if not corpse then
+				-- silently ignore
+				return
+			end
+
+			corpse.timeTilExplode = nextParse(parse)
+			corpse.color.r = nextParse(parse)
+			corpse.color.g = nextParse(parse)
+			corpse.color.b = nextParse(parse)
+			corpse.red = nextParse(parse)
+			corpse.p(nextParse(parse))
+			corpse.r = nextParse(parse)
+			corpse.h[1](nextParse(parse))
+			corpse.h[2](nextParse(parse))
+			corpse.h[3](nextParse(parse))
+			corpse.h[4](nextParse(parse))
+			local position = nextParse(parse)
+			local angle = nextParse(parse)
+			local velocity = nextParse(parse)
+			local angularVelocity = nextParse(parse)
+			corpse.name = nextParse(parse)
+			if corpse.m.body then
+				tankbobs.w_setPosition(corpse.m.body, position)
+				tankbobs.w_setAngle(corpse.m.body, angle)
+				tankbobs.w_setLinearVelocity(corpse.m.body, velocity)
+				tankbobs.w_setAngularVelocity(corpse.m.body, angularVelocity)
+			end
+		  end
+		, { INT
+		  , DOUBLE
+		  , DOUBLE
+		  , DOUBLE
+		  , DOUBLE
+		  , BOOL
+		  , VEC2
+		  , DOUBLE
+		  , VEC2
+		  , VEC2
+		  , VEC2
+		  , VEC2
+		  , VEC2
+		  , DOUBLE
+		  , VEC2
+		  , DOUBLE
+		  , STRING
 		  }
 		},
 
@@ -585,27 +663,31 @@ protocol_unpersist =
 	}
 }
 
-local function getNumProjectiles(num)
+local function getNumProjectiles()
 	return #c_weapon_getProjectiles()
 end
 
-local function getNumTanks(num)
+local function getNumTanks()
 	return #c_world_getTanks()
 end
 
-local function getNumPowerups(num)
+local function getNumCorpses()
+	return #c_world_getCorpses()
+end
+
+local function getNumPowerups()
 	return #c_world_getPowerups()
 end
 
-local function getNumWalls(num)
+local function getNumWalls()
 	return #c_tcm_current_map.walls
 end
 
-local function getNumControlPoints(num)
+local function getNumControlPoints()
 	return #c_tcm_current_map.controlPoints
 end
 
-local function getNumFlags(num)
+local function getNumFlags()
 	return #c_tcm_current_map.flags
 end
 
@@ -649,6 +731,12 @@ protocol_persist =
 		, nil
 		, VT_FUNCTION
 		, getNumTanks
+		, INT
+		},
+		{ identifier(increment())
+		, nil
+		, VT_FUNCTION
+		, getNumCorpses
 		, INT
 		},
 		{ identifier(increment())
@@ -803,6 +891,57 @@ protocol_persist =
 		  , NILINT
 		  , NILINT
 		  , INT
+		  }
+		},
+
+		-- corpses
+		{ identifier(increment())
+		, nil
+		, VT_FUNCTION
+		, function()
+			local res = {}
+
+			newPut(res)
+
+			for k, v in pairs(c_world_getCorpses()) do
+				nextPut(k)
+				nextPut(v.timeTilExplode)
+				nextPut(v.color.r)
+				nextPut(v.color.g)
+				nextPut(v.color.b)
+				nextPut(v.red)
+				nextPut(v.p)
+				nextPut(v.r)
+				nextPut(v.h[1])
+				nextPut(v.h[2])
+				nextPut(v.h[3])
+				nextPut(v.h[4])
+				nextPut(v.m.body and tankbobs.w_getPosition(v.m.body) or ZERO)
+				nextPut(v.m.body and tankbobs.w_getAngle(v.m.body) or 0)
+				nextPut(v.m.body and tankbobs.w_getLinearVelocity(v.m.body) or ZERO)
+				nextPut(v.m.body and tankbobs.w_getAngularVelocity(v.m.body) or 0)
+				nextPut(v.name)
+			end
+
+			return res
+		  end
+		, { INT
+		  , DOUBLE
+		  , DOUBLE
+		  , DOUBLE
+		  , DOUBLE
+		  , BOOL
+		  , VEC2
+		  , DOUBLE
+		  , VEC2
+		  , VEC2
+		  , VEC2
+		  , VEC2
+		  , VEC2
+		  , DOUBLE
+		  , VEC2
+		  , DOUBLE
+		  , STRING
 		  }
 		},
 
