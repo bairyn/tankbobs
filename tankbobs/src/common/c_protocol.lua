@@ -163,7 +163,7 @@ local function setNumPowerups(num)
 		local push = tankbobs.m_vec2()
 		push.R = c_const_get("powerup_pushStrength")
 		push.t = c_const_get("powerup_pushAngle")
-		t_w_setLinearVelocity(powerup.m.body, push)
+		tankbobs.w_setLinearVelocity(powerup.m.body, push)
 	end
 
 	for i = num + 1, oldNum do
