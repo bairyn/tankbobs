@@ -1289,7 +1289,7 @@ function c_protocol_setPersistProtocol(protocol)
 
 					new = new .. identifier
 					size = size + 1
-				elseif parseIndex then
+				elseif parseIndex and size <= 0 then
 					-- We screwed up somewhere.  FIXME: Why does this happen?
 					parseIndex = 1
 
