@@ -160,7 +160,7 @@ local function setNumPowerups(num)
 		c_world_spawnPowerup(powerup)
 
 		-- add some initial push to the powerup
-		local push = t_m_vec2()
+		local push = tankbobs.m_vec2()
 		push.R = c_const_get("powerup_pushStrength")
 		push.t = c_const_get("powerup_pushAngle")
 		t_w_setLinearVelocity(powerup.m.body, push)
