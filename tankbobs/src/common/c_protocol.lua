@@ -346,7 +346,12 @@ protocol_unpersist =
 			tank.h[4](nextParse(parse))
 			tank.r = nextParse(parse)
 			tank.name = nextParse(parse)
+			local oldExists = tank.exists
 			tank.exists = nextParse(parse)
+			if not tank.exists and oldExists then
+				tank.exists = true
+				c_world_tank_die(tank)
+			end
 			tank.spawning = nextParse(parse)
 			tank.lastSpawnPoint = nextParse(parse)
 			tank.state = bit.tohex(nextParse(parse))
