@@ -289,7 +289,7 @@ protocol_unpersist =
 		  end
 		, { VEC2
 		  , VEC2
-		  , VEC2
+		  , DOUBLE
 		  , INT
 		  , DOUBLE
 		  , INT
@@ -695,7 +695,7 @@ protocol_persist =
 		  end
 		, { VEC2
 		  , VEC2
-		  , VEC2
+		  , DOUBLE
 		  , INT
 		  , DOUBLE
 		  , INT
