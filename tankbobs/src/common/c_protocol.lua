@@ -143,8 +143,10 @@ local function setNumTanks(num)
 	for i = oldNum, num + 1, -1 do
 		-- remove tank
 		local tank = c_world_getTanks()[i]
-		c_world_tank_die(tank)
-		c_world_removeTank(tank)
+		if tank then
+			c_world_tank_die(tank)
+			c_world_removeTank(tank)
+		end
 	end
 end
 
@@ -169,8 +171,10 @@ local function setNumPowerups(num)
 	for i = oldNum, num + 1, -1 do
 		-- remove powerup
 		local powerup = c_world_getPowerups()[i]
-		tankbobs.w_removeBody(powerup.m.body)
-		c_world_powerupRemove(powerup)
+		if powerup then
+			tankbobs.w_removeBody(powerup.m.body)
+			c_world_powerupRemove(powerup)
+		end
 	end
 end
 
