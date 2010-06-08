@@ -140,7 +140,7 @@ local function setNumTanks(num)
 		c_world_tank_spawn(tank)
 	end
 
-	for i = num + 1, oldNum do
+	for i = oldNum, num + 1, -1 do
 		-- remove tank
 		local tank = c_world_getTanks()[i]
 		c_world_tank_die(tank)
@@ -166,7 +166,7 @@ local function setNumPowerups(num)
 		tankbobs.w_setLinearVelocity(powerup.m.body, push)
 	end
 
-	for i = num + 1, oldNum do
+	for i = oldNum, num + 1, -1 do
 		-- remove powerup
 		local powerup = c_world_getPowerups()[i]
 		tankbobs.w_removeBody(powerup.m.body)
