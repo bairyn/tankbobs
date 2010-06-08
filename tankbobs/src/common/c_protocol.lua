@@ -721,52 +721,50 @@ protocol_persist =
 			newPut(res)
 
 			for k, v in pairs(c_world_getTanks()) do
-				if v.exists and v.m.body and v.m.fixture then
-					nextPut(k)
-					nextPut(v.p)
-					nextPut(tankbobs.w_getLinearVelocity(v.m.body))
-					nextPut(tankbobs.w_getAngularVelocity(v.m.body))
-					nextPut(v.h[1])
-					nextPut(v.h[2])
-					nextPut(v.h[3])
-					nextPut(v.h[4])
-					nextPut(v.r)
-					nextPut(v.name)
-					nextPut(v.exists)
-					nextPut(v.spawning)
-					nextPut(v.lastSpawnPoint)
-					nextPut(v.state)
-					nextPut(v.weapon)
-					nextPut(v.health)
-					nextPut(v.shield)
-					nextPut(v.killer)
-					nextPut(v.score)
-					nextPut(v.ammo)
-					nextPut(v.clips)
-					nextPut(v.cd.acceleration)
-					nextPut(v.cd.aimAid)
-					nextPut(v.reloading)
-					nextPut(v.shotgunReloadState)
-					nextPut(v.red)
-					nextPut(v.color.r)
-					nextPut(v.color.g)
-					nextPut(v.color.b)
-					nextPut(v.tagged)
-					nextPut(v.radiusFireTime)
-					nextPut(v.megaTank)
-					nextPut(v.target)
-					local index = 0
-					if v.flag then
-						for k, v in pairs(c_tcm_current_map.flags) do
-							if v == flag then
-								index = k
+				nextPut(k)
+				nextPut(v.p)
+				nextPut(v.m.body and tankbobs.w_getLinearVelocity(v.m.body) or ZERO)
+				nextPut(v.m.body and tankbobs.w_getAngularVelocity(v.m.body) or 0)
+				nextPut(v.h[1])
+				nextPut(v.h[2])
+				nextPut(v.h[3])
+				nextPut(v.h[4])
+				nextPut(v.r)
+				nextPut(v.name)
+				nextPut(v.exists)
+				nextPut(v.spawning)
+				nextPut(v.lastSpawnPoint)
+				nextPut(v.state)
+				nextPut(v.weapon)
+				nextPut(v.health)
+				nextPut(v.shield)
+				nextPut(v.killer)
+				nextPut(v.score)
+				nextPut(v.ammo)
+				nextPut(v.clips)
+				nextPut(v.cd.acceleration)
+				nextPut(v.cd.aimAid)
+				nextPut(v.reloading)
+				nextPut(v.shotgunReloadState)
+				nextPut(v.red)
+				nextPut(v.color.r)
+				nextPut(v.color.g)
+				nextPut(v.color.b)
+				nextPut(v.tagged)
+				nextPut(v.radiusFireTime)
+				nextPut(v.megaTank)
+				nextPut(v.target)
+				local index = 0
+				if v.flag then
+					for k, v in pairs(c_tcm_current_map.flags) do
+						if v == flag then
+							index = k
 
-								break
-							end
+							break
 						end
 					end
-					nextPut(index)
 				end
+				nextPut(index)
 			end
 
 			return res
