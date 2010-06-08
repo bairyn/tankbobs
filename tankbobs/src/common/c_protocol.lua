@@ -426,9 +426,9 @@ protocol_unpersist =
 		  end
 		, { INT
 		  , VEC2
+		  , DOUBLE
 		  , VEC2
-		  , VEC2
-		  , VEC2
+		  , DOUBLE
 		  , DOUBLE
 		  , INT
 		  , BOOL
@@ -825,9 +825,9 @@ protocol_persist =
 		  end
 		, { INT
 		  , VEC2
+		  , DOUBLE
 		  , VEC2
-		  , VEC2
-		  , VEC2
+		  , DOUBLE
 		  , DOUBLE
 		  , INT
 		  , BOOL
