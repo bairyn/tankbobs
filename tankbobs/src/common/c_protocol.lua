@@ -354,7 +354,7 @@ protocol_unpersist =
 			end
 			tank.spawning = nextParse(parse)
 			tank.lastSpawnPoint = nextParse(parse)
-			tank.state = bit.tohex(nextParse(parse))
+			tank.state = bit.tobit(nextParse(parse))
 			tank.weapon = nextParse(parse)
 			tank.health = nextParse(parse)
 			tank.shield = nextParse(parse)
