@@ -239,13 +239,15 @@ function online_readPackets(d)  -- local
 					connection.t = tankbobs.io_toInt(data:sub(1, 4)) data = data:sub(5)
 					local tank = c_world_getTanks()[connection.t]
 					if tank then
-						if c_config_get("client.online.stepAhead") then
-							c_world_record(tank)
+						if math.random() >= c_config_get("client.online.randomSnapshotFilter") then
+							if c_config_get("client.online.stepAhead") then
+								c_world_record(tank)
+							end
+							local state = tank.state
+							c_protocol_unpersist(data)
+							tank.state = state
+							c_world_stepAhead(connection.timestamp, t)
 						end
-						local state = tank.state
-						c_protocol_unpersist(data)
-						tank.state = state
-						c_world_stepAhead(connection.timestamp, t)
 					else
 						c_protocol_unpersist(data)
 					end
