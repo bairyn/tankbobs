@@ -58,7 +58,7 @@
 		<krr>20</krr>  Key Refresh Rate
 		<musicVolume>0.6</musicVolume>
 		<online>
-			<randomSnapshotFilter>0.1</randomSnapshotFilter>
+			<randomSnapshotFilter>0.2</randomSnapshotFilter>
 			<stepAhead>true</stepAhead>
 			<unlagged>true</unlagged>
 		</online>
@@ -195,7 +195,7 @@
 		<fps>64</fps>
 		<logFile>games.log</logFile>  Make empty (or false) to not record to logs
 		<maxPersistSize>1000</maxPersistSize>
-		<pfps>12</pfps>
+		<pfps>24</pfps>
 		<startupCommandFile>server.cmd</startupCommandFile>
 		<writeFileOnBan>false</writeFileOnBan>  if false, bans are written on restart
 	</server>
