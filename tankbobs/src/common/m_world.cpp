@@ -1408,7 +1408,10 @@ int w_getIndex(lua_State *L)
 	b2Body *body = reinterpret_cast<b2Body *> (lua_touserdata(L, 1));
 	lua_settop(L, 0);
 
-	lua_pushinteger(L, reinterpret_cast<long> (body->GetUserData()));
+	if(body)
+		lua_pushinteger(L, reinterpret_cast<long> (body->GetUserData()));
+	else
+		lua_pushnil(L);
 
 	return 1;
 }
