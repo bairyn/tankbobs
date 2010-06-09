@@ -67,7 +67,7 @@ local function testEnd()
 		return
 	end
 
-	if not worldInitialized then
+	if not c_world_isInitialized() then
 		return
 	end
 

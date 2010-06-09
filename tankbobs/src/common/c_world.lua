@@ -540,6 +540,10 @@ function c_world_getPowerupTypeByIndex(index)
 	--]]
 end
 
+function c_world_isInitialized()
+	return worldInitialized
+end
+
 function c_world_newWorld()
 	local t = t_t_getTicks()
 
