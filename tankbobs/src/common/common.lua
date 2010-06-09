@@ -594,7 +594,50 @@ function common_formatTimeMilliseconds(time)
 	return string.format("%d:%02d:%03d", math.floor(time / 60000), (time - (math.floor(time / 60000) * 60000)) / 1000, time - (math.floor(time / 1000) * 1000))
 end
 
----[[ constants ]]---
+---[[ Dynamic runtime optimization ]]---
+local rates = {40, 24, 12, 1}
+local level = 0
+local nextLevel = 0
+local lastLevelTime = nil
+
+local function dro_getLevel(rate)
+	local level = 0
+
+	local function add(rate2)
+		if rate < rate2 then
+			level = level + 1
+		end
+	end
+
+	for _, v in pairs(rates) do
+		add(v)
+	end
+
+	return
+end
+
+function common_dro_addFrame(rate)
+	nextLevel = dro_getLevel(rate)
+
+	if nextLevel ~= level then
+		if not lastLevelTime then
+			lastLevelTime = tankbobs.t_getTicks()
+		elseif lastLevelTime + 1000 <= tankbobs.t_getTicks() then
+			lastLevelTime = nil
+			level = nextLevel
+
+			if level >= 3 then
+				collectgarbage("collect")
+			end
+		end
+	end
+end
+
+function common_dro_getLevel()
+	return level
+end
+
+---[[ Constants ]]---
 
 SPECIAL        = {}
 

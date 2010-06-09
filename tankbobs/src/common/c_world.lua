@@ -3325,7 +3325,7 @@ function c_world_step(d)
 			c_world_offsetWorldTimers(d * c_const_get("world_time"))
 		else
 			while worldTime < t do
-				if c_world_isBehind() then
+				if c_world_isBehind() or (common_dro_getLevel() >= 4) then
 					c_world_resetBehind()
 
 					break

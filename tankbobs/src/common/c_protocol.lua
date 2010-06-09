@@ -1346,7 +1346,7 @@ function c_protocol_setUnpersistProtocol(protocol)
 			local unpersist = true
 
 			if segment[6] and segment.size then
-				unpersist = math.random() >= c_config_get("client.online.randomSnapshotLowPriorityFilter")
+				unpersist = math.random() >= math.min(c_config_get("client.online.rslpfMax"), c_config_get("client.online.randomSnapshotLowPriorityFilter") + (common_dro_getLevel() >= 2 and 0.2 or 0) + (common_dro_getLevel() >= 3 and 0.2 or 0))
 			end
 
 			if unpersist then
@@ -1550,7 +1550,7 @@ function c_protocol_setPersistProtocol(protocol)
 			local persist = true
 
 			if v[6] then
-				persist = math.random() >= c_config_get("server.randomSnapshotLowPriorityFilter")
+				persist = math.random() >= math.min(c_config_get("server.rslpfMax"), c_config_get("server.randomSnapshotLowPriorityFilter") + (common_dro_getLevel() >= 2 and 0.2 or 0) + (common_dro_getLevel() >= 3 and 0.2 or 0))
 			end
 
 			if not v[2] or v[2]() and persist then

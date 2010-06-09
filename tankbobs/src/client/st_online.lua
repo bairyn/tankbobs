@@ -229,19 +229,24 @@ end
 function online_readPackets(d)  -- local
 	local status, ip, port, data
 	repeat
-		status, ip, port, data = tankbobs.n_readPacket()
+		if common_dro_getLevel() >= 4 then
+			tankbobs.n_readPacket()
+			status = false
+		else
+			status, ip, port, data = tankbobs.n_readPacket()
+		end
 
 		if status then
 			local switch = string.byte(data, 1) data = data:sub(2)
 			if switch == nil then
 			elseif switch == 0xA2 then
-				if connection.ping then
+				if connection.ping and not (common_dro_getLevel() >= 3 and math.random() >= 0.8) then
 					local t = tankbobs.t_getTicks()
 					connection.timestamp = tankbobs.io_toInt(data:sub(1, 4)) data = data:sub(5)
 					connection.t = tankbobs.io_toInt(data:sub(1, 4)) data = data:sub(5)
 					local tank = c_world_getTanks()[connection.t]
 					if tank then
-						if math.random() >= c_config_get("client.online.randomSnapshotFilter") then
+						if math.random() >= math.min(c_config_get("client.rsfMax"), c_config_get("client.online.randomSnapshotFilter") + ((common_dro_getLevel() >= 1) and 0.1 or 0)) then
 							if c_config_get("client.online.stepAhead") then
 								c_world_record(tank)
 							end

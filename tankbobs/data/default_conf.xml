@@ -6,6 +6,7 @@
 		<cameraRotate>true</cameraRotate>
 		<cameraSpeed>5</cameraSpeed>
 		<cameraZoom>1</cameraZoom>
+		<dro>true</dro>
 		<fps>128</fps>
 		<histSize>1024</histSize>  record 256 frames of input
 		<ifps>64</ifps>
@@ -60,6 +61,8 @@
 		<online>
 			<randomSnapshotFilter>0.1</randomSnapshotFilter>
 			<randomSnapshotLowPriorityFilter>0.1</randomSnapshotLowPriorityFilter>
+			<rsfMax>0.9</rsfMax>
+			<rslpfMax>0.9</rslpfMax>
 			<stepAhead>true</stepAhead>
 			<unlagged>true</unlagged>
 		</online>
@@ -200,6 +203,7 @@
 		<maxPersistSize>900</maxPersistSize>
 		<pfps>32</pfps>
 		<randomSnapshotLowPriorityFilter>0.8</randomSnapshotLowPriorityFilter>
+		<rslpfMax>0.9</rslpfMax>
 		<startupCommandFile>server.cmd</startupCommandFile>
 		<writeFileOnBan>false</writeFileOnBan>  if false, bans are written on restart
 	</server>

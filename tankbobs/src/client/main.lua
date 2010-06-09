@@ -30,6 +30,7 @@ local c_config_get = c_config_get
 local c_config_set = c_config_set
 local common_FTM   = common_FTM
 local common_MTF   = common_MTF
+local common_dro_addFrame = common_dro_addFrame
 local tankbobs     = tankbobs
 
 local main_loop
@@ -43,6 +44,7 @@ function main_init()
 	common_FTM   = _G.common_FTM
 	common_MTF   = _G.common_MTF
 	tankbobs     = _G.tankbobs
+	common_dro_addFrame = _G.common_dro_addFrame
 
 	if client and not server then
 		-- reinitialize SDL
@@ -125,6 +127,9 @@ function main_loop()
 	end
 
 	fps = common_MTF(t - lastTime)
+	if c_config_get("client.dro") then
+		common_dro_addFrame(fps)
+	end
 
 	local d = (t - lastTime) / c_world_timeMultiplier()
 	lastTime = t
