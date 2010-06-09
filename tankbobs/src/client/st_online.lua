@@ -68,7 +68,8 @@ local refreshKeys = function()
 		return
 	end
 
-	for i = connection.t, connection.t do
+	--for i = connection.t, connection.t do
+	for i = 1, 1 do
 		local tank = c_world_getTanks()[i]
 
 		if not tank then
