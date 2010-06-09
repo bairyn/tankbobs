@@ -2705,7 +2705,7 @@ function c_world_corpse_step(d, corpse)
 		corpse.r = t_w_getAngle(corpse.m.body)
 	end
 
-	corpse.timeTilExplode = math.max(-c_const_get("world_corpsePostTime"), corpse.timeTilExplode - d)  -- can be negative
+	corpse.timeTilExplode = math.min(c_const_get("world_corpseTime"), math.max(-c_const_get("world_corpsePostTime"), corpse.timeTilExplode - d))  -- can be negative
 
 	if corpse.timeTilExplode <= -c_const_get("world_corpsePostTime") then
 		-- remove corpse
@@ -2723,6 +2723,8 @@ function c_world_corpse_step(d, corpse)
 		if corpse.m.body then
 			tankbobs.w_removeBody(corpse.m.body) corpse.m.body = nil corpse.m.fixture = nil
 		end
+	else
+		corpse.explode = false
 	end
 end
 
