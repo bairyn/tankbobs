@@ -861,7 +861,7 @@ function c_world_hasWon()
 				for k, v in pairs(c_world_tanks) do
 					if v.score == maxScore then
 						numMax   = numMax + 1
-						lastMaxK = K
+						lastMaxK = k
 						lastMaxV = v
 					end
 				end
