@@ -1177,7 +1177,7 @@ function game_step(d)
 				end
 			end
 
-			if v.weapon and v.reloading > 0 and v.m.lastReloadState ~= v.reloading > 0 then
+			if v.weapon and v.reloading > 0 and v.m.lastReloadState ~= (v.reloading > 0) then
 				v.m.lastReloadState = v.reloading > 0
 
 				if c_weapon_getWeapons()[v.weapon] and c_weapon_getWeapons()[v.weapon].shotgunClips then
