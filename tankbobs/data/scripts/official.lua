@@ -204,7 +204,7 @@ elseif c_tcm_current_map.name == "race-track" then
 	local function setPosition(tank)
 		if tank.exists and tank.m.respawnPos then
 			tank.p(tank.m.respawnPos)
-			tankbobs.w_setPosition(tank.body, tank.p)
+			tankbobs.w_setPosition(tank.m.body, tank.p)
 			tank.r = tank.m.respawnRot
 		end
 	end
@@ -317,7 +317,7 @@ elseif c_tcm_current_map.name == "tutorial" then
 	local function setPosition(tank)
 		if tank.exists and tank.m.respawnPos then
 			tank.p(tank.m.respawnPos)
-			tankbobs.w_setPosition(tank.body, tank.p)
+			tankbobs.w_setPosition(tank.m.body, tank.p)
 			tank.r = tank.m.respawnRot
 		end
 	end
@@ -514,8 +514,8 @@ elseif c_tcm_current_map.name == "tutorial" then
 		end
 		tank.m.respawnPos(c_tcm_current_map.playerSpawnPoints[1].p)
 		tank.p(tank.m.respawnPos)
-		tankbobs.w_setPosition(tank.body, tank.p)
-		tankbobs.w_setLinearVelocity(tank.body, tankbobs.m_vec2(0, 0))
+		tankbobs.w_setPosition(tank.m.body, tank.p)
+		tankbobs.w_setLinearVelocity(tank.m.body, tankbobs.m_vec2(0, 0))
 
 		-- disable rotation
 		tank.r = c_const_get("tank_defaultRotation")
@@ -813,8 +813,8 @@ elseif c_tcm_current_map.name == "tutorial" then
 			end
 			tank.m.respawnPos(c_tcm_current_map.playerSpawnPoints[1].p)
 			tank.p(tank.m.respawnPos)
-			tankbobs.w_setPosition(tank.body, tank.p)
-			tankbobs.w_setLinearVelocity(tank.body, tankbobs.m_vec2(0, 0))
+			tankbobs.w_setPosition(tank.m.body, tank.p)
+			tankbobs.w_setLinearVelocity(tank.m.body, tankbobs.m_vec2(0, 0))
 
 			-- listen for a collision of the wall and the giant switch.  Once a collision happens, enable the switch path (push the switch), and continue to the next step
 			local oldc_world_contactListener = c_world_contactListener
@@ -856,8 +856,8 @@ elseif c_tcm_current_map.name == "tutorial" then
 			end
 			tank.m.respawnPos(c_tcm_current_map.playerSpawnPoints[1].p)
 			tank.p(tank.m.respawnPos)
-			tankbobs.w_setPosition(tank.body, tank.p)
-			tankbobs.w_setLinearVelocity(tank.body, tankbobs.m_vec2(0, 0))
+			tankbobs.w_setPosition(tank.m.body, tank.p)
+			tankbobs.w_setLinearVelocity(tank.m.body, tankbobs.m_vec2(0, 0))
 
 			-- continue to next step of tutorial once tank has rotated > 90 degrees
 			if math.abs(c_const_get("tank_defaultRotation") - tank.r) > (math.pi * 2) / 4 then
