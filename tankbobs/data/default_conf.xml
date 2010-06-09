@@ -86,6 +86,8 @@
 			<fpsAlpha> 0.875 </fpsAlpha>
 			<fpsCounter> false </fpsCounter>
 
+			<gameTimer>true</gameTimer>
+
 			<fullscreen>false</fullscreen>
 
 			<height>600</height>

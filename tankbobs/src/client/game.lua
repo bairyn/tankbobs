@@ -181,7 +181,12 @@ function game_new()
 			widget.text = common_formatTimeSeconds(c_world_getTimer())
 		end
 
-		gui_addLabel(tankbobs.m_vec2(89.75, 92.5), "", updateGameTimer, 0.5, c_config_get("client.renderer.fpsRed"), c_config_get("client.renderer.fpsGreen"), c_config_get("client.renderer.fpsBlue"), c_config_get("client.renderer.fpsAlpha"), c_config_get("client.renderer.fpsRed"), c_config_get("client.renderer.fpsGreen"), c_config_get("client.renderer.fpsGreen"), c_config_get("client.renderer.fpsAlpha"))
+		local y = 92.5
+
+		if c_config_get("client.renderer.gameTimer") then
+			gui_addLabel(tankbobs.m_vec2(89.75, y), "", updateGameTimer, 0.5, c_config_get("client.renderer.fpsRed"), c_config_get("client.renderer.fpsGreen"), c_config_get("client.renderer.fpsBlue"), c_config_get("client.renderer.fpsAlpha"), c_config_get("client.renderer.fpsRed"), c_config_get("client.renderer.fpsGreen"), c_config_get("client.renderer.fpsGreen"), c_config_get("client.renderer.fpsAlpha"))
+			y = y - 7.5
+		end
 
 		-- fps counter
 		local function updateFPS(widget)
@@ -189,7 +194,7 @@ function game_new()
 		end
 
 		if c_config_get("client.renderer.fpsCounter") then
-			gui_addLabel(tankbobs.m_vec2(92.5, 86.0), "", updateFPS, 0.5, c_config_get("client.renderer.fpsRed"), c_config_get("client.renderer.fpsGreen"), c_config_get("client.renderer.fpsBlue"), c_config_get("client.renderer.fpsAlpha"), c_config_get("client.renderer.fpsRed"), c_config_get("client.renderer.fpsGreen"), c_config_get("client.renderer.fpsGreen"), c_config_get("client.renderer.fpsAlpha"))
+			gui_addLabel(tankbobs.m_vec2(92.5, y), "", updateFPS, 0.5, c_config_get("client.renderer.fpsRed"), c_config_get("client.renderer.fpsGreen"), c_config_get("client.renderer.fpsBlue"), c_config_get("client.renderer.fpsAlpha"), c_config_get("client.renderer.fpsRed"), c_config_get("client.renderer.fpsGreen"), c_config_get("client.renderer.fpsGreen"), c_config_get("client.renderer.fpsAlpha"))
 		end
 
 		-- end of round label
