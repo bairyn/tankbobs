@@ -227,6 +227,13 @@ protocol_unpersist =
 		, "connection.serverTimestamp"
 		, INT
 		},
+		-- Pause state
+		{ identifier(increment())
+		, nil  -- Always send and store this (function)
+		, VT_FUNCTION
+		, c_world_setPaused
+		, BOOL
+		},
 
 		-- Scores
 		{ identifier(increment())
@@ -703,6 +710,13 @@ protocol_persist =
 		, VT_FUNCTION
 		, tankbobs.t_getTicks
 		, INT
+		},
+		-- Pause state
+		{ identifier(increment())
+		, nil  -- Always send and store this (function)
+		, VT_FUNCTION
+		, c_world_getPaused
+		, BOOL
 		},
 
 		-- Scores
