@@ -234,6 +234,20 @@ protocol_unpersist =
 		, c_world_setPaused
 		, BOOL
 		},
+		-- Game timer
+		{ identifier(increment())
+		, nil  -- Always send and store this (function)
+		, VT_FUNCTION
+		, c_world_setTimer
+		, INT
+		},
+		-- Game timer second
+		{ identifier(increment())
+		, nil  -- Always send and store this (function)
+		, VT_FUNCTION
+		, c_world_setTimerSecond
+		, INT
+		},
 
 		-- Scores
 		{ identifier(increment())
@@ -717,6 +731,20 @@ protocol_persist =
 		, VT_FUNCTION
 		, c_world_getPaused
 		, BOOL
+		},
+		-- Game timer
+		{ identifier(increment())
+		, nil  -- Always send and store this (function)
+		, VT_FUNCTION
+		, c_world_getTimer
+		, INT
+		},
+		-- Game timer second
+		{ identifier(increment())
+		, nil  -- Always send and store this (function)
+		, VT_FUNCTION
+		, c_world_getTimerSecond
+		, INT
 		},
 
 		-- Scores
