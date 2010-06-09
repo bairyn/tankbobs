@@ -78,6 +78,8 @@ local lastPowerupSpawnTime
 local nextPowerupSpawnPoint
 local worldInitialized = false
 local zoom = 0
+local gameTimer = 0
+local gameTimerSecond = 0
 
 local key = {}
 
@@ -617,10 +619,15 @@ function c_world_newWorld()
 		end
 	end
 
-	c_world_setPaused(false)  -- clear pause
+	-- clear pause
+	c_world_setPaused(false)
 
 	worldTime = t_t_getTicks()
 	lastWorldTime = t_t_getTicks()
+
+	-- game timer
+	c_world_setTimer(0)
+	c_world_setTimerSecond(1)
 
 	worldInitialized = true
 
@@ -3321,6 +3328,12 @@ function c_world_step(d)
 
 				--wd = worldTime - lastWorldTime / c_world_timeMultiplier()
 
+				gameTimerSecond = gameTimerSecond - wd
+				if gameTimerSecond <= 0 then
+					gameTimerSecond = 1
+					gameTimer = gameTimer + 1
+				end
+
 				tankbobs.w_luaStep(wd)
 
 				--[[
@@ -3408,4 +3421,20 @@ function c_world_timeMultiplier(v)
 	else
 		return c_const_get("world_time") * c_config_get("game.timescale")
 	end
+end
+
+function c_world_setTimer(time)
+	gameTimer = time
+end
+
+function c_world_getTimer()
+	return gameTimer
+end
+
+function c_world_setTimerSecond(time)
+	gameTimerSecond = time
+end
+
+function c_world_getTimerSecond()
+	return gameTimerSecond
 end

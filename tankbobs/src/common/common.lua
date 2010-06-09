@@ -586,6 +586,14 @@ function common_commonStartString(strings)
 	return result
 end
 
+function common_formatTimeSeconds(time)
+	return string.format("02%d:%02d", math.floor(time / 60), time % 60)
+end
+
+function common_formatTimeMilliseconds(time)
+	return string.format("%d:%02d:%03d", math.floor(time / 60000), (time - (math.floor(time / 60000) * 60000)) / 1000, time - (math.floor(time / 1000) * 1000))
+end
+
 ---[[ constants ]]---
 
 SPECIAL        = {}
