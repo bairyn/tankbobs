@@ -618,7 +618,7 @@ elseif c_tcm_current_map.name == "tutorial" then
 				elseif state == STATEBEGIN then
 				elseif state == STATECOMPLETERELOADFIRE then
 					if tank.ammo <= 0 then
-						if not tank.reloading then
+						if tank.reloading <= 0 then
 							if client and not server and step ~= 99 then
 								step = 99
 								updateHelperText("Now reload your shotgun completely.", {"18_1.wav"})
@@ -630,7 +630,7 @@ elseif c_tcm_current_map.name == "tutorial" then
 						end
 					end
 				elseif state == STATECOMPLETERELOAD then
-					if not tank.reloading then
+					if tank.reloading <= 0 then
 						if tank.ammo < weapon.capacity then
 							noReload()
 							state = STATECOMPLETERELOADFIRE
@@ -649,7 +649,7 @@ elseif c_tcm_current_map.name == "tutorial" then
 					end
 				elseif state == STATEPARTIALRELOADFIRE then
 					if tank.ammo <= 0 then
-						if not tank.reloading then
+						if tank.reloading <= 0 then
 							if client and not server and step ~= 97 then
 								step = 97
 								updateHelperText("Now try partially reloading your shotgun.", {"19_1.wav"})
@@ -661,7 +661,7 @@ elseif c_tcm_current_map.name == "tutorial" then
 						end
 					end
 				elseif state == STATEPARTIALRELOAD then
-					if not tank.reloading then
+					if tank.reloading <= 0 then
 						if tank.ammo < weapon.capacity then
 							if client and not server and step ~= 7 then
 								step = 7
