@@ -87,7 +87,7 @@ local function testEnd()
 				s_printnl("(", c_world_gameTypeHumanString(), ") Blue Team Wins!")
 			end
 		else
-			client_sendEvent(client_getByTank(win), tankbobs.io_fromChar(0x00) .. tankbobs.io_fromInt(key))
+			client_sendEvent(nil, tankbobs.io_fromChar(0x00) .. tankbobs.io_fromInt(key))
 
 			s_printnl("(", c_world_gameTypeHumanString(), ") '", win.name, "' Wins!")
 		end
