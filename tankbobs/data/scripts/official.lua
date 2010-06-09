@@ -611,7 +611,7 @@ elseif c_tcm_current_map.name == "tutorial" then
 				if state == STATENOTHING then
 					-- disable both firing and shooting
 					noFireOrReload()
-					updateHelperText("The shotgun is much more powerful than the\nweak machinegun.  Observe that there are\nnow two bars below your health bar.  The bar\nimmediately below your health bar, with a\n border, shows you how much you have loaded\n.  The bars below represent the\nnumber of clips or extra shells you have.", {"17_1.wav"})
+					updateHelperText("The shotgun is much more powerful than the\nweak machinegun.  Observe that there are\nnow two bars below your health bar.  The bar\nimmediately below your health bar, with a\n border, shows you how much you have loaded.\nThe bars below represent the\nnumber of clips or extra shells you have.", {"17_1.wav"})
 					setFutureHelperText(12, "Go ahead and try firing your shotgun by pressing\nand holding '" .. key("fire") .. "'.\nWhen you finish firing your loaded ammo,\npress and hold your reload key, '" .. key("reload") .. "'\nto reload completely until it's full.", {"22_1.wav"}, function () state = STATECOMPLETERELOADFIRE noReload() end)
 
 					state = STATEBEGIN
@@ -686,7 +686,7 @@ elseif c_tcm_current_map.name == "tutorial" then
 				state = STATENOTHING
 				p(7)
 
-				updateHelperText("Oops!  You either ran out of ammo or died.\nHere, grab another shotgun and try again.", {"13_1.wav"})
+				updateHelperText("Oops!  You either ran out of ammo or died.\nGrab another shotgun and try again.", {"13_1.wav"})
 			end
 		end
 
@@ -802,7 +802,7 @@ elseif c_tcm_current_map.name == "tutorial" then
 			end
 		end
 
-		setFutureHelperText(4, "Follow the arrows.\nNotice how the ground feels slick.\nPressing special, '" .. key("special") .. "', will prevent the tank from sliding.\nYou need to be moving\nwhile using special, or you won't be able to turn turn.\nAlso notice how you can't accelerate while\nusing special.", {"7_1.wav"})
+		setFutureHelperText(4, "Follow the arrows.\nNotice how the ground feels slick.\nPressing special, '" .. key("special") .. "', will prevent the tank\nfrom sliding.  You need to be moving\nwhile using special, or you won't be able to turn.\nAlso notice how you can't accelerate while\nusing special.", {"7_1.wav"})
 	end
 
 	local function updateShootWallStep()
