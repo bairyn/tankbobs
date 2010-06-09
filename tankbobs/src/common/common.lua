@@ -613,7 +613,7 @@ local function dro_getLevel(rate)
 		add(v)
 	end
 
-	return
+	return level
 end
 
 function common_dro_addFrame(rate)
