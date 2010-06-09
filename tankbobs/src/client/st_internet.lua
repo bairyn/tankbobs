@@ -49,7 +49,7 @@ local CONNECTED     = CONNECTED
 local server_timeout = 6
 
 function st_internet_init()
-	connection = {state = UNCONNECTED, proceeding = false, lastRequestTime, challenge = 0, address = c_config_get("client.serverIP"), ip = "", port = nil, ui = "", ping = nil, offset = nil, gameType = nil, timestamp, t = nil, banMessage = ""}
+	connection = {state = UNCONNECTED, proceeding = false, lastRequestTime, challenge = 0, address = c_config_get("client.serverIP"), ip = "", port = nil, ui = "", ping = nil, offset = nil, timestamp, t = nil, banMessage = ""}
 
 	if connection.address:find(":") then
 		connection.port = tonumber(connection.address:sub(connection.address:find(":") + 1))
@@ -183,7 +183,7 @@ function st_internet_step(d)
 					local spawnStyle = tankbobs.io_toChar(data:sub(1, 1)) data = data:sub(2)
 					local set = data:sub(1, data:find(tankbobs.io_fromChar(0x00)) - 1) data = data:sub(data:find(tankbobs.io_fromChar(0x00)) + 1)
 					local map = data:sub(1, data:find(tankbobs.io_fromChar(0x00)) - 1) data = data:sub(data:find(tankbobs.io_fromChar(0x00)) + 1)
-					local gameType = data:sub(1, data:find(tankbobs.io_fromChar(0x00)) - 1) data = data:sub(data:find(tankbobs.io_fromChar(0x00)) + 1)
+					local gameType = tankbobs.io_toInt(data:sub(1, 4)) data = data:sub(5)
 
 					-- stop background state
 					if backgroundState then
