@@ -897,7 +897,7 @@ end
 -- pass index in a table to overwrite previous corpse
 function c_world_addCorpse(index, vel, tank)
 	-- HACK: Only add corpses from server while online
-	if not tank then
+	if tank and client and online then
 		return
 	end
 
