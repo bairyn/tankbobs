@@ -59,6 +59,7 @@
 		<musicVolume>0.6</musicVolume>
 		<online>
 			<randomSnapshotFilter>0.1</randomSnapshotFilter>
+			<randomSnapshotLowPriorityFilter>0.1</randomSnapshotLowPriorityFilter>
 			<stepAhead>true</stepAhead>
 			<unlagged>true</unlagged>
 		</online>
@@ -198,6 +199,7 @@
 		<logFile>games.log</logFile>  Make empty (or false) to not record to logs
 		<maxPersistSize>1000</maxPersistSize>
 		<pfps>32</pfps>
+		<randomSnapshotLowPriorityFilter>0.8</randomSnapshotLowPriorityFilter>
 		<startupCommandFile>server.cmd</startupCommandFile>
 		<writeFileOnBan>false</writeFileOnBan>  if false, bans are written on restart
 	</server>

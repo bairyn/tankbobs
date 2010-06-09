@@ -293,18 +293,21 @@ protocol_unpersist =
 		, VT_FUNCTION
 		, setNumWalls
 		, INT
+		, 0
 		},
 		{ identifier(increment())
 		, function() return c_world_getGameType() == DOMINATION end
 		, VT_FUNCTION
 		, setNumControlPoints
 		, INT
+		, 0
 		},
 		{ identifier(increment())
 		, function() return c_world_getGameType() == CAPTURETHEFLAG end
 		, VT_FUNCTION
 		, setNumFlags
 		, INT
+		, 0
 		},
 
 		-- projectiles
@@ -543,6 +546,7 @@ protocol_unpersist =
 		  , BOOL
 		  , INT
 		  }
+		, 0
 		},
 
 		-- walls
@@ -639,6 +643,7 @@ protocol_unpersist =
 		  , DOUBLE
 		  , VEC2
 		  }
+		, 0
 		},
 
 		-- control points
@@ -791,18 +796,21 @@ protocol_persist =
 		, VT_FUNCTION
 		, getNumWalls
 		, INT
+		, 0
 		},
 		{ identifier(increment())
 		, function() return c_world_getGameType() == DOMINATION end
 		, VT_FUNCTION
 		, getNumControlPoints
 		, INT
+		, 0
 		},
 		{ identifier(increment())
 		, function() return c_world_getGameType() == CAPTURETHEFLAG end
 		, VT_FUNCTION
 		, getNumFlags
 		, INT
+		, 0
 		},
 
 		-- projectiles
@@ -1023,6 +1031,7 @@ protocol_persist =
 		  , BOOL
 		  , INT
 		  }
+		, 0
 		},
 
 		-- walls
@@ -1106,6 +1115,7 @@ protocol_persist =
 		  , DOUBLE
 		  , VEC2
 		  }
+		, 0
 		},
 
 		-- control points
@@ -1333,35 +1343,47 @@ function c_protocol_setUnpersistProtocol(protocol)
 				break
 			end
 
-			local res, size = parseSegment(segment[5], data)
+			local unpersist = true
 
-			if not size then
-				common_printError(0, "Warning: unpersist: segment with identifier '" .. common_stringToHex("", "0x", identifierString) .. "' ended prematurely ('" .. #data .. "' bytes of post-identifier data left to parse)." .. common_stringToHex("", "0x", identifierString) .. "'\n")
-
-				break
+			if segment[6] and segment.size then
+				unpersist = math.random() >= c_config_get("client.online.randomSnapshotLowPriorityFilter")
 			end
 
-			data = data:sub(size + 1)
+			if unpersist then
+				local res, size = parseSegment(segment[5], data)
 
-			if not segment[2] or segment[2]() then
-				if segment[3] == VT_STRING then
-					local function setValue(value, key, t)
-						t = t or _G
+				if not size then
+					common_printError(0, "Warning: unpersist: segment with identifier '" .. common_stringToHex("", "0x", identifierString) .. "' ended prematurely ('" .. #data .. "' bytes of post-identifier data left to parse)." .. common_stringToHex("", "0x", identifierString) .. "'\n")
 
-						local pos = key:find("%.")
-						if pos then
-							return setValue(value, key:sub(pos + 1), t[key:sub(1, pos - 1)])
-						else
-							t[key] = value
-						end
-					end
-
-					setValue(res, segment[4])
-				elseif segment[3] == VT_FUNCTION then
-					segment[4](res)
-				else
-					error("Unrecognized value type ('" .. segment[3] .. "') in protocol segment with identifier '" .. common_stringToHex("", "0x", identifierString) .. "'.")
+					break
 				end
+
+				segment.size = size
+
+				data = data:sub(size + 1)
+
+				if not segment[2] or segment[2]() then
+					if segment[3] == VT_STRING then
+						local function setValue(value, key, t)
+							t = t or _G
+
+							local pos = key:find("%.")
+							if pos then
+								return setValue(value, key:sub(pos + 1), t[key:sub(1, pos - 1)])
+							else
+								t[key] = value
+							end
+						end
+
+						setValue(res, segment[4])
+					elseif segment[3] == VT_FUNCTION then
+						segment[4](res)
+					else
+						error("Unrecognized value type ('" .. segment[3] .. "') in protocol segment with identifier '" .. common_stringToHex("", "0x", identifierString) .. "'.")
+					end
+				end
+			else
+				data = data:sub(segment.size + 1)
 			end
 		end
 	end
@@ -1525,7 +1547,13 @@ function c_protocol_setPersistProtocol(protocol)
 			-- TODO: Support identifiers larger than 254
 			local identifier = tankbobs.io_fromChar(v[1])
 
-			if not v[2] or v[2]() then
+			local persist = true
+
+			if v[6] then
+				persist = math.random() >= c_config_get("server.randomSnapshotLowPriorityFilter")
+			end
+
+			if not v[2] or v[2]() and persist then
 				if v[3] == VT_STRING then
 					local function getValue(key, t)
 						t = t or _G

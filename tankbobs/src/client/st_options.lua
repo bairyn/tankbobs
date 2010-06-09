@@ -862,14 +862,21 @@ local st_optionsInternet_done
 local st_optionsInternet_stepAhead
 local st_optionsInternet_unlagged
 local st_optionsInternet_randomSnapshotFilter
+local st_optionsInternet_randomSnapshotLowPriorityFilter
 
 function st_optionsInternet_init()
 	gui_addAction(tankbobs.m_vec2(25, 85), "Back", nil, c_state_advance)
 
 	gui_addLabel(tankbobs.m_vec2(50, 75), "Step Ahead", nil, 1 / 3) gui_addCycle(tankbobs.m_vec2(75, 75), "Step Ahead", nil, st_optionsInternet_stepAhead, {"No", "Yes"}, c_config_get("client.online.stepAhead") and 2 or 1, 1.5 / 3)
 	gui_addLabel(tankbobs.m_vec2(50, 72), "Predict other tanks (not yet supported)", nil, 1 / 3) gui_addCycle(tankbobs.m_vec2(75, 72), "Predict other tanks", nil, st_optionsInternet_unlagged, {"No", "Yes"}, c_config_get("client.online.unlagged") and 2 or 1, 1.5 / 3)
-	gui_addLabel(tankbobs.m_vec2(50, 63), "Random Snapshot Filter", nil, 1 / 3) gui_addScale(tankbobs.m_vec2(50, 66), "Random Snapshot Filter", nil, st_optionsInternet_randomSnapshotFilter, c_config_get("client.online.randomSnapshotFilter"))
-	gui_addLabel(tankbobs.m_vec2(50, 60), "(Some servers send snapshots more frequently than others)", nil, 1 / 4)
+	gui_addScale(tankbobs.m_vec2(50, 66), "Random Snapshot Filter", nil, st_optionsInternet_randomSnapshotFilter, c_config_get("client.online.randomSnapshotFilter"))
+	gui_addScale(tankbobs.m_vec2(50, 63), "Random Snapshot Filter", nil, st_optionsInternet_randomSnapshotLowPriorityFilter, c_config_get("client.online.randomSnapshotLowPriorityFilter"))
+	gui_addLabel(tankbobs.m_vec2(50, 60), "Random Snapshot Filters", nil, 1 / 3)
+	gui_addLabel(tankbobs.m_vec2(50, 57), "The top bar configures how many snapshots to filter.", nil, 1 / 4)
+	gui_addLabel(tankbobs.m_vec2(50, 54), "Out of the remaining snapshots, the lower bar configures", nil, 1 / 4)
+	gui_addLabel(tankbobs.m_vec2(50, 51), "how many of the remaining lower priority segments will be.", nil, 1 / 4)
+	gui_addLabel(tankbobs.m_vec2(50, 48), "filtered out.", nil, 1 / 4)
+	gui_addLabel(tankbobs.m_vec2(50, 45), "(Some servers send snapshots more frequently than others).", nil, 1 / 4)
 end
 
 function st_optionsInternet_done()
@@ -894,6 +901,10 @@ end
 
 function st_optionsInternet_randomSnapshotFilter(widget, pos)
 	c_config_set("client.online.randomSnapshotFilter", pos)
+end
+
+function st_optionsInternet_randomSnapshotLowPriorityFilter(widget, pos)
+	c_config_set("client.online.randomSnapshotLowPriorityFilter", pos)
 end
 
 optionsInternet_state =
