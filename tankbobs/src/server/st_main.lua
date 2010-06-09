@@ -67,8 +67,8 @@ local function testEnd()
 		return
 	end
 
-	if not c_world_redTeam or c_world_blueTeam then
-		return  -- world probably not initialized
+	if not worldInitialized then
+		return
 	end
 
 	local win, isTeam, key = c_world_hasWon()
