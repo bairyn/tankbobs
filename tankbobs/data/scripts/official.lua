@@ -865,7 +865,7 @@ elseif c_tcm_current_map.name == "tutorial" then
 					step = 1
 					tankbobs.a_playSound(c_const_get("tutStep_sound"))
 
-					updateHelperText("Now, you'll want to try firing your default weapon.", {"4_1.wav", "4_2.wav"})
+					updateHelperText("Now, try firing your default weapon.", {"4_1.wav", "4_2.wav"})
 					setFutureHelperText(3, "Press '" .. key("fire") .. "' to shoot the wall back to the switch.\nRotate your tank to aim.", {"5_1.wav", "5_2.wav"}, function () c_world_setZoom(0.33) e(1) updateShootWallStep() end)
 				end
 			end

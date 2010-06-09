@@ -1008,10 +1008,7 @@ function c_weapon_fire(tank, d)
 		return
 	end
 
-	local reloading = false
-	if tank.reloading > 0.0 then
-		reloading = true
-	end
+	local reloading = tank.reloading > 0.0
 
 	tank.reloading = math.max(0, tank.reloading - d)
 
