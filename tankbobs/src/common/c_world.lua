@@ -2388,6 +2388,11 @@ function c_world_spawnPowerup(powerup, index)
 end
 
 function c_world_powerupSpawnPoint_step(d, powerupSpawnPoint)
+	-- HACK: Only add powerups from server while online
+	if online and client then
+		return
+	end
+
 	local t = t_t_getTicks()
 	local spawn = false
 
