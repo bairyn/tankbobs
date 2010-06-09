@@ -597,15 +597,15 @@ CIRCLE         = 2 * math.pi
 ZERO           = tankbobs.m_vec2(0, 0)
 
 -- gametypes
-DEATHMATCH     = {}
-TEAMDEATHMATCH = {}
-SURVIVOR       = {}
-TEAMSURVIVOR   = {}
-MEGATANK       = {}
-CHASE          = {}
-PLAGUE         = {}
-DOMINATION     = {}
-CAPTURETHEFLAG = {}
+DEATHMATCH     = 0x00000000
+TEAMDEATHMATCH = 0x00000001
+SURVIVOR       = 0x00000002
+TEAMSURVIVOR   = 0x00000003
+MEGATANK       = 0x00000004
+CHASE          = 0x00000005
+PLAGUE         = 0x00000006
+DOMINATION     = 0x00000007
+CAPTURETHEFLAG = 0x00000008
 
 -- enumerations
 
