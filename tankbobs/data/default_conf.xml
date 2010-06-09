@@ -197,7 +197,7 @@
 	<server>
 		<fps>64</fps>
 		<logFile>games.log</logFile>  Make empty (or false) to not record to logs
-		<maxPersistSize>1000</maxPersistSize>
+		<maxPersistSize>900</maxPersistSize>
 		<pfps>32</pfps>
 		<randomSnapshotLowPriorityFilter>0.8</randomSnapshotLowPriorityFilter>
 		<startupCommandFile>server.cmd</startupCommandFile>
