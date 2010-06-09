@@ -1427,16 +1427,16 @@ function c_protocol_setPersistProtocol(protocol)
 			local new
 
 			for i = parseIndex or 1, max do
+				parseIndex = math.max(1, i - #grammar)
+
 				if i % #grammar == 1 then
 					if size > maxSize then
-						parseIndex = math.max(1, i - #grammar)
-
 						return res, true
-					else
-						new = res
+					elseif new then
+						res = res .. new
 					end
 
-					new = new .. identifier
+					new = identifier
 					size = size + 1
 				elseif parseIndex and size <= 0 then
 					-- We screwed up somewhere.  FIXME: Why does this happen?
@@ -1456,9 +1456,13 @@ function c_protocol_setPersistProtocol(protocol)
 				new = new .. value
 			end
 
-			parseIndex = nil
+			if size > maxSize then
+				return res, true
+			elseif size > 0 then
+				res = res .. new
+			end
 
-			res = new or res
+			parseIndex = nil
 
 			return res, false
 		else
