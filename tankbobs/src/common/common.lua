@@ -587,7 +587,7 @@ function common_commonStartString(strings)
 end
 
 function common_formatTimeSeconds(time)
-	return string.format("02%d:%02d", math.floor(time / 60), time % 60)
+	return string.format("%02d:%02d", math.floor(time / 60), time % 60)
 end
 
 function common_formatTimeMilliseconds(time)
