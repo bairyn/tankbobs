@@ -333,7 +333,6 @@ protocol_unpersist =
 			local tank = c_world_getTanks()[newParse(parse)]
 
 			if not tank then
-				-- silently ignore
 				return
 			end
 
@@ -440,7 +439,6 @@ protocol_unpersist =
 			local corpse = c_world_getCorpses()[newParse(parse)]
 
 			if not corpse then
-				-- silently ignore
 				return
 			end
 
@@ -495,7 +493,6 @@ protocol_unpersist =
 			local powerup = c_world_getPowerups()[newParse(parse)]
 
 			if not powerup then
-				-- silently ignore
 				return
 			end
 
@@ -535,7 +532,6 @@ protocol_unpersist =
 			local wall = c_tcm_current_map.walls[newParse(parse)]
 
 			if not wall then
-				-- silently ignore
 				return
 			end
 
@@ -632,7 +628,6 @@ protocol_unpersist =
 			local controlPoint = c_tcm_current_map.controlPoints[newParse(parse)]
 
 			if not controlPoint then
-				-- silently ignore
 				return
 			end
 
@@ -651,7 +646,6 @@ protocol_unpersist =
 			local flag = c_tcm_current_map.flags[newParse(parse)]
 
 			if not flag then
-				-- silently ignore
 				return
 			end
 
