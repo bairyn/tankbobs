@@ -116,6 +116,8 @@ local refreshKeys = function()
 			if key ~= 303 and key ~= 304 then
 				key = kl(key)
 
+				local tank = c_world_getTanks()[connection.t]
+
 				if kp(key) then
 					tank.state = bit.bor(tank.state, flag)
 				else
