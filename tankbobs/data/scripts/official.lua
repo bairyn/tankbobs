@@ -611,7 +611,7 @@ elseif c_tcm_current_map.name == "tutorial" then
 				if state == STATENOTHING then
 					-- disable both firing and shooting
 					noFireOrReload()
-					updateHelperText("The shotgun is much more powerful than the\nweak machinegun.  Observe that there are\nnow two bars below your health bar.  The bar\nimmediately below your health bar (the one with a border) shows\nyou how much ammo of your current clip you\nhave remaining.  The bars you see below represent\nthe number of clips or extra you have.", {"17_1.wav"})
+					updateHelperText("The shotgun is much more powerful than the\nweak machinegun.  Observe that there are\nnow two bars below your health bar.  The bar\nimmediately below your health bar, with a\n border, shows you how much you have loaded\n.  The bars below represent the\nnumber of clips or extra shells you have.", {"17_1.wav"})
 					setFutureHelperText(12, "Go ahead and try firing your shotgun by pressing\nand holding '" .. key("fire") .. "'.\nWhen you finish firing your loaded ammo,\npress and hold your reload key, '" .. key("reload") .. "'\nto reload completely until it's full.", {"22_1.wav"}, function () state = STATECOMPLETERELOADFIRE noReload() end)
 
 					state = STATEBEGIN
@@ -621,7 +621,7 @@ elseif c_tcm_current_map.name == "tutorial" then
 						if tank.reloading <= 0 then
 							if client and not server and step ~= 99 then
 								step = 99
-								updateHelperText("Now reload your shotgun completely.", {"18_1.wav"})
+								updateHelperText("Now reload your shotgun completely ('" .. key("reload") .. "')", {"18_1.wav"})
 							end
 
 							noFire()
@@ -634,14 +634,14 @@ elseif c_tcm_current_map.name == "tutorial" then
 						if tank.ammo < weapon.capacity then
 							noReload()
 							state = STATECOMPLETERELOADFIRE
-							updateHelperText("You didn't press and hold\nyour reload key, '" .. key("reload") .. "' until the end.\nFire the rest of your ammo, and then press and\nHOLD your reload key until you completely\nreload your weapon this time.", {"16_1.wav"})
+							updateHelperText("You didn't press and hold\nyour reload key, '" .. key("reload") .. "' until completely full.\nFire the rest of your ammo, and then press and\nHOLD your reload key until you completely\nreload your weapon.", {"16_1.wav"})
 						else
 							if client and not server and step ~= 6 then
 								step = 6
 								tankbobs.a_playSound(c_const_get("tutStep_sound"))
 
 								noReload()
-								updateHelperText("Now, you'll want to try reloading your\nshotgun partially.  Try pressing and\nholding your reload key and letting go\nbefore you reload completely.", {"15_1.wav"})
+								updateHelperText("Now, try reloading your shotgun partially.  Try pressing and\nholding your reload key and letting go\nbefore you reload completely.", {"15_1.wav"})
 							end
 
 							state = STATEPARTIALRELOADFIRE
@@ -677,7 +677,7 @@ elseif c_tcm_current_map.name == "tutorial" then
 						else
 							noReload()
 							state = STATEPARTIALRELOADFIRE
-							updateHelperText("You didn't press and hold\nyour reload key, '" .. key("reload") .. "' before the end.\nFire the rest of your ammo, and then hold and\nRELEASE your reload key BEFORE you completely\nreload your weapon this time.", {"14_1.wav"})
+							updateHelperText("You didn't release your\nreload key, '" .. key("reload") .. "' soon enough.\nFire the rest of your ammo, and then hold and\nRELEASE your reload key BEFORE you completely\nreload your weapon.", {"14_1.wav"})
 						end
 					end
 				end
@@ -802,7 +802,7 @@ elseif c_tcm_current_map.name == "tutorial" then
 			end
 		end
 
-		setFutureHelperText(4, "Follow the arrows.\nNotice how the ground feels slick.\nPressing special, '" .. key("special") .. "', will remove the slick effect.\nYou need at least some velocity\nwhile using special, or you can't turn.\nAlso notice that you can't accelerate while\nusing special.", {"7_1.wav"})
+		setFutureHelperText(4, "Follow the arrows.\nNotice how the ground feels slick.\nPressing special, '" .. key("special") .. "', will prevent the tank from sliding.\nYou need to be moving\nwhile using special, or you won't be able to turn turn.\nAlso notice how you can't accelerate while\nusing special.", {"7_1.wav"})
 	end
 
 	local function updateShootWallStep()
