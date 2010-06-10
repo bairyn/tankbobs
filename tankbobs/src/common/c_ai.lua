@@ -812,9 +812,9 @@ function c_ai_followObjective(tank, objective)
 
 		if not objective.nextPathUpdateTime or tankbobs.t_getTicks() >= objective.nextPathUpdateTime or (objective.path and not objective.path[objective.nextNode]) then  -- we don't always attempt to find a new path even if it doesn't already have a path, since because path finding can be expensive, continuously trying to find one in a spot where one should exist but doesn't can turn the game into a slide show.
 			if objective.static then
-				objective.nextPathUpdateTime = tankbobs.t_getTicks() + c_world_timeMultiplier(c_const_get("ai_staticPathUpdateTime"))
+				objective.nextPathUpdateTime = tankbobs.t_getTicks() + c_world_timeMultiplier(c_const_get("ai_staticPathUpdateTime") + (common_dro_getLevel() >= 3 and 6 or 0))
 			else
-				objective.nextPathUpdateTime = tankbobs.t_getTicks() + c_world_timeMultiplier(c_const_get("ai_pathUpdateTime"))
+				objective.nextPathUpdateTime = tankbobs.t_getTicks() + c_world_timeMultiplier(c_const_get("ai_pathUpdateTime") + (common_dro_getLevel() >= 3 and 6 or 0))
 			end
 
 			local start = c_ai_findClosestNavigationPoint(tank.p)
@@ -1297,6 +1297,16 @@ end
 
 local p1, p2 = tankbobs.m_vec2(), tankbobs.m_vec2()
 function c_ai_tank_step(tank, d)
+	if common_dro_getLevel() >= 4 then
+		return
+	end
+
+	if common_dro_getLevel() >= 3 then
+		if math.random() < 0.8 then
+			return
+		end
+	end
+
 	local t = tankbobs.t_getTicks()
 
 	if c_world_isBehind() then

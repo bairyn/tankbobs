@@ -595,7 +595,7 @@ function common_formatTimeMilliseconds(time)
 end
 
 ---[[ Dynamic runtime optimization ]]---
-local rates = {40, 24, 12, 1}
+local rates = {40, 24, 12, 3}
 local level = 0
 local nextLevel = 0
 local lastLevelTime = nil
