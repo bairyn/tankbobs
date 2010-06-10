@@ -1294,7 +1294,22 @@ function c_world_tank_checkSpawn(d, tank)
 	end
 
 	if tank.lastSpawnPoint == 0 then
-		tank.lastSpawnPoint = 1
+		local switch = c_world_getSpawnStyle()
+		if     switch == BLOCKABLE then
+			tank.lastSpawnPoint = 1
+		elseif switch == ALTERNATING then
+			local index = 1
+
+			for k, v in pairs(c_world_tanks) do
+				if v == tank then
+					index = k
+
+					break
+				end
+			end
+
+			tank.lastSpawnPoint = (index - 1) % #c_tcm_current_map.playerSpawnPoints + 1
+		end
 	end
 
 	local sp = tank.lastSpawnPoint
