@@ -246,7 +246,7 @@ function online_readPackets(d)  -- local
 					connection.t = tankbobs.io_toInt(data:sub(1, 4)) data = data:sub(5)
 					local tank = c_world_getTanks()[connection.t]
 					if tank then
-						if math.random() >= math.min(c_config_get("client.rsfMax"), c_config_get("client.online.randomSnapshotFilter") + ((common_dro_getLevel() >= 1) and 0.1 or 0)) then
+						if math.random() >= math.min(c_config_get("client.online.rsfMax"), c_config_get("client.online.randomSnapshotFilter") + ((common_dro_getLevel() >= 1) and 0.1 or 0)) then
 							if c_config_get("client.online.stepAhead") then
 								c_world_record(tank)
 							end
