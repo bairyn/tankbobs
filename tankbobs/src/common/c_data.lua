@@ -60,8 +60,14 @@ function c_data_init()
 	c_const_set("module-win_dir", c_const_get("data_dir") .. "modules-win/", 1)
 	c_const_set("module64-win_dir", c_const_get("data_dir") .. "modules64-win/", 1)
 	c_const_set("jit_dir", c_const_get("data_dir") .. "jit/", 1)
-	c_const_set("data_conf", c_const_get("data_dir") .. "default_conf.xml", 1)
-	c_const_set("user_conf", c_const_get("user_dir") .. "rc.xml", 1)
+	if server then
+		c_const_set("data_conf", c_const_get("data_dir") .. "default_conf_server.xml", 1)
+		c_const_set("user_conf", c_const_get("user_dir") .. "rc_server.xml", 1)
+	end
+	if client then
+		c_const_set("data_conf", c_const_get("data_dir") .. "default_conf.xml", 1)
+		c_const_set("user_conf", c_const_get("user_dir") .. "rc.xml", 1)
+	end
 	c_const_set("ui_file", c_const_get("user_dir") .. "GUID.dat", 1)
 	c_const_set("ttf_dir", c_const_get("data_dir") .. "ttf/", 1)
 	c_const_set("bans_file", c_const_get("user_dir") .. "bans.txt", 1)

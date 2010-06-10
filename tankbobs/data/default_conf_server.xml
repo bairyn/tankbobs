@@ -1,0 +1,79 @@
+<config>
+	<common>
+		<permitSymbolicLinks>false</permitSymbolicLinks>
+		<online>
+			<packetDelay>0</packetDelay>
+		</online>
+	</common>
+
+	<debug>
+	</debug>
+
+	<game>
+		<allBotLevels>automatic</allBotLevels>
+		<spawnMode>0</spawnMode>
+		<bot>
+			<color>
+				<r> 0.875 </r>  Orange
+				<g> 0.750 </g>
+				<b> 0.010 </b>
+				<a> 1.000 </a>
+			</color>
+		</bot>
+		<captureLimit>10</captureLimit>
+		<chaseLimit>30</chaseLimit>
+		<computers>0</computers>
+		<controlLimit>200</controlLimit>
+		<defaultTankRed>   0.875 </defaultTankRed>  Orange
+		<defaultTankGreen> 0.750 </defaultTankGreen>
+		<defaultTankBlue>  0.010 </defaultTankBlue>
+		<defaultTankAlpha> 1.000 </defaultTankAlpha>
+		<ept>false</ept>  Whether to do an extra expensive but accurate test for powerup pickups
+		<fragLimit>15</fragLimit>
+		<gameType>deathmatch</gameType>
+		<instagib>false</instagib>
+		<lastMap>small_1</lastMap>
+		<lastSet>small</lastSet>
+		<megaPointLimit>25</megaPointLimit>
+		<overview>1</overview>
+		<plaguePointLimit>300</plaguePointLimit>
+		<player1>
+			<name>Player1</name>
+			<color>  blue
+				<r>0.1</r>
+				<g>0.1</g>
+				<b>0.9</b>
+				<a>1.0</a>
+			</color>
+			<team>red</team>
+		</player1>
+		<player2>
+			<name>Player2</name>
+			<color>  red
+				<r>0.9</r>
+				<g>0.1</g>
+				<b>0.1</b>
+				<a>1.0</a>
+			</color>
+			<team>red</team>
+		</player2>
+		<players>2</players>
+		<punish>true</punish>
+		<survivorPointLimit>10</survivorPointLimit>
+		<teamFragLimit>15</teamFragLimit>
+		<teamSurvivorPointLimit>10</teamSurvivorPointLimit>
+		<timescale>1</timescale>
+		<worldFPS>256</worldFPS>
+	</game>
+
+	<server>
+		<fps>64</fps>
+		<logFile>games.log</logFile>  Make empty (or false) to not record to logs
+		<maxPersistSize>900</maxPersistSize>
+		<pfps>32</pfps>
+		<randomSnapshotLowPriorityFilter>0.8</randomSnapshotLowPriorityFilter>
+		<rslpfMax>0.9</rslpfMax>
+		<startupCommandFile>server.cmd</startupCommandFile>
+		<writeFileOnBan>false</writeFileOnBan>  if false, bans are written on restart
+	</server>
+</config>
