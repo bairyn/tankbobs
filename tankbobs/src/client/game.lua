@@ -998,6 +998,9 @@ function game_step(d)
 	if c_config_get("client.screensEven") then
 		screens = math.min(screens, #c_world_getTanks())
 	end
+	if online then
+		screens = 1
+	end
 	local widthChange = c_config_get("client.screensWidthChange")  -- some space on side to avoid stretch effect
 
 	local spacing = 2
