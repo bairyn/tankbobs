@@ -1177,9 +1177,7 @@ function game_step(d)
 				end
 			end
 
-			if v.weapon and v.reloading > 0 and v.m.lastReloadState ~= (v.reloading > 0) then
-				v.m.lastReloadState = v.reloading > 0
-
+			if v.weapon and v.reloading > 0 and v.m.lastReload < v.reloading then
 				if c_weapon_getWeapons()[v.weapon] and c_weapon_getWeapons()[v.weapon].shotgunClips then
 					if v.shotgunReloadState == 0 then
 						tankbobs.a_playSound(c_const_get("weaponAudio_dir") .. c_weapon_getWeapons()[v.weapon].reloadSound.initial)
@@ -1196,6 +1194,7 @@ function game_step(d)
 					end
 				end
 			end
+			v.m.lastReload = v.reloading
 
 			if v.m.lastCollideTime and v.m.lastCollideTimeB ~= v.m.lastCollideTime then
 				v.m.lastCollideTimeB = v.m.lastCollideTime

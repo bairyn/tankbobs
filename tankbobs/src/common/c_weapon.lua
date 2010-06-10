@@ -1035,14 +1035,6 @@ function c_weapon_fire(tank, d)
 		end
 	end
 
-	if not (bit.band(tank.state, FIRING) ~= 0) and (not tank.lastFireTime or t >= tank.lastFireTime + c_world_timeMultiplier(weapon.repeatRate)) then
-		tank.notFireReset = false
-	elseif tank.notFireReset then
-		ret()
-
-		return
-	end
-
 	if reloading then
 		if weapon.shotgunClips then
 			if not tank.shotgunReloadState then
@@ -1097,10 +1089,18 @@ function c_weapon_fire(tank, d)
 		return
 	end
 
+	if not (bit.band(tank.state, FIRING) ~= 0) and (not tank.lastFireTime or t >= tank.lastFireTime + c_world_timeMultiplier(weapon.repeatRate)) then
+		tank.notFireReset = false
+	elseif tank.notFireReset then
+		ret()
+
+		return
+	end
+
 	if not tank.lastFireTime or (tank.lastFireTime < t - (c_world_timeMultiplier(weapon.repeatRate))) then
 		tank.lastFireTime = t - (c_world_timeMultiplier(weapon.repeatRate))
 
-		if bit.band(tank.state, RELOAD) ~= 0 and not tank.reloading and tank.clips > 0 and tank.ammo < weapon.capacity then
+		if bit.band(tank.state, RELOAD) ~= 0 and tank.reloading <= 0.0 and tank.clips > 0 and tank.ammo < weapon.capacity then
 			if weapon.shotgunClips then
 				tank.reloading = weapon.reloadTime.initial
 			else
@@ -1145,7 +1145,11 @@ function c_weapon_fire(tank, d)
 
 					return c_weapon_outOfAmmo(tank)
 				else
-					tank.reloading = t
+					if weapon.shotgunClips then
+						tank.reloading = weapon.reloadTime.initial
+					else
+						tank.reloading = weapon.reloadTime
+					end
 
 					return
 				end
