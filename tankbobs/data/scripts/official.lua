@@ -537,7 +537,7 @@ elseif c_tcm_current_map.name == "tutorial" then
 		end
 
 		tank.shield = tank.shield + c_const_get("tank_boostShield")
-		updateHelperText("You have been given a shield.  You would\nnormally earn them by picking up a special\ntype of a green powerup.  A shield protects\nyou from three quarters of damage,\nand protects you completely from damage\nfrom colliding against walls.\nFollow the arrows to finish this tutorial.", {"21_1.wav"})
+		updateHelperText("You have been given a shield.  Outside this\n tutorial, you would earn them by picking up\na type of green powerup.  A shield greatly\nprotects your tank,\nand completely protects against collisions.\nFollow the arrows to finish this tutorial.", {"21_1.wav"})
 		e(9)
 	end
 
