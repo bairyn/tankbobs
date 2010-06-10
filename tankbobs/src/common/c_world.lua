@@ -1308,7 +1308,7 @@ function c_world_tank_checkSpawn(d, tank)
 				end
 			end
 
-			tank.lastSpawnPoint = (index - 1) % #c_tcm_current_map.playerSpawnPoints + 1
+			tank.lastSpawnPoint = (index - 1) % #c_tcm_current_map.powerupSpawnPoints + 1
 		end
 	end
 
