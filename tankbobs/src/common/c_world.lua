@@ -73,7 +73,7 @@ local behind
 local worldTime = 0
 local lastWorldTime = 0
 local c_world_instagib = false
-local c_world_spawnMode = false
+local c_world_spawnMode = BLOCKABLE
 local lastPowerupSpawnTime
 local nextPowerupSpawnPoint
 local worldInitialized = false
