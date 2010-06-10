@@ -267,6 +267,8 @@ elseif c_tcm_current_map.name == "race-track" then
 
 	c_mods_prependFunction("c_world_step", frame)
 elseif c_tcm_current_map.name == "tutorial" then
+	local WALLPOWERUP = 0x8020
+
 	-- don't do anything if running on server
 	if server or not client then
 		error "Cannot run tutorial level on server"
@@ -324,6 +326,22 @@ elseif c_tcm_current_map.name == "tutorial" then
 	c_mods_appendFunction("c_world_spawnTank", setPosition)
 
 	c_const_set("helperAudio_dir", c_const_get("globalAudio_dir") .. "tutorial_", -1)
+
+	-- tanks don't bounce against walls with misc set to "powerup"
+
+	c_const_set("powerup_clipmask", c_const_get("powerup_clipmask") + WALLPOWERUP)
+
+	for _, v in pairs(c_tcm_current_map.walls) do
+		if not v.detail and v.m.body then
+			if v.misc == "powerup" then
+				tankbobs.w_removeBody(v.m.body) v.m.body = nil v.m.fixture = nil
+
+				local b = c_world_wallShape(v.p)
+				v.m.body = tankbobs.w_addBody(b[1], 0, c_const_get("wall_canSleep"), c_const_get("wall_isBullet"), c_const_get("wall_linearDamping"), c_const_get("wall_angularDamping"), k)
+				v.m.fixture = tankbobs.w_addPolygonalFixture(b[2], c_const_get("wall_density"), c_const_get("wall_friction"), c_const_get("wall_restitution"), c_const_get("wall_isSensor"), c_const_get("wall_contentsMask") + WALLPOWERUP, c_const_get("wall_clipmask"), v.m.body, not v.static)
+			end
+		end
+	end
 
 	-- helper label
 	local updateHelperText
