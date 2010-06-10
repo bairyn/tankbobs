@@ -62,17 +62,6 @@ int x_scroll = 0, y_scroll = 0;
 
 Tankbobs_editor::Tankbobs_editor(QWidget *parent)
 {
-	QGLFormat fmt;
-	fmt.setAlpha(true);
-	fmt.setDepth(true);
-	fmt.setDirectRendering(true);
-	fmt.setDoubleBuffer(true);
-	fmt.setSamples(4);
-	fmt.setSampleBuffers(true);
-	fmt.setRgba(true);
-	fmt.setSwapInterval(60);
-	QGLFormat::setDefaultFormat(fmt);
-
 	setupUi(this);
 
 	connect(cancel0, SIGNAL(clicked()), this, SLOT(selectionCancel()));
