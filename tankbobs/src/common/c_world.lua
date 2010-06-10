@@ -957,7 +957,7 @@ function c_world_tank_die(tank, t)
 
 		tank.m.lastDieTime = t
 
-		tankbobs.w_removeBody(tank.m.body) tank.m.body = nil tank.m.fixture = nil
+		c_world_removeBodyFromEntity(tank)
 
 		local switch = c_world_getGameType()
 		if switch == PLAGUE or
@@ -1226,8 +1226,7 @@ function c_world_removeTank(tank)
 	for k, v in pairs(c_world_tanks) do
 		if v == tank then
 			if v.exists and v.m.body then
-				tankbobs.w_removeBody(v.m.body)
-				v.m.body = nil v.m.fixture = nil
+				c_world_removeBodyFromEntity(v)
 			end
 
 			c_world_tanks[k] = nil
@@ -1256,8 +1255,7 @@ function c_world_spawnTank(tank)
 	end
 
 	if tank.m.body then
-		tankbobs.w_removeBody(tank.m.body)
-		tank.m.body = nil v.m.fixture = nil
+		c_world_removeBodyFromEntity(tank)
 	end
 
 	local weapon = tank.weapon and c_weapon_getWeapons()[tank.weapon]
@@ -2351,7 +2349,7 @@ function c_world_projectile_step(d, projectile)
 
 	if not weapon then
 		if projectile.m.body then
-			tankbobs.w_removeBody(projectile.m.body) projectile.m.body = nil projectile.m.fixture = nil
+			c_world_removeBodyFromEntity(projectile)
 		end
 		c_weapon_removeProjectile(projectile)
 		return
@@ -2359,7 +2357,7 @@ function c_world_projectile_step(d, projectile)
 
 	if projectile.collided then
 		if projectile.m.body then
-			tankbobs.w_removeBody(projectile.m.body) projectile.m.body = nil projectile.m.fixture = nil
+			c_world_removeBodyFromEntity(projectile)
 		end
 
 		-- if explosive projectile, don't remove immediately
@@ -2607,7 +2605,7 @@ function c_world_powerup_step(d, powerup)
 	local t = t_t_getTicks()
 
 	if powerup.collided then
-		tankbobs.w_removeBody(powerup.m.body)
+		c_world_removeBodyFromEntity(powerup)
 		c_world_powerupRemove(powerup)
 		return
 	end
@@ -2642,7 +2640,7 @@ function c_world_removeCorpse(corpse)
 	for k, v in pairs(c_world_corpses) do
 		if v == corpse then
 			if v.m.body then
-				tankbobs.w_removeBody(v.m.body) v.m.body = nil v.m.fixture = nil
+				c_world_removeBodyFromEntity(v)
 			end
 
 			c_world_corpses[k] = nil
@@ -2750,7 +2748,7 @@ function c_world_corpse_step(d, corpse)
 		end
 
 		if corpse.m.body then
-			tankbobs.w_removeBody(corpse.m.body) corpse.m.body = nil corpse.m.fixture = nil
+			c_world_removeBodyFromEntity(corpse)
 		end
 	else
 		corpse.explode = false
@@ -3177,6 +3175,10 @@ end
 
 function c_world_postContactListener(begin, fixtureA, fixtureB, bodyA, bodyB, position, normal)
 	return false
+end
+
+function c_world_removeBodyFromEntity(entity)
+	tankbobs.w_removeBody(entity.m.body) entity.m.body = nil entity.m.fixture = nil
 end
 
 function c_world_resetWorldTimers(t)

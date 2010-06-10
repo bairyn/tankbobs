@@ -189,7 +189,7 @@ local function setNumPowerups(num)
 		-- remove powerup
 		local powerup = c_world_getPowerups()[i]
 		if powerup then
-			tankbobs.w_removeBody(powerup.m.body)
+			c_world_removeBodyFromEntity(powerup)
 			c_world_powerupRemove(powerup)
 		end
 	end

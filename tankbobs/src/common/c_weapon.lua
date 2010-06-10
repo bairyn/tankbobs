@@ -1254,7 +1254,7 @@ function c_weapon_removeProjectile(projectile)
 		if v == projectile then
 			--if not v.collided and v.m.body then
 			if v.m.body then
-				tankbobs.w_removeBody(v.m.body) v.m.body = nil v.m.fixture = nil
+				c_world_removeBodyFromEntity(v)
 			end
 
 			c_world_projectiles[k] = nil
@@ -1315,7 +1315,7 @@ function c_weapon_resetProjectiles()
 	if not common_empty(c_world_projectiles) then
 		for k, v in pairs(c_world_projectiles) do
 			if not v.collided and v.m.body then
-				tankbobs.w_removeBody(v.m.body) v.m.body = nil v.m.fixture = nil
+				c_world_removeBodyFromEntity(v)
 			end
 		end
 
