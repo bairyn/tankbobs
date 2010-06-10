@@ -123,13 +123,6 @@ local function newPut(t, value)
 end
 
 
-local numProjectiles = nil
-local function setNumProjectiles(num)
-	numProjectiles = num
-
-	c_weapon_resetProjectiles()
-end
-
 local function setNumTanks(num)
 	local oldNum = #c_world_getTanks()
 
@@ -267,12 +260,6 @@ protocol_unpersist =
 		{ identifier(increment())
 		, nil
 		, VT_FUNCTION
-		, setNumProjectiles
-		, INT
-		},
-		{ identifier(increment())
-		, nil
-		, VT_FUNCTION
 		, setNumTanks
 		, INT
 		},
@@ -308,45 +295,6 @@ protocol_unpersist =
 		, setNumFlags
 		, INT
 		, 0
-		},
-
-		-- projectiles
-		{ identifier(increment())
-		, nil
-		, VT_FUNCTION
-		, function(parse)
-			-- Projectiles are reset and created
-			local projectile = c_weapon_projectile:new()
-
-			newParse()
-
-			projectile.p(nextParse(parse))
-			local velocity = nextParse(parse)
-			local angularVelocity = nextParse(parse)
-			projectile.weapon = nextParse(parse)
-			projectile.r = nextParse(parse)
-			projectile.collisions = nextParse(parse)
-			projectile.owner = nextParse(parse)
-			projectile.collided = nextParse(parse)
-
-			if c_weapon_getWeapons()[projectile.weapon] then
-				table.insert(c_weapon_getProjectiles(), projectile)
-
-				projectile.m.body = tankbobs.w_addBody(projectile.p, projectile.r, c_const_get("projectile_canSleep"), c_const_get("projectile_isBullet"), c_const_get("projectile_linearDamping"), c_const_get("projectile_angularDamping"), #c_weapon_getProjectiles())
-				projectile.m.fixture = tankbobs.w_addFixture(projectile.m.body, c_weapon_getWeapons()[projectile.weapon].m.p.fixtureDefinition, true)
-				tankbobs.w_setLinearVelocity(projectile.m.body, velocity)
-				tankbobs.w_setAngularVelocity(projectile.m.body, angularVelocity)
-			end
-		  end
-		, { VEC2
-		  , VEC2
-		  , DOUBLE
-		  , INT
-		  , DOUBLE
-		  , INT
-		  , INT
-		  , BOOL
-		  }
 		},
 
 		-- tanks
@@ -688,10 +636,6 @@ protocol_unpersist =
 	}
 }
 
-local function getNumProjectiles()
-	return #c_weapon_getProjectiles()
-end
-
 local function getNumTanks()
 	return #c_world_getTanks()
 end
@@ -770,12 +714,6 @@ protocol_persist =
 		{ identifier(increment())
 		, nil
 		, VT_FUNCTION
-		, getNumProjectiles
-		, INT
-		},
-		{ identifier(increment())
-		, nil
-		, VT_FUNCTION
 		, getNumTanks
 		, INT
 		},
@@ -811,41 +749,6 @@ protocol_persist =
 		, getNumFlags
 		, INT
 		, 0
-		},
-
-		-- projectiles
-		{ identifier(increment())
-		, nil
-		, VT_FUNCTION
-		, function()
-			local res = {}
-
-			newPut(res)
-
-			for _, v in pairs(c_weapon_getProjectiles()) do
-				if not v.collided and v.m.body and v.m.fixture then
-					nextPut(v.p)
-					nextPut(tankbobs.w_getLinearVelocity(v.m.body))
-					nextPut(tankbobs.w_getAngularVelocity(v.m.body))
-					nextPut(v.weapon)
-					nextPut(v.r)
-					nextPut(v.collisions)
-					nextPut(v.owner)
-					nextPut(v.collided)
-				end
-			end
-
-			return res
-		  end
-		, { VEC2
-		  , VEC2
-		  , DOUBLE
-		  , INT
-		  , DOUBLE
-		  , INT
-		  , INT
-		  , BOOL
-		  }
 		},
 
 		-- tanks
