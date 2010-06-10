@@ -61,8 +61,8 @@
 		<online>
 			<randomSnapshotFilter>0.1</randomSnapshotFilter>
 			<randomSnapshotLowPriorityFilter>0.1</randomSnapshotLowPriorityFilter>
-			<rsfMax>0.9</rsfMax>
-			<rslpfMax>0.9</rslpfMax>
+			<rsfMax>0.1</rsfMax>
+			<rslpfMax>0.6</rslpfMax>
 			<stepAhead>true</stepAhead>
 			<unlagged>true</unlagged>
 		</online>

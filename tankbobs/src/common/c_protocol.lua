@@ -591,7 +591,6 @@ protocol_unpersist =
 		  , DOUBLE
 		  , VEC2
 		  }
-		, 0
 		},
 
 		-- control points
@@ -947,41 +946,43 @@ protocol_persist =
 			newPut(res)
 
 			for k, v in pairs(c_tcm_current_map.walls) do
-				nextPut(k)
+				if v.path or not v.static then
+					nextPut(k)
 
-				local q = not not v.p[4]
-				nextPut(q)
+					local q = not not v.p[4]
+					nextPut(q)
 
-				--[[
-				nextPut(v.p[1])
-				nextPut(v.p[2])
-				nextPut(v.p[3])
-				nextPut(q and v.p[4] or ZERO)
-				nextPut(v.texture)
-				nextPut(v.detail)
-				nextPut(v.static)
-				nextPut(v.t[1])
-				nextPut(v.t[2])
-				nextPut(v.t[3])
-				nextPut(q and v.t[4] or ZERO)
-				--]]
+					--[[
+					nextPut(v.p[1])
+					nextPut(v.p[2])
+					nextPut(v.p[3])
+					nextPut(q and v.p[4] or ZERO)
+					nextPut(v.texture)
+					nextPut(v.detail)
+					nextPut(v.static)
+					nextPut(v.t[1])
+					nextPut(v.t[2])
+					nextPut(v.t[3])
+					nextPut(q and v.t[4] or ZERO)
+					--]]
 
-				nextPut(v.m.pos[1])
-				nextPut(v.m.pos[2])
-				nextPut(v.m.pos[3])
-				nextPut(q and v.m.pos[4] or ZERO)
+					nextPut(v.m.pos[1])
+					nextPut(v.m.pos[2])
+					nextPut(v.m.pos[3])
+					nextPut(q and v.m.pos[4] or ZERO)
 
-				nextPut(v.m.body and tankbobs.w_getPosition(v.m.body) or ZERO)
-				nextPut(v.m.body and tankbobs.w_getAngle(v.m.body) or 0)
-				nextPut(v.m.body and tankbobs.w_getLinearVelocity(v.m.body) or ZERO)
-				nextPut(v.m.body and tankbobs.w_getAngularVelocity(v.m.body) or 0)
+					nextPut(v.m.body and tankbobs.w_getPosition(v.m.body) or ZERO)
+					nextPut(v.m.body and tankbobs.w_getAngle(v.m.body) or 0)
+					nextPut(v.m.body and tankbobs.w_getLinearVelocity(v.m.body) or ZERO)
+					nextPut(v.m.body and tankbobs.w_getAngularVelocity(v.m.body) or 0)
 
-				nextPut(v.path)
-				nextPut(v.pid)
-				nextPut(v.m.pid)
-				nextPut(v.m.ppid)
-				nextPut(v.m.ppos or 0)
-				nextPut(v.m.startpos or ZERO)
+					nextPut(v.path)
+					nextPut(v.pid)
+					nextPut(v.m.pid)
+					nextPut(v.m.ppid)
+					nextPut(v.m.ppos or 0)
+					nextPut(v.m.startpos or ZERO)
+				end
 			end
 
 			return res
