@@ -45,7 +45,7 @@ function st_main_init()
 
 	c_world_setGameType(c_config_get("game.gameType"))
 	c_world_setInstagib(c_config_get("game.instagib"))
-	c_world_setSpawnStyle(c_config_get("game.spawnStyle"))
+	c_world_setSpawnMode(c_config_get("game.spawnMode"))
 
 	c_world_newWorld()
 end
