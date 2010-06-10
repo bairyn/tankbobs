@@ -142,7 +142,7 @@
 
 	<game>
 		<allBotLevels>automatic</allBotLevels>
-		<spawnStyle>0</spawnStyle>
+		<spawnMode>0</spawnMode>
 		<bot>
 			<color>
 				<r> 0.875 </r>  Orange

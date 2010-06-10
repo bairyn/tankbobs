@@ -450,7 +450,7 @@ function client_step(d)
 								client.challenge = math.random(0x00000000, 0x7FFFFFFF)
 								tankbobs.n_writeToPacket(tankbobs.io_fromInt(client.challenge))
 								tankbobs.n_writeToPacket(instagib)
-								tankbobs.n_writeToPacket(tankbobs.io_fromChar(c_world_getSpawnStyle()))
+								tankbobs.n_writeToPacket(tankbobs.io_fromChar(c_world_getSpawnMode()))
 								-- set and map as a NULL-terminated string
 								tankbobs.n_writeToPacket(c_tcm_current_set.name .. string.char(0x00))
 								tankbobs.n_writeToPacket(c_tcm_current_map.name .. string.char(0x00))

@@ -272,8 +272,8 @@ command =
 	matched = false
 }
 
-local help, exec, eval, exit, set, map, listSets, listMaps, echo, pause, restart, port, gameType, clientList, kick, ban, kickban, banList, unban, saveBans, loadBans, instagib, spawnStyle, c_set, c_get
-local helpT, execT, evalT, exitT, setT, mapT, listSetsT, listMapsT, echoT, pauseT, restartT, portT, gameTypeT, clientListT, kickT, banT, kickbanT, banListT, unbanT, saveBansT, loadBansT, instagibT, spawnStyleT, c_setT, c_getT
+local help, exec, eval, exit, set, map, listSets, listMaps, echo, pause, restart, port, gameType, clientList, kick, ban, kickban, banList, unban, saveBans, loadBans, instagib, spawnMode, c_set, c_get
+local helpT, execT, evalT, exitT, setT, mapT, listSetsT, listMapsT, echoT, pauseT, restartT, portT, gameTypeT, clientListT, kickT, banT, kickbanT, banListT, unbanT, saveBansT, loadBansT, instagibT, spawnModeT, c_setT, c_getT
 
 function help(line)
 	local args = commands_args(line)
@@ -327,7 +327,7 @@ function help(line)
 			" -listSets\n" ..
 			" -gameType\n" ..
 			" -instagib\n" ..
-			" -spawnStyle\n" ..
+			" -spawnMode\n" ..
 			" -exec\n" ..
 			" -eval\n" ..
 			" -clientList\n" ..
@@ -1188,7 +1188,7 @@ end
 
 -- no auto completion for instagib
 
-function spawnStyle(line)
+function spawnMode(line)
 	local args = commands_args(line)
 
 	if #args >= 2 then
@@ -1203,25 +1203,25 @@ function spawnStyle(line)
 		end
 
 		if not setting then
-			return help("help spawnStyle")
+			return help("help spawnMode")
 		end
 
-		c_config_set("game.spawnStyle", setting)
+		c_config_set("game.spawnMode", setting)
 	else
 		local setting = "an unrecognized value"
 
-		local switch = c_world_getSpawnStyle()
+		local switch = c_world_getSpawnMode()
 		if switch == BLOCKABLE then
 			setting = "'blockable'"
 		elseif switch == ALTERNATING then
 			setting = "'alternating'"
 		end
 
-		s_printnl("spawnStyle: spawnStyle is currently set to ", setting)
+		s_printnl("spawnMode: spawnMode is currently set to ", setting)
 	end
 end
 
--- no auto completion for spawnStyle
+-- no auto completion for spawnMode
 
 function c_set(line)
 	local args = commands_args(line)
@@ -1523,13 +1523,13 @@ commands =
 	},
 
 	{
-		"spawnStyle",
-		spawnStyle,
-		spawnStyleT,
+		"spawnMode",
+		spawnMode,
+		spawnModeT,
 		"Usage:\n" ..
-		" spawnStyle (blockable|alternating)\n" ..
+		" spawnMode (blockable|alternating)\n" ..
 		"\n"  ..
-		" Sets spawn style setting.  When called without any arguments, the\n" ..
+		" Sets spawn mode setting.  When called without any arguments, the\n" ..
 		" current setting is printed to console."
 	},
 

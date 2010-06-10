@@ -73,7 +73,7 @@ local behind
 local worldTime = 0
 local lastWorldTime = 0
 local c_world_instagib = false
-local c_world_spawnStyle = false
+local c_world_spawnMode = false
 local lastPowerupSpawnTime
 local nextPowerupSpawnPoint
 local worldInitialized = false
@@ -698,12 +698,12 @@ function c_world_getInstagib()
 	return c_world_instagib
 end
 
-function c_world_setSpawnStyle(state)
-	c_world_spawnStyle = state
+function c_world_setSpawnMode(state)
+	c_world_spawnMode = state
 end
 
-function c_world_getSpawnStyle()
-	return c_world_spawnStyle
+function c_world_getSpawnMode()
+	return c_world_spawnMode
 end
 
 function c_world_getGameType()
@@ -1294,7 +1294,7 @@ function c_world_tank_checkSpawn(d, tank)
 	end
 
 	if tank.lastSpawnPoint == 0 then
-		local switch = c_world_getSpawnStyle()
+		local switch = c_world_getSpawnMode()
 		if     switch == BLOCKABLE then
 			tank.lastSpawnPoint = 1
 		elseif switch == ALTERNATING then
@@ -1315,7 +1315,7 @@ function c_world_tank_checkSpawn(d, tank)
 	local sp = tank.lastSpawnPoint
 	local playerSpawnPoint = c_tcm_current_map.playerSpawnPoints[tank.lastSpawnPoint]
 
-	local switch = c_world_getSpawnStyle()
+	local switch = c_world_getSpawnMode()
 	if switch == BLOCKABLE then
 		while not c_world_tank_canSpawn(d, tank) do
 			tank.lastSpawnPoint = tank.lastSpawnPoint + 1
