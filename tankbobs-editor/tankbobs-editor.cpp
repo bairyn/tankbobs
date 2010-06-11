@@ -1072,7 +1072,7 @@ static void drawPaths(void)
 				{
 					glScaled(1.1 / ZOOM, 1.1 / ZOOM, 1.0);
 					glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-					glColor4d(1.0, 0.0, 0.0, 1.0);
+					glColor4d(0.8, 0.1, 0.2, 1.0);
 					if(glIsList(entBase + e_selectionPath))
 						glCallList(entBase + e_selectionPath);
 				}
@@ -1284,7 +1284,7 @@ void Editor::initializeGL()
 
 	glNewList(entBase + e_selectionPath, GL_COMPILE);
 		glPushAttrib(GL_CURRENT_BIT);
-			glColor4d(1.0, 0.0, 0.0, 1.0);
+			glColor4d(0.8, 0.1, 0.2, 1.0);
 			glBegin(GL_QUADS);
 				glVertex2d(-PATH_WIDTH * 0.5, +PATH_HEIGHT * 0.5);
 				glVertex2d(-PATH_WIDTH * 0.5, -PATH_HEIGHT * 0.5);
