@@ -1056,7 +1056,7 @@ protocol_persist =
 				nextPut(k)
 				nextPut(v.m.stolen)
 				nextPut(v.m.dropped)
-				nextPut(v.m.pos)
+				nextPut(v.m.pos or ZERO)
 			end
 
 			return res

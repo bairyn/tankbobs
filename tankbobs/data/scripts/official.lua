@@ -702,7 +702,7 @@ elseif c_tcm_current_map.name == "tutorial" then
 
 		e(8)
 
-		updateHelperText("You will now be introduced to teleporters.\nGo left and into the teleporter.", {"20_1.wav"})
+		updateHelperText("Go left and into the teleporter.", {"20_1.wav"})
 	end
 
 	local function updateFirstWeaponStep()
@@ -777,7 +777,7 @@ elseif c_tcm_current_map.name == "tutorial" then
 						if tank.ammo < weapon.capacity then
 							noReload()
 							state = STATECOMPLETERELOADFIRE
-							updateHelperText("You didn't press and hold\nyour reload key, '" .. key("reload") .. "' until completely full.\nFire the rest of your ammo, and then press and\nHOLD your reload key until you completely\nreload your weapon.", {"16_1.wav"})
+							updateHelperText("You didn't press and hold\nyour reload key, '" .. key("reload") .. "' long enough.\nFire the rest of your ammo, and then press and\nHOLD your reload key until you completely\nreload your weapon.", {"16_1.wav"})
 						else
 							if client and not server and step ~= 6 then
 								step = 6
