@@ -868,12 +868,12 @@ function game_audioDistance(p)
 	if not (online and connection.t and c_world_getTanks()[connection.t]) then
 		local ds = {}
 		for _, v in pairs(c_world_getTanks()) do
-			table.insert(ds, {v.p, math.min(0, 1 - (p - v.p).R / game_audioRange)})
+			table.insert(ds, math.max(0, 1 - (p - v.p).R / c_const_get("game_audioRange")))
 		end
-		table.sort(ds, function(a, b) return a[2] < b[2] end)
-		return ds[1][1] or 1
+		table.sort(ds, function(a, b) return a > b end)  -- reverse sort
+		return ds[1] or 1
 	else
-		return math.min(0, 1 - (p - c_world_getTanks()[connection.t].p).R / game_audioRange)
+		return math.max(0, 1 - (p - c_world_getTanks()[connection.t].p).R / c_const_get("game_audioRange"))
 	end
 end
 
