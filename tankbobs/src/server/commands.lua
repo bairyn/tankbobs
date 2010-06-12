@@ -272,8 +272,8 @@ command =
 	matched = false
 }
 
-local help, exec, eval, exit, set, map, listSets, listMaps, echo, pause, restart, port, gameType, clientList, kick, ban, kickban, banList, unban, saveBans, loadBans, instagib, spawnMode, c_set, c_get
-local helpT, execT, evalT, exitT, setT, mapT, listSetsT, listMapsT, echoT, pauseT, restartT, portT, gameTypeT, clientListT, kickT, banT, kickbanT, banListT, unbanT, saveBansT, loadBansT, instagibT, spawnModeT, c_setT, c_getT
+local help, exec, eval, exit, set, map, listSets, listMaps, echo, pause, restart, port, gameType, clientList, kick, ban, kickban, banList, unban, saveBans, loadBans, instagib, spawnMode, c_set, c_get, pfps
+local helpT, execT, evalT, exitT, setT, mapT, listSetsT, listMapsT, echoT, pauseT, restartT, portT, gameTypeT, clientListT, kickT, banT, kickbanT, banListT, unbanT, saveBansT, loadBansT, instagibT, spawnModeT, c_setT, c_getT, fpsT
 
 function help(line)
 	local args = commands_args(line)
@@ -1262,6 +1262,20 @@ end
 
 -- no auto completion for get
 
+function pfps(line)
+	local args = commands_args(line)
+
+	if #args <= 1 then
+		local cmd = args[1]
+
+		s_printnl(string.format("%s: %f", cmd, fps))
+	else
+		return help("help fps")
+	end
+end
+
+-- no auto completion for fps
+
 commands =
 {
 	{
@@ -1562,5 +1576,15 @@ commands =
 		" c_get config\n" ..
 		"\n" ..
 		" Outputs a configurable to the console."
+	},
+
+	{
+		{"fps"},
+		pfps,
+		fpsT,
+		"Usage:\n" ..
+		" fps\n" ..
+		"\n" ..
+		" Prints current frame-rate to console."
 	},
 }
