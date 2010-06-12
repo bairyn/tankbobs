@@ -2897,6 +2897,7 @@ function c_world_teleporter_step(d, teleporter)
 
 					v.target = target.id
 					v.m.lastTeleportTime = t_t_getTicks()
+					v.m.lastTeleportPosition = t_m_vec2(v.p)
 					tankbobs.w_setPosition(v.m.body, target.p)
 					v.p(tankbobs.w_getPosition(v.m.body))
 				end
