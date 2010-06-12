@@ -1384,7 +1384,7 @@ function game_step(d)
 					end
 				end
 
-				return tank
+				return tank or c_world_getTanks()[1]
 			end
 			if v.m.lastCaptureTime and v.m.lastCaptureTimeB ~= v.m.lastCaptureTime then
 				v.m.lastCaptureTimeB = v.m.lastCaptureTime
@@ -1416,9 +1416,9 @@ function game_step(d)
 			if v.m.lastReturnTime and v.m.lastReturnTimeB ~= v.m.lastReturnTime then
 				v.m.lastReturnTimeB = v.m.lastReturnTime
 
-				tankbobs.a_setVolumeChunk(c_const_get("flagReturn_sound"), game_audioDistance(findTank().p))
+				tankbobs.a_setVolumeChunk(c_const_get("flagReturn_sound"), game_audioDistance(v.m.pos or v.p))
 				tankbobs.a_playSound(c_const_get("flagReturn_sound"))
-				tankbobs.a_setVolumeChunk(c_const_get("flagReturn_sound"), game_audioDistance(findTank().p))
+				tankbobs.a_setVolumeChunk(c_const_get("flagReturn_sound"), game_audioDistance(v.m.pos or v.p))
 			end
 		end
 	elseif switch == PLAGUE or
