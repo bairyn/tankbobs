@@ -2558,6 +2558,10 @@ function c_world_powerup_pickUp(tank, powerup)
 
 	powerup.collided = true
 
+	if not powerupType then
+		return
+	end
+
 	tank.m.lastPickupTime = t
 
 	if powerupType.name == "machinegun" then
