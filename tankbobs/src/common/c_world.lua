@@ -3107,12 +3107,19 @@ function c_world_contactListener(begin, fixtureA, fixtureB, bodyA, bodyB, positi
 				c_weapon_projectileCollided(projectile2, bodyA)
 			end
 		elseif c_world_isBodyTank(bodyA) or c_world_isBodyTank(bodyB) then
-			local tank, tank2
+			local tank, tank2 wall, wall2
+			local skip = false
 
-			tank = c_world_isBodyTank(bodyA)
+			tank  = c_world_isBodyTank(bodyA)
 			tank2 = c_world_isBodyTank(bodyB)
+			wall  = c_world_isBodyWall(bodyA)
+			wall2 = c_world_isBodyWall(bodyB)
 
-			if not powerup then
+			if (wall and not wall.static) or (wall2 and not wall2.static) then
+				skip = true
+			end
+
+			if not (powerup or skip) then
 				if tank then
 					c_world_collide(tank, normal, tank2)
 				end
