@@ -1372,28 +1372,53 @@ function game_step(d)
 		end
 	elseif switch == CAPTURETHEFLAG then
 		for _, v in pairs(c_tcm_current_map.flags) do
+			local tank = nil
+			local function findTank()
+				if not tank then
+					for _, vs in pairs() do
+						if vs.flag == v then
+							tank = vs
+
+							break
+						end
+					end
+				end
+
+				return tank
+			end
 			if v.m.lastCaptureTime and v.m.lastCaptureTimeB ~= v.m.lastCaptureTime then
 				v.m.lastCaptureTimeB = v.m.lastCaptureTime
 
-				tankbobs.a_setVolumeChunk(c_const_get("flagCapture_sound"), game_audioDistance(v.p))
-				tankbobs.a_playSound(c_const_get("flagCapture_sound"))
-				tankbobs.a_setVolumeChunk(c_const_get("flagCapture_sound"), game_audioDistance(v.p))
+				local otherFlag = nil
+				for _, vs in pairs(c_tcm_current_map.flags) do
+					if vs.red ~= v.red then
+						otherFlag = vs
+
+						break
+					end
+				end
+
+				if otherFlag then
+					tankbobs.a_setVolumeChunk(c_const_get("flagCapture_sound"), game_audioDistance(otherFlag.p))
+					tankbobs.a_playSound(c_const_get("flagCapture_sound"))
+					tankbobs.a_setVolumeChunk(c_const_get("flagCapture_sound"), game_audioDistance(otherFlag.p))
+				end
 			end
 
 			if v.m.lastPickupTime and v.m.lastPickupTimeB ~= v.m.lastPickupTime then
 				v.m.lastPickupTimeB = v.m.lastPickupTime
 
-				tankbobs.a_setVolumeChunk(c_const_get("flagPickUp_sound"), game_audioDistance(v.p))
+				tankbobs.a_setVolumeChunk(c_const_get("flagPickUp_sound"), game_audioDistance(findTank().p))
 				tankbobs.a_playSound(c_const_get("flagPickUp_sound"))
-				tankbobs.a_setVolumeChunk(c_const_get("flagPickUp_sound"), game_audioDistance(v.p))
+				tankbobs.a_setVolumeChunk(c_const_get("flagPickUp_sound"), game_audioDistance(findTank().p))
 			end
 
 			if v.m.lastReturnTime and v.m.lastReturnTimeB ~= v.m.lastReturnTime then
 				v.m.lastReturnTimeB = v.m.lastReturnTime
 
-				tankbobs.a_setVolumeChunk(c_const_get("flagReturn_sound"), game_audioDistance(v.p))
+				tankbobs.a_setVolumeChunk(c_const_get("flagReturn_sound"), game_audioDistance(findTank().p))
 				tankbobs.a_playSound(c_const_get("flagReturn_sound"))
-				tankbobs.a_setVolumeChunk(c_const_get("flagReturn_sound"), game_audioDistance(v.p))
+				tankbobs.a_setVolumeChunk(c_const_get("flagReturn_sound"), game_audioDistance(findTank().p))
 			end
 		end
 	elseif switch == PLAGUE or
