@@ -266,9 +266,132 @@ elseif c_tcm_current_map.name == "race-track" then
 	end
 
 	c_mods_prependFunction("c_world_step", frame)
-elseif c_tcm_current_map.name == "tutorial" then
+elseif c_tcm_current_map.name == "spree" then
+	-- tanks don't bounce against walls with misc set to "powerup"
+
 	local WALLPOWERUP = 0x8020
 
+	c_const_set("powerup_clipmask", c_const_get("powerup_clipmask") + WALLPOWERUP)
+
+	for _, v in pairs(c_tcm_current_map.walls) do
+		if not v.detail and v.m.body then
+			if v.misc == "powerup" then
+				tankbobs.w_removeBody(v.m.body) v.m.body = nil v.m.fixture = nil
+
+				local b = c_world_wallShape(v.p)
+				v.m.body = tankbobs.w_addBody(b[1], 0, c_const_get("wall_canSleep"), c_const_get("wall_isBullet"), c_const_get("wall_linearDamping"), c_const_get("wall_angularDamping"), k)
+				v.m.fixture = tankbobs.w_addPolygonalFixture(b[2], c_const_get("wall_density"), c_const_get("wall_friction"), c_const_get("wall_restitution"), c_const_get("wall_isSensor"), c_const_get("wall_contentsMask") + WALLPOWERUP, c_const_get("wall_clipmask"), v.m.body, not v.static)
+			end
+		end
+	end
+
+	-- map triggers
+
+	local map_triggers
+	do
+		-- find paths that triggers are linked to
+		local triggers = {}
+		local triggered_ = {}
+		for _, wall in pairs(c_tcm_current_map.walls) do
+			if wall.misc:sub(1, 1) == 't' and #wall.misc > 1 then
+				local match = wall.misc:sub(2)
+				local trigger = {wall, {}}
+
+				for k, path in pairs(c_tcm_current_map.paths) do
+					if path.misc:find(match) then
+						local linked = {}
+
+						for _, wall_sub in pairs(c_tcm_current_map.walls) do
+							if wall_sub.path and wall_sub.pid == k - 1 then
+								table.insert(linked, wall_sub)
+							end
+						end
+
+						if #linked > 0 then
+							table.insert(trigger[2], {path, linked})
+						end
+					end
+				end
+
+				if #trigger[2] > 0 then
+					table.insert(triggers, trigger)
+				end
+			end
+		end
+
+		local function triggered(trigger)
+			for k, v in pairs(triggered_) do
+				if v[1] == trigger then
+					return k
+				end
+			end
+
+			return false
+		end
+
+		local function find(t, v)
+			for k, vs in pairs(t) do
+				if vs == v then
+					return k
+				end
+			end
+
+			return nil
+		end
+
+		local function time(path)
+			local time = 0
+			local paths = {}
+			local mpaths = c_tcm_current_map.paths
+
+			while path and not find(paths, path) do
+				table.insert(paths, path)
+
+				time = time + path.time
+
+				path = mpaths[path.t + 1]
+			end
+
+			return time
+		end
+
+		function map_triggers(d, min)
+			local remove = nil
+
+			for k, v in pairs(triggers) do
+				if not min or k >= min then
+					local triggeredk = triggered(v)
+
+					if triggeredk then
+						local triggered = triggered_[triggeredk]
+						if triggered[2] then
+							triggered[2] = triggered[2] - d
+							if triggered[2] <= 0 then
+								triggered_[triggeredk] = nil
+
+								v[2][1][1].enabled = not v[2][1][1].enabled
+							end
+						end
+					else
+						for _, tank in pairs(c_world_getTanks()) do
+							if c_world_intersection(d, c_world_tankHull(tank), v[1].p) then
+								v[2][1][1].enabled = not v[2][1][1].enabled
+
+								table.insert(triggered_, {v, time(v[2][1][1])})
+
+								if client then
+									tankbobs.a_playSound(c_const_get("globalAudio_dir") .. "pop.wav")
+								end
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+
+	c_mods_appendFunction("c_world_step", map_triggers)
+elseif c_tcm_current_map.name == "tutorial" then
 	-- don't do anything if running on server
 	if server or not client then
 		error "Cannot run tutorial level on server"
@@ -328,6 +451,8 @@ elseif c_tcm_current_map.name == "tutorial" then
 	c_const_set("helperAudio_dir", c_const_get("globalAudio_dir") .. "tutorial_", -1)
 
 	-- tanks don't bounce against walls with misc set to "powerup"
+
+	local WALLPOWERUP = 0x8020
 
 	c_const_set("powerup_clipmask", c_const_get("powerup_clipmask") + WALLPOWERUP)
 
