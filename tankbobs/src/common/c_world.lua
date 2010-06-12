@@ -3107,7 +3107,7 @@ function c_world_contactListener(begin, fixtureA, fixtureB, bodyA, bodyB, positi
 				c_weapon_projectileCollided(projectile2, bodyA)
 			end
 		elseif c_world_isBodyTank(bodyA) or c_world_isBodyTank(bodyB) then
-			local tank, tank2 wall, wall2
+			local tank, tank2, wall, wall2
 			local skip = false
 
 			tank  = c_world_isBodyTank(bodyA)
