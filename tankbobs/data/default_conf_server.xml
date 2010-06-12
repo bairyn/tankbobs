@@ -64,14 +64,14 @@
 		<teamFragLimit>15</teamFragLimit>
 		<teamSurvivorPointLimit>10</teamSurvivorPointLimit>
 		<timescale>1</timescale>
-		<worldFPS>256</worldFPS>
+		<worldFPS>64</worldFPS>
 	</game>
 
 	<server>
-		<fps>128</fps>
+		<fps>64</fps>
 		<logFile>games.log</logFile>  Make empty (or false) to not record to logs
 		<maxPersistSize>900</maxPersistSize>
-		<pfps>128</pfps>
+		<pfps>64</pfps>
 		<randomSnapshotLowPriorityFilter>0.8</randomSnapshotLowPriorityFilter>
 		<rslpfMax>0.6</rslpfMax>
 		<startupCommandFile>server.cmd</startupCommandFile>

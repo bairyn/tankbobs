@@ -3,7 +3,7 @@
 		<ambience>true</ambience>
 		<audioChunkSize>3072</audioChunkSize>
 		<cameraExtraFOV>25</cameraExtraFOV>
-		<cameraRotate>true</cameraRotate>
+		<cameraRotate>false</cameraRotate>
 		<cameraSpeed>5</cameraSpeed>
 		<cameraZoom>1</cameraZoom>
 		<fps>128</fps>
@@ -194,6 +194,6 @@
 		<teamFragLimit>15</teamFragLimit>
 		<teamSurvivorPointLimit>10</teamSurvivorPointLimit>
 		<timescale>1</timescale>
-		<worldFPS>256</worldFPS>
+		<worldFPS>128</worldFPS>
 	</game>
 </config>
