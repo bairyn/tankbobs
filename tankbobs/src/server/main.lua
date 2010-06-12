@@ -152,6 +152,11 @@ function main_loop()
 		return
 	end
 
+	fps = common_MTF(t - lastTime)
+	if c_config_get("common.dro") then
+		common_dro_addFrame(fps)
+	end
+
 	if c_tcm_current_map and (c_config_get("server.pfps") == 0 or not lastPTime or t - lastPTime > common_FTM(c_config_get("server.pfps"))) then
 		lastPTime = t
 

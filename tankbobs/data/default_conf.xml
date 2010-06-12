@@ -6,7 +6,6 @@
 		<cameraRotate>true</cameraRotate>
 		<cameraSpeed>5</cameraSpeed>
 		<cameraZoom>1</cameraZoom>
-		<dro>true</dro>
 		<fps>128</fps>
 		<histSize>1024</histSize>  record 256 frames of input
 		<ifps>64</ifps>
@@ -127,6 +126,7 @@
 	</client>
 
 	<common>
+		<dro>true</dro>
 		<permitSymbolicLinks>false</permitSymbolicLinks>
 		<online>
 			<packetDelay>0</packetDelay>

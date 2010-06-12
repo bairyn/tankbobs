@@ -1,5 +1,6 @@
 <config>
 	<common>
+		<dro>false</dro>
 		<permitSymbolicLinks>false</permitSymbolicLinks>
 		<online>
 			<packetDelay>0</packetDelay>

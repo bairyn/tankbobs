@@ -123,11 +123,12 @@ function main_loop()
 
 	if c_config_get("client.fps") > 0 and t - lastTime < common_FTM(c_config_get("client.fps")) then
 		tankbobs.t_delay(common_FTM(c_config_get("client.fps")) - t + lastTime)
+
 		return
 	end
 
 	fps = common_MTF(t - lastTime)
-	if c_config_get("client.dro") then
+	if c_config_get("common.dro") then
 		common_dro_addFrame(fps)
 	end
 
