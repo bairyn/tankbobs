@@ -1375,7 +1375,7 @@ function game_step(d)
 			local tank = nil
 			local function findTank()
 				if not tank then
-					for _, vs in pairs() do
+					for _, vs in pairs(c_world_getTanks()) do
 						if vs.flag == v then
 							tank = vs
 
