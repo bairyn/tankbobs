@@ -325,7 +325,7 @@ function c_weapon_init()
 
 	weapon.name = "semi-instagun"
 	weapon.altName = "semi-instagun"
-	weapon.damage = 100
+	weapon.damage = 1000000
 	weapon.pellets = 1
 	weapon.speed = 4000
 	weapon.spread = tankbobs.m_radians(0)
