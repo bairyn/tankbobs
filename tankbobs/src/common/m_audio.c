@@ -411,7 +411,7 @@ int a_playSound(lua_State *L)
 
 	CHECKINIT(init, L);
 
-	if(!audioInitialized)
+	if(!audioInitialized || (lua_tostring(L, 1) && !*lua_tostring(L, 1)))
 		return 0;
 
 	if(lua_isstring(L, 1))
@@ -560,7 +560,7 @@ int a_setVolumeChunk(lua_State *L)
 
 	CHECKINIT(init, L);
 
-	if(!audioInitialized)
+	if(!audioInitialized || (lua_tostring(L, 1) && !*lua_tostring(L, 1)))
 		return 0;
 
 	volume = luaL_checknumber(L, -1) * MIX_MAX_VOLUME;
