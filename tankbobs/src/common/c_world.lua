@@ -176,7 +176,7 @@ function c_world_init()
 
 	c_const_set("game_aidAidStartDistance", 2.1, 1)
 	c_const_set("game_aidAidMaxDistance", 4096, 1)
-	c_const_set("game_aimAidLockTime", 2, 1)
+	c_const_set("game_aimAidLockTime", 1, 1)
 	c_const_set("game_aimAidClearTime", 5, 1)
 
 	-- hull of tank facing right
