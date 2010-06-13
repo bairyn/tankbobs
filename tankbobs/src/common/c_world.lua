@@ -174,6 +174,9 @@ function c_world_init()
 	c_const_set("game_chasePointTime", 10, 1)
 	c_const_set("game_tagProtection", 0.2, 1)
 
+	c_const_set("game_aimAidLockTime", 3, 1)
+	c_const_set("game_aimAidClearTime", 1, 1)
+
 	-- hull of tank facing right
 	c_const_set("tank_hullx1", -2.0, 1) c_const_set("tank_hully1",  2.0, 1)
 	c_const_set("tank_hullx2", -2.0, 1) c_const_set("tank_hully2", -2.0, 1)
@@ -495,6 +498,11 @@ c_world_tank =
 	cd =
 	{ acceleration = false
 	, aimAid = false
+	, aimAidLock = nil
+	, aimAidIsLocked = false
+	, aimAidTarget = nil
+	, aimAidStart = nil
+	, aimAidEnd = nil
 	},  -- data cleared on death
 	nextSpawnTime = 0,
 
@@ -1804,15 +1812,15 @@ end
 
 function c_world_findClosestIntersection(start, endP, ignoreTypes)
 	-- test against the world and find the closest intersection point
-	-- returns false; or true, intersectionPoint, typeOfTarget, target
-	local minDistance, minIntersection, typeOfTarget, target
+	-- returns false; or true, intersectionPoint, typeOfTarget, target, targetIndex
+	local minDistance, minIntersection, typeOfTarget, target, targetIndex
 	local b, intersection
 
 	ignoreTypes = ignoreTypes or ""
 
 	-- walls
 	if not ignoreTypes:find("wall") then
-		for _, v in ipairs(c_tcm_current_map.walls) do
+		for k, v in ipairs(c_tcm_current_map.walls) do
 			if not v.detail then
 				if (not v.static or not ignoreTypes:find("static")) and (v.static or not ignoreTypes:find("dynamic")) then
 					b, intersection = c_world_lineIntersectsHull(start, endP, v.m.pos)
@@ -1822,11 +1830,13 @@ function c_world_findClosestIntersection(start, endP, ignoreTypes)
 							minDistance = math.abs((intersection - start).R)
 							typeOfTarget = "wall"
 							target = v
+							targetIndex = k
 						elseif math.abs((intersection - start).R) < minDistance then
 							minIntersection = intersection
 							minDistance = math.abs((intersection - start).R)
 							typeOfTarget = "wall"
 							target = v
+							targetIndex = k
 						end
 					end
 				end
@@ -1836,7 +1846,7 @@ function c_world_findClosestIntersection(start, endP, ignoreTypes)
 
 	-- tanks
 	if not ignoreTypes:find("tank") then
-		for _, v in ipairs(c_world_tanks) do
+		for k, v in ipairs(c_world_tanks) do
 			if v.exists then
 				b, intersection = c_world_lineIntersectsHull(start, endP, c_world_tankHull(v))
 				if b then
@@ -1845,11 +1855,13 @@ function c_world_findClosestIntersection(start, endP, ignoreTypes)
 						minDistance = math.abs((intersection - start).R)
 						typeOfTarget = "tank"
 						target = v
+						targetIndex = k
 					elseif math.abs((intersection - start).R) < minDistance then
 						minIntersection = intersection
 						minDistance = math.abs((intersection - start).R)
 						typeOfTarget = "tank"
 						target = v
+						targetIndex = k
 					end
 				end
 			end
@@ -1858,7 +1870,7 @@ function c_world_findClosestIntersection(start, endP, ignoreTypes)
 
 	-- projectiles
 	if not ignoreTypes:find("projectile") then
-		for _, v in ipairs(c_weapon_getProjectiles()) do
+		for k, v in ipairs(c_weapon_getProjectiles()) do
 			if not v.collided then
 				b, intersection = c_world_lineIntersectsHull(start, endP, c_world_projectileHull(v))
 				if b then
@@ -1867,11 +1879,13 @@ function c_world_findClosestIntersection(start, endP, ignoreTypes)
 						minDistance = math.abs((intersection - start).R)
 						typeOfTarget = "projectile"
 						target = v
+						targetIndex = k
 					elseif math.abs((intersection - start).R) < minDistance then
 						minIntersection = intersection
 						minDistance = math.abs((intersection - start).R)
 						typeOfTarget = "projectile"
 						target = v
+						targetIndex = k
 					end
 				end
 			end
@@ -1880,7 +1894,7 @@ function c_world_findClosestIntersection(start, endP, ignoreTypes)
 
 	-- powerups
 	if not ignoreTypes:find("powerup") then
-		for _, v in ipairs(c_world_powerups) do
+		for k, v in ipairs(c_world_powerups) do
 			if v.exists then
 				b, intersection = c_world_lineIntersectsHull(start, endP, c_world_powerupHull(v))
 				if b then
@@ -1889,11 +1903,13 @@ function c_world_findClosestIntersection(start, endP, ignoreTypes)
 						minDistance = math.abs((intersection - start).R)
 						typeOfTarget = "powerup"
 						target = v
+						targetIndex = k
 					elseif math.abs((intersection - start).R) < minDistance then
 						minIntersection = intersection
 						minDistance = math.abs((intersection - start).R)
 						typeOfTarget = "powerup"
 						target = v
+						targetIndex = k
 					end
 				end
 			end
@@ -1902,7 +1918,7 @@ function c_world_findClosestIntersection(start, endP, ignoreTypes)
 
 	-- corpses
 	if not ignoreTypes:find("corpse") then
-		for _, v in ipairs(c_world_corpses) do
+		for k, v in ipairs(c_world_corpses) do
 			if v.exists then
 				b, intersection = c_world_lineIntersectsHull(start, endP, c_world_corpseHull(v))
 				if b then
@@ -1911,18 +1927,20 @@ function c_world_findClosestIntersection(start, endP, ignoreTypes)
 						minDistance = math.abs((intersection - start).R)
 						typeOfTarget = "corpse"
 						target = v
+						targetIndex = k
 					elseif math.abs((intersection - start).R) < minDistance then
 						minIntersection = intersection
 						minDistance = math.abs((intersection - start).R)
 						typeOfTarget = "corpse"
 						target = v
+						targetIndex = k
 					end
 				end
 			end
 		end
 	end
 
-	return minDistance, minIntersection, typeOfTarget, target
+	return minDistance, minIntersection, typeOfTarget, target, targetIndex
 end
 
 local nextHistory
@@ -2092,11 +2110,87 @@ function c_world_tank_step(d, tank)
 	end
 
 	if not skip then
+		local dir = 0
+
+		if tank.cd.aimAid then
+			if not tank.cd.aimAidLock then
+				tank.cd.aimAidLock = 0
+			end
+
+			local b, typeOfTarget, target
+			local vec = tankbobs.m_vec2()
+			local start, endP = tankbobs.m_vec2(tank.p), tankbobs.m_vec2()
+
+			vec.t = tank.r
+			vec.R = c_const_get("aimAid_startDistance")
+			start:add(vec)
+
+			endP(start)
+			vec.R = c_const_get("aimAid_maxDistance")
+			endP:add(vec)
+
+			b, vec, typeOfTarget, target, targetIndex = c_world_findClosestIntersection(start, endP)
+
+			if b then
+				endP = vec
+			end
+
+			if not tank.cd.aimAidStart or not tank.cd.aimAidEnd then
+				tank.cd.aimAidStart, tank.cd.aimAidEnd = t_m_vec2(start), t_m_vec2(endP)
+			else
+				tank.cd.aimAidStart(start)
+				tank.cd.aimAidEnd(endP)
+			end
+
+			if tank.cd.aimAidLock <= 0 then
+				tank.cd.aimAidIsLocked = false
+				tank.cd.aimAidTarget = nil
+			end
+
+			if tank.cd.aimAidTarget then
+				if b and typeOfTarget == "tank" and targetIndex == tank.cd.aimAidTarget then
+					tank.cd.aimAidLock = math.min(1, tank.cd.aimAidLock + d / c_const_get("game_aimAidLockTime"))
+				else
+					tank.cd.aimAidLock = math.max(0, tank.cd.aimAidLock - d / c_const_get("game_aimAidClearTime"))
+				end
+
+				if tank.cd.aimAidLock >= 1 then
+					tank.cd.aimAidIsLocked = true
+				end
+			else
+				if b and typeOfTarget == "tank" then
+					tank.cd.aimAidTarget = targetIndex
+
+					tank.cd.aimAidLock = math.min(1, tank.cd.aimAidLock + d / c_const_get("game_aimAidLockTime"))
+				end
+			end
+
+			if tank.cd.aimAidIsLocked and not (b and typeOfTarget == "tank" and targetIndex == tank.cd.aimAidTarget) then
+				local enemy = c_world_getTanks()[tank.cd.aimAidTarget]
+
+				if enemy and enemy.exists then
+					local angle = (enemy.p - tank.p).t
+					tank.r, angle = c_ai_angleRange(tank.r, angle)
+					dir = tank.r - angle
+				end
+			end
+		else
+			tank.cd.aimAidLock = nil
+			tank.cd.aimAidIsLocked = false
+			tank.cd.aimAidTarget = nil
+			tank.cd.aimAidStart = nil
+			tank.cd.aimAidEnd = nil
+		end
+
+		if bit.band(tank.state, tank.bor(LEFT, RIGHT)) ~= 0 then
+			dir = 0
+		end
+
 		if bit.band(tank.state, SPECIAL) ~= 0 then
 			local add = 0
 
 			if bit.band(tank.state, SLOW) ~= 0 then
-				if bit.band(tank.state, LEFT) ~= 0 then
+				if bit.band(tank.state, LEFT) ~= 0 or dir < 0 then
 					if vel.R < 0 then
 						-- inverse rotation
 						add = -tank_slowRotationSpecialFactor * vel.R
@@ -2105,7 +2199,7 @@ function c_world_tank_step(d, tank)
 					end
 				end
 
-				if bit.band(tank.state, RIGHT) ~= 0 then
+				if bit.band(tank.state, RIGHT) ~= 0 or dir > 0 then
 					if vel.R < 0 then  -- inverse rotation
 						add =  tank_slowRotationSpecialFactor * vel.R
 					else
@@ -2113,7 +2207,7 @@ function c_world_tank_step(d, tank)
 					end
 				end
 			else
-				if bit.band(tank.state, LEFT) ~= 0 then
+				if bit.band(tank.state, LEFT) ~= 0 or dir < 0 then
 					if vel.R < 0 then  -- inverse rotation
 						add = -tank_rotationSpecialFactor * vel.R
 					else
@@ -2121,7 +2215,7 @@ function c_world_tank_step(d, tank)
 					end
 				end
 
-				if bit.band(tank.state, RIGHT) ~= 0 then
+				if bit.band(tank.state, RIGHT) ~= 0 or dir > 0 then
 					if vel.R < 0 then  -- inverse rotation
 						add =  tank_rotationSpecialFactor * vel.R
 					else
@@ -2209,19 +2303,19 @@ function c_world_tank_step(d, tank)
 			end
 
 			if bit.band(tank.state, SLOW) ~= 0 then
-				if bit.band(tank.state, LEFT) ~= 0 then
+				if bit.band(tank.state, LEFT) ~= 0 or dir < 0 then
 					tank.r = tank.r + d * tank_slowRotationSpeed
 				end
 
-				if bit.band(tank.state, RIGHT) ~= 0 then
+				if bit.band(tank.state, RIGHT) ~= 0 or dir > 0 then
 					tank.r = tank.r - d * tank_slowRotationSpeed
 				end
 			else
-				if bit.band(tank.state, LEFT) ~= 0 then
+				if bit.band(tank.state, LEFT) ~= 0 or dir < 0 then
 					tank.r = tank.r + d * tank_rotationSpeed
 				end
 
-				if bit.band(tank.state, RIGHT) ~= 0 then
+				if bit.band(tank.state, RIGHT) ~= 0 or dir > 0 then
 					tank.r = tank.r - d * tank_rotationSpeed
 				end
 			end

@@ -517,30 +517,15 @@ function game_drawWorld(d, M, rotM)
 							gl.EnableClientState("VERTEX_ARRAY")
 							if (v.weapon and c_weapon_getWeapons()[v.weapon] and c_weapon_getWeapons()[v.weapon].aimAid and v.reloading <= 0) or (v.cd.aimAid) then
 								gl.PushAttrib("ENABLE_BIT")
-									local b
-									local vec = tankbobs.m_vec2()
-									local start, endP = tankbobs.m_vec2(v.p), tankbobs.m_vec2()
-					
-									vec.t = v.r
-									vec.R = c_const_get("aimAid_startDistance")
-									start:add(vec)
-					
-									endP(start)
-									vec.R = c_const_get("aimAid_maxDistance")
-									endP:add(vec)
-					
-									b, vec = c_world_findClosestIntersection(start, endP)
-									if b then
-										endP = vec
-									end
-					
-									aa[1][1] = start.x aa[1][2] = start.y
-									aa[2][1] = endP.x aa[2][2] = endP.y
+									local l = v.cd.aimAidLock or 0
+
+									aa[1][1] = v.cd.aimAidStart and v.cd.aimAidStart.x or 0 aa[1][2] = v.cd.aimAidStart and v.cd.aimAidStart.y or 0
+									aa[2][1] = v.cd.aimAidStart and v.cd.aimAidEnd.x or 0 aa[2][2] = v.cd.aimAidStart and v.cd.aimAidEnd.y or 0
 									gl.Disable("TEXTURE_2D")
-									gl.Color(0.9, 0.1, 0.1, 1)
+									gl.Color(0.9 - 0.9 * l, 0.1, 0.1 + 0.9 * l, 1)
 									gl.TexEnv("TEXTURE_ENV_COLOR", 0.9, 0.1, 0.1, 1)
 									gl.VertexPointer(aa)
-									gl.LineWidth(c_const_get("aimAid_width"))
+									gl.LineWidth(c_const_get("aimAid_width") + c_const_get("aimAid_lockWidth") * l)
 									gl.DrawArrays("LINES", 0, 2)
 								gl.PopAttrib()
 							end
