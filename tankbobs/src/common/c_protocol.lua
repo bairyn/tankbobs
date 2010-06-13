@@ -346,6 +346,11 @@ protocol_unpersist =
 			tank.megaTank = nextParse(parse)
 			tank.target = nextParse(parse)
 			local flag = nextParse(parse)
+			tank.cd.aimAidLock = nextParse(parse)
+			tank.cd.aimAidIsLocked = nextParse(parse)
+			tank.cd.aimAidTarget = nextParse(parse)
+			tank.cd.aimAidStart = nextParse(parse)
+			tank.cd.aimAidEnd = nextParse(parse)
 
 			if flag == 0 then
 				tank.flag = nil
@@ -400,6 +405,11 @@ protocol_unpersist =
 		  , NILINT
 		  , NILINT
 		  , INT
+		  , DOUBLE
+		  , BOOL
+		  , NILINT
+		  , VEC2
+		  , VEC2
 		  }
 		},
 
@@ -804,6 +814,11 @@ protocol_persist =
 					end
 				end
 				nextPut(index)
+				nextPut(tank.cd.aimAidLock or 0)
+				nextPut(tank.cd.aimAidIsLocked)
+				nextPut(tank.cd.aimAidTarget)
+				nextPut(tank.cd.aimAidStart or ZERO)
+				nextPut(tank.cd.aimAidEnd or ZERO)
 			end
 
 			return res
@@ -842,6 +857,11 @@ protocol_persist =
 		  , NILINT
 		  , NILINT
 		  , INT
+		  , DOUBLE
+		  , BOOL
+		  , NILINT
+		  , VEC2
+		  , VEC2
 		  }
 		},
 
