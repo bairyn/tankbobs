@@ -2182,7 +2182,7 @@ function c_world_tank_step(d, tank)
 			tank.cd.aimAidEnd = nil
 		end
 
-		if bit.band(tank.state, tank.bor(LEFT, RIGHT)) ~= 0 then
+		if bit.band(tank.state, bit.bor(LEFT, RIGHT)) ~= 0 then
 			dir = 0
 		end
 
