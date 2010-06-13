@@ -814,11 +814,11 @@ protocol_persist =
 					end
 				end
 				nextPut(index)
-				nextPut(tank.cd.aimAidLock or 0)
-				nextPut(tank.cd.aimAidIsLocked)
-				nextPut(tank.cd.aimAidTarget)
-				nextPut(tank.cd.aimAidStart or ZERO)
-				nextPut(tank.cd.aimAidEnd or ZERO)
+				nextPut(v.cd.aimAidLock or 0)
+				nextPut(v.cd.aimAidIsLocked)
+				nextPut(v.cd.aimAidTarget)
+				nextPut(v.cd.aimAidStart or ZERO)
+				nextPut(v.cd.aimAidEnd or ZERO)
 			end
 
 			return res
