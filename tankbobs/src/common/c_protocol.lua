@@ -349,8 +349,6 @@ protocol_unpersist =
 			tank.cd.aimAidLock = nextParse(parse)
 			tank.cd.aimAidIsLocked = nextParse(parse)
 			tank.cd.aimAidTarget = nextParse(parse)
-			tank.cd.aimAidStart = nextParse(parse)
-			tank.cd.aimAidEnd = nextParse(parse)
 
 			if flag == 0 then
 				tank.flag = nil
@@ -408,8 +406,6 @@ protocol_unpersist =
 		  , DOUBLE
 		  , BOOL
 		  , NILINT
-		  , VEC2
-		  , VEC2
 		  }
 		},
 
@@ -817,8 +813,6 @@ protocol_persist =
 				nextPut(v.cd.aimAidLock or 0)
 				nextPut(v.cd.aimAidIsLocked)
 				nextPut(v.cd.aimAidTarget)
-				nextPut(v.cd.aimAidStart or ZERO)
-				nextPut(v.cd.aimAidEnd or ZERO)
 			end
 
 			return res
@@ -860,8 +854,6 @@ protocol_persist =
 		  , DOUBLE
 		  , BOOL
 		  , NILINT
-		  , VEC2
-		  , VEC2
 		  }
 		},
 
