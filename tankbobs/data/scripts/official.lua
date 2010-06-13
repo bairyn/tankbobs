@@ -381,6 +381,7 @@ elseif c_tcm_current_map.name == "spree" then
 
 								if client then
 									tankbobs.a_playSound(c_const_get("globalAudio_dir") .. "pop.wav")
+									tankbobs.a_setVolumeChunk(c_const_get("globalAudio_dir") .. "pop.wav", game_audioDistance(tank.p))
 								end
 							end
 						end
