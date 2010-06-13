@@ -230,7 +230,6 @@ function game_new()
 	-- initialize melee sounds
 	for _, v in pairs(c_weapon_getWeapons()) do
 		if v.meleeRange ~= 0 then
-			tankbobs.a_setVolumeChunk(c_const_get("weaponAudio_dir") .. v.fireSound, 0)
 			tankbobs.a_playSound(c_const_get("weaponAudio_dir") .. v.fireSound, -1)
 			tankbobs.a_setVolumeChunk(c_const_get("weaponAudio_dir") .. v.fireSound, 0)
 		end
@@ -1107,7 +1106,6 @@ function game_step(d)
 			if v.explode and not v.m.explodeSound then
 				v.m.explodeSound = t
 				if c_const_get("world_corpseTime") >= c_const_get("world_minimumCorpseTimeForDeathNoiseAndStuff") then
-					tankbobs.a_setVolumeChunk(c_const_get("corpseExplode_sound"), game_audioDistance(v.p))
 					tankbobs.a_playSound(c_const_get("corpseExplode_sound"))
 					tankbobs.a_setVolumeChunk(c_const_get("corpseExplode_sound"), game_audioDistance(v.p))
 				end
@@ -1135,7 +1133,6 @@ function game_step(d)
 
 					if c_weapon_getWeapons()[v.weapon].meleeRange ~= 0 then
 					elseif v.m.empty then
-						tankbobs.a_setVolumeChunk(c_const_get("emptyTrigger_sound"), game_audioDistance(v.p))
 						tankbobs.a_playSound(c_const_get("emptyTrigger_sound"))
 						tankbobs.a_setVolumeChunk(c_const_get("emptyTrigger_sound"), game_audioDistance(v.p))
 					elseif v.weapon and v.m.fired then
@@ -1146,7 +1143,6 @@ function game_step(d)
 						elseif type(c_weapon_getWeapons()[v.weapon].fireSound) == "string" then
 							sound = c_const_get("weaponAudio_dir") .. c_weapon_getWeapons()[v.weapon].fireSound
 						end
-						tankbobs.a_setVolumeChunk(sound, game_audioDistance(v.p))
 						tankbobs.a_playSound(sound)
 						tankbobs.a_setVolumeChunk(sound, game_audioDistance(v.p))
 
@@ -1230,7 +1226,6 @@ function game_step(d)
 					end
 				end
 
-				tankbobs.a_setVolumeChunk(sound, game_audioDistance(v.p))
 				tankbobs.a_playSound(sound)
 				tankbobs.a_setVolumeChunk(sound, game_audioDistance(v.p))
 			end
@@ -1239,7 +1234,6 @@ function game_step(d)
 			if v.m.lastCollideTime and v.m.lastCollideTimeB ~= v.m.lastCollideTime then
 				v.m.lastCollideTimeB = v.m.lastCollideTime
 
-				tankbobs.a_setVolumeChunk(c_const_get("collide_sound"), v.m.intensity * c_config_get("client.volume") * game_audioDistance(v.p))
 				tankbobs.a_playSound(c_const_get("collide_sound"))
 				tankbobs.a_setVolumeChunk(c_const_get("collide_sound"), v.m.intensity * c_config_get("client.volume") * game_audioDistance(v.p))
 			end
@@ -1247,7 +1241,6 @@ function game_step(d)
 			if v.m.lastDamageTime and v.m.lastDamageTimeB ~= v.m.lastDamageTime then
 				v.m.lastDamageTimeB = v.m.lastDamageTime
 
-				tankbobs.a_setVolumeChunk(c_const_get("damage_sound"), game_audioDistance(v.p))
 				tankbobs.a_playSound(c_const_get("damage_sound"))
 				tankbobs.a_setVolumeChunk(c_const_get("damage_sound"), game_audioDistance(v.p))
 			end
@@ -1261,12 +1254,10 @@ function game_step(d)
 			local switch = c_world_getGameType()
 			if switch == PLAGUE then
 				if not roundEnd or v.tagged then
-					tankbobs.a_setVolumeChunk(c_const_get("die_sound"), game_audioDistance(v.p))
 					tankbobs.a_playSound(c_const_get("die_sound"))
 					tankbobs.a_setVolumeChunk(c_const_get("die_sound"), game_audioDistance(v.p))
 				end
 			else
-				tankbobs.a_setVolumeChunk(c_const_get("die_sound"), game_audioDistance(v.p))
 				tankbobs.a_playSound(c_const_get("die_sound"))
 				tankbobs.a_setVolumeChunk(c_const_get("die_sound"), game_audioDistance(v.p))
 			end
@@ -1275,7 +1266,6 @@ function game_step(d)
 		if v.m.lastPickupTime and v.m.lastPickupTimeB ~= v.m.lastPickupTime then
 			v.m.lastPickupTimeB = v.m.lastPickupTime 
 
-			tankbobs.a_setVolumeChunk(c_const_get("powerupPickup_sound"), game_audioDistance(v.p))
 			tankbobs.a_playSound(c_const_get("powerupPickup_sound"))
 			tankbobs.a_setVolumeChunk(c_const_get("powerupPickup_sound"), game_audioDistance(v.p))
 		end
@@ -1284,7 +1274,6 @@ function game_step(d)
 			v.m.lastTeleportTimeB = v.m.lastTeleportTime 
 
 			local intensity = math.max(game_audioDistance(v.p), game_audioDistance(v.m.lastTeleportPosition))
-			tankbobs.a_setVolumeChunk(c_const_get("teleport_sound"), intensity)
 			tankbobs.a_playSound(c_const_get("teleport_sound"))
 			tankbobs.a_setVolumeChunk(c_const_get("teleport_sound"), intensity)
 		end
@@ -1313,7 +1302,6 @@ function game_step(d)
 		if v.m.lastSpawnTimeB ~= v.m.lastSpawnTime then
 			v.m.lastSpawnTimeB = v.m.lastSpawnTime
 
-			tankbobs.a_setVolumeChunk(c_const_get("powerupSpawn_sound"), game_audioDistance(v.p))
 			tankbobs.a_playSound(c_const_get("powerupSpawn_sound"))
 			tankbobs.a_setVolumeChunk(c_const_get("powerupSpawn_sound"), game_audioDistance(v.p))
 		end
@@ -1327,14 +1315,12 @@ function game_step(d)
 
 			if weapon.projectileIsCollideSound then
 				local sound = c_const_get("collideProjectile_sounds")[math.random(1, #c_const_get("collideProjectile_sounds"))]
-				tankbobs.a_setVolumeChunk(sound, game_audioDistance(v.p))
 				tankbobs.a_playSound(sound)
 				tankbobs.a_setVolumeChunk(sound, game_audioDistance(v.p))
 			end
 
 			if weapon.projectileExplode then
 				local sound = c_const_get("weaponAudio_dir") .. weapon.projectileExplodeSound
-				tankbobs.a_setVolumeChunk(sound, game_audioDistance(v.p))
 				tankbobs.a_playSound(sound)
 				tankbobs.a_setVolumeChunk(sound, game_audioDistance(v.p))
 			end
@@ -1365,7 +1351,6 @@ function game_step(d)
 			if v.m.teamB ~= v.m.team then
 				v.m.teamB = v.m.team
 
-				tankbobs.a_setVolumeChunk(c_const_get("control_sound"), game_audioDistance(v.p))
 				tankbobs.a_playSound(c_const_get("control_sound"))
 				tankbobs.a_setVolumeChunk(c_const_get("control_sound"), game_audioDistance(v.p))
 			end
@@ -1399,7 +1384,6 @@ function game_step(d)
 				end
 
 				if otherFlag then
-					tankbobs.a_setVolumeChunk(c_const_get("flagCapture_sound"), game_audioDistance(otherFlag.p))
 					tankbobs.a_playSound(c_const_get("flagCapture_sound"))
 					tankbobs.a_setVolumeChunk(c_const_get("flagCapture_sound"), game_audioDistance(otherFlag.p))
 				end
@@ -1408,7 +1392,6 @@ function game_step(d)
 			if v.m.lastPickupTime and v.m.lastPickupTimeB ~= v.m.lastPickupTime then
 				v.m.lastPickupTimeB = v.m.lastPickupTime
 
-				tankbobs.a_setVolumeChunk(c_const_get("flagPickUp_sound"), game_audioDistance(findTank().p))
 				tankbobs.a_playSound(c_const_get("flagPickUp_sound"))
 				tankbobs.a_setVolumeChunk(c_const_get("flagPickUp_sound"), game_audioDistance(findTank().p))
 			end
@@ -1416,7 +1399,6 @@ function game_step(d)
 			if v.m.lastReturnTime and v.m.lastReturnTimeB ~= v.m.lastReturnTime then
 				v.m.lastReturnTimeB = v.m.lastReturnTime
 
-				tankbobs.a_setVolumeChunk(c_const_get("flagReturn_sound"), game_audioDistance(v.m.pos or v.p))
 				tankbobs.a_playSound(c_const_get("flagReturn_sound"))
 				tankbobs.a_setVolumeChunk(c_const_get("flagReturn_sound"), game_audioDistance(v.m.pos or v.p))
 			end
