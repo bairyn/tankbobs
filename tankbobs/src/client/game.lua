@@ -1385,7 +1385,7 @@ function game_step(d)
 
 				if otherFlag then
 					tankbobs.a_playSound(c_const_get("flagCapture_sound"))
-					tankbobs.a_setVolumeChunk(c_const_get("flagCapture_sound"), game_audioDistance(otherFlag.p))
+					tankbobs.a_setVolumeChunk(c_const_get("flagCapture_sound"), game_audioDistance(v.p))
 				end
 			end
 
