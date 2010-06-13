@@ -175,7 +175,7 @@ function c_world_init()
 	c_const_set("game_tagProtection", 0.2, 1)
 
 	c_const_set("game_aimAidLockTime", 3, 1)
-	c_const_set("game_aimAidClearTime", 1, 1)
+	c_const_set("game_aimAidClearTime", 5, 1)
 
 	-- hull of tank facing right
 	c_const_set("tank_hullx1", -2.0, 1) c_const_set("tank_hully1",  2.0, 1)
