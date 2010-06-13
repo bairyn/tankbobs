@@ -174,6 +174,8 @@ function c_world_init()
 	c_const_set("game_chasePointTime", 10, 1)
 	c_const_set("game_tagProtection", 0.2, 1)
 
+	c_const_set("game_aidAidStartDistance", 2.1, 1)
+	c_const_set("game_aidAidMaxDistance", 4096, 1)
 	c_const_set("game_aimAidLockTime", 2, 1)
 	c_const_set("game_aimAidClearTime", 5, 1)
 
@@ -2122,11 +2124,11 @@ function c_world_tank_step(d, tank)
 			local start, endP = tankbobs.m_vec2(tank.p), tankbobs.m_vec2()
 
 			vec.t = tank.r
-			vec.R = c_const_get("aimAid_startDistance")
+			vec.R = c_const_get("game_aidAidStartDistance")
 			start:add(vec)
 
 			endP(start)
-			vec.R = c_const_get("aimAid_maxDistance")
+			vec.R = c_const_get("game_aidAidMaxDistance")
 			endP:add(vec)
 
 			b, vec, typeOfTarget, target, targetIndex = c_world_findClosestIntersection(start, endP)

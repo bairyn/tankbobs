@@ -61,8 +61,6 @@ function renderer_init()
 		gl = _G.gl
 	end
 
-	c_const_set("aimAid_startDistance", 2.1, 1)  -- distance between the aid and the tank
-	c_const_set("aimAid_maxDistance", 4096, 1)
 	c_const_set("aimAid_width", 0.75, 1)
 	c_const_set("aimAid_lockWidth", 1.5, 1)
 	c_const_set("trail_startDistance", 2.6, 1)  -- distance between the trail and the tank
