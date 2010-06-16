@@ -257,6 +257,7 @@ c_tcm_wall =
 
 	pid = 0,
 	path = false,
+	type = "",
 
 	m = {pid = nil,
 		 ppid = nil,
@@ -586,6 +587,16 @@ function c_tcm_read_map(filename)
 			wall.static = true
 		else
 			wall.static = false
+		end
+
+		if wall.static and not wall.path then
+			wall.type = "static"
+		elseif not wall.static and not wall.path then
+			wall.type = "dynamic"
+		elseif wall.static and wall.path then
+			wall.type = "kinematic"
+		elseif not wall.static and not wall.path then
+			error("c_tcm_read_map: Wall in map '" .. r.name .. "' ('" .. r.map .. "') by index '" .. tostring(it) .. "' is neither static nor linked to a path")
 		end
 
 		wall.misc = c_tcm_private_get(tankbobs.fs_read, i, false, 512)

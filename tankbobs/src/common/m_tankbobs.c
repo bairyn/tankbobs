@@ -1061,7 +1061,7 @@ static const struct luaL_Reg tankbobs[] =
 			The second argument is the body's rotation in radians
 			The third argument is whether the body can sleep.  The fourth argument is
 			whether the body is a bullet.  The fifth and sixth arguments are the body's
-			linear and angular damping.  The seventh argument is the initial index of the
+			linear and angular damping.  Seventh, the body type, "static, "kinematic", or "dynamic", is passed.  The eighth argument is the initial index of the
 			body passed as an integer.  The body is returned.  If it is never freed manually
 			beforehand, it will be when the world is freed. */
 	{"w_getBody", w_getBody}, /* get the body to which a fixture is attached */
@@ -1102,16 +1102,17 @@ static const struct luaL_Reg tankbobs[] =
 	{"w_setBullet", w_setBullet}, /* set a body as bullet or not */
 		/* The body is the first value passed.  The second argument is the value of whether the body is a
 			bullet.  Nothing is returned. */
-	{"w_isStatic", w_isBullet}, /* whether the body is static */
+	{"w_isStatic", w_isStatic}, /* whether the body is static */
+		/* The body is the only value passed.  A boolean is returned. */
+	{"w_isKinematic", w_isKinematic}, /* whether the body is kinematic */
 		/* The body is the only value passed.  A boolean is returned. */
 	{"w_isDynamic", w_isDynamic}, /* whether the body is dynamic */
 		/* The body is the only value passed.  A boolean is returned. */
 	{"w_isSleeping", w_isSleeping}, /* whether the body is sleeping */
 		/* The body is the only value passed.  A boolean is returned. */
-	{"w_allowSleeping", w_allowSleeping}, /* whether the body is sleeping */
-		/* The body is the first value passed.  The second argument is whether the body will ever sleep. */
-	{"w_wakeUp", w_wakeUp}, /* wake a body up */
-		/* The body is the only value passed.  Nothing is returned. */
+	{"w_getSleepingAllowed", w_getSleepingAllowed}, /* get a body's ability to sleep */
+	{"w_setSleepingAllowed", w_setSleepingAllowed}, /* set a body's ability to sleep */
+	{"w_setAwake", w_setAwake}, /* set body's awake state */
 	{"w_getPosition", w_getPosition}, /* get a body's position */
 		/* The body is the first argument passed.  The returned value is a vector of the body's position */
 	{"w_getAngle", w_getAngle}, /* get a body's angle */
@@ -1134,9 +1135,11 @@ static const struct luaL_Reg tankbobs[] =
 	{"w_applyTorque", w_applyTorque}, /* apply a torque to a body */
 		/* The first argument is the body.  The second argument is the torque to apply, and the third
 			argument is the point of the torque. */
-	{"w_applyImpulse", w_applyImpulse}, /* apply an impulse to a body */
+	{"w_applyLinearImpulse", w_applyLinearImpulse}, /* apply an impulse to a body */
 		/* The first argument is the body.  The second argument is the impulse to apply, and the third
 			argument is the point of the impulse. */
+	{"w_applyAngularImpulse", w_applyAngularImpulse}, /* apply an impulse to a body */
+		/* The first argument is the body.  The second argument is the impulse */
 	{"w_getCenterOfMass", w_getCenterOfMass}, /* get a body's center of mass */
 		/* The first and only argument is the body.  A vector of the position of the body's
 			center of mass is returned */

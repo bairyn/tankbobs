@@ -42,6 +42,7 @@ function c_weapon_init()
 	c_const_set("projectile_isBullet", true, 1)
 	c_const_set("projectile_linearDamping", 0, 1)
 	c_const_set("projectile_angularDamping", 0, 1)
+	c_const_set("projectile_type", "type", 1)
 	c_const_set("projectile_friction", 0, 1)
 	c_const_set("projectile_max", 16384, 1)
 
@@ -1198,8 +1199,8 @@ function c_weapon_fire(tank, d)
 
 				projectile.r = vec.t
 
-				projectile.m.body = tankbobs.w_addBody(projectile.p, projectile.r, c_const_get("projectile_canSleep"), c_const_get("projectile_isBullet"), c_const_get("projectile_linearDamping"), c_const_get("projectile_angularDamping"), projectileIndex)
-				projectile.m.fixture = tankbobs.w_addFixture(projectile.m.body, weapon.m.p.fixtureDefinition, true)
+				projectile.m.body = tankbobs.w_addBody(projectile.p, projectile.r, c_const_get("projectile_canSleep"), c_const_get("projectile_isBullet"), c_const_get("projectile_linearDamping"), c_const_get("projectile_angularDamping"), c_const_get("projectile_type"), projectileIndex)
+				projectile.m.fixture = tankbobs.w_addFixture(projectile.m.body, weapon.m.p.fixtureDefinition)
 				vec.R = weapon.speed
 				tankbobs.w_setLinearVelocity(projectile.m.body, vec)
 
@@ -1207,12 +1208,12 @@ function c_weapon_fire(tank, d)
 
 				angle = angle - weapon.spread
 
-				-- apply knockback impulse to the tank
+				-- apply knockback to tank
 				local point = tankbobs.w_getCenterOfMass(tank.m.body)
 				local force = tankbobs.m_vec2()
 				force.R = -weapon.knockback
 				force.t = tankbobs.w_getAngle(tank.m.body)
-				tankbobs.w_applyImpulse(tank.m.body, force, point)
+				tankbobs.w_applyLinearImpulse(tank.m.body, force, point)
 			end
 		end
 

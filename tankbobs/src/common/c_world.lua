@@ -169,7 +169,7 @@ function c_world_init()
 	c_const_set("powerup_angularDamping", 0, 1)
 	c_const_set("powerup_pushStrength", 32, 1)
 	c_const_set("powerup_pushAngle", CIRCLE / 8, 1)
-	c_const_set("powerup_static", false, 1)
+	c_const_set("powerup_type", "dynamic", 1)
 
 	c_const_set("game_chasePointTime", 10, 1)
 	c_const_set("game_tagProtection", 0.2, 1)
@@ -212,14 +212,14 @@ function c_world_init()
 	c_const_set("tank_linearDamping", 0, 1)
 	c_const_set("tank_angularDamping", 0, 1)
 	c_const_set("tank_spawnTime", 0.75, 1)
-	c_const_set("tank_static", false, 1)
+	c_const_set("tank_type", "dynamic", 1)
 	c_const_set("corpse_restitution", 0.6, 1)
 	c_const_set("corpse_canSleep", false, 1)
 	c_const_set("corpse_isBullet", true, 1)
 	c_const_set("corpse_linearDamping", 0, 1)
 	c_const_set("corpse_angularDamping", 0, 1)
 	c_const_set("corpse_spawnTime", 0.75, 1)
-	c_const_set("corpse_static", false, 1)
+	c_const_set("corpse_type", "dynamic", 1)
 	c_const_set("corpse_density", 2, 1)
 	c_const_set("corpse_friction", 0.25, 1)
 	c_const_set("corpse_worldFriction", 2, 1)  -- damping
@@ -232,6 +232,7 @@ function c_world_init()
 	c_const_set("wall_isBullet", false, 1)
 	c_const_set("wall_linearDamping", 0.75, 1)
 	c_const_set("wall_angularDamping", 0.75, 1)
+	c_const_set("wall_minPathTimeVelocity", 0.2, 1)
 	c_const_set("tank_rotationChange", 1, 1)
 	tank_rotationChange = c_const_get("tank_rotationChange")
 	c_const_set("tank_rotationChangeMinSpeed", 4, 1)
@@ -606,8 +607,8 @@ function c_world_newWorld()
 
 			-- add wall to world
 			local b = c_world_wallShape(v.p)
-			v.m.body = tankbobs.w_addBody(b[1], 0, c_const_get("wall_canSleep"), c_const_get("wall_isBullet"), c_const_get("wall_linearDamping"), c_const_get("wall_angularDamping"), k)
-			v.m.fixture = tankbobs.w_addPolygonalFixture(b[2], c_const_get("wall_density"), c_const_get("wall_friction"), c_const_get("wall_restitution"), c_const_get("wall_isSensor"), c_const_get("wall_contentsMask"), c_const_get("wall_clipmask"), v.m.body, not v.static)
+			v.m.body = tankbobs.w_addBody(b[1], 0, c_const_get("wall_canSleep"), c_const_get("wall_isBullet"), c_const_get("wall_linearDamping"), c_const_get("wall_angularDamping"), v.type, k)
+			v.m.fixture = tankbobs.w_addPolygonalFixture(b[2], c_const_get("wall_density"), c_const_get("wall_friction"), c_const_get("wall_restitution"), c_const_get("wall_isSensor"), c_const_get("wall_contentsMask"), c_const_get("wall_clipmask"), v.m.body)
 			if not v.m.body then
 				error "c_world_newWorld: could not add a wall to the physical world"
 			end
@@ -944,8 +945,8 @@ function c_world_addCorpse(index, vel, tank)
 	end
 
 	corpse.timeTilExplode = c_const_get("world_corpseTime")
-	corpse.m.body = tankbobs.w_addBody(corpse.p, corpse.r, c_const_get("corpse_canSleep"), c_const_get("corpse_isBullet"), c_const_get("corpse_linearDamping"), c_const_get("corpse_angularDamping"), index)
-	corpse.m.fixture = tankbobs.w_addPolygonalFixture(corpse.h, c_const_get("corpse_density"), c_const_get("corpse_friction"), c_const_get("corpse_restitution"), c_const_get("corpse_isSensor"), c_const_get("corpse_contentsMask"), c_const_get("corpse_clipmask"), corpse.m.body, not c_const_get("corpse_static"))
+	corpse.m.body = tankbobs.w_addBody(corpse.p, corpse.r, c_const_get("corpse_canSleep"), c_const_get("corpse_isBullet"), c_const_get("corpse_linearDamping"), c_const_get("corpse_angularDamping"), c_const_get("corpse_type"), index)
+	corpse.m.fixture = tankbobs.w_addPolygonalFixture(corpse.h, c_const_get("corpse_density"), c_const_get("corpse_friction"), c_const_get("corpse_restitution"), c_const_get("corpse_isSensor"), c_const_get("corpse_contentsMask"), c_const_get("corpse_clipmask"), corpse.m.body)
 	if vel then
 		t_w_setLinearVelocity(corpse.m.body, vel)
 	end
@@ -1286,8 +1287,8 @@ function c_world_spawnTank(tank)
 	end
 
 	-- add a physical body
-	tank.m.body = tankbobs.w_addBody(tank.p, tank.r, c_const_get("tank_canSleep"), c_const_get("tank_isBullet"), c_const_get("tank_linearDamping"), c_const_get("tank_angularDamping"), index)
-	tank.m.fixture = tankbobs.w_addPolygonalFixture(tank.h, c_const_get("tank_density"), c_const_get("tank_friction"), c_const_get("tank_restitution"), c_const_get("tank_isSensor"), c_const_get("tank_contentsMask"), c_const_get("tank_clipmask"), tank.m.body, not c_const_get("tank_static"))
+	tank.m.body = tankbobs.w_addBody(tank.p, tank.r, c_const_get("tank_canSleep"), c_const_get("tank_isBullet"), c_const_get("tank_linearDamping"), c_const_get("tank_angularDamping"), c_const_get("tank_type"), index)
+	tank.m.fixture = tankbobs.w_addPolygonalFixture(tank.h, c_const_get("tank_density"), c_const_get("tank_friction"), c_const_get("tank_restitution"), c_const_get("tank_isSensor"), c_const_get("tank_contentsMask"), c_const_get("tank_clipmask"), tank.m.body)
 
 	c_ai_tankSpawn(tank)
 
@@ -2396,6 +2397,11 @@ function c_world_wall_step(d, wall)
 				end
 				wall.m.ppos = 0
 				wall.m.startpos = t_m_vec2(c_world_wallShape(wall.m.pos)[1])
+				local path = paths[wall.m.pid]
+				local prevPath = paths[wall.m.ppid]
+				if path and prevPath and prevPath.time >= c_const_get("wall_minPathTimeVelocity") then
+					tankbobs.w_setLinearVelocity(wall.m.body, (path.p - prevPath.p) / prevPath.time)
+				end
 			else
 				local path = paths[wall.m.pid]
 				local prevPath = paths[wall.m.ppid]
@@ -2415,6 +2421,9 @@ function c_world_wall_step(d, wall)
 						wall.m.pid = path.t + 1
 						path = paths[wall.m.pid]
 						wall.m.ppos = 0
+						if prevPath and path and prevPath.time >= c_const_get("wall_minPathTimeVelocity") then
+							tankbobs.w_setLinearVelocity(wall.m.body, (path.p - prevPath.p) / prevPath.time)
+						end
 					end
 				end
 			end
@@ -2494,8 +2503,8 @@ function c_world_spawnPowerup(powerup, index)
 		end
 	end
 
-	powerup.m.body = tankbobs.w_addBody(powerup.p, 0, c_const_get("powerup_canSleep"), c_const_get("powerup_isBullet"), c_const_get("powerup_linearDamping"), c_const_get("powerup_angularDamping"), index)
-	powerup.m.fixture = tankbobs.w_addPolygonalFixture(c_world_powerupHull(powerup), c_const_get("powerup_density"), c_const_get("powerup_friction"), c_const_get("powerup_restitution"), c_const_get("powerup_isSensor"), c_const_get("powerup_contentsMask"), c_const_get("powerup_clipmask"), powerup.m.body, not c_const_get("powerup_static"))
+	powerup.m.body = tankbobs.w_addBody(powerup.p, 0, c_const_get("powerup_canSleep"), c_const_get("powerup_isBullet"), c_const_get("powerup_linearDamping"), c_const_get("powerup_angularDamping"), c_const_get("powerup_type"), index)
+	powerup.m.fixture = tankbobs.w_addPolygonalFixture(c_world_powerupHull(powerup), c_const_get("powerup_density"), c_const_get("powerup_friction"), c_const_get("powerup_restitution"), c_const_get("powerup_isSensor"), c_const_get("powerup_contentsMask"), c_const_get("powerup_clipmask"), powerup.m.body)
 end
 
 function c_world_powerupSpawnPoint_step(d, powerupSpawnPoint)

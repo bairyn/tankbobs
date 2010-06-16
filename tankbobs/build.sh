@@ -70,9 +70,21 @@ if [ "$1" == "make" ]; then
 		fi
 	fi
 
-	# build Box2D and luaJIT manually
+# build Box2D and luaJIT manually
 	if [ $debug == 0 ]; then
-		make -C ./src/lib/Box2D/Source CXXFLAGS="-O2 -fPIC"
+		if ! cd ./src/lib/Box2D/Build; then
+			exit 1
+		fi
+		if ! cmake CMAKE_BUILD_TYPE=Release -DBOX2D_INSTALL=ON -DBOX2D_BUILD_STATIC=ON -DBOX2D_BUILD_SHARED=ON ./../; then
+			exit 1
+		fi
+		if ! make; then
+			exit 1
+		fi
+		if ! cd ./../../../../; then
+			exit 1
+		fi
+
 		make -C ./src/lib/LuaJIT linux
 		if ! [ -d "./build/jit" ]; then
 			mkdir ./build/jit
@@ -80,7 +92,19 @@ if [ "$1" == "make" ]; then
 		cp ./src/lib/LuaJIT/jit/opt.lua ./build/jit/
 		cp ./src/lib/LuaJIT/jit/opt_inline.lua ./build/jit/
 	else
-		make -C ./src/lib/Box2D/Source CXXFLAGS="-g -fPIC"
+		if ! cd ./src/lib/Box2D/Build; then
+			exit 1
+		fi
+		if ! cmake CMAKE_BUILD_TYPE=Debug -DBOX2D_INSTALL=ON -DBOX2D_BUILD_STATIC=ON -DBOX2D_BUILD_SHARED=ON ./../; then
+			exit 1
+		fi
+		if ! make; then
+			exit 1
+		fi
+		if ! cd ./../../../../; then
+			exit 1
+		fi
+
 		make -C ./src/lib/LuaJIT linux CFLAGS="-DLUAJIT_ASSERT -DLUA_USE_APICHECK -DUSE_VALGRIND -g -fomit-frame-pointer -Wall -DLUA_USE_LINUX -I../dynasm"
 		if ! [ -d "./build/jit" ]; then
 			mkdir ./build/jit
@@ -90,12 +114,11 @@ if [ "$1" == "make" ]; then
 	fi
 
 	# build physfs (PhysicsFS)
-	cd ./src/lib/physfs-2.0.0/
-	#if ! cmake .; then
-	if ! cmake -Wno-dev .; then  # Remove annoying warning
+	if ! cd ./src/lib/physfs-2.0.0/; then
 		exit 1
 	fi
-	if ! make -C .; then
+	#if ! cmake .; then
+	if ! cmake -Wno-dev .; then  # Remove annoying warning
 		exit 1
 	fi
 	cd ./../../../
