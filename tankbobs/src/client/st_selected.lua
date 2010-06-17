@@ -63,10 +63,8 @@ function st_selected_init()
 	local switch = c_config_get("game.instagib")
 	if switch == false then
 		instagibPos = 1
-	elseif switch == "semi" then
-		instagibPos = 2
 	else
-		instagibPos = 3
+		instagibPos = 2
 	end
 
 	local collisionDamagePos = 0
@@ -120,7 +118,7 @@ function st_selected_init()
 	skillLevels[0] = "Custom"
 	gui_addLabel(tankbobs.m_vec2(50, 75), "Game mode", nil, 1 / 3) gui_addCycle(tankbobs.m_vec2(75, 75), "Game mode", nil, st_selected_gameType, strings, pos, 0.5)
 	limit = gui_addLabel(tankbobs.m_vec2(50, 69), c_world_gameTypePointLimitLabel(gameType), nil, 1 / 3) limitInput = gui_addInput(tankbobs.m_vec2(75, 69), tostring(c_config_get(limitConfig)), nil, st_selected_limit, true, 4, 0.5)
-	gui_addLabel(tankbobs.m_vec2(50, 63), "Instagib", nil, 1 / 3) gui_addCycle(tankbobs.m_vec2(75, 63), "Instagib", nil, st_selected_instagib, {"No", "Semi", "Yes"}, instagibPos, 0.5)
+	gui_addLabel(tankbobs.m_vec2(50, 63), "Instagib", nil, 1 / 3) gui_addCycle(tankbobs.m_vec2(75, 63), "Instagib", nil, st_selected_instagib, {"No", "Yes"}, instagibPos, 0.5)
 	gui_addLabel(tankbobs.m_vec2(50, 57), "Collision damage", nil, 1 / 3) gui_addCycle(tankbobs.m_vec2(75, 57), "Collision damage", nil, st_selected_collisionDamage, {"Yes", "No"}, collisionDamagePos, 0.5)
 	gui_addLabel(tankbobs.m_vec2(50, 51), "Spawn mode", nil, 1 / 3) gui_addCycle(tankbobs.m_vec2(75, 51), "Spawn mode", nil, st_selected_spawn, {"Blockable", "Alternating"}, spawnPos, 0.5)
 	gui_addLabel(tankbobs.m_vec2(50, 45), "Punish teamkills and suicides", nil, 1 / 5) gui_addCycle(tankbobs.m_vec2(75, 45), "Punish teamkills and suicides", nil, st_selected_punish, {"Yes", "No"}, punishPos, 0.5)
@@ -171,8 +169,6 @@ function st_selected_instagib(widget, string, index)
 	local setting = false
 	if string == "Yes" then
 		setting = true
-	elseif string == "Semi" then
-		setting = "semi"
 	elseif string == "No" then
 		setting = false
 	end
