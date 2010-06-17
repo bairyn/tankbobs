@@ -241,6 +241,14 @@ protocol_unpersist =
 		, c_world_setTimerSecond
 		, INT
 		},
+		-- Has a tank been destroyed yet?
+		{ identifier(increment())
+		, nil
+		, VT_FUNCTION
+		, c_world_setHasDestroyed
+		, BOOL
+		, 0
+		},
 
 		-- Scores
 		{ identifier(increment())
@@ -699,6 +707,14 @@ protocol_persist =
 		, VT_FUNCTION
 		, c_world_getTimerSecond
 		, INT
+		},
+		-- Has a tank been destroyed yet?
+		{ identifier(increment())
+		, nil
+		, VT_FUNCTION
+		, c_world_getHasDestroyed
+		, BOOL
+		, 0
 		},
 
 		-- Scores
