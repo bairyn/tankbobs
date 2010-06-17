@@ -788,7 +788,7 @@ elseif c_tcm_current_map.name == "tutorial" then
 								tankbobs.a_playSound(c_const_get("tutStep_sound"))
 
 								noReload()
-								updateHelperText("Now, try reloading your shotgun partially.  Try pressing and\nholding your reload key and letting go\nbefore you reload completely.", {"15_1.wav"})
+								updateHelperText("Now, try reloading your shotgun partially.  Try\npressing and holding your reload key and\nreleasing before you reload completely.", {"15_1.wav"})
 							end
 
 							state = STATEPARTIALRELOADFIRE
