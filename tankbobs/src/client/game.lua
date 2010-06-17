@@ -1189,7 +1189,7 @@ function game_step(d)
 				end
 			end
 
-			if v.weapon and v.reloading > 0 and v.m.lastReload < v.reloading then
+			if v.weapon and v.reloading > 0 and (v.m.lastReload < v.reloading or not not v.m.lastShotgunReloading ~= not not v.shotgunReloadState) then
 				local sound
 
 				if c_weapon_getWeapons()[v.weapon] and c_weapon_getWeapons()[v.weapon].shotgunClips then
@@ -1215,6 +1215,7 @@ function game_step(d)
 				tankbobs.a_setVolumeChunk(sound, game_audioDistance(v.p))
 			end
 			v.m.lastReload = v.reloading
+			v.m.lastShotgunReloading = not not v.shotgunReloadState
 
 			if v.m.lastCollideTime and v.m.lastCollideTimeB ~= v.m.lastCollideTime then
 				v.m.lastCollideTimeB = v.m.lastCollideTime
