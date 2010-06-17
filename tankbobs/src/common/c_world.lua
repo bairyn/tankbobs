@@ -232,6 +232,7 @@ function c_world_init()
 	c_const_set("wall_isBullet", false, 1)
 	c_const_set("wall_linearDamping", 0.75, 1)
 	c_const_set("wall_angularDamping", 0.75, 1)
+	c_const_set("wall_minPathTimeVelocity", 0.2, 1)
 	c_const_set("tank_rotationChange", 1, 1)
 	tank_rotationChange = c_const_get("tank_rotationChange")
 	c_const_set("tank_rotationChangeMinSpeed", 4, 1)
@@ -2396,6 +2397,11 @@ function c_world_wall_step(d, wall)
 				end
 				wall.m.ppos = 0
 				wall.m.startpos = t_m_vec2(c_world_wallShape(wall.m.pos)[1])
+				local path = paths[wall.m.pid]
+				local prevPath = paths[wall.m.ppid]
+				if path and prevPath and prevPath.time >= c_const_get("wall_minPathTimeVelocity") then
+					tankbobs.w_setLinearVelocity(wall.m.body, (path.p - prevPath.p) / prevPath.time)
+				end
 			else
 				local path = paths[wall.m.pid]
 				local prevPath = paths[wall.m.ppid]
@@ -2415,6 +2421,9 @@ function c_world_wall_step(d, wall)
 						wall.m.pid = path.t + 1
 						path = paths[wall.m.pid]
 						wall.m.ppos = 0
+						if prevPath and path and prevPath.time >= c_const_get("wall_minPathTimeVelocity") then
+							tankbobs.w_setLinearVelocity(wall.m.body, (path.p - prevPath.p) / prevPath.time)
+						end
 					end
 				end
 			end
