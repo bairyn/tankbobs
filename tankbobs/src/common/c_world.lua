@@ -1075,7 +1075,7 @@ function c_world_tank_die(tank, t)
 					end
 				end
 
-				if num <= 1 then
+				if num == 1 then
 					local last = c_world_tanks[lastTagged]
 
 					last.tagged = false
