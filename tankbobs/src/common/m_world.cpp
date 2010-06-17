@@ -468,7 +468,6 @@ int w_addFixture(lua_State *L)
 	const b2Shape *shape = fixtureDefinition->shape;
 
 	fixture = body->CreateFixture(fixtureDefinition);
-	delete shape;
 	if(!fixture)
 	{
 		tstr *message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
@@ -525,7 +524,9 @@ int w_addFixtureFinal(lua_State *L)
 		lua_error(L);
 	}
 
+	const b2Shape *shape = fixtureDefinition->shape;
 	fixture = body->CreateFixture(fixtureDefinition);
+	delete shape;
 	if(!fixture)
 	{
 		tstr *message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
@@ -638,6 +639,7 @@ int w_removeDefinition(lua_State *L)
 	CHECKINIT(init, L);
 
 	b2FixtureDef *fixtureDefinition = reinterpret_cast<b2FixtureDef *> (lua_touserdata(L, 1));
+	delete fixtureDefinition->shape;
 	if(!fixtureDefinition)
 	{
 		tstr *message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
