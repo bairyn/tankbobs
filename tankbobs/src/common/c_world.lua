@@ -730,7 +730,7 @@ function c_world_getSpawnMode()
 end
 
 function c_world_setHasDestroyed(state)
-	hasDestroyed
+	hasDestroyed = state
 end
 
 function c_world_getHasDestroyed()
