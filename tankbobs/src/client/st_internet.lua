@@ -30,9 +30,6 @@ local st_internet_button
 local st_internet_mouse
 local st_internet_step
 
-local st_internet_serverIP
-local st_internet_start
-
 UNINITIALIZED       = 0
 UNCONNECTED         = 1
 BANNED              = 2  -- banned from server

@@ -62,8 +62,6 @@ end
 local st_optionsGame_init
 local st_optionsGame_done
 
-local st_optionsGame_worldFPS
-
 function st_optionsGame_init()
 	gui_addAction(tankbobs.m_vec2(25, 85), "Back", nil, c_state_advance)
 
@@ -131,10 +129,6 @@ optionsGame_state =
 
 local st_optionsAudio_init
 local st_optionsAudio_done
-
-local st_optionsAudio_volume
-local st_optionsAudio_musicVolume
-local st_optionsAudio_chunkSize
 
 function st_optionsAudio_init()
 	gui_addAction(tankbobs.m_vec2(25, 85), "Back", nil, c_state_advance)
@@ -215,16 +209,6 @@ local st_optionsVideo_init
 local st_optionsVideo_done
 
 local st_optionsVideo_renderer
-
-local st_optionsVideo_fullscreen
-local st_optionsVideo_resolution
-local st_optionsVideo_width
-local st_optionsVideo_height
-local st_optionsVideo_apply
-local st_optionsVideo_gameTimer
-local st_optionsVideo_fpsCounter
-local st_optionsVideo_rotateCamera
-local st_optionsVideo_screen
 
 local custom = false
 
@@ -355,24 +339,6 @@ optionsVideo_state =
 local st_optionsPlayers_init
 local st_optionsPlayers_done
 local st_optionsPlayers_step
-
-local st_optionsPlayers_configurePlayer
-local st_optionsPlayers_computers
-local st_optionsPlayers_players
-local st_optionsPlayers_name
-local st_optionsPlayers_fire
-local st_optionsPlayers_forward
-local st_optionsPlayers_back
-local st_optionsPlayers_left
-local st_optionsPlayers_right
-local st_optionsPlayers_special
-local st_optionsPlayers_reverse
-local st_optionsPlayers_slow
-local st_optionsPlayers_mod
-local st_optionsPlayers_reload
-local st_optionsPlayers_colorR
-local st_optionsPlayers_colorG
-local st_optionsPlayers_colorB
 
 local optionsPlayers_tankRotation
 local currentPlayer = 1
@@ -768,13 +734,6 @@ optionsPlayers_state =
 local optionsControls_init
 local optionsControls_done
 
-local st_optionsControls_keyLayout
-local st_optionsControls_pause
-local st_optionsControls_exit
-local st_optionsControls_quit
-local st_optionsControls_screenToggle
-local st_optionsControls_krr
-
 function st_optionsControls_init()
 	gui_addAction(tankbobs.m_vec2(25, 85), "Back", nil, c_state_advance)
 
@@ -859,11 +818,6 @@ optionsControls_state =
 local st_optionsInternet_init
 local st_optionsInternet_done
 
-local st_optionsInternet_stepAhead
-local st_optionsInternet_unlagged
-local st_optionsInternet_randomSnapshotFilter
-local st_optionsInternet_randomSnapshotLowPriorityFilter
-
 function st_optionsInternet_init()
 	gui_addAction(tankbobs.m_vec2(25, 85), "Back", nil, c_state_advance)
 
@@ -923,12 +877,6 @@ optionsInternet_state =
 
 local st_options_init
 local st_options_done
-
-local st_options_video
-local st_options_audio
-local st_options_players
-local st_options_controls
-local st_options_internet
 
 function st_options_init()
 	gl = _G.gl

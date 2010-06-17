@@ -54,10 +54,6 @@ local st_online_button
 local st_online_mouse
 local st_online_step
 
-local st_online_serverIP
-local st_online_start
-local online_readPackets
-
 local won
 local newScreens
 
@@ -226,7 +222,7 @@ function st_online_done()
 	game_end()
 end
 
-function online_readPackets(d)  -- local
+function online_readPackets(d)
 	local status, ip, port, data
 	repeat
 		if common_dro_getLevel() >= 4 then

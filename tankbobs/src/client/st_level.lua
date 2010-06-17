@@ -30,8 +30,6 @@ local st_level_button
 local st_level_mouse
 local st_level_step
 
-local st_level_levelSelected
-local st_level_select
 local level_description
 
 function st_level_init()

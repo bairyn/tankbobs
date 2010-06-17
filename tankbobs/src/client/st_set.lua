@@ -30,8 +30,6 @@ local st_set_button
 local st_set_mouse
 local st_set_step
 
-local st_set_setSelected
-local st_set_select
 local set_description
 
 function st_set_init()

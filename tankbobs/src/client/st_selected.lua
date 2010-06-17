@@ -30,16 +30,6 @@ local st_selected_button
 local st_selected_mouse
 local st_selected_step
 
-local st_selected_limit
-local st_selected_start
-local st_selected_gameType
-local st_selected_instagib
-local st_selected_collisionDamage
-local st_selected_spawn
-local st_selected_punish
-local st_selected_skill
-local st_selected_players
-local st_selected_computers
 local limit = nil
 local limitInput = nil
 local limitConfig = ""
