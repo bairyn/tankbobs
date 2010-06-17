@@ -231,10 +231,8 @@ function st_selected_computers(widget)
 end
 
 function st_selected_start(widget)
-	if c_config_get(limitConfig) > 0 then
-		renderer_clear()
-		c_state_goto(play_state)
-	end
+	renderer_clear()
+	c_state_goto(play_state)
 end
 
 selected_state =
