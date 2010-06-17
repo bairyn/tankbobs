@@ -34,6 +34,7 @@ CDLL_BEGIN
 
 #include "common.h"
 
+#ifdef TDEBUG
 #if defined(__FILE) && defined(__LINE) && defined(TDEBUG)
 #define CHECKINIT(i, L)                                                            \
 do                                                                                 \
@@ -70,6 +71,9 @@ do                                                                              
 		lua_error(L);                                                              \
 	}                                                                              \
 } while(0)
+#endif
+#else
+#define CHECKINIT(i, L)
 #endif
 
 #define BUFSIZE  1024

@@ -43,6 +43,7 @@ extern "C"
 
 #include "Box2D.h"
 
+#ifdef TDEBUG
 #define CHECKWORLD(world, L) \
 do \
 { \
@@ -59,6 +60,9 @@ do \
 		lua_error(L); \
 	} \
 } while(0)
+#else
+#define CHECKWORLD(world, L)
+#endif
 
 #define WORLDBUFSIZE BUFSIZE - 6
 
