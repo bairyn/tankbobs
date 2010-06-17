@@ -1102,7 +1102,7 @@ static const struct luaL_Reg tankbobs[] =
 	{"w_setBullet", w_setBullet}, /* set a body as bullet or not */
 		/* The body is the first value passed.  The second argument is the value of whether the body is a
 			bullet.  Nothing is returned. */
-	{"w_isStatic", w_isBullet}, /* whether the body is static */
+	{"w_isStatic", w_isStatic}, /* whether the body is static */
 		/* The body is the only value passed.  A boolean is returned. */
 	{"w_isDynamic", w_isDynamic}, /* whether the body is dynamic */
 		/* The body is the only value passed.  A boolean is returned. */
