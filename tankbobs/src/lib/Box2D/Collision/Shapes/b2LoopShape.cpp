@@ -21,6 +21,8 @@
 #include <new>
 using namespace std;
 
+#include <cstring>
+
 b2Shape* b2LoopShape::Clone(b2BlockAllocator* allocator) const
 {
 	void* mem = allocator->Allocate(sizeof(b2LoopShape));

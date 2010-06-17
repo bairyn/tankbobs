@@ -130,7 +130,7 @@ if(BOX2D_BUILD_SHARED)
 	set_target_properties(Box2D_shared PROPERTIES
 		OUTPUT_NAME "Box2D"
 		CLEAN_DIRECT_OUTPUT 1
-		VERSION ${BOX2D_VERSION}
+		VERSION "${BOX2D_VERSION}"
 	)
 endif()
 
@@ -152,7 +152,7 @@ if(BOX2D_BUILD_STATIC)
 	)
 	set_target_properties(Box2D PROPERTIES
 		CLEAN_DIRECT_OUTPUT 1
-		VERSION ${BOX2D_VERSION}
+		VERSION "${BOX2D_VERSION}"
 	)
 endif()
 
