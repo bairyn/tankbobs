@@ -1325,8 +1325,17 @@ function c_world_tank_checkSpawn(d, tank)
 		return
 	end
 
+	local spawnMode = c_world_getSpawnMode()
+
+	local switch = c_world_getGameType()
+	if     switch == MEGATANK then
+		if tank.megaTank and c_world_tanks[tank.megaTank] == tank then
+			spawnMode = BLOCKABLE
+		end
+	end
+
 	if tank.lastSpawnPoint == 0 then
-		local switch = c_world_getSpawnMode()
+		local switch = spawnMode
 		if     switch == BLOCKABLE then
 			tank.lastSpawnPoint = 1
 		elseif switch == ALTERNATING then
@@ -1349,7 +1358,7 @@ function c_world_tank_checkSpawn(d, tank)
 	local sp = tank.lastSpawnPoint
 	local playerSpawnPoint = c_tcm_current_map.playerSpawnPoints[tank.lastSpawnPoint]
 
-	local switch = c_world_getSpawnMode()
+	local switch = spawnMode
 	if switch == BLOCKABLE then
 		while not c_world_tank_canSpawn(d, tank) do
 			tank.lastSpawnPoint = tank.lastSpawnPoint + 1
