@@ -92,8 +92,10 @@ end
 local functions = {}
 
 -- c_mods_appendFunction appends f to a function by the name of 'name'.  The function must have global scope.  The results of the base function are dropped.
-function c_mods_appendFunction(name, f)
-	local base = _G[name]
+function c_mods_appendFunction(name, f, t)
+	t = t or _G
+
+	local base = t[name]
 
 	local exists = false
 	for _, v in pairs(functions) do
@@ -102,10 +104,10 @@ function c_mods_appendFunction(name, f)
 		end
 	end
 	if not exists then
-		table.insert(functions, {name, _G[name]})
+		table.insert(functions, {name, t[name], t})
 	end
 
-	_G[name] = function (...)
+	t[name] = function (...)
 		base(...)
 		return f(...)
 	end
@@ -113,8 +115,10 @@ end
 
 -- c_mods_appendFunction prepends f to a function by the name of 'name'.  The function must have global scope.  The results of the prepended function are dropped.
 -- This function can return three arguments.  If the first is false (not nil!) then the second part of the function is not called.  If the second argument is a table, the base function will be called with those arguments contained in the table.  If the third argument is a table, the contents of it are returned.
-function c_mods_prependFunction(name, f)
-	local base = _G[name]
+function c_mods_prependFunction(name, f, t)
+	t = t or _G
+
+	local base = t[name]
 
 	local exists = false
 	for _, v in pairs(functions) do
@@ -123,10 +127,10 @@ function c_mods_prependFunction(name, f)
 		end
 	end
 	if not exists then
-		table.insert(functions, {name, _G[name]})
+		table.insert(functions, {name, t[name], t})
 	end
 
-	_G[name] = function (...)
+	t[name] = function (...)
 		local call, args, ret = f(...)
 
 		if call ~= false then
@@ -155,8 +159,10 @@ function c_mods_prependFunction(name, f)
 	end
 end
 
-function c_mods_replaceFunction(name, f)
-	local base = _G[name]
+function c_mods_replaceFunction(name, f, t)
+	t = t or _G
+
+	local base = t[name]
 
 	local exists = false
 	for _, v in pairs(functions) do
@@ -165,17 +171,17 @@ function c_mods_replaceFunction(name, f)
 		end
 	end
 	if not exists then
-		table.insert(functions, {name, _G[name]})
+		table.insert(functions, {name, t[name], t})
 	end
 
-	_G[name] = f
+	t[name] = f
 end
 
 -- restore a single function
 function c_mods_restoreFunction(name)
 	for _, v in pairs(functions) do
 		if v[1] == name then
-			_G[v[1]] = v[2]
+			v[3][v[1]] = v[2]
 		end
 	end
 end
@@ -183,7 +189,7 @@ end
 -- restore all functions
 function c_mods_restoreFunctions()
 	for _, v in pairs(functions) do
-		_G[v[1]] = v[2]
+		v[3][v[1]] = v[2]
 	end
 
 	functions = {}
