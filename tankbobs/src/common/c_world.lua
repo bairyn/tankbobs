@@ -78,6 +78,7 @@ local c_world_collisionDamage = false
 local lastPowerupSpawnTime
 local nextPowerupSpawnPoint
 local worldInitialized = false
+local hasDestroyed = false
 local zoom = 0
 local gameTimer = 0
 local gameTimerSecond = 0
@@ -594,6 +595,8 @@ function c_world_newWorld()
 	team.red = false
 	team.score = 0
 
+	c_world_setHasDestroyed(false)
+
 	-- reset powerups
 	lastPowerupSpawnTime = nil
 	nextPowerupSpawnPoint = nil
@@ -724,6 +727,14 @@ end
 
 function c_world_getSpawnMode()
 	return c_world_spawnMode
+end
+
+function c_world_setHasDestroyed(state)
+	hasDestroyed
+end
+
+function c_world_getHasDestroyed()
+	return hasDestroyed
 end
 
 function c_world_getGameType()
@@ -972,6 +983,8 @@ function c_world_tank_die(tank, t)
 
 	if tank.exists and tank.m.body then
 		-- things that can't be done more than once
+		c_world_setHasDestroyed(true)
+
 		local vel = t_w_getLinearVelocity(tank.m.body)
 		local index = tankbobs.w_getIndex(tank.m.body)
 
@@ -2350,7 +2363,7 @@ function c_world_tank_step(d, tank)
 	if switch == MEGATANK then
 		--if #c_world_tanks > 1 then  -- this is redundant, since this function couldn't be called with an empty table.  If it could, this check would be necessary.
 			-- set all tanks as tagged if the last tank hasn't been initialised (the length operator will always point to an existing tank if the table isn't empty)
-			if not tank.m.megaTankInitialised then
+			if not tank.m.megaTankInitialised and c_world_getHasDestroyed() and #c_world_tanks >= 2 then
 				for _, v in pairs(c_world_tanks) do
 					tank.m.megaTankInitialised = true
 
@@ -2359,7 +2372,7 @@ function c_world_tank_step(d, tank)
 				end
 			end
 
-			if tank.megaTank and c_world_tanks[tank.megaTank] == tank then
+			if tank.m.megaTankInitialised and tank.megaTank and c_world_tanks[tank.megaTank] == tank then
 				tank.clips = 1
 
 				if t >= tank.lastAttackedTime + c_const_get("world_megaTankBonusAttackTime") then
