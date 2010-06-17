@@ -153,6 +153,7 @@
 		</bot>
 		<captureLimit>10</captureLimit>
 		<chaseLimit>30</chaseLimit>
+		<collisionDamage>true</collisionDamage>
 		<computers>0</computers>
 		<controlLimit>200</controlLimit>
 		<defaultTankRed>   0.875 </defaultTankRed>  Orange

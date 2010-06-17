@@ -180,6 +180,7 @@ function st_internet_step(d)
 				elseif switch == 0xA0 then
 					local challenge = tankbobs.io_toInt(data:sub(1, 4)) data = data:sub(5)
 					local instagib = tankbobs.io_toChar(data:sub(1, 1)) data = data:sub(2)
+					local collisionDamage = tankbobs.io_toChar(data:sub(1, 1)) data = data:sub(2)
 					local spawnMode = tankbobs.io_toChar(data:sub(1, 1)) data = data:sub(2)
 					local set = data:sub(1, data:find(tankbobs.io_fromChar(0x00)) - 1) data = data:sub(data:find(tankbobs.io_fromChar(0x00)) + 1)
 					local map = data:sub(1, data:find(tankbobs.io_fromChar(0x00)) - 1) data = data:sub(data:find(tankbobs.io_fromChar(0x00)) + 1)
@@ -205,6 +206,7 @@ function st_internet_step(d)
 						c_world_setInstagib(true)
 					end
 
+					c_world_setCollisionDamage(collisionDamage ~= 0)
 					c_world_setSpawnMode(spawnMode)
 
 					-- send the server the challenge response

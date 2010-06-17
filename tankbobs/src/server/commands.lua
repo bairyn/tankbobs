@@ -272,8 +272,8 @@ command =
 	matched = false
 }
 
-local help, exec, eval, exit, set, map, listSets, listMaps, echo, pause, restart, port, gameType, clientList, kick, ban, kickban, banList, unban, saveBans, loadBans, instagib, spawnMode, c_set, c_get, pfps
-local helpT, execT, evalT, exitT, setT, mapT, listSetsT, listMapsT, echoT, pauseT, restartT, portT, gameTypeT, clientListT, kickT, banT, kickbanT, banListT, unbanT, saveBansT, loadBansT, instagibT, spawnModeT, c_setT, c_getT, fpsT
+local help, exec, eval, exit, set, map, listSets, listMaps, echo, pause, restart, port, gameType, clientList, kick, ban, kickban, banList, unban, saveBans, loadBans, instagib, collisionDamage, spawnMode, c_set, c_get, pfps
+local helpT, execT, evalT, exitT, setT, mapT, listSetsT, listMapsT, echoT, pauseT, restartT, portT, gameTypeT, clientListT, kickT, banT, kickbanT, banListT, unbanT, saveBansT, loadBansT, instagibT, collisionDamageT, spawnModeT, c_setT, c_getT, fpsT
 
 function help(line)
 	local args = commands_args(line)
@@ -327,6 +327,7 @@ function help(line)
 			" -listSets\n" ..
 			" -gameType\n" ..
 			" -instagib\n" ..
+			" -collisionDamage\n" ..
 			" -spawnMode\n" ..
 			" -exec\n" ..
 			" -eval\n" ..
@@ -1188,6 +1189,79 @@ end
 
 -- no auto completion for instagib
 
+function collisionDamage(line)
+	local args = commands_args(line)
+
+	if #args >= 2 then
+		local instagib = tostring(args[2]):lower()
+		local enabled = nil
+
+		local switch = instagib:sub(1, 1)
+		if switch == 't' then
+			enabled = true
+		elseif switch == 'f' then
+			enabled = false
+		elseif switch == 'd' then
+			enabled = false
+		elseif switch == 'e' then
+			enabled = true
+		elseif switch == 'y' then
+			enabled = true
+		elseif switch == 'n' then
+			enabled = false
+		elseif switch == 'o' then
+			local switch = instagib:sub(2, 2)
+			if switch == 'n' then
+				enabled = true
+			elseif switch == 'f' then
+				if instagib:sub(3, 3) == 'f' then
+					enabled = false
+				end
+			end
+		elseif switch == 's' then
+			enabled = "semi"
+		elseif switch == '/' then
+			enabled = "semi"
+		elseif switch == 'p' then
+			enabled = "semi"
+		end
+
+		if enabled == nil then
+			return help("help collisionDamage")
+		end
+
+		if c_config_get("game.collisionDamage") ~= enabled then
+			c_config_set("game.collisionDamage", enabled)
+
+			s_printnl("collisionDamage: collisionDamage will be set to '", tostring(enabled),"' at next restart")
+		end
+	else
+		local collisionDamage
+		local nextCollisionDamage
+
+		local function textify(collisionDamage)
+			local switch = c_world_getCollisionDamage()
+			if switch == true then
+				return "enabled"
+			elseif switch == "semi" then
+				return "semi"
+			else
+				return "disabled"
+			end
+		end
+
+		collisionDamage = textify(c_world_getCollisionDamage())
+		nextCollisionDamage = textify(c_config_get("game.collisionDamage"))
+
+		s_printnl("collisionDamage: collisionDamage is currently set to '", collisionDamage, "'")
+		if nextCollisionDamage ~= collisionDamage then
+			s_printnl("collisionDamage: collisionDamage will be set to '", nextCollisionDamage, "' at next restart")
+		end
+	end
+end
+
+-- no auto completion for collisionDamage
+
 function spawnMode(line)
 	local args = commands_args(line)
 
@@ -1534,6 +1608,17 @@ commands =
 		"\n"  ..
 		" Sets instagib mode.  When called without arguments, will print the\n" ..
 		" current mode to console."
+	},
+
+	{
+		"collisionDamage",
+		collisionDamage,
+		collisionDamageT,
+		"Usage:\n" ..
+		" collisionDamage (true|false|enabled|disabled|yes|no|on|off)\n" ..
+		"\n"  ..
+		" Sets collision damage setting.  When called without any arguments, the\n" ..
+		" current setting is printed to console."
 	},
 
 	{

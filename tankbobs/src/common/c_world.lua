@@ -74,6 +74,7 @@ local worldTime = 0
 local lastWorldTime = 0
 local c_world_instagib = false
 local c_world_spawnMode = BLOCKABLE
+local c_world_collisionDamage = false
 local lastPowerupSpawnTime
 local nextPowerupSpawnPoint
 local worldInitialized = false
@@ -707,6 +708,14 @@ end
 
 function c_world_getInstagib()
 	return c_world_instagib
+end
+
+function c_world_setCollisionDamage(state)
+	c_world_collisionDamage = state
+end
+
+function c_world_getCollisionDamage()
+	return c_world_collisionDamage
 end
 
 function c_world_setSpawnMode(state)
@@ -3137,8 +3146,7 @@ local function c_world_collide(tank, normal, attacker)
 	local vel = t_w_getLinearVelocity(tank.m.body)
 	local component = vel * -normal
 
-	if c_world_getInstagib() ~= "semi" and tank.shield < c_const_get("tank_shieldMinCollide") then
-		-- no collision damage in semi-instagib mode or if any of the shield remains
+	if c_world_getCollisionDamage() and tank.shield < c_const_get("tank_shieldMinCollide") then
 		if component >= c_const_get("tank_damageMinSpeed") then
 			local damage = c_const_get("tank_damageK") * (component - c_const_get("tank_damageMinSpeed"))
 

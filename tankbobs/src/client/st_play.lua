@@ -175,6 +175,7 @@ function st_play_init()
 
 	-- set instagib state
 	c_world_setInstagib(c_config_get("game.instagib"))
+	c_world_setCollisionDamage(c_config_get("game.collisionDamage"))
 
 	game_new()
 
