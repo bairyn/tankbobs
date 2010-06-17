@@ -202,6 +202,10 @@ function c_config_init()
 
 	function c_config_get(key, noError)
 		if config[key] == nil and not noError then
+			if debug then
+				print(debug.traceback())
+			end
+
 			error("c_config_get: config doesn't exist: " .. key)
 		elseif type(config[key]) == "table" then
 			return t_t_clone(config[key])
