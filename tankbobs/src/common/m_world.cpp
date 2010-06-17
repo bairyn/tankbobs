@@ -115,10 +115,10 @@ class w_private_worldListener : public b2ContactListener
 				b2Body *bodyB = fixtureB->GetBody();
 				b2WorldManifold man;
 				contact->GetWorldManifold(&man);
-				b2Vec2 normal = man.normal;
+				b2Vec2 normal = man.m_normal;
 
-				b2Vec2 *point = &man.points[0];
-				for(int i = 0; i < contact->GetManifold()->pointCount; point = &man.points[++i])
+				b2Vec2 *point = &man.m_points[0];
+				for(int i = 0; i < contact->GetManifold()->m_pointCount; point = &man.m_points[++i])
 				{
 					lua_rawgeti(clState, LUA_REGISTRYINDEX, clFunction);
 					lua_pushboolean(clState, true);
@@ -160,10 +160,10 @@ class w_private_worldListener : public b2ContactListener
 				b2Body *bodyB = fixtureB->GetBody();
 				b2WorldManifold man;
 				contact->GetWorldManifold(&man);
-				b2Vec2 normal = man.normal;
+				b2Vec2 normal = man.m_normal;
 
-				b2Vec2 *point = &man.points[0];
-				for(int i = 0; i < contact->GetManifold()->pointCount; point = &man.points[++i])
+				b2Vec2 *point = &man.m_points[0];
+				for(int i = 0; i < contact->GetManifold()->m_pointCount; point = &man.m_points[++i])
 				{
 					lua_rawgeti(clState, LUA_REGISTRYINDEX, clFunction);
 					lua_pushboolean(clState, false);
@@ -235,7 +235,7 @@ int w_newWorld(lua_State *L)
 		lua_error(L);
 	}
 
-	world = new b2World(worldGravity, allowSleep);
+	world = new b2World(worldAABB, worldGravity, allowSleep);
 
 	world->SetContactListener(&w_private_contactListener);
 
@@ -376,24 +376,15 @@ int w_addBody(lua_State *L)
 	bodyDefinition.position.Set(v->x * unitScale, v->y * unitScale);
 	bodyDefinition.angle = luaL_checknumber(L, 2);
 	bodyDefinition.allowSleep = lua_toboolean(L, 3);
-	bodyDefinition.bullet = lua_toboolean(L, 4);
+	bodyDefinition.isBullet = lua_toboolean(L, 4);
 	bodyDefinition.linearDamping = luaL_checknumber(L, 5);
 	bodyDefinition.angularDamping = luaL_checknumber(L, 6);
-	const char *s = luaL_checkstring(L, 7);
-	if      (strcmp(s, "static") == 0)
-		bodyDefinition.type = b2_staticBody;
-	else if (strcmp(s, "kinematic") == 0)
-		bodyDefinition.type = b2_kinematicBody;
-	else if (strcmp(s, "dynamic") == 0)
-		bodyDefinition.type = b2_dynamicBody;
-	else
-		bodyDefinition.type = b2_staticBody;
 
 	b2Body *body = world->CreateBody(&bodyDefinition);
 
-	body->SetUserData(reinterpret_cast<void *> (luaL_checkinteger(L, 8)));
+	body->SetUserData(reinterpret_cast<void *> (luaL_checkinteger(L, 7)));
 
-	lua_pop(L, 8);
+	lua_pop(L, 7);  /* balance stack */
 
 	lua_pushlightuserdata(L, body);
 
@@ -465,8 +456,6 @@ int w_addFixture(lua_State *L)
 		lua_error(L);
 	}
 
-	const b2Shape *shape = fixtureDefinition->shape;
-
 	fixture = body->CreateFixture(fixtureDefinition);
 	if(!fixture)
 	{
@@ -480,6 +469,11 @@ int w_addFixture(lua_State *L)
 			(message);
 		lua_error(L);
 	}
+
+	if(lua_toboolean(L, 3))
+		body->SetMassFromShapes();  /* Dynamic */
+	else
+		body->SetMassData(&staticMassData);  /* Static */
 
 	lua_pushlightuserdata(L, fixture);
 
@@ -524,9 +518,7 @@ int w_addFixtureFinal(lua_State *L)
 		lua_error(L);
 	}
 
-	const b2Shape *shape = fixtureDefinition->shape;
 	fixture = body->CreateFixture(fixtureDefinition);
-	delete shape;
 	if(!fixture)
 	{
 		tstr *message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
@@ -541,6 +533,11 @@ int w_addFixtureFinal(lua_State *L)
 	}
 
 	delete fixtureDefinition;
+
+	if(lua_toboolean(L, 3))
+		body->SetMassFromShapes();  /* Dynamic */
+	else
+		body->SetMassData(&staticMassData);  /* Static */
 
 	lua_pushlightuserdata(L, fixture);
 
@@ -579,27 +576,38 @@ int w_addPolygonalFixture(lua_State *L)
 
 	m_orderVertices(vertices, numVertices, COUNTERCLOCKWISE);
 
-	b2PolygonShape shape;
-	shape.m_vertexCount = numVertices;
+	b2PolygonDef fixtureDefinition;
+	fixtureDefinition.vertexCount = numVertices;
 	for(int i = 0; i < numVertices; i++)
 	{
-		shape.m_vertices[i].Set(vertices[i]->x * unitScale, vertices[i]->y * unitScale);
+		fixtureDefinition.vertices[i].Set(vertices[i]->x * unitScale, vertices[i]->y * unitScale);
 	}
 
 	free(vertices);
 
-	b2FixtureDef def;
+	fixtureDefinition.density = luaL_checknumber(L, 2);
+	fixtureDefinition.friction = luaL_checknumber(L, 3);
+	fixtureDefinition.restitution = luaL_checknumber(L, 4);
 
-	def.shape = &shape;
+	fixtureDefinition.isSensor = lua_toboolean(L, 5);
 
-	def.density = luaL_checknumber(L, 2);
-	def.friction = luaL_checknumber(L, 3);
-	def.restitution = luaL_checknumber(L, 4);
+	fixtureDefinition.filter.categoryBits = luaL_checkinteger(L, 6);
+	fixtureDefinition.filter.maskBits = luaL_checkinteger(L, 7);
 
-	def.isSensor = lua_toboolean(L, 5);
+	b2FixtureDef *def = dynamic_cast<b2FixtureDef *>(&fixtureDefinition);
 
-	def.filter.categoryBits = luaL_checkinteger(L, 6);
-	def.filter.maskBits = luaL_checkinteger(L, 7);
+	if(!def)
+	{
+		tstr *message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
+			();
+		CDLL_FUNCTION("libtstr", "tstr_base_set", void(*)(tstr *, const char *))
+			(message, "w_addPolygonalFixture: could not dynamically cast fixtureDefinition from type b2PolygonDef * to b2FixtureDef *\n");
+		lua_pushstring(L, CDLL_FUNCTION("libtstr", "tstr_cstr", const char *(*)(tstr *))
+							(message));
+		CDLL_FUNCTION("libtstr", "tstr_free", void(*)(tstr *))
+			(message);
+		lua_error(L);
+	}
 
 	b2Body *body = reinterpret_cast<b2Body *> (lua_touserdata(L, 8));
 	if(!body)
@@ -615,7 +623,7 @@ int w_addPolygonalFixture(lua_State *L)
 		lua_error(L);
 	}
 
-	b2Fixture *fixture = body->CreateFixture(&def);
+	b2Fixture *fixture = body->CreateFixture(def);
 	if(!fixture)
 	{
 		tstr *message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
@@ -629,6 +637,11 @@ int w_addPolygonalFixture(lua_State *L)
 		lua_error(L);
 	}
 
+	if(lua_toboolean(L, 9))
+		body->SetMassFromShapes();  /* Dynamic */
+	else
+		body->SetMassData(&staticMassData);  /* Static */
+
 	lua_pushlightuserdata(L, fixture);
 
 	return 1;
@@ -639,7 +652,6 @@ int w_removeDefinition(lua_State *L)
 	CHECKINIT(init, L);
 
 	b2FixtureDef *fixtureDefinition = reinterpret_cast<b2FixtureDef *> (lua_touserdata(L, 1));
-	delete fixtureDefinition->shape;
 	if(!fixtureDefinition)
 	{
 		tstr *message = CDLL_FUNCTION("libtstr", "tstr_new", tstr *(*)(void))
@@ -688,27 +700,25 @@ int w_addPolygonDefinition(lua_State *L)
 
 	m_orderVertices(vertices, numVertices, COUNTERCLOCKWISE);
 
-	b2PolygonShape *shape = new b2PolygonShape;
-	shape->m_vertexCount = numVertices;
+	b2PolygonDef fixtureDefinition;
+	fixtureDefinition.vertexCount = numVertices;
 	for(int i = 0; i < numVertices; i++)
 	{
-		shape->m_vertices[i].Set(vertices[i]->x * unitScale, vertices[i]->y * unitScale);
+		fixtureDefinition.vertices[i].Set(vertices[i]->x * unitScale, vertices[i]->y * unitScale);
 	}
 
 	free(vertices);
 
-	b2FixtureDef *def = new b2FixtureDef;
+	fixtureDefinition.density = luaL_checknumber(L, 2);
+	fixtureDefinition.friction = luaL_checknumber(L, 3);
+	fixtureDefinition.restitution = luaL_checknumber(L, 4);
 
-	def->shape = shape;
+	fixtureDefinition.isSensor = lua_toboolean(L, 5);
 
-	def->density = luaL_checknumber(L, 2);
-	def->friction = luaL_checknumber(L, 3);
-	def->restitution = luaL_checknumber(L, 4);
+	fixtureDefinition.filter.categoryBits = luaL_checkinteger(L, 6);
+	fixtureDefinition.filter.maskBits = luaL_checkinteger(L, 7);
 
-	def->isSensor = lua_toboolean(L, 5);
-
-	def->filter.categoryBits = luaL_checkinteger(L, 6);
-	def->filter.maskBits = luaL_checkinteger(L, 7);
+	b2FixtureDef *def = dynamic_cast<b2FixtureDef *>(new b2PolygonDef(fixtureDefinition));
 
 	lua_pushlightuserdata(L, def);
 
@@ -719,24 +729,22 @@ int w_addCircularDefinition(lua_State *L)
 {
 	CHECKINIT(init, L);
 
-	b2CircleShape *shape = new b2CircleShape;
+	b2CircleDef fixtureDefinition;
 
 	const vec2_t *v = CHECKVEC(L, 1);
-	shape->m_p = b2Vec2(v->x * unitScale, v->y * unitScale);
-	shape->m_radius = luaL_checknumber(L, 2);
+	fixtureDefinition.localPosition = b2Vec2(v->x * unitScale, v->y * unitScale);
+	fixtureDefinition.radius = luaL_checknumber(L, 2);
 
-	b2FixtureDef *def = new b2FixtureDef;
+	fixtureDefinition.density = luaL_checknumber(L, 3);
+	fixtureDefinition.friction = luaL_checknumber(L, 4);
+	fixtureDefinition.restitution = luaL_checknumber(L, 5);
 
-	def->shape = shape;
+	fixtureDefinition.filter.categoryBits = luaL_checkinteger(L, 7);
+	fixtureDefinition.filter.maskBits = luaL_checkinteger(L, 8);
 
-	def->density = luaL_checknumber(L, 3);
-	def->friction = luaL_checknumber(L, 4);
-	def->restitution = luaL_checknumber(L, 5);
+	fixtureDefinition.isSensor = lua_toboolean(L, 9);
 
-	def->filter.categoryBits = luaL_checkinteger(L, 7);
-	def->filter.maskBits = luaL_checkinteger(L, 8);
-
-	def->isSensor = lua_toboolean(L, 9);
+	b2FixtureDef *def = dynamic_cast<b2FixtureDef *>(new b2CircleDef(fixtureDefinition));
 
 	lua_pushlightuserdata(L, def);
 
@@ -830,6 +838,7 @@ int w_setBullet(lua_State *L)
 	b2Body *body = reinterpret_cast<b2Body *> (lua_touserdata(L, 1));
 
 	body->SetBullet(lua_toboolean(L, 2));
+	lua_pushboolean(L, body->IsBullet());
 
 	return 0;
 }
@@ -842,20 +851,7 @@ int w_isStatic(lua_State *L)
 
 	b2Body *body = reinterpret_cast<b2Body *> (lua_touserdata(L, 1));
 
-	lua_pushboolean(L, body->GetType() == b2_staticBody);
-
-	return 1;
-}
-
-int w_isKinematic(lua_State *L)
-{
-	CHECKINIT(init, L);
-
-	CHECKWORLD(world, L);
-
-	b2Body *body = reinterpret_cast<b2Body *> (lua_touserdata(L, 1));
-
-	lua_pushboolean(L, body->GetType() == b2_kinematicBody);
+	lua_pushboolean(L, body->IsStatic());
 
 	return 1;
 }
@@ -868,7 +864,7 @@ int w_isDynamic(lua_State *L)
 
 	b2Body *body = reinterpret_cast<b2Body *> (lua_touserdata(L, 1));
 
-	lua_pushboolean(L, body->GetType() == b2_dynamicBody);
+	lua_pushboolean(L, body->IsDynamic());
 
 	return 1;
 }
@@ -881,12 +877,12 @@ int w_isSleeping(lua_State *L)
 
 	b2Body *body = reinterpret_cast<b2Body *> (lua_touserdata(L, 1));
 
-	lua_pushboolean(L, !body->IsAwake());
+	lua_pushboolean(L, body->IsSleeping());
 
 	return 1;
 }
 
-int w_getSleepingAllowed(lua_State *L)
+int w_allowSleeping(lua_State *L)
 {
 	CHECKINIT(init, L);
 
@@ -894,25 +890,12 @@ int w_getSleepingAllowed(lua_State *L)
 
 	b2Body *body = reinterpret_cast<b2Body *> (lua_touserdata(L, 1));
 
-	lua_pushboolean(L, body->IsSleepingAllowed());
-
-	return 1;
-}
-
-int w_setSleepingAllowed(lua_State *L)
-{
-	CHECKINIT(init, L);
-
-	CHECKWORLD(world, L);
-
-	b2Body *body = reinterpret_cast<b2Body *> (lua_touserdata(L, 1));
-
-	body->SetSleepingAllowed(lua_toboolean(L, 2));
+	body->AllowSleeping(lua_toboolean(L, 2));
 
 	return 0;
 }
 
-int w_setAwake(lua_State *L)
+int w_wakeUp(lua_State *L)
 {
 	CHECKINIT(init, L);
 
@@ -920,7 +903,7 @@ int w_setAwake(lua_State *L)
 
 	b2Body *body = reinterpret_cast<b2Body *> (lua_touserdata(L, 1));
 
-	body->SetAwake(lua_toboolean(L, 2));
+	body->WakeUp();
 
 	return 0;
 }
@@ -1042,7 +1025,7 @@ int w_setPosition(lua_State *L)
 
 	const vec2_t *v = CHECKVEC(L, 2);
 
-	body->SetTransform(b2Vec2(v->x * unitScale, v->y * unitScale), body->GetAngle());
+	body->SetXForm(b2Vec2(v->x * unitScale, v->y * unitScale), body->GetAngle());
 
 	return 0;
 }
@@ -1055,7 +1038,7 @@ int w_setAngle(lua_State *L)
 
 	b2Body *body = reinterpret_cast<b2Body *> (lua_touserdata(L, 1));
 
-	body->SetTransform(body->GetPosition(), luaL_checknumber(L, 2));
+	body->SetXForm(body->GetPosition(), luaL_checknumber(L, 2));
 
 	return 0;
 }
@@ -1091,7 +1074,7 @@ int w_applyTorque(lua_State *L)
 	return 0;
 }
 
-int w_applyLinearImpulse(lua_State *L)
+int w_applyImpulse(lua_State *L)
 {
 	CHECKINIT(init, L);
 
@@ -1102,20 +1085,7 @@ int w_applyLinearImpulse(lua_State *L)
 	const vec2_t *impulse = CHECKVEC(L, 2);
 	const vec2_t *point = CHECKVEC(L, 3);
 
-	body->ApplyLinearImpulse(b2Vec2(impulse->x * unitScale, impulse->y * unitScale), b2Vec2(point->x * unitScale, point->y * unitScale));
-
-	return 0;
-}
-
-int w_applyAngularImpulse(lua_State *L)
-{
-	CHECKINIT(init, L);
-
-	CHECKWORLD(world, L);
-
-	b2Body *body = reinterpret_cast<b2Body *> (lua_touserdata(L, 1));
-
-	body->ApplyAngularImpulse(lua_tonumber(L, 1));
+	body->ApplyImpulse(b2Vec2(impulse->x * unitScale, impulse->y * unitScale), b2Vec2(point->x * unitScale, point->y * unitScale));
 
 	return 0;
 }
@@ -1182,7 +1152,7 @@ int w_getNumVertices(lua_State *L)
 	int num = 0;
 	switch(fixture->GetType())
 	{
-		case b2Shape::e_polygon:
+		case b2_polygonShape:
 		{
 			const b2PolygonShape *shape = dynamic_cast<const b2PolygonShape *>(fixture->GetShape());
 			num = shape->GetVertexCount();
@@ -1229,7 +1199,7 @@ int w_getVertices(lua_State *L)
 	int i = 0;
 	switch(fixture->GetType())
 	{
-		case b2Shape::e_polygon:
+		case b2_polygonShape:
 		{
 			const b2PolygonShape *shape = dynamic_cast<const b2PolygonShape *>(fixture->GetShape());
 			const b2Vec2 *vertices = shape->m_vertices;
@@ -1322,7 +1292,7 @@ int w_getBodyNumVertices(lua_State *L)
 	{
 		switch(fixture->GetType())
 		{
-			case b2Shape::e_polygon:
+			case b2_polygonShape:
 			{
 				const b2PolygonShape *shape = dynamic_cast<const b2PolygonShape *>(fixture->GetShape());
 				num += shape->GetVertexCount();
@@ -1359,7 +1329,7 @@ int w_getBodyVertices(lua_State *L)
 	{
 		switch(fixture->GetType())
 		{
-			case b2Shape::e_polygon:
+			case b2_polygonShape:
 			{
 				const b2PolygonShape *shape = dynamic_cast<const b2PolygonShape *>(fixture->GetShape());
 				const b2Vec2 *vertices = shape->m_vertices;

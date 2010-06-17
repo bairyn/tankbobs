@@ -279,8 +279,8 @@ elseif c_tcm_current_map.name == "spree" then
 				tankbobs.w_removeBody(v.m.body) v.m.body = nil v.m.fixture = nil
 
 				local b = c_world_wallShape(v.p)
-				v.m.body = tankbobs.w_addBody(b[1], 0, c_const_get("wall_canSleep"), c_const_get("wall_isBullet"), c_const_get("wall_linearDamping"), c_const_get("wall_angularDamping"), v.type, k)
-				v.m.fixture = tankbobs.w_addPolygonalFixture(b[2], c_const_get("wall_density"), c_const_get("wall_friction"), c_const_get("wall_restitution"), c_const_get("wall_isSensor"), c_const_get("wall_contentsMask") + WALLPOWERUP, c_const_get("wall_clipmask"), v.m.body)
+				v.m.body = tankbobs.w_addBody(b[1], 0, c_const_get("wall_canSleep"), c_const_get("wall_isBullet"), c_const_get("wall_linearDamping"), c_const_get("wall_angularDamping"), k)
+				v.m.fixture = tankbobs.w_addPolygonalFixture(b[2], c_const_get("wall_density"), c_const_get("wall_friction"), c_const_get("wall_restitution"), c_const_get("wall_isSensor"), c_const_get("wall_contentsMask") + WALLPOWERUP, c_const_get("wall_clipmask"), v.m.body, not v.static)
 			end
 		end
 	end
@@ -463,8 +463,8 @@ elseif c_tcm_current_map.name == "tutorial" then
 				tankbobs.w_removeBody(v.m.body) v.m.body = nil v.m.fixture = nil
 
 				local b = c_world_wallShape(v.p)
-				v.m.body = tankbobs.w_addBody(b[1], 0, c_const_get("wall_canSleep"), c_const_get("wall_isBullet"), c_const_get("wall_linearDamping"), c_const_get("wall_angularDamping"), v.type, k)
-				v.m.fixture = tankbobs.w_addPolygonalFixture(b[2], c_const_get("wall_density"), c_const_get("wall_friction"), c_const_get("wall_restitution"), c_const_get("wall_isSensor"), c_const_get("wall_contentsMask") + WALLPOWERUP, c_const_get("wall_clipmask"), v.m.body)
+				v.m.body = tankbobs.w_addBody(b[1], 0, c_const_get("wall_canSleep"), c_const_get("wall_isBullet"), c_const_get("wall_linearDamping"), c_const_get("wall_angularDamping"), k)
+				v.m.fixture = tankbobs.w_addPolygonalFixture(b[2], c_const_get("wall_density"), c_const_get("wall_friction"), c_const_get("wall_restitution"), c_const_get("wall_isSensor"), c_const_get("wall_contentsMask") + WALLPOWERUP, c_const_get("wall_clipmask"), v.m.body, not v.static)
 			end
 		end
 	end

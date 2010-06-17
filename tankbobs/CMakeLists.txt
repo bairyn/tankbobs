@@ -33,9 +33,9 @@ else(NOJIT MATCHES True)
 endif(NOJIT MATCHES True)
 
 if(NOJIT MATCHES True)
-	set(include_dirs /usr/include/SDL ./src/lib ./src/lib/tstr ./src/common ./src/lib/Box2D src/lib/physfs-2.0.0 src/lib/physfs-2.0.0/extras /usr/include/lua /usr/include/lua5.1)
+	set(include_dirs /usr/include/SDL ./src/lib ./src/lib/tstr ./src/common ./src/lib/Box2D/Include src/lib/physfs-2.0.0 src/lib/physfs-2.0.0/extras /usr/include/lua /usr/include/lua5.1)
 else(NOJIT MATCHES True)
-	set(include_dirs /usr/include/SDL ./src/lib ./src/lib/tstr ./src/common ./src/lib/Box2D src/lib/physfs-2.0.0 src/lib/physfs-2.0.0/extras ./src/lib/LuaJIT/src)
+	set(include_dirs /usr/include/SDL ./src/lib ./src/lib/tstr ./src/common ./src/lib/Box2D/Include src/lib/physfs-2.0.0 src/lib/physfs-2.0.0/extras ./src/lib/LuaJIT/src)
 endif(NOJIT MATCHES True)
 
 include_directories(${include_dirs})
@@ -48,16 +48,16 @@ endif(UNIX)
 set(tankbobs_srcs src/common/m_input.c src/common/m_fs.c src/common/m_io.c src/common/m_math.c src/common/m_console.c src/common/m_renderer.c src/common/m_net.c src/common/m_audio.c src/common/m_tankbobs.c src/lib/crossdll.c src/lib/physfs-2.0.0/extras/physfsrwops.c)
 set(tankbobs_Box2D_srcs src/common/m_world.cpp)
 if(WIN32)
-	set(tankbobs_libs lua51.lib SDL SDL_mixer SDL_image SDL_ttf SDL_net.lib OpenGL32.lib glu32.lib Box2D.lib physfs.lib libpng.lib freetype.lib zlib.lib)
+	set(tankbobs_libs lua51.lib SDL SDL_mixer SDL_image SDL_ttf SDL_net.lib OpenGL32.lib glu32.lib box2d.lib physfs.lib libpng.lib freetype.lib zlib.lib)
 else(WIN32)
-	set(tankbobs_libs lua.a SDL SDL_mixer SDL_image SDL_ttf SDL_net.a GL GLU Box2D.a physfs.a png.a freetype m z dl ncurses)
+	set(tankbobs_libs lua.a SDL SDL_mixer SDL_image SDL_ttf SDL_net.a GL GLU box2d.a physfs.a png.a freetype m z dl ncurses)
 endif(WIN32)
 if(NOJIT MATCHES True)
-	set(tankbobs_libdirs ../src/lib/Box2D/Build ../src/lib/physfs-2.0.0)
-	#set(tankbobs_libdirs ../src/lib/Box2D/Build ../src/lib/physfs-2.0.0)  # FIXME: why does linking with this cause linker errors?; TODO
+	set(tankbobs_libdirs ../src/lib/Box2D/Source/Gen/float ../src/lib/physfs-2.0.0)
+	#set(tankbobs_libdirs ../src/lib/Box2D/Source/Gen/fixed ../src/lib/physfs-2.0.0)  # FIXME: why does linking with this cause linker errors?; TODO
 else(NOJIT MATCHES True)
-	set(tankbobs_libdirs ../src/lib/Box2D/Build ../src/lib/physfs-2.0.0 ../src/lib/LuaJIT/src)
-	#set(tankbobs_libdirs ../src/lib/Box2D/Build ../src/lib/physfs-2.0.0 ../src/lib/LuaJIT/src)  # FIXME: why does linking with this cause linker errors?; TODO
+	set(tankbobs_libdirs ../src/lib/Box2D/Source/Gen/float ../src/lib/physfs-2.0.0 ../src/lib/LuaJIT/src)
+	#set(tankbobs_libdirs ../src/lib/Box2D/Source/Gen/fixed ../src/lib/physfs-2.0.0 ../src/lib/LuaJIT/src)  # FIXME: why does linking with this cause linker errors?; TODO
 endif(NOJIT MATCHES True)
 
 set(client_srcs src/client/client.c)
