@@ -431,6 +431,9 @@ elseif c_tcm_current_map.name == "tutorial" then
 	-- disable instagib
 	c_world_setInstagib(false)
 
+	-- enable collision damage
+	c_world_setCollisionDamage(true)
+
 
 	-- when a tank dies, set the respawn position to its waypoint, which is set by wall triggers
 	local function die(tank, t)
