@@ -273,6 +273,7 @@ function c_world_init()
 	c_const_set("world_megaTankShieldRegenerate", 0.25, 1)
 	c_const_set("world_megaTankBonusShieldGain", 0, 1)
 	c_const_set("world_megaTankKillBonus", 2, 1)
+	c_const_set("world_megaTankMinHealthCollideDamage", 20, 1)
 
 	c_const_set("world_plagueDecayRate", 3.875, 1)
 	c_const_set("world_plagueSpawnTime", 2.9, 1)  -- this is *not* in addition to anything  -- spawning right after corpses explode make the game funner by adding more strategy to it
@@ -3167,11 +3168,13 @@ local function c_world_collide(tank, normal, attacker)
 	local component = vel * -normal
 
 	if c_world_getCollisionDamage() and tank.shield < c_const_get("tank_shieldMinCollide") then
-		if component >= c_const_get("tank_damageMinSpeed") then
-			local damage = c_const_get("tank_damageK") * (component - c_const_get("tank_damageMinSpeed"))
+		if not (c_world_getGameType() == MEGATANK and tank and tank.megaTank and c_world_tanks[tank.megaTank] == tank and tank.health < c_const_get("world_megaTankMinHealthCollideDamage")) then
+			if component >= c_const_get("tank_damageMinSpeed") then
+				local damage = c_const_get("tank_damageK") * (component - c_const_get("tank_damageMinSpeed"))
 
-			if damage >= c_const_get("tank_collideMinDamage") then
-				c_world_tankDamage(tank, damage, c_world_tankIndex(attacker))
+				if damage >= c_const_get("tank_collideMinDamage") then
+					c_world_tankDamage(tank, damage, c_world_tankIndex(attacker))
+				end
 			end
 		end
 	end
