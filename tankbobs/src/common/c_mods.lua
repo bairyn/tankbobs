@@ -112,6 +112,7 @@ function c_mods_appendFunction(name, f)
 end
 
 -- c_mods_appendFunction prepends f to a function by the name of 'name'.  The function must have global scope.  The results of the prepended function are dropped.
+-- This function can return three arguments.  If the first is false (not nil!) then the second part of the function is not called.  If the second argument is a table, the base function will be called with those arguments contained in the table.  If the third argument is a table, the contents of it are returned.
 function c_mods_prependFunction(name, f)
 	local base = _G[name]
 
@@ -126,8 +127,31 @@ function c_mods_prependFunction(name, f)
 	end
 
 	_G[name] = function (...)
-		f(...)
-		return base(...)
+		local call, args, ret = f(...)
+
+		if call ~= false then
+			if type(args) == "table" then
+				if type(ret) == "table" then
+					base(unpack(args))
+					return unpack(ret)
+				else
+					return base(unpack(args))
+				end
+			else
+				if type(ret) == "table" then
+					base(...)
+					return unpack(ret)
+				else
+					return base(...)
+				end
+			end
+		else
+			if type(ret) == "table" then
+				return unpack(ret)
+			else
+				return
+			end
+		end
 	end
 end
 
