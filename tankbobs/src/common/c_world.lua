@@ -2363,10 +2363,17 @@ function c_world_tank_step(d, tank)
 	if switch == MEGATANK then
 		--if #c_world_tanks > 1 then  -- this is redundant, since this function couldn't be called with an empty table.  If it could, this check would be necessary.
 			-- set all tanks as tagged if the last tank hasn't been initialised (the length operator will always point to an existing tank if the table isn't empty)
-			if not tank.m.megaTankInitialised and c_world_getHasDestroyed() and #c_world_tanks >= 2 then
+			if not tank.m.megaTankInitialised and #c_world_tanks >= 2 then
 				for _, v in pairs(c_world_tanks) do
 					tank.m.megaTankInitialised = true
 
+					tank.tagged = true
+					tank.megaTank = nil
+				end
+			end
+
+			if not c_world_getHasDestroyed() then
+				for _, v in pairs(c_world_tanks) do
 					tank.tagged = true
 					tank.megaTank = nil
 				end
