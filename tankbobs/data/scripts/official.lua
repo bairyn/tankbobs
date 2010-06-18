@@ -96,8 +96,7 @@ if c_tcm_current_map.name == "arena" then
 		end
 	end
 
-	tankbobs.w_setIterations(4)
-	tankbobs.w_setTimeStep(1 / 250)
+	tankbobs.w_setIterations(8)
 
 	c_mods_prependFunction("c_world_contactListener", toggleWallPath)
 	tankbobs.w_setContactListener(c_world_contactListener)
