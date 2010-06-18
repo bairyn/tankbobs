@@ -2147,7 +2147,7 @@ function c_world_tank_step(d, tank)
 	if not skip then
 		local dir = 0
 
-		if v.weapon and c_weapon_getWeapons()[v.weapon].aimAid then
+		if tank.weapon and c_weapon_getWeapons()[tank.weapon].aimAid then
 			local b, typeOfTarget, target
 			local vec = tankbobs.m_vec2()
 			local start, endP = tankbobs.m_vec2(tank.p), tankbobs.m_vec2()
