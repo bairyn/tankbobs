@@ -2147,6 +2147,33 @@ function c_world_tank_step(d, tank)
 	if not skip then
 		local dir = 0
 
+		if v.weapon and c_weapon_getWeapons()[v.weapon].aimAid then
+			local b, typeOfTarget, target
+			local vec = tankbobs.m_vec2()
+			local start, endP = tankbobs.m_vec2(tank.p), tankbobs.m_vec2()
+
+			vec.t = tank.r
+			vec.R = c_const_get("game_aidAidStartDistance")
+			start:add(vec)
+
+			endP(start)
+			vec.R = c_const_get("game_aidAidMaxDistance")
+			endP:add(vec)
+
+			b, vec, typeOfTarget, target, targetIndex = c_world_findClosestIntersection(start, endP)
+
+			if b then
+				endP = vec
+			end
+
+			if not tank.cd.aimAidStart or not tank.cd.aimAidEnd then
+				tank.cd.aimAidStart, tank.cd.aimAidEnd = t_m_vec2(start), t_m_vec2(endP)
+			else
+				tank.cd.aimAidStart(start)
+				tank.cd.aimAidEnd(endP)
+			end
+		end
+
 		if tank.cd.aimAid then
 			if not tank.cd.aimAidLock then
 				tank.cd.aimAidLock = 0
