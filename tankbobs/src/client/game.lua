@@ -1360,19 +1360,8 @@ function game_step(d)
 			if v.m.lastCaptureTime and v.m.lastCaptureTimeB ~= v.m.lastCaptureTime then
 				v.m.lastCaptureTimeB = v.m.lastCaptureTime
 
-				local otherFlag = nil
-				for _, vs in pairs(c_tcm_current_map.flags) do
-					if vs.red ~= v.red then
-						otherFlag = vs
-
-						break
-					end
-				end
-
-				if otherFlag then
-					tankbobs.a_playSound(c_const_get("flagCapture_sound"))
-					tankbobs.a_setVolumeChunk(c_const_get("flagCapture_sound"), game_audioDistance(v.p))
-				end
+				tankbobs.a_playSound(c_const_get("flagCapture_sound"))
+				tankbobs.a_setVolumeChunk(c_const_get("flagCapture_sound"), game_audioDistance(v.p))
 			end
 
 			if v.m.lastPickupTime and v.m.lastPickupTimeB ~= v.m.lastPickupTime then
