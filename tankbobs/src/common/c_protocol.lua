@@ -243,7 +243,8 @@ protocol_unpersist =
 		},
 		-- Has a tank been destroyed yet?
 		{ identifier(increment())
-		, nil
+		--, function() return c_world_getGameType() == MEGATANK end
+		, function() return false end
 		, VT_FUNCTION
 		, c_world_setHasDestroyed
 		, BOOL
@@ -710,7 +711,8 @@ protocol_persist =
 		},
 		-- Has a tank been destroyed yet?
 		{ identifier(increment())
-		, nil
+		--, function() return c_world_getGameType() == MEGATANK end
+		, function() return false end
 		, VT_FUNCTION
 		, c_world_getHasDestroyed
 		, BOOL
