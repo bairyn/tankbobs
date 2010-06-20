@@ -243,8 +243,8 @@ protocol_unpersist =
 		},
 		-- Has a tank been destroyed yet?
 		{ identifier(increment())
-		--, function() return c_world_getGameType() == MEGATANK end
-		, function() return false end
+		--, function () return c_world_getGameType() == MEGATANK end
+		, function () return false end
 		, VT_FUNCTION
 		, c_world_setHasDestroyed
 		, BOOL
@@ -292,14 +292,14 @@ protocol_unpersist =
 		, 0
 		},
 		{ identifier(increment())
-		, function() return c_world_getGameType() == DOMINATION end
+		, function () return c_world_getGameType() == DOMINATION end
 		, VT_FUNCTION
 		, setNumControlPoints
 		, INT
 		, 0
 		},
 		{ identifier(increment())
-		, function() return c_world_getGameType() == CAPTURETHEFLAG end
+		, function () return c_world_getGameType() == CAPTURETHEFLAG end
 		, VT_FUNCTION
 		, setNumFlags
 		, INT
@@ -610,7 +610,7 @@ protocol_unpersist =
 
 		-- control points
 		{ identifier(increment())
-		, function() return c_world_getGameType() == DOMINATION end
+		, function () return c_world_getGameType() == DOMINATION end
 		, VT_FUNCTION
 		, function(parse)
 			local controlPoint = c_tcm_current_map.controlPoints[newParse(parse)]
@@ -628,7 +628,7 @@ protocol_unpersist =
 
 		-- flags
 		{ identifier(increment())
-		, function() return c_world_getGameType() == CAPTURETHEFLAG end
+		, function () return c_world_getGameType() == CAPTURETHEFLAG end
 		, VT_FUNCTION
 		, function(parse)
 			local flag = c_tcm_current_map.flags[newParse(parse)]
@@ -711,8 +711,8 @@ protocol_persist =
 		},
 		-- Has a tank been destroyed yet?
 		{ identifier(increment())
-		--, function() return c_world_getGameType() == MEGATANK end
-		, function() return false end
+		--, function () return c_world_getGameType() == MEGATANK end
+		, function () return false end
 		, VT_FUNCTION
 		, c_world_getHasDestroyed
 		, BOOL
@@ -760,14 +760,14 @@ protocol_persist =
 		, 0
 		},
 		{ identifier(increment())
-		, function() return c_world_getGameType() == DOMINATION end
+		, function () return c_world_getGameType() == DOMINATION end
 		, VT_FUNCTION
 		, getNumControlPoints
 		, INT
 		, 0
 		},
 		{ identifier(increment())
-		, function() return c_world_getGameType() == CAPTURETHEFLAG end
+		, function () return c_world_getGameType() == CAPTURETHEFLAG end
 		, VT_FUNCTION
 		, getNumFlags
 		, INT
@@ -778,7 +778,7 @@ protocol_persist =
 		{ identifier(increment())
 		, nil
 		, VT_FUNCTION
-		, function()
+		, function ()
 			local res = {}
 
 			newPut(res)
@@ -879,7 +879,7 @@ protocol_persist =
 		{ identifier(increment())
 		, nil
 		, VT_FUNCTION
-		, function()
+		, function ()
 			local res = {}
 
 			newPut(res)
@@ -932,7 +932,7 @@ protocol_persist =
 		{ identifier(increment())
 		, nil
 		, VT_FUNCTION
-		, function()
+		, function ()
 			local res = {}
 
 			newPut(res)
@@ -970,7 +970,7 @@ protocol_persist =
 		{ identifier(increment())
 		, nil
 		, VT_FUNCTION
-		, function()
+		, function ()
 			local res = {}
 
 			newPut(res)
@@ -1054,9 +1054,9 @@ protocol_persist =
 
 		-- control points
 		{ identifier(increment())
-		, function() return c_world_getGameType() == DOMINATION end
+		, function () return c_world_getGameType() == DOMINATION end
 		, VT_FUNCTION
-		, function()
+		, function ()
 			local res = {}
 
 			newPut(res)
@@ -1075,9 +1075,9 @@ protocol_persist =
 
 		-- flags
 		{ identifier(increment())
-		, function() return c_world_getGameType() == CAPTURETHEFLAG end
+		, function () return c_world_getGameType() == CAPTURETHEFLAG end
 		, VT_FUNCTION
-		, function()
+		, function ()
 			local res = {}
 
 			newPut(res)
