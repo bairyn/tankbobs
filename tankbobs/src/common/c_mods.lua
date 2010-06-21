@@ -89,49 +89,82 @@ function c_mods_finish()  -- This function is called before the cleanup code is 
 end
 
 
-local functions = {}
+local functions = {{}}
 
--- c_mods_appendFunction appends f to a function by the name of 'name'.  The function must have global scope.  The results of the base function are dropped.
-function c_mods_appendFunction(name, f, t)
+-- restore a single function
+function c_mods_restoreFunction(name)
+	for _, v in pairs(functions) do
+		if v[1] == name then
+			v[3][v[1]] = v[2]
+		end
+	end
+end
+
+-- restore all functions
+function c_mods_restoreFunctions()
+	for _, v in pairs(functions[#functions]) do
+		v[3][v[1]] = v[2]
+	end
+end
+
+function c_mods_pushFunctions()
+	functions[#functions + 1] = {}
+	if #functions > 1 then
+		tankbobs.t_clone(functions[#functions], functions[#functions + 1])
+	end
+end
+
+function c_mods_popFunctions()
+	for _, v in pairs(functions[#functions]) do
+		v[3][v[1]] = v[2]
+	end
+
+	functions[#functions] = nil
+end
+
+-- c_mods_appendFunction appends fn to a function by the name of 'name'.  The function must have global scope.  The results of the base function are dropped.
+function c_mods_appendFunction(name, fn, t)
 	t = t or _G
 
+	local f    = functions[#functions] or error("c_mods_appendFunction called with function name '" .. tostring(name) .. "' after stack underflow")
 	local base = t[name]
 
 	local exists = false
-	for _, v in pairs(functions) do
+	for _, v in pairs(f) do
 		if v[1] == name then
 			exists = true
 		end
 	end
 	if not exists then
-		table.insert(functions, {name, t[name], t})
+		table.insert(f, {name, t[name], t})
 	end
 
 	t[name] = function (...)
 		base(...)
-		return f(...)
+		return fn(...)
 	end
 end
 
--- c_mods_appendFunction prepends f to a function by the name of 'name'.  The function must have global scope.  The results of the prepended function are dropped.
+-- c_mods_prependFunction prepends fn to a function by the name of 'name'.  The function must have global scope.  The results of the prepended function are dropped.
 -- This function can return three arguments.  If the first is false (not nil!) then the second part of the function is not called.  If the second argument is a table, the base function will be called with those arguments contained in the table.  If the third argument is a table, the contents of it are returned.
-function c_mods_prependFunction(name, f, t)
+function c_mods_prependFunction(name, fn, t)
 	t = t or _G
 
+	local f    = functions[#functions] or error("c_mods_prependFunction called with function name '" .. tostring(name) .. "' after stack underflow")
 	local base = t[name]
 
 	local exists = false
-	for _, v in pairs(functions) do
+	for _, v in pairs(f) do
 		if v[1] == name then
 			exists = true
 		end
 	end
 	if not exists then
-		table.insert(functions, {name, t[name], t})
+		table.insert(f, {name, t[name], t})
 	end
 
 	t[name] = function (...)
-		local call, args, ret = f(...)
+		local call, args, ret = fn(...)
 
 		if call ~= false then
 			if type(args) == "table" then
@@ -159,43 +192,26 @@ function c_mods_prependFunction(name, f, t)
 	end
 end
 
-function c_mods_replaceFunction(name, f, t)
+function c_mods_replaceFunction(name, fn, t)
 	t = t or _G
 
+	local f    = functions[#functions] or error("c_mods_replaceFunction called with function name '" .. tostring(name) .. "' after stack underflow")
 	local base = t[name]
 
 	local exists = false
-	for _, v in pairs(functions) do
+	for _, v in pairs(f) do
 		if v[1] == name then
 			exists = true
 		end
 	end
 	if not exists then
-		table.insert(functions, {name, t[name], t})
+		table.insert(f, {name, t[name], t})
 	end
 
-	t[name] = f
+	t[name] = fn
 end
 
--- restore a single function
-function c_mods_restoreFunction(name)
-	for _, v in pairs(functions) do
-		if v[1] == name then
-			v[3][v[1]] = v[2]
-		end
-	end
-end
-
--- restore all functions
-function c_mods_restoreFunctions()
-	for _, v in pairs(functions) do
-		v[3][v[1]] = v[2]
-	end
-
-	functions = {}
-end
-
--- this function appends f to freeWorld.  This is useful to set an exit function for level scripts.
+-- This function appends f to freeWorld.  This is useful to set an exit function for level scripts.  It can be called multiple times, in which case each function is called in order.
 function c_mods_exitWorldFunction(f)
 	c_mods_appendFunction("c_world_freeWorld", f)
 end

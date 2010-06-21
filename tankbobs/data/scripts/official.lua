@@ -2,7 +2,9 @@
 Script for official levels
 --]]
 
-c_mods_exitWorldFunction(c_mods_restoreFunctions)
+-- These two lines should appear in order at the beginning of every script.
+c_mods_pushFunctions()
+c_mods_exitWorldFunction(c_mods_popFunctions)
 
 if c_tcm_current_map.name == "arena" then
 	c_const_set("powerup_pushStrength", 0, -1)
