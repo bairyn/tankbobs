@@ -10,7 +10,13 @@ if c_tcm_current_map.name == "arena" then
 	c_const_set("powerup_pushStrength", 0, -1)
 	c_const_set("powerup_lifeTime", 0, -1)
 	c_const_set("powerup_restartTime", 8, -1)
+	c_const_set("powerup_health_restartTime", 30, -1)
+	c_const_set("powerup_shield_restartTime", 30, -1)
 	c_const_set("wall_freezeTime", 1, -1)
+	c_const_set("arena_degeneration", 1 + (1/3), -1)
+
+	local teleporter_touchDistance = c_const_get("teleporter_touchDistance")
+	c_const_set("teleporter_touchDistance", -1)
 
 	local function giveShield(tank)
 		tank.shield = 99999999
@@ -18,7 +24,14 @@ if c_tcm_current_map.name == "arena" then
 
 	c_mods_appendFunction("c_world_spawnTank_misc", giveShield)
 
-	local function giveClips()
+	local degeneration = nil
+	for _, v in pairs(c_tcm_current_map.walls) do
+		if v.misc == "degeneration" then
+			degeneration = v
+		end
+	end
+
+	local function giveClips(d)
 		for _, v in pairs(c_world_getTanks()) do
 
 			if v.exists and v.weapon then
@@ -26,6 +39,12 @@ if c_tcm_current_map.name == "arena" then
 
 				if weapon and weapon.clips > 0 then
 					v.clips = 1
+				end
+
+				if degeneration then
+					if c_world_intersection(0, c_world_tankHull(v), degeneration.m.pos) then
+						v.health = v.health - d * c_const_get("arena_degeneration")
+					end
 				end
 			end
 		end
@@ -35,6 +54,46 @@ if c_tcm_current_map.name == "arena" then
 			if v.m.unfreezeTime and tankbobs.t_getTicks() > v.m.unfreezeTime then
 				v.unfreezeTime = nil
 				v.path = true
+			end
+		end
+
+		-- teleporters can't be blocked
+		local teleporters = c_tcm_current_map.teleporters
+
+		for _, teleporter in pairs(c_tcm_current_map.teleporters) do
+			for _, v in pairs(c_world_getTanks()) do
+				if v.exists then
+					-- inexpensive distance check
+					if math.abs((v.p - teleporter.p).R) <= teleporter_touchDistance then
+						local target = teleporters[teleporter.t + 1]
+
+						if teleporter.enabled and target and v.target ~= teleporter.id then
+							--[[
+							for _, v in pairs(c_world_getTanks()) do
+								if v.exists then
+									if math.abs((v.p - target.p).R) <= teleporter_touchDistance then
+										return
+									end
+								end
+							end
+							-- test for rest of world
+							if c_world_pointIntersects(target.p) then
+								return
+							end
+							--]]
+
+							v.target = target.id
+							v.m.lastTeleportTime = tankbobs.t_getTicks()
+							v.m.lastTeleportPosition = t_m_vec2(v.p)
+							tankbobs.w_setPosition(v.m.body, target.p)
+							v.p(tankbobs.w_getPosition(v.m.body))
+						end
+
+						--return
+					elseif v.target == teleporter.id then
+						v.target = nil
+					end
+				end
 			end
 		end
 	end
@@ -98,13 +157,38 @@ if c_tcm_current_map.name == "arena" then
 		end
 	end
 
+	local function meleeHit(tank, attacker)
+		if attacker and attacker.weapon ~= c_weapon_getDefaultWeapon() then
+			tank.shield = 0
+		end
+	end
+
+	c_mods_appendFunction("c_weapon_meleeHit", meleeHit)
+
 	tankbobs.w_setIterations(8)
 
 	c_mods_prependFunction("c_world_contactListener", toggleWallPath)
 	tankbobs.w_setContactListener(c_world_contactListener)
 
 	local function resetSpawnTime(tank, powerup)
-		c_tcm_current_map.powerupSpawnPoints[powerup.spawner].m.nextPowerupTime = tankbobs.t_getTicks() + c_world_timeMultiplier(c_const_get("powerup_restartTime"))
+		local m = c_tcm_current_map.powerupSpawnPoints[powerup.spawner].m
+
+		if powerup.powerupType then
+			local powerupType = c_world_getPowerupTypeByIndex(powerup.powerupType)
+			if powerup.powerupType then
+				if powerupType.name == "health" then
+					m.nextPowerupTime = tankbobs.t_getTicks() + c_world_timeMultiplier(c_const_get("powerup_health_restartTime"))
+
+					return
+				elseif powerupType.name == "shield" then
+					m.nextPowerupTime = tankbobs.t_getTicks() + c_world_timeMultiplier(c_const_get("powerup_shield_restartTime"))
+
+					return
+				end
+			end
+		end
+
+		m.nextPowerupTime = tankbobs.t_getTicks() + c_world_timeMultiplier(c_const_get("powerup_restartTime"))
 	end
 
 	c_mods_prependFunction("c_world_powerup_pickUp", resetSpawnTime)
