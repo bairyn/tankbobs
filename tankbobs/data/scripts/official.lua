@@ -15,9 +15,6 @@ if c_tcm_current_map.name == "arena" then
 	c_const_set("wall_freezeTime", 1, -1)
 	c_const_set("arena_degeneration", 1 + (1/3), -1)
 
-	local teleporter_touchDistance = c_const_get("teleporter_touchDistance")
-	c_const_set("teleporter_touchDistance", -1)
-
 	local function giveShield(tank)
 		tank.shield = 99999999
 	end
@@ -54,55 +51,6 @@ if c_tcm_current_map.name == "arena" then
 			if v.m.unfreezeTime and tankbobs.t_getTicks() > v.m.unfreezeTime then
 				v.unfreezeTime = nil
 				v.path = true
-			end
-		end
-
-		-- teleporters can't be blocked
-		local teleporters = c_tcm_current_map.teleporters
-
-		for _, teleporter in pairs(c_tcm_current_map.teleporters) do
-			for _, v in pairs(c_world_getTanks()) do
-				local breaking = false
-				repeat
-					if v.exists then
-						-- inexpensive distance check
-						if math.abs((v.p - teleporter.p).R) <= teleporter_touchDistance then
-							local target = teleporters[teleporter.t + 1]
-
-							if teleporter.enabled and target and v.target ~= teleporter.id then
-								--[[
-								for _, v in pairs(c_world_getTanks()) do
-									if v.exists then
-										if math.abs((v.p - target.p).R) <= teleporter_touchDistance then
-											return
-										end
-									end
-								end
-								-- test for rest of world
-								if c_world_pointIntersects(target.p) then
-									return
-								end
-								--]]
-								if math.abs((v.p - target.p).R) <= teleporter_touchDistance then
-									breaking = true break
-								end
-
-								v.target = target.id
-								v.m.lastTeleportTime = tankbobs.t_getTicks()
-								v.m.lastTeleportPosition = tankbobs.m_vec2(v.p)
-								tankbobs.w_setPosition(v.m.body, target.p)
-								v.p(tankbobs.w_getPosition(v.m.body))
-							end
-
-							--return
-						elseif v.target == teleporter.id then
-							v.target = nil
-						end
-					end
-				until true
-				if breaking then
-					break
-				end
 			end
 		end
 	end
