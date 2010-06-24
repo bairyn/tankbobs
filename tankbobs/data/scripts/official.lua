@@ -84,7 +84,7 @@ if c_tcm_current_map.name == "arena" then
 
 							v.target = target.id
 							v.m.lastTeleportTime = tankbobs.t_getTicks()
-							v.m.lastTeleportPosition = t_m_vec2(v.p)
+							v.m.lastTeleportPosition = tankbobs.m_vec2(v.p)
 							tankbobs.w_setPosition(v.m.body, target.p)
 							v.p(tankbobs.w_getPosition(v.m.body))
 						end
