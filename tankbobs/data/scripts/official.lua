@@ -62,37 +62,46 @@ if c_tcm_current_map.name == "arena" then
 
 		for _, teleporter in pairs(c_tcm_current_map.teleporters) do
 			for _, v in pairs(c_world_getTanks()) do
-				if v.exists then
-					-- inexpensive distance check
-					if math.abs((v.p - teleporter.p).R) <= teleporter_touchDistance then
-						local target = teleporters[teleporter.t + 1]
+				local breaking = false
+				repeat
+					if v.exists then
+						-- inexpensive distance check
+						if math.abs((v.p - teleporter.p).R) <= teleporter_touchDistance then
+							local target = teleporters[teleporter.t + 1]
 
-						if teleporter.enabled and target and v.target ~= teleporter.id then
-							--[[
-							for _, v in pairs(c_world_getTanks()) do
-								if v.exists then
-									if math.abs((v.p - target.p).R) <= teleporter_touchDistance then
-										return
+							if teleporter.enabled and target and v.target ~= teleporter.id then
+								--[[
+								for _, v in pairs(c_world_getTanks()) do
+									if v.exists then
+										if math.abs((v.p - target.p).R) <= teleporter_touchDistance then
+											return
+										end
 									end
 								end
-							end
-							-- test for rest of world
-							if c_world_pointIntersects(target.p) then
-								return
-							end
-							--]]
+								-- test for rest of world
+								if c_world_pointIntersects(target.p) then
+									return
+								end
+								--]]
+								if math.abs((v.p - target.p).R) <= teleporter_touchDistance then
+									breaking = true break
+								end
 
-							v.target = target.id
-							v.m.lastTeleportTime = tankbobs.t_getTicks()
-							v.m.lastTeleportPosition = tankbobs.m_vec2(v.p)
-							tankbobs.w_setPosition(v.m.body, target.p)
-							v.p(tankbobs.w_getPosition(v.m.body))
+								v.target = target.id
+								v.m.lastTeleportTime = tankbobs.t_getTicks()
+								v.m.lastTeleportPosition = tankbobs.m_vec2(v.p)
+								tankbobs.w_setPosition(v.m.body, target.p)
+								v.p(tankbobs.w_getPosition(v.m.body))
+							end
+
+							--return
+						elseif v.target == teleporter.id then
+							v.target = nil
 						end
-
-						--return
-					elseif v.target == teleporter.id then
-						v.target = nil
 					end
+				until true
+				if breaking then
+					break
 				end
 			end
 		end
