@@ -648,7 +648,7 @@ elseif c_tcm_current_map.name == "tutorial" then
 			end
 		end
 		local function resetHelperText(d)
-			t = t or t_t_getTicks()
+			t = t or tankbobs.t_getTicks()
 
 			for _, v in pairs(future) do
 				v[1] = t
