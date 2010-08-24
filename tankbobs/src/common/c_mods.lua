@@ -93,7 +93,7 @@ local functions = {{}}
 
 -- restore a single function
 function c_mods_restoreFunction(name)
-	for k, v in pairs(functions) do
+	for k, v in pairs(functions[#functions]) do
 		if v[1] == name then
 			v[3][v[1]] = v[2]
 
