@@ -12,7 +12,7 @@ cd `dirname $0`
 REVISION=$(git rev-list master | wc -l)
 PAKNAME="data-tankbobs-v${VERSION}-R${REVISION}.tpk"
 BUILDNAME="tankbobs-build-v${VERSION}-R${REVISION}.tar.gz"
-CMAKEFLAGS="-D PEDANTIC=TRUE"
+CMAKEFLAGS="-D PEDANTIC=TRUE $OTHER_CMAKE_FLAGS"
 
 if ! [ -d "./build" ]; then
 	mkdir ./build
