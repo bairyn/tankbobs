@@ -170,9 +170,9 @@ function main_loop()
 					c_state_click(tankbobs.in_getEventData(lastevent, "intData3"), false, x, y)
 				end
 			elseif tankbobs.in_getEventData(lastevent, "type") == "keydown" then
-				c_state_button(tankbobs.in_getEventData(lastevent, "intData0"), true)
+				c_state_button(tankbobs.in_getEventData(lastevent, "intData0"), true, tankbobs.in_getEventData(lastevent, "strData1"))
 			elseif tankbobs.in_getEventData(lastevent, "type") == "keyup" then
-				c_state_button(tankbobs.in_getEventData(lastevent, "intData0"), false)
+				c_state_button(tankbobs.in_getEventData(lastevent, "intData0"), false, tankbobs.in_getEventData(lastevent, "strData1"))
 			elseif tankbobs.in_getEventData(lastevent, "type") == "mousemove" then
 				local x, y, xrel, yrel = tankbobs.in_getEventData(lastevent, "intData0"), tankbobs.in_getEventData(lastevent, "intData1"), tankbobs.in_getEventData(lastevent, "intData2"), tankbobs.in_getEventData(lastevent, "intData3")
 

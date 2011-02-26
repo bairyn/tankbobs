@@ -749,7 +749,7 @@ local function gui_private_selected(selection)
 end
 
 -- returns true when the pressed key should not be handled further than the input widget
-function gui_private_inputKey(button)  -- local
+function gui_private_inputKey(button, pressed, str)  -- local
 	if button == 276 or button == c_config_get("client.key.left") then  -- left
 		if selected.textPos > 0 then
 			selected.textPos = selected.textPos - 1
@@ -792,49 +792,76 @@ function gui_private_inputKey(button)  -- local
 
 		return true
 	elseif button >= 32 and button < 127 then
-		if (#selected.inputText < selected.maxLength) and (not selected.integerOnly or (button >= string.byte('0') and button <= string.byte('9'))) then
-			local add = string.char(button)
+		local isInteger = false
 
-			if shift then
-				add = add:upper()
-				if add == ";" then
-					add = ":"
-				elseif add == "1" then
-					add = "!"
-				elseif add == "2" then
-					add = "@"
-				elseif add == "3" then
-					add = "#"
-				elseif add == "4" then
-					add = "$"
-				elseif add == "5" then
-					add = "%"
-				elseif add == "6" then
-					add = "^"
-				elseif add == "7" then
-					add = "&"
-				elseif add == "8" then
-					add = "*"
-				elseif add == "9" then
-					add = "("
-				elseif add == "0" then
-					add = ")"
-				elseif add == "\\" then
-					add = "|"
-				elseif add == "/" then
-					add = "?"
-				elseif add == "[" then
-					add = "{"
-				elseif add == "]" then
-					add = "}"
-				elseif add == "," then
-					add = "<"
-				elseif add == "." then
-					add = ">"
-				elseif add == "'" then
-					add = "\""
-				end
+		if button >= string.byte('0') and button <= string.byte('9') then
+			isInteger = true
+		elseif type(str) == "string" then
+			if str == "0"
+			or str == "1"
+			or str == "2"
+			or str == "3"
+			or str == "4"
+			or str == "5"
+			or str == "6"
+			or str == "7"
+			or str == "8"
+			or str == "9"
+			then
+				isInteger = true
 			end
+		end
+
+		if (#selected.inputText < selected.maxLength) and (not selected.integerOnly or isInteger) then
+			local add
+
+			if type(str) ~= "string" then
+				add = string.char(button)
+
+				if shift then
+					add = add:upper()
+					if add == ";" then
+						add = ":"
+					elseif add == "1" then
+						add = "!"
+					elseif add == "2" then
+						add = "@"
+					elseif add == "3" then
+						add = "#"
+					elseif add == "4" then
+						add = "$"
+					elseif add == "5" then
+						add = "%"
+					elseif add == "6" then
+						add = "^"
+					elseif add == "7" then
+						add = "&"
+					elseif add == "8" then
+						add = "*"
+					elseif add == "9" then
+						add = "("
+					elseif add == "0" then
+						add = ")"
+					elseif add == "\\" then
+						add = "|"
+					elseif add == "/" then
+						add = "?"
+					elseif add == "[" then
+						add = "{"
+					elseif add == "]" then
+						add = "}"
+					elseif add == "," then
+						add = "<"
+					elseif add == "." then
+						add = ">"
+					elseif add == "'" then
+						add = "\""
+					end
+				end
+			else
+				add = str
+			end
+
 			selected.inputText = selected.inputText:sub(1, selected.textPos) .. add .. selected.inputText:sub(selected.textPos + 1, -1)
 			selected.textPos = selected.textPos + 1
 
@@ -934,7 +961,7 @@ function gui_mouse(x, y, xrel, yrel)
 	end
 end
 
-function gui_button(button, pressed)
+function gui_button(button, pressed, str)
 	button = c_config_keyLayoutGet(button) or button
 
 	if keyPressed and keyPressed == button then
@@ -1147,7 +1174,7 @@ function gui_button(button, pressed)
 
 	elseif selected and selected.type == INPUT then
 		if pressed then
-			return gui_private_inputKey(button, false)
+			return gui_private_inputKey(button, false, str)
 		else
 			if button == selected.inputKeyPressed then
 				selected.inputKeyPressed = nil

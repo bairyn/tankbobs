@@ -267,8 +267,8 @@ local function continue()
 		quitScreen = false
 	end
 end
-function st_play_button(button, pressed)
-	if not gui_button(button, pressed) then
+function st_play_button(button, pressed, str)
+	if not gui_button(button, pressed, str) then
 		if pressed then
 			if button == 0x0D and endOfGame then  -- enter
 				c_state_goto(play_state)

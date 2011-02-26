@@ -218,12 +218,15 @@ int in_getEvents(lua_State *L)
 					in_private_sdleventInit(n);
 				}
 				{
-					char *tmp = malloc(2);
-					tmp[1] = 0;
-					tmp[0] = event.key.keysym.sym;
+					char *tmp = malloc(2), *tmp2 = malloc(2);
+					tmp[1] = tmp2[1] = 0;
+					tmp[0]  = event.key.keysym.sym;
+					tmp2[0] = event.key.keysym.unicode & 0xFF;
 					n->type = "keydown";
 					n->intArg0 = event.key.keysym.sym;
+					n->intArg1 = event.key.keysym.unicode;
 					n->strArg0 = tmp;
+					n->strArg1 = tmp2;
 				}
 				if(!e->type)
 				{
@@ -246,12 +249,15 @@ int in_getEvents(lua_State *L)
 					in_private_sdleventInit(n);
 				}
 				{
-					char *tmp = malloc(2);
-					tmp[1] = 0;
+					char *tmp = malloc(2), *tmp2 = malloc(2);
+					tmp[1] = tmp2[1] = 0;
 					tmp[0] = event.key.keysym.sym;
+					tmp2[0] = event.key.keysym.unicode & 0xFF;
 					n->type = "keyup";
 					n->intArg0 = event.key.keysym.sym;
+					n->intArg1 = event.key.keysym.unicode;
 					n->strArg0 = tmp;
+					n->strArg1 = tmp2;
 				}
 				if(!e->type)
 				{

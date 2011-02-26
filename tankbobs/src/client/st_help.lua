@@ -49,8 +49,8 @@ function st_help_click(button, pressed, x, y)
 	gui_click(button, pressed, x, y)
 end
 
-function st_help_button(button, pressed)
-	if not gui_button(button, pressed) then
+function st_help_button(button, pressed, str)
+	if not gui_button(button, pressed, str) then
 		if pressed then
 			if button == 0x1B or button == c_config_get("client.key.quit") then
 				c_state_advance()

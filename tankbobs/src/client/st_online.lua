@@ -349,8 +349,8 @@ local function continue()
 		quitScreen = false
 	end
 end
-function st_online_button(button, pressed)
-	if not gui_button(button, pressed) then
+function st_online_button(button, pressed, str)
+	if not gui_button(button, pressed, str) then
 		if pressed then
 			if button == c_config_get("client.key.pause") then
 				--if not won and not quitScreen then

@@ -204,6 +204,8 @@ int t_initialize(lua_State *L)
 		lua_error(L);
 	}
 
+	SDL_EnableUNICODE(1);
+
 	init = true;
 
 	return 0;
@@ -816,14 +818,22 @@ static const struct luaL_Reg tankbobs[] =
 				type: "keydown"
 				intData0: the numerical value of the key pressed, eg decimal 96
 					for the letter 'a'
+				intData1: the numerical unicode value of the key pressed, eg decimal 96
+					for the letter 'a'
 				strData0: the string value of the key pressed, eg "a" for the
 					letter 'a'
+				strData1: the string unicode value of the key pressed, eg "a" for the
+					letter 'a'; only the least significant byte is used
 			SDL_KEYUP -
 				type: "keyup"
 				intData0: the numerical value of the key pressed, eg decimal 96
 					for the letter 'a'
+				intData1: the numerical unicode value of the key pressed, eg decimal 96
+					for the letter 'a'
 				strData0: the string value of the key pressed, eg "a" for the
 					letter 'a'
+				strData1: the string unicode value of the key pressed, eg "a" for the
+					letter 'a'; only the least significant byte is used
 			SDL_MOUSEMOTION
 				type: "mousemove"
 				intData0: x absolute cursor position

@@ -155,7 +155,7 @@ function c_state_click(button, pressed, x, y)  -- should only be called from the
 	end
 end
 
-function c_state_button(button, pressed)  -- should only be called from the main loop
+function c_state_button(button, pressed, str)  -- should only be called from the main loop
 	if not states[1] then
 		error("c_state_button: state not initialized or state table lost")
 	end
@@ -168,7 +168,7 @@ function c_state_button(button, pressed)  -- should only be called from the main
 		error("c_state_button: no valid state")
 	end
 
-	local res = states[1].cur.button(tonumber(c_config_keyLayoutSet(button)) or 0, pressed)
+	local res = states[1].cur.button(tonumber(c_config_keyLayoutSet(button)) or 0, pressed, str)
 	if res ~= nil then
 		if type(res) == "number" or type(res) == "boolean" or type(res) == "string" then
 			error("c_state_button: state " .. states[1].cur.name .. " returned an error value: " .. tostring(res))
