@@ -1,0 +1,19 @@
+Tankbobs is a small 2D shooter game licensed under the GPL that is written in C
+and Lua.  Much more can be written about it, particularly regarding its
+scriptability.
+
+In most cases, running "./build.sh -d -o make" should build Tankbobs, where
+"-d" enables debugging, "-o" to disable jit, and "make" runs make after cmake
+(see ./build -h for help).
+
+I started developing this when I was 14 and essentially stopped working on it
+when I was 15, but it's still left in a quite playable state as I remember it.
+(My passion has since been Haskell, which I've since been studying, practicing,
+ and using.  I highly recommend checking it out; it's absolutely stunning!) Set
+your expectations accordingly, please.
+
+I've moved this repository from mercenariesguild.net (Thanks for hosting it!)
+to github.
+
+I apologize for the unisolated large binary files that have dramatically
+inflated the size of the repository, but it seems to be too late to cleanly fix that.
