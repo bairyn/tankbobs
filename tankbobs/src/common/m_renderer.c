@@ -483,7 +483,11 @@ int r_drawString(lua_State *L)
 	const vec2_t *v2;
 	const char *draw;
 	SDL_Color c = {255, 255, 255, 255};
+#ifndef FONT_USEBLIT
+	SDL_Surface *s;
+#else
 	SDL_Surface *s, *screen;
+#endif
 	SDL_Rect p;
 	int i;
 	r_fontCache_t *fc;
@@ -496,7 +500,10 @@ int r_drawString(lua_State *L)
 
 	CHECKCURRENTFONT(L);
 
+#ifndef FONT_USEBLIT
+#else
 	screen = SDL_GetVideoSurface();
+#endif
 
 	draw = luaL_checkstring(L, 1);
 	v2 = CHECKVEC(L, 2);
