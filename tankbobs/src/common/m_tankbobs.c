@@ -206,7 +206,7 @@ int t_initialize(lua_State *L)
 
 	SDL_EnableUNICODE(1);
 
-	//init = true;
+	init = true;
 
 	return 0;
 }
@@ -341,6 +341,7 @@ int t_isWindows(lua_State *L)
 
 int t_implode(lua_State *L)
 {
+	int i;
 	const char *glue = "";
 	char str[BUFSIZE] = {""};
 
@@ -349,6 +350,7 @@ int t_implode(lua_State *L)
 	if(lua_isstring(L, 2))
 		glue = lua_tostring(L, 2);
 
+	i = 0;
 	lua_pushnil(L);
 	while(lua_next(L, 1))
 	{

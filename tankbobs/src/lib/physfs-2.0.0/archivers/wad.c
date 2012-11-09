@@ -245,11 +245,9 @@ static int wad_load_entries(const char *name, int forWriting, WADinfo *info)
     PHYSFS_uint32 fileCount;
     PHYSFS_uint32 directoryOffset;
     WADentry *entry;
-#if 0
     char lastDirectory[9];
 
     lastDirectory[8] = 0; /* Make sure lastDirectory stays null-terminated. */
-#endif
 
     BAIL_IF_MACRO(!wad_open(name, forWriting, &fh, &fileCount,&directoryOffset), NULL, 0);
     info->entryCount = fileCount;
