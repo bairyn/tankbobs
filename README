@@ -1,15 +1,4 @@
-Tankbobs is a small 2D shooter game licensed under the GPL that is written in C
-and Lua.  TODO: write more about it.
+Tankbobs is a cross-platform 2D shooter game licensed under the GPL.
 
-In most cases, running "./build.sh -d -o make" should build Tankbobs, where
-"-d" enables debugging, "-o" to disable jit, and "make" runs make after cmake
-(see ./build.sh -h for help).
-
-I apologize for the unisolated large binary files that have dramatically
-inflated the size of the repository, but it seems to be too late to cleanly fix
-that, unfortunately.
-
-I started developing Tankbobs in 2008 and have rarely worked on it since my
-16th birthday in 2010.  (My passion for C and Lua has since been replaced with
-an even stronger one for Haskell.  I highly recommend checking it out; it's
-absolutely stunning!)
+Shoot others to score points, race against mates and computer-controlled players in a
+track with a variety of powerups, and capture the flag over the 'net to help your team win.
