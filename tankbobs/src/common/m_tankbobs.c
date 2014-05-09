@@ -206,7 +206,7 @@ int t_initialize(lua_State *L)
 
 	SDL_EnableUNICODE(1);
 
-	init = true;
+	//init = true;
 
 	return 0;
 }
