@@ -109,6 +109,10 @@ function st_background_init()
 	local tank2 = c_world_tank:new()
 	table.insert(c_world_getTanks(), tank1)
 	table.insert(c_world_getTanks(), tank2)
+	tank1.red    = false
+	tank1.m.team = "blue"
+	tank2.red    = true
+	tank2.m.team = "red"
 	c_ai_initTank(tank1)
 	c_ai_initTank(tank2)
 	c_world_tank_spawn(tank1)
