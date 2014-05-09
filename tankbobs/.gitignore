@@ -1,0 +1,13 @@
+.*.sw?
+*.o
+
+CMakeCache.txt
+CMakeFiles
+cmake_install.cmake
+
+/build
+/src/lib/Box2D/Source/Gen
+/src/lib/physfs-2.0.0/Makefile
+/src/lib/physfs-2.0.0/*.a
+/src/lib/physfs-2.0.0/*.so*
+/src/lib/physfs-2.0.0/test_physfs
