@@ -94,7 +94,7 @@ if [ "$1" == "make" ]; then
 	# build physfs (PhysicsFS)
 	cd ./src/lib/physfs-2.0.0/
 	#if ! cmake .; then
-	if ! cmake -Wno-dev .; then  # Remove annoying warning
+	if ! cmake -Wno-dev -DPHYSFS_BUILD_WX_TEST=FALSE .; then  # Remove annoying warning
 		exit 1
 	fi
 	if ! make -C .; then
