@@ -70,7 +70,7 @@ int a_init(lua_State *L)
 {
 	int chunksize = CHUNKSIZE;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	if(audioInitialized)
 		return 0;
@@ -120,7 +120,7 @@ int a_quit(lua_State *L)
 {
 	sound_t *i;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	if(!audioInitialized)
 		return 0;
@@ -157,7 +157,7 @@ int a_initSound(lua_State *L)
 #endif
 	const char *filename = NULL;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	if(!audioInitialized)
 		return 0;
@@ -267,7 +267,7 @@ int a_freeSound(lua_State *L)
 {
 	const char *filename = NULL;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	if(!audioInitialized)
 		return 0;
@@ -310,7 +310,7 @@ int a_startMusic(lua_State *L)
 #endif
 	const char *filename = NULL;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	if(!audioInitialized)
 		return 0;
@@ -377,7 +377,7 @@ int a_startMusic(lua_State *L)
 
 int a_pauseMusic(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	if(!audioInitialized)
 		return 0;
@@ -390,7 +390,7 @@ int a_pauseMusic(lua_State *L)
 
 int a_stopMusic(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	if(!audioInitialized)
 		return 0;
@@ -409,7 +409,7 @@ int a_playSound(lua_State *L)
 #endif
 	const char *filename = NULL;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	if(!audioInitialized || (lua_tostring(L, 1) && !*lua_tostring(L, 1)))
 		return 0;
@@ -517,7 +517,7 @@ int a_setMusicVolume(lua_State *L)
 {
 	int volume; 
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	if(!audioInitialized)
 		return 0;
@@ -535,7 +535,7 @@ int a_setVolume(lua_State *L)
 {
 	int volume; 
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	if(!audioInitialized)
 		return 0;
@@ -558,7 +558,7 @@ int a_setVolumeChunk(lua_State *L)
 #endif
 	const char *filename = NULL;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	if(!audioInitialized || (lua_tostring(L, 1) && !*lua_tostring(L, 1)))
 		return 0;

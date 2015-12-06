@@ -44,12 +44,12 @@ along with Tankbobs.  If not, see <http://www.gnu.org/licenses/>.
 #define VERSION "0.1.0"
 #define VERSIONSUFFIX "-dev"
 
-int init = false;
+int tinit = false;
 Uint32 sdlFlags;
 
 int t_t(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	lua_pushboolean(L, true);
 
@@ -58,7 +58,7 @@ int t_t(lua_State *L)
 
 int t_in(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	lua_pushboolean(L, true);
 
@@ -67,7 +67,7 @@ int t_in(lua_State *L)
 
 int t_io(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	lua_pushboolean(L, true);
 
@@ -76,7 +76,7 @@ int t_io(lua_State *L)
 
 int t_r(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	lua_pushboolean(L, true);
 
@@ -85,7 +85,7 @@ int t_r(lua_State *L)
 
 int t_m(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	lua_pushboolean(L, true);
 
@@ -94,7 +94,7 @@ int t_m(lua_State *L)
 
 int t_w(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	lua_pushboolean(L, true);
 
@@ -103,7 +103,7 @@ int t_w(lua_State *L)
 
 int t_c(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 #if defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__TOS_WINDOWS__) || defined(__WINDOWS__)
 	lua_pushboolean(L, false);
@@ -116,7 +116,7 @@ int t_c(lua_State *L)
 
 int t_a(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	lua_pushboolean(L, true);
 
@@ -125,7 +125,7 @@ int t_a(lua_State *L)
 
 int t_n(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	lua_pushboolean(L, true);
 
@@ -134,7 +134,7 @@ int t_n(lua_State *L)
 
 int t_fs(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	lua_pushboolean(L, true);
 
@@ -206,14 +206,14 @@ int t_initialize(lua_State *L)
 
 	SDL_EnableUNICODE(1);
 
-	//init = true;
+	tinit = true;
 
 	return 0;
 }
 
 int t_quit(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	r_quitFont();
 
@@ -225,7 +225,7 @@ int t_quit(lua_State *L)
 
 int t_quitSDL(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	SDL_Quit();
 
@@ -289,7 +289,7 @@ int t_getVersion(lua_State *L)
 
 int t_getTicks(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	lua_pushinteger(L, SDL_GetTicks());
 	return 1;
@@ -297,7 +297,7 @@ int t_getTicks(lua_State *L)
 
 int t_delay(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	SDL_Delay(luaL_checkinteger(L, 1));
 	return 1;
@@ -305,7 +305,7 @@ int t_delay(lua_State *L)
 
 int t_isDebug(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 #ifdef TDEBUG
 	lua_pushboolean(L, true);
@@ -317,7 +317,7 @@ int t_isDebug(lua_State *L)
 
 int t_is64Bit(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 #if defined(__x86_64) || defined(__x86_64__) || defined(__ia64) || defined(__ia64__) || defined(__IA64) || defined(__IA64__) || defined(__M_IA64) || defined(__M_IA64__) || defined(_WIN64)
 	lua_pushboolean(L, true);
@@ -329,7 +329,7 @@ int t_is64Bit(lua_State *L)
 
 int t_isWindows(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 #if defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__TOS_WINDOWS__) || defined(__WINDOWS__)
 	lua_pushboolean(L, true);
@@ -345,7 +345,7 @@ int t_implode(lua_State *L)
 	const char *glue = "";
 	char str[BUFSIZE] = {""};
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	if(lua_isstring(L, 2))
 		glue = lua_tostring(L, 2);
@@ -391,7 +391,7 @@ int t_explode(lua_State *L)
 	int stringLen;
 	int lastArgumentEmpty;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	string = luaL_checkstring(L, 1);
 	stringLen = strlen(string);
@@ -683,7 +683,7 @@ int t_clone(lua_State *L)
 {
 	int copyVectors = FALSE;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	if(lua_isboolean(L, 1))
 	{
@@ -731,7 +731,7 @@ int t_clone(lua_State *L)
 
 int t_emptyTable(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	/* nil-iffies table */
 	while(lua_pushnil(L), lua_next(L, -2))

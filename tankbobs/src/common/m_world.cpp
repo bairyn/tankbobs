@@ -205,7 +205,7 @@ void w_init(lua_State *L)
 
 int w_setUnitScale(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	unitScale = luaL_checknumber(L, 1);
 
@@ -214,7 +214,7 @@ int w_setUnitScale(lua_State *L)
 
 int w_newWorld(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	const vec2_t *lower = CHECKVEC(L, 1);
 	const vec2_t *upper = CHECKVEC(L, 2);
@@ -279,7 +279,7 @@ int w_newWorld(lua_State *L)
 
 int w_freeWorld(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	if(!world)
 	{
@@ -324,7 +324,7 @@ int w_freeWorld(lua_State *L)
 
 int w_setTimeStep(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	timeStep = luaL_checknumber(L, 1);
 
@@ -333,7 +333,7 @@ int w_setTimeStep(lua_State *L)
 
 int w_getTimeStep(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	lua_pushnumber(L, timeStep);
 
@@ -342,7 +342,7 @@ int w_getTimeStep(lua_State *L)
 
 int w_setIterations(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	iterations = luaL_checkinteger(L, 1);
 
@@ -351,7 +351,7 @@ int w_setIterations(lua_State *L)
 
 int w_getIterations(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	lua_pushinteger(L, iterations);
 
@@ -360,7 +360,7 @@ int w_getIterations(lua_State *L)
 
 int w_step(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	world->Step(timeStep, iterations, iterations);
 
@@ -371,7 +371,7 @@ int w_addBody(lua_State *L)
 {
 	const vec2_t *v;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	CHECKWORLD(world, L);
 
@@ -397,7 +397,7 @@ int w_addBody(lua_State *L)
 
 int w_getBody(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	CHECKWORLD(world, L);
 
@@ -428,7 +428,7 @@ int w_addFixture(lua_State *L)
 	b2Fixture    *fixture;
 	b2FixtureDef *fixtureDefinition;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	CHECKWORLD(world, L);
 
@@ -490,7 +490,7 @@ int w_addFixtureFinal(lua_State *L)
 	b2Fixture    *fixture;
 	b2FixtureDef *fixtureDefinition;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	CHECKWORLD(world, L);
 
@@ -550,7 +550,7 @@ int w_addFixtureFinal(lua_State *L)
 
 int w_addPolygonalFixture(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	CHECKWORLD(world, L);
 
@@ -653,7 +653,7 @@ int w_addPolygonalFixture(lua_State *L)
 
 int w_removeDefinition(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	b2FixtureDef *fixtureDefinition = reinterpret_cast<b2FixtureDef *> (lua_touserdata(L, 1));
 	if(!fixtureDefinition)
@@ -676,7 +676,7 @@ int w_removeDefinition(lua_State *L)
 
 int w_addPolygonDefinition(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	if((!lua_istable(L, 1)) || !(lua_objlen(L, 1) > 0))
 	{
@@ -731,7 +731,7 @@ int w_addPolygonDefinition(lua_State *L)
 
 int w_addCircularDefinition(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	b2CircleDef fixtureDefinition;
 
@@ -757,7 +757,7 @@ int w_addCircularDefinition(lua_State *L)
 
 int w_fixtures(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	CHECKWORLD(world, L);
 
@@ -790,7 +790,7 @@ int w_fixtures(lua_State *L)
 
 int w_removeBody(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	CHECKWORLD(world, L);
 
@@ -803,7 +803,7 @@ int w_removeBody(lua_State *L)
 
 int w_bodies(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	CHECKWORLD(world, L);
 
@@ -822,7 +822,7 @@ int w_bodies(lua_State *L)
 
 int w_isBullet(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	CHECKWORLD(world, L);
 
@@ -835,7 +835,7 @@ int w_isBullet(lua_State *L)
 
 int w_setBullet(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	CHECKWORLD(world, L);
 
@@ -849,7 +849,7 @@ int w_setBullet(lua_State *L)
 
 int w_isStatic(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	CHECKWORLD(world, L);
 
@@ -862,7 +862,7 @@ int w_isStatic(lua_State *L)
 
 int w_isDynamic(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	CHECKWORLD(world, L);
 
@@ -875,7 +875,7 @@ int w_isDynamic(lua_State *L)
 
 int w_isSleeping(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	CHECKWORLD(world, L);
 
@@ -888,7 +888,7 @@ int w_isSleeping(lua_State *L)
 
 int w_allowSleeping(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	CHECKWORLD(world, L);
 
@@ -901,7 +901,7 @@ int w_allowSleeping(lua_State *L)
 
 int w_wakeUp(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	CHECKWORLD(world, L);
 
@@ -914,7 +914,7 @@ int w_wakeUp(lua_State *L)
 
 int w_getPosition(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	CHECKWORLD(world, L);
 
@@ -936,7 +936,7 @@ int w_getPosition(lua_State *L)
 
 int w_getAngle(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	CHECKWORLD(world, L);
 
@@ -951,7 +951,7 @@ int w_getAngle(lua_State *L)
 
 int w_setLinearVelocity(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	CHECKWORLD(world, L);
 
@@ -966,7 +966,7 @@ int w_setLinearVelocity(lua_State *L)
 
 int w_getLinearVelocity(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	CHECKWORLD(world, L);
 
@@ -993,7 +993,7 @@ int w_getLinearVelocity(lua_State *L)
 
 int w_setAngularVelocity(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	CHECKWORLD(world, L);
 
@@ -1006,7 +1006,7 @@ int w_setAngularVelocity(lua_State *L)
 
 int w_getAngularVelocity(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	CHECKWORLD(world, L);
 
@@ -1021,7 +1021,7 @@ int w_getAngularVelocity(lua_State *L)
 
 int w_setPosition(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	CHECKWORLD(world, L);
 
@@ -1036,7 +1036,7 @@ int w_setPosition(lua_State *L)
 
 int w_setAngle(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	CHECKWORLD(world, L);
 
@@ -1049,7 +1049,7 @@ int w_setAngle(lua_State *L)
 
 int w_applyForce(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	CHECKWORLD(world, L);
 
@@ -1065,7 +1065,7 @@ int w_applyForce(lua_State *L)
 
 int w_applyTorque(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	CHECKWORLD(world, L);
 
@@ -1080,7 +1080,7 @@ int w_applyTorque(lua_State *L)
 
 int w_applyImpulse(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	CHECKWORLD(world, L);
 
@@ -1096,7 +1096,7 @@ int w_applyImpulse(lua_State *L)
 
 int w_getCenterOfMass(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	CHECKWORLD(world, L);
 
@@ -1117,7 +1117,7 @@ int w_getCenterOfMass(lua_State *L)
 
 int w_scaleVelocity(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	CHECKWORLD(world, L);
 
@@ -1134,7 +1134,7 @@ int w_scaleVelocity(lua_State *L)
 
 int w_getNumVertices(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	CHECKWORLD(world, L);
 
@@ -1175,7 +1175,7 @@ int w_getNumVertices(lua_State *L)
 
 int w_getVertices(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	CHECKWORLD(world, L);
 
@@ -1232,7 +1232,7 @@ int w_getVertices(lua_State *L)
 
 int w_getContents(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	CHECKWORLD(world, L);
 
@@ -1258,7 +1258,7 @@ int w_getContents(lua_State *L)
 
 int w_getClipmask(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	CHECKWORLD(world, L);
 
@@ -1284,7 +1284,7 @@ int w_getClipmask(lua_State *L)
 
 int w_getBodyNumVertices(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	CHECKWORLD(world, L);
 
@@ -1315,7 +1315,7 @@ int w_getBodyNumVertices(lua_State *L)
 
 int w_getBodyVertices(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	CHECKWORLD(world, L);
 
@@ -1363,7 +1363,7 @@ int w_getBodyVertices(lua_State *L)
 
 int w_getBodyContents(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	CHECKWORLD(world, L);
 
@@ -1384,7 +1384,7 @@ int w_getBodyContents(lua_State *L)
 
 int w_getBodyClipmask(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	CHECKWORLD(world, L);
 
@@ -1405,7 +1405,7 @@ int w_getBodyClipmask(lua_State *L)
 
 int w_getIndex(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	CHECKWORLD(world, L);
 
@@ -1422,7 +1422,7 @@ int w_getIndex(lua_State *L)
 
 int w_setIndex(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	CHECKWORLD(world, L);
 
@@ -1454,7 +1454,7 @@ int w_luaStep(lua_State *L)
 {
 	double d;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	CHECKWORLD(world, L);
 	
@@ -1476,7 +1476,7 @@ int w_luaStep(lua_State *L)
 
 int w_setContactListener(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	CHECKWORLD(world, L);
 

@@ -39,9 +39,189 @@ local widgets = {}
 local selected = nil
 local scroll = 0
 
+--
+
+local GENERIC = {}
+local LABEL   = {}
+local ACTION  = {}
+local CYCLE   = {}
+local INPUT   = {}
+local KEY     = {}
+local SCALE   = {}
+
+local PLACEHOLDER_VEC={'PLACEHOLDER_VEC'}
+local widget =
+{
+	new  = c_class_new,
+	init = function (o)
+		o.scale = 1
+		o.color.r = c_const_get("label_r") o.altColor.r = c_const_get("label_r")
+		o.color.g = c_const_get("label_g") o.altColor.g = c_const_get("label_g")
+		o.color.b = c_const_get("label_b") o.altColor.b = c_const_get("label_b")
+		o.color.a = c_const_get("label_a") o.altColor.a = c_const_get("label_a")
+	end,
+	type = GENERIC,
+
+	p = PLACEHOLDER_VEC,
+	upperRightPos = PLACEHOLDER_VEC,
+	text = "",
+	updateTextCallBack = nil,  -- This function called every frame.  If the function exists and returns a string, the widget's text will be set to string returned.
+
+	scale = 0,
+	color = {0, 0, 0, 0},
+	altColor = {0, 0, 0, 0},
+	bump = nil,
+
+	setText = function (self, text)
+		self.text = tostring(text)
+
+		return self
+	end,
+
+	selectedCallback = nil,
+
+	setSelectedCallback = function (self, f)
+		self.selectedCallback = f
+
+		return self
+	end,
+
+	m = {p = {}},
+
+	selectable = false
+}
+
+local label =
+{
+	new  = c_class_new,
+	type = LABEL,
+	base = widget,
+
+	selectable = false
+}
+
+local action =
+{
+	new  = c_class_new,
+	type = ACTION,
+	base = widget,
+
+	actionCallBack = nil,  -- this is called with either actionCallBack(currentWidget, mouseX, mouseY) or actionCallBack(currentWidget, keyButton)
+
+	selectable = true
+}
+
+local cycle =
+{
+	new  = c_class_new,
+	type = CYCLE,
+	base = widget,
+
+	setCyclePos = function (self, pos)
+		self.cyclePos = pos
+
+		return self
+	end,
+	cycleCallBack = nil,  -- called with (currentWidget, elementString, elementIndex) when the user changes the current element in a cycle
+	cycleList = {},  -- a table of strings
+	cyclePos = 0,  -- which element of the table is currently selected (by key / index)
+
+	selectable = true
+}
+
+local input =
+{
+	new  = c_class_new,
+	type = INPUT,
+	base = widget,
+
+	setText = function (self, text)
+		text = tostring(text)
+
+		if #text >= 1 then
+			text = text:sub(1, self.maxLength)
+		end
+
+		self.text = text
+		self.inputText = text
+		self.textPos = #text
+
+		-- Don't call change callback
+		--if self.textChangedCallBack then
+			--self:textChangedCallBack(self, self.inputText)
+		--end
+
+		return self
+	end,
+	inputText = "",
+	textChangedCallBack = nil,
+	maxLength = 0,
+	integerOnly = false,
+	textPos = 0,
+
+	selectable = true
+}
+
+local key =
+{
+	new  = c_class_new,
+	type = KEY,
+	base = widget,
+
+	setKey = function (self, button)
+		self.button = c_config_keyLayoutGet(button)
+		if key then
+			self.text = gui_char(button)
+		else
+			self.text = ""
+		end
+
+		--if self.keyChangedCallBack then
+			--self:keyChangedCallBack(self, self.button)
+		--end
+
+		return self
+	end,
+	keyActive = false,  -- whether or not a key press will set this key
+	keyChangedCallBack = nil,
+	button = nil,
+
+	selectable = true
+}
+
+local scale =
+{
+	new  = c_class_new,
+	type = SCALE,
+	base = widget,
+
+	setScalePos = function (self, pos)
+		if pos < 0 then
+			pos = 0
+		elseif pos > 1 then
+			pos = 1
+		end
+
+		self.scalePos = pos
+
+		--if self.scaleChangedCallBack then
+			--self:scaleChangedCallBack(self, self.scalePos)
+		--end
+
+		return self
+	end,
+	scalePos = 0,  -- 0-1
+	scaleChangedCallBack = nil,
+	scaleMouseOffset = 0,
+	scaleActive = false,
+	scaleLength = nil,
+
+	selectable = true
+}
+
 function gui_init()
-  widget.p = tankbobs.m_vec2
-  widget.upperRightPos = tankbobs.m_vec2
+  widget.p = tankbobs.m_vec2()
+  widget.upperRightPos = tankbobs.m_vec2()
 
   --
 
@@ -240,184 +420,6 @@ end
 function gui_done()
 	widgets = nil
 end
-
-local GENERIC = {}
-local LABEL   = {}
-local ACTION  = {}
-local CYCLE   = {}
-local INPUT   = {}
-local KEY     = {}
-local SCALE   = {}
-
-local PLACEHOLDER_VEC={'PLACEHOLDER_VEC'}
-local widget =
-{
-	new  = c_class_new,
-	init = function (o)
-		o.scale = 1
-		o.color.r = c_const_get("label_r") o.altColor.r = c_const_get("label_r")
-		o.color.g = c_const_get("label_g") o.altColor.g = c_const_get("label_g")
-		o.color.b = c_const_get("label_b") o.altColor.b = c_const_get("label_b")
-		o.color.a = c_const_get("label_a") o.altColor.a = c_const_get("label_a")
-	end,
-	type = GENERIC,
-
-	p = PLACEHOLDER_VEC,
-	upperRightPos = PLACEHOLDER_VEC,
-	text = "",
-	updateTextCallBack = nil,  -- This function called every frame.  If the function exists and returns a string, the widget's text will be set to string returned.
-
-	scale = 0,
-	color = {0, 0, 0, 0},
-	altColor = {0, 0, 0, 0},
-	bump = nil,
-
-	setText = function (self, text)
-		self.text = tostring(text)
-
-		return self
-	end,
-
-	selectedCallback = nil,
-
-	setSelectedCallback = function (self, f)
-		self.selectedCallback = f
-
-		return self
-	end,
-
-	m = {p = {}},
-
-	selectable = false
-}
-
-local label =
-{
-	new  = c_class_new,
-	type = LABEL,
-	base = widget,
-
-	selectable = false
-}
-
-local action =
-{
-	new  = c_class_new,
-	type = ACTION,
-	base = widget,
-
-	actionCallBack = nil,  -- this is called with either actionCallBack(currentWidget, mouseX, mouseY) or actionCallBack(currentWidget, keyButton)
-
-	selectable = true
-}
-
-local cycle =
-{
-	new  = c_class_new,
-	type = CYCLE,
-	base = widget,
-
-	setCyclePos = function (self, pos)
-		self.cyclePos = pos
-
-		return self
-	end,
-	cycleCallBack = nil,  -- called with (currentWidget, elementString, elementIndex) when the user changes the current element in a cycle
-	cycleList = {},  -- a table of strings
-	cyclePos = 0,  -- which element of the table is currently selected (by key / index)
-
-	selectable = true
-}
-
-local input =
-{
-	new  = c_class_new,
-	type = INPUT,
-	base = widget,
-
-	setText = function (self, text)
-		text = tostring(text)
-
-		if #text >= 1 then
-			text = text:sub(1, self.maxLength)
-		end
-
-		self.text = text
-		self.inputText = text
-		self.textPos = #text
-
-		-- Don't call change callback
-		--if self.textChangedCallBack then
-			--self:textChangedCallBack(self, self.inputText)
-		--end
-
-		return self
-	end,
-	inputText = "",
-	textChangedCallBack = nil,
-	maxLength = 0,
-	integerOnly = false,
-	textPos = 0,
-
-	selectable = true
-}
-
-local key =
-{
-	new  = c_class_new,
-	type = KEY,
-	base = widget,
-
-	setKey = function (self, button)
-		self.button = c_config_keyLayoutGet(button)
-		if key then
-			self.text = gui_char(button)
-		else
-			self.text = ""
-		end
-
-		--if self.keyChangedCallBack then
-			--self:keyChangedCallBack(self, self.button)
-		--end
-
-		return self
-	end,
-	keyActive = false,  -- whether or not a key press will set this key
-	keyChangedCallBack = nil,
-	button = nil,
-
-	selectable = true
-}
-
-local scale =
-{
-	new  = c_class_new,
-	type = SCALE,
-	base = widget,
-
-	setScalePos = function (self, pos)
-		if pos < 0 then
-			pos = 0
-		elseif pos > 1 then
-			pos = 1
-		end
-
-		self.scalePos = pos
-
-		--if self.scaleChangedCallBack then
-			--self:scaleChangedCallBack(self, self.scalePos)
-		--end
-
-		return self
-	end,
-	scalePos = 0,  -- 0-1
-	scaleChangedCallBack = nil,
-	scaleMouseOffset = 0,
-	scaleActive = false,
-	scaleLength = nil,
-
-	selectable = true
-}
 
 function gui_finish()
 	selected = nil

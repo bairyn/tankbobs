@@ -77,7 +77,7 @@ int n_init(lua_State *L)
 {
 	tstr *message;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	currentPort = DEFAULTPORT;
 
@@ -148,7 +148,7 @@ static void n_sendOldestPacket(void)
 
 int n_quit(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	while(lastSentPacket >= 0)
 	{
@@ -193,7 +193,7 @@ int n_quit(lua_State *L)
 
 int n_setQueueTime(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	queueTime = luaL_checkinteger(L, 1);
 
@@ -204,7 +204,7 @@ int n_newPacket(lua_State *L)
 {
 	int size;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	if(currentPacket)
 	{
@@ -233,7 +233,7 @@ int n_writeToPacket(lua_State *L)
 	size_t len;
 	const char *data;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	if(!currentPacket)
 	{
@@ -260,7 +260,7 @@ int n_writeToPacket(lua_State *L)
 
 int n_setPort(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	currentPort = luaL_checkinteger(L, 1) & (0x0000FFFF);
 
@@ -312,7 +312,7 @@ int n_sendPacket(lua_State *L)
 {
 	const char *hostName;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	if(!currentPacket || !currentSocket)
 	{
@@ -409,7 +409,7 @@ int n_readPacket(lua_State *L)
 {
 	UDPpacket *p = NULL;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	if(!currentSocket || !listenPacket)
 	{

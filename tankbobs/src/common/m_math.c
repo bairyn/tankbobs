@@ -93,7 +93,7 @@ int m_vec2(lua_State *L)  /* similar to c_math.lua's vec2:new() but can take arg
 {
 	vec2_t *v;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	if(lua_isnumber(L, 1) && lua_isnumber(L, 2))
 	{
@@ -148,7 +148,7 @@ int m_vec2_index(lua_State *L)
 	const char *index_s;
 	tstr *message;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	v = CHECKVEC(L, 1);
 	index_s = luaL_checkstring(L, 2);
@@ -217,7 +217,7 @@ int m_vec2_newindex(lua_State *L)
 	double val;
 	tstr *message;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	v = CHECKVEC(L, 1);
 	index = *luaL_checkstring(L, 2);
@@ -285,7 +285,7 @@ int m_vec2_unify(lua_State *L)
 {
 	vec2_t *v;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	v = CHECKVEC(L, 1);
 
@@ -301,7 +301,7 @@ int m_vec2_unit(lua_State *L)
 	vec2_t *v;
 	const vec2_t *v2;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	v = lua_newuserdata(L, sizeof(vec2_t));
 
@@ -323,7 +323,7 @@ int m_vec2___add(lua_State *L)
 	vec2_t *v;
 	const vec2_t *v2, *v3;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	v2 = CHECKVEC(L, 1);
 	v3 = CHECKVEC(L, 2);
@@ -346,7 +346,7 @@ int m_vec2_add(lua_State *L)
 	vec2_t *v;
 	const vec2_t *v2;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	v = CHECKVEC(L, 1);
 	v2 = CHECKVEC(L, 2);
@@ -364,7 +364,7 @@ int m_vec2___sub(lua_State *L)
 	vec2_t *v;
 	const vec2_t *v2, *v3;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	v2 = CHECKVEC(L, 1);
 	v3 = CHECKVEC(L, 2);
@@ -387,7 +387,7 @@ int m_vec2_sub(lua_State *L)
 	vec2_t *v;
 	const vec2_t *v2;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	v = CHECKVEC(L, 1);
 	v2 = CHECKVEC(L, 2);
@@ -406,7 +406,7 @@ int m_vec2___mul(lua_State *L)
 	const vec2_t *v2, *v3;
 	double scalar;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	if(lua_isnumber(L, 1))
 	{
@@ -454,7 +454,7 @@ int m_vec2_mul(lua_State *L)
 	vec2_t *v;
 	double scalar;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	/* scalar multiplication only */
 	v = CHECKVEC(L, 1);
@@ -473,7 +473,7 @@ int m_vec2___div(lua_State *L)
 	const vec2_t *v2;
 	double scalar;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	/* scalar division only */
 	if(lua_isnumber(L, 1))
@@ -513,7 +513,7 @@ int m_vec2_div(lua_State *L)
 	vec2_t *v;
 	double scalar;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	/* scalar division only */
 	v = CHECKVEC(L, 1);
@@ -530,7 +530,7 @@ int m_vec2_len(lua_State *L)
 {
 	const vec2_t *v;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	v = CHECKVEC(L, 1);
 
@@ -543,7 +543,7 @@ int m_vec2_call(lua_State *L)
 {
 	vec2_t *v;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	v = CHECKVEC(L, 1);
 
@@ -574,7 +574,7 @@ int m_vec2_unm(lua_State *L)
 	vec2_t *v;
 	const vec2_t *v2;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	v = lua_newuserdata(L, sizeof(vec2_t));
 
@@ -594,7 +594,7 @@ int m_vec2_inv(lua_State *L)
 {
 	vec2_t *v;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	v = CHECKVEC(L, 1);
 
@@ -637,7 +637,7 @@ int m_line(lua_State *L)  /* algorithm, by Christopher Barlett, at http://angelf
 {
 	const vec2_t *l1p1, *l1p2, *l2p1, *l2p2;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	l1p1 = CHECKVEC(L, 1);
 	l1p2 = CHECKVEC(L, 2);
@@ -675,7 +675,7 @@ int m_edge(lua_State *L)  /* algorithm, by Darel Rex Finley, 2006, can be found 
 	double x;
 	double intersection;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	l1p1 = CHECKVEC(L, 1);
 	l1p2 = CHECKVEC(L, 2);
@@ -850,7 +850,7 @@ int m_polygon(lua_State *L)  /* brute force line test; will NOT detect an inters
 {
 	int i, j;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	{
 		int num1 = ((lua_objlen(L, 1)) > (1) ? (lua_objlen(L, 1)) : (1));
@@ -920,7 +920,7 @@ int m_vec2_normalto(lua_State *L)
 	vec2_t *v;
 	const vec2_t *v2;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	v2 = CHECKVEC(L, 1);
 
@@ -942,7 +942,7 @@ int m_vec2_project(lua_State *L)
 	const vec2_t *v2, *v3;
 	double dot;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	v2 = CHECKVEC(L, 1);
 	v3 = CHECKVEC(L, 2);

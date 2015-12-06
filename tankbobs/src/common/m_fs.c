@@ -152,7 +152,7 @@ static int fs_luaL_loadfile(lua_State *L, const char *filename)
 	int c = 0;
 	int fnameindex = lua_gettop(L) + 1;  /* index of filename on the stack */
 
-	if(!init || !PHYSFS_isInit())
+	if(!tinit || !PHYSFS_isInit())
 	{
 		lua_pushnil(L);
 
@@ -275,7 +275,7 @@ static int fs_readable(const char *filename)
 {
 	PHYSFS_File *file;
 
-	if(!init || !PHYSFS_isInit())
+	if(!tinit || !PHYSFS_isInit())
 		return 0;
 
 	if(!PHYSFS_exists(filename))
@@ -698,7 +698,7 @@ int fs_init(lua_State *L)
 	int status;
 	const char *a = argv0;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	PHYSFS_permitSymbolicLinks(lua_toboolean(L, 1));
 
@@ -788,8 +788,8 @@ int fs_quit(lua_State *L)
 {
 	int status;
 
-	CHECKINIT(init, L);
-	CHECKFSINIT(init, L);
+	CHECKINIT(tinit, L);
+	CHECKFSINIT(tinit, L);
 
 	status = PHYSFS_deinit();
 
@@ -807,7 +807,7 @@ int fs_setArgv0(lua_State *L)
 {
 	static char buf[BUFSIZE];
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	strncpy(buf, luaL_checkstring(L, 1), sizeof(buf));
 
@@ -820,8 +820,8 @@ int fs_setArgv0(lua_State *L)
 
 int fs_getRawDirectorySeparator(lua_State *L)
 {
-	CHECKINIT(init, L);
-	CHECKFSINIT(init, L);
+	CHECKINIT(tinit, L);
+	CHECKFSINIT(tinit, L);
 
 	lua_pushstring(L, PHYSFS_getDirSeparator());
 
@@ -833,8 +833,8 @@ int fs_getCDDirectories(lua_State *L)
 	const char **cds;
 	const char **i;
 
-	CHECKINIT(init, L);
-	CHECKFSINIT(init, L);
+	CHECKINIT(tinit, L);
+	CHECKFSINIT(tinit, L);
 
 	cds = (const char **) PHYSFS_getCdRomDirs();
 
@@ -854,8 +854,8 @@ int fs_getCDDirectories(lua_State *L)
 
 int fs_getBaseDirectory(lua_State *L)
 {
-	CHECKINIT(init, L);
-	CHECKFSINIT(init, L);
+	CHECKINIT(tinit, L);
+	CHECKFSINIT(tinit, L);
 
 	lua_pushstring(L, PHYSFS_getBaseDir());
 
@@ -864,8 +864,8 @@ int fs_getBaseDirectory(lua_State *L)
 
 int fs_getUserDirectory(lua_State *L)
 {
-	CHECKINIT(init, L);
-	CHECKFSINIT(init, L);
+	CHECKINIT(tinit, L);
+	CHECKFSINIT(tinit, L);
 
 	lua_pushstring(L, PHYSFS_getUserDir());
 
@@ -876,8 +876,8 @@ int fs_getWriteDirectory(lua_State *L)
 {
 	const char *w;
 
-	CHECKINIT(init, L);
-	CHECKFSINIT(init, L);
+	CHECKINIT(tinit, L);
+	CHECKFSINIT(tinit, L);
 
 	w = PHYSFS_getWriteDir();
 
@@ -891,8 +891,8 @@ int fs_getWriteDirectory(lua_State *L)
 
 int fs_setWriteDirectory(lua_State *L)
 {
-	CHECKINIT(init, L);
-	CHECKFSINIT(init, L);
+	CHECKINIT(tinit, L);
+	CHECKFSINIT(tinit, L);
 
 	PHYSFS_setWriteDir(luaL_checkstring(L, 1));
 
@@ -904,8 +904,8 @@ int fs_getSearchPath(lua_State *L)
 	const char **searchPath;
 	const char **i;
 
-	CHECKINIT(init, L);
-	CHECKFSINIT(init, L);
+	CHECKINIT(tinit, L);
+	CHECKFSINIT(tinit, L);
 
 	searchPath = (const char **) PHYSFS_getSearchPath();
 
@@ -927,8 +927,8 @@ int fs_mkdir(lua_State *L)
 {
 	int status;
 
-	CHECKINIT(init, L);
-	CHECKFSINIT(init, L);
+	CHECKINIT(tinit, L);
+	CHECKFSINIT(tinit, L);
 
 	status = PHYSFS_mkdir(luaL_checkstring(L, 1));
 
@@ -946,8 +946,8 @@ int fs_remove(lua_State *L)
 {
 	int status;
 
-	CHECKINIT(init, L);
-	CHECKFSINIT(init, L);
+	CHECKINIT(tinit, L);
+	CHECKFSINIT(tinit, L);
 
 	status = PHYSFS_delete(luaL_checkstring(L, 1));
 
@@ -965,8 +965,8 @@ int fs_which(lua_State *L)
 {
 	const char *d;
 
-	CHECKINIT(init, L);
-	CHECKFSINIT(init, L);
+	CHECKINIT(tinit, L);
+	CHECKFSINIT(tinit, L);
 
 	d = PHYSFS_getRealDir(luaL_checkstring(L, 1));
 
@@ -983,8 +983,8 @@ int fs_listFiles(lua_State *L)
 	const char **files;
 	const char **i;
 
-	CHECKINIT(init, L);
-	CHECKFSINIT(init, L);
+	CHECKINIT(tinit, L);
+	CHECKFSINIT(tinit, L);
 
 	files = (const char **) PHYSFS_enumerateFiles(luaL_checkstring(L, 1));
 
@@ -1004,8 +1004,8 @@ int fs_listFiles(lua_State *L)
 
 int fs_fileExists(lua_State *L)
 {
-	CHECKINIT(init, L);
-	CHECKFSINIT(init, L);
+	CHECKINIT(tinit, L);
+	CHECKFSINIT(tinit, L);
 
 	lua_pushboolean(L, PHYSFS_exists(luaL_checkstring(L, 1)));
 
@@ -1014,8 +1014,8 @@ int fs_fileExists(lua_State *L)
 
 int fs_directoryExists(lua_State *L)
 {
-	CHECKINIT(init, L);
-	CHECKFSINIT(init, L);
+	CHECKINIT(tinit, L);
+	CHECKFSINIT(tinit, L);
 
 	lua_pushboolean(L, PHYSFS_isDirectory(luaL_checkstring(L, 1)));
 
@@ -1024,8 +1024,8 @@ int fs_directoryExists(lua_State *L)
 
 int fs_symbolicLinkExists(lua_State *L)
 {
-	CHECKINIT(init, L);
-	CHECKFSINIT(init, L);
+	CHECKINIT(tinit, L);
+	CHECKFSINIT(tinit, L);
 
 	lua_pushboolean(L, PHYSFS_isSymbolicLink(luaL_checkstring(L, 1)));
 
@@ -1036,8 +1036,8 @@ int fs_getModificationTime(lua_State *L)
 {
 	PHYSFS_sint64 time;
 
-	CHECKINIT(init, L);
-	CHECKFSINIT(init, L);
+	CHECKINIT(tinit, L);
+	CHECKFSINIT(tinit, L);
 
 	time = PHYSFS_getLastModTime(luaL_checkstring(L, 1));
 
@@ -1053,8 +1053,8 @@ int fs_openWrite(lua_State *L)
 {
 	PHYSFS_File *fout;
 
-	CHECKINIT(init, L);
-	CHECKFSINIT(init, L);
+	CHECKINIT(tinit, L);
+	CHECKFSINIT(tinit, L);
 
 	fout = PHYSFS_openWrite(luaL_checkstring(L, 1));
 
@@ -1074,8 +1074,8 @@ int fs_openAppend(lua_State *L)
 {
 	PHYSFS_File *fout;
 
-	CHECKINIT(init, L);
-	CHECKFSINIT(init, L);
+	CHECKINIT(tinit, L);
+	CHECKFSINIT(tinit, L);
 
 	fout = PHYSFS_openAppend(luaL_checkstring(L, 1));
 
@@ -1095,8 +1095,8 @@ int fs_openRead(lua_State *L)
 {
 	PHYSFS_File *fin;
 
-	CHECKINIT(init, L);
-	CHECKFSINIT(init, L);
+	CHECKINIT(tinit, L);
+	CHECKFSINIT(tinit, L);
 
 	fin = PHYSFS_openRead(luaL_checkstring(L, 1));
 
@@ -1117,8 +1117,8 @@ int fs_close(lua_State *L)
 	int status = 0;
 	PHYSFS_File *file;
 
-	CHECKINIT(init, L);
-	CHECKFSINIT(init, L);
+	CHECKINIT(tinit, L);
+	CHECKFSINIT(tinit, L);
 
 	file = lua_touserdata(L, 1);
 
@@ -1147,8 +1147,8 @@ int fs_read(lua_State *L)
 	static char staticBuffer[BUFSIZE];
 	char *buf = staticBuffer;
 
-	CHECKINIT(init, L);
-	CHECKFSINIT(init, L);
+	CHECKINIT(tinit, L);
+	CHECKFSINIT(tinit, L);
 
 	fin = lua_touserdata(L, 1);
 	len = luaL_checkinteger(L, 2);
@@ -1202,8 +1202,8 @@ int fs_write(lua_State *L)
 	size_t len;
 	const char *string;
 
-	CHECKINIT(init, L);
-	CHECKFSINIT(init, L);
+	CHECKINIT(tinit, L);
+	CHECKFSINIT(tinit, L);
 
 	fout = lua_touserdata(L, 1);
 	string = luaL_checklstring(L, 2, &len);
@@ -1225,8 +1225,8 @@ int fs_tell(lua_State *L)
 	int offset;
 	PHYSFS_File *file;
 
-	CHECKINIT(init, L);
-	CHECKFSINIT(init, L);
+	CHECKINIT(tinit, L);
+	CHECKFSINIT(tinit, L);
 
 	file = lua_touserdata(L, 1);
 
@@ -1251,8 +1251,8 @@ int fs_seekFromStart(lua_State *L)
 	PHYSFS_File *file;
 	PHYSFS_uint64 offset;
 
-	CHECKINIT(init, L);
-	CHECKFSINIT(init, L);
+	CHECKINIT(tinit, L);
+	CHECKFSINIT(tinit, L);
 
 	file = lua_touserdata(L, 1);
 	offset = luaL_checkinteger(L, 2);
@@ -1274,8 +1274,8 @@ int fs_fileLength(lua_State *L)
 	PHYSFS_File *file;
 	PHYSFS_uint64 len;
 
-	CHECKINIT(init, L);
-	CHECKFSINIT(init, L);
+	CHECKINIT(tinit, L);
+	CHECKFSINIT(tinit, L);
 
 	file = lua_touserdata(L, 1);
 
@@ -1297,8 +1297,8 @@ int fs_getInt(lua_State *L)
 	PHYSFS_file *fin;
 	PHYSFS_uint32 value;
 
-	CHECKINIT(init, L);
-	CHECKFSINIT(init, L);
+	CHECKINIT(tinit, L);
+	CHECKFSINIT(tinit, L);
 
 	fin = lua_touserdata(L, 1);
 
@@ -1331,8 +1331,8 @@ int fs_getShort(lua_State *L)
 	PHYSFS_file *fin;
 	PHYSFS_uint16 value;
 
-	CHECKINIT(init, L);
-	CHECKFSINIT(init, L);
+	CHECKINIT(tinit, L);
+	CHECKFSINIT(tinit, L);
 
 	fin = lua_touserdata(L, 1);
 
@@ -1365,8 +1365,8 @@ int fs_getChar(lua_State *L)
 	PHYSFS_file *fin;
 	unsigned char value;
 
-	CHECKINIT(init, L);
-	CHECKFSINIT(init, L);
+	CHECKINIT(tinit, L);
+	CHECKFSINIT(tinit, L);
 
 	fin = lua_touserdata(L, 1);
 
@@ -1400,8 +1400,8 @@ int fs_getDouble(lua_State *L)
 	PHYSFS_uint64 value;
 	double *n = (double *) &value;
 
-	CHECKINIT(init, L);
-	CHECKFSINIT(init, L);
+	CHECKINIT(tinit, L);
+	CHECKFSINIT(tinit, L);
 
 	fin = lua_touserdata(L, 1);
 
@@ -1435,8 +1435,8 @@ int fs_getFloat(lua_State *L)
 	PHYSFS_uint32 value;
 	float *n = (float *) &value;
 
-	CHECKINIT(init, L);
-	CHECKFSINIT(init, L);
+	CHECKINIT(tinit, L);
+	CHECKFSINIT(tinit, L);
 
 	fin = lua_touserdata(L, 1);
 
@@ -1474,8 +1474,8 @@ int fs_getStr(lua_State *L)
 	int all;
 	PHYSFS_file *fin;
 
-	CHECKINIT(init, L);
-	CHECKFSINIT(init, L);
+	CHECKINIT(tinit, L);
+	CHECKFSINIT(tinit, L);
 
 	fin = lua_touserdata(L, 1);
 	if(!lua_isnoneornil(L, 2))
@@ -1530,8 +1530,8 @@ int fs_putInt(lua_State *L)
 	PHYSFS_file *fout;
 	PHYSFS_uint32 value;
 
-	CHECKINIT(init, L);
-	CHECKFSINIT(init, L);
+	CHECKINIT(tinit, L);
+	CHECKFSINIT(tinit, L);
 
 	fout = lua_touserdata(L, 1);
 	value = lua_tointeger(L, 2);
@@ -1554,8 +1554,8 @@ int fs_putShort(lua_State *L)
 	PHYSFS_file *fout;
 	PHYSFS_uint16 value;
 
-	CHECKINIT(init, L);
-	CHECKFSINIT(init, L);
+	CHECKINIT(tinit, L);
+	CHECKFSINIT(tinit, L);
 
 	fout = lua_touserdata(L, 1);
 	value = lua_tointeger(L, 2);
@@ -1578,8 +1578,8 @@ int fs_putChar(lua_State *L)
 	PHYSFS_file *fout;
 	unsigned char value;
 
-	CHECKINIT(init, L);
-	CHECKFSINIT(init, L);
+	CHECKINIT(tinit, L);
+	CHECKFSINIT(tinit, L);
 
 	fout = lua_touserdata(L, 1);
 	value = *(luaL_checkstring(L, 2));
@@ -1603,8 +1603,8 @@ int fs_putDouble(lua_State *L)
 	PHYSFS_uint64 value;
 	io64tv num;
 
-	CHECKINIT(init, L);
-	CHECKFSINIT(init, L);
+	CHECKINIT(tinit, L);
+	CHECKFSINIT(tinit, L);
 
 	fout = lua_touserdata(L, 1);
 	num = lua_tonumber(L, 2);
@@ -1629,8 +1629,8 @@ int fs_putFloat(lua_State *L)
 	PHYSFS_uint32 value;
 	io32tv num;
 
-	CHECKINIT(init, L);
-	CHECKFSINIT(init, L);
+	CHECKINIT(tinit, L);
+	CHECKFSINIT(tinit, L);
 
 	fout = lua_touserdata(L, 1);
 	num = lua_tonumber(L, 2);
@@ -1653,8 +1653,8 @@ int fs_mount(lua_State *L)
 	int len;
 	int status;
 
-	CHECKINIT(init, L);
-	CHECKFSINIT(init, L);
+	CHECKINIT(tinit, L);
+	CHECKFSINIT(tinit, L);
 
 	len = lua_objlen(L, 2);
 
@@ -1689,16 +1689,16 @@ int fs_loadfile(lua_State *L)
 {
 	const char *fname = luaL_optstring(L, 1, NULL);
 
-	CHECKINIT(init, L);
-	CHECKFSINIT(init, L);
+	CHECKINIT(tinit, L);
+	CHECKFSINIT(tinit, L);
 
 	return load_aux(L, fs_luaL_loadfile(L, fname));
 }
 
 int fs_permitSymbolicLinks(lua_State *L)
 {
-	CHECKINIT(init, L);
-	CHECKFSINIT(init, L);
+	CHECKINIT(tinit, L);
+	CHECKFSINIT(tinit, L);
 
 	PHYSFS_permitSymbolicLinks(lua_toboolean(L, 1));
 

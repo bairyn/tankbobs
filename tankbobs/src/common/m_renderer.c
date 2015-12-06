@@ -100,7 +100,7 @@ void r_init(lua_State *L)
 
 int r_initialize(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 /*
 	int stereo  = config_get_d(CONFIG_STEREO)      ? 1 : 0;
@@ -147,7 +147,7 @@ int r_checkRenderer(lua_State *L)
 {
 	const SDL_VideoInfo *videoInfo = SDL_GetVideoInfo();
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	if(!videoInfo->hw_available)
 	{
@@ -199,7 +199,7 @@ int r_newWindow(lua_State *L)
 	const char *title, *icon;
 	SDL_Surface *sicon;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	w = luaL_checkinteger(L, -5);
 	h = luaL_checkinteger(L, -4);
@@ -297,7 +297,7 @@ int r_ortho2D(lua_State *L)
 {
 	double l, r, b, t;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	t = luaL_checknumber(L, -1);
 	b = luaL_checknumber(L, -2);
@@ -311,7 +311,7 @@ int r_ortho2D(lua_State *L)
 
 int r_swapBuffers(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	SDL_GL_SwapBuffers();
 
@@ -396,7 +396,7 @@ int r_selectFont(lua_State *L)
 	const char *name;
 	tstr *message;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	name = luaL_checkstring(L, 1);
 
@@ -432,7 +432,7 @@ int r_selectFont(lua_State *L)
 
 int r_fontName(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	CHECKCURRENTFONT(L);
 
@@ -443,7 +443,7 @@ int r_fontName(lua_State *L)
 
 int r_fontSize(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	CHECKCURRENTFONT(L);
 
@@ -454,7 +454,7 @@ int r_fontSize(lua_State *L)
 
 int r_fontFilename(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	CHECKCURRENTFONT(L);
 
@@ -492,7 +492,7 @@ int r_drawString(lua_State *L)
 	GLfloat fill[4];
 	int priority = 0;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	CHECKCURRENTFONT(L);
 
@@ -806,7 +806,7 @@ int r_freeFont(lua_State *L)
 	int j;
 	tstr *message;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	name = luaL_checkstring(L, 1);
 
@@ -878,7 +878,7 @@ int r_loadImage2D(lua_State *L)
 	SDL_Surface *img, *converted;
 	SDL_PixelFormat fmt;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	filename = luaL_checkstring(L, 1);
 

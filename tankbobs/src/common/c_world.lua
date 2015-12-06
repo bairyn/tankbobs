@@ -87,8 +87,8 @@ local gameTimerSecond = 0
 local key = {}
 
 function c_world_init()
-  c_world_powerup.p = tankbobs.m_vec2
-  c_world_tank.p = tankbobs.m_vec2
+  c_world_powerup.p = tankbobs.m_vec2()
+  c_world_tank.p = tankbobs.m_vec2()
   c_world_tank.h = {tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2()}
 
   --

@@ -79,7 +79,7 @@ do                                                                              
 #define BUFSIZE  1024
 #define FBUFSIZE 4096
 
-extern int init;
+extern int tinit;
 extern Uint32 sdlFlags;
 
 /* m_tankbobs.c */

@@ -315,7 +315,7 @@ void c_initNL(lua_State *L)
 
 int c_init(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	switch(c_private_initConsole())
 	{
@@ -360,7 +360,7 @@ int c_init(lua_State *L)
 
 int c_quit(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	consoleInitialized = FALSE;
 
@@ -377,7 +377,7 @@ int c_input(lua_State *L)
 	static char text[MAX_EDIT_LINE];
 	tstr *prompt;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	for(;;)
 	{
@@ -571,7 +571,7 @@ int c_input(lua_State *L)
 
 int c_setTabFunction(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	strncpy(tfName, luaL_checkstring(L, 1), sizeof(tfName));
 
@@ -584,7 +584,7 @@ int c_print(lua_State *L)
 	int scroll = ((lastLine > scrollLine && lastLine <= scrollLine + LOG_LINES) ? (TRUE) : (FALSE));
 	const char *print;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	print = luaL_checkstring(L, 1);
 	lua_pop(L, 1);
@@ -627,7 +627,7 @@ int c_print(lua_State *L)
 
 int c_setHistoryFile(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	strncpy(historyFile, luaL_checkstring(L, 1), sizeof(historyFile));
 
@@ -636,7 +636,7 @@ int c_setHistoryFile(lua_State *L)
 
 int c_loadHistory(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	if(historyFile[0])
 	{
@@ -739,7 +739,7 @@ int c_loadHistory(lua_State *L)
 
 int c_saveHistory(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	if(historyFile[0])
 	{

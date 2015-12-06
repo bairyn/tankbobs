@@ -109,7 +109,7 @@ int in_getResolutions(lua_State *L)
 	int i;
 	SDL_Rect **modes;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	modes = SDL_ListModes(NULL, sdlFlags);
 
@@ -151,7 +151,7 @@ int in_getEvents(lua_State *L)
 	in_sdlevent *l;
 	register unsigned int results = 0;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	while(SDL_PollEvent(&event))
 	{
@@ -692,7 +692,7 @@ int in_getEventData(lua_State *L)
 	const char *arg = luaL_checkstring(L, -1);
 	in_sdlevent *e = lua_touserdata(L, -2);
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	if(!e || !arg)
 	{
@@ -790,7 +790,7 @@ int in_nextEvent(lua_State *L)
 {
 	in_sdlevent *e = (in_sdlevent *)lua_touserdata(L, -1);
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	if(!e || !e->type)
 	{
@@ -810,7 +810,7 @@ int in_freeEvents(lua_State *L)
 {
 	in_sdlevent *e = (in_sdlevent *)lua_touserdata(L, -1);
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	if(!e)
 	{
@@ -825,7 +825,7 @@ int in_freeEvents(lua_State *L)
 
 int in_grabClear(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	SDL_WM_GrabInput(SDL_GRAB_OFF);
 	SDL_ShowCursor(SDL_ENABLE);
@@ -835,7 +835,7 @@ int in_grabClear(lua_State *L)
 
 int in_grabMouse(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	if(luaL_checkinteger(L, 1) > 0 && luaL_checkinteger(L, 2) > 0)
 	{
@@ -852,7 +852,7 @@ int in_grabMouse(lua_State *L)
 
 int in_isGrabbed(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	lua_pushboolean(L, !SDL_ShowCursor(SDL_QUERY));
 
@@ -864,7 +864,7 @@ static int numKeys;
 
 int in_getKeys(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	keyState = SDL_GetKeyState(&numKeys);
 
@@ -875,7 +875,7 @@ int in_keyPressed(lua_State *L)
 {
 	int key;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	key = luaL_checkinteger(L, 1);
 

@@ -70,7 +70,7 @@ int io_getHomeDirectory(lua_State *L)
 {
 	const char *userdir;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 #ifdef _WIN32
 	userdir = getenv("APPDATA");
@@ -97,7 +97,7 @@ int io_getInt(lua_State *L)
 	io32t integer;
 	FILE *fin = *((FILE **) lua_touserdata(L, -1));
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	if(!fin)
 	{
@@ -175,7 +175,7 @@ int io_getShort(lua_State *L)
 	io16t integer;
 	FILE *fin = *((FILE **)lua_touserdata(L, -1));
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	if(!fin)
 	{
@@ -225,7 +225,7 @@ int io_getChar(lua_State *L)
 	io8t integer;
 	FILE *fin = *((FILE **)lua_touserdata(L, -1));
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	if(!fin)
 	{
@@ -263,7 +263,7 @@ int io_getFloat(lua_State *L)
 	io32t number;
 	FILE *fin = *((FILE **)lua_touserdata(L, -1));
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	if(!fin)
 	{
@@ -341,7 +341,7 @@ int io_getDouble(lua_State *L)
 	io64t number;
 	FILE *fin = *((FILE **)lua_touserdata(L, -1));
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	if(!fin)
 	{
@@ -476,7 +476,7 @@ int io_getStr(lua_State *L)
 	int c;
 	FILE *fin = *((FILE **)lua_touserdata(L, -1));
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	if(!fin)
 	{
@@ -515,7 +515,7 @@ int io_getStrL(lua_State *L)
 	int i, len = luaL_checkinteger(L, -1);
 	FILE *fin = *((FILE **)lua_touserdata(L, -2));
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	if(!fin)
 	{
@@ -550,7 +550,7 @@ int io_toInt(lua_State *L)
 {
 	io32t integer;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
 	integer.integer = ((const io32t *) luaL_checkstring(L, 1))->integer;
@@ -569,7 +569,7 @@ int io_toShort(lua_State *L)
 {
 	io16t integer;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
 	integer.integer = ((const io16t *) luaL_checkstring(L, 1))->integer;
@@ -585,7 +585,7 @@ int io_toShort(lua_State *L)
 
 int io_toChar(lua_State *L)
 {
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	lua_pushinteger(L, *((const io8t *) luaL_checkstring(L, 1)));
 
@@ -596,7 +596,7 @@ int io_toFloat(lua_State *L)
 {
 	io32t number;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
 	number.value = ((const io32t *) luaL_checkstring(L, 1))->value;
@@ -615,7 +615,7 @@ int io_toDouble(lua_State *L)
 {
 	io64t number;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
 	number.value = ((const io64t *) luaL_checkstring(L, 1))->value;
@@ -636,7 +636,7 @@ int io_fromInt(lua_State *L)
 {
 	io32t integer;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	integer.integer = (io32tv) luaL_checkinteger(L, 1);
 
@@ -654,7 +654,7 @@ int io_fromShort(lua_State *L)
 {
 	io16t integer;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	integer.integer = (io32tv) luaL_checkinteger(L, 1);
 
@@ -671,7 +671,7 @@ int io_fromChar(lua_State *L)
 {
 	io8t integer;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	integer = (io8t) luaL_checkinteger(L, 1);
 
@@ -684,7 +684,7 @@ int io_fromFloat(lua_State *L)
 {
 	io32t number;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	number.value = (io32ft) luaL_checknumber(L, 1);
 
@@ -702,7 +702,7 @@ int io_fromDouble(lua_State *L)
 {
 	io64t number;
 
-	CHECKINIT(init, L);
+	CHECKINIT(tinit, L);
 
 	number.value = (io64ft) luaL_checknumber(L, 1);
 
