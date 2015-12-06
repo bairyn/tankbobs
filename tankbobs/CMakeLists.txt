@@ -33,9 +33,9 @@ else(NOJIT MATCHES True)
 endif(NOJIT MATCHES True)
 
 if(NOJIT MATCHES True)
-	set(include_dirs /usr/include/SDL ./src/lib ./src/lib/tstr ./src/common ./src/lib/Box2D/Include src/lib/physfs-2.0.0 src/lib/physfs-2.0.0/extras /usr/include/lua /usr/include/lua5.1)
+  set(include_dirs /usr/include/SDL ./src/lib ./src/lib/tstr ./src/common ./src/lib/Box2D/Include src/lib/physfs-2.0.0 src/lib/physfs-2.0.0/extras src/lib/SDL_net-1.2.8/local/include /usr/include/lua /usr/include/lua5.1)
 else(NOJIT MATCHES True)
-	set(include_dirs /usr/include/SDL ./src/lib ./src/lib/tstr ./src/common ./src/lib/Box2D/Include src/lib/physfs-2.0.0 src/lib/physfs-2.0.0/extras ./src/lib/LuaJIT/src)
+  set(include_dirs /usr/include/SDL ./src/lib ./src/lib/tstr ./src/common ./src/lib/Box2D/Include src/lib/physfs-2.0.0 src/lib/physfs-2.0.0/extras src/lib/SDL_net-1.2.8/local/include ./src/lib/LuaJIT/src)
 endif(NOJIT MATCHES True)
 
 include_directories(${include_dirs})
@@ -53,11 +53,11 @@ else(WIN32)
 	set(tankbobs_libs lua5.1 SDL SDL_mixer SDL_image SDL_ttf SDL_net.a GL GLU box2d.a physfs.a png freetype m z dl ncurses)
 endif(WIN32)
 if(NOJIT MATCHES True)
-	set(tankbobs_libdirs ../src/lib/Box2D/Source/Gen/float ../src/lib/physfs-2.0.0)
-	#set(tankbobs_libdirs ../src/lib/Box2D/Source/Gen/fixed ../src/lib/physfs-2.0.0)  # FIXME: why does linking with this cause linker errors?; TODO
+  set(tankbobs_libdirs ../src/lib/Box2D/Source/Gen/float ../src/lib/physfs-2.0.0 ../src/lib/SDL_net-1.2.8/local/lib)
+	#set(tankbobs_libdirs ../src/lib/Box2D/Source/Gen/fixed ../src/lib/physfs-2.0.0 ../src/lib/SDL_net-1.2.8/local/lib)  # FIXME: why does linking with this cause linker errors?; TODO
 else(NOJIT MATCHES True)
-	set(tankbobs_libdirs ../src/lib/Box2D/Source/Gen/float ../src/lib/physfs-2.0.0 ../src/lib/LuaJIT/src)
-	#set(tankbobs_libdirs ../src/lib/Box2D/Source/Gen/fixed ../src/lib/physfs-2.0.0 ../src/lib/LuaJIT/src)  # FIXME: why does linking with this cause linker errors?; TODO
+	set(tankbobs_libdirs ../src/lib/Box2D/Source/Gen/float ../src/lib/physfs-2.0.0 ../src/lib/SDL_net-1.2.8/local/lib ../src/lib/LuaJIT/src)
+	#set(tankbobs_libdirs ../src/lib/Box2D/Source/Gen/fixed ../src/lib/physfs-2.0.0 ../src/lib/SDL_net-1.2.8/local/lib ../src/lib/LuaJIT/src)  # FIXME: why does linking with this cause linker errors?; TODO
 endif(NOJIT MATCHES True)
 
 set(client_srcs src/client/client.c)
@@ -75,11 +75,11 @@ else(NOJIT MATCHES True)
 endif(NOJIT MATCHES True)
 
 if(UNIX)
-	set(client_libs lua5.1 m z dl physfs.a)
-	set(server_libs lua5.1 m z dl physfs.a)
+  set(client_libs lua5.1 m z dl physfs.a)
+  set(server_libs lua5.1 m z dl physfs.a)
 else(UNIX)
-	set(client_libs lua51.lib zlib.lib physfs.lib)
-	set(server_libs lua51.lib zlib.lib physfs.lib)
+  set(client_libs lua51.lib zlib.lib physfs.lib)
+  set(server_libs lua51.lib zlib.lib physfs.lib)
 endif(UNIX)
 
 if(WIN32)
