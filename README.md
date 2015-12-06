@@ -4,15 +4,15 @@ Tankbobs is a cross-platform 2D shooter game licensed under the GPL.
 
 Shoot other tanks to score points, race against mates and computer-controlled
 players in a track with a variety of powerups, and capture the flag over the
-'net to help your team win.
+'net to help your team win!
 
 Features:
   * Online play
   * AI
-  * Scriptable mod support
+  * Extensible scripting and mod support
   * Custom levels
   * Unlimited acceleration with speed-proportional rotation mode for
-    effectively unlimited speed.
+    effectively unlimited speed
 
 # Screenshots
 
@@ -45,3 +45,6 @@ Features:
 ![screenshot: 32.png](screenshots/32.png)
 
 ![screenshot: server-console.png](screenshots/server-console.png)
+
+![screenshot: 33.png](screenshots/33.png)
+![screenshot: 34.png](screenshots/34.png)
