@@ -23,6 +23,7 @@ c_ai.lua
 Bot AI
 --]]
 
+
 function c_ai_init()
 	c_const_set("ai_fps", 175)
 	c_const_set("ai_fpsRelativeToSkill", 100)
@@ -308,9 +309,10 @@ function c_ai_findClosestEnemy(tank, filter)
 	end
 end
 
-local p1, p2, tmp = tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2()
 function c_ai_findClosestEnemyInSight(tank, filter)
 	-- returns the closest tank that can be shot at, the angle at which the tank will need to be so that a bullet will shoot the enemy, the position of the future collision, and the time it takes for the projectile to reach the collision point, if its velocity is constant
+  local p1, p2, tmp = tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2()
+
 	local tanks = {}
 	local range = c_const_get("ai_botRange")
 	local accuracy = 2 * c_const_get("ai_botAccuracy") * tank.ai.skill
@@ -764,8 +766,9 @@ function c_ai_isFollowingObjective(tank, objectiveIndex)
 	return tank.ai.objectives[objectiveIndex] and tank.ai.objectives[objectiveIndex].following
 end
 
-local p1, p2 = tankbobs.m_vec2(), tankbobs.m_vec2()
 function c_ai_followObjective(tank, objective)
+  local p1, p2 = tankbobs.m_vec2(), tankbobs.m_vec2()
+
 	if not objective or not objective.p then
 		return
 	end
@@ -1104,7 +1107,6 @@ function c_ai_beginningOfPlagueGame()
 	return true
 end
 
-local p1, p2 = tankbobs.m_vec2(), tankbobs.m_vec2()
 function c_ai_avoidIfAlmostDead(tank)
 	if not tank.bot then
 		return
@@ -1177,8 +1179,9 @@ function c_ai_avoid(tank)
 	c_ai_avoidIfAlmostDead(tank)
 end
 
-local p1, p2 = tankbobs.m_vec2(), tankbobs.m_vec2()
 function c_ai_cruise(tank)
+  local p1, p2 = tankbobs.m_vec2(), tankbobs.m_vec2()
+
 	local vel = tankbobs.w_getLinearVelocity(tank.m.body)
 
 	if tank.ai.turning and not tank.ai.close then
@@ -1295,7 +1298,6 @@ function c_ai_yourTeamOffensive(tank)
 	return true
 end
 
-local p1, p2 = tankbobs.m_vec2(), tankbobs.m_vec2()
 function c_ai_tank_step(tank, d)
 	if common_dro_getLevel() >= 4 then
 		return

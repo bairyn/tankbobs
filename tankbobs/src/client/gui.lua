@@ -40,6 +40,11 @@ local selected = nil
 local scroll = 0
 
 function gui_init()
+  widget.p = tankbobs.m_vec2
+  widget.upperRightPos = tankbobs.m_vec2
+
+  --
+
 	c_const_get = _G.c_const_get
 	tankbobs = _G.tankbobs
 	gl = _G.gl
@@ -244,6 +249,7 @@ local INPUT   = {}
 local KEY     = {}
 local SCALE   = {}
 
+local PLACEHOLDER_VEC={'PLACEHOLDER_VEC'}
 local widget =
 {
 	new  = c_class_new,
@@ -256,8 +262,8 @@ local widget =
 	end,
 	type = GENERIC,
 
-	p = tankbobs.m_vec2(),
-	upperRightPos = tankbobs.m_vec2(),
+	p = PLACEHOLDER_VEC,
+	upperRightPos = PLACEHOLDER_VEC,
 	text = "",
 	updateTextCallBack = nil,  -- This function called every frame.  If the function exists and returns a string, the widget's text will be set to string returned.
 

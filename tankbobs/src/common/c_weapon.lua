@@ -33,6 +33,15 @@ local c_weapons
 local bit
 
 function c_weapon_init()
+  c_weapon_projectile.p = tankbobs.m_vec2()
+  c_weapon.textureR = {tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2()}
+  c_weapon.render = {tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2()}
+  c_weapon.projectileHull = {tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2()}
+  c_weapon.projectiletextureR = {tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2()}
+  c_weapon.projectileRender = {tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2()}
+
+  --
+
 	c_world_tankDamage = _G.c_world_tankDamage
 	c_const_get = _G.c_const_get
 	tankbobs = _G.tankbobs
@@ -818,6 +827,7 @@ function c_weapon_done()
 	c_weapon_clear(true)
 end
 
+local PLACEHOLDER_VEC={'PLACEHOLDER_VEC'}
 c_weapon =
 {
 	new = c_class_new,
@@ -847,8 +857,8 @@ c_weapon =
 	fireSound = "",
 	reloadSound = "",
 
-	textureR = {tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2()},
-	render = {tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2()},
+	textureR = {PLACEHOLDER_VEC, PLACEHOLDER_VEC, PLACEHOLDER_VEC, PLACEHOLDER_VEC},
+	render = {PLACEHOLDER_VEC, PLACEHOLDER_VEC, PLACEHOLDER_VEC, PLACEHOLDER_VEC},
 
 	-- projectiles
 	projectileDensity = 0,
@@ -860,11 +870,11 @@ c_weapon =
 
 	projectileTexture = "",
 
-	projectileHull = {tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2()},
+	projectileHull = {PLACEHOLDER_VEC, PLACEHOLDER_VEC, PLACEHOLDER_VEC, PLACEHOLDER_VEC},
 	projectileRadius = 0,
 
-	projectiletextureR = {tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2()},
-	projectileRender = {tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2()},
+	projectiletextureR = {PLACEHOLDER_VEC, PLACEHOLDER_VEC, PLACEHOLDER_VEC, PLACEHOLDER_VEC},
+	projectileRender = {PLACEHOLDER_VEC, PLACEHOLDER_VEC, PLACEHOLDER_VEC, PLACEHOLDER_VEC},
 
 	projectileExplode = false,
 	projectileExplodeDamage = 0,
@@ -880,7 +890,7 @@ c_weapon_projectile =
 {
 	new = c_class_new,
 
-	p = tankbobs.m_vec2(),
+	p = PLACEHOLDER_VEC,
 	weapon = nil,  -- type of the weapon which created the bolt
 	r = 0,  -- rotation
 	collisions = 0,

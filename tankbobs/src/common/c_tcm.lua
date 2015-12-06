@@ -145,6 +145,14 @@ wayPoints
 local bit
 
 function c_tcm_init()
+  -- Fully initializes classes.
+  c_tcm_entity.p = tankbobs.m_vec2()
+  c_tcm_wall.p = {tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2()}
+  c_tcm_wall.t = {tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2()}
+  c_tcm_wall.m.startpos = tankbobs.m_vec2
+  c_tcm_flag.m.pos = tankbobs.m_vec2
+
+  -- Initialization.
 	bit = c_module_load "bit"
 
 	c_const_set("tcm_dir", c_const_get("data_dir") .. "tcm/")
@@ -172,6 +180,7 @@ end
 function c_tcm_done()
 end
 
+local PLACEHOLDER_VEC={'PLACEHOLDER_VEC'}
 c_tcm_set =
 {
 	new = c_class_new,
@@ -233,7 +242,7 @@ c_tcm_entity =
 	new = c_class_new,
 
 	id = 0,
-	p = tankbobs.m_vec2(),
+	p = PLACEHOLDER_VEC,
 
 	misc = "",
 
@@ -248,8 +257,8 @@ c_tcm_wall =
 		o.l = c_const_get("tcm_tankLevel")
 	end,
 
-	p = {tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2()},  -- walls have 4 (or 3) positions
-	t = {tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2()},
+	p = {PLACEHOLDER_VEC, PLACEHOLDER_VEC, PLACEHOLDER_VEC, PLACEHOLDER_VEC},  -- walls have 4 (or 3) positions
+	t = {PLACEHOLDER_VEC, PLACEHOLDER_VEC, PLACEHOLDER_VEC, PLACEHOLDER_VEC},
 	texture = "",
 	detail = false,
 	static = false,
@@ -261,7 +270,7 @@ c_tcm_wall =
 	m = {pid = nil,
 		 ppid = nil,
 		 ppos = 0,
-		 startpos = tankbobs.m_vec2(),
+		 startpos = PLACEHOLDER_VEC,
 		 p = {}}
 }
 
@@ -312,7 +321,7 @@ c_tcm_controlPoint =
 	wayPoint = 0,
 
 	m = {team = nil,
-		 p = {}}
+	     p = {}}
 }
 
 c_tcm_flag =
@@ -326,8 +335,8 @@ c_tcm_flag =
 
 	m = {stolen = nil,
 	     dropped = false,
-	     pos = tankbobs.m_vec2(),
-		 p = {}}
+	     pos = PLACEHOLDER_VEC,
+	     p = {}}
 }
 
 c_tcm_wayPoint =

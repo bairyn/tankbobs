@@ -39,6 +39,11 @@ tankbobs.t_initialize("common_interrupt", false)
 math.randomseed(os.time())
 
 function common_init()
+  ---[[ Constants ]]---
+  ZERO = tankbobs.m_vec2(0, 0)
+
+  ---[[ Initialization ]]---
+
 	package.path = package.path
 	package.cpath = package.cpath
 
@@ -645,7 +650,7 @@ MAGIC          = -1414677826
 
 CIRCLE         = 2 * math.pi
 
-ZERO           = tankbobs.m_vec2(0, 0)
+--ZERO           = tankbobs.m_vec2(0, 0)
 
 -- gametypes
 DEATHMATCH     = 0x00000000

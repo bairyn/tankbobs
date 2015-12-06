@@ -87,6 +87,12 @@ local gameTimerSecond = 0
 local key = {}
 
 function c_world_init()
+  c_world_powerup.p = tankbobs.m_vec2
+  c_world_tank.p = tankbobs.m_vec2
+  c_world_tank.h = {tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2()}
+
+  --
+
 	c_config_set            = _G.c_config_set
 	c_config_get            = _G.c_config_get
 	c_const_set             = _G.c_const_set
@@ -430,6 +436,7 @@ end
 function c_world_done()
 end
 
+local PLACEHOLDER_VEC={'PLACEHOLDER_VEC'}
 c_world_powerupType =
 {
 	new = c_class_new,
@@ -443,7 +450,7 @@ c_world_powerup =
 {
 	new = c_class_new,
 
-	p = tankbobs.m_vec2(),
+	p = PLACEHOLDER_VEC,
 	r = 0,  -- rotation
 	spawner = 0,  -- index of psp
 	collided = false,  -- whether it needs to be removed
@@ -472,8 +479,8 @@ c_world_tank =
 		o.color.b = c_config_get("game.defaultTankBlue")
 	end,
 
-	p = tankbobs.m_vec2(),
-	h = {tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2(), tankbobs.m_vec2()},  -- physical box: four vectors of offsets for tanks
+	p = PLACEHOLDER_VEC,
+	h = {PLACEHOLDER_VEC, PLACEHOLDER_VEC, PLACEHOLDER_VEC, PLACEHOLDER_VEC},  -- physical box: four vectors of offsets for tanks
 	r = 0,  -- tank's rotation
 	name = "",
 	exists = false,
