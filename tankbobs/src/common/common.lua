@@ -23,7 +23,7 @@ common.lua
 Common functions
 --]]
 
-version = {0,1,0 ,"-dev"}
+version = {0,1,0,0 ,"-dev"}
 
 -- All code should use the PhysicsFS interface
 path = package.path
