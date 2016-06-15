@@ -164,12 +164,11 @@ static const char *c_private_nextHistoryField(void)
 #define CINIT_SUCCESS 0
 #define CINIT_NOTTY   1
 #define CINIT_NCERR   2
+void c_private_resize(int);
+void c_private_updateCursor(void);
+void c_private_drawScrollBar(void);
 static int c_private_initConsole(void)
 {
-	void c_private_resize(int);
-	void c_private_updateCursor(void);
-	void c_private_drawScrollBar(void);
-
 	int collumn;
 
 #if defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__TOS_WINDOWS__) || defined(__WINDOWS__)
