@@ -387,6 +387,15 @@ BDISTFILE="tankbobs-build-v${VERSION}-r${REVISION}.tar.gz"
 CMAKEFLAGS="-D PEDANTIC=TRUE${OTHER_CMAKE_FLAGS+" ${OTHER_CMAKE_FLAGS}"}"
 
 ZIP="${ZIP:-"zip"}"
+if ! is-set LUAC; then
+  if cmd-exists "luac-5.1"; then
+    LUAC="${LUAC:-"luac-5.1"}"
+  elif cmd-exists "luac5.1"; then
+    LUAC="${LUAC:-"luac5.1"}"
+  else
+    LUAC="${LUAC:-"luac5.1"}"
+  fi
+fi
 LUAC="${LUAC:-"luac5.1"}"
 CMAKE="${CMAKE:-"cmake"}"
 
