@@ -1,0 +1,5 @@
+TODO: write a puppet manifest to install dependencies.
+
+Ubuntu:
+	- As of 2018-12-13: run: sudo aptitude install libsdl1.2-dev libfreetype6-dev libsdl-mixer1.2 libsdl-mixer1.2-dev libsdl-ttf2.0-dev libsdl2-ttf-dev libsdl-net1.2-dev libsdl-image1.2-dev libsdl-sound1.2-dev liblua5.1-0 liblua5.1-0-dev cmake build-essential
+	- Tankbobs uses Lua 5.1 and various SDL1.2 libraries.
