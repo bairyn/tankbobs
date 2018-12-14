@@ -595,7 +595,9 @@ require "(( $# == nonoptsc ))"
 
 # ################################################################
 
-PHYSFS_CMAKE_FLAGS="-Wno-dev -DPHYSFS_BUILD_WX_TEST=FALSE${PHYSFS_CMAKE_FLAGS+" ${PHYSFS_CMAKE_FLAGS}"}"
+# 2018-12-13: Tankbobs wouldn't build on my system without PHYSFS_INTERNAL_ZLIB set to TRUE.
+#PHYSFS_CMAKE_FLAGS="-Wno-dev -DPHYSFS_BUILD_WX_TEST=FALSE${PHYSFS_CMAKE_FLAGS+" ${PHYSFS_CMAKE_FLAGS}"}"
+PHYSFS_CMAKE_FLAGS="-Wno-dev -DPHYSFS_INTERNAL_ZLIB=TRUE -DPHYSFS_BUILD_WX_TEST=FALSE${PHYSFS_CMAKE_FLAGS+" ${PHYSFS_CMAKE_FLAGS}"}"
 if ((!debug)); then
   LUAFLAGS="-s${LUAFLAGS+" ${LUAFLAGS}"}"
   SDLNET_CFLAGS="-fPIC -g -O2${SDLNET_CFLAGS+" ${SDLNET_CFLAGS}"}"
